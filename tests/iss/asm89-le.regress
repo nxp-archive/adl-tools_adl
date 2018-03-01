@@ -1,0 +1,42 @@
+
+asm89.elf:     file format elf32-powerpcle
+asm89.elf
+architecture: powerpc:common, flags 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+start address 0x00001054
+
+Program Header:
+    LOAD off    0x00000000 vaddr 0x00000000 paddr 0x00000000 align 2**16
+         filesz 0x0000107c memsz 0x0000107c flags r-x
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000028  00001054  00001054  00001054  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+SYMBOL TABLE:
+00001054 l    d  .text	00000000 .text
+00000000 l    df *ABS*	00000000 asm89.o
+0000105c l       .text	00000000 L1
+00000000         *UND*	00000000 _start
+0001107c g       .text	00000000 __end
+0001107c g       .text	00000000 __bss_start
+0001107c g       .text	00000000 _edata
+0001107c g       .text	00000000 _end
+
+
+
+Disassembly of section .text:
+
+00001054 <L1-0x8>:
+    1054:	00042085 	addi     r1,r2,1 ; addi     r1,r2,2
+    1058:	00011042 
+
+0000105c <L1>:
+    105c:	00284189 	addi     r1,r2,3 ; mulli    r3,r4,20
+    1060:	00031042 
+    1064:	000a2085 	addi     r1,r2,4 ; addi     r1,r2,5
+    1068:	00041042 
+    106c:	000e2085 	addi     r1,r2,6 ; addi     r1,r2,7
+    1070:	00061042 
+    1074:	ffffd10d 	addi     r1,r2,8 ; bc       r2,105c <L1>,1
+    1078:	00081042 

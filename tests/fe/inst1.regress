@@ -1,0 +1,44 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  E: [16,16] [not used] 
+        Immediate field used to specify a 1-bit value used by *wrteei* to place in the
+    EE (External Input Enable) bit of the Machine State Register.
+    
+  OPCD: [0,5] [not used] 
+        Primary opcode.
+    
+  RA: [11,15] [not used] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [not used] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] [not used] 
+        Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] [not used] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SPRN: [16,20] [11,15] [not used] 
+        Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  XO: [21,30] [not used] 
+        Extended opcode.
+    
+-------------------------------
+

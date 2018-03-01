@@ -1,0 +1,52 @@
+//
+// Test of instruction fields which reference register files.
+//
+
+define (arch = minippc) {
+
+  int foo(int b)
+    {
+      return 10*b;
+    }
+
+  define (reg = MSR) {
+    width = 32;
+  }
+
+  define (regfile = GPR) {
+    width = 32;
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+  
+  define (instr = Foo) {
+    fields=(OPCD(40),RT,RA,RB);    
+    action = { 
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

@@ -1,0 +1,5 @@
+asm8.adl:15: Register modifications are not allowed here.
+asm8.adl:21: Unknown variable/resource found in action code:  RA
+asm8.adl:27: Unknown variable/resource found in action code:  size
+asm8.adl:34: Unknown variable/resource found in action code:  get_dest
+asm8.adl:38: Argument to packet assembler rule must be 'InstrBundle' for a packet rule or 'InstrInfo' for an instruction rule.

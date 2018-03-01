@@ -1,0 +1,3 @@
+asm121.s: Assembler messages:
+asm121.s:10: Error: Bad expression for operand 2: ((64+SomeValue)<<24)
+asm121.s:11: Error: invalid operands (*UND* and *ABS* sections) for `<<'

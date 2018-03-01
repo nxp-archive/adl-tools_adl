@@ -1,0 +1,26 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ int signExtend ( int a , int signbit ) ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

@@ -1,0 +1,167 @@
+//
+// Tests to make sure that we can alias one instruction to another whose name
+// is not a simple identifier.  Also, if we encounter an instruction field
+// in an expression for an instruction shorthand, we should add it to our list
+// of fields for the shorthand.
+//
+
+define (arch = minippc) {
+
+  // Various helper routines.
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0);
+
+    CR(4*field,4*field+3) = r;
+
+    // Test to make sure that recursion will not break
+    // our src/trg register analysis.
+    foo();
+  }
+
+  void foo() {
+    CIA = 0x4;
+    foo();
+  }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=D) {
+    """
+    Signed immediate field for addressing.
+    """;
+    bits = (16,31);\
+    display = dec;
+    is_signed = true;
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      GPR(RT) = GPR(RA) + si;
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr="subic.") {
+    alias = "addic."(RT(RT),RA(RA),SI(-SI));
+  }
+  
+  // Example of referencing a register file w/o a simple instruction field as an index.
+  define (instr="lmw") {
+    fields=(OPCD(46),RT,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var EA = b + D;      
+      int r = RT.uint32();
+      do {
+        GPR(r) = Mem(EA,4);
+        r = r + 1;
+        EA = EA + 4;
+      } while (r <= 31);
+    };
+  }
+
+  define (instr="stmw") {
+    fields=(OPCD(48),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      int r = RS.uint32();
+      do {
+        Mem(addr,4) = GPR(r);
+        r = r + 1;
+        addr = addr + 4;
+      } while (r <= 31);
+    };
+  }
+
+  // Example of an instruction with a fixed reference to an element of a register file.
+  define (instr="foo") {
+    fields=(OPCD(47),RT,RA,D);
+    action = {
+      GPR(0) = GPR(31);
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc);
+}

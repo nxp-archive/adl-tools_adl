@@ -1,0 +1,96 @@
+//
+// Test nested instructions usage
+//
+
+ define (arch=minippc) {
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+
+ blk = (agu,dalu);
+
+	
+
+ define(instrfield=OPCD) {
+   pseudo = true;
+   width = variable;
+ }
+ define(instrfield=A) {
+   bits =(10,15);
+ }
+ define (instrfield=B) { 
+  bits = (6,9);
+ }
+ define (instrfield=C) {
+  bits = (16,17);
+ }
+
+ define(instrfield=Src1) {
+   pseudo = true;
+   width = 3;
+ }
+
+ define(instrfield=Src2) {
+   pseudo = true;
+   width = 3;
+ }
+
+ define(instrfield=Dst) {
+   pseudo = true;
+   width = 3;
+ }
+
+ define (instr=Bar)  
+ {
+   fields = (OPCD,Src1,Src2,Dst);
+   width = 32;
+   action = {} ;
+ } 
+
+ define (instr=Foo) 
+ { 
+   fields = (OPCD,Src1,Src2,Dst);
+   width = 32;
+   define(instr=Foo1) {
+     fields = (OPCD,A,B,C);
+     alias = Foo(OPCD(OPCD),Src1(A),Src2(B),Dst(C));
+     action = {};
+   };
+
+   action = {
+   };
+   define(instr=Foo2) {
+     fields = (OPCD,A,B,C);
+     alias = Foo(OPCD(OPCD),Src1(C),Src2(C),Dst(C));
+     action = {};
+   };
+
+   define(instr=Foo3) {
+     fields = (A,B,C);
+     alias = Foo2(Src1(C),Src2(C),Dst(C));
+     
+   }
+
+   define(instr=Foo4) {
+     fields = (OPCD,A,B,C);
+     alias = Foo(OPCD(OPCD),Src1(C),Src2(C),Dst(C));
+   }
+
+    define(instr=Foo5) {
+     fields = (A,B,C);
+     pseudo = true;
+   }
+
+   action = {
+   };
+
+ }
+
+} 
+
+ 
+
+define (core=P) {
+  archs=minippc;
+}

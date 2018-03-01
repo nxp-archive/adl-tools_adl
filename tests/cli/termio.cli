@@ -1,0 +1,51 @@
+#
+# A simple example of a memory-mapped I/O system emulated using 
+# the scripting interface.
+#
+
+
+set os_write_trigger 0xa0000
+set os_read_trigger  0xb0000
+
+set read_data {"Hello there!" "Some input" "Last input line..."}
+set cur_read_item 0
+
+# This emulates a memory-mapped write routine.  It is triggered on a call to the
+# length parameter.  We just grab the data and write it out.
+proc os_write {id name pre seq ea ra value} {
+	# Only do this after the write has occurred.
+	if { !$pre } {
+		puts -nonewline [memlist [expr {$ra + 4}] $value 1 char]
+	}
+}
+
+# This emulates a memory-mapped read routine.  It is triggered on a call to the
+# length parameter.  We copy the next available string into the buffer and set
+# the length appropriately, or else we set the length to 0 if no more data
+# exists.
+proc os_read {id name pre seq ea ra value} {
+	# Only do this before the read has occurred.
+	if { $pre } {
+		global cur_read_item
+		global read_data
+		set length 0
+		if {$cur_read_item < [llength $read_data]} {
+			# We have more data, so copy it into memory and then set the length parm.
+			set data [split [lindex $read_data $cur_read_item] ""]
+			set length [llength $data]
+			incr cur_read_item
+			set read_buf [expr {$ra + 4}]
+			foreach d $data {
+				setmem $read_buf [scan $d "%c"] 1
+				incr read_buf
+			}
+		}
+		# Update the length parameter (0 if no data).
+		setmem $ra $length
+	}
+}
+
+setlogcmd mem_write os_write Mem $os_write_trigger
+setlogcmd mem_read  os_read  Mem $os_read_trigger
+go
+quit

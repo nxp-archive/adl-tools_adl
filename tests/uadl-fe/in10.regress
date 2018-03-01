@@ -1,0 +1,5 @@
+in10.uadl:49: warning: Instruction defined in class 'sfx' but not ADL:  halt
+in10.uadl:74: Destination state of S_MM not defined in this instruction class.
+in10.uadl:20: No exiting states for pipeline stage mMM
+in10.uadl:4: warning: Instructions access no data memory
+Could not parse in10.uadl

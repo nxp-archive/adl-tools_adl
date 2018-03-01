@@ -1,0 +1,34 @@
+
+CORE n=:procs:P0
+
+# ea=0x01800000 ra=0x29800000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=0x1 TS=0 RPN=0xA6000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x6000
+
+# ea=0xfffff000 ra=0x39800000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=0x1 TS=0 RPN=0xE6000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x3fffff
+
+# ea=0x2000 ra=0x49800000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=0x1 TS=0 RPN=0x126000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x8
+
+# ea=0x1000 ra=0x59800000 (shared page)
+TD n=TlbCam set=0 way=3 V=1 TID=0 SIZE=0x1 TS=0 RPN=0x166000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x4
+
+MD n=Mem ra=0x49800004 d=0xa
+MD n=Mem ra=0x49800008 d=0xb
+
+CORE n=:procs:P1
+
+# ea=0x01800000 ra=0x2d800000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=0x1 TS=0 RPN=0xB6000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x6000
+
+# ea=0xfffff000 ra=0x3d800000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=0x1 TS=0 RPN=0xF6000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x3fffff
+
+# ea=0x2000 ra=0x4d800000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=0x1 TS=0 RPN=0x136000 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x8
+
+# ea=0x1000 ra=0x59900000
+TD n=TlbCam set=0 way=3 V=1 TID=0 SIZE=0x1 TS=0 RPN=0x166400 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x4
+
+MD n=Mem ra=0x4d800004 d=0x1
+MD n=Mem ra=0x4d800008 d=0x2

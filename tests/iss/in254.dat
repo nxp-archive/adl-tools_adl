@@ -1,0 +1,96 @@
+#
+# Make sure that we break up a JIT basic block which crosses a page.
+#
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	b L1
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+L1:
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	subic. r3,r3,1
+	bne L1
+	.long 0x0
+
+= /asm
+
+= mdopts
+	instr-offset:0xAfff0
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x000afff0 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000afff4 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000afff8 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000afffc d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0018 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b001c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0020 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0024 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x000b0028 d=0x4800002C	#	b L1
+MD n=Mem ra=0x000b002c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0030 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0034 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0038 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b003c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0040 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0044 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0048 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b004c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0050 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000b0054 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x000b0058 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x000b005c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x000b0060 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x000b0064 d=0x3463FFFF	#	subic. r3,r3,1
+MD n=Mem ra=0x000b0068 d=0x4082FFEC	#	bne L1
+MD n=Mem ra=0x000b006c d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+# ea=0x0000 ra=0xAF000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x2BC WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x0
+
+# ea=0x1000 ra=0xB0000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x2C0 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x4
+
+RD n=GPR i=3 d=3
+RD n=NIA     d=0x0ff0
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000000e
+RD n=GPR i=2 d=0x0000000c

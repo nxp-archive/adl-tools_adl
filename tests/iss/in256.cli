@@ -1,0 +1,30 @@
+#
+# More testing of breakpoints with the JIT.  Specifically- can we break on the
+# beginning of a basic block and when done, is direct threading restored?
+#
+
+set mode [lindex $argv 0]
+switch $mode {
+		jit -
+		dc  { }
+		default {
+				puts {Bad mode argument specified.  Expected either "dc" or "jit".}
+				exit 1
+		}
+}
+
+set query "${mode}_escapes"
+
+set te 0
+simmode $mode
+setbrk 0x4
+for { set i 1 } { $i <= 5 } { incr i } {
+		go
+		puts "GPR2:  [reg GPR2]; GPR3:  [reg GPR3]"
+		set te [expr $te + [simstat $query]]
+}
+clrbrk 0x4
+go
+set te [expr $te + [simstat $query]]
+puts "Number of escapes:  $te"
+quit

@@ -1,0 +1,43 @@
+//
+// This adds support for some extra scheduling logic.
+//
+
+#define UADL
+
+#import "mod13.adl"
+
+defmod (sys = PMT) {
+
+  defmod(core=Thread) {
+
+    define (reg=LoadStoreCount) {}
+    define (reg=LoadStoreIndex) {}
+
+    // For testing only: Just used for deadlock testing.
+    define (instr=crxor) {
+      fields=(OPCD(19),RT,RA,RB,XO(193));
+      action = {
+        CR = CR.set(RT,CR(RA) ^ CR(RB));
+      };
+    }
+
+    bool loadStoreProceed(unsigned tid,unsigned groupsize)
+    {
+      return (LoadStoreIndex == tid);
+    }
+
+    void loadStoreIncr(unsigned groupsize,unsigned numthreads)
+    {
+      LoadStoreCount = LoadStoreCount + 1;
+      if (LoadStoreCount >= groupsize) {
+        LoadStoreIndex = (LoadStoreIndex + 1) % numthreads;
+        LoadStoreCount = 0;
+      }
+    }
+   
+  }
+
+  defmod (shared) {
+    regs = (HID0,TEN,CCR,LoadStoreCount,LoadStoreIndex);
+  }
+}

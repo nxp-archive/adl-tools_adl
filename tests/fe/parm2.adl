@@ -1,0 +1,45 @@
+//
+// Simple test of parameters, testing the fact that parameters can be
+// set across architectures.
+//
+
+define (arch=a1) {
+  define (reg=A) {
+    attrs=(cia,nia);
+  }
+  define (reg=B) {}
+  define (parm=p1) {
+    options=(mode1,mode2,mode3,mode4);
+  }
+  define (parm=p2) {
+    options=(a,b,c,d);
+    watch = {
+      if (A == 2 && B == 3) {
+        p2 = b;
+      } else {
+        p2 = d;
+      }
+    };
+  }
+  define (parm=p3) {
+    options=(true,false);
+    value = true;
+  }
+}
+
+define (arch=a2) {
+  defmod(parm=p2) {
+    value=d;
+    constant=true;
+  }
+}
+
+define (arch=a3) {
+  defmod(parm=p1) {
+    value=mode1;
+  }
+}
+
+define (core=bar) {
+  archs=(a1,a2,a3);
+}

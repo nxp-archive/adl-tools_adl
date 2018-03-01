@@ -1,0 +1,159 @@
+format=huvp;
+//------------------------------------------------------------------------------
+test => in94 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  P => P {
+    I : R {nm="CR"; d=0x00000000;};
+    I : R {nm="CTR"; d=0x00000000;};
+    I : R {nm="ESR"; d=0x00000000;};
+    I : R {nm="FOO"; d=0xdeadbeef;};
+    I : R {nm="HDBCR0"; d=0x00000000;};
+    I : R {nm="HID0"; d=0x00000000;};
+    I : R {nm="HID1"; d=0x00000000;};
+    I : R {nm="HitReg"; d=0x00000000;};
+    I : R {nm="IVOR6"; d=0x00000000;};
+    I : R {nm="IVOR7"; d=0x00000100;};
+    I : R {nm="IVPR"; d=0x00000000;};
+    I : R {nm="LR"; d=0x00000000;};
+    I : R {nm="MAS0"; d=0x00000000;};
+    I : R {nm="MAS1"; d=0x00000000;};
+    I : R {nm="MAS2"; d=0x00000000;};
+    I : R {nm="MSR"; d=0x00000000;};
+    I : R {nm="NIA"; d=0x00000ff8;};
+    I : R {nm="PID0"; d=0x00000000;};
+    I : R {nm="PID1"; d=0x00000000;};
+    I : R {nm="RESRV"; d=0x00000000;};
+    I : R {nm="SRR0"; d=0x00000000;};
+    I : R {nm="SRR1"; d=0x00000000;};
+    I : R {nm="WatchDogTrigger"; d=0x00000000;};
+    I : R {nm="XER"; d=0x00000000;};
+    I : R {nm="GPR0"; d=0x00000000;};
+    I : R {nm="GPR1"; d=0x00001fff;};
+    I : R {nm="GPR2"; d=0x00000000;};
+    I : R {nm="GPR3"; d=0x00000000;};
+    I : R {nm="GPR4"; d=0x00002000;};
+    I : R {nm="GPR5"; d=0x00000000;};
+    I : R {nm="GPR6"; d=0x00000000;};
+    I : R {nm="GPR7"; d=0x00000000;};
+    I : R {nm="GPR8"; d=0x00000000;};
+    I : R {nm="GPR9"; d=0x00000000;};
+    I : R {nm="GPR10"; d=0x00000000;};
+    I : R {nm="GPR11"; d=0x00000000;};
+    I : R {nm="GPR12"; d=0x00000000;};
+    I : R {nm="GPR13"; d=0x00000000;};
+    I : R {nm="GPR14"; d=0x00000000;};
+    I : R {nm="GPR15"; d=0x00000000;};
+    I : R {nm="GPR16"; d=0x00000000;};
+    I : R {nm="GPR17"; d=0x00000000;};
+    I : R {nm="GPR18"; d=0x00000000;};
+    I : R {nm="GPR19"; d=0x00000000;};
+    I : R {nm="GPR20"; d=0x00000000;};
+    I : R {nm="GPR21"; d=0x00000000;};
+    I : R {nm="GPR22"; d=0x00000000;};
+    I : R {nm="GPR23"; d=0x00000000;};
+    I : R {nm="GPR24"; d=0x00000000;};
+    I : R {nm="GPR25"; d=0x00000000;};
+    I : R {nm="GPR26"; d=0x00000000;};
+    I : R {nm="GPR27"; d=0x00000000;};
+    I : R {nm="GPR28"; d=0x00000000;};
+    I : R {nm="GPR29"; d=0x00000000;};
+    I : R {nm="GPR30"; d=0x00000000;};
+    I : R {nm="GPR31"; d=0x00000000;};
+    I : T {n="TlbCam"; t="ID"; way=0; ep=0x0000000000000000; rp=0x0000000000010000; 
+            d={{"E",0x0},{"EPN",0x0},{"RPN",0x40},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TS",0x0},{"UR",0x0},{"UW",0x0},
+              {"UX",0x0},{"V",0x1},{"WIMG",0x1},};};
+    I : T {n="TlbCam"; t="ID"; way=1; ep=0x0000000000001000; rp=0x0000000000011000; 
+            d={{"E",0x0},{"EPN",0x4},{"RPN",0x44},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x1},{"SX",0x0},{"TID",0x0},{"TS",0x0},{"UR",0x0},{"UW",0x0},
+              {"UX",0x0},{"V",0x1},{"WIMG",0x1},};};
+    I : T {n="TlbCam"; t="ID"; way=2; ep=0x0000000000002000; rp=0x00000000000b2000; 
+            d={{"E",0x0},{"EPN",0x8},{"RPN",0x2c8},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x0},{"SX",0x1},{"TID",0x0},{"TS",0x0},{"UR",0x0},{"UW",0x0},
+              {"UX",0x0},{"V",0x1},{"WIMG",0x3},};};
+    E : I {asm="addi r1,r1,1"; c=1;
+                   ea=0x0000000000000ff8; ra=0x0000000000010ff8; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00002000],};};
+    E : I {asm="addi r1,r1,1"; c=2;
+                   ea=0x0000000000000ffc; ra=0x0000000000010ffc; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00002001],};};
+    E : F {ea=0x0000000000001000; c=3;
+                   ir={[ t=>"reg", rn=>"MSR", d=>0x00000000],
+                       [ t=>"reg", rn=>"SRR1", d=>0x00000000],
+                       [ t=>"reg", rn=>"SRR0", d=>0x00001000],
+                       [ t=>"intr", msg=>"ProtectionFault"],};};
+    R : RES {ea=0x0000000000000100; ra=0x0000000000010100; ta=0x1;};
+    R : R {nm="CR"; d=0x00000000;};
+    R : R {nm="CTR"; d=0x00000000;};
+    R : R {nm="ESR"; d=0x00000000;};
+    R : R {nm="FOO"; d=0xdeadbeef;};
+    R : R {nm="HDBCR0"; d=0x00000000;};
+    R : R {nm="HID0"; d=0x00000000;};
+    R : R {nm="HID1"; d=0x00000000;};
+    R : R {nm="IVOR6"; d=0x00000000;};
+    R : R {nm="IVOR7"; d=0x00000100;};
+    R : R {nm="IVPR"; d=0x00000000;};
+    R : R {nm="LR"; d=0x00000000;};
+    R : R {nm="MAS0"; d=0x00000000;};
+    R : R {nm="MAS1"; d=0x00000000;};
+    R : R {nm="MAS2"; d=0x00000000;};
+    R : R {nm="MSR"; d=0x00000000;};
+    R : R {nm="NIA"; d=0x00000100;};
+    R : R {nm="PID0"; d=0x00000000;};
+    R : R {nm="PID1"; d=0x00000000;};
+    R : R {nm="RESRV"; d=0x00000000;};
+    R : R {nm="SRR0"; d=0x00001000;};
+    R : R {nm="SRR1"; d=0x00000000;};
+    R : R {nm="WatchDogTrigger"; d=0x00000000;};
+    R : R {nm="XER"; d=0x00000000;};
+    R : R {nm="GPR0"; d=0x00000000;};
+    R : R {nm="GPR1"; d=0x00002001;};
+    R : R {nm="GPR2"; d=0x00000000;};
+    R : R {nm="GPR3"; d=0x00000000;};
+    R : R {nm="GPR4"; d=0x00002000;};
+    R : R {nm="GPR5"; d=0x00000000;};
+    R : R {nm="GPR6"; d=0x00000000;};
+    R : R {nm="GPR7"; d=0x00000000;};
+    R : R {nm="GPR8"; d=0x00000000;};
+    R : R {nm="GPR9"; d=0x00000000;};
+    R : R {nm="GPR10"; d=0x00000000;};
+    R : R {nm="GPR11"; d=0x00000000;};
+    R : R {nm="GPR12"; d=0x00000000;};
+    R : R {nm="GPR13"; d=0x00000000;};
+    R : R {nm="GPR14"; d=0x00000000;};
+    R : R {nm="GPR15"; d=0x00000000;};
+    R : R {nm="GPR16"; d=0x00000000;};
+    R : R {nm="GPR17"; d=0x00000000;};
+    R : R {nm="GPR18"; d=0x00000000;};
+    R : R {nm="GPR19"; d=0x00000000;};
+    R : R {nm="GPR20"; d=0x00000000;};
+    R : R {nm="GPR21"; d=0x00000000;};
+    R : R {nm="GPR22"; d=0x00000000;};
+    R : R {nm="GPR23"; d=0x00000000;};
+    R : R {nm="GPR24"; d=0x00000000;};
+    R : R {nm="GPR25"; d=0x00000000;};
+    R : R {nm="GPR26"; d=0x00000000;};
+    R : R {nm="GPR27"; d=0x00000000;};
+    R : R {nm="GPR28"; d=0x00000000;};
+    R : R {nm="GPR29"; d=0x00000000;};
+    R : R {nm="GPR30"; d=0x00000000;};
+    R : R {nm="GPR31"; d=0x00000000;};
+    I : T {n="TlbCam"; t="ID"; way=0; ep=0x0000000000000000; rp=0x0000000000010000; 
+            d={{"E",0x0},{"EPN",0x0},{"RPN",0x40},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TS",0x0},{"UR",0x0},{"UW",0x0},
+              {"UX",0x0},{"V",0x1},{"WIMG",0x1},};};
+    I : T {n="TlbCam"; t="ID"; way=1; ep=0x0000000000001000; rp=0x0000000000011000; 
+            d={{"E",0x0},{"EPN",0x4},{"RPN",0x44},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x1},{"SX",0x0},{"TID",0x0},{"TS",0x0},{"UR",0x0},{"UW",0x0},
+              {"UX",0x0},{"V",0x1},{"WIMG",0x1},};};
+    I : T {n="TlbCam"; t="ID"; way=2; ep=0x0000000000002000; rp=0x00000000000b2000; 
+            d={{"E",0x0},{"EPN",0x8},{"RPN",0x2c8},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x0},{"SX",0x1},{"TID",0x0},{"TS",0x0},{"UR",0x0},{"UW",0x0},
+              {"UX",0x0},{"V",0x1},{"WIMG",0x3},};};
+  } // P
+} 

@@ -1,0 +1,135 @@
+// Test assembler prefix groupint
+define (arch = MiniStarCore) {
+
+  parallel_execution = 4;
+  packet_pos_incr = 16;
+  attrs = (type1,type2);  
+  define (reg = pc) {
+    attrs = (cia,nia);  
+    serial = true;
+  }
+  
+  define (regfile = GPR) {
+    width = 32;
+    size  = 16;
+    prefix = r;
+  }
+  
+  define (instrfield=VlesSize) {
+    width  = 8;  
+    prefix = true;
+    pseudo = true;
+    value  = 0;
+  }
+  
+  define (instr = PREFIX) {
+    fields = ((bits(8,15), 	VlesSize),
+	      (bits(0,7), 	0x80	)); // prefix will start with msb 1
+
+    prefix = true;  
+    width  = 16;
+  }
+  define (instrfield = RA) {
+    bits = (8,11);
+    ref = GPR;
+  }
+ 
+   define (instrfield = RB) {
+    bits = (12,15);
+    ref = GPR;
+  }
+   
+  define (instrfield = IMM) {
+    bits = (12,15);
+  }
+  
+  define (instrfield = IMM2) {
+    bits = (16,47);
+  }
+   
+  define (instrfield = OPCD) {
+    bits = (0,7);
+  }
+    
+  define (instr = set) {
+    fields = (OPCD(1),RA,IMM);
+    action = { 
+      GPR(RA) = IMM;
+    };
+    attrs = type1;
+  }
+
+  define (instr = set2) {
+    fields = (OPCD(4),RA,IMM,IMM2);
+    action = { 
+      GPR(RA) = IMM2;
+    };
+    attrs = type1;
+  }
+
+ 
+   
+  define (instr = store) {
+    fields = (OPCD(2),RA,RB);
+    action = { 
+      Mem(RA,4) = GPR(RB);
+    };
+    attrs = type1;
+  } 
+  
+  define (instr = add) {
+    fields = (OPCD(3),RA,RB);
+    action = { 
+      GPR(RA) = GPR(RA) + GPR(RB);
+    };
+    attrs = type2;
+  } 
+  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type1,type2);
+    disasm_instrtables = (prefix,type1,type2); 
+  } 
+  
+  post_exec = func() {
+    if (getPacketPosition() == VlesSize + 1) {
+      setPacketPosition(0);
+    } else {
+      setCurrentInstrTable(type1);
+    }
+  };
+  
+  post_packet = func() {
+    info(1,"eop");
+    setCurrentInstrTable(prefix);
+  };    
+
+  
+  decode_miss = func(addr_t,unsigned) {
+    halt();
+  };
+
+  decode_retry = func(addr_t,unsigned) {
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else if (getCurrentInstrTable() == type1) {
+      setCurrentInstrTable(type2);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+
+  post_asm = func(unsigned instr_width) {
+    VlesSize += instr_width/16;
+  };    
+}
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1,type2);
+}

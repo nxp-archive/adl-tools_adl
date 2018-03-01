@@ -1,0 +1,111 @@
+
+//
+// Example event-bus- this should fail to parse.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  // Enums at the architecture level are okay.
+  enum MsgTypes { Read, Write, LastMsg };
+
+  enum { Foo = LastMsg+1, Bar };
+
+  define (eventbus=msg) {
+    define (field=type) {
+      reset = Stuff;
+    }
+    define (field=addr) {
+      bits = 32;
+      reset = 0x2000;
+    }
+    define (field=data) {
+      bits = 32;
+      reset = 5;
+    }
+    define (field=foo) {
+      bits = 20;
+    }
+
+    action = func (msg_t x) {
+      HIT = x.data;
+    };
+  }
+
+  define (eventbus=msg2) {
+
+    define (field=data) {
+      bits = 32;
+    }
+
+  }
+
+  // A reference to a bus in action code is okay.
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      msg_t msg;
+      msg.type = Stuff;
+      int j = Foo;
+      msg.send();
+    };
+  }  
+
+}
+
+define(arch=foo2) {
+
+  // Removal of a bus.
+  defmod(eventbus=msg2) {
+    remove = 1;
+  }
+
+  // Addition and removal of fields in a bus.
+  defmod(eventbus=msg) {
+    defmod(field=foo) {
+      remove = 1;
+    }
+    define (field=flag) { }
+  }
+
+}
+
+define (core=P) {
+  archs=(foo,foo2);
+}

@@ -1,0 +1,75 @@
+//
+// This makes sure that if a source or target is first seen as a single item,
+// then as a full item, we'll remove the other single-item references.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB+2);
+      int r = RT+1;
+      // Because we don't know what 'r' is, we switch to requiring the entire
+      // register file, which should mean that all other GPR entries are
+      // collapsed into this one.
+      GPR(r) = GPR(RA);
+    };
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

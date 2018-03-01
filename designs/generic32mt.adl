@@ -1,0 +1,12 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This just makes the build rules simpler for creating generic32mt from generic32.adl
+//
+
+#import "generic32.adl"

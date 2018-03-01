@@ -1,0 +1,29 @@
+#
+# This tests the use of level-sensitive exceptions.
+#
+
+step
+# Exception is disabled, so this shouldn't do anything.
+triggerexcpt External
+step
+# Still no exception.
+puts "NIA:  [reg NIA]"
+# Still no exception
+triggerexcpt External
+step
+setbrk 0x18
+go
+# This should be triggered immediately because MSR.EE is still 1.
+triggerexcpt External
+clrbrk 0x18
+setbrk 0x20
+go
+# This should not be triggered because it is disabled.
+triggerexcpt External
+clrbrk 0x20
+step
+# Now the exception is canceled, so it shouldn't fire when MSR.EE re-enables
+# External exceptions.
+cancelexcpt External
+go
+quit

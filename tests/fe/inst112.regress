@@ -1,0 +1,11 @@
+inst112.adl:54: Parm field can not be indexed.
+inst112.adl:69: Address type not defined for parm field.
+inst112.adl:74: Shift is not defined for parm field.
+inst112.adl:79: Display is not defined for parm field.
+inst112.adl:84: Parm field can not have nested fields.
+inst112.adl:95: Syntax is not defined for parm field.
+inst112.adl:105: Action is not defined for parm field.
+inst112.adl:91: Parm field can not be alias.
+inst112.adl:123: Parm field 'X23' may not be handled by syntax.
+inst112.adl:36: Parm field can not have relocations.
+Too many errors.

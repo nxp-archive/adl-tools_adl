@@ -1,0 +1,4 @@
+inst68.adl:136: Bad field name in syntax specifier : DaDb_imp_bits__25_31_.Dc
+inst68.adl:143: Bad field name in syntax specifier : DaDb_imp_bits__25_31_.Dc
+inst68.adl:150: Bad field name in syntax specifier : DaD.Da
+inst68.adl:157: Expression Da is not handled by any control code.

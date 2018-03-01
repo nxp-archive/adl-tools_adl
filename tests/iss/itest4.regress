@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<node>
+<name> P </name>
+<regs>
+<reg>
+<name> CCR </name>
+<shared> 0 </shared>
+<id> 0 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> L1E </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+<regfield>
+<name> L2E </name>
+<start> 1 </start>
+<end> 1 </end>
+</regfield>
+
+<regfield>
+<name> WT </name>
+<start> 2 </start>
+<end> 2 </end>
+</regfield>
+
+<regfield>
+<name> WTNA </name>
+<start> 3 </start>
+<end> 3 </end>
+</regfield>
+
+<regfield>
+<name> WTONA </name>
+<start> 4 </start>
+<end> 4 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> CIA </name>
+<attrs> cia </attrs>
+<shared> 0 </shared>
+<id> 1 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CR </name>
+<attrs> debug(1) </attrs>
+<shared> 0 </shared>
+<id> 2 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CTR </name>
+<attrs> debug(2) </attrs>
+<shared> 0 </shared>
+<id> 3 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CacheInhibited </name>
+<shared> 0 </shared>
+<id> 4 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> DBGCTRL </name>
+<shared> 0 </shared>
+<id> 5 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> CNT </name>
+<start> 0 </start>
+<end> 7 </end>
+</regfield>
+
+<regfield>
+<name> EN </name>
+<start> 31 </start>
+<end> 31 </end>
+</regfield>
+
+<regfield>
+<name> LIM </name>
+<start> 8 </start>
+<end> 15 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> ESR </name>
+<shared> 0 </shared>
+<id> 6 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> HDBCR0 </name>
+<shared> 0 </shared>
+<id> 7 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> MMU_ON </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> HID0 </name>
+<attrs> privileged </attrs>
+<shared> 0 </shared>
+<id> 8 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> HID1 </name>
+<attrs> privileged </attrs>
+<shared> 0 </shared>
+<id> 9 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> IVOR7 </name>
+<shared> 0 </shared>
+<id> 10 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> IVPR </name>
+<shared> 0 </shared>
+<id> 11 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> LR </name>
+<attrs> debug(3) </attrs>
+<shared> 0 </shared>
+<id> 12 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> LittleEndian </name>
+<shared> 0 </shared>
+<id> 13 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> MSR </name>
+<shared> 0 </shared>
+<id> 14 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> AS </name>
+<start> 12 </start>
+<end> 12 </end>
+</regfield>
+
+<regfield>
+<name> DR </name>
+<start> 11 </start>
+<end> 11 </end>
+</regfield>
+
+<regfield>
+<name> EE </name>
+<start> 13 </start>
+<end> 13 </end>
+</regfield>
+
+<regfield>
+<name> IR </name>
+<start> 10 </start>
+<end> 10 </end>
+</regfield>
+
+<regfield>
+<name> PR </name>
+<start> 9 </start>
+<end> 9 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> NIA </name>
+<attrs> nia debug(4) </attrs>
+<shared> 0 </shared>
+<id> 15 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> PID0 </name>
+<shared> 0 </shared>
+<id> 16 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> PID1 </name>
+<shared> 0 </shared>
+<id> 17 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> SRR0 </name>
+<shared> 0 </shared>
+<id> 18 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> SRR1 </name>
+<shared> 0 </shared>
+<id> 19 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> XER </name>
+<attrs> debug(5) </attrs>
+<shared> 0 </shared>
+<id> 20 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> CA </name>
+<start> 2 </start>
+<end> 2 </end>
+</regfield>
+
+<regfield>
+<name> OV </name>
+<start> 1 </start>
+<end> 1 </end>
+</regfield>
+
+<regfield>
+<name> SO </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> GPR </name>
+<attrs> debug(0) </attrs>
+<shared> 0 </shared>
+<id> 21 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 32</size>
+</reg>
+
+<reg>
+<name> SPR </name>
+<shared> 0 </shared>
+<id> 22 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 1024</size>
+</reg>
+
+</regs>
+<mmu>
+<mmulookup>
+<name> TlbCam </name>
+<shared> 0 </shared>
+<id> 0 </id>
+<sets> 1 </sets>
+<ways> 16 </ways>
+<fields>
+<mmufield>
+<name> E </name>
+<attrs> translation_attr </attrs>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> EPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> RPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> SIZE </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> SR </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> SW </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> SX </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> TID </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TS </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> UR </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> UW </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> UX </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> V </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> WIMG </name>
+<attrs> translation_attr </attrs>
+<width> 4 </width>
+</mmufield>
+
+</fields>
+</mmulookup>
+
+<mmulookup>
+<name> TlbFoo </name>
+<shared> 0 </shared>
+<id> 1 </id>
+<sets> 1 </sets>
+<ways> 0 </ways>
+<fields>
+<mmufield>
+<name> EPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> RPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> SIZE </name>
+<width> 6 </width>
+</mmufield>
+
+</fields>
+</mmulookup>
+
+</mmu>
+<exceptions>
+<exception>
+<name> ProtectionFault </name>
+<id> 1</id>
+<flag> 1</flag>
+<priority> 0</priority>
+</exception>
+
+</exceptions>
+<caches>
+<cache>
+<name> L1d </name>
+<shared> 0 </shared>
+<type> data </type>
+<level> 1 </level>
+<size> 32768 </size>
+<linesz> 128 </linesz>
+<sets>
+<set>64</set>
+</sets>
+<ways>
+<way>4</way>
+</ways>
+</cache>
+
+<cache>
+<name> L1i </name>
+<shared> 0 </shared>
+<type> instr </type>
+<level> 1 </level>
+<size> 32768 </size>
+<linesz> 128 </linesz>
+<sets>
+<set>64</set>
+</sets>
+<ways>
+<way>4</way>
+</ways>
+</cache>
+
+<cache>
+<name> L2 </name>
+<shared> 0 </shared>
+<type> unified </type>
+<level> 2 </level>
+<size> 65536 </size>
+<linesz> 128 </linesz>
+<sets>
+<set>128</set>
+</sets>
+<ways>
+<way>4</way>
+</ways>
+</cache>
+
+</caches>
+</node>

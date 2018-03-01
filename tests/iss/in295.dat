@@ -1,0 +1,39 @@
+#
+# Test sparse register file moves for mod88.adl and makes sure that 24-bit
+# instructions work properly w/the DAT reader.
+#
+# This uses as-mod88, generated from mod88.adl.
+#
+
+= asm
+
+	li 1,10
+	mtvr VA0,1
+	li 1,20
+	mtvr VA1,1
+	li 1,30
+	mtvr VB0,1
+	li 1,40
+	mtvr VB1,1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3820000A	#	li 1,10
+MD n=Mem ra=0x00000004 d=0xF0010A s=3	#	mtvr VA0,1
+MD n=Mem ra=0x00000007 d=0x38200014	#	li 1,20
+MD n=Mem ra=0x0000000b d=0xF0010B s=3	#	mtvr VA1,1
+MD n=Mem ra=0x0000000e d=0x3820001E	#	li 1,30
+MD n=Mem ra=0x00000012 d=0xF0010C s=3	#	mtvr VB0,1
+MD n=Mem ra=0x00000015 d=0x38200028	#	li 1,40
+MD n=Mem ra=0x00000019 d=0xF0010D s=3	#	mtvr VB1,1
+# </GEN>
+
+CORE n=:P
+
+RESULTS
+
+RD n=VA i=0 d=10
+RD n=VA i=1 d=20
+RD n=VB i=0 d=30
+RD n=VB i=1 d=40

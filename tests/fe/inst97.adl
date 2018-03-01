@@ -1,0 +1,117 @@
+//
+// Simple test of instruction fields.
+//
+define (arch=minippc) {
+
+	
+  
+  define(reloc = R1) { 
+     value = 1;
+     instrfield = OPCD;
+  }
+
+  define(reloc = R2) { 
+     value = 2;
+     instrfield = XO;
+  }
+
+  define(reloc = R3) { 
+     value = 3;
+     instrfield = SPRN;
+  }
+
+  define(reloc = R4) { 
+     value = 4;
+     instrfield = SPRN;
+  }
+
+  define(reloc = R5) { 
+     value = 5;
+     instrfield = RB;
+  }  
+
+  define(reloc = R6) { 
+     value = 6;
+     instrfield = RS;
+  }  
+
+  define(reloc = R7) { 
+     value = 7;
+     instrfield = Foo;
+  }  
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    width = variable;
+    pseudo = true; 
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    ref = D;
+    type = regfile;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (0,12);
+    define(instrfield=nested) {
+      size = 3;
+      fields = (1,3);
+    }
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    pseudo = true;
+    width = 3;
+    prefix = true;
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    alias = RT;
+  }
+  define (instrfield=E) {
+    """
+    Immediate field used to specify a 1-bit value used by *wrteei* to place in the
+    EE (External Input Enable) bit of the Machine State Register.
+    """;
+    bits = 16;
+  }
+  define (regfile = D) {
+    size = 16;
+    width = 32;
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

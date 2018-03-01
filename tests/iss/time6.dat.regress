@@ -1,0 +1,8 @@
+powerpc:  Instr 5 (+5):  Incorrect completion-time:  Found 300 (adjusted to 300), expected 15 (285)
+powerpc:  Instr 6 (+1):  Incorrect completion-time:  Found 400 (adjusted to 115), expected 17 (98)
+powerpc:  Instr 7 (+1):  Incorrect completion-time:  Found 500 (adjusted to 117), expected 28 (89)
+powerpc:  Instr 8 (+1):  Incorrect completion-time:  Found 600 (adjusted to 128), expected 31 (97)
+powerpc:  Instr 9 (+1):  Incorrect completion-time:  Found 700 (adjusted to 131), expected 32 (99)
+powerpc:  Instr 10 (+1):  Incorrect completion-time:  Found 800 (adjusted to 132), expected 33 (99)
+powerpc:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

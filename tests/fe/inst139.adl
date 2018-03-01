@@ -1,0 +1,82 @@
+//
+// Test that shorthands can map to multiple instructions.  This also makes sure
+// that we can target instructions with multiple block-types.
+//
+
+define (arch=minippc) {
+
+  define (reg=pc) {
+    attrs = (cia,nia);
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instrfield=(R1,R2,R3)) {
+    width = 5;
+    pseudo = true;
+  }
+
+  define (regfile=GPR) { size = 32; };
+
+  blk = (red,green,blue);
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    blk = red;
+    action = {
+      if (RA == 0) {
+        GPR(RT) = SI;
+      } else {
+        GPR(RT) = GPR(RA) + SI;
+      }
+    };
+  }
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    blk = green;
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define(instr=add2) {
+    syntax = ("add %f,%f,%f,%f",R1,R2,R3,SI);
+    alias = ( addi(RT(R3),RA(R3),SI(SI)), add(RT(R1),RA(R2),RB(R3)) );
+    // No block defined, so we inherit them both.
+  } 
+
+  define(instr=add3) {
+    syntax = ("add %f,%f",R1,SI);
+    alias = ( addi(RT(R1),RA(R1),SI(SI)), add(RT(R1),RA(R1),RB(R1)) );
+    // We should be able to override the block as well.
+    blk = blue;
+  } 
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

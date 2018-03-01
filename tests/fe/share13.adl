@@ -1,0 +1,34 @@
+//
+// The type declarations should exist in both cores.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  enum Foo { aFoo, bFoo, cFoo };
+
+  struct XX {
+    bits<10> _x;
+    bits<10> _y;
+  };
+  
+}
+
+define (sys=PChip) {
+  define (core = P0) {
+    archs = foo;
+  }
+  define (core = P1) {
+    archs = foo;
+  }
+  P0 c0;
+  P1 c1;
+}

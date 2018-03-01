@@ -1,0 +1,150 @@
+//
+// Tests all combinations of register/register-file reads/writes.
+//
+// The test is run with the --data-model-debug option so that we see
+// the access objects explicitly.
+//
+
+define (arch=minippc) {
+  
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+ 
+  define (instr=g) {
+    fields=(OPCD(7),RT,RA,RB,XO_X(10));
+    
+    action= {
+      X = Y + 1;
+      GPR(RT) = GPR(RA) + 1;
+      GPR(RT)(0,15) = GPR(RA)(0,15);
+      GPR(RT)(10) = RA;
+      X(0,15) = RT;
+      X(23) = RT;
+      X.x = RT;
+      GPR(RT).x = GPR(RA);
+      Y.xx(1) = RT;
+      VPR(RT).xx(3) = GPR(RA);
+
+      thread(0).X;
+      thread(0).X(1,13);
+      thread(0).X.x;
+      thread(0).Y.xx(3);
+      thread(0).GPR(RT);
+      thread(1).GPR(RA)(0,15);
+      thread(1).GPR(RA).x;
+      thread(1).VPR(12).xx(2);
+
+      thread(0).X = 1;
+      thread(0).X(1,13) = 2;
+      thread(0).X.x = 3;
+      thread(0).Y.xx(3) = 4;
+      thread(0).GPR(RT) = 5;
+      thread(1).GPR(RA)(0,15) = 6;
+      thread(1).GPR(RA).x = 7;
+      thread(1).VPR(RA).xx(2) = 8;
+
+      delayed_write(X,2) = Y.xx(2) + 1;
+      delayed_write(GPR(RT),2) = GPR(RA).x + 1;
+      delayed_write(GPR(RT)(0,15),2) = VPR(RA).xx(3) + GPR(RB);
+      delayed_write(GPR(RT)(10),2) = RT;
+      delayed_write(X(0,15),2) = X(8,24);
+      delayed_write(X(23),2) = RT;
+      delayed_write(X.x,2) = X.x;
+      delayed_write(GPR(RT).x,2) = GPR(RA);
+      delayed_write(Y.xx(1),2) = RT;
+      delayed_write(VPR(RT).xx(4),2) = GPR(RA);
+
+      // These are reads of non-indexed fields, so the slices are taken after
+      // the register read is performed.
+      GPR(RT) = X.x(0,4);
+      X = GPR(RT).x(0,15);
+
+      // Calling a method of the intbv which results from a register read should
+      // parse correctly: The read should be associated just with the register
+      // and not with the method.
+      X = Y.uint32();
+      X = GPR(RA).uint32();
+
+      // Special case- validIndex() accesses a constant version of the whole register-file.
+      GPR.validIndex(23);      
+      GPR.size();
+    };
+  }
+
+  define (context=thread) {
+    regs=(pc,X,Y);
+    regfiles = (GPR,VPR);
+    num_contexts = 2;
+    active = { return TACTIVE; };
+  }
+  
+  define (regfile=GPR) {
+    define (field=x) {
+      bits = (0,1);
+    }
+    size = 32;
+  }
+
+  define (regfile=VPR) {
+    define (field=xx) {
+      indexed = 16;
+    }
+    size = 32;
+  }
+
+  define (reg=X) {
+    define (field=x) {
+      bits = (0,1);
+    }
+  }
+
+  define (reg=Y) {
+    define (field=xx) {
+      indexed = 8;
+    }
+  }
+
+  define (reg=Z) {
+    define (field=x) {
+      bits = (0,15);
+    }
+    define (write) {
+      action = func(bits<32> x) {
+        // These should be marked as register writes to Z.
+        ThisReg = x;
+        ThisReg.x = x + 1;
+      };
+    }
+    reset = func () {
+     ThisReg = 0xdeadbeef;
+    };    
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=TACTIVE) { }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,35 @@
+//
+
+define (arch = MiniPPC) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg=LR) {};
+
+  define (regfile=SPR) {
+    size=1024;
+    define (entry=6)  { reg = GPR(1); }
+    define (entry=7)  { reg = LR; }
+    define (entry=8)  { reg = foobar(0).GPR(2); }
+    define (entry=9)  { reg = foobar(0).LR; }
+  }
+
+  define (context=foobar) {
+    regfiles = (GPR);
+    regs = (LR);
+    num_contexts = 3;
+  }
+
+}
+
+
+define (core = P) {
+  archs = MiniPPC;
+}

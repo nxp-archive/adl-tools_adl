@@ -1,0 +1,14 @@
+Disassembly:
+
+100:	lwz r2,4096(r0)
+104:	addi r10,r10,256
+108:	add r3,r2,r1
+10c:	addic. r5,r5,-2
+110:	stw r3,0(r4)
+114:	stw r3,0(r6)
+118:	lhz r7,4100(r0)
+11c:	lbz r8,4101(r0)
+120:	stb r8,8196(r0)
+124:	sth r7,8200(r0)
+128:	halt
+

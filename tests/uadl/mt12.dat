@@ -1,0 +1,68 @@
+#
+# This is used to make sure that we're properly conveying the thread ID to the
+# memory subsystem.
+#
+= asm
+
+	lwz r1,0x1000(r0)
+	lwz r2,0x1004(r0)
+	lwz r3,0x1008(r0)
+	lwz r4,0x100c(r0)
+	.long 0x0
+	lwz r1,0x2000(r0)
+	lwz r2,0x2004(r0)
+	lwz r3,0x2008(r0)
+	lwz r4,0x200c(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x80401004	#	lwz r2,0x1004(r0)
+MD n=Mem ra=0x00000008 d=0x80601008	#	lwz r3,0x1008(r0)
+MD n=Mem ra=0x0000000c d=0x8080100C	#	lwz r4,0x100c(r0)
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x80202000	#	lwz r1,0x2000(r0)
+MD n=Mem ra=0x00000018 d=0x80402004	#	lwz r2,0x2004(r0)
+MD n=Mem ra=0x0000001c d=0x80602008	#	lwz r3,0x2008(r0)
+MD n=Mem ra=0x00000020 d=0x8080200C	#	lwz r4,0x200c(r0)
+# </GEN>
+
+CORE n=:PMT
+
+#RD n=CCR d=0x80000000
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA d=0x0
+
+CORE n=:PMT:t1
+
+RD n=NIA d=0x14
+
+MD n=Mem ra=0x1000 d=1
+MD n=Mem ra=0x1004 d=2
+MD n=Mem ra=0x1008 d=3
+MD n=Mem ra=0x100c d=4
+MD n=Mem ra=0x2000 d=10
+MD n=Mem ra=0x2004 d=20
+MD n=Mem ra=0x2008 d=30
+MD n=Mem ra=0x200c d=40
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=4
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=40

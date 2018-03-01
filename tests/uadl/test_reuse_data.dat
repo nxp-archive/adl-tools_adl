@@ -1,0 +1,15 @@
+#
+# test fetch unit parameter 'reuse_data'.
+#   with 'reuse_data = true', the add instruction should only be fetched once,
+#   otherwise, it will be fetched twice.
+#
+= asm
+
+       b loop
+loop:  add r2,r2,r1
+
+= /asm
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x48000004	#	b loop
+MD n=Mem ra=0x00000004 d=0x7C420A14	#	loop:  add r2,r2,r1
+# </GEN>

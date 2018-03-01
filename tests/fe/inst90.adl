@@ -1,0 +1,162 @@
+//
+// Tests the tracking of partial reads/writes.  We should set the resource masks
+// appropriately, based upon the slices or fields that we access.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  // Test mask creation when assigning to register fields.
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      FOO.D = GPR(RT);
+      FOO.B = GPR(31);
+    };
+  }
+
+  // Test mask creation when reading from register fields.
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      GPR(RA) = FOO.A + FOO.C;
+    };
+  }
+
+  // Test mask creation when assigning to register slices.
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    action = {
+      x(4,15,RA,RB);
+    };
+  }
+
+  // Test mask creation when reading from register slices.
+  define (instr=d) {
+    fields=(OPCD(4),RT,RA,RB,XO_X(10));
+    action = {
+      GPR(RT) = FOO(0,3) + FOO(28,31) + FOO(20);
+    };
+  }
+
+  // Test mask creation when assigning to register-file fields.
+  define (instr=e) {
+    fields=(OPCD(5),RT,RA,RB,XO_X(10));
+    action = {
+      GPR(RT).D = FOO.A;
+      GPR(RT).B = FOO.B;
+    };
+  }
+
+  // Test mask creation when readomg from register-file fields.
+  define (instr=f) {
+    fields=(OPCD(6),RT,RA,RB,XO_X(10));
+    action = {
+      GPR(RT) = GPR(RA).A + GPR(RA).C + GPR(RB).D;
+    };
+  }
+
+  // Test mask creation when assigning to register-file slices.
+  define (instr=g) {
+    fields=(OPCD(7),RT,RA,RB,XO_X(10));
+    action = {
+      GPR(RT)(16,31) = GPR(RA)(16,31) + GPR(RB)(16,31);
+    };
+  }
+
+  // Test mask creation when reading from a field of a specific register-file item.
+  define (instr=h) {
+    fields=(OPCD(8),RT,RA,RB,XO_X(10));
+    action = {
+      FOO.B = GPR(31).A;
+    };
+  }
+
+  void x(int t1,int t2,int a,int b)
+  {
+    FOO(t1,t2) = GPR(a) + GPR(b);
+  }
+
+  define (reg=FOO) {
+    define (field=A) {
+      bits = (0,7);
+    }
+    define (field=B) {
+      bits = (8,15);
+    }
+    define (field=C) {
+      bits = (16,23);
+    }
+    define (field=D) {
+      bits = (24,31);
+    }
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+
+    define (field=A) {
+      bits = (0,7);
+    }
+    define (field=B) {
+      bits = (8,15);
+    }
+    define (field=C) {
+      bits = (16,23);
+    }
+    define (field=D) {
+      bits = (24,31);
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

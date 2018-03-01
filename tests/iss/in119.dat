@@ -1,0 +1,64 @@
+#
+# Basic test of calculated branches.
+#
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,2
+  blr
+  .long 0x0
+  addi r4,r4,1
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  addi r2,r2,1
+  addi r2,r2,1
+  mtspr LR,r3
+  blr
+
+= /asm
+
+= mdopts
+
+  instr-offset:  0xfe8
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000fe8 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000fec d=0x38210002	#	addi r1,r1,2
+MD n=Mem ra=0x00000ff0 d=0x4E800020	#	blr
+MD n=Mem ra=0x00000ff4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff8 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000ffc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001000 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001004 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001008 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000100c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001010 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00001014 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00001018 d=0x7C6803A6	#	mtspr LR,r3
+MD n=Mem ra=0x0000101c d=0x4E800020	#	blr
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0xfe8
+
+RD n=LR d=0x1010
+
+RD n=GPR i=3 d=0xff8
+
+RESULTS
+
+RD n=NIA      d=0x00001000
+RD n=LR       d=0x00000ff8
+
+RD n=GPR i=0  d=0x00000000
+RD n=GPR i=1  d=0x00000003
+RD n=GPR i=2  d=0x00000002
+RD n=GPR i=3  d=0x00000ff8
+RD n=GPR i=4  d=0x00000001
+

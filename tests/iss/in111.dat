@@ -1,0 +1,152 @@
+
+= ccode
+
+extern unsigned count;
+
+void foo()
+{
+	count = 10;
+}
+
+void bar()
+{
+	count *= 2;
+}
+
+int main()
+{
+  foo();
+  bar();
+  return 0; 
+}
+
+= /ccode
+
+= subst
+
+  # The high-half of all addresses are set to 0.
+  /\w+\@ha/0x0/
+
+  # The counter location.
+  /count\@l/0x1000/
+
+  /\s+bl foo/bl -108/
+  /\s+bl bar/bl -72/
+
+= /subst
+
+= copt
+
+-O3
+
+= /copt
+
+= asm
+
+	.file	"fileYtgUVv.c"
+	.section	".text"
+	.align 2
+	.globl foo
+	.type	foo, @function
+foo:
+	stwu 1,-32(1)
+	stw 31,28(1)
+	mr 31,1
+	lis 9,count@ha
+	li 0,10
+	stw 0,count@l(9)
+	lwz 11,0(1)
+	lwz 31,-4(11)
+	mr 1,11
+	blr
+	.size	foo, .-foo
+	.align 2
+	.globl bar
+	.type	bar, @function
+bar:
+	stwu 1,-32(1)
+	stw 31,28(1)
+	mr 31,1
+	lis 11,count@ha
+	lis 9,count@ha
+	lwz 0,count@l(9)
+	slwi 0,0,1
+	stw 0,count@l(11)
+	lwz 11,0(1)
+	lwz 31,-4(11)
+	mr 1,11
+	blr
+	.size	bar, .-bar
+	.align 2
+	.globl main
+	.type	main, @function
+main:
+	stwu 1,-32(1)
+	mflr 0
+	stw 31,28(1)
+	stw 0,36(1)
+	mr 31,1
+	bl foo
+	bl bar
+	li 0,0
+	mr 3,0
+	lwz 11,0(1)
+	lwz 0,4(11)
+	mtlr 0
+	lwz 31,-4(11)
+	mr 1,11
+	blr
+	.size	main, .-main
+	.ident	"GCC: (GNU) 3.3.2"
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x9421FFE0	#	stwu 1,-32(1)
+MD n=Mem ra=0x00000004 d=0x93E1001C	#	stw 31,28(1)
+MD n=Mem ra=0x00000008 d=0x7C3F0B78	#	mr 31,1
+MD n=Mem ra=0x0000000c d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x00000010 d=0x3800000A	#	li 0,10
+MD n=Mem ra=0x00000014 d=0x90091000	#	stw 0,0x1000(9)
+MD n=Mem ra=0x00000018 d=0x81610000	#	lwz 11,0(1)
+MD n=Mem ra=0x0000001c d=0x83EBFFFC	#	lwz 31,-4(11)
+MD n=Mem ra=0x00000020 d=0x7D615B78	#	mr 1,11
+MD n=Mem ra=0x00000024 d=0x4E800020	#	blr
+MD n=Mem ra=0x00000028 d=0x9421FFE0	#	stwu 1,-32(1)
+MD n=Mem ra=0x0000002c d=0x93E1001C	#	stw 31,28(1)
+MD n=Mem ra=0x00000030 d=0x7C3F0B78	#	mr 31,1
+MD n=Mem ra=0x00000034 d=0x3D600000	#	lis 11,0x0
+MD n=Mem ra=0x00000038 d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x0000003c d=0x80091000	#	lwz 0,0x1000(9)
+MD n=Mem ra=0x00000040 d=0x5400083C	#	slwi 0,0,1
+MD n=Mem ra=0x00000044 d=0x900B1000	#	stw 0,0x1000(11)
+MD n=Mem ra=0x00000048 d=0x81610000	#	lwz 11,0(1)
+MD n=Mem ra=0x0000004c d=0x83EBFFFC	#	lwz 31,-4(11)
+MD n=Mem ra=0x00000050 d=0x7D615B78	#	mr 1,11
+MD n=Mem ra=0x00000054 d=0x4E800020	#	blr
+MD n=Mem ra=0x00000058 d=0x9421FFE0	#	stwu 1,-32(1)
+MD n=Mem ra=0x0000005c d=0x7C0802A6	#	mflr 0
+MD n=Mem ra=0x00000060 d=0x93E1001C	#	stw 31,28(1)
+MD n=Mem ra=0x00000064 d=0x90010024	#	stw 0,36(1)
+MD n=Mem ra=0x00000068 d=0x7C3F0B78	#	mr 31,1
+MD n=Mem ra=0x0000006c d=0x4BFFFF95	#	bl -108
+MD n=Mem ra=0x00000070 d=0x4BFFFFB9	#	bl -72
+MD n=Mem ra=0x00000074 d=0x38000000	#	li 0,0
+MD n=Mem ra=0x00000078 d=0x7C030378	#	mr 3,0
+MD n=Mem ra=0x0000007c d=0x81610000	#	lwz 11,0(1)
+MD n=Mem ra=0x00000080 d=0x800B0004	#	lwz 0,4(11)
+MD n=Mem ra=0x00000084 d=0x7C0803A6	#	mtlr 0
+MD n=Mem ra=0x00000088 d=0x83EBFFFC	#	lwz 31,-4(11)
+MD n=Mem ra=0x0000008c d=0x7D615B78	#	mr 1,11
+MD n=Mem ra=0x00000090 d=0x4E800020	#	blr
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0x0
+
+RD n=GPR i=1 d=0x500
+RD n=NIA d=0x00000060
+RD n=LR  d=0x0000009c
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=20

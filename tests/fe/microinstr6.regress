@@ -1,0 +1,279 @@
+======
+Cores:
+======
+Name:  "packet_ops"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  bdo: [29,30] 
+        Branch destination packet offset field.
+
+    This specifies the micro-op to execute within the target instruction.
+    
+  bdp: [10,28] 
+    Signed:  1
+    Addr:  PC-relative
+    Shift:  3
+        PC-relative branch destination-packet field.
+
+    This is used to specify the address of the instruction.
+    
+  fop: [0,1] 
+        Outer 'envelope' instruction opcode.
+    
+  op: [0,4] 
+        Primary opcode for sub-instrutions.
+    
+  opA: [2,32] [instr table: instr_subinstr1]
+        Instruction field for storing a 31-bit instruction (first slot).
+    
+  opB: [33,63] [instr table: instr_subinstr1]
+        Instruction field for storing a 31-bit instruction (second slot).
+    
+  opC: [2,21] [instr table: instr_subinstr2]
+        Instruction field for storing a 20-bit instruction (first slot).
+    
+  opD: [22,41] [instr table: instr_subinstr2]
+        Instruction field for storing a 20-bit instruction (second slot).
+    
+  opE: [42,61] [instr table: instr_subinstr2]
+        Instruction field for storing a 20-bit instruction (third slot).
+    
+  ra: [10,14] [regfile:  GPR]
+        First operand source instruction field.
+    
+  rb: [15,19] [regfile:  GPR]
+        Second operand source instruction field.
+    
+  rs: [5,9] [regfile:  GPR]
+        Standard source instruction field.
+    
+  rt: [5,9] [regfile:  GPR]
+        Standard target instruction field.
+    
+  simm: [15,30] 
+    Display:  dec
+    Signed:  1
+        Unsigned immediate field.
+    
+Instructions:
+  Name:  add
+  Width:  20
+  Is micro op.
+  Attributes:  instr_subinstr2
+  Fields:  op(1) rt ra rb
+  Action:  {
+    GPR ( rt ) = GPR ( ra ) + GPR ( rb ) ;
+}
+  Source Registers:  GPR(ra) GPR(rb) 
+  Target Registers:  GPR(rt) 
+  Documention:
+
+    Add register-register.
+    
+  -------------------------------
+  Name:  addi
+  Width:  31
+  Is micro op.
+  Attributes:  instr_subinstr1
+  Fields:  op(1) rt ra simm
+  Action:  {
+    GPR ( rt ) = GPR ( ra ) + simm ;
+}
+  Source Registers:  GPR(ra) 
+  Target Registers:  GPR(rt) 
+  Documention:
+
+    Add immediate.
+    
+  -------------------------------
+  Name:  bc
+  Width:  31
+  Branch:  Conditional
+  Is micro op.
+  Micro-op offset field: bdo
+  Attributes:  instr_subinstr1
+  Fields:  op(3) rs bdp bdo
+  Action:  {
+    if ( GPR ( rs ) != 0 ) {
+        setMicroOpOffset ( bdo ) ;
+        NIA = bdp ;
+    }
+}
+  Source Registers:  CIA GPR(rs) 
+  Target Registers:  NIA? 
+  Documention:
+
+    Branch conditional.
+    
+  -------------------------------
+  Name:  halt
+  Width:  64
+  Attributes:  other
+  Fields:  fop(0)
+  Action:  {
+    halt (  ) ;
+}
+  Documention:
+
+    Halt simulation.
+    
+  -------------------------------
+  Name:  mul
+  Width:  20
+  Is micro op.
+  Attributes:  instr_subinstr2
+  Fields:  op(3) rt ra rb
+  Action:  {
+    GPR ( rt ) = GPR ( ra ) * GPR ( rb ) ;
+}
+  Source Registers:  GPR(ra) GPR(rb) 
+  Target Registers:  GPR(rt) 
+  Documention:
+
+    Multiply register-register.
+    
+  -------------------------------
+  Name:  mulli
+  Width:  31
+  Is micro op.
+  Attributes:  instr_subinstr1
+  Fields:  op(2) rt ra simm
+  Action:  {
+    GPR ( rt ) = GPR ( ra ) * simm ;
+}
+  Source Registers:  GPR(ra) 
+  Target Registers:  GPR(rt) 
+  Documention:
+
+    Multiply immediate.
+    
+  -------------------------------
+  Name:  nop1
+  Width:  31
+  Is micro op.
+  Attributes:  instr_subinstr1
+  Fields:  op(0)
+  Action:  {
+}
+  Documention:
+
+    Format-1 no-op.
+    
+  -------------------------------
+  Name:  nop2
+  Width:  20
+  Is micro op.
+  Attributes:  instr_subinstr2
+  Fields:  op(0)
+  Action:  {
+}
+  Documention:
+
+    Format-2 no-op.
+    
+  -------------------------------
+  Name:  parallel
+  Width:  64
+  Micro ops:  2
+  DSyntax:  "%f = %f":   opA opB
+  Attributes:  other
+  Fields:  fop(3) opA opB
+  Documention:
+
+    Contains two 31-bit instructions. Implies parallel execution.
+    
+  -------------------------------
+  Name:  serial1
+  Width:  64
+  Micro ops:  2
+  DSyntax:  "%f ; %f":   opA opB
+  Attributes:  other
+  Fields:  fop(1) opA opB
+  Documention:
+
+    Contains two 31-bit instructions. Implies serial execution.
+    
+  -------------------------------
+  Name:  serial2
+  Width:  64
+  Micro ops:  3
+  DSyntax:  "%f ; %f ; %f":   opC opD opE
+  Attributes:  other
+  Fields:  fop(2) opC opD opE
+  Documention:
+
+    Contains three 20-bit instructions. Implies serial execution.
+    
+  -------------------------------
+  Name:  sub
+  Width:  20
+  Is micro op.
+  Attributes:  instr_subinstr2
+  Fields:  op(2) rt ra rb
+  Action:  {
+    GPR ( rt ) = GPR ( ra ) - GPR ( rb ) ;
+}
+  Source Registers:  GPR(ra) GPR(rb) 
+  Target Registers:  GPR(rt) 
+  Documention:
+
+    Subtract register-register.
+    
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xc000000000000000
+    0(0000000000000000):  halt
+    1(4000000000000000):  serial1
+    2(8000000000000000):  serial2
+    3(c000000000000000):  parallel
+instr_subinstr1:
+    Mask:  0xf8000000
+    0(0):  nop1
+    1(8000000):  addi
+    2(10000000):  mulli
+    3(18000000):  bc
+instr_subinstr2:
+    Mask:  0xf8000000
+    0(0):  nop2
+    1(8000000):  add
+    2(10000000):  sub
+    3(18000000):  mul
+
+Post-Packet-Asm Handler:  func ( InstrBundle b ) {
+}
+  Assembler instruction tables: other instr_subinstr1 instr_subinstr2 
+-------------------------------
+

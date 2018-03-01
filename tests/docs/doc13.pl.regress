@@ -1,0 +1,666 @@
+$data = {
+"cores" => {
+"P" => {
+"bit_endianness" => "little",
+"parallel_execution" => 3,
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"PC" => {
+"width" => 32,
+"serial" => 1,
+"attributes" => {
+"cia" => "",
+"nia" => "",
+},
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"width" => 32,
+"size" => 16,
+"prefix" => "r",
+"shared" => 0,
+},
+},
+"instrfields" => {
+"Enc1" => {
+"pseudo" => 1,
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Enc1_imp_bits__15_0_" => {
+"bits" => [
+[
+15,
+0,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+"implements" => "Enc1",
+},
+"HighReg" => {
+"pseudo" => 1,
+"prefix" => 1,
+"width" => 6,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0",
+"type" => "imm",
+"value" => 0,
+},
+"HighReg_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_" => {
+"bits" => [
+[
+11,
+6,
+],
+],
+"prefix" => 1,
+"width" => 6,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0xfc0",
+"type" => "imm",
+"value" => 0,
+"implements" => "HighReg",
+},
+"HighReg_imp_bits__17_16_" => {
+"bits" => [
+[
+17,
+16,
+],
+],
+"prefix" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x30000",
+"type" => "imm",
+"value" => 0,
+"implements" => "HighReg",
+},
+"IMM" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+"signed" => 1,
+},
+"IMM_imp_bits__11_11_x_10_10_x_9_9_x_5_5_x_4_4_" => {
+"bits" => [
+[
+11,
+9,
+],
+[
+5,
+4,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xe30",
+"type" => "imm",
+"signed" => 1,
+"implements" => "IMM",
+},
+"RA" => {
+"pseudo" => 1,
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RA_imp_bits__16_16_x_6_6_x_7_7_x_8_8_" => {
+"bits" => [
+[
+16,
+16,
+],
+[
+6,
+6,
+],
+[
+7,
+7,
+],
+[
+8,
+8,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x101c0",
+"type" => "regfile",
+"implements" => "RA",
+"ref" => "GPR",
+},
+"RA_imp_bits__16_16_x_8_8_x_7_7_x_6_6_" => {
+"bits" => [
+[
+16,
+16,
+],
+[
+8,
+6,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x101c0",
+"type" => "regfile",
+"implements" => "RA",
+"ref" => "GPR",
+},
+"RB" => {
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RB_imp_bits__11_11_x_10_10_x_9_9_" => {
+"bits" => [
+[
+11,
+9,
+],
+],
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xe00",
+"type" => "regfile",
+"implements" => "RB",
+"ref" => "GPR",
+},
+"RT" => {
+"pseudo" => 1,
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RT_imp_bits__17_17_x_14_14_x_13_13_x_12_12_" => {
+"bits" => [
+[
+17,
+17,
+],
+[
+14,
+12,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x27000",
+"type" => "regfile",
+"implements" => "RT",
+"ref" => "GPR",
+},
+"SG" => {
+"pseudo" => 1,
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+},
+"SG_imp_bits__15_15_" => {
+"bits" => [
+[
+15,
+15,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x8000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+"implements" => "SG",
+},
+"VarInstrOpcode_imp_bits__17_16_x_14_0_" => {
+"bits" => [
+[
+17,
+16,
+],
+[
+14,
+0,
+],
+],
+"width" => 17,
+"size" => 17,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x37fff",
+"type" => "imm",
+},
+"VarInstrOpcode_imp_bits__3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+3,
+0,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf",
+"type" => "imm",
+},
+"VarInstrOpcode_imp_bits__5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+5,
+0,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3f",
+"type" => "imm",
+},
+"VarPrefixOpcode_imp_bits__14_14_x_13_13_x_12_12_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+14,
+0,
+],
+],
+"prefix" => 1,
+"width" => 15,
+"size" => 15,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fff",
+"type" => "imm",
+},
+"VarPrefixOpcode_imp_bits__5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+5,
+0,
+],
+],
+"prefix" => 1,
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3f",
+"type" => "imm",
+},
+"VlesSize" => {
+"pseudo" => 1,
+"prefix" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+"value" => 1,
+},
+"VlesSize_imp_bits__14_14_x_13_13_x_12_12_" => {
+"bits" => [
+[
+14,
+12,
+],
+],
+"prefix" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7000",
+"type" => "imm",
+"value" => 1,
+"implements" => "VlesSize",
+},
+"reserved_imp_bits__15_15_" => {
+"bits" => [
+[
+15,
+15,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x8000",
+"type" => "imm",
+},
+},
+"instrs" => {
+"OneWord" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "OneWord HighReg, Enc1",
+"dsyntax" => "OneWord ${HighReg}, ${Enc1}",
+"fields" => {
+"HighReg_imp_bits__17_16_" => "",
+"Enc1_imp_bits__15_0_" => "",
+},
+"pseudo" => 1,
+"disassemble" => 1,
+},
+"PREFIX" => {
+"width" => 16,
+"syntax" => "LPREFIX, VlesSize = VlesSize, HighReg = HighReg",
+"dsyntax" => "LPREFIX, VlesSize = ${VlesSize}, HighReg = ${HighReg}",
+"attributes" => {
+"prefix" => "",
+},
+"fields" => {
+"reserved_imp_bits__15_15_" => "reserved",
+"VlesSize_imp_bits__14_14_x_13_13_x_12_12_" => "",
+"HighReg_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_" => "",
+"VarPrefixOpcode_imp_bits__5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => 3,
+},
+"prefix" => 1,
+"disassemble" => 1,
+},
+"add" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "add RA,RB,RT",
+"dsyntax" => "add ${RA},${RB},${RT}",
+"attributes" => {
+"type1" => "",
+"first" => "",
+},
+"fields" => {
+"RT_imp_bits__17_17_x_14_14_x_13_13_x_12_12_" => "",
+"RA_imp_bits__16_16_x_6_6_x_7_7_x_8_8_" => "",
+"SG_imp_bits__15_15_" => "",
+"RB_imp_bits__11_11_x_10_10_x_9_9_" => "",
+"VarInstrOpcode_imp_bits__5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => 9,
+},
+"action" => <<DATA
+{
+    info ( 1 , "RA= " << RA , ", RB= " << RB , ", RT= " << RT ) ;
+    GPR ( RT ) = GPR ( RB ) + GPR ( RA ) ;
+    a (  ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"type" => "OneWord",
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"helpers" => [
+"a",
+"b",
+"c",
+],
+},
+"halt" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "halt SG",
+"dsyntax" => "halt ${SG}",
+"attributes" => {
+"type1" => "",
+"first" => "",
+},
+"fields" => {
+"VarInstrOpcode_imp_bits__17_16_x_14_0_" => 0,
+"SG_imp_bits__15_15_" => "",
+},
+"action" => <<DATA
+{
+    halt (  ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"type" => "OneWord",
+},
+"mv" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "mv RA,IMM,RT",
+"dsyntax" => "mv ${RA},${IMM},${RT}",
+"attributes" => {
+"type1" => "",
+"first" => "",
+},
+"fields" => {
+"RT_imp_bits__17_17_x_14_14_x_13_13_x_12_12_" => "",
+"RA_imp_bits__16_16_x_8_8_x_7_7_x_6_6_" => "",
+"SG_imp_bits__15_15_" => "",
+"IMM_imp_bits__11_11_x_10_10_x_9_9_x_5_5_x_4_4_" => "",
+"VarInstrOpcode_imp_bits__3_3_x_2_2_x_1_1_x_0_0_" => 11,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) + IMM ;
+}
+DATA
+,
+"disassemble" => 1,
+"type" => "OneWord",
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"nop" => {
+"width" => 16,
+"syntax" => "nop",
+"dsyntax" => "nop",
+"attributes" => {
+"prefix" => "",
+"type1" => "",
+},
+"fields" => {
+"reserved_imp_bits__15_15_" => "reserved",
+"VarPrefixOpcode_imp_bits__14_14_x_13_13_x_12_12_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => 11527,
+},
+"prefix" => 1,
+"disassemble" => 1,
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+{
+    VlesSize = b . size (  ) ;
+}
+DATA
+,
+"post-packet" => <<DATA
+{
+    info ( 1 , "------------------------- eop ----------------------" ) ;
+    setCurrentInstrTable ( prefix ) ;
+}
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"parms" => {
+"icount" => {
+"value" => "i0",
+"options" => [
+"i0",
+"i1",
+"i2",
+"i3",
+"i4",
+],
+},
+},
+"asm_config" => {
+"comments" => [
+";",
+],
+"line_comments" => [
+";",
+],
+"line_seps" => [
+"\n",
+],
+"instr_seps" => [
+"\n",
+],
+"group_seps" => [
+[
+"[",
+"]",
+],
+[
+"\n",
+"\n",
+],
+],
+"asm_instrtables" => [
+"prefix",
+"type1",
+],
+"disasm_instrtables" => [
+"prefix",
+"type1",
+],
+},
+"helpers" => {
+"a" => {
+"action" => <<DATA
+ void a (  ) {
+    b (  ) ;
+}
+DATA
+,
+"helpers" => [
+"b",
+"c",
+],
+},
+"b" => {
+"action" => <<DATA
+ void b (  ) {
+    c (  ) ;
+}
+DATA
+,
+"helpers" => [
+"c",
+],
+},
+"c" => {
+"action" => <<DATA
+ void c (  ) {
+}
+DATA
+,
+},
+},
+},
+},
+"systems" => {
+},
+};
+

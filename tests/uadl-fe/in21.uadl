@@ -1,0 +1,75 @@
+//
+//  Tests for incorrect attribute-base instruction class definition.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+
+    define (pipestage mID) {}
+
+    define (pipestage mEX) {}
+
+    define (pipestage mWB) {}
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class d) {
+    instr_attrs = classD;
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+    S_INIT:{ change_state(S_ID); }
+    S_ID:  { change_state(S_EX); }
+    S_EX:  { change_state(S_WB); }
+    S_WB:  { change_state(S_INIT); }
+    };
+
+  }
+
+  define (instr_class a) {
+    instr_attrs = classA;
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+    S_INIT:{ change_state(S_ID); }
+    S_ID:  { change_state(S_EX); }
+    S_EX:  { change_state(S_WB); }
+    S_WB:  { change_state(S_INIT); }
+    };
+
+  }
+
+
+}

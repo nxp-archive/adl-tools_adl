@@ -1,0 +1,485 @@
+//
+// A DLX model with forwarding paths from MM and EX.
+//
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = mMEM;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4);
+    }
+
+    // Pipeline stages
+    define (pipestage=(mID, mEX, mMM, mWB)) {}
+
+    // Forwarding path.  Will assume a width of 32.
+    define (forwarding_path=FwdEX) {}
+
+    // This has a size of 2 so that we can store ea + data for load-with-update
+    // instructions.
+    define (forwarding_path=FwdMM) { size = 2; }
+
+    // Memory system
+    define (memory mMEM) { 
+      data_width = 32;
+    }
+
+    define (custom counter) {
+      header = "dlx_custom_cr.h";
+      type = MyCounter;
+      define (args) {
+        max = 2;
+      }
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_EXp, S_MM, S_MMp, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = (S_EX,S_EXp);
+      mMM = (S_MM,S_MMp);
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     rlwinm, add, or, cmpi, cmp, 
+                     mfspr, srw, cror, crand, halt,
+                     mulli,  mullw, mtspr );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+      Flags = CR;
+      Flags = XER;
+    };
+
+    define (instr=(ori, xori, "andi.", "andis.", rlwimi, "rlwimi.", 
+                   rlwinm, "rlwinm.", and, or, "or.", xor, slw, sraw, "sraw.", srawi, "srawi.",
+                   srw )) {
+      define (operands) {
+        Src1 = GPR(RS);
+        Src2 = GPR(RB);
+        Trg  = GPR(RA);
+      };
+    }
+
+    define (instr=(cmpli,cmpi,cmp,cmpl)) {
+      define (operands) {
+        Src1 = GPR(RA);
+        Src2 = GPR(RB);
+        Trg  = CR;
+      }
+    }
+
+    define (instr=(mfspr)) {
+      define (operands) {
+        Src1 = SPR(SPRN);
+        Trg  = GPR(RT);
+      }
+    }
+
+    define (instr=(mtspr)) {
+      define (operands) {
+        Trg = SPR(SPRN);
+        Src1  = GPR(RS);
+      }
+    }
+
+    define (instr=(crxor,creqv,crand,cror)) {
+      define (operands) {
+        Src1 = CR;
+        Trg  = CR;
+      }
+    } 
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Src1.can_read_fp(FwdEX,FwdMM) &&  Src2.can_read_fp(FwdEX,FwdMM) && Flags.can_read() &&
+               Trg.can_write() && mEX.has_space() ) {
+        Src1.read(FwdEX,FwdMM);
+        Src2.read(FwdEX,FwdMM);
+        Trg.read(FwdEX,FwdMM);
+        Flags.read();
+				Trg.allocate();
+        Flags.allocate();
+				change_state(S_EX);
+      }
+		// No space-check, so one will be inserted.
+		S_EX: {
+			exec();
+      FwdEX.write(Trg);
+			change_state(S_MM);
+		}
+		S_MM: { 
+      FwdMM.write(Trg);
+			change_state(S_WB); 
+		}
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+#   define FOO_INDEX 200
+
+  // Test the "MyCounter" custom resource using a mtspr of 200.
+  define (instr_class mtspr_foo) {
+    instructions = (mtspr(SPRN(FOO_INDEX)));
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+    S_INIT: {
+      change_state(S_ID);
+    }
+    S_ID: {
+      if (Src.can_read_fp(FwdEX,FwdMM) && counter.can_allocate() && mEX.has_space()) {
+        Src.read(FwdEX,FwdMM);
+        Trg.allocate();
+        counter.allocate();
+        change_state(S_EX);
+      }
+    }
+    S_EX: {
+        exec();
+        FwdEX.write(Trg);
+        change_state(S_MM);
+      }
+    S_MM: {
+      FwdMM.write(Trg);
+      change_state(S_WB);
+    }
+    S_WB: {
+      write_ops();
+      counter.deallocate();
+      change_state(S_INIT);
+    }
+
+    };
+  }
+
+
+ define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzx );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg = targets;
+      Imm = field(D);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read_fp(FwdEX,FwdMM) && Src2.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && mEX.has_space()) {
+        Src1.read(FwdEX,FwdMM);
+        Src2.read(FwdEX,FwdMM);
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && mMEM.can_request_read()) {
+        // Calc ea.
+        exec();
+        mMEM.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (mMEM.can_read()) { 
+        exec_and_read(mMEM);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        FwdMM.write(Trg);
+        change_state(S_WB);
+      }
+      else if (mMEM.can_request_read()) {
+        mMEM.send_read_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+ define (instr_class load_update) {
+    instructions = ( lwzu );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg   = GPR(RT);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read_fp(FwdEX,FwdMM) && Src2.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && mEX.has_space()) {
+        Src1.read(FwdEX,FwdMM);
+        Src2.read(FwdEX,FwdMM);
+        Src1.allocate();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && mMEM.can_request_read()) {
+        // Calc ea.
+        exec();
+        mMEM.send_read_request();
+        FwdEX.write(Src1);
+        change_state(S_MM);
+      }
+		S_MM: if (mMEM.can_read()) { 
+        exec_and_read(mMEM);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        // Forward both ea and data, since ea in FwdEx is invalidated.
+        FwdMM.write(Trg);
+        FwdMM.write(Src1);
+        change_state(S_WB);
+      }
+      else if (mMEM.can_request_read()) {
+        mMEM.send_read_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+
+ define (instr_class store) {
+   instructions = (stb, sth, sthx, stw, stwx);
+
+   machine = normal;
+
+   define (operands) {
+     Src = sources;
+   };
+
+   allow_missing_operands = true;
+
+   action = {
+   S_INIT: {
+     change_state(S_ID);
+   };
+   S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && mEX.has_space()) {
+       Src.read(FwdEX,FwdMM);
+       change_state(S_EX);
+     }
+   S_EX: if (mMM.has_space() && mMEM.can_request_write()) {
+       // Calc ea.
+       exec();
+       mMEM.send_write_request();
+       change_state(S_MM);
+     }
+   S_MM: if (mMEM.can_write()) {
+       exec_and_write(mMEM);
+       change_state(S_MMp);
+     }
+   // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+   S_MMp: if (exec_done() && mWB.has_space()) {
+       change_state(S_WB);
+     }
+     else if (mMEM.can_request_write()) {
+       mMEM.send_write_request();
+       change_state(S_MM);
+     }
+   // No need for a space-check, since S_WBp maps to the same stage.
+   S_WB: {
+     write_ops();
+     change_state(S_WBp);
+   }
+   S_WBp: {
+     change_state(S_INIT);
+   }
+   };
+ }
+
+  // Note that stmw does 64-bit writes, writing two operands at a time.
+  define (instr_class stmw) {
+    instructions = (stmw );
+
+    machine = normal;
+
+    define (operands) {
+      Src   = sources;
+      Trg   = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && mEX.has_space()) {
+				Src.read(FwdEX,FwdMM);
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && mMEM.can_request_write()) {
+        // Calc ea.
+        exec();
+        mMEM.send_write_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		S_MM: if (mMEM.can_write()) { 
+        // Do 64-bit writes, unless our request is odd in size, in which case
+        // we'll have a 4-byte write at the end.
+        exec_and_write(mMEM,2,4);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (mMEM.can_request_write()) {
+        mMEM.send_write_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+  };
+
+
+
+ define (instr_class store_update) {
+    instructions = (stwu);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && mEX.has_space()) {
+				Src.read(FwdEX,FwdMM);
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && mMEM.can_request_write()) {
+        // Calc ea.
+        exec();
+        mMEM.send_write_request();
+        FwdEX.write(Trg);
+        change_state(S_MM);
+      }
+		S_MM: if (mMEM.can_write()) { 
+        exec_and_write(mMEM);
+        FwdMM.write(Trg);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        FwdMM.write(Trg);
+        change_state(S_WB);
+      }
+      else if (mMEM.can_request_write()) {
+        mMEM.send_write_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+ define (instr_class branch) {
+   instructions = ( bc, b, bl, bclr );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+   
+   action = {
+   S_INIT :{
+     change_state(S_ID);
+   };
+   S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space()) {
+       read_ops();
+       allocate_ops();
+       exec();
+       write_ops();
+       if (branch_taken()) {
+         taken_flush();
+       }
+       change_state(S_EX);
+     }
+   S_EX: {
+     change_state(S_MM);
+   }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+   };
+ }
+
+};

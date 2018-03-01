@@ -1,0 +1,545 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This model uses signed bits 
+//
+
+define (arch = MiniPPC) {
+
+  void setCrField(bits<3> field,sbits<32> x,sbits<32> y) {
+    var cr = CR;
+    bits<4> r = 
+      ( (x<y) ? 0x8 : 0) |
+      ( (x>y) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    width = 64;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    width = 64;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+The condition register.
+    """;
+  }
+
+  define (reg=CTR) {
+    """
+The counter register.
+    """;
+  }
+
+  define (reg=HID0) { }
+
+  define (reg=HID1) { }
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    width = 64;
+    size = 32;
+    prefix = r;
+  }
+
+  define (regfile=SPR) {
+    """
+Special purpose registers.
+    """;
+    size=1024;
+
+    define (entry=9)  { reg = CTR; }
+    define (entry=50) { reg = HID0; }
+    define (entry=51) { reg = HID1; }
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=CM) {
+      bits = 4;
+    }
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=U) {
+    """
+Extended opcode for DS-style instructions.
+    """;
+    bits = (30,31);
+  }
+
+  define (instrfield=BO) {
+    """
+Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+Field used to specify a bit in the Condition Register to be used
+as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+Field used to specify one of the Condition Register fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+    ref = SPR;
+  }
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+  }
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=DS) {
+    """
+Immediate field used to specify a 14-bit signed two's complement integer which
+is concatenated on the right with 0b00 and sign-extended to 64-bits.
+    """;
+    bits = (16,29);
+  }
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  //
+  // The effective address size is dependent upon the MSR.CM field.
+  //
+  define (ea_mask) {
+    watch = {
+      if (MSR.CM == 1) {
+        EaMask = 0xffffffffULL;
+      } else {
+        EaMask = 0xffffffffffffffffULL;
+      }
+    };
+  }
+
+  // The real-address size is fixed.
+  define (ra_mask) {
+    value = 0xffffffffffffff;
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    """
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    """;
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      sbits<64> si = SI;
+      sbits<64> tmp = 0;
+      tmp(0,22) = si(0,22);
+      tmp(23,63) = si(23,63);
+      if (RA == 0) {
+        GPR(RT) = tmp;
+      } else {
+        GPR(RT) = GPR(RA) + tmp;
+      }
+    };
+  }
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      sbits<64> si(SI);
+      GPR(RT) = GPR(RA) + si;
+       setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      bits<64> si = SI;
+      if (RA == 0) {
+        GPR(RT) = si << 16;
+      } else {
+        GPR(RT) = GPR(RA) + (si << 16);
+      }
+    };
+  }
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    action = func() {
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = (BO(2)!=0) || (( (CTR!=0) ^ BO(3).uint32())!=0);
+      var cond_ok = (BO(0)!=0) || ( CR(BI) == BO(1));
+      if ( ctr_ok && cond_ok ) {
+        sbits<64> ea = concat(BD,zero(2));
+        NIA = CIA + ea;
+      }
+    };
+  }
+
+  define (instr=bdnz) {
+    alias = bc(BO(16),BI(0),BD(BD));
+  }
+
+  define (instr=cmpi) {
+    fields=(OPCD(11),BF,RA,SI);
+    action = func () {
+      sbits<64> si = SI;
+      setCrField(BF,GPR(RA),si);
+    };
+  }
+
+  define (instr=cmpwi) {
+    alias = cmpi(BF(BF),RA(RA),SI(SI));
+  }
+
+  define (instr=cmp) {
+    fields=(OPCD(31),BF,RA,RB,XO(0));
+    action = {
+      setCrField(BF,GPR(RA),GPR(RB));
+    };
+  }
+
+  define (instr=la) {
+    alias = addi(RT(RT),RA(RA),SI(SI));
+  }
+
+  define (instr=lbz) {
+    fields=(OPCD(34),RT,RA,D);
+    action = {
+      var d = signExtend(D,64);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,1);
+    };
+  }
+
+  define (instr=lhz) {
+    fields=(OPCD(40),RT,RA,D);
+    action = {
+      sbits<64> d = D;
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,2);
+    };
+  }
+
+  define (instr=li) {
+    alias = addi(RT(RT),RA(0),SI(SI));
+  }
+
+  define (instr=lis) {
+    alias = addis(RT(RT),RA(0),SI(SI));
+  }
+
+  define (instr=ld) {
+    fields=(OPCD(58),RT,RA,DS,U(0));
+    action = {
+      sbits<64> d = concat(DS,zero(2));
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,8);
+    };
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    action = {
+      sbits<64> d = D;
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=lwzx) {
+    fields=(OPCD(31),RT,RA,RB,XO(23));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=mr) {
+    alias=or(RA(RS),RA(RA),RB(RS));
+  }
+
+  define (instr=mfmsr) {
+    fields=(OPCD(31),RT,XO(83));
+    action = {
+      GPR(RT) = MSR;
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  define (instr=mtctr) {
+    alias=mtspr(RS(RS),SPRN(9));
+  }
+
+  define (instr=mullw) {
+    fields=(OPCD(31),RT,RA,RB,XO(235));
+    action = {
+      GPR(RT) = GPR(RA) * GPR(RB);
+    };
+  }
+
+  define (instr=or) {
+    fields=(OPCD(31),RS,RA,RB,XO(444));
+    action = {
+      GPR(RA) = GPR(RS) | GPR(RB);
+    };
+  }
+
+  define (instr=ori) {
+    fields=(OPCD(24),RS,RA,UI);
+    action = {
+      GPR(RA) = GPR(RS) | UI;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<64> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=slwi) {
+    alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(0),ME(31-SH));
+  }
+
+  define (instr=stb) {
+    fields=(OPCD(38),RS,RA,D);
+    action = {
+      bits<64> b = (RA == 0) ? 0 : GPR(RA);
+      sbits<64> d = D;
+      bits<64> addr = b + d;
+      Mem(addr,1) = GPR(RS);
+    };
+  }
+
+  define (instr=sth) {
+    fields=(OPCD(44),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var d = signExtend(D,64);
+      var addr = b + d;
+      Mem(addr,2) = GPR(RS);
+    };
+  }
+
+  define (instr=std) {
+    fields=(OPCD(62),RS,RA,DS,U(0));
+    action = {
+      var d = signExtend(concat(DS,zero(2)),64);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      Mem(addr,8) = GPR(RS);
+    };
+  }
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var d = signExtend(D,64);
+      var addr = b + d;
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  define (instr=stwu) {
+    fields=(OPCD(37),RS,RA,D);
+    action = {
+      var d = signExtend(D,64);
+      var addr = GPR(RA) + d;
+      Mem(addr,4) = GPR(RS);
+      GPR(RA) = addr;
+    };
+  }
+
+  define (instr=stwx) {
+    fields=(OPCD(31),RS,RA,RB,XO(151));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  define (instr=srw) {
+    fields=(OPCD(31),RS,RA,RB,XO(536));
+    action = {
+      var n = GPR(RB)(27,31);
+      GPR(RS) = GPR(RA) >> n;
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

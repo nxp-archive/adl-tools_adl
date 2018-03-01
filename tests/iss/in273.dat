@@ -1,0 +1,91 @@
+#
+# Writes to local memories should wrap on the memory boundary.
+#
+# Note:  This was generated with as-mod82, which isn't built by default.
+#        To build:  ./adl2asm mod82.adl --no-optimize
+#
+#        Then use with makedat:  ./makedat --as=./as-mod82 in272.dat
+#
+= asm
+
+	rd 0x8,256
+	wr 0x7c,256
+
+	done
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x1008 s=2	#	rd 0x8,256
+MD n=Mem ra=0x00000002 d=0x207C s=2	#	wr 0x7c,256
+MD n=Mem ra=0x00000004 d=0x00 s=1	#	done
+# </GEN>
+
+CORE n=:rubber
+
+MD n=dmem ra=0x20  d=0x12345678
+MD n=dmem ra=0x24  d=0x87654321
+MD n=dmem ra=0x28  d=0xdeadbeef
+MD n=dmem ra=0x2c  d=0xb0f0babe
+MD n=dmem ra=0x30  d=0x9abcdef0
+MD n=dmem ra=0x34  d=0x0fedcba9
+MD n=dmem ra=0x38  d=0xf00f1234
+MD n=dmem ra=0x3c  d=0xbebea5a5
+
+TRACE
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x1008207c
+INSTR op=0x1008					asm="rd 0x008,256"
+D n=dmem t=read ea=0x8 nb=32
+M n=dmem t=read ea=0x20 ra=0x20 d=0x12345678
+M n=dmem t=read ea=0x24 ra=0x24 d=0x87654321
+M n=dmem t=read ea=0x28 ra=0x28 d=0xdeadbeef
+M n=dmem t=read ea=0x2c ra=0x2c d=0xb0f0babe
+M n=dmem t=read ea=0x30 ra=0x30 d=0x9abcdef0
+M n=dmem t=read ea=0x34 ra=0x34 d=0x0fedcba9
+M n=dmem t=read ea=0x38 ra=0x38 d=0xf00f1234
+M n=dmem t=read ea=0x3c ra=0x3c d=0xbebea5a5
+R n=r256 d=0x1234567887654321deadbeefb0f0babe9abcdef00fedcba9f00f1234bebea5a5
+
+I ea=0x2 id=2 tic=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x1008207c
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00000000
+INSTR op=0x207c					asm="wr 0x07c,256"
+D n=dmem t=write ea=0x7c nb=32
+M n=dmem t=write ea=0x1f0 ra=0x1f0 d=0x12345678
+M n=dmem t=write ea=0x1f4 ra=0x1f4 d=0x87654321
+M n=dmem t=write ea=0x1f8 ra=0x1f8 d=0xdeadbeef
+M n=dmem t=write ea=0x1fc ra=0x1fc d=0xb0f0babe
+M n=dmem t=write ea=0x0 ra=0x0 d=0x9abcdef0
+M n=dmem t=write ea=0x4 ra=0x4 d=0x0fedcba9
+M n=dmem t=write ea=0x8 ra=0x8 d=0xf00f1234
+M n=dmem t=write ea=0xc ra=0xc d=0xbebea5a5
+
+I ea=0x4 id=3 tic=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00000000
+INSTR op=0x00					asm="done"
+
+RESULTS
+
+RD n=NIA d=0x00000005
+RD n=r256 d=0x1234567887654321deadbeefb0f0babe9abcdef00fedcba9f00f1234bebea5a5
+
+MD n=dmem ra=0x0000000000000000 d=0x9abcdef0	#	(2596069104)
+MD n=dmem ra=0x0000000000000004 d=0x0fedcba9	#	(267242409)
+MD n=dmem ra=0x0000000000000008 d=0xf00f1234	#	(4027519540)
+MD n=dmem ra=0x000000000000000c d=0xbebea5a5	#	(3200165285)
+MD n=dmem ra=0x0000000000000020 d=0x12345678	#	(305419896)
+MD n=dmem ra=0x0000000000000024 d=0x87654321	#	(2271560481)
+MD n=dmem ra=0x0000000000000028 d=0xdeadbeef	#	(3735928559)
+MD n=dmem ra=0x000000000000002c d=0xb0f0babe	#	(2968566462)
+MD n=dmem ra=0x0000000000000030 d=0x9abcdef0	#	(2596069104)
+MD n=dmem ra=0x0000000000000034 d=0x0fedcba9	#	(267242409)
+MD n=dmem ra=0x0000000000000038 d=0xf00f1234	#	(4027519540)
+MD n=dmem ra=0x000000000000003c d=0xbebea5a5	#	(3200165285)
+MD n=dmem ra=0x00000000000001f0 d=0x12345678	#	(305419896)
+MD n=dmem ra=0x00000000000001f4 d=0x87654321	#	(2271560481)
+MD n=dmem ra=0x00000000000001f8 d=0xdeadbeef	#	(3735928559)
+MD n=dmem ra=0x00000000000001fc d=0xb0f0babe	#	(2968566462)

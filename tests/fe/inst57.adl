@@ -1,0 +1,139 @@
+//
+// Test new fields syntax
+//
+
+ define (arch=minippc) {
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+ blk = (dalu);
+ 
+ define(instrfield=OPCD){
+   pseudo = true;
+   width = variable;
+ }
+ 
+ define(instrfield=F1){
+   bits = 6;
+ }
+
+
+  define(instrfield=F2){
+   bits = 8;
+  }
+  define(instrfield=F3){
+   bits = (9,11);
+  }
+ 
+  define (instrfield=ESG) 
+  {
+	width = 1;  
+	pseudo = true;
+
+  }
+
+  define (instrfield=HighReg) 
+  {
+	prefix = true;    
+	pseudo = true;
+	blk = dalu;       
+  	indexed = 3; 
+  }
+
+  define (instrfield=Enc1) 
+  {
+	width = 16;  
+	pseudo = true;
+  }
+
+  define (instrfield = HighAgu)
+  {
+     pseudo = true;
+     prefix = true;
+     type = HighReg;
+     blk = agu;
+     indexed = 3;
+  }
+
+  define (instrfield = HighDalu1)
+  {
+     pseudo = true;
+     prefix = true;
+     type = HighReg;
+     blk = dalu;
+     indexed = 7;
+  }
+  define (instrfield = HighDalu2)
+  {
+     pseudo = true;
+     prefix = true;
+     type = HighReg;
+     blk = dalu;
+     indexed = 3;
+     size = 7;	
+  }
+  define (instrfield = HighDalu3)
+  {
+     pseudo = true;
+     prefix = true;
+     type = HighReg;
+     blk = dalu;
+     indexed = 3;
+     width = 7;	
+  }
+  define (instrfield = HighDalu4)
+  {
+     pseudo = true;
+     prefix = true;
+     type = HighReg;
+     blk = dalu;
+     width = variable;	
+  }
+	
+
+
+
+ define(instr=Foo2) {
+   fields = (OPCD,F1, F2);
+   width = 32;
+   define(instr=Foo3) {
+    fields = ((bits(0,1),b111111),(bits(2),F1));
+    alias = Foo2(OPCD(OPCD));
+   }
+   action = {};
+ }
+
+
+ define(instr=Foo6) {
+   fields = (OPCD,F1, F2(1));
+   width = 32;
+
+   define(instr=Foo7) {
+    fields = ((bits(0,1),b01),(bits(2,20),F1));
+    alias = Foo6(OPCD(OPCD));
+   }
+
+   define(instr=Foo8) {
+    fields = ((bits(0,1),b01),(bits(3),F2(3)));
+    alias = Foo6(OPCD(OPCD));
+   }
+   action = {};
+ }
+
+  define(instr=Foo10) {
+   fields = (OPCD,F3, F2);
+   width = 32;
+   define(instr=Foo11) {
+    fields = ((bits(0,1),b11),(bits(2,4),F3(0,1)));
+    alias = Foo10(OPCD(OPCD));
+   }
+   action = {};
+ }
+
+}
+ 
+
+define (core=P) {
+  archs=minippc;
+}

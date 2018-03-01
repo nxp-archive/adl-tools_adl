@@ -1,0 +1,1 @@
+mmu18.adl:94: The total number of instruction attributes used within MMU tests (11) must be less than the number of offset bits in the smallest translation size (which is 10 for TlbCam TLB).

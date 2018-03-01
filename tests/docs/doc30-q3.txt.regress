@@ -1,0 +1,32 @@
+
+-----------------------------------------------
+| NAME                 | OUTPUTS              |
+-----------------------------------------------
+| add                  | GPR(RT)              |
+| addi                 | GPR(RT)              |
+| addis                | GPR(RT)              |
+| clrlwi               | GPR(RA)              |
+| la                   | GPR(RT)              |
+| lbz                  | GPR(RT)              |
+| lhz                  | GPR(RT)              |
+| li                   | GPR(RT)              |
+| lis                  | GPR(RT)              |
+| lmw                  | GPR(RT . uint32 (    |
+|                      | ),31)                |
+| lwz                  | GPR(RT)              |
+| lwzu                 | GPR(RA . uint32 (    |
+|                      | )), GPR(RT)          |
+| lwzx                 | GPR(RT)              |
+| mflr                 | GPR(RT)              |
+| mfspr                | GPR(RT)              |
+| mr                   | GPR(RA)              |
+| mullw                | GPR(RT)              |
+| or                   | GPR(RA)              |
+| ori                  | GPR(RA)              |
+| oris                 | GPR(RA)              |
+| rlwinm               | GPR(RA)              |
+| rlwinm_              | GPR(RA)              |
+| slwi                 | GPR(RA)              |
+| srw                  | GPR(RA)              |
+| stwu                 | GPR(RA)              |
+-----------------------------------------------

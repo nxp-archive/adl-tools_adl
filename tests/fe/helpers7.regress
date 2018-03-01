@@ -1,0 +1,57 @@
+=======
+Systems:
+=======
+System:  minippc
+  Locally-defined Cores:
+    Name:  "Thread0"
+    Type:  thread
+    Registers:
+      Name:  "CIA"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia
+      Documention:
+
+    Current instruction address.
+    
+      -------------------------------
+      Name:  "NIA"
+      Usage:  read, written
+      Width:  32
+      Attributes:  nia
+      Documention:
+
+    Next instruction address.
+    
+      -------------------------------
+    Current-instruction-address register:  CIA
+    Next-instruction-address register:  NIA
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Caches:
+      L1d (level 1, data)
+        Size    :  32768 bytes
+        Linesize:  64 bytes
+        Sets    :  64 
+        Ways    :  8 
+        Miss handler:  func ( CacheAccess ca , addr_t a ) {
+    foo (  ) ;
+    bar (  ) ;
+}
+
+    
+Helper Functions:
+      bar:
+ void bar (  ) {
+}
+
+      foo:
+ void foo (  ) {
+}
+    -------------------------------
+  Constituent Items:
+    t0:  Thread0
+-------------------------------
+

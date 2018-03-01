@@ -1,0 +1,204 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  ADDR_3: [17,31] [48,95] 
+  IMM16_2: [16,31] 
+  IMM32_3: [16,32] [34,47] 
+  IMM64_3: [34,95] 
+  IMM8_1: [7,14] 
+  OPCD_1: [0,3] 
+  OPCD_2: [0,3] 
+  OPCD_3: [0,3] [not used] 
+  RA_1: [4,6] 
+  RA_2: [4,12] 
+  RA_3: [4,8] 
+  RB_1: [8,11] 
+  RB_2: [13,14] [16,18] 
+  RB_3: [9,14] 
+  RC_1: [12,14] 
+  RC_2: [19,31] 
+  RC_3: [16,19] [not used] 
+  XOPCD_2: [15,15] 
+  XOPCD_3: [33,33] 
+Instructions:
+  Name:  add16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(1) RA_1 RB_1 RC_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  add32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(1) RA_2 XOPCD_2(1) RB_2 RC_2
+  Action:  {
+}
+  -------------------------------
+  Name:  addi16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(4) RA_1 IMM8_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  addi32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(4) RA_2 XOPCD_2(1) IMM16_2
+  Action:  {
+}
+  -------------------------------
+  Name:  addi48 (rank: 100)
+  Width:  48
+  Fields:  OPCD_2(9) RA_3 IMM32_3
+  Action:  {
+}
+  -------------------------------
+  Name:  addi96 (rank: 100)
+  Width:  96
+  Fields:  OPCD_2(10) RA_3 XOPCD_3(0) IMM64_3
+  Action:  {
+}
+  -------------------------------
+  Name:  ld16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(7) RA_1 RB_1 RC_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  ld32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(7) RA_2 XOPCD_2(1) RB_2 RC_2
+  Action:  {
+}
+  -------------------------------
+  Name:  ld96 (rank: 100)
+  Width:  96
+  Fields:  OPCD_2(11) RA_3 RB_3 ADDR_3
+  Action:  {
+}
+  -------------------------------
+  Name:  mult16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(3) RA_1 RB_1 RC_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  mult32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(3) RA_2 XOPCD_2(1) RB_2 RC_2
+  Action:  {
+}
+  -------------------------------
+  Name:  multi16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(6) RA_1 IMM8_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  multi32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(6) RA_2 XOPCD_2(1) IMM16_2
+  Action:  {
+}
+  -------------------------------
+  Name:  st16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(8) RA_1 RB_1 RC_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  st32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(8) RA_2 XOPCD_2(1) RB_2 RC_2
+  Action:  {
+}
+  -------------------------------
+  Name:  st96 (rank: 100)
+  Width:  96
+  Fields:  OPCD_2(12) RA_3 RB_3 ADDR_3
+  Action:  {
+}
+  -------------------------------
+  Name:  sub16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(2) RA_1 RB_1 RC_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  sub32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(2) RA_2 XOPCD_2(1) RB_2 RC_2
+  Action:  {
+}
+  -------------------------------
+  Name:  subi16 (rank: 100)
+  Width:  16
+  Fields:  OPCD_1(5) RA_1 IMM8_1 XOPCD_2(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  subi32 (rank: 100)
+  Width:  32
+  Fields:  OPCD_2(5) RA_2 XOPCD_2(1) IMM16_2
+  Action:  {
+}
+  -------------------------------
+  Name:  subi96 (rank: 100)
+  Width:  96
+  Fields:  OPCD_2(10) RA_3 XOPCD_3(1) IMM64_3
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xf00000000000000000000000
+    1(100000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  add16
+      1(000100000000000000000000):  add32
+    2(200000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  sub16
+      1(000100000000000000000000):  sub32
+    3(300000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  mult16
+      1(000100000000000000000000):  mult32
+    4(400000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  addi16
+      1(000100000000000000000000):  addi32
+    5(500000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  subi16
+      1(000100000000000000000000):  subi32
+    6(600000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  multi16
+      1(000100000000000000000000):  multi32
+    7(700000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  ld16
+      1(000100000000000000000000):  ld32
+    8(800000000000000000000000):      Mask:  0x000100000000000000000000
+      0(000000000000000000000000):  st16
+      1(000100000000000000000000):  st32
+    9(900000000000000000000000):  addi48
+    10(a00000000000000000000000):      Mask:  0x000000004000000000000000
+      0(000000000000000000000000):  addi96
+      1(000000004000000000000000):  subi96
+    11(b00000000000000000000000):  ld96
+    12(c00000000000000000000000):  st96
+-------------------------------
+

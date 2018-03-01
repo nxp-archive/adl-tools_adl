@@ -1,0 +1,75 @@
+#
+# Basic forwarding-path test.
+#
+= asm
+
+	addi r3,r2,10
+	addi r4,r3,10
+	addi r5,r4,10
+	addi r6,r2,10
+	addi r7,r5,10
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3862000A	#	addi r3,r2,10
+MD n=Mem ra=0x00000004 d=0x3883000A	#	addi r4,r3,10
+MD n=Mem ra=0x00000008 d=0x38A4000A	#	addi r5,r4,10
+MD n=Mem ra=0x0000000c d=0x38C2000A	#	addi r6,r2,10
+MD n=Mem ra=0x00000010 d=0x38E5000A	#	addi r7,r5,10
+# </GEN>
+
+RD n=NIA     d=0x0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3862000a
+INSTR op=0x3862000a					asm="addi r3,r2,10"
+ITIME t=1
+R n=GPR i=3 d=0x0000000a
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3883000a
+INSTR op=0x3883000a					asm="addi r4,r3,10"
+ITIME t=2
+R n=GPR i=4 d=0x00000014
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38a4000a
+INSTR op=0x38a4000a					asm="addi r5,r4,10"
+ITIME t=3
+R n=GPR i=5 d=0x0000001e
+CTIME t=7
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38c2000a
+INSTR op=0x38c2000a					asm="addi r6,r2,10"
+ITIME t=4
+R n=GPR i=6 d=0x0000000a
+CTIME t=8
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38e5000a
+INSTR op=0x38e5000a					asm="addi r7,r5,10"
+ITIME t=5
+R n=GPR i=7 d=0x00000028
+CTIME t=9
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=6
+CTIME t=10
+
+RESULTS
+
+RD n=GPR i=3 d=0x0000000a
+RD n=GPR i=4 d=0x00000014
+RD n=GPR i=5 d=0x0000001e
+RD n=GPR i=6 d=0x0000000a
+RD n=GPR i=7 d=0x00000028

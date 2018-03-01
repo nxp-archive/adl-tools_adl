@@ -1,0 +1,22 @@
+#
+# Basic test of breakpoint and watchpoint callback functions.
+#
+
+proc b1 {id ea} {
+	puts [format "Breakpoint at 0x%x" $ea ]
+	# This should halt simulation.
+	return "simstop"
+}
+
+proc w1 {id type ea pre nb v } {
+	puts [format "Watchpoint at 0x%x" $ea ]
+	# Test that we can remove a watchpoint.
+	clrwatchcmd w1
+}
+
+setbreakcmd 0x4c b1
+setwatchcmd 0x2000 write w1
+go
+puts "NIA is now [reg NIA]"
+clrbreakcmd b1
+go

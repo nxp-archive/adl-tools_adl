@@ -1,0 +1,584 @@
+$data = {
+"cores" => {
+"P" => {
+"doc" => <<DATA
+Example documentation string- place overview information here.
+
+DATA
+,
+"bit_endianness" => "little",
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+Current instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+Next instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+"SR" => {
+"width" => 32,
+"fields" => {
+"C" => {
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"LF" => {
+"bits" => [
+[
+30,
+27,
+],
+],
+},
+"OVF" => {
+"bits" => [
+[
+10,
+10,
+],
+],
+},
+"P0" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"P1" => {
+"bits" => [
+[
+31,
+31,
+],
+],
+},
+"P2" => {
+"bits" => [
+[
+30,
+30,
+],
+],
+},
+"P3" => {
+"bits" => [
+[
+29,
+29,
+],
+],
+},
+"P4" => {
+"bits" => [
+[
+28,
+28,
+],
+],
+},
+"P5" => {
+"bits" => [
+[
+27,
+27,
+],
+],
+},
+"RF" => {
+"bits" => [
+[
+13,
+13,
+],
+],
+},
+"RM" => {
+"bits" => [
+[
+3,
+3,
+],
+],
+},
+"S" => {
+"bits" => [
+[
+6,
+6,
+],
+],
+},
+"SAT" => {
+"bits" => [
+[
+11,
+11,
+],
+],
+},
+"SCM" => {
+"bits" => [
+[
+8,
+8,
+],
+[
+5,
+4,
+],
+],
+},
+"SM" => {
+"bits" => [
+[
+2,
+2,
+],
+],
+},
+"SM2" => {
+"bits" => [
+[
+7,
+7,
+],
+],
+},
+"T" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"W20" => {
+"bits" => [
+[
+12,
+12,
+],
+],
+},
+},
+"reserved_mask" => "0b00000111111111111100001000000000",
+"shared" => 0,
+},
+},
+"regfiles" => {
+"D" => {
+"doc" => <<DATA
+General purpose registers.
+    
+DATA
+,
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+},
+"instrfields" => {
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+5,
+0,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3f",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+15,
+11,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+20,
+16,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"RC" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+25,
+21,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) as a target.
+    
+DATA
+,
+"bits" => [
+[
+10,
+6,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+10,
+6,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"Src1" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Src2" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Src3" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Subtraction" => {
+"pseudo" => 1,
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Trg" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+30,
+21,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe00000",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add_family" => {
+"syntax" => "add_family Src1, Src2, Src3, Trg, Subtraction",
+"dsyntax" => "add_family ${Src1}, ${Src2}, ${Src3}, ${Trg}, ${Subtraction}",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Src3" => "",
+"Trg" => "",
+"Subtraction" => "",
+},
+"action" => <<DATA
+{
+     bits < 32 > x = D ( Src1 ) ;
+     bits < 32 > y = D ( Src2 ) ;
+    D ( Trg ) = ( sbits < 32 >  ) ( x + y ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"extracted-doc-op" => <<DATA
+
+Trg = (W4) ( Src1 + Src2 ) ;
+DATA
+,
+"inputs" => [
+"D(Src1)",
+"D(Src2)",
+],
+"outputs" => [
+"D(Trg)",
+],
+},
+"add1" => {
+"width" => 32,
+"syntax" => "add1 RC, RB, RA, RT",
+"dsyntax" => "add1 ${RC}, ${RB}, ${RA}, ${RT}",
+"fields" => {
+"RC" => "",
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 31,
+},
+"aliases" => {
+"add_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "Src3",
+"value" => "RC",
+},
+"misc" => {
+"field" => "Subtraction",
+"value" => 0,
+},
+],
+"parent_action" => <<DATA
+{
+     bits < 32 > x = D ( RA ) ;
+     bits < 32 > y = D ( RB ) ;
+    D ( RT ) = ( sbits < 32 >  ) ( x + y ) ;
+}
+DATA
+,
+"extracted-doc-op" => <<DATA
+
+RT = (W4) ( RA + RB ) ;
+DATA
+,
+},
+},
+"parent" => "add_family",
+"disassemble" => 1,
+"inputs" => [
+"D(RA)",
+"D(RB)",
+],
+"outputs" => [
+"D(RT)",
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+"helpers" => {
+"ABS20" => {
+"action" => <<DATA
+ bits < 32 > ABS20 ( bits < 32 > src ) {
+    return src ;
+}
+DATA
+,
+},
+"f_inst_rnd_mpy" => {
+"action" => <<DATA
+ bits < 32 > f_inst_rnd_mpy ( sbits < 32 > x ) {
+}
+DATA
+,
+},
+"fp_fusedmpy" => {
+"action" => <<DATA
+ bits < 32 > fp_fusedmpy ( bits < 32 > src1 , bits < 32 > src2 , bits < 32 > src3 , bool addition ) {
+    if ( addition ) {
+        return src1 + src2 * src3 ;
+    } else {
+        return src1 - src2 * src3 ;
+    }
+}
+DATA
+,
+},
+"get" => {
+"action" => <<DATA
+ void get ( int a1 , bits < 32 > * r1 , int a2 , bits < 32 > * r2 , bool  ) {
+}
+DATA
+,
+},
+},
+},
+},
+"systems" => {
+},
+};
+

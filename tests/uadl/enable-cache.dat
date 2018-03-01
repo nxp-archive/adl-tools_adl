@@ -1,0 +1,4 @@
+
+CORE n=:P
+
+RD n=CCR d=0xc0000000

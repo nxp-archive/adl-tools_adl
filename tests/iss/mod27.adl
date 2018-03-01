@@ -1,0 +1,23 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This makes sure that we can include just a single instruction table, without
+// instantiating the default table.
+//
+
+#include "mod8.adl"
+
+defmod (core = P) {
+
+  define (reg=HID0) { }
+
+  remove itable_watch;
+
+  archs = (MiniPPC,Mixed);
+  instrtables=(mixed);
+}

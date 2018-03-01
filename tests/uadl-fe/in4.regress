@@ -1,0 +1,78 @@
+in4.uadl:23: warning: 'GPR' is not a register, but a register file
+in4.uadl:19: warning: Register 'Nia' is not defined by ADL.  It will be ignored.
+in4.uadl:27: warning: 'PC' is not a register file, but a register
+in4.uadl:8: warning: Instructions access no data memory
+P (for architecture P):
+  First-level instruction memory:  L1i
+
+  Fetch Unit:  Fetcher
+    Fetch Memory:  L1i
+    Entries     :  1
+    Entry Size  :  4
+    Fetch Sizes :  4 
+
+  Register:  Foo
+    ID        :  0
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  GPR
+    ID        :  2
+    Size      :  32
+    Width     :  32
+    Latency   :  1
+    Is aliased:  0
+  Register:  PC
+    ID        :  1
+    Size      :  1
+    Width     :  32
+    Latency   :  1
+    Is aliased:  0
+
+  Memory:  Mem
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Cache:  L1d
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory      :  Mem
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+  Cache:  L1i
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory      :  Mem
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+

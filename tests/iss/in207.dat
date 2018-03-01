@@ -1,0 +1,59 @@
+#
+# Test to make sure that aliases in a transactional ISS work correctly.
+#
+# Assembly generated from as-mod69 (built by hand).
+#
+= asm
+
+	vadduwm v0,v2,v3
+	mfspr r1,303
+	
+= /asm
+
+= aopts
+
+-maltivec -mregnames
+
+= /aopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x10021880	#	vadduwm v0,v2,v3
+MD n=Mem ra=0x00000004 d=0x7C2F4AA6	#	mfspr r1,303
+# </GEN>
+
+RD n=VPR i=2 d=0xdeadbeef_deadbeef_deadbeef_deadbeef
+RD n=VPR i=3 d=0x00000001_00000001_00000001_00000001
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x10021880					asm="vadduwm 0,2,3"
+ITIME t=0
+R n=VPR i=0 d=0xdeadbef0000000000000000000000000
+R n=VPR i=0 d=0xdeadbef0deadbef00000000000000000
+R n=VPR i=0 d=0xdeadbef0deadbef0deadbef000000000
+R n=VPR i=0 d=0xdeadbef0deadbef0deadbef0deadbef0
+CTIME t=0
+
+I ea=0x4 id=2
+INSTR op=0x7c2f4aa6					asm="mfspr 1,0x12f"
+ITIME t=0
+R n=GPR i=1 d=0xbd5b7de0
+CTIME t=0
+
+I ea=0x8 id=3
+INSTR op=0x00000000					asm="halt "
+ITIME t=0
+CTIME t=0
+
+RESULTS
+
+RD n=GPR i=1 d=0xbd5b7de0
+
+RD n=VPR i=0 d=0xdeadbef0deadbef0deadbef0deadbef0
+RD n=VPR i=1 d=0x00000000000000000000000000000000
+RD n=VPR i=2 d=0xdeadbeefdeadbeefdeadbeefdeadbeef
+RD n=VPR i=3 d=0x00000001000000010000000100000001
+

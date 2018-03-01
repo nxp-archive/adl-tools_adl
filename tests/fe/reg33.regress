@@ -1,0 +1,84 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "A"
+  Read alias/hook:
+    func (  ) {
+    if ( ThisReg == x ) {
+        return 1 ;
+    }
+}
+    Source Registers:  A 
+
+  Usage:  read, written
+  Width:  32
+  Reset:  0
+  Enums:  'x' 'y' 'z' 'w' 
+  -------------------------------
+  Name:  "B"
+  Usage:  read, written
+  Width:  32
+  Reset:  func (  ) {
+    B = first ;
+}
+  Enums:  'first' 'reserved' 'reserved' 'fourth' 
+  -------------------------------
+  Name:  "C"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,7] 
+  RA: [10,12] 
+Instructions:
+  Name:  In1 (rank: 100)
+  Width:  16
+  Fields:  OPCD(1) RA
+  Action:  {
+    if ( B == 3 ) {
+        B = B :: fourth ;
+    }
+}
+  Source Registers:  B 
+  Target Registers:  B? 
+  -------------------------------
+  Name:  In2 (rank: 100)
+  Width:  16
+  Fields:  OPCD(2) RA
+  Action:  {
+    if ( A == A :: x ) {
+        A = A :: y ;
+    }
+}
+  Source Registers:  A 
+  Target Registers:  A? 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff000000
+    1(1000000):  In1
+    2(2000000):  In2
+
+Post-Exec Handler:  {
+    if ( A == A :: x ) {
+        C = B :: first ;
+    }
+}
+  Source Registers:  A 
+  Target Registers:  C? 
+-------------------------------
+

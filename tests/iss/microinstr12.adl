@@ -1,0 +1,231 @@
+// Test combineInstr() with "-1" arguments
+
+define (core = rubber) {
+  archs = rubber; 
+  instrtables = (other, instr_opA, instr_opB);
+}
+
+define (arch = rubber) {
+
+
+//##############################################################################
+// Parameters
+//##############################################################################
+
+  bit_endianness = little;
+  instr_endianness = little;
+
+//==============================================================================
+
+//##############################################################################
+// Attributes
+//##############################################################################
+   
+    attrs = (
+             log_as_reg, 
+             instr_macro, instr_opA, instr_opB
+            );
+
+//============================================================================== 
+
+
+//##############################################################################
+// Registers
+//##############################################################################
+
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+  }
+
+  define (regfile = a) { 
+    attrs = (log_as_reg);
+    width = 4;
+    size = 4;
+  }  
+  
+//============================================================================== 
+
+
+//##############################################################################
+// Instruction Fields
+//##############################################################################
+
+  define(instrfield=AA){
+    display = dec;
+    pseudo = true;
+    width = 2;    
+  }
+
+  define(instrfield=Imme4){
+    display = dec;
+    pseudo = true;
+    width = 4; 
+  } 
+
+  define(instrfield=opA) {
+    display = hex;
+	pseudo = true;
+	width = 15;
+	type = instr;
+	ref = instr_opA;
+  }
+  
+  define(instrfield=opB) {
+    display = hex;
+	pseudo = true;
+	width = 15;
+	type = instr;
+	ref = instr_opB;
+  }   
+  
+  
+//============================================================================== 
+
+//##############################################################################
+// Instructions
+//##############################################################################
+
+  define (instr = format){ 
+    width = 64;
+    fields = (
+              (bits(55,52),b1010),
+              (bits(49,35),opA), (bits(34,20),opB)
+             );
+    syntax = ("format %f, %f", opA, opB);
+    attrs = (instr_macro);
+	action={ 
+            run(opA, opB); 
+           };    
+  }
+  
+   define (instr = mva){  
+    width = 15;
+    fields = (
+              (bits(14,12),b111), 
+              (bits(11,10),AA), (bits(9,6),Imme4),
+              (bits(5,0),0)
+             );
+    syntax = ("mva a%f,%f", AA, Imme4);
+    attrs = (instr_opA);    
+    action={
+            a(AA) = Imme4;
+           };
+  }
+
+  define (instr = emptyA){  
+    width = 15;
+    fields = (
+              (bits(14,0),0)
+             );
+    syntax = ("empty");
+    attrs = (instr_opA);    
+    action={};
+  }
+  
+  define (instr = mvb){  
+    width = 15;
+    fields = (
+              (bits(14,12),b101), 
+              (bits(11,10),AA), (bits(9,6),Imme4),
+              (bits(5,0),0)
+             );
+    syntax = ("mvb a%f,%f", AA, Imme4);
+    attrs = (instr_opB);    
+    action={
+            a(AA) = Imme4;
+           };
+  }
+ 
+  define (instr = emptyB){  
+    width = 15;
+    fields = (
+              (bits(14,0),0)
+             );
+    syntax = ("empty");
+    attrs = (instr_opB);    
+    action={};
+  } 
+ 
+  define (instr = done){ 
+    width = 64;
+    fields = ((bits(63,0),0));  
+    syntax = ("done");
+    attrs = (instr_macro);
+    action={ 
+            halt(); 
+           };
+  }  
+
+//============================================================================== 
+
+//##############################################################################
+// Assembler
+//##############################################################################
+  
+  parallel_execution = 1;
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = ("//", "#");
+    packet_grouping = ("\n");
+    line_separators = ("\n");
+    asm_instrtables = (other, instr_opA, instr_opB);
+    disasm_instrtables = (other, instr_opA, instr_opB);
+  }
+  
+//============================================================================== 
+
+//##############################################################################
+// Post-packet Assembly Hooks
+//##############################################################################
+
+  post_packet_asm = func(InstrBundle b) {
+    InstrBundle newb;
+
+    if (b.size() == 1) {
+        if (b[0].instrHasAttr(instr_opA)) {
+            newb.push_back(combineInstr("format", 0, -1));
+        }
+        else if (b[0].instrHasAttr(instr_opB)) {
+            newb.push_back(combineInstr("format", -1, 0));            
+        }
+        else if (b[0].instrHasAttr(instr_macro)) {
+            newb.push_back(b[0]);
+        }         
+        else {
+            error(1,"Incorrect instruction formation: ", b.size());
+        }
+    } 
+     
+    if (b.size() == 2) { 
+        if (b[0].instrHasAttr(instr_opA) && b[1].instrHasAttr(instr_opB)) {
+            newb.push_back(combineInstr("format", 0, 1));
+        } 
+        else {
+            error(1,"Incorrect instruction formation: ", b.size());
+        }
+    }     
+    
+    if ((b.size() < 1) || (b.size() > 2)) {
+        error(1,"Incorrect instruction formation: ", b.size());
+    }
+    
+    b = newb;
+  };
+
+//==============================================================================
+
+
+}  // End of core spec
+
+
+

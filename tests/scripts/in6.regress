@@ -1,0 +1,9 @@
+Unable to install callback on register HID0 (ignored).
+Unable to install read callback on register HID0 (ignored).
+Unable to install callback on register HID1 (ignored).
+Unable to install read callback on register HID1 (ignored).
+Unable to install callback on register FOO (ignored).
+Unable to install read callback on register FOO (ignored).
+Program exception triggered.
+Instructions executed:  13
+

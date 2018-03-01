@@ -1,0 +1,31 @@
+# Test independent operation of two cores.
+:socket:2
+!
+vCont;s
+vCont;s
+:socket:1
+!
+vCont;s
+vCont;s
+:noresp:vCont;c
+:socket:2
+:sleep:1
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;s
+vCont;c
+:sleep:1
+:socket:2
+@
+:socket:1
+# This reads the X00 from the continue above.
+:getresp:
+@

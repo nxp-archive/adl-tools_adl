@@ -1,0 +1,4 @@
+powerpc:  Instr 4 (+4):  Incorrect completion-time:  Found 20 (adjusted to 25), expected 14 (11)
+powerpc  Error:  55% (11 cycles off out of 20) error exceeded threshold for completion-time
+powerpc:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

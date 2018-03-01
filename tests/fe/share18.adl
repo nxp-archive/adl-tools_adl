@@ -1,0 +1,65 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Make sure that we can handle defmods of the share item.  In this case, we
+// should see both NIAs, TCR, and FOO as shared.
+//
+
+#define NumThreads 2
+
+define (arch=mt) {
+
+  attrs = (log_as_reg);
+
+  define (regfile=NIAs) {
+    attrs = log_as_reg;
+    size = 2;
+  }
+
+  define (regfile=TCR) {
+    size = NumThreads;
+  }
+
+  define (reg=FOO) {}
+
+  define (reg=NIA) {
+    attrs = (nia,cia);
+    alias = NIAs(child_id);
+  }
+
+  define (regfile=SPR) {
+    size = 1024;
+    define (entry=30) { reg=NIAs; }
+    define (entry=60) { reg=TCR(child_id); };
+    define (entry=61) { reg=TCR; };
+  }
+
+}
+
+define (core=P) {
+  remove=1;
+}
+
+define (sys=PMT) {
+  define (core = Thread) {
+    archs = (mt);
+  }
+  define (shared) {
+    regfiles = (NIAs,TCR);
+  }
+  Thread t[NumThreads];
+}
+
+defmod (sys=PMT) {
+
+  defmod(shared) {
+    regs = FOO;
+  }
+
+}
+

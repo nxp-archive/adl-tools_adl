@@ -1,0 +1,26 @@
+#
+# Simple infinite loop in order to test the RSP protocol with
+# communication from multiple clients.
+#
+
+CORE n=:P
+
+= asm
+
+start:
+  addi r1,r1,1
+  b start
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x4BFFFFFC	#	b start
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0x12345678
+
+MD n=Mem ra=0x3000 d=0xf00dface
+MD n=Mem ra=0x4000 d=0x87654321
+

@@ -1,0 +1,97 @@
+//
+// This tests the use of subinstructions which are used in multiple groups in
+// the same instruction.
+//
+
+define (arch = foo) {
+
+    // Least Significant Bit is number 0
+    bit_endianness = little;
+
+    // PC Program Counter Register 
+    define (reg = PC) {
+        width = 24;
+
+        attrs = cia;
+        attrs = nia;
+
+    }
+
+    define (instrfield = OPC) {
+        """ Opcode Field """;
+        
+        pseudo = 1;
+        width  = 8;
+    }
+
+    define (instrfield = ADDR_13_8) {
+        """ XB - ADDR[13:8] """;
+
+        pseudo = 1;
+        width  = 6;
+    }
+
+    define (instrfield = XYS) {
+        """ XB - XYS """;
+
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (instrfield = u4_or_e4) {
+        """ XB - u4_or_e4 """;
+
+        pseudo = 1;
+        width  = 4;
+    }
+
+    define (instrfield = X1) {
+        """ XB - Extension Byte 1 """;
+
+        pseudo = 1;
+        width  = 8;
+    }    
+
+    define (instrfield = B2) {
+        """ 2-Bit Field """;
+
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (subinstr = XB_0) {
+        fields = (B2(0x0), ADDR_13_8, X1);
+        
+        action = func (uint32_t incdec_size, bits<1> &is_imm, bits<1> &is_reg, bits<24> &addr_or_reg_idx_or_imm) {
+        };
+    }
+   
+    define (subinstr = XB_1_2) {
+
+        fields = (B2(0x1), XYS, u4_or_e4);
+
+        action = func (uint32_t incdec_size, bits<1> &is_imm, bits<1> &is_reg, bits<24> &addr_or_reg_idx_or_imm) {
+        };
+    }
+
+    define (instr = MACx_MB_2) {
+
+        define (subinstrs = SRC1) {
+          subs = (XB_0,XB_1_2);
+        }
+
+        define (subinstrs = SRC2) {
+          subs = (XB_0,XB_1_2);
+        }
+
+        fields = (OPC(0x1B), SRC1, SRC2);
+
+        action = {
+
+        };
+    }
+}
+
+define (core = foo) {
+    archs = foo;
+}

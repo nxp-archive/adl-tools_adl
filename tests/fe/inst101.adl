@@ -1,0 +1,49 @@
+//
+// Test to make sure that we will implicitly assign bits to pseudo fields
+// if they're used directly within an instructions field list.
+//
+// This makes sure that things work in little-endian mode.
+// 
+define (arch=minippc) {
+
+  bit_endianness = little;
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    //bits = (0,5);
+    pseudo = true;
+    width = 8;
+  }
+  
+  define (instrfield=X) {
+    pseudo = true;
+    width = 8;
+  }
+
+  define (instrfield=Y) {
+    pseudo = true;
+    width = 16;
+  }
+  
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (instr=A) {
+    fields = (OPCD(0x1e),X,Y);
+    action = {};
+  }
+
+  define (instr=B) {
+    fields = (OPCD(0x1c),X,Y);
+    action = {};
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,383 @@
+//
+// Further test of prefix bits with fields.  Because we do instruction
+// re-arranging, we manually set the high-PR bit for each instruction.  We also
+// enforce some other ordering constraints: PR bits for blue instructions go
+// into the two high bits of the prefix, and red instructions go into the lower
+// bits.
+//
+// This also tests the use of instruction-field default-disassembly behavior
+// using the disassemble=prefix option.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+  parallel_execution = 4;
+  attrs = (prefix,type1);  
+  blk = (blue,red);
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 16;  prefix = r; };
+
+  define (reloc=RC1) { value=100; width = 4; instrfield = IMM; }
+  define (reloc=RC2) { value=101; width = 16; instrfield = IMM2; }
+
+  // -------- INSTRFIELDS ----------
+  
+  define (instrfield = RT)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = IMM) { width = 5; pseudo = true; is_signed=true; }
+  define (instrfield = IMM2){ width = 16; pseudo = true; is_signed=true; }
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+  define (instrfield = Enc1)   { width = 16;  pseudo = true; }
+
+  define (instrfield = PR)  { 
+    width = 2; 
+    pseudo = true; 
+    assembler = true; 
+    disassemble = prefix; 
+    value = ""; 
+    enumerated = (("","pr0"),"pr1","pr2","pr3");
+  }
+
+  define (instrfield = PL)  { 
+    width = 1; 
+    pseudo = true; 
+    assembler = true; 
+    disassemble = prefix; 
+    value = ""; 
+    enumerated = (("","pl0"),"pl1");
+  }
+
+  define (instrfield = HighPr)  { 
+    pseudo = true; 
+    prefix = true; 
+    width = 4; 
+    indexed = 1; 
+    value = 0; 
+
+    action = func(unsigned) {
+   };
+  }
+
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  = 1; };
+
+  define (instrfield = Foo)  { width = 1; prefix = true; pseudo = true; };
+
+  
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = PREFIX) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+              (bits(4),Foo),
+              (bits(5),0),
+              (bits(6),HighPr(0)),
+              (bits(7),HighPr(1)),
+              (bits(8),HighPr(2)),
+              (bits(9),HighPr(3)),
+              (bits(10),0),
+              (bits(11),0),
+              (bits(12),VlesSize(0)),
+              (bits(13),VlesSize(1)),
+              (bits(14),VlesSize(2)),
+              (bits(15),reserved));
+    prefix = true;
+    syntax = ("LPREFIX, Foo = %f, VlesSize = %f, HighPr = %f",Foo,VlesSize,HighPr);  
+    attrs = prefix;
+    width  = 16;
+    action = {
+    };
+  }
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr = OneWord) 
+    {
+      fields = ((bits(15,0), Enc1),
+                (bits(16),HighPr));
+      pseudo = true;
+    }
+
+  define (instr = nop) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),
+              (bits(7),0),
+              (bits(8),1),
+              (bits(9),0),
+              (bits(10),1),
+              (bits(11),1),
+              (bits(12),0),
+              (bits(13),1),
+              (bits(14),0),
+              (bits(15),reserved),
+              (bits(16),reserved)
+              );
+    type = OneWord;
+    blk = red;
+    syntax = ("nop");  
+    attrs = (type1);
+    action = {};
+  }
+
+
+  define(instr=add) {
+    attrs = (type1);
+    type = OneWord;
+    blk = red;
+    fields = (
+              (bits(0),1),
+              (bits(1),0),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),PL),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),RB(0)),
+              (bits(10),RB(1)),
+              (bits(11),RB(2)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),PR(0)),
+              (bits(16),PR(1))
+              );
+
+    action = {
+      GPR(RT) = GPR(RB) + GPR(RA);
+    };
+    syntax = ("add %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=mv) {
+    attrs = (type1);
+    type = OneWord;
+    blk = blue;
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),IMM(0)),
+              (bits(5),IMM(1)),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),IMM(2)),
+              (bits(10),IMM(3)),
+              (bits(11),IMM(4)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),PR(0)),
+              (bits(16),PR(1))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM;
+    };
+    syntax = ("mv %f,%f,%f",RA,IMM,RT);
+  }
+
+  define(instr=addi) {
+    attrs = (type1);
+    type = OneWord;
+    blk = red;
+    fields = (
+      	      (bits(0),IMM2(0)),
+              (bits(1),IMM2(1)),
+              (bits(2),IMM2(2)),
+              (bits(3),IMM2(3)),
+              (bits(4),IMM2(4)),
+              (bits(5),IMM2(5)),
+              (bits(6),IMM2(6)),
+              (bits(7),IMM2(7)),
+              (bits(8),IMM2(8)),
+              (bits(9),IMM2(9)),
+              (bits(10),IMM2(10)),
+              (bits(11),IMM2(11)),
+              (bits(12),IMM2(12)),
+              (bits(13),IMM2(13)),
+              (bits(14),IMM2(14)),
+              (bits(15),IMM2(15)),
+              (bits(16),1),
+              (bits(17),1),
+              (bits(18),1),
+              (bits(19),0),
+              (bits(20),RA(0)),		
+              (bits(21),RA(1)),		
+              (bits(22),RA(2)),		
+              (bits(23),RT(0)),
+              (bits(24),RT(1)),
+              (bits(25),RT(2)),
+              (bits(26),0),
+              (bits(27),0),
+              (bits(28),0),
+              (bits(29),0),
+              (bits(30),PR(0)),
+              (bits(31),PR(1))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM2;
+    };
+    syntax = ("%i %f,%f,%f",RA,IMM2,RT);
+  }
+
+  define(instr=halt)  {
+    attrs = (type1);
+    type = OneWord;
+    blk = red;
+    fields = (
+              (bits(14,0),0),
+              (bits(15),PR(0)),
+              (bits(16),PR(1))
+              );
+    action = { halt(); };
+    syntax = ("%i");
+  }
+
+  define (instr = pr0) {
+    assembler = { CndExec = 0; };
+  }
+  define (instr = pr1) {
+    assembler = { CndExec = 1; };
+  }
+  define (instr = pr2) {
+    assembler = { CndExec = 2; };
+  }
+  define (instr = pr3) {
+    assembler = { CndExec = 3; };
+  }
+
+  define (instr = pl0) {
+    assembler = { CndExecL = 0; };
+  }
+  define (instr = pl1) {
+    assembler = { CndExecL = 1; };
+  }
+
+  void set_pr(unsigned &pr,int type,const InstrInfo &b,unsigned &mask)
+  {
+    if (b.instrBlk(type)) {
+      if (b.instrHasField(PR) && b.PR > 1) {
+        pr |= mask;
+      }
+      mask >>= 1;
+    }
+  }
+
+  post_packet_asm = func(InstrBundle b) {
+    // Rearrange instructions so that blue comes before red before anything else.
+    InstrBundle newb(b);
+    unsigned cur = 0;
+    bool handled[b.size()];
+    for (unsigned i = 0; i != b.size(); ++i) { handled[i] = false; }
+
+    // Blue comes first.
+    unsigned bcount = 0;
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (b[i].instrBlk(blue)) {
+        newb[cur++] = b[i];
+        handled[i] = true;
+        ++bcount;
+      }
+    }
+    if (bcount > 2) {
+      error(1,"Only two blue instructions are allowed in a packet.");
+    }
+    // Then red.
+    unsigned rcount = 0;
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (!handled[i] && b[i].instrBlk(red)) {
+        newb[cur++] = b[i];
+        handled[i] = true;
+        ++rcount;
+      }
+    }
+    if (rcount > 2) {
+      error(1,"Only two red instructions are allowed in a packet.");
+    }
+
+    b = newb;
+    VlesSize = b.size();
+
+    // Now set the PR bit after rearranging.  Blue instructions go in the first
+    // two bits, red in the second two.
+    unsigned b_pr = 0;
+    unsigned mask = 0x2;
+    for (unsigned i = 0; i != b.size(); ++i) {
+      set_pr(b_pr,blue,b[i],mask);
+    }
+    unsigned r_pr = 0;
+    mask = 0x2;
+    for (unsigned i = 0; i != b.size(); ++i) {
+      set_pr(r_pr,red,b[i],mask);
+    }
+    HighPr = ((b_pr & 0x3) << 2) | ((r_pr & 0x3));
+
+    // For testing purposes, try setting a field in the prefix only if the
+    // prefix is generated and the size of the packet is 2.
+    savePrefix(b);
+
+    if (b.has_prefix() && b.size() == 2) {
+      Foo = 1;
+    }
+  };
+ 
+  pre_asm = func() {
+    if (CndExec) {
+      PR = CndExec;
+      CndExec = 0;
+    } 
+    if (CndExecL) {
+      PL = CndExecL;
+      CndExecL = 0;
+    }
+  };
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type1);
+    disasm_instrtables = (prefix,type1); 
+    explicit_regs = true;	
+
+    define(parm=CndExec) {
+      type = integer;
+      value = 0;
+    }
+
+    define(parm=CndExecL) {
+      type = integer;
+      value = 0;
+    }
+   
+  };
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

@@ -1,0 +1,89 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CG: 
+    Conflict allowed.
+    Pseudo:  1
+    Width:   1
+  CG_imp_bits__48_48_: [48,48] 
+    Implements:  CG
+  CG_imp_bits__4_4_: [4,4] 
+    Implements:  CG
+  R1: 
+    Pseudo:  1
+    Width:   6
+  R1_imp_bits__11_16_: [11,16] 
+    Implements:  R1
+  R2: 
+    Pseudo:  1
+    Width:   6
+  R2_imp_bits__17_22_: [17,22] 
+    Implements:  R2
+  R3: 
+    Pseudo:  1
+    Width:   6
+  R3_imp_bits__26_31_: [26,31] 
+    Implements:  R3
+  VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_: [0,3] [5,10] 
+  VarInstrOpcode_imp_bits__0_7_x_32_47_x_49_63_: [0,7] [32,47] [49,63] 
+Instructions:
+  Name:  a (rank: 100)
+  Width:  64
+  Attributes:  one
+  Fields:  R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_ CG_imp_bits__48_48_ VarInstrOpcode_imp_bits__0_7_x_32_47_x_49_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  32
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  32
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  32
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+one:
+    Mask:  0x0800000000000000
+    1(0800000000000000):      Mask:  0xf700000000000000
+      196(c400000000000000):        Mask:  0x00000000ffff7fff
+        0(0000000000000000):  a
+    default:      Mask:  0xf7e0000000000000
+      1572(c480000000000000):  b
+      1573(c4a0000000000000):  c
+      1574(c4c0000000000000):  d
+two:
+    Mask:  0xf7e00000
+    1572(c4800000):  b
+    1573(c4a00000):  c
+    1574(c4c00000):  d
+-------------------------------
+

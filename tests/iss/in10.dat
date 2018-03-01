@@ -1,0 +1,91 @@
+#
+# <ASM>
+#
+#     add   r3,r2,r1
+#     mtspr 50,r20
+#     add   r6,r5,r4
+#     add   r8,r6,r7
+#     mtspr 50,r21
+#     add   r9,r8,r10
+#     mtspr 50,r22
+#     add   r11,r5,r4
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00000004 d=0x7E920BA6	# mtspr 50,r20
+MD n=Mem ra=0x00000008 d=0x7CC52214	# add r6,r5,r4
+MD n=Mem ra=0x0000000c d=0x7D063A14	# add r8,r6,r7
+MD n=Mem ra=0x00000010 d=0x7EB20BA6	# mtspr 50,r21
+MD n=Mem ra=0x00000014 d=0x7D285214	# add r9,r8,r10
+MD n=Mem ra=0x00000018 d=0x7ED20BA6	# mtspr 50,r22
+MD n=Mem ra=0x0000001c d=0x7D652214	# add r11,r5,r4
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=0xffffffffff
+RD n=GPR i=2 d=0x0000000009
+
+RD n=GPR i=4 d=0xffffffffff
+RD n=GPR i=5 d=0x0000000009
+
+RD n=GPR i=7 d=0xdeadbeef12345670
+RD n=GPR i=9 d=0xff00000000000000
+RD n=GPR i=10 d=0xffffffff
+RD n=GPR i=11 d=0xff00000000000000
+
+RD n=GPR i=20 d=0x80000000
+RD n=GPR i=21 d=0x00000000
+RD n=GPR i=22 d=0x40000000
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0  d=0x7c620a14
+INSTR op=0x7c620a14 asm="add 3,2,1"
+R n=GPR i=3 d=0x8
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4  d=0x7e920ba6
+INSTR op=0x7e920ba6 asm="mtspr 20,50"
+R n=HID0 d=0x80000000
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8  d=0x7cc52214
+INSTR op=0x7cc52214 asm="add 6,5,4"
+R n=GPR i=6 d=0x0000010000000008
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc  d=0x7d063a14
+INSTR op=0x7d063a14 asm="add 8,6,7"
+R n=GPR i=8 d=0xdeadbfef12345678
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10  d=0x7eb20ba6
+INSTR op=0x7eb20ba6 asm="mtspr 21,50"
+R n=HID0 d=0x00000000
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14  d=0x7d285214
+INSTR op=0x7d285214 asm="add 9,8,10"
+R n=GPR i=9 d=0xff00000012345677
+
+I id=7 ea=0x18
+M n=Mem t=ifetch ea=0x18  d=0x7ed20ba6
+INSTR op=0x7ed20ba6 asm="mtspr 22,50"
+R n=HID0 d=0x40000000
+
+I id=8 ea=0x1c
+M n=Mem t=ifetch ea=0x1c  d=0x7d652214
+INSTR op=0x7d652214 asm="add 11,5,4"
+R n=GPR i=11 d=0x0000000000000008
+
+I id=9 ea=0x20
+M n=Mem t=ifetch ea=0x20  d=0x0
+INSTR op=0x0 asm="halt"
+
+RESULTS
+
+RD n=GPR i=3 d=0x0000000000000008
+RD n=GPR i=6 d=0x0000010000000008
+RD n=GPR i=8 d=0xdeadbfef12345678
+RD n=GPR i=9 d=0xff00000012345677
+RD n=GPR i=11 d=0x0000000000000008

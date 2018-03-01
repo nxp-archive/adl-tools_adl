@@ -1,0 +1,217 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This uses mod1.adl, but removes the 'halt' instruction so that
+// our disassembler will look like the output of the standard GNU
+// PowerPC disassembler.
+//
+
+#import "mod1.adl"
+
+define (arch=NoHalt) {
+
+  //
+  // Some basic relocations for use by the assembler/disassembler.
+  //
+
+  define (reloc=RELOC_HA16) {
+    abbrev = "ha";
+    value = 10;
+    field_width = 16;
+    right_shift = 16;
+    is_signed = true;
+    action = func (addr_t relocation,int) {
+      return relocation + ( (relocation & 0x8000) << 1 );
+    };
+  }
+
+  define (reloc=RELOC_HI16) {
+    abbrev = "h";
+    value = 11;
+    field_width = 16;
+    right_shift = 16;
+    is_signed = true;
+  }
+
+  define (reloc=RELOC_BIG) {
+    abbrev = "b";
+    value = 2;
+    field_width = 32;
+  }
+
+  define (reloc=RELOC_LO16) {
+    abbrev = "l";
+    value = 13;
+    field_width = 16;
+    check_overflow = false;
+    instrfield = D;
+  }
+
+  define (reloc=RELOC_REL24) {
+    value = 14;
+    bitpos = 2;
+    instrfield = LI;
+  }
+
+  defmod(instr=halt) {
+    remove = 1;
+  }
+  
+  define (instrfield = F1) {
+    bits = (28,31);
+    enumerated = ( "", ",1", ",2", ",3", reserved, reserved, ",foo" );
+  };
+
+  define (instrfield = F2) {
+    bits = (26,27);
+    enumerated = ( "+0", "+1", "+2", "+3" );
+  };
+
+  define (instrfield = F3) {
+    bits = (28,29);
+    enumerated = ( "+n0", "+n1", "+n2", "+n3" );
+  };
+
+  define (instrfield=I1) {
+    bits = (16,27);
+    is_inverted = true;
+  }
+
+  define (instrfield=SI2) {
+    """
+Signed immediate field with shift.
+    """;
+    bits = (16,31);
+    display = dec;
+    shift = 16;
+    is_signed = true;
+  }
+
+  // Dummy instruction to test enumerated fields.
+  define (instr=dum1) {
+    fields = ( OPCD(69), F1,RA,RS );
+    syntax = ("dum1%f %f,%f",F1,RA,RS);
+    action = { ; };
+  }
+
+  // Dummy instruction to test inverted fields.
+  define (instr=dum2) {
+    fields = ( OPCD(70), RA,RS,I1 );
+    action = { ; };
+  }
+
+  defmod (instr=mulli) {
+    remove = true;
+  }
+
+  // Dummy instructions to test overloading based upon operand types/sizes.
+
+  // The name started with aa_ to make sure that our sorting works- we want
+  // the register-register instruction to be considered last.
+  define (instr=aa_dum3_regreg) {
+    width = 32; 
+    fields = ( OPCD(71), RA,RS,RB );
+    syntax = ("dum3 %f,%f,%f",RS,RA,RB);
+    action = { ; };
+  }
+
+  define (instr=dum3_regimm) {
+    width = 32; 
+    fields = ( OPCD(72), RA,RS,SI );
+    syntax = ("dum3 %f,%f,%f",RS,RA,SI);
+    action = { ; };
+  }
+
+  define (instr=dum3_regimm2) {
+    width = 32; 
+    fields = ( OPCD(73), RA,RS,SI2 );
+    syntax = ("dum3 %f,%f,%f",RS,RA,SI2);
+    action = { ; };
+  }
+
+  // Dummy instructions to test ordering of instructions in assembler
+  // based on the use of enumerations.  Ordinarily, these are ordered
+  // by name, but since they have similar syntax, the ones using the
+  // most enumerated fields should be considered first in the assembler.
+  define (instr=dum4a) {
+    fields = ( OPCD(74), SI,RA,RS );
+    syntax = ("dum4 %f+%f,%f",RA,SI,RS);
+    action = { ; };
+  }
+  define (instr=dum4b) {
+    fields = ( OPCD(103), F2,RA,RS );
+    syntax = ("dum4 %f%f,%f",RA,F2,RS);
+    action = { ; };
+  }
+  define (instr=dum4c) {
+    fields = ( OPCD(105), F3,RA,RS );
+    syntax = ("dum4 %f%f,%f",RA,F3,RS);
+    action = { ; };
+  }
+
+  define (instr = add5) {
+    syntax = ("%i %f",RT);
+    alias = addi(RT(RT),RA(RT),SI(5));
+  }
+  
+  //
+  // Test that we can expand an alias to multiple instructions.
+  //
+  
+  define (instrfield = SI32) {
+    pseudo = true;
+    width = 32;
+  }
+
+  define (instr=li_big) {
+    syntax = ("li %f,%f",RT,SI32);
+    alias = (
+             // The complex expression here is due to addi being signed.  If the
+             // upper bit of the addi portion is set, then we have to add one to
+             // the addis value, since addi will subtract by one.
+             addis( RT(RT), RA(0), SI( (SI32 >> 16) + ( (SI32 & 0x8000) ? 1 : 0 ) ) ),
+             addi( RA(RT), RA(RT), SI(SI32 & 0xffff) )
+             );
+  }
+
+  // Example helper used by alias action code.
+  void create_constant_loader(InstrBundle &b,unsigned r,uint64_t c)
+  {
+    unsigned upper = ( c >> 16 ) + ( (c & 0x8000) ? 1 : 0);
+    b.push_back(createInstr("addis",r,0,upper));
+    b.push_back(createInstr("addi",r,r, (c & 0xffff) ));
+  }
+  
+  // An example of a complex alias.  In this case, we'll eliminate the addi if
+  // the constant will fit within the upper bits (just the addis).
+  define (instr = li_c_big) {
+    fields = (RT,SI32);
+    syntax = ("lic %f,%f",RT,SI32);
+    alias_action = func(const InstrArgs &args) {
+      unsigned r = args[0].value();
+      uint64_t c = args[1].value();
+      InstrBundle b;
+      if ( (c & 0xffff) == 0) {
+        // Only an upper constant.
+        b.push_back(createInstr("addis",r,0,(c >> 16)));
+      } else if ( (c & 0xffff) == c) {
+        // Only a lower constant.
+        b.push_back(createInstr("ori",r,0,c));
+      } else {
+        // Need an instruction pair.
+        create_constant_loader(b,r,c);
+      }
+      return b;
+    };
+  }
+ 
+}
+
+define (core = P) {
+  archs = (MiniPPC,NoHalt);
+}

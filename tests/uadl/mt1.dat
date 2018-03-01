@@ -1,0 +1,218 @@
+#
+# A very simple mt test case.
+#
+CORE n=:PMT
+
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	addi r3,r3,3
+	addi r4,r4,4
+	addi r5,r5,5
+	addi r6,r6,6
+	.long 0x0
+	addi r7,r7,7
+	addi r8,r8,8
+	addi r9,r9,9
+	addi r10,r10,10
+	addi r11,r11,11
+	addi r12,r12,12
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000000c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000010 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000014 d=0x38C60006	#	addi r6,r6,6
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x38E70007	#	addi r7,r7,7
+MD n=Mem ra=0x00000020 d=0x39080008	#	addi r8,r8,8
+MD n=Mem ra=0x00000024 d=0x39290009	#	addi r9,r9,9
+MD n=Mem ra=0x00000028 d=0x394A000A	#	addi r10,r10,10
+MD n=Mem ra=0x0000002c d=0x396B000B	#	addi r11,r11,11
+MD n=Mem ra=0x00000030 d=0x398C000C	#	addi r12,r12,12
+# </GEN>
+
+CORE n=:PMT
+
+RD n=CCR d=0x80000000
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA d=0x0
+
+CORE n=:PMT:t1
+
+RD n=NIA d=0x1c
+
+TRACE
+
+CORE n=:PMT:t0
+
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=4
+R n=GPR i=1 d=0x00000001
+CTIME t=7
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+ITIME t=4
+R n=GPR i=2 d=0x00000002
+CTIME t=7
+
+CORE n=:PMT:t1
+
+
+I ea=0x1c id=3 tic=1
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x38e70007
+INSTR op=0x38e70007					asm="addi r7,r7,7"
+ITIME t=5
+R n=GPR i=7 d=0x00000007
+CTIME t=8
+
+CORE n=:PMT:t0
+
+
+I ea=0x8 id=4 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38630003
+INSTR op=0x38630003					asm="addi r3,r3,3"
+ITIME t=6
+R n=GPR i=3 d=0x00000003
+CTIME t=9
+
+CORE n=:PMT:t1
+
+
+I ea=0x20 id=5 tic=2
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x39080008
+INSTR op=0x39080008					asm="addi r8,r8,8"
+ITIME t=6
+R n=GPR i=8 d=0x00000008
+CTIME t=9
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=6 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38840004
+INSTR op=0x38840004					asm="addi r4,r4,4"
+ITIME t=7
+R n=GPR i=4 d=0x00000004
+CTIME t=10
+
+CORE n=:PMT:t1
+
+
+I ea=0x24 id=7 tic=3
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x39290009
+INSTR op=0x39290009					asm="addi r9,r9,9"
+ITIME t=7
+R n=GPR i=9 d=0x00000009
+CTIME t=10
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=8 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38a50005
+INSTR op=0x38a50005					asm="addi r5,r5,5"
+ITIME t=8
+R n=GPR i=5 d=0x00000005
+CTIME t=11
+
+CORE n=:PMT:t1
+
+
+I ea=0x28 id=9 tic=4
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x394a000a
+INSTR op=0x394a000a					asm="addi r10,r10,10"
+ITIME t=8
+R n=GPR i=10 d=0x0000000a
+CTIME t=11
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=10 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38c60006
+INSTR op=0x38c60006					asm="addi r6,r6,6"
+ITIME t=9
+R n=GPR i=6 d=0x00000006
+CTIME t=12
+
+CORE n=:PMT:t1
+
+
+I ea=0x2c id=11 tic=5
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x396b000b
+INSTR op=0x396b000b					asm="addi r11,r11,11"
+ITIME t=9
+R n=GPR i=11 d=0x0000000b
+CTIME t=12
+
+CORE n=:PMT:t0
+
+
+I ea=0x18 id=12 tic=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=10
+CTIME t=13
+
+CORE n=:PMT:t1
+
+
+I ea=0x30 id=13 tic=6
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x398c000c
+INSTR op=0x398c000c					asm="addi r12,r12,12"
+ITIME t=10
+R n=GPR i=12 d=0x0000000c
+CTIME t=13
+
+I ea=0x34 id=14 tic=7
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=11
+CTIME t=14
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1  d=0x00000001
+RD n=GPR i=2  d=0x00000002
+RD n=GPR i=3  d=0x00000003
+RD n=GPR i=4  d=0x00000004
+RD n=GPR i=5  d=0x00000005
+RD n=GPR i=6  d=0x00000006
+RD n=GPR i=7  d=0x00000000
+RD n=GPR i=8  d=0x00000000
+RD n=GPR i=9  d=0x00000000
+RD n=GPR i=10 d=0x00000000
+RD n=GPR i=11 d=0x00000000
+RD n=GPR i=12 d=0x00000000
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1  d=0x00000000
+RD n=GPR i=2  d=0x00000000
+RD n=GPR i=3  d=0x00000000
+RD n=GPR i=4  d=0x00000000
+RD n=GPR i=5  d=0x00000000
+RD n=GPR i=6  d=0x00000000
+RD n=GPR i=7  d=0x00000007
+RD n=GPR i=8  d=0x00000008
+RD n=GPR i=9  d=0x00000009
+RD n=GPR i=10 d=0x0000000a
+RD n=GPR i=11 d=0x0000000b
+RD n=GPR i=12 d=0x0000000c

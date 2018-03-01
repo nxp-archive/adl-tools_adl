@@ -1,0 +1,617 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+
+
+.. _adl-internal-target-1:
+Registers
+---------
+
+
+.. _adl-internal-target-2:
+*BAR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">BAR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-3:
+*FOO*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">FOO</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-4:
+*XER*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="reserved" title="Reserved"></td>
+   <td width="3.125%" class="field">SO</td>
+   <td width="3.125%" class="field">OV</td>
+   <td width="3.125%" class="field">CA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   <td class="singleeven">32</td>
+   <td class="singleodd">33</td>
+   <td class="singleeven">34</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The overflow and carry register.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - SO
+       -  [32] 
+       - 
+     * - OV
+       -  [33] 
+       - 
+     * - CA
+       -  [34] 
+       - 
+
+
+.. _adl-internal-target-5:
+*pc*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">pc</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-6:
+Register Files
+--------------
+
+
+.. _adl-internal-target-7:
+*GPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">GPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  32
+
+Description:
+
+  General purpose registers.
+  
+  
+
+
+.. _adl-internal-target-8:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#ifield-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#ifield-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> <a href="#ifield-section-x">&nbsp;&nbsp;X&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-o:
+
+
+.. _adl-internal-target-9:
+*OPCD*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 6
+   * - Bits
+     - [0,5] 
+
+Description:
+
+  Primary opcode.
+  
+  
+
+
+.. _ifield-section-r:
+
+
+.. _adl-internal-target-10:
+*RA*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [11,15] 
+
+Description:
+
+  Field used to specify a General Purpose Register to be used as a source.
+  
+  
+
+
+.. _adl-internal-target-11:
+*RB*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [16,20] 
+
+Description:
+
+  Field used to specify a General Purpose Register to be used as a source.
+  
+  
+
+
+.. _adl-internal-target-12:
+*RS*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify a General Purpose Register as a target.
+  
+  
+
+
+.. _adl-internal-target-13:
+*RT*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify a General Purpose Register to be used as a target.
+  
+  
+
+
+.. _ifield-section-s:
+
+
+.. _adl-internal-target-14:
+*SI*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 16
+   * - Bits
+     - [16,31] 
+   * - Signed
+     - True
+   * - Unsigned Upper Bound
+     - True
+
+Description:
+
+  Signed immediate field for arithmetic operations.
+  
+  
+
+
+Semantics:  **SignExtend(SI)**
+
+
+.. _ifield-section-x:
+
+
+.. _adl-internal-target-15:
+*XO*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 10
+   * - Bits
+     - [21,30] 
+
+Description:
+
+  Extended opcode.
+  
+  
+
+
+.. _adl-internal-target-16:
+Instructions
+------------
+
+
+.. _adl-internal-target-17:
+*add1 RT, RA, SI*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+        Update : {
+                GPR ( RA ) = 0 ;
+            }{
+                BAR = 2 ;
+            }GPR ( RT ) = GPR ( RA ) + SI ;
+        
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `BAR <#adl-internal-target-2>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">12&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-18:
+*add2 RT, RA, SI*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+        Update : {
+                GPR ( RA ) = 0 ;
+            }{
+                BAR = 2 ;
+            }GPR ( RT ) = GPR ( RA ) + SI ;
+        
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `BAR <#adl-internal-target-2>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">13&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-19:
+*add3 RT, RA, SI*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+        Update : {
+                BAR = 2 ;
+            }GPR ( RT ) = GPR ( RA ) + SI ;
+        
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `BAR <#adl-internal-target-2>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">14&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-20:
+*add4 RT, RA, SI*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+        Update : {
+                GPR ( RA ) = 1 ;
+            }GPR ( RT ) = GPR ( RA ) + SI ;
+        
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-7>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">15&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-21:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+

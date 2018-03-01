@@ -1,0 +1,53 @@
+//
+// Test of adding register files.
+//
+
+define (arch = minippc) {
+
+  define (regfile = vprs) {
+    width = 128;
+    size = 32;
+    define (field = w) {
+      indexed = 32;
+    }
+    define (field = h) {
+      indexed = 16;
+    }
+    define (field = byte) {
+      indexed = 8;
+    }
+    define (field = bit) {
+      indexed = 1;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg = a) {
+    width = 32;
+    define (field = f0) {
+      "A reserved field.";
+      bits = (0,10);
+      reserved = 1;
+    }
+    define (field = f1) {
+      "A read-only field.";
+      bits = (11,20);
+      readonly = 1;
+    }
+    define (field = f2) {
+      bits = (21,31);
+    }
+    define (field = f2) {
+      remove = 1;
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

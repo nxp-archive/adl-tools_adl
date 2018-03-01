@@ -1,0 +1,3386 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ int access_spr ( int i , unsigned int j ) ;
+
+//-------------------------
+
+=======
+Systems:
+=======
+System:  QE_2risc
+  Shared Resources:
+    Register-files:  DSEM 
+  Locally-defined Cores:
+    Name:  "qe_risc"
+    Architectural Parameters:
+      Name:  Fetch
+      Options:  JmpN Normal 
+      Value:  Normal
+      Const:  0
+      Boolean:  0
+      -------------------------------
+    Register Files:
+      Name:  "DSEM"
+      Size:  32
+      Usage:  read, written
+      Width:  1
+      Documention:
+
+  DATA MEMORY semaphore.
+  
+      -------------------------------
+      Name:  "EXT_SPR"
+      Size:  128
+      Usage:  read, written
+      Width:  32
+      Documention:
+
+  External Special purpose registers.
+  
+      -------------------------------
+      Name:  "GPR"
+      Size:  32
+      Prefix:  GPR
+      Read alias/hook:
+        GPR0
+
+      Write alias/hook:
+        GPR0
+
+      Usage:  read, written, slice-read
+      Width:  32
+      Pseudo:  1
+      -------------------------------
+      Name:  "GPR0"
+      Size:  32
+      Prefix:  GPR
+      Contained registers:
+        0:  r1
+        1:  r2
+        2:  r3
+        3:  r4
+        4:  r5
+        5:  r6
+        6:  r7
+        7:  r8
+        8:  r9
+        9:  r10
+        10:  r11
+        11:  r12
+        12:  r13
+        13:  r14
+        14:  r15
+        15:  r16
+        16:  r17
+        17:  r18
+        18:  r19
+        19:  r20
+        20:  r21
+        21:  r22
+        22:  r23
+        23:  r24
+        24:  r25
+        25:  r26
+        26:  rpage
+        27:  rba
+        28:  ser
+        29:  sst
+        30:  sp
+        31:  r0
+      Usage:  read, written
+      Width:  32
+      Documention:
+
+  General purpose registers.
+  
+      -------------------------------
+      Name:  "SPR"
+      Size:  128
+      Contained registers:
+        0:  RESERVED0
+        1:  cr
+        2:  RESERVED2
+        3:  SNUMR
+        4:  RESERVED4
+        5:  ILR
+        6:  RESERVED6
+        7:  ITR
+        8:  RESERVED8
+        9:  BTR
+        10:  RESERVEDa
+        11:  DVR
+        12:  RESERVEDc
+        13:  BGTLR
+        14:  RESERVEDe
+      Usage:  read, written
+      Width:  32
+      Documention:
+
+  Special purpose registers.
+  
+      -------------------------------
+    Registers:
+      Name:  "BGTLR"
+      Usage:  read, written
+      Width:  32
+        addr[8,31]   
+        en[0]   
+      Reset:  0
+      Documention:
+
+  BackGround Task Link Register .
+     
+      -------------------------------
+      Name:  "BTR"
+      Usage:  read, written
+      Width:  32
+      Reset:  0
+      Documention:
+
+  Breakpoint Temporal Register .
+     
+      -------------------------------
+      Name:  "DVR"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      Documention:
+
+  Debug Virtual Register .
+     
+      -------------------------------
+      Name:  "ILR"
+      Usage:  read, written, field-written
+      Width:  32
+        addr[8,31]   
+        en[0]   
+          Usage:  field-written
+      Reset:  0
+      Documention:
+
+  Interrupt Link Register .
+     
+      -------------------------------
+      Name:  "ITR"
+      Usage:  read, written
+      Width:  32
+      Reset:  0
+      Documention:
+
+  Interrupt Temporal Register .
+     
+      -------------------------------
+      Name:  "NIA"
+      Write alias/hook:
+        func ( bits < 32 > value ) {
+    NIA ( 0 , 31 ) = PC ;
+}
+        Source Registers:  PC 
+        Target Registers:  NIA 
+
+      Usage:  read, written, slice-written
+      Width:  32
+      Attributes:  nia
+      Reset:  0
+      Documention:
+
+  Next instruction address for fetch.
+     
+      -------------------------------
+      Name:  "NNPC"
+      Usage:  read, written, slice-written
+      Width:  24
+      Reset:  2
+      Documention:
+
+  NPC+.
+     
+      -------------------------------
+      Name:  "NPC"
+      Usage:  read, slice-written
+      Width:  24
+      Reset:  1
+      Documention:
+
+  Next instruction address.
+     
+      -------------------------------
+      Name:  "PC"
+      Usage:  read, written, slice-written
+      Width:  24
+      Attributes:  cia
+      Reset:  0
+      Documention:
+
+  Current instruction address.
+  
+      -------------------------------
+      Name:  "PR"
+      Width:  65
+      Documention:
+
+  Temporal regester for debug prints .
+  
+      -------------------------------
+      Name:  "RESERVED0"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVED2"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVED4"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVED6"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVED8"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVEDa"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVEDc"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "RESERVEDe"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "SNUMR"
+      Usage:  read, written, field-read
+      Width:  32
+        bg[16]   
+        org_bg[0]   
+          Usage:  field-read
+        org_snum[8,15]   
+          Usage:  field-read
+        snum[24,31]   
+      Reset:  0x80000000
+      Documention:
+
+  Serial Number Register .
+         
+      -------------------------------
+      Name:  "cr"
+      Usage:  read, written, slice-read, field-read, field-written
+      Width:  32
+        abz[12]   
+        alw[31]  (readonly)  
+        awz[4]   
+        carry[0]   
+          Usage:  field-read, field-written
+        cr24[24]   
+        cr25[25]   
+        cr26[26]   
+        cr27[27]   
+        emr[29]   
+        emrd[28]   
+        lbz[7]   
+        leac[22]   
+        leq[3]   
+        lwn[6]   
+        lwz[5]   
+        min[15]   
+          Usage:  field-written
+        mod[14]   
+        neg[2]   
+        odd[13]   
+        ov[8]   
+        rcnf0[16]   
+        rcnf1[17]   
+        rcnf2[18]   
+        rcnf3[19]   
+        rcnf4[20]   
+        rcnf5[21]   
+        rcnf7[23]   
+        sl[11]   
+        sle[10]   
+        sm[30]   
+          Usage:  field-written
+        sov[9]   
+        zero[1]   
+      Reset:  0x8001
+      Documention:
+
+  Conditional Regester .
+     
+      -------------------------------
+      Name:  "r0"
+      Read alias/hook:
+        {
+    return 0 ;
+}
+
+      Write alias/hook:
+        (ignored)
+
+      Usage:  read, written
+      Width:  32
+      Reset:  0
+      -------------------------------
+      Name:  "r1"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r10"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r11"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r12"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r13"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r14"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r15"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r16"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r17"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r18"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r19"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r2"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r20"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r21"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r22"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r23"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r24"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r25"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r26"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r3"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r4"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r5"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r6"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r7"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r8"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "r9"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "rba"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "rpage"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "ser"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "sp"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "sst"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+    Current-instruction-address register:  PC
+    Next-instruction-address register:  NIA
+    Real-address Mask:
+      Initial mask:  0xffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffff (constant)
+    Memories:
+      Name:  DMEM (1)
+      Size:   32768
+      Addressing unit: 1
+
+      Name:  IMEM (2)
+      Instruction memory
+      Size:   32768
+      Addressing unit: 4
+
+    Instruction Fields:
+      AU: [5,5] 
+          Address Update option for pushsch/ldsch instructions.
+  
+      B8: [7,7] 
+        Enums:  '.b4' '.b8' 
+          mfspr.b8 instructions.
+  
+        Default value :'.b4'
+      BIT: [6,10] 
+          Conditional BIT select for JMP instruction.
+  
+      BS: [22,23] 
+          Bite select bit for ALUIS instructions.
+  
+      BUFFER_SIZE: [13,15] 
+        Enums:  '' '.r' '.bf4' '.bf8' '.bf16' '.bf32' '.bf48' '.bf64' 
+          BUFFER_SIZE field for BTM Imm instructions
+  
+      CASE_SIZE: [8,10] 
+        Enums:  '.b2' '.b4' '.b8' '.b16' '.b32' '.b64' '.b128' '.b256' 
+          size of case instruction.
+  
+        Default value :'.b16'
+      CFA: [26,30] 
+        Enums:  'carry' 'zero' 'neg' 'leq' 'awz' 'lwz' 'lwn' 'lbz' ( 'ov' 'cr[23]' ) 'sov' 'sle' 'sl' 'abz' 'odd' 'mod' 'min' 'rcnf0' 'rcnf1' 'rcnf2' 'rcnf3' 'rcnf4' 'rcnf5' ( 'leac' 'rcnf6' ) 'rcnf7' 'emrd' 'emr' 'sm' 
+          pointer to CR bit for alu conditional instructions.
+  
+      CMPRS: [7,7] 
+        Enums:  '' '.c' 
+          CMPRS option for push/pushl instructions.
+  
+      CMPRS_J: [23,23] 
+        Enums:  '' '.c' 
+          CMPRS option for jmp instructions.
+  
+      CRC: [8,9] 
+        Enums:  '' '.crc10' '.crc32' '.s' 
+          CRC type for BCRC/BCOPY instructions
+  
+      DATA: [9,9] 
+        Enums:  '' '.d' 
+          Size option for DMA instructions
+  
+      DATA5: [11,15] 
+          DATA5 field for mergei instruction.
+  
+      DES: [12,12] 
+        Enums:  '' '.des' 
+          DES option for BCOPYI instruction
+  
+      DIRECTION: [26,26] 
+        Enums:  '.r' '.l' 
+          Shift instructions direction.
+  
+      DMA_SIZE: [5,8] 
+        Enums:  '' '.r' '.b1' '.b1!' '.b2' '.b2!' '.b4' '.b4!' '.b8' '.b8!' '.rs' '.rs!' '.b24' '.b32' '.b48' '.eob' 
+          Size option for DMA instructions
+  
+      DRAM_OFFSET: [21,31] 
+        Signed:  1
+          MURAM offset for ld/st/spr instructions
+  
+      DSIZE: [8,9] 
+        Enums:  '.b1' '.b2' '.b4' '.b8' 
+          DSIZE field for BCAM/BMIN/BMAX instructions
+  
+        Default value :'.b4'
+      DS_ALU: [26,29] 
+        Enums:  'reserved' '.b1' 'reserved' '.b2' 'reserved' 'reserved' 'reserved' '.b3' '.b1m' 'reserved' 'reserved' 'reserved' '.b2m' 'reserved' '.b3m' '.b4' 
+          data size for cnt and ffs instructions.
+  
+        Default value :'.b4'
+      FLAGS: [10,10] 
+        Enums:  '' '.f' 
+          CR update for ALU instruction.
+  
+      HU: [5,5] 
+        Enums:  '.c' '' 
+          Flag to update half of target register for push instruction.
+  
+      HWS: [4,4] 
+          High Word Select for ALU immideate instructions
+  
+      IMM16: [16,31] 
+          immideate 16.
+  
+      IMM5: [16,20] 
+          shift size for shifti instruction.
+  
+      IMM5M: [21,25] 
+          IMM5 field for rlmerge and mergei instructions.
+  
+      IMM8: [24,31] 
+          immideate 8.
+  
+      IMM8S: [8,15] 
+          IMM8 for mtspri instructions.
+  
+      IMM_P1: 
+        Display:  hex
+        Pseudo:  1
+        Width:   32
+        Valid masks:   (0xffff0000, 0)   (0xffff, 0)  
+          Pseudo immediate for addi,addci,subi,subci
+  
+      IMM_P2: 
+        Display:  hex
+        Pseudo:  1
+        Width:   32
+        Valid masks:   (0xffffff00, 0)   (0xffff00ff, 0)   (0xff00ffff, 0)   (0xffffff, 0)  
+          Pseudo immediate for mtspri,addis,subis,addcis,subcis
+  
+      IMM_P3: 
+        Display:  hex
+        Pseudo:  1
+        Width:   32
+        Valid masks:   (0xffff0000, 0)   (0xffff, 0)   (0xffff0000, 0xffff0000)   (0xffff, 0xffff)  
+          Pseudo immediate for andi,ori,xori,movei
+  
+      IMM_P4: 
+        Display:  hex
+        Pseudo:  1
+        Width:   32
+        Valid masks:   (0xffffff00, 0)   (0xffff00ff, 0)   (0xff00ffff, 0)   (0xffffff, 0)   (0xffffff00, 0xffffff00)   (0xffff00ff, 0xffff00ff)   (0xff00ffff, 0xff00ffff)   (0xffffff, 0xffffff)  
+          Pseudo immediate for andis,oris,xoris
+  
+      INSTR_OFFSET: [16,31] 
+          instruction offset for imm. jmp instructions
+  
+      INVA: [5,5] 
+        Enums:  '' '~' 
+          INV operand B in ALU instruction.
+  
+      LONG_OFFSET: [8,31] 
+          instruction offset for pushl instruction
+  
+      M: [10,10] 
+        Enums:  '' '.mask' 
+          M option for BCAM instructions
+  
+      ML: [6,10] 
+          Mask Left.
+  
+      MR: [26,30] 
+          Mask Rigth.
+  
+      NOP_J: [5,5] 
+        Enums:  '' '.n' 
+          NOP option in JMP instruction.
+  
+      NOTAC: [31,31] 
+        Enums:  '' '~' 
+          NOT of CR flag for alu conditional instructions.
+  
+      NOT_J: [4,4] 
+        Enums:  '' '~' 
+          Condition NOT for JMP instructions
+  
+      NUPDATE: [9,9] 
+        Enums:  '' '.u' 
+          Not update option of ALU instruction.
+  
+      ONE: [31,31] 
+        Enums:  '' '.one' 
+          ONE option for add/sub instructions.
+  
+      OPCD: [0,4] 
+          Primary opcode.
+  
+      OPCD_ALU: [6,8] 
+          Secondary opcode for ALU instructions.
+  
+      OPCD_B10: [10,10] 
+          DMAR/DMAW selector for DMA instructions
+  
+      OPCD_B11: [11,11] 
+          Reserved field for BCAMI/BMINI/BMAXI instructions
+  
+      OPCD_B12: [12,12] 
+          Reserved field for BCAMI/BMINI/BMAXI instructions
+  
+      OPCD_B21: [21,21] 
+          CALL/POP/RETURN bit.
+  
+      OPCD_B22: [22,22] 
+          CALL/POP/RETURN bit.
+  
+      OPCD_B31: [31,31] 
+          Secondary opcode.
+  
+      OPCD_B5: [5,5] 
+          Secondary opcode.
+  
+      OPCD_B6: [6,6] 
+          Secondary opcode for push/pushl instructions.
+  
+      OPCD_B7: [7,7] 
+          Secondary opcode.
+  
+      OPCD_B8: [8,8] 
+          LD/ST selector for LDM/STM instructions.
+  
+      OPCD_BTM: [5,7] 
+          Secondary opcode for BTM instructions
+  
+      OPCD_SHRT: [0,3] 
+          Primary short opcode.
+  
+      RA: [11,15] [regfile:  GPR]
+          RA.
+  
+      RA_2: [11,15] [regfile:  GPR]
+      Table:  (( 0 1 ), reserved, ( 2 3 ), reserved, ( 4 5 ), reserved, ( 6 7 ), reserved, ( 8 9 ), reserved, ( 10 11 ), reserved, ( 12 13 ), reserved, ( 14 15 ), reserved, ( 16 17 ), reserved, ( 18 19 ), reserved, ( 20 21 ), reserved, ( 22 23 ), reserved, ( 24 25 ), reserved, ( 26 27 ), reserved, ( 28 29 ), reserved, ( 30 31 ), reserved)
+          RA_2.
+  
+      RA_4: [11,15] [regfile:  GPR]
+      Table:  (( 0 1 2 3 ), reserved, reserved, reserved, ( 4 5 6 7 ), reserved, reserved, reserved, ( 8 9 10 11 ), reserved, reserved, reserved, ( 12 13 14 15 ), reserved, reserved, reserved, ( 16 17 18 19 ), reserved, reserved, reserved, ( 20 21 22 23 ), reserved, reserved, reserved, ( 24 25 26 27 ), reserved, reserved, reserved, ( 28 29 30 31 ), reserved, reserved, reserved)
+          RA_4.
+  
+      RB: [16,20] [regfile:  GPR]
+          RB.
+  
+      RC: [21,25] [regfile:  GPR]
+          RC.
+  
+      RS: [5,5] 
+          RS field for mfspr instruction.
+  
+      RSV_B21: [21,21] 
+          Reserved bit.
+  
+      RSV_B29: [29,29] 
+          Reserved bit.
+  
+      RSV_B30: [30,30] 
+          Reserved bit.
+  
+      RSV_B31: [31,31] 
+          Reserved bit.
+  
+      RT1: [7,7] 
+        Enums:  '' '.rt1' 
+          Reserved tag for pushsch/ldsch instructions.
+  
+      RT2: [8,8] 
+        Enums:  '' '.rt2' 
+          Reserved tag for pushsch/ldsch instructions.
+  
+      RT3: [9,9] 
+        Enums:  '' '.rt3' 
+          Reserved tag for pushsch/ldsch instructions.
+  
+      RV: [10,10] 
+        Enums:  '' '.rv' 
+          RV option for BCRC/BCOPY instructions
+  
+      RVS: [10,11] 
+        Enums:  '' '.rvc' '.rv' 
+          RVS option for BCRCI/BCOPYI instructions
+  
+      SBS: [6,7] 
+        Enums:  '.by0' '.by1' '.by2' ( '.by3' '' ) 
+          BS field for mtspri instruction.
+  
+      SHIFT_OPTION: [27,29] 
+        Enums:  'reserved' 'reserved' '.rotc' '.rot' '.algc' '.alg' '.logc' '' 
+          shift type for shift* instructions.
+  
+      SIZEA: [8,10] 
+        Enums:  '.b1' '.b2' '.b3' '.b4' '.b1m' '.b2m' '.b3m' 
+          SIZEA field for mtspr instruction.
+  
+        Default value :'.b4'
+      SIZEB: [5,7] 
+        Enums:  '.b1' '.b2' '.b3' '.b4' '.b1m' '.b2m' '.b3m' 
+          SIZEB field for mtspr instruction.
+  
+        Default value :'.b4'
+      SIZE_LD: [5,7] 
+        Enums:  '.b1' '.b1s' '.b2' '.b2s' '.b4' '.b3' '.b8' '.q' 
+          size field for ld instructions.
+  
+        Default value :'.b4'
+      SIZE_P: [not used] 
+        Pseudo:  1
+        Width:   4
+        Enums:  '.b1' '.b2' '.b3' '.b4' '.b1m' '.b2m' '.b3m' 
+          Pseudo field for  in mtspr instruction.
+  
+        Default value :'.b4'
+      SIZE_ST: [5,7] 
+        Enums:  '.b1' 'reserved' '.b2' 'reserved' '.b4' '.b3' '.b8' '.q' 
+          size field for st instructions.
+  
+        Default value :'.b4'
+      SM: [4,4] 
+        Enums:  '' '.sm' 
+          Semaphor option for DMA instructions
+  
+      SML: [8,8] 
+        Enums:  '' '.sm' 
+          Semaphor option for LD instruction
+  
+      SPRF: [21,31] 
+          SPR address field for mtspr/mfspr instructions
+  
+      SPRF_I: [29,31] 
+      Table:  (( 1 ), ( 3 ), ( 5 ), ( 7 ))
+          SPR address field for mtspr/mfspr instructions
+  
+      SW: [4,4] 
+        Enums:  '' '.leswp' 
+          Swap option for LD instruction
+  
+      SWAP_TYPE: [26,28] 
+        Enums:  '.bitsw' '.bytsw' '.wrdsw' '.bytshr' '.bitshr' '.extuw' '.leswp' '' 
+          ALU swap type.
+  
+      UPDATE: [9,9] 
+        Enums:  '.n' '' 
+          Update option of ALU instruction.
+  
+      UR: [10,10] 
+        Enums:  '' '.ur' 
+          Micro code requesr option for pushsch/ldsch instructions.
+  
+    Subinstructions:
+    Name:  ld1
+    Fields:  SW SIZE_LD FLAGS RA
+    Action:  func ( bits < 64 > & data1 ) {
+     bits < 64 > data_ = data1 ;
+    if ( SIZE_LD == 0 ) GPR ( RA ) = concat ( zero ( 24 ) , data_ ( 0 , 7 ) ) ;
+    if ( SIZE_LD == 1 ) GPR ( RA ) = signExtend ( data_ ( 0 , 7 ) , 32 ) ;
+    if ( SIZE_LD == 2 ) GPR ( RA ) = ( SW == 1 ) ? concat ( zero ( 16 ) , data_ ( 8 , 15 ) , data_ ( 0 , 7 ) ) : concat ( zero ( 16 ) , data_ ( 0 , 15 ) ) ;
+    if ( SIZE_LD == 3 ) GPR ( RA ) = ( SW == 1 ) ? signExtend ( concat ( data_ ( 8 , 15 ) , data_ ( 0 , 7 ) ) , 32 ) : signExtend ( data_ ( 0 , 15 ) , 32 ) ;
+    if ( SIZE_LD == 4 ) GPR ( RA ) = ( SW == 1 ) ? concat ( data_ ( 24 , 31 ) , data_ ( 16 , 23 ) , data_ ( 8 , 15 ) , data_ ( 0 , 7 ) ) : data_ ( 0 , 31 ) ;
+    if ( SIZE_LD == 5 ) GPR ( RA ) = concat ( zero ( 8 ) , data_ ( 8 , 31 ) ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( RA ) , GPR ( RA ) ) ;
+        cr . min = 0 ;
+    }
+    data1 = data_ ;
+}
+    Source Registers:  cr? 
+    Target Registers:  GPR(RA)? cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  ld2
+    Fields:  SW SIZE_LD(6) FLAGS RA_2
+    Action:  func ( bits < 64 > data1 ) {
+     bits < 64 > data_ = data1 ;
+    GPR ( RA_2 ( 0 ) ) = ( SW == 1 ) ? concat ( data_ ( 24 , 31 ) , data_ ( 16 , 23 ) , data_ ( 8 , 15 ) , data_ ( 0 , 7 ) ) : data_ ( 0 , 31 ) ;
+    GPR ( RA_2 ( 1 ) ) = ( SW == 1 ) ? concat ( data_ ( 56 , 63 ) , data_ ( 48 , 55 ) , data_ ( 40 , 47 ) , data_ ( 32 , 39 ) ) : data_ ( 32 , 63 ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( RA_2 ( 0 ) ) , GPR ( RA_2 ( 0 ) ) ) ;
+        cr . min = 0 ;
+    }
+    data1 = data_ ;
+}
+    Source Registers:  cr? 
+    Target Registers:  GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  ld4
+    Fields:  SW SIZE_LD(7) FLAGS RA_4
+    Action:  func ( bits < 64 > data1 ) {
+     bits < 64 > data_ = data1 ;
+    GPR ( RA_4 ( 0 ) ) = ( SW == 1 ) ? concat ( zero ( 16 ) , data_ ( 24 , 31 ) , data_ ( 16 , 23 ) ) : concat ( zero ( 16 ) , data_ ( 0 , 15 ) ) ;
+    GPR ( RA_4 ( 1 ) ) = ( SW == 1 ) ? concat ( zero ( 16 ) , data_ ( 8 , 15 ) , data_ ( 0 , 7 ) ) : concat ( zero ( 16 ) , data_ ( 16 , 31 ) ) ;
+    GPR ( RA_4 ( 2 ) ) = ( SW == 1 ) ? concat ( zero ( 16 ) , data_ ( 56 , 63 ) , data_ ( 48 , 55 ) ) : concat ( zero ( 16 ) , data_ ( 32 , 47 ) ) ;
+    GPR ( RA_4 ( 3 ) ) = ( SW == 1 ) ? concat ( zero ( 16 ) , data_ ( 40 , 47 ) , data_ ( 32 , 39 ) ) : concat ( zero ( 16 ) , data_ ( 48 , 63 ) ) ;
+    if ( FLAGS == 1 ) {
+         bits < 32 > tmps = concat ( GPR ( RA_4 ( 0 ) ) ( 16 , 31 ) , GPR ( RA_4 ( 1 ) ) ( 16 , 31 ) ) ;
+        cr = CR_status ( tmps , tmps ) ;
+        cr . min = 0 ;
+    }
+    data1 = data_ ;
+}
+    Source Registers:  cr? 
+    Target Registers:  GPR(RA_4 ( 0 )) GPR(RA_4 ( 1 )) GPR(RA_4 ( 2 )) GPR(RA_4 ( 3 )) cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  ldm1
+    Fields:  SIZE_LD FLAGS RA
+    Action:  func ( bits < 64 > & data1 ) {
+     bits < 64 > data_ = data1 ;
+    if ( SIZE_LD == 0 ) GPR ( RA ) = concat ( zero ( 24 ) , data_ ( 0 , 7 ) ) ; else if ( SIZE_LD == 1 ) GPR ( RA ) = signExtend ( data_ ( 0 , 7 ) , 32 ) ; else if ( SIZE_LD == 2 ) GPR ( RA ) = concat ( zero ( 16 ) , data_ ( 0 , 15 ) ) ; else if ( SIZE_LD == 3 ) GPR ( RA ) = signExtend ( data_ ( 0 , 15 ) , 32 ) ; else if ( SIZE_LD == 4 ) GPR ( RA ) = data_ ( 0 , 31 ) ; else if ( SIZE_LD == 5 ) GPR ( RA ) = concat ( zero ( 8 ) , data_ ( 8 , 31 ) ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( RA ) , GPR ( RA ) ) ;
+    }
+    data1 = data_ ;
+}
+    Source Registers:  cr? 
+    Target Registers:  GPR(RA)? cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  ldm2
+    Fields:  SIZE_LD(6) FLAGS RA_2
+    Action:  func ( bits < 64 > & data1 ) {
+     bits < 64 > data_ = data1 ;
+    GPR ( RA_2 ( 0 ) ) = data_ ( 0 , 31 ) ;
+    GPR ( RA_2 ( 1 ) ) = data_ ( 32 , 63 ) ;
+    if ( FLAGS == 1 ) {
+         bits < 32 > tmps = concat ( GPR ( RA_2 ( 0 ) ) , GPR ( RA_2 ( 0 ) ) ) ;
+        cr = CR_status ( tmps , tmps ) ;
+    }
+    data1 = data_ ;
+}
+    Source Registers:  cr? 
+    Target Registers:  GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  ldm4
+    Fields:  SIZE_LD(7) FLAGS RA_4
+    Action:  func ( bits < 64 > & data1 ) {
+     bits < 64 > data_ = data1 ;
+    GPR ( RA_4 ( 0 ) ) = concat ( zero ( 16 ) , data_ ( 0 , 15 ) ) ;
+    GPR ( RA_4 ( 1 ) ) = concat ( zero ( 16 ) , data_ ( 16 , 31 ) ) ;
+    GPR ( RA_4 ( 2 ) ) = concat ( zero ( 16 ) , data_ ( 32 , 47 ) ) ;
+    GPR ( RA_4 ( 3 ) ) = concat ( zero ( 16 ) , data_ ( 48 , 63 ) ) ;
+    if ( FLAGS == 1 ) {
+         bits < 32 > tmps = concat ( GPR ( RA_4 ( 0 ) ) ( 16 , 31 ) , GPR ( RA_4 ( 1 ) ) ( 16 , 31 ) ) ;
+        cr = CR_status ( tmps , tmps ) ;
+    }
+    data1 = data_ ;
+}
+    Source Registers:  cr? 
+    Target Registers:  GPR(RA_4 ( 0 )) GPR(RA_4 ( 1 )) GPR(RA_4 ( 2 )) GPR(RA_4 ( 3 )) cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  st0
+    Fields:  SIZE_ST(6) FLAGS RA(31)
+    Action:  func ( bits < 64 > & data_ ) {
+    data_ = concat ( GPR ( 31 ) , GPR ( 31 ) ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( 31 ) , GPR ( 31 ) ) ;
+        cr . min = 0 ;
+    }
+}
+    Source Registers:  GPR(31) cr? 
+    Target Registers:  cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  st1
+    Fields:  SIZE_ST FLAGS RA
+    Action:  func ( bits < 64 > & data_ ) {
+    data_ = concat ( GPR ( RA ) , GPR ( RA ) ) ;
+    if ( SIZE_ST == 0 ) {
+        data_ = concat ( zero ( 32 ) , GPR ( RA ) ( 24 , 31 ) , GPR ( RA ) ( 24 , 31 ) , GPR ( RA ) ( 24 , 31 ) , GPR ( RA ) ( 24 , 31 ) ) ;
+        data_ = concat ( data_ ( 32 , 63 ) , data_ ( 32 , 63 ) ) ;
+    } else if ( SIZE_ST == 2 ) data_ = concat ( GPR ( RA ) ( 16 , 31 ) , GPR ( RA ) ( 16 , 31 ) , GPR ( RA ) ( 16 , 31 ) , GPR ( RA ) ( 16 , 31 ) ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( RA ) , GPR ( RA ) ) ;
+        cr . min = 0 ;
+    }
+}
+    Source Registers:  GPR(RA) cr? 
+    Target Registers:  cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  st2
+    Fields:  SIZE_ST(6) FLAGS RA_2
+    Action:  func ( bits < 64 > & data_ ) {
+    data_ = concat ( GPR ( RA_2 ( 0 ) ) , GPR ( RA_2 ( 1 ) ) ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( RA_2 ( 0 ) ) , GPR ( RA_2 ( 0 ) ) ) ;
+        cr . min = 0 ;
+    }
+}
+    Source Registers:  GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) cr? 
+    Target Registers:  cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Name:  st4
+    Fields:  SIZE_ST(7) FLAGS RA_4
+    Action:  func ( bits < 64 > & data_ ) {
+    data_ = concat ( GPR ( RA_4 ( 0 ) ) ( 16 , 31 ) , GPR ( RA_4 ( 1 ) ) ( 16 , 31 ) , GPR ( RA_4 ( 2 ) ) ( 16 , 31 ) , GPR ( RA_4 ( 3 ) ) ( 16 , 31 ) ) ;
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( GPR ( RA_4 ( 0 ) ) , GPR ( RA_4 ( 0 ) ) ) ;
+    }
+}
+    Source Registers:  GPR(RA_4 ( 0 ))/p GPR(RA_4 ( 1 ))[mask 0x0000ffff]/p GPR(RA_4 ( 2 ))[mask 0x0000ffff]/p GPR(RA_4 ( 3 ))[mask 0x0000ffff]/p cr? 
+    Target Registers:  cr? 
+    Helper Functions:  CR_status 
+    -------------------------------
+    Instructions:
+      Name:  add (rank: 100)
+      Width:  32
+      Syntax:  "add%p%p%p%p %f,%f,%f":   SWAP_TYPE UPDATE FLAGS ONE RC RA RB
+      Fields:  OPCD(27) INVA(0) OPCD_ALU(0) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) ONE
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = GPR ( RB ) ;
+     bits < 32 > tmp = op1 + op2 + ONE ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp_s , tmp ) ;
+        cr = CR_add_status ( op1 , op2 , ONE ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p? 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_add_status CR_status swap 
+      -------------------------------
+      Name:  addc (rank: 100)
+      Width:  32
+      Syntax:  "addc%p%p%p %f,%f,%f":   SWAP_TYPE UPDATE FLAGS RC RA RB
+      Fields:  OPCD(27) INVA(0) OPCD_ALU(1) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) RSV_B31(0)
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = GPR ( RB ) ;
+     bits < 32 > tmp = op1 + op2 + cr . carry ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = cr . carry ;
+        cr = CR_status ( tmp_s , tmp ) ;
+        cr = CR_add_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_add_status CR_status swap 
+      -------------------------------
+      Name:  addci (rank: 100)
+      Width:  32
+      Syntax:  "addci%p%p %f,%f":   UPDATE FLAGS RA IMM_P1 HWS(IMM_P1 > 0xFFFF ? 0 : 1) IMM16(IMM_P1 > 0xFFFF ? IMM_P1 >> 16 : IMM_P1)
+      DSyntax:  "addci%f%f %f,%f":   UPDATE FLAGS RA IMM_P1(( (( ( IMM16 << 16 ) > 0xFFFF ? 0 : 1 ) ==  HWS ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA(0) OPCD_ALU(1) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = imm ;
+     bits < 32 > tmp = op1 + op2 + cr . carry ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = cr . carry ;
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_add_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_add_status CR_status imm16e 
+      -------------------------------
+      Name:  addcis (rank: 100)
+      Width:  32
+      Syntax:  "addcis%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2 BS(IMM_P2 <= 0xFF ? 3 : IMM_P2 <= 0xFF00 ? 2 : IMM_P2 <= 0xFF0000 ? 1 : 0) IMM8(IMM_P2 <= 0xFF ? IMM_P2 : IMM_P2 <= 0xFF00 ? IMM_P2 >> 8 : IMM_P2 <= 0xFF0000 ? IMM_P2 >> 16 : IMM_P2 >> 24)
+      DSyntax:  "addcis%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2(( (( ( IMM8 << 16 ) <= 0xFF ? 3 : ( IMM8 << 16 ) <= 0xFF00 ? 2 : ( IMM8 << 16 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 16 ) : (( ( IMM8 << 24 ) <= 0xFF ? 3 : ( IMM8 << 24 ) <= 0xFF00 ? 2 : ( IMM8 << 24 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 24 ) : (( ( IMM8 << 8 ) <= 0xFF ? 3 : ( IMM8 << 8 ) <= 0xFF00 ? 2 : ( IMM8 << 8 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA(0) OPCD_ALU(1) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = imm ;
+     bits < 32 > tmp = op1 + op2 + cr . carry ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = cr . carry ;
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_add_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_add_status CR_status imm8e 
+      -------------------------------
+      Name:  addi (rank: 100)
+      Width:  32
+      Syntax:  "addi%p%p %f,%f":   UPDATE FLAGS RA IMM_P1 HWS(IMM_P1 > 0xFFFF ? 0 : 1) IMM16(IMM_P1 > 0xFFFF ? IMM_P1 >> 16 : IMM_P1)
+      DSyntax:  "addi%f%f %f,%f":   UPDATE FLAGS RA IMM_P1(( (( ( IMM16 << 16 ) > 0xFFFF ? 0 : 1 ) ==  HWS ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA(0) OPCD_ALU(0) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = imm ;
+     bits < 32 > tmp = op1 + op2 ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_add_status ( op1 , op2 , 0 ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p? 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_add_status CR_status imm16e 
+      -------------------------------
+      Name:  addis (rank: 100)
+      Width:  32
+      Syntax:  "addis%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2 BS(IMM_P2 <= 0xFF ? 3 : IMM_P2 <= 0xFF00 ? 2 : IMM_P2 <= 0xFF0000 ? 1 : 0) IMM8(IMM_P2 <= 0xFF ? IMM_P2 : IMM_P2 <= 0xFF00 ? IMM_P2 >> 8 : IMM_P2 <= 0xFF0000 ? IMM_P2 >> 16 : IMM_P2 >> 24)
+      DSyntax:  "addis%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2(( (( ( IMM8 << 16 ) <= 0xFF ? 3 : ( IMM8 << 16 ) <= 0xFF00 ? 2 : ( IMM8 << 16 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 16 ) : (( ( IMM8 << 24 ) <= 0xFF ? 3 : ( IMM8 << 24 ) <= 0xFF00 ? 2 : ( IMM8 << 24 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 24 ) : (( ( IMM8 << 8 ) <= 0xFF ? 3 : ( IMM8 << 8 ) <= 0xFF00 ? 2 : ( IMM8 << 8 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA(0) OPCD_ALU(0) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = imm ;
+     bits < 32 > tmp = op1 + op2 ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_add_status ( op1 , op2 , 0 ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p? 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_add_status CR_status imm8e 
+      -------------------------------
+      Name:  and (rank: 100)
+      Width:  32
+      Syntax:  "and%p%p%p %f,%f,%f%f":   SWAP_TYPE UPDATE FLAGS RC RA INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(2) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) RSV_B31(0)
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 32 > tmp = op1 & op2 ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp_s , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status swap 
+      -------------------------------
+      Name:  andi (rank: 100)
+      Width:  32
+      Syntax:  "andi%p%p %f,%f":   UPDATE FLAGS RA IMM_P3 HWS(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) || ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0) INVA(( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( IMM_P3 & 0xFFFF ) == 0xFFFF ) ? 1 : 0) IMM16(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) ? IMM_P3 : ( ( IMM_P3 & 0xFFFF ) == 0 ) ? IMM_P3 >> 16 : ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? ~ IMM_P3 : ~ ( IMM_P3 >> 16 ))
+      DSyntax:  "andi%f%f %f,%f":   UPDATE FLAGS RA IMM_P3(( (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM16 ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) : (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( IMM16 << 16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA OPCD_ALU(2) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ imm : imm ;
+     bits < 32 > tmp = op1 & op2 ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_status imm16e 
+      -------------------------------
+      Name:  andis (rank: 100)
+      Width:  32
+      Syntax:  "andis%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P4 INVA(( ( IMM_P4 & 0xFFFFFF00 ) ) == 0 || ( ( IMM_P4 & 0xFFFF00FF ) ) == 0 || ( ( IMM_P4 & 0xFF00FFFF ) ) == 0 || ( ( IMM_P4 & 0x00FFFFFF ) ) == 0 ? 0 : 1) BS(( ( IMM_P4 & 0xFFFFFF00 ) == 0 ) || ( ( IMM_P4 & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( IMM_P4 & 0xFFFF00FF ) == 0 ) || ( ( IMM_P4 & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) || ( ( IMM_P4 & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0) IMM8(( ( IMM_P4 & 0xFFFFFF00 ) == 0 ) ? IMM_P4 : ( ( IMM_P4 & 0xFFFF00FF ) == 0 ) ? IMM_P4 >> 8 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) ? IMM_P4 >> 16 : ( ( IMM_P4 & 0x00FFFFFF ) == 0 ) ? IMM_P4 >> 24 : ( ( IMM_P4 & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? ~ IMM_P4 : ( ( IMM_P4 & 0xFFFF00FF ) == 0xFFFF00FF ) ? ~ ( IMM_P4 >> 8 ) : ( ( IMM_P4 & 0xFF00FFFF ) == 0xFF00FFFF ) ? ~ ( IMM_P4 >> 16 ) : ~ ( IMM_P4 >> 24 ))
+      DSyntax:  "andis%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P4(( (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) : (( ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM8 ) : (( ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 24 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 24 ) : (( ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 16 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 16 ) : (( ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 8 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA OPCD_ALU(2) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ imm : imm ;
+     bits < 32 > tmp = op1 & op2 ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_status imm8e 
+      -------------------------------
+      Name:  bcam (rank: 100)
+      Width:  32
+      Syntax:  "bcam%p%p %f,%f(%f)":   DSIZE M RA DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(1) DSIZE M RA RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 1 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , DSIZE , M , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bcami (rank: 100)
+      Width:  32
+      Syntax:  "bcami%p%p%p %f(%f)":   DSIZE M BUFFER_SIZE DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(5) DSIZE M OPCD_B11(0) OPCD_B12(0) BUFFER_SIZE RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 5 ;
+     bits < 3 > opcd_b12 = 0 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , DSIZE , M , zero ( 2 ) , BUFFER_SIZE ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bclr (rank: 100)
+      Width:  32
+      Syntax:  "bclr%p%p %f,%f,%f%f":   UPDATE FLAGS RC RA INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(6) UPDATE FLAGS RA RB RC SWAP_TYPE(7) RSV_B29(0) RSV_B30(0) OPCD_B31(0)
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 5 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 32 > mask = 1 ;
+    mask = mask << op2 ;
+     bits < 32 > tmp = op1 & ~ mask ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  bcopy (rank: 100)
+      Width:  32
+      Syntax:  "bcopy%p%p %f,%f(%f)":   CRC RV RA DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(3) CRC RV RA RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 3 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , CRC , RV , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bcopyi (rank: 100)
+      Width:  32
+      Syntax:  "bcopyi%p%p%p%p %f(%f)":   CRC RVS DES BUFFER_SIZE DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(7) CRC RVS DES BUFFER_SIZE RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 7 ;
+     bits < 3 > opcd_b12 = 0 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , CRC , RVS , DES , BUFFER_SIZE ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bcrc (rank: 100)
+      Width:  32
+      Syntax:  "bcrc%p%p %f,%f(%f)":   CRC RV RA DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(0) CRC RV RA RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 0 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , CRC , RV , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bcrci (rank: 100)
+      Width:  32
+      Syntax:  "bcrci%p%p%p %f(%f)":   CRC RVS BUFFER_SIZE DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(4) CRC RVS OPCD_B12(0) BUFFER_SIZE RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 4 ;
+     bits < 3 > opcd_b12 = 0 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , CRC , RVS , opcd_b12 , BUFFER_SIZE ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bmax (rank: 100)
+      Width:  32
+      Syntax:  "bmax%p %f,%f(%f)":   DSIZE RA DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(2) DSIZE OPCD_B10(1) RA RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 2 ;
+     bits < 3 > opcd_b10 = 1 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , DSIZE , opcd_b10 , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bmaxi (rank: 100)
+      Width:  32
+      Syntax:  "bmaxi%p%p %f(%f)":   DSIZE BUFFER_SIZE DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(6) DSIZE OPCD_B10(1) OPCD_B11(0) OPCD_B12(0) BUFFER_SIZE RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 6 ;
+     bits < 3 > opcd_b10 = 1 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , DSIZE , opcd_b10 , zero ( 2 ) , BUFFER_SIZE ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bmin (rank: 100)
+      Width:  32
+      Syntax:  "bmin%p %f,%f(%f)":   DSIZE RA DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(2) DSIZE OPCD_B10(0) RA RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 2 ;
+     bits < 3 > opcd_b10 = 0 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , DSIZE , opcd_b10 , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bmini (rank: 100)
+      Width:  32
+      Syntax:  "bmini%p%p %f(%f)":   DSIZE BUFFER_SIZE DRAM_OFFSET RB
+      Fields:  OPCD(8) OPCD_BTM(6) DSIZE OPCD_B10(0) OPCD_B11(0) OPCD_B12(0) BUFFER_SIZE RB DRAM_OFFSET
+      Action:  {
+     bits < 4 > opcd = 8 ;
+     bits < 3 > opcd_btm = 6 ;
+     bits < 3 > opcd_b10 = 0 ;
+     bits < 15 > spr_addr = concat ( opcd , opcd_btm , DSIZE , opcd_b10 , zero ( 2 ) , BUFFER_SIZE ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  bset (rank: 100)
+      Width:  32
+      Syntax:  "bset%p%p %f,%f,%f%f":   UPDATE FLAGS RC RA INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(5) UPDATE FLAGS RA RB RC SWAP_TYPE(7) RSV_B29(0) RSV_B30(0) OPCD_B31(0)
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 5 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 32 > mask = 1 ;
+    mask = mask << op2 ;
+     bits < 32 > tmp = op1 | mask ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  cadd (rank: 100)
+      Width:  32
+      Syntax:  "add%p%p %f%f,%f,%f,%f":   UPDATE FLAGS NOTAC CFA RC RA RB
+      Fields:  OPCD(26) INVA(0) OPCD_ALU(0) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 + op2 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        if ( cond == 1 ) cr = CR_add_status ( op1 , op2 , 0 ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_add_status CR_status 
+      -------------------------------
+      Name:  caddc (rank: 100)
+      Width:  32
+      Syntax:  "addc%p%p %f%f,%f,%f,%f":   UPDATE FLAGS NOTAC CFA RC RA RB
+      Fields:  OPCD(26) INVA(0) OPCD_ALU(1) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? ( op1 + op2 + cr . carry ) : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = cr . carry ;
+        cr = CR_status ( tmp , tmp ) ;
+        if ( cond == 1 ) cr = CR_add_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_add_status CR_status 
+      -------------------------------
+      Name:  call (rank: 100)
+      Width:  32
+      Syntax:  "call%p%p %f%f[%f],%f":   NOP_J CMPRS_J NOTAC RA BIT RB BIT(31 - BIT)
+      DSyntax:  "call%f%f %f%f[%f],%f":   NOP_J CMPRS_J NOTAC RA BIT(31 - BIT) RB
+      Fields:  OPCD(19) NOP_J BIT RA RB OPCD_B21(0) OPCD_B22(0) CMPRS_J NOTAC
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 1 > cond = NOTAC ^ op1 ( BIT , BIT ) ;
+     bits < 24 > tmp = GPR ( RB ) ;
+    if ( CMPRS_J == 1 ) tmp = concat ( tmp ( 8 ) , zero ( 8 ) , tmp ( 9 , 23 ) ) ;
+    if ( cond == 1 ) {
+        NNPC = tmp ;
+        if ( NOP_J == 1 ) Fetch = JmpN ;
+    }
+    tmp = PC + 2 ;
+    sp = tmp ;
+}
+      Source Registers:  GPR(RA) GPR(RB) PC cr 
+      Target Registers:  NNPC? sp 
+      -------------------------------
+      Name:  calli (rank: 100)
+      Width:  32
+      Syntax:  "calli%p %f%f[%f],%f":   NOP_J NOT_J RA BIT INSTR_OFFSET BIT(31 - BIT) INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? ( INSTR_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - INSTR_OFFSET ) + 1 ))
+      DSyntax:  "calli%f %f%f[%f],%f":   NOP_J NOT_J RA BIT(31 - BIT) INSTR_OFFSET
+      Fields:  OPCD_SHRT(10) NOT_J NOP_J BIT RA INSTR_OFFSET
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 1 > cond = NOT_J ^ op1 ( BIT , BIT ) ;
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+    if ( cond == 1 ) {
+        NNPC = PC + offset ;
+        if ( NOP_J == 1 ) Fetch = JmpN ;
+    }
+     bits < 24 > tmp = PC + 2 ;
+    sp = tmp ;
+}
+      Source Registers:  GPR(RA) PC cr 
+      Target Registers:  NNPC? sp 
+      -------------------------------
+      Name:  cand (rank: 100)
+      Width:  32
+      Syntax:  "and%p%p %f%f,%f,%f,%f%f":   UPDATE FLAGS NOTAC CFA RC RA INVA RB
+      Fields:  OPCD(26) INVA OPCD_ALU(2) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 & op2 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  cases (rank: 100)
+      Width:  32
+      Syntax:  "case%p%p %f,%f":   NOP_J CASE_SIZE INSTR_OFFSET RA INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? ( INSTR_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - INSTR_OFFSET ) + 1 ))
+      DSyntax:  "case%f%f %f,%f":   NOP_J CASE_SIZE INSTR_OFFSET RA
+      Fields:  OPCD(18) NOP_J OPCD_B6(1) OPCD_B7(1) CASE_SIZE RA INSTR_OFFSET
+      Action:  {
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+     var op1 = ( CASE_SIZE == 0 ) ? concat ( zero ( 8 ) , GPR ( RA ) ( 31 ) ) : ( CASE_SIZE == 1 ) ? concat ( zero ( 7 ) , GPR ( RA ) ( 30 , 31 ) ) : ( CASE_SIZE == 2 ) ? concat ( zero ( 6 ) , GPR ( RA ) ( 29 , 31 ) ) : ( CASE_SIZE == 3 ) ? concat ( zero ( 5 ) , GPR ( RA ) ( 28 , 31 ) ) : ( CASE_SIZE == 4 ) ? concat ( zero ( 4 ) , GPR ( RA ) ( 27 , 31 ) ) : ( CASE_SIZE == 5 ) ? concat ( zero ( 3 ) , GPR ( RA ) ( 26 , 31 ) ) : ( CASE_SIZE == 6 ) ? concat ( zero ( 2 ) , GPR ( RA ) ( 25 , 31 ) ) : concat ( zero ( 1 ) , GPR ( RA ) ( 24 , 31 ) ) ;
+     var index = concat ( op1 , zero ( 1 ) ) ;
+    NNPC = PC + offset + index ;
+    if ( NOP_J == 1 ) Fetch = JmpN ;
+}
+      Source Registers:  GPR(RA)[mask 0x000000ff]/p PC 
+      Target Registers:  NNPC 
+      -------------------------------
+      Name:  cbclr (rank: 100)
+      Width:  32
+      Syntax:  "bclr%p%p %f%f,%f,%f,%f":   UPDATE FLAGS NOTAC CFA RC RA IMM5
+      Fields:  OPCD(26) INVA(0) OPCD_ALU(6) UPDATE FLAGS RA IMM5 RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > mask = 1 ;
+    mask = mask << IMM5 ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 & ~ mask : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  cbset (rank: 100)
+      Width:  32
+      Syntax:  "bset%p%p %f%f,%f,%f,%f":   UPDATE FLAGS NOTAC CFA RC RA IMM5
+      Fields:  OPCD(26) INVA(0) OPCD_ALU(5) UPDATE FLAGS RA IMM5 RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = 1 ;
+    op2 = op2 << IMM5 ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 | op2 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  cnt (rank: 100)
+      Width:  32
+      Syntax:  "cnt%p%p%p %f,%f%f":   UPDATE FLAGS DS_ALU RC INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(5) UPDATE FLAGS RA(31) RB RC DS_ALU RSV_B30(0) OPCD_B31(1)
+      Action:  {
+     bits < 32 > mask = 0 ;
+    if ( DS_ALU ( 0 ) == 1 ) mask = mask | 0xff000000 ;
+    if ( DS_ALU ( 1 ) == 1 ) mask = mask | 0x00ff0000 ;
+    if ( DS_ALU ( 2 ) == 1 ) mask = mask | 0x0000ff00 ;
+    if ( DS_ALU ( 3 ) == 1 ) mask = mask | 0x000000ff ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+    op2 = op2 & mask ;
+     bits < 16 > d16 = op2 ( 0 , 15 ) | op2 ( 16 , 31 ) ;
+     bits < 32 > tmp = 0 ;
+     bits < 32 > i = 0 ;
+    for ( i = 0 ; i < 16 ; i = i + 1 ) {
+        tmp = tmp + d16 ( 0 ) ;
+        d16 = concat ( d16 ( 1 , 15 ) , zero ( 1 ) ) ;
+    }
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RB) cr? 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  cor (rank: 100)
+      Width:  32
+      Syntax:  "or%p%p %f%f,%f,%f,%f%f":   UPDATE FLAGS NOTAC CFA RC RA INVA RB
+      Fields:  OPCD(26) INVA OPCD_ALU(3) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 | op2 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  csub (rank: 100)
+      Width:  32
+      Syntax:  "sub%p%p %f%f,%f,%f,%f":   UPDATE FLAGS NOTAC CFA RC RA RB
+      Fields:  OPCD(26) INVA(1) OPCD_ALU(0) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = ~ GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 + op2 + 1 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        if ( cond == 1 ) cr = CR_sub_status ( op1 , op2 , 1 ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status CR_sub_status 
+      -------------------------------
+      Name:  csubc (rank: 100)
+      Width:  32
+      Syntax:  "subc%p%p %f%f,%f,%f,%f":   UPDATE FLAGS NOTAC CFA RC RA RB
+      Fields:  OPCD(26) INVA(1) OPCD_ALU(1) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = ~ GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 + op2 + ~ cr . carry : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = ~ cr . carry ;
+        cr = CR_status ( tmp , tmp ) ;
+        if ( cond == 1 ) cr = CR_sub_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status CR_sub_status 
+      -------------------------------
+      Name:  cxor (rank: 100)
+      Width:  32
+      Syntax:  "xor%p%p %f%f,%f,%f,%f%f":   UPDATE FLAGS NOTAC CFA RC RA INVA RB
+      Fields:  OPCD(26) INVA OPCD_ALU(4) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op1 ^ op2 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  dmar (rank: 100)
+      Width:  32
+      Syntax:  "dmar%p%p%p %f(%f),%f":   SM DMA_SIZE DATA DRAM_OFFSET RB RA
+      Fields:  OPCD_SHRT(5) SM DMA_SIZE DATA OPCD_B10(0) RA RB DRAM_OFFSET
+      Action:  {
+     bits < 3 > opcd = 5 ;
+     bits < 15 > spr_addr = concat ( opcd , SM , DMA_SIZE , DATA , zero ( 1 ) , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  dmaw (rank: 100)
+      Width:  32
+      Syntax:  "dmaw%p%p%p %f(%f),%f":   SM DMA_SIZE DATA DRAM_OFFSET RB RA
+      Fields:  OPCD_SHRT(5) SM DMA_SIZE DATA OPCD_B10(1) RA RB DRAM_OFFSET
+      Action:  {
+     bits < 3 > opcd = 5 ;
+     bits < 15 > spr_addr = concat ( opcd , SM , DMA_SIZE , DATA , ~ zero ( 1 ) , RA ) ;
+     var offset = signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = GPR ( RB ) + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) ( 0 , 7 ) , EA , GPR ( RA ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RA) GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  ffs (rank: 100)
+      Width:  32
+      Syntax:  "ffs%p%p%p %f,%f%f":   UPDATE FLAGS DS_ALU RC INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(6) UPDATE FLAGS RA(31) RB RC DS_ALU RSV_B30(0) OPCD_B31(1)
+      Action:  {
+     bits < 32 > mask = 0 ;
+    if ( DS_ALU ( 0 ) == 1 ) mask = mask | 0xff000000 ;
+    if ( DS_ALU ( 1 ) == 1 ) mask = mask | 0x00ff0000 ;
+    if ( DS_ALU ( 2 ) == 1 ) mask = mask | 0x0000ff00 ;
+    if ( DS_ALU ( 3 ) == 1 ) mask = mask | 0x000000ff ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+    op2 = op2 & mask ;
+     bits < 32 > tmp = 32 ;
+     bits < 32 > i = 0 ;
+    for ( i = 0 ; i < 32 ; i = i + 1 ) {
+        if ( op2 ( i ) == 1 ) {
+            tmp = i ;
+            break ;
+        }
+    }
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        cr . carry = tmp ( 26 ) ;
+    }
+}
+      Source Registers:  GPR(RB) cr? 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  halt (rank: 100)
+      Width:  32
+      Fields:  OPCD(9)
+      Action:  {
+    halt (  ) ;
+}
+      -------------------------------
+      Name:  jmp (rank: 100)
+      Width:  32
+      Syntax:  "jmp%f %f%f[%f],%f":   NOP_J NOT_J RA IMM_P1 INSTR_OFFSET INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? INSTR_OFFSET - cia (  ) : ~ ( cia (  ) - INSTR_OFFSET ) + 1) BIT(31 - IMM_P1)
+      DSyntax:  "jmp%f %f%f[%f],%f":   NOP_J NOT_J RA IMM_P1(31 - BIT) INSTR_OFFSET
+      Fields:  OPCD_SHRT(11) NOT_J NOP_J BIT RA INSTR_OFFSET
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 1 > cond = NOT_J ^ op1 ( BIT , BIT ) ;
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+    if ( cond == 1 ) {
+        NNPC = PC + offset ;
+        if ( NOP_J == 1 ) Fetch = JmpN ;
+    }
+}
+      Source Registers:  GPR(RA) PC? cr 
+      Target Registers:  NNPC? 
+      -------------------------------
+      Name:  ld_1 (rank: 0)
+      Width:  32
+      Syntax:  "ld%p%p%p%p%p %f,%f(%f)":   SIZE_LD SW SML NUPDATE FLAGS RA DRAM_OFFSET RB
+      Fields:  OPCD_SHRT(0) SW SIZE_LD SML NUPDATE FLAGS RA RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+     bits < 24 > leswp_addr_correction = ( ( SW & cr ( 22 ) ) == 1 ) ? 0x3 : 0 ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ^ leswp_addr_correction ;
+    if ( SIZE_LD == 1 || SIZE_LD == 5 ) EA = EA & 0xfffffe ;
+    if ( SIZE_LD == 2 || SIZE_LD == 6 ) EA = EA & 0xfffffc ;
+    if ( SIZE_LD == 3 || SIZE_LD == 7 ) EA = EA & 0xfffff8 ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( SIZE_LD == 0 ) be = 0x80 ; else if ( SIZE_LD == 1 ) be = 0x80 ; else if ( SIZE_LD == 2 ) be = 0xc0 ; else if ( SIZE_LD == 3 ) be = 0xc0 ; else if ( SIZE_LD == 4 ) be = 0xf0 ; else if ( SIZE_LD == 5 ) be = 0x70 ; else if ( SIZE_LD == 6 ) be = 0xff ; else if ( SIZE_LD == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+     bits < 65 > tmp = muram_bus_access ( 1 , EA , be , 0 , SML ) ;
+     bits < 6 > bit_shift = concat ( EA ( 21 , 23 ) , zero ( 3 ) ) ;
+    data_ = tmp ( 1 , 64 ) << bit_shift ;
+    if ( SML == 1 ) {
+        cr . sm = tmp ( 0 ) ;
+    }
+    ld1( data_ ) ;
+}
+      Source Registers:  DSEM GPR(RB) cr/p? 
+      Target Registers:  DSEM? GPR(RA)? GPR(RB)? cr/p? 
+      Source Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  ld_2 (rank: 0)
+      Width:  32
+      Syntax:  "ld%p%p%p%p%p %f,%f(%f)":   SIZE_LD(6) SW SML NUPDATE FLAGS RA_2 DRAM_OFFSET RB
+      DSyntax:  "ld.b8%f%f%f%f %f,%f(%f)":   SW SML NUPDATE FLAGS RA_2 DRAM_OFFSET RB
+      Fields:  OPCD_SHRT(0) SW SIZE_LD(6) SML NUPDATE FLAGS RA_2 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+     bits < 24 > leswp_addr_correction = ( ( SW & cr ( 22 ) ) == 1 ) ? 0x3 : 0 ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ^ leswp_addr_correction ;
+    if ( 6 == 1 || 6 == 5 ) EA = EA & 0xfffffe ;
+    if ( 6 == 2 || 6 == 6 ) EA = EA & 0xfffffc ;
+    if ( 6 == 3 || 6 == 7 ) EA = EA & 0xfffff8 ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 6 == 0 ) be = 0x80 ; else if ( 6 == 1 ) be = 0x80 ; else if ( 6 == 2 ) be = 0xc0 ; else if ( 6 == 3 ) be = 0xc0 ; else if ( 6 == 4 ) be = 0xf0 ; else if ( 6 == 5 ) be = 0x70 ; else if ( 6 == 6 ) be = 0xff ; else if ( 6 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+     bits < 65 > tmp = muram_bus_access ( 1 , EA , be , 0 , SML ) ;
+     bits < 6 > bit_shift = concat ( EA ( 21 , 23 ) , zero ( 3 ) ) ;
+    data_ = tmp ( 1 , 64 ) << bit_shift ;
+    if ( SML == 1 ) {
+        cr . sm = tmp ( 0 ) ;
+    }
+    ld2( data_ ) ;
+}
+      Source Registers:  DSEM GPR(RB) cr/p? 
+      Target Registers:  DSEM? GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) GPR(RB)? cr/p? 
+      Source Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  ld_4 (rank: 0)
+      Width:  32
+      Syntax:  "ld%p%p%p%p%p %f,%f(%f)":   SIZE_LD(7) SW SML NUPDATE FLAGS RA_4 DRAM_OFFSET RB
+      DSyntax:  "ld.q%f%f%f%f %f,%f(%f)":   SW SML NUPDATE FLAGS RA_4 DRAM_OFFSET RB
+      Fields:  OPCD_SHRT(0) SW SIZE_LD(7) SML NUPDATE FLAGS RA_4 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+     bits < 24 > leswp_addr_correction = ( ( SW & cr ( 22 ) ) == 1 ) ? 0x3 : 0 ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ^ leswp_addr_correction ;
+    if ( 7 == 1 || 7 == 5 ) EA = EA & 0xfffffe ;
+    if ( 7 == 2 || 7 == 6 ) EA = EA & 0xfffffc ;
+    if ( 7 == 3 || 7 == 7 ) EA = EA & 0xfffff8 ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 7 == 0 ) be = 0x80 ; else if ( 7 == 1 ) be = 0x80 ; else if ( 7 == 2 ) be = 0xc0 ; else if ( 7 == 3 ) be = 0xc0 ; else if ( 7 == 4 ) be = 0xf0 ; else if ( 7 == 5 ) be = 0x70 ; else if ( 7 == 6 ) be = 0xff ; else if ( 7 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+     bits < 65 > tmp = muram_bus_access ( 1 , EA , be , 0 , SML ) ;
+     bits < 6 > bit_shift = concat ( EA ( 21 , 23 ) , zero ( 3 ) ) ;
+    data_ = tmp ( 1 , 64 ) << bit_shift ;
+    if ( SML == 1 ) {
+        cr . sm = tmp ( 0 ) ;
+    }
+    ld4( data_ ) ;
+}
+      Source Registers:  DSEM GPR(RB) cr/p? 
+      Target Registers:  DSEM? GPR(RA_4 ( 0 )) GPR(RA_4 ( 1 )) GPR(RA_4 ( 2 )) GPR(RA_4 ( 3 )) GPR(RB)? cr/p? 
+      Source Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  ldm_1 (rank: 0)
+      Width:  32
+      Syntax:  "ldm%p%p%p %f,%f(%f)":   SIZE_LD NUPDATE FLAGS RA DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_LD OPCD_B8(0) NUPDATE FLAGS RA RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( SIZE_LD == 1 || SIZE_LD == 5 ) EA = EA & 0xfffffe ;
+    if ( SIZE_LD == 2 || SIZE_LD == 6 ) EA = EA & 0xfffffc ;
+    if ( SIZE_LD == 3 || SIZE_LD == 7 ) EA = EA & 0xfffff8 ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( SIZE_LD == 0 ) be = 0x80 ; else if ( SIZE_LD == 1 ) be = 0x80 ; else if ( SIZE_LD == 2 ) be = 0xc0 ; else if ( SIZE_LD == 3 ) be = 0xc0 ; else if ( SIZE_LD == 4 ) be = 0xf0 ; else if ( SIZE_LD == 5 ) be = 0x70 ; else if ( SIZE_LD == 6 ) be = 0xff ; else if ( SIZE_LD == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+     bits < 64 > tmp = muram_bus_access ( 1 , EA , be , 0 , 0 ) ;
+     bits < 6 > bit_shift = concat ( EA ( 21 , 23 ) , zero ( 3 ) ) ;
+    data_ = tmp ( 0 , 63 ) << bit_shift ;
+    ldm1( data_ ) ;
+}
+      Source Registers:  DSEM GPR(RB)/p cr? 
+      Target Registers:  GPR(RA)? GPR(RB)? cr? 
+      Source Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  ldm_2m (rank: 0)
+      Width:  32
+      Syntax:  "ldm%p%p%p %f,%f(%f)":   SIZE_LD(6) NUPDATE FLAGS RA_2 DRAM_OFFSET RB
+      DSyntax:  "ldm.b8%f%f %f,%f(%f)":   NUPDATE FLAGS RA_2 DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_LD(6) OPCD_B8(0) NUPDATE FLAGS RA_2 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 6 == 1 || 6 == 5 ) EA = EA & 0xfffffe ;
+    if ( 6 == 2 || 6 == 6 ) EA = EA & 0xfffffc ;
+    if ( 6 == 3 || 6 == 7 ) EA = EA & 0xfffff8 ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 6 == 0 ) be = 0x80 ; else if ( 6 == 1 ) be = 0x80 ; else if ( 6 == 2 ) be = 0xc0 ; else if ( 6 == 3 ) be = 0xc0 ; else if ( 6 == 4 ) be = 0xf0 ; else if ( 6 == 5 ) be = 0x70 ; else if ( 6 == 6 ) be = 0xff ; else if ( 6 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+     bits < 64 > tmp = muram_bus_access ( 1 , EA , be , 0 , 0 ) ;
+     bits < 6 > bit_shift = concat ( EA ( 21 , 23 ) , zero ( 3 ) ) ;
+    data_ = tmp ( 0 , 63 ) << bit_shift ;
+    ldm2( data_ ) ;
+}
+      Source Registers:  DSEM GPR(RB)/p cr? 
+      Target Registers:  GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) GPR(RB)? cr? 
+      Source Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  ldm_4m (rank: 0)
+      Width:  32
+      Syntax:  "ldm%p%p%p %f,%f(%f)":   SIZE_LD(7) NUPDATE FLAGS RA_4 DRAM_OFFSET RB
+      DSyntax:  "ldm.q%f%f %f,%f(%f)":   NUPDATE FLAGS RA_4 DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_LD(7) OPCD_B8(0) NUPDATE FLAGS RA_4 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 7 == 1 || 7 == 5 ) EA = EA & 0xfffffe ;
+    if ( 7 == 2 || 7 == 6 ) EA = EA & 0xfffffc ;
+    if ( 7 == 3 || 7 == 7 ) EA = EA & 0xfffff8 ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 7 == 0 ) be = 0x80 ; else if ( 7 == 1 ) be = 0x80 ; else if ( 7 == 2 ) be = 0xc0 ; else if ( 7 == 3 ) be = 0xc0 ; else if ( 7 == 4 ) be = 0xf0 ; else if ( 7 == 5 ) be = 0x70 ; else if ( 7 == 6 ) be = 0xff ; else if ( 7 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+     bits < 64 > tmp = muram_bus_access ( 1 , EA , be , 0 , 0 ) ;
+     bits < 6 > bit_shift = concat ( EA ( 21 , 23 ) , zero ( 3 ) ) ;
+    data_ = tmp ( 0 , 63 ) << bit_shift ;
+    ldm4( data_ ) ;
+}
+      Source Registers:  DSEM GPR(RB)/p cr? 
+      Target Registers:  GPR(RA_4 ( 0 )) GPR(RA_4 ( 1 )) GPR(RA_4 ( 2 )) GPR(RA_4 ( 3 )) GPR(RB)? cr? 
+      Source Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  ldsch (rank: 100)
+      Width:  32
+      Syntax:  "ldsch%p%p%p%p %f,%f":   UR RT1 RT2 RT3 RA RB AU(RB != 0x1F)
+      DSyntax:  "ldsch%f%f%f%f %f,%f":   UR RT1 RT2 RT3 RA RB
+      Fields:  OPCD(5) AU OPCD_B6(0) RT1 RT2 RT3 UR RA RB
+      Action:  {
+     bits < 4 > opcd = 5 ;
+     bits < 15 > spr_addr = concat ( opcd , AU , zero ( 1 ) , RT1 , RT2 , RT3 ) ;
+    spr_addr = concat ( spr_addr , UR , RA ) ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) , zero ( 23 ) , SNUMR . org_bg , SNUMR . org_snum ) , rba , sst ) ;
+     bits < 65 > dispatch = dispatch_bus_access (  ) ;
+     bits < 1 > ack = dispatch ( 0 ) ;
+     bits < 8 > snum = dispatch ( 1 , 8 ) ;
+     bits < 24 > iaddr = dispatch ( 9 , 32 ) ;
+     bits < 8 > status = dispatch ( 33 , 40 ) ;
+     bits < 24 > page = dispatch ( 41 , 64 ) ;
+    if ( ack == 1 ) {
+        NNPC = iaddr ;
+        GPR ( RA ) = concat ( zero ( 8 ) , page ) ;
+        SNUMR = concat ( zero ( 8 ) , snum , zero ( 8 ) , snum ) ;
+        cr = concat ( cr ( 0 , 21 ) , status , cr ( 30 , 31 ) ) ;
+    } else {
+    }
+}
+      Source Registers:  EXT_SPR GPR(RB) SNUMR[mask 0x80ff0000]/p cr[mask 0xfffffc03]/p? rba sst 
+      Target Registers:  EXT_SPR GPR(RA)? NNPC? SNUMR? cr? 
+      Helper Functions:  dispatch_bus_access spr_bus_access 
+      -------------------------------
+      Name:  ldsch_shorthand (rank: 100)
+      Width:  32
+      Syntax:  "ldsch%p%p%p%p %f":   UR RT1 RT2 RT3 RB
+      Fields:  OPCD(5) OPCD_B6(0) RT1 RT2 RT3 UR RA(26) RB
+      Alias:  ldsch AU(RB != 0x1F) RT1(RT1) RT2(RT2) RT3(RT3) UR(UR) RB(RB) 
+      Source Registers:  EXT_SPR GPR(RB) SNUMR[mask 0x80ff0000]/p cr[mask 0xfffffc03]/p? rba sst 
+      Target Registers:  EXT_SPR GPR(RA)? NNPC? SNUMR? cr? 
+      Helper Functions:  dispatch_bus_access spr_bus_access 
+      -------------------------------
+      Name:  ldschi (rank: 100)
+      Width:  32
+      Fields:  OPCD(5) AU(1) OPCD_B6(1) RT1 RT2 RT3 UR RA INSTR_OFFSET
+      Action:  {
+     bits < 4 > opcd = 5 ;
+     bits < 15 > spr_addr = concat ( opcd , ~ zero ( 2 ) , RT1 , RT2 , RT3 ) ;
+    spr_addr = concat ( spr_addr , UR , RA ) ;
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+     bits < 24 > tmp = PC + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( tmp , zero ( 23 ) , SNUMR . org_bg , SNUMR . org_snum ) , rba , sst ) ;
+     bits < 65 > dispatch = dispatch_bus_access (  ) ;
+     bits < 1 > ack = dispatch ( 0 ) ;
+     bits < 8 > snum = dispatch ( 1 , 8 ) ;
+     bits < 24 > iaddr = dispatch ( 9 , 32 ) ;
+     bits < 8 > status = dispatch ( 33 , 40 ) ;
+     bits < 24 > page = dispatch ( 41 , 64 ) ;
+    if ( ack == 1 ) {
+        NNPC = iaddr ;
+        GPR ( RA ) = concat ( zero ( 8 ) , page ) ;
+        SNUMR = concat ( zero ( 8 ) , snum , zero ( 8 ) , snum ) ;
+        cr = concat ( cr ( 0 , 21 ) , status , cr ( 30 , 31 ) ) ;
+    } else {
+    }
+}
+      Source Registers:  EXT_SPR PC SNUMR[mask 0x80ff0000]/p cr[mask 0xfffffc03]/p? rba sst 
+      Target Registers:  EXT_SPR GPR(RA)? NNPC? SNUMR? cr? 
+      Helper Functions:  dispatch_bus_access spr_bus_access 
+      -------------------------------
+      Name:  ldschi_shorthand (rank: 100)
+      Width:  32
+      Syntax:  "ldschi%p%p%p%p %f":   UR RT1 RT2 RT3 INSTR_OFFSET
+      Fields:  OPCD(5) AU(1) OPCD_B6(1) RT1 RT2 RT3 UR RA(26) INSTR_OFFSET
+      Alias:  ldschi RT1(RT1) RT2(RT2) RT3(RT3) UR(UR) INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? ( INSTR_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - INSTR_OFFSET ) + 1 )) 
+      Source Registers:  EXT_SPR PC SNUMR[mask 0x80ff0000]/p cr[mask 0xfffffc03]/p? rba sst 
+      Target Registers:  EXT_SPR GPR(RA)? NNPC? SNUMR? cr? 
+      Helper Functions:  dispatch_bus_access spr_bus_access 
+      -------------------------------
+      Name:  loop (rank: 100)
+      Width:  32
+      Syntax:  "loop%p%p (%f)-,%f":   NOP_J CMPRS_J RA RB
+      Fields:  OPCD(18) NOP_J OPCD_B6(0) OPCD_B7(0) RA RB CMPRS_J
+      Action:  {
+     bits < 24 > tmp = GPR ( RB ) ;
+    if ( CMPRS_J == 1 ) tmp = concat ( tmp ( 8 ) , zero ( 8 ) , tmp ( 9 , 23 ) ) ;
+    if ( GPR ( RA ) != 0 ) {
+        NNPC = tmp ;
+        if ( NOP_J == 1 ) Fetch = JmpN ;
+    }
+    GPR ( RA ) = GPR ( RA ) - 1 ;
+}
+      Source Registers:  GPR(RA) GPR(RB) 
+      Target Registers:  GPR(RA) NNPC? 
+      -------------------------------
+      Name:  loopi (rank: 100)
+      Width:  32
+      Syntax:  "loopi%f (%f)-,%f":   NOP_J RA INSTR_OFFSET INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? ( INSTR_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - INSTR_OFFSET ) + 1 ))
+      DSyntax:  "loopi%f (%f)-,%f":   NOP_J RA INSTR_OFFSET
+      Fields:  OPCD(18) NOP_J OPCD_B6(1) OPCD_B7(0) RA INSTR_OFFSET
+      Action:  {
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+    if ( GPR ( RA ) != 0 ) {
+        NNPC = PC + offset ;
+        if ( NOP_J == 1 ) Fetch = JmpN ;
+    }
+    GPR ( RA ) = GPR ( RA ) - 1 ;
+}
+      Source Registers:  GPR(RA) PC? 
+      Target Registers:  GPR(RA) NNPC? 
+      -------------------------------
+      Name:  merge (rank: 100)
+      Width:  32
+      Syntax:  "merge %f,%f,%f,%f,%f":   RC RB RA ML MR
+      Fields:  OPCD(25) OPCD_B5(0) ML RA RB RC MR OPCD_B31(0)
+      Action:  {
+     bits < 32 > mask = mmask ( ML , MR ) ;
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > tmp = merge ( op1 , GPR ( RB ) , mask ) ;
+    if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  merge mmask 
+      -------------------------------
+      Name:  mergei (rank: 100)
+      Width:  32
+      Syntax:  "mergei %f%f,%f,%f,%f,%f":   INVA RB DATA5 IMM5M ML MR
+      Fields:  OPCD(31) INVA ML DATA5 RB IMM5M MR OPCD_B31(1)
+      Action:  {
+     bits < 32 > mask = mmask ( ML , MR ) ;
+     bits < 32 > rot = bit_shift ( DATA5 , 0 , IMM5M , 3 , 1 ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+    GPR ( RB ) = merge ( rot , op2 , mask ) ;
+}
+      Source Registers:  GPR(RB) 
+      Target Registers:  GPR(RB) 
+      Helper Functions:  bit_shift merge mmask 
+      -------------------------------
+      Name:  mfspr_1 (rank: 100)
+      Width:  32
+      Syntax:  "mfspr%p %f,%f":   B8 RA SPRF RS(( ! B8 ) && ( ( SPRF & 1 ) == 1 )) SPRF(SPRF >> 1)
+      DSyntax:  "mfspr%f %f,%f":   B8 RA SPRF(SPRF << 1)
+      Fields:  OPCD(15) RS B8 RA RB(31) SPRF
+      Action:  {
+     bits < 64 > rdata ;
+     bits < 1 > rsn = ~ RS ;
+     bits < 1 > rs_b8 = RS | B8 ;
+     bits < 4 > beh = concat ( rsn , rsn , rsn , rsn ) ;
+     bits < 4 > bel = concat ( rs_b8 , rs_b8 , rs_b8 , rs_b8 ) ;
+     bits < 8 > be = concat ( beh , bel ) ;
+    if ( SPRF > 0x7f ) {
+        rdata = spr_bus_access ( 1 , SPRF , be , 0 , rba , sst ) ;
+    }
+    GPR ( RA ) = ( RS == 1 ) ? rdata ( 32 , 63 ) : rdata ( 0 , 31 ) ;
+    if ( B8 == 1 ) GPR ( RA | 1 ) = rdata ( 32 , 63 ) ;
+}
+      Source Registers:  EXT_SPR? rba? sst? 
+      Target Registers:  GPR(RA) GPR(RA | 1)? 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  mfspr_2 (rank: 100)
+      Width:  32
+      Syntax:  "mfspr%p %f,%f":   B8 RA SPRF_I RS(( ! B8 ) && ( ( SPRF_I & 1 ) == 1 )) SPRF_I(SPRF_I >> 1)
+      DSyntax:  "mfspr%f %f,%f":   B8 RA SPRF_I(SPRF_I << 1)
+      Fields:  OPCD(16) RS B8 RA RB(31) SPRF_I
+      Action:  {
+     bits < 64 > rdata ;
+     bits < 1 > rsn = ~ RS ;
+     bits < 1 > rs_b8 = RS | B8 ;
+     bits < 4 > beh = concat ( rsn , rsn , rsn , rsn ) ;
+     bits < 4 > bel = concat ( rs_b8 , rs_b8 , rs_b8 , rs_b8 ) ;
+     bits < 8 > be = concat ( beh , bel ) ;
+    rdata = concat ( zero ( 32 ) , SPR ( SPRF_I ( 0 ) ) ) ;
+    GPR ( RA ) = ( RS == 1 ) ? rdata ( 32 , 63 ) : rdata ( 0 , 31 ) ;
+    if ( B8 == 1 ) GPR ( RA | 1 ) = rdata ( 32 , 63 ) ;
+}
+      Source Registers:  SPR(SPRF_I ( 0 )) 
+      Target Registers:  GPR(RA) GPR(RA | 1)? 
+      -------------------------------
+      Name:  movei (rank: 100)
+      Width:  32
+      Syntax:  "movei%p%p %f,%f":   UPDATE FLAGS RA IMM_P3 HWS(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) || ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0) INVA(( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( IMM_P3 & 0xFFFF ) == 0xFFFF ) ? 1 : 0) IMM16(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) ? IMM_P3 : ( ( IMM_P3 & 0xFFFF ) == 0 ) ? IMM_P3 >> 16 : ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? ~ IMM_P3 : ~ ( IMM_P3 >> 16 ))
+      DSyntax:  "movei%f%f %f,%f":   UPDATE FLAGS RA IMM_P3(( (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM16 ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) : (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( IMM16 << 16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA OPCD_ALU(7) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > tmp = ( INVA == 1 ) ? ~ imm : imm ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  cr? 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_status imm16e 
+      -------------------------------
+      Name:  mtspr_1 (rank: 100)
+      Width:  32
+      Syntax:  "mtspr%f%f %f,%f,%f":   SIZEB SIZEA RB RA SPRF SPRF(SPRF >> 1)
+      DSyntax:  "mtspr%f%f %f,%f,%f":   SIZEB SIZEA RB RA SPRF(SPRF << 1)
+      Fields:  OPCD(14) SIZEB SIZEA RA RB SPRF
+      Action:  {
+     bits < 16 > spr_even = concat ( zero ( 4 ) , SPRF , zero ( 1 ) ) ;
+     bits < 16 > spr_odd = concat ( zero ( 4 ) , SPRF , ~ zero ( 1 ) ) ;
+     bits < 32 > maskA = ( SIZEA == 0 ) ? 0x000000ff : ( SIZEA == 1 ) ? 0x0000ffff : ( SIZEA == 2 ) ? 0x00ffffff : ( SIZEA == 3 ) ? 0xffffffff : ( SIZEA == 4 ) ? 0xff000000 : ( SIZEA == 5 ) ? 0xffff0000 : ( SIZEA == 6 ) ? 0xffffff00 : 0 ;
+     bits < 32 > maskB = ( SIZEB == 0 ) ? 0x000000ff : ( SIZEB == 1 ) ? 0x0000ffff : ( SIZEB == 2 ) ? 0x00ffffff : ( SIZEB == 3 ) ? 0xffffffff : ( SIZEB == 4 ) ? 0xff000000 : ( SIZEB == 5 ) ? 0xffff0000 : ( SIZEB == 6 ) ? 0xffffff00 : 0 ;
+     bits < 4 > beh = concat ( maskB ( 0 ) , maskB ( 8 ) , maskB ( 16 ) , maskB ( 24 ) ) ;
+     bits < 4 > bel = concat ( maskA ( 0 ) , maskA ( 8 ) , maskA ( 16 ) , maskA ( 24 ) ) ;
+     bits < 8 > be = concat ( beh , bel ) ;
+    if ( SPRF > 0x7f ) {
+        spr_bus_access ( 0 , SPRF , be , concat ( GPR ( RB ) , GPR ( RA ) ) , rba , sst ) ;
+    }
+}
+      Source Registers:  EXT_SPR? GPR(RA)? GPR(RB)? rba? sst? 
+      Target Registers:  EXT_SPR? 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  mtspr_2 (rank: 100)
+      Width:  32
+      Syntax:  "mtspr%f%f %f,%f,%f":   SIZEB SIZEA RB RA SPRF_I SPRF_I(SPRF_I >> 1)
+      DSyntax:  "mtspr%f%f %f,%f,%f":   SIZEB SIZEA RB RA SPRF_I(SPRF_I << 1)
+      Fields:  OPCD(17) SIZEB SIZEA RA RB SPRF_I
+      Action:  {
+     bits < 32 > maskA = ( SIZEA == 0 ) ? 0x000000ff : ( SIZEA == 1 ) ? 0x0000ffff : ( SIZEA == 2 ) ? 0x00ffffff : ( SIZEA == 3 ) ? 0xffffffff : ( SIZEA == 4 ) ? 0xff000000 : ( SIZEA == 5 ) ? 0xffff0000 : ( SIZEA == 6 ) ? 0xffffff00 : 0 ;
+     bits < 32 > maskB = ( SIZEB == 0 ) ? 0x000000ff : ( SIZEB == 1 ) ? 0x0000ffff : ( SIZEB == 2 ) ? 0x00ffffff : ( SIZEB == 3 ) ? 0xffffffff : ( SIZEB == 4 ) ? 0xff000000 : ( SIZEB == 5 ) ? 0xffff0000 : ( SIZEB == 6 ) ? 0xffffff00 : 0 ;
+     bits < 4 > beh = concat ( maskB ( 0 ) , maskB ( 8 ) , maskB ( 16 ) , maskB ( 24 ) ) ;
+     bits < 4 > bel = concat ( maskA ( 0 ) , maskA ( 8 ) , maskA ( 16 ) , maskA ( 24 ) ) ;
+     bits < 8 > be = concat ( beh , bel ) ;
+    SPR ( SPRF_I ( 0 ) ) = merge ( GPR ( RA ) , SPR ( SPRF_I ( 0 ) ) , maskA ) ;
+}
+      Source Registers:  GPR(RA) SPR(SPRF_I ( 0 )) 
+      Target Registers:  SPR(SPRF_I ( 0 )) 
+      Helper Functions:  merge 
+      -------------------------------
+      Name:  mtspri_1 (rank: 100)
+      Width:  32
+      Syntax:  "mtspri%p %f,%f":   SBS IMM_P2 SPRF RS(( ( SPRF & 1 ) == 0 ) ? 0 : 1) SPRF(SPRF >> 1) IMM8S(( IMM_P2 <= 0xFF ) ? IMM_P2 : ( IMM_P2 <= 0xFF00 ) ? IMM_P2 >> 8 : ( IMM_P2 <= 0xFF0000 ) ? IMM_P2 >> 16 : IMM_P2 >> 24) SBS(( IMM_P2 == 0 ) ? SBS : ( IMM_P2 <= 0xFF ) ? 3 : ( IMM_P2 <= 0xFF00 ) ? 2 : ( IMM_P2 <= 0xFF0000 ) ? 1 : 0)
+      DSyntax:  "mtspri%f %f,%f":   SBS IMM_P2(( (( ( ( IMM8S << 16 ) <= 0xFF ) ? ( IMM8S << 16 ) : ( ( IMM8S << 16 ) <= 0xFF00 ) ? ( IMM8S << 16 ) >> 8 : ( ( IMM8S << 16 ) <= 0xFF0000 ) ? ( IMM8S << 16 ) >> 16 : ( IMM8S << 16 ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S << 16 ) == 0 ) ? SBS : ( ( IMM8S << 16 ) <= 0xFF ) ? 3 : ( ( IMM8S << 16 ) <= 0xFF00 ) ? 2 : ( ( IMM8S << 16 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S << 16 ) : (( ( ( IMM8S << 24 ) <= 0xFF ) ? ( IMM8S << 24 ) : ( ( IMM8S << 24 ) <= 0xFF00 ) ? ( IMM8S << 24 ) >> 8 : ( ( IMM8S << 24 ) <= 0xFF0000 ) ? ( IMM8S << 24 ) >> 16 : ( IMM8S << 24 ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S << 24 ) == 0 ) ? SBS : ( ( IMM8S << 24 ) <= 0xFF ) ? 3 : ( ( IMM8S << 24 ) <= 0xFF00 ) ? 2 : ( ( IMM8S << 24 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S << 24 ) : (( ( ( IMM8S << 8 ) <= 0xFF ) ? ( IMM8S << 8 ) : ( ( IMM8S << 8 ) <= 0xFF00 ) ? ( IMM8S << 8 ) >> 8 : ( ( IMM8S << 8 ) <= 0xFF0000 ) ? ( IMM8S << 8 ) >> 16 : ( IMM8S << 8 ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S << 8 ) == 0 ) ? SBS : ( ( IMM8S << 8 ) <= 0xFF ) ? 3 : ( ( IMM8S << 8 ) <= 0xFF00 ) ? 2 : ( ( IMM8S << 8 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S << 8 ) : (( ( ( IMM8S ) <= 0xFF ) ? ( IMM8S ) : ( ( IMM8S ) <= 0xFF00 ) ? ( IMM8S ) >> 8 : ( ( IMM8S ) <= 0xFF0000 ) ? ( IMM8S ) >> 16 : ( IMM8S ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S ) == 0 ) ? SBS : ( ( IMM8S ) <= 0xFF ) ? 3 : ( ( IMM8S ) <= 0xFF00 ) ? 2 : ( ( IMM8S ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S ) : (( ( ( 1 ) <= 0xFF ) ? ( 1 ) : ( ( 1 ) <= 0xFF00 ) ? ( 1 ) >> 8 : ( ( 1 ) <= 0xFF0000 ) ? ( 1 ) >> 16 : ( 1 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 1 ) == 0 ) ? SBS : ( ( 1 ) <= 0xFF ) ? 3 : ( ( 1 ) <= 0xFF00 ) ? 2 : ( ( 1 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 1 ) : (( ( ( 0 ) <= 0xFF ) ? ( 0 ) : ( ( 0 ) <= 0xFF00 ) ? ( 0 ) >> 8 : ( ( 0 ) <= 0xFF0000 ) ? ( 0 ) >> 16 : ( 0 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 0 ) == 0 ) ? SBS : ( ( 0 ) <= 0xFF ) ? 3 : ( ( 0 ) <= 0xFF00 ) ? 2 : ( ( 0 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 0 ) : (( ( ( 2 ) <= 0xFF ) ? ( 2 ) : ( ( 2 ) <= 0xFF00 ) ? ( 2 ) >> 8 : ( ( 2 ) <= 0xFF0000 ) ? ( 2 ) >> 16 : ( 2 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 2 ) == 0 ) ? SBS : ( ( 2 ) <= 0xFF ) ? 3 : ( ( 2 ) <= 0xFF00 ) ? 2 : ( ( 2 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 2 ) : (( ( ( 3 ) <= 0xFF ) ? ( 3 ) : ( ( 3 ) <= 0xFF00 ) ? ( 3 ) >> 8 : ( ( 3 ) <= 0xFF0000 ) ? ( 3 ) >> 16 : ( 3 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 3 ) == 0 ) ? SBS : ( ( 3 ) <= 0xFF ) ? 3 : ( ( 3 ) <= 0xFF00 ) ? 2 : ( ( 3 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 3 ) : ( SBS ) )) SPRF(SPRF << 1)
+      Fields:  OPCD(13) RS SBS IMM8S RB(31) SPRF
+      Action:  {
+     bits < 32 > mask = ( SBS == 0 ) ? 0xff000000 : ( SBS == 1 ) ? 0x00ff0000 : ( SBS == 2 ) ? 0x0000ff00 : 0x000000ff ;
+     bits < 32 > imm = concat ( IMM8S , IMM8S , IMM8S , IMM8S ) ;
+     bits < 4 > be4 = concat ( mask ( 0 ) , mask ( 8 ) , mask ( 16 ) , mask ( 24 ) ) ;
+     bits < 8 > be = ( RS == 1 ) ? concat ( zero ( 4 ) , be4 ) : concat ( be4 , zero ( 4 ) ) ;
+    if ( SPRF > 0x7f ) {
+        spr_bus_access ( 0 , SPRF , be , concat ( imm , imm ) , rba , sst ) ;
+    }
+}
+      Source Registers:  EXT_SPR? rba? sst? 
+      Target Registers:  EXT_SPR? 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  mtspri_2 (rank: 100)
+      Width:  32
+      Syntax:  "mtspri%p %f,%f":   SBS IMM_P2 SPRF_I RS(( ( SPRF_I & 1 ) == 0 ) ? 0 : 1) SPRF_I(SPRF_I >> 1) IMM8S(( IMM_P2 <= 0xFF ) ? IMM_P2 : ( IMM_P2 <= 0xFF00 ) ? IMM_P2 >> 8 : ( IMM_P2 <= 0xFF0000 ) ? IMM_P2 >> 16 : IMM_P2 >> 24) SBS(( IMM_P2 == 0 ) ? SBS : ( IMM_P2 <= 0xFF ) ? 3 : ( IMM_P2 <= 0xFF00 ) ? 2 : ( IMM_P2 <= 0xFF0000 ) ? 1 : 0)
+      DSyntax:  "mtspri%f %f,%f":   SBS IMM_P2(( (( ( ( IMM8S << 16 ) <= 0xFF ) ? ( IMM8S << 16 ) : ( ( IMM8S << 16 ) <= 0xFF00 ) ? ( IMM8S << 16 ) >> 8 : ( ( IMM8S << 16 ) <= 0xFF0000 ) ? ( IMM8S << 16 ) >> 16 : ( IMM8S << 16 ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S << 16 ) == 0 ) ? SBS : ( ( IMM8S << 16 ) <= 0xFF ) ? 3 : ( ( IMM8S << 16 ) <= 0xFF00 ) ? 2 : ( ( IMM8S << 16 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S << 16 ) : (( ( ( IMM8S << 24 ) <= 0xFF ) ? ( IMM8S << 24 ) : ( ( IMM8S << 24 ) <= 0xFF00 ) ? ( IMM8S << 24 ) >> 8 : ( ( IMM8S << 24 ) <= 0xFF0000 ) ? ( IMM8S << 24 ) >> 16 : ( IMM8S << 24 ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S << 24 ) == 0 ) ? SBS : ( ( IMM8S << 24 ) <= 0xFF ) ? 3 : ( ( IMM8S << 24 ) <= 0xFF00 ) ? 2 : ( ( IMM8S << 24 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S << 24 ) : (( ( ( IMM8S << 8 ) <= 0xFF ) ? ( IMM8S << 8 ) : ( ( IMM8S << 8 ) <= 0xFF00 ) ? ( IMM8S << 8 ) >> 8 : ( ( IMM8S << 8 ) <= 0xFF0000 ) ? ( IMM8S << 8 ) >> 16 : ( IMM8S << 8 ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S << 8 ) == 0 ) ? SBS : ( ( IMM8S << 8 ) <= 0xFF ) ? 3 : ( ( IMM8S << 8 ) <= 0xFF00 ) ? 2 : ( ( IMM8S << 8 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S << 8 ) : (( ( ( IMM8S ) <= 0xFF ) ? ( IMM8S ) : ( ( IMM8S ) <= 0xFF00 ) ? ( IMM8S ) >> 8 : ( ( IMM8S ) <= 0xFF0000 ) ? ( IMM8S ) >> 16 : ( IMM8S ) >> 24 ) ==  IMM8S )  &&  (( ( ( IMM8S ) == 0 ) ? SBS : ( ( IMM8S ) <= 0xFF ) ? 3 : ( ( IMM8S ) <= 0xFF00 ) ? 2 : ( ( IMM8S ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( IMM8S ) : (( ( ( 1 ) <= 0xFF ) ? ( 1 ) : ( ( 1 ) <= 0xFF00 ) ? ( 1 ) >> 8 : ( ( 1 ) <= 0xFF0000 ) ? ( 1 ) >> 16 : ( 1 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 1 ) == 0 ) ? SBS : ( ( 1 ) <= 0xFF ) ? 3 : ( ( 1 ) <= 0xFF00 ) ? 2 : ( ( 1 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 1 ) : (( ( ( 0 ) <= 0xFF ) ? ( 0 ) : ( ( 0 ) <= 0xFF00 ) ? ( 0 ) >> 8 : ( ( 0 ) <= 0xFF0000 ) ? ( 0 ) >> 16 : ( 0 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 0 ) == 0 ) ? SBS : ( ( 0 ) <= 0xFF ) ? 3 : ( ( 0 ) <= 0xFF00 ) ? 2 : ( ( 0 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 0 ) : (( ( ( 2 ) <= 0xFF ) ? ( 2 ) : ( ( 2 ) <= 0xFF00 ) ? ( 2 ) >> 8 : ( ( 2 ) <= 0xFF0000 ) ? ( 2 ) >> 16 : ( 2 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 2 ) == 0 ) ? SBS : ( ( 2 ) <= 0xFF ) ? 3 : ( ( 2 ) <= 0xFF00 ) ? 2 : ( ( 2 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 2 ) : (( ( ( 3 ) <= 0xFF ) ? ( 3 ) : ( ( 3 ) <= 0xFF00 ) ? ( 3 ) >> 8 : ( ( 3 ) <= 0xFF0000 ) ? ( 3 ) >> 16 : ( 3 ) >> 24 ) ==  IMM8S )  &&  (( ( ( 3 ) == 0 ) ? SBS : ( ( 3 ) <= 0xFF ) ? 3 : ( ( 3 ) <= 0xFF00 ) ? 2 : ( ( 3 ) <= 0xFF0000 ) ? 1 : 0 ) ==  SBS ) ? ( 3 ) : ( SBS ) )) SPRF_I(SPRF_I << 1)
+      Fields:  OPCD(20) RS SBS IMM8S RB(31) SPRF_I
+      Action:  {
+     bits < 32 > mask = ( SBS == 0 ) ? 0xff000000 : ( SBS == 1 ) ? 0x00ff0000 : ( SBS == 2 ) ? 0x0000ff00 : 0x000000ff ;
+     bits < 32 > imm = concat ( IMM8S , IMM8S , IMM8S , IMM8S ) ;
+     bits < 4 > be4 = concat ( mask ( 0 ) , mask ( 8 ) , mask ( 16 ) , mask ( 24 ) ) ;
+     bits < 8 > be = ( RS == 1 ) ? concat ( zero ( 4 ) , be4 ) : concat ( be4 , zero ( 4 ) ) ;
+    if ( RS == 1 ) SPR ( SPRF_I ( 0 ) ) = merge ( imm , SPR ( SPRF_I ( 0 ) ) , mask ) ;
+}
+      Source Registers:  SPR(SPRF_I ( 0 ))? 
+      Target Registers:  SPR(SPRF_I ( 0 ))? 
+      Helper Functions:  merge 
+      -------------------------------
+      Name:  mtspris_1 (rank: 100)
+      Width:  32
+      Syntax:  "mtspris%p %f,%f,%f":   SIZEB RB IMM8S SPRF_I SPRF_I(SPRF_I >> 1)
+      DSyntax:  "mtspris%f %f,%f,%f":   SIZEB RB IMM8S SPRF_I(SPRF_I << 1)
+      Fields:  OPCD(12) SIZEB IMM8S RB SPRF_I
+      Action:  {
+     bits < 32 > imm = concat ( zero ( 24 ) , IMM8S ) ;
+     bits < 32 > maskA = 0x000000ff ;
+     bits < 32 > maskB = ( SIZEB == 0 ) ? 0x000000ff : ( SIZEB == 1 ) ? 0x0000ffff : ( SIZEB == 2 ) ? 0x00ffffff : ( SIZEB == 3 ) ? 0xffffffff : ( SIZEB == 4 ) ? 0xff000000 : ( SIZEB == 5 ) ? 0xffff0000 : ( SIZEB == 6 ) ? 0xffffff00 : 0 ;
+     bits < 8 > be = concat ( maskB ( 0 ) , maskB ( 8 ) , maskB ( 16 ) , maskB ( 24 ) , zero ( 3 ) , ~ zero ( 1 ) ) ;
+    SPR ( SPRF_I ( 0 ) ) = merge ( imm , SPR ( SPRF_I ( 0 ) ) , maskA ) ;
+}
+      Source Registers:  SPR(SPRF_I ( 0 )) 
+      Target Registers:  SPR(SPRF_I ( 0 )) 
+      Helper Functions:  merge 
+      -------------------------------
+      Name:  mtspris_2 (rank: 100)
+      Width:  32
+      Syntax:  "mtspris%p %f,%f,%f":   SIZEB RB IMM8S SPRF SPRF(SPRF >> 1)
+      DSyntax:  "mtspris%f %f,%f,%f":   SIZEB RB IMM8S SPRF(SPRF << 1)
+      Fields:  OPCD(20) SIZEB IMM8S RB SPRF
+      Action:  {
+     bits < 32 > imm = concat ( zero ( 24 ) , IMM8S ) ;
+     bits < 32 > maskA = 0x000000ff ;
+     bits < 32 > maskB = ( SIZEB == 0 ) ? 0x000000ff : ( SIZEB == 1 ) ? 0x0000ffff : ( SIZEB == 2 ) ? 0x00ffffff : ( SIZEB == 3 ) ? 0xffffffff : ( SIZEB == 4 ) ? 0xff000000 : ( SIZEB == 5 ) ? 0xffff0000 : ( SIZEB == 6 ) ? 0xffffff00 : 0 ;
+     bits < 8 > be = concat ( maskB ( 0 ) , maskB ( 8 ) , maskB ( 16 ) , maskB ( 24 ) , zero ( 3 ) , ~ zero ( 1 ) ) ;
+    if ( SPRF > 0x7f ) {
+        spr_bus_access ( 0 , SPRF , be , concat ( GPR ( RB ) , imm ) , rba , sst ) ;
+    }
+}
+      Source Registers:  EXT_SPR? GPR(RB)? rba? sst? 
+      Target Registers:  EXT_SPR? 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  or (rank: 100)
+      Width:  32
+      Syntax:  "or%p%p%p %f,%f,%f%f":   UPDATE FLAGS SWAP_TYPE RC RA INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(3) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) RSV_B31(0)
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 32 > tmp = op1 | op2 ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp_s , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status swap 
+      -------------------------------
+      Name:  ori (rank: 100)
+      Width:  32
+      Syntax:  "ori%p%p %f,%f":   UPDATE FLAGS RA IMM_P3 HWS(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) || ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0) INVA(( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( IMM_P3 & 0xFFFF ) == 0xFFFF ) ? 1 : 0) IMM16(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) ? IMM_P3 : ( ( IMM_P3 & 0xFFFF ) == 0 ) ? IMM_P3 >> 16 : ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? ~ IMM_P3 : ~ ( IMM_P3 >> 16 ))
+      DSyntax:  "ori%f%f %f,%f":   UPDATE FLAGS RA IMM_P3(( (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM16 ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) : (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( IMM16 << 16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA OPCD_ALU(3) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ imm : imm ;
+     bits < 32 > tmp = op1 | op2 ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_status imm16e 
+      -------------------------------
+      Name:  oris (rank: 100)
+      Width:  32
+      Syntax:  "oris%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P4 INVA(( ( IMM_P4 & 0xFFFFFF00 ) ) == 0 || ( ( IMM_P4 & 0xFFFF00FF ) ) == 0 || ( ( IMM_P4 & 0xFF00FFFF ) ) == 0 || ( ( IMM_P4 & 0x00FFFFFF ) ) == 0 ? 0 : 1) BS(( ( IMM_P4 & 0xFFFFFF00 ) == 0 ) || ( ( IMM_P4 & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( IMM_P4 & 0xFFFF00FF ) == 0 ) || ( ( IMM_P4 & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) || ( ( IMM_P4 & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0) IMM8(( ( IMM_P4 & 0xFFFFFF00 ) == 0 ) ? IMM_P4 : ( ( IMM_P4 & 0xFFFF00FF ) == 0 ) ? IMM_P4 >> 8 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) ? IMM_P4 >> 16 : ( ( IMM_P4 & 0x00FFFFFF ) == 0 ) ? IMM_P4 >> 24 : ( ( IMM_P4 & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? ~ IMM_P4 : ( ( IMM_P4 & 0xFFFF00FF ) == 0xFFFF00FF ) ? ~ ( IMM_P4 >> 8 ) : ( ( IMM_P4 & 0xFF00FFFF ) == 0xFF00FFFF ) ? ~ ( IMM_P4 >> 16 ) : ~ ( IMM_P4 >> 24 ))
+      DSyntax:  "oris%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P4(( (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) : (( ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM8 ) : (( ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 24 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 24 ) : (( ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 16 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 16 ) : (( ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 8 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA OPCD_ALU(3) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ imm : imm ;
+     bits < 32 > tmp = op1 | op2 ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_status imm8e 
+      -------------------------------
+      Name:  pop (rank: 100)
+      Width:  32
+      Syntax:  "pop%p%p %f%f[%f],%f":   NOP_J CMPRS_J NOTAC RA BIT RB BIT(31 - BIT)
+      DSyntax:  "pop%f%f %f%f[%f],%f":   NOP_J CMPRS_J NOTAC RA BIT(31 - BIT) RB
+      Fields:  OPCD(19) NOP_J BIT RA RB OPCD_B21(1) OPCD_B22(0) CMPRS_J NOTAC
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 1 > cond = NOTAC ^ op1 ( BIT , BIT ) ;
+     bits < 24 > tmp = GPR ( RB ) ;
+    if ( CMPRS_J == 1 ) tmp = concat ( tmp ( 8 ) , zero ( 8 ) , tmp ( 9 , 23 ) ) ;
+    if ( cond == 1 ) {
+        NNPC = tmp ;
+        if ( NOP_J == 1 ) Fetch = JmpN ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  NNPC? 
+      -------------------------------
+      Name:  push (rank: 100)
+      Width:  32
+      Syntax:  "push%f %f,%f":   HU INSTR_OFFSET RA CMPRS(1 - HU) INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? ( INSTR_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - INSTR_OFFSET ) + 1 ))
+      DSyntax:  "push%f %f,%f":   HU INSTR_OFFSET RA
+      Fields:  OPCD(24) HU OPCD_B6(0) CMPRS RA INSTR_OFFSET
+      Action:  {
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+     bits < 24 > tmp = PC + offset ;
+    if ( CMPRS == 1 ) tmp = concat ( tmp ( 0 , 7 ) , tmp ( 0 , 0 ) , tmp ( 9 , 23 ) ) ;
+    GPR ( RA ) = ( HU == 1 ) ? concat ( zero ( 8 ) , tmp ) : merge ( GPR ( RA ) , tmp , 0xffff0000 ) ;
+}
+      Source Registers:  GPR(RA) PC 
+      Target Registers:  GPR(RA) 
+      Helper Functions:  merge 
+      -------------------------------
+      Name:  pushl (rank: 100)
+      Width:  32
+      Syntax:  "pushl%p %f":   CMPRS LONG_OFFSET LONG_OFFSET(( LONG_OFFSET >= cia (  ) ) ? ( LONG_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - LONG_OFFSET ) + 1 ))
+      DSyntax:  "pushl%f %f":   CMPRS LONG_OFFSET
+      Fields:  OPCD(24) OPCD_B6(1) CMPRS LONG_OFFSET
+      Action:  {
+     bits < 24 > tmp = PC + LONG_OFFSET ;
+    if ( CMPRS == 1 ) tmp = concat ( tmp ( 0 , 7 ) , tmp ( 0 , 0 ) , tmp ( 9 , 23 ) ) ;
+    sp = concat ( zero ( 8 ) , tmp ) ;
+}
+      Source Registers:  PC 
+      Target Registers:  sp 
+      -------------------------------
+      Name:  pushsch (rank: 100)
+      Width:  32
+      Syntax:  "pushsch%p%p%p%p %f":   UR RT1 RT2 RT3 RB AU(RB != 0x1f)
+      DSyntax:  "pushsch%f%f%f%f %f":   UR RT1 RT2 RT3 RB
+      Fields:  OPCD(4) AU OPCD_B6(0) RT1 RT2 RT3 UR RA(31) RB
+      Action:  {
+     bits < 4 > opcd = 4 ;
+     bits < 15 > spr_addr = concat ( opcd , AU , zero ( 1 ) , RT1 , RT2 , RT3 ) ;
+    spr_addr = concat ( spr_addr , UR , ~ zero ( 5 ) ) ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( GPR ( RB ) , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR GPR(RB) rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  pushschi (rank: 100)
+      Width:  32
+      Syntax:  "pushschi%p%p%p%p %f":   UR RT1 RT2 RT3 INSTR_OFFSET INSTR_OFFSET(( INSTR_OFFSET >= cia (  ) ) ? ( INSTR_OFFSET - cia (  ) ) : ( ~ ( cia (  ) - INSTR_OFFSET ) + 1 ))
+      DSyntax:  "pushschi%f%f%f%f %f":   UR RT1 RT2 RT3 INSTR_OFFSET
+      Fields:  OPCD(4) AU(1) OPCD_B6(1) RT1 RT2 RT3 UR RA(31) INSTR_OFFSET
+      Action:  {
+     bits < 4 > opcd = 4 ;
+     bits < 15 > spr_addr = concat ( opcd , ~ zero ( 2 ) , RT1 , RT2 , RT3 ) ;
+    spr_addr = concat ( spr_addr , UR , ~ zero ( 5 ) ) ;
+     var offset = signExtend ( INSTR_OFFSET , 24 ) ;
+     bits < 24 > tmp = PC + offset ;
+    spr_bus_access ( 0 , spr_addr , 0xff , concat ( tmp , zero ( 32 ) ) , rba , sst ) ;
+}
+      Source Registers:  EXT_SPR PC rba sst 
+      Target Registers:  EXT_SPR 
+      Helper Functions:  spr_bus_access 
+      -------------------------------
+      Name:  returnn (rank: 100)
+      Width:  32
+      Syntax:  "return%f %f":   NOP_J RB
+      Fields:  OPCD(19) NOP_J BIT(31) RA(31) RB OPCD_B21(1) OPCD_B22(1) CMPRS_J(0) NOTAC(0)
+      Action:  {
+    NNPC = GPR ( RB ) ;
+    if ( NOP_J == 1 ) Fetch = JmpN ;
+    ILR . en = 1 ;
+}
+      Source Registers:  GPR(RB) 
+      Target Registers:  ILR[mask 0x80000000]/p NNPC 
+      -------------------------------
+      Name:  rland (rank: 100)
+      Width:  32
+      Syntax:  "rland %f,%f,%f,%f,%f":   RC RA RB ML MR
+      Fields:  OPCD(25) OPCD_B5(1) ML RA RB RC MR OPCD_B31(0)
+      Action:  {
+     bits < 32 > mask = mmask ( ML , MR ) ;
+     bits < 5 > n = GPR ( RB ) ;
+     bits < 32 > tmp = bit_shift ( GPR ( RA ) , 0 , n , 3 , 1 ) & mask ;
+    if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+}
+      Source Registers:  GPR(RA) GPR(RB) 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  bit_shift mmask 
+      -------------------------------
+      Name:  rlandi (rank: 100)
+      Width:  32
+      Syntax:  "rlandi %f,%f,%f,%f,%f":   RC RA IMM5 ML MR
+      Fields:  OPCD(25) OPCD_B5(1) ML RA IMM5 RC MR OPCD_B31(1)
+      Action:  {
+     bits < 32 > mask = mmask ( ML , MR ) ;
+     bits < 32 > tmp = bit_shift ( GPR ( RA ) , 0 , IMM5 , 3 , 1 ) & mask ;
+    if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+}
+      Source Registers:  GPR(RA) 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  bit_shift mmask 
+      -------------------------------
+      Name:  rlmerge (rank: 100)
+      Width:  32
+      Syntax:  "rlmerge %f%f,%f,%f,%f,%f":   INVA RB RA IMM5M ML MR
+      Fields:  OPCD(31) INVA ML RA RB IMM5M MR OPCD_B31(0)
+      Action:  {
+     bits < 32 > mask = mmask ( ML , MR ) ;
+     bits < 32 > rot = bit_shift ( GPR ( RA ) , 0 , IMM5M , 3 , 1 ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+    GPR ( RB ) = merge ( rot , op2 , mask ) ;
+}
+      Source Registers:  GPR(RA) GPR(RB) 
+      Target Registers:  GPR(RB) 
+      Helper Functions:  bit_shift merge mmask 
+      -------------------------------
+      Name:  select (rank: 100)
+      Width:  32
+      Syntax:  "select%p%p %f%f,%f,%f,%f%f":   UPDATE FLAGS NOTAC CFA RC RA INVA RB
+      Fields:  OPCD(26) INVA OPCD_ALU(7) UPDATE FLAGS RA RB RC CFA NOTAC
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 1 > cond = NOTAC ^ cr ( CFA , CFA ) ;
+     bits < 32 > tmp = ( cond == 1 ) ? op2 : op1 ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status 
+      -------------------------------
+      Name:  shift_ (rank: 100)
+      Width:  32
+      Syntax:  "shift%p%p%p%p %f,%f,%f%f":   DIRECTION SHIFT_OPTION UPDATE FLAGS RC RA INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(7) UPDATE FLAGS RA RB RC DIRECTION SHIFT_OPTION RSV_B30(0) OPCD_B31(0)
+      Action:  {
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 5 > size_ = ( op2 & 0x1f ) ;
+     bits < 33 > tmp = bit_shift ( GPR ( RA ) , cr . carry , size_ , SHIFT_OPTION , DIRECTION ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ( 1 , 32 ) ; else GPR ( RC ) = tmp ( 1 , 32 ) ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp ( 1 , 32 ) , tmp ( 1 , 32 ) ) ;
+        cr . carry = tmp ( 0 ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status bit_shift 
+      -------------------------------
+      Name:  shifti (rank: 100)
+      Width:  32
+      Syntax:  "shifti%p%p%p%p %f,%f,%f":   DIRECTION SHIFT_OPTION UPDATE FLAGS RC RA IMM5
+      Fields:  OPCD(27) INVA(0) OPCD_ALU(7) UPDATE FLAGS RA IMM5 RC DIRECTION SHIFT_OPTION RSV_B30(0) OPCD_B31(1)
+      Action:  {
+     bits < 33 > tmp = bit_shift ( GPR ( RA ) , cr . carry , IMM5 , SHIFT_OPTION , DIRECTION ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ( 1 , 32 ) ; else GPR ( RC ) = tmp ( 1 , 32 ) ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp ( 1 , 32 ) , tmp ( 1 , 32 ) ) ;
+        cr . carry = tmp ( 0 ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status bit_shift 
+      -------------------------------
+      Name:  st_0 (rank: 0)
+      Width:  32
+      Syntax:  "st%p%p%p%p %f,%f(%f)":   SIZE_ST(6) NUPDATE SML FLAGS RA(31) DRAM_OFFSET RB
+      DSyntax:  "st.b8%f%f%f 31,%f(%f)":   NUPDATE SML FLAGS DRAM_OFFSET RB
+      Fields:  OPCD(2) SIZE_ST(6) SML NUPDATE FLAGS RA(31) RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st0( data_ ) ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 6 == 1 || 6 == 5 ) EA = EA & 0xfffffe ;
+    if ( 6 == 2 || 6 == 6 ) EA = EA & 0xfffffc ;
+    if ( 6 == 3 || 6 == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 6 == 0 ) be = 0x80 ; else if ( 6 == 1 ) be = 0x80 ; else if ( 6 == 2 ) be = 0xc0 ; else if ( 6 == 3 ) be = 0xc0 ; else if ( 6 == 4 ) be = 0xf0 ; else if ( 6 == 5 ) be = 0x70 ; else if ( 6 == 6 ) be = 0xff ; else if ( 6 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , SML ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+    if ( FLAGS == 1 ) {
+        cr . min = 0 ;
+    }
+}
+      Source Registers:  DSEM GPR(31) GPR(RB) cr? 
+      Target Registers:  DSEM? GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  st_1 (rank: 0)
+      Width:  32
+      Syntax:  "st%p%p%p%p %f,%f(%f)":   SIZE_ST NUPDATE SML FLAGS RA DRAM_OFFSET RB
+      Fields:  OPCD(2) SIZE_ST SML NUPDATE FLAGS RA RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st1( data_ ) ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( SIZE_ST == 1 || SIZE_ST == 5 ) EA = EA & 0xfffffe ;
+    if ( SIZE_ST == 2 || SIZE_ST == 6 ) EA = EA & 0xfffffc ;
+    if ( SIZE_ST == 3 || SIZE_ST == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( SIZE_ST == 0 ) be = 0x80 ; else if ( SIZE_ST == 1 ) be = 0x80 ; else if ( SIZE_ST == 2 ) be = 0xc0 ; else if ( SIZE_ST == 3 ) be = 0xc0 ; else if ( SIZE_ST == 4 ) be = 0xf0 ; else if ( SIZE_ST == 5 ) be = 0x70 ; else if ( SIZE_ST == 6 ) be = 0xff ; else if ( SIZE_ST == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , SML ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+    if ( FLAGS == 1 ) {
+        cr . min = 0 ;
+    }
+}
+      Source Registers:  DSEM GPR(RA) GPR(RB) cr? 
+      Target Registers:  DSEM? GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  st_2 (rank: 0)
+      Width:  32
+      Syntax:  "st%p%p%p%p %f,%f(%f)":   SIZE_ST(6) NUPDATE SML FLAGS RA_2 DRAM_OFFSET RB
+      DSyntax:  "st.b8%f%f%f %f,%f(%f)":   NUPDATE SML FLAGS RA_2 DRAM_OFFSET RB
+      Fields:  OPCD(2) SIZE_ST(6) SML NUPDATE FLAGS RA_2 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st2( data_ ) ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 6 == 1 || 6 == 5 ) EA = EA & 0xfffffe ;
+    if ( 6 == 2 || 6 == 6 ) EA = EA & 0xfffffc ;
+    if ( 6 == 3 || 6 == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 6 == 0 ) be = 0x80 ; else if ( 6 == 1 ) be = 0x80 ; else if ( 6 == 2 ) be = 0xc0 ; else if ( 6 == 3 ) be = 0xc0 ; else if ( 6 == 4 ) be = 0xf0 ; else if ( 6 == 5 ) be = 0x70 ; else if ( 6 == 6 ) be = 0xff ; else if ( 6 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , SML ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+    if ( FLAGS == 1 ) {
+        cr . min = 0 ;
+    }
+}
+      Source Registers:  DSEM GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) GPR(RB) cr? 
+      Target Registers:  DSEM? GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  st_4 (rank: 0)
+      Width:  32
+      Syntax:  "st%p%p%p%p %f,%f(%f)":   SIZE_ST(7) NUPDATE SML FLAGS RA_4 DRAM_OFFSET RB
+      DSyntax:  "st.q%f%f%f %f,%f(%f)":   NUPDATE SML FLAGS RA_4 DRAM_OFFSET RB
+      Fields:  OPCD(2) SIZE_ST(7) SML NUPDATE FLAGS RA_4 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st4( data_ ) ;
+     bits < 24 > EA_temp = GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 7 == 1 || 7 == 5 ) EA = EA & 0xfffffe ;
+    if ( 7 == 2 || 7 == 6 ) EA = EA & 0xfffffc ;
+    if ( 7 == 3 || 7 == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 7 == 0 ) be = 0x80 ; else if ( 7 == 1 ) be = 0x80 ; else if ( 7 == 2 ) be = 0xc0 ; else if ( 7 == 3 ) be = 0xc0 ; else if ( 7 == 4 ) be = 0xf0 ; else if ( 7 == 5 ) be = 0x70 ; else if ( 7 == 6 ) be = 0xff ; else if ( 7 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , SML ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ;
+    if ( FLAGS == 1 ) {
+        cr . min = 0 ;
+    }
+}
+      Source Registers:  DSEM GPR(RA_4 ( 0 ))/p GPR(RA_4 ( 1 ))[mask 0x0000ffff]/p GPR(RA_4 ( 2 ))[mask 0x0000ffff]/p GPR(RA_4 ( 3 ))[mask 0x0000ffff]/p GPR(RB) cr? 
+      Target Registers:  DSEM? GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  stm_0 (rank: 0)
+      Width:  32
+      Syntax:  "stm%p%p%p %f,%f(%f)":   SIZE_ST(6) NUPDATE FLAGS RA(31) DRAM_OFFSET RB
+      DSyntax:  "stm.b8%f%f 31,%f(%f)":   NUPDATE FLAGS DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_ST(6) OPCD_B8(1) NUPDATE FLAGS RA(31) RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st0( data_ ) ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 6 == 1 || 6 == 5 ) EA = EA & 0xfffffe ;
+    if ( 6 == 2 || 6 == 6 ) EA = EA & 0xfffffc ;
+    if ( 6 == 3 || 6 == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 6 == 0 ) be = 0x80 ; else if ( 6 == 1 ) be = 0x80 ; else if ( 6 == 2 ) be = 0xc0 ; else if ( 6 == 3 ) be = 0xc0 ; else if ( 6 == 4 ) be = 0xf0 ; else if ( 6 == 5 ) be = 0x70 ; else if ( 6 == 6 ) be = 0xff ; else if ( 6 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , 0 ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+}
+      Source Registers:  DSEM GPR(31) GPR(RB)/p cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  stm_1 (rank: 0)
+      Width:  32
+      Syntax:  "stm%p%p%p %f,%f(%f)":   SIZE_ST NUPDATE FLAGS RA DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_ST OPCD_B8(1) NUPDATE FLAGS RA RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st1( data_ ) ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( SIZE_ST == 1 || SIZE_ST == 5 ) EA = EA & 0xfffffe ;
+    if ( SIZE_ST == 2 || SIZE_ST == 6 ) EA = EA & 0xfffffc ;
+    if ( SIZE_ST == 3 || SIZE_ST == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( SIZE_ST == 0 ) be = 0x80 ; else if ( SIZE_ST == 1 ) be = 0x80 ; else if ( SIZE_ST == 2 ) be = 0xc0 ; else if ( SIZE_ST == 3 ) be = 0xc0 ; else if ( SIZE_ST == 4 ) be = 0xf0 ; else if ( SIZE_ST == 5 ) be = 0x70 ; else if ( SIZE_ST == 6 ) be = 0xff ; else if ( SIZE_ST == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , 0 ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+}
+      Source Registers:  DSEM GPR(RA) GPR(RB)/p cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  stm_2 (rank: 0)
+      Width:  32
+      Syntax:  "stm%p%p%p %f,%f(%f)":   SIZE_ST(6) NUPDATE FLAGS RA_2 DRAM_OFFSET RB
+      DSyntax:  "stm.b8%f%f %f,%f(%f)":   NUPDATE FLAGS RA_2 DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_ST(6) OPCD_B8(1) NUPDATE FLAGS RA_2 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st2( data_ ) ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 6 == 1 || 6 == 5 ) EA = EA & 0xfffffe ;
+    if ( 6 == 2 || 6 == 6 ) EA = EA & 0xfffffc ;
+    if ( 6 == 3 || 6 == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 6 == 0 ) be = 0x80 ; else if ( 6 == 1 ) be = 0x80 ; else if ( 6 == 2 ) be = 0xc0 ; else if ( 6 == 3 ) be = 0xc0 ; else if ( 6 == 4 ) be = 0xf0 ; else if ( 6 == 5 ) be = 0x70 ; else if ( 6 == 6 ) be = 0xff ; else if ( 6 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , 0 ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+}
+      Source Registers:  DSEM GPR(RA_2 ( 0 )) GPR(RA_2 ( 1 )) GPR(RB)/p cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  stm_4 (rank: 0)
+      Width:  32
+      Syntax:  "stm%p%p%p %f,%f(%f)":   SIZE_ST(7) NUPDATE FLAGS RA_4 DRAM_OFFSET RB
+      DSyntax:  "stm.q%f%f %f,%f(%f)":   NUPDATE FLAGS RA_4 DRAM_OFFSET RB
+      Fields:  OPCD(3) SIZE_ST(7) OPCD_B8(1) NUPDATE FLAGS RA_4 RB DRAM_OFFSET
+      Action:  {
+     bits < 64 > data_ ;
+    st4( data_ ) ;
+     bits < 7 > modulo = GPR ( RB ) ( 1 , 7 ) ;
+     bits < 7 > addr = GPR ( RB ) ( 22 , 28 ) ;
+     bits < 7 > mask = ( modulo ( 0 ) == 1 ) ? 0x7f : ( modulo ( 1 ) == 1 ) ? 0x3f : ( modulo ( 2 ) == 1 ) ? 0x1f : ( modulo ( 3 ) == 1 ) ? 0x0f : ( modulo ( 4 ) == 1 ) ? 0x07 : ( modulo ( 5 ) == 1 ) ? 0x03 : ( modulo ( 6 ) == 1 ) ? 0x01 : 0 ;
+     bits < 32 > wrap = ( ( addr & mask ) == ( modulo & mask ) ) ? 0x80000000 : 0 ;
+     bits < 24 > EA_temp = ( wrap == 0 ) ? GPR ( RB ) + signExtend ( DRAM_OFFSET , 24 ) : GPR ( RB ) & ~ concat ( zero ( 14 ) , mask , zero ( 3 ) ) ;
+     bits < 24 > EA = EA_temp ;
+    if ( 7 == 1 || 7 == 5 ) EA = EA & 0xfffffe ;
+    if ( 7 == 2 || 7 == 6 ) EA = EA & 0xfffffc ;
+    if ( 7 == 3 || 7 == 7 ) EA = EA & 0xfffff8 ;
+     bits < 3 > addr_lsb = EA ( 21 , 23 ) ;
+     bits < 8 > be ;
+    if ( 7 == 0 ) be = 0x80 ; else if ( 7 == 1 ) be = 0x80 ; else if ( 7 == 2 ) be = 0xc0 ; else if ( 7 == 3 ) be = 0xc0 ; else if ( 7 == 4 ) be = 0xf0 ; else if ( 7 == 5 ) be = 0x70 ; else if ( 7 == 6 ) be = 0xff ; else if ( 7 == 7 ) be = 0xff ;
+    be = be >> addr_lsb ;
+    muram_bus_access ( 0 , EA , be , data_ , 0 ) ;
+    if ( NUPDATE == 1 ) GPR ( RB ) = merge ( GPR ( RB ) , EA_temp , 0xff000000 ) ^ wrap ;
+}
+      Source Registers:  DSEM GPR(RA_4 ( 0 ))/p GPR(RA_4 ( 1 ))[mask 0x0000ffff]/p GPR(RA_4 ( 2 ))[mask 0x0000ffff]/p GPR(RA_4 ( 3 ))[mask 0x0000ffff]/p GPR(RB)/p cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Target Memories:  DMEM 
+      Helper Functions:  CR_status merge muram_bus_access 
+      -------------------------------
+      Name:  sub (rank: 100)
+      Width:  32
+      Syntax:  "sub%p%p%p%p %f,%f,%f":   SWAP_TYPE UPDATE FLAGS ONE RC RA RB
+      Fields:  OPCD(27) INVA(1) OPCD_ALU(0) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) ONE
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = ~ GPR ( RB ) ;
+     bits < 32 > tmp = op1 + op2 + ~ ONE ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp_s , tmp ) ;
+        cr = CR_sub_status ( op1 , op2 , ~ ONE ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p? 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status CR_sub_status swap 
+      -------------------------------
+      Name:  subc (rank: 100)
+      Width:  32
+      Syntax:  "subc%p%p%p %f,%f,%f":   SWAP_TYPE UPDATE FLAGS RC RA RB
+      Fields:  OPCD(27) INVA(1) OPCD_ALU(1) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) RSV_B31(0)
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > op2 = ~ GPR ( RB ) ;
+     bits < 32 > tmp = op1 + op2 + ~ cr . carry ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+     bits < 32 > Cin ;
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = ~ cr . carry ;
+        cr = CR_status ( tmp_s , tmp ) ;
+        cr = CR_sub_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr/p 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status CR_sub_status swap 
+      -------------------------------
+      Name:  subci (rank: 100)
+      Width:  32
+      Syntax:  "subci%p%p %f,%f":   UPDATE FLAGS RA IMM_P1 HWS(IMM_P1 > 0xFFFF ? 0 : 1) IMM16(IMM_P1 > 0xFFFF ? IMM_P1 >> 16 : IMM_P1)
+      DSyntax:  "subci%f%f %f,%f":   UPDATE FLAGS RA IMM_P1(( (( ( IMM16 << 16 ) > 0xFFFF ? 0 : 1 ) ==  HWS ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA(1) OPCD_ALU(1) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = ~ imm ;
+     bits < 32 > tmp = op1 + op2 + ~ cr . carry ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = ~ cr . carry ;
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_sub_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_status CR_sub_status imm16e 
+      -------------------------------
+      Name:  subcis (rank: 100)
+      Width:  32
+      Syntax:  "subcis%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2 BS(IMM_P2 <= 0xFF ? 3 : IMM_P2 <= 0xFF00 ? 2 : IMM_P2 <= 0xFF0000 ? 1 : 0) IMM8(IMM_P2 <= 0xFF ? IMM_P2 : IMM_P2 <= 0xFF00 ? IMM_P2 >> 8 : IMM_P2 <= 0xFF0000 ? IMM_P2 >> 16 : IMM_P2 >> 24)
+      DSyntax:  "subcis%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2(( (( ( IMM8 << 16 ) <= 0xFF ? 3 : ( IMM8 << 16 ) <= 0xFF00 ? 2 : ( IMM8 << 16 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 16 ) : (( ( IMM8 << 24 ) <= 0xFF ? 3 : ( IMM8 << 24 ) <= 0xFF00 ? 2 : ( IMM8 << 24 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 24 ) : (( ( IMM8 << 8 ) <= 0xFF ? 3 : ( IMM8 << 8 ) <= 0xFF00 ? 2 : ( IMM8 << 8 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA(1) OPCD_ALU(1) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = ~ imm ;
+     bits < 32 > tmp = op1 + op2 + ~ cr . carry ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+         bits < 32 > Cin = ~ cr . carry ;
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_sub_status ( op1 , op2 , Cin ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_status CR_sub_status imm8e 
+      -------------------------------
+      Name:  subi (rank: 100)
+      Width:  32
+      Syntax:  "subi%p%p %f,%f":   UPDATE FLAGS RA IMM_P1 HWS(IMM_P1 > 0xFFFF ? 0 : 1) IMM16(IMM_P1 > 0xFFFF ? IMM_P1 >> 16 : IMM_P1)
+      DSyntax:  "subi%f%f %f,%f":   UPDATE FLAGS RA IMM_P1(( (( ( IMM16 << 16 ) > 0xFFFF ? 0 : 1 ) ==  HWS ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA(1) OPCD_ALU(0) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = ~ imm ;
+     bits < 32 > tmp = op1 + op2 + 1 ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_sub_status ( op1 , op2 , 1 ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p? 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_status CR_sub_status imm16e 
+      -------------------------------
+      Name:  subis (rank: 100)
+      Width:  32
+      Syntax:  "subis%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2 BS(IMM_P2 <= 0xFF ? 3 : IMM_P2 <= 0xFF00 ? 2 : IMM_P2 <= 0xFF0000 ? 1 : 0) IMM8(IMM_P2 <= 0xFF ? IMM_P2 : IMM_P2 <= 0xFF00 ? IMM_P2 >> 8 : IMM_P2 <= 0xFF0000 ? IMM_P2 >> 16 : IMM_P2 >> 24)
+      DSyntax:  "subis%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P2(( (( ( IMM8 << 16 ) <= 0xFF ? 3 : ( IMM8 << 16 ) <= 0xFF00 ? 2 : ( IMM8 << 16 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 16 ) : (( ( IMM8 << 24 ) <= 0xFF ? 3 : ( IMM8 << 24 ) <= 0xFF00 ? 2 : ( IMM8 << 24 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 24 ) : (( ( IMM8 << 8 ) <= 0xFF ? 3 : ( IMM8 << 8 ) <= 0xFF00 ? 2 : ( IMM8 << 8 ) <= 0xFF0000 ? 1 : 0 ) ==  BS ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA(1) OPCD_ALU(0) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = ~ imm ;
+     bits < 32 > tmp = op1 + op2 + 1 ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+        cr = CR_sub_status ( op1 , op2 , 1 ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr/p? 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_status CR_sub_status imm8e 
+      -------------------------------
+      Name:  xor (rank: 100)
+      Width:  32
+      Syntax:  "xor%p%p%p %f,%f,%f%f":   UPDATE FLAGS SWAP_TYPE RC RA INVA RB
+      Fields:  OPCD(27) INVA OPCD_ALU(4) UPDATE FLAGS RA RB RC SWAP_TYPE RSV_B29(0) RSV_B30(0) RSV_B31(0)
+      Action:  {
+     bits < 32 > op1 = ( ( RA == 0x1f ) && ( RC == 0x1f ) ) ? cr : GPR ( RA ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ GPR ( RB ) : GPR ( RB ) ;
+     bits < 32 > tmp = op1 ^ op2 ;
+     bits < 32 > tmp_s = swap ( tmp , SWAP_TYPE ) ;
+    if ( UPDATE == 1 ) {
+        if ( RC == 0x1f ) cr = tmp ; else GPR ( RC ) = tmp_s ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp_s , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) GPR(RB) cr 
+      Target Registers:  GPR(RC)? cr? 
+      Helper Functions:  CR_status swap 
+      -------------------------------
+      Name:  xori (rank: 100)
+      Width:  32
+      Syntax:  "xori%p%p %f,%f":   UPDATE FLAGS RA IMM_P3 HWS(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) || ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0) INVA(( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( IMM_P3 & 0xFFFF ) == 0xFFFF ) ? 1 : 0) IMM16(( ( IMM_P3 & 0xFFFF0000 ) == 0 ) ? IMM_P3 : ( ( IMM_P3 & 0xFFFF ) == 0 ) ? IMM_P3 >> 16 : ( ( IMM_P3 & 0xFFFF0000 ) == 0xFFFF0000 ) ? ~ IMM_P3 : ~ ( IMM_P3 >> 16 ))
+      DSyntax:  "xori%f%f %f,%f":   UPDATE FLAGS RA IMM_P3(( (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ IMM16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM16 ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM16 << 16 ) ) : (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  HWS )  &&  (( ( ( ( IMM16 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( IMM16 << 16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  INVA ) ? ( IMM16 << 16 ) : ( IMM16 ) ))
+      Fields:  OPCD_SHRT(14) HWS INVA OPCD_ALU(4) UPDATE FLAGS RA IMM16
+      Action:  {
+     bits < 32 > op1 = ( RA == 0x1f ) ? cr : GPR ( RA ) ;
+     bits < 32 > imm = imm16e ( IMM16 , HWS ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ imm : imm ;
+     bits < 32 > tmp = op1 ^ op2 ;
+    if ( UPDATE == 1 ) {
+        if ( RA == 0x1f ) cr = tmp ; else GPR ( RA ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr 
+      Target Registers:  GPR(RA)? cr? 
+      Helper Functions:  CR_status imm16e 
+      -------------------------------
+      Name:  xoris (rank: 100)
+      Width:  32
+      Syntax:  "xoris%p%p %f,%f,%f":   UPDATE FLAGS RB RA IMM_P4 INVA(( ( IMM_P4 & 0xFFFFFF00 ) ) == 0 || ( ( IMM_P4 & 0xFFFF00FF ) ) == 0 || ( ( IMM_P4 & 0xFF00FFFF ) ) == 0 || ( ( IMM_P4 & 0x00FFFFFF ) ) == 0 ? 0 : 1) BS(( ( IMM_P4 & 0xFFFFFF00 ) == 0 ) || ( ( IMM_P4 & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( IMM_P4 & 0xFFFF00FF ) == 0 ) || ( ( IMM_P4 & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) || ( ( IMM_P4 & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0) IMM8(( ( IMM_P4 & 0xFFFFFF00 ) == 0 ) ? IMM_P4 : ( ( IMM_P4 & 0xFFFF00FF ) == 0 ) ? IMM_P4 >> 8 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) ? IMM_P4 >> 16 : ( ( IMM_P4 & 0xFF00FFFF ) == 0 ) ? IMM_P4 >> 24 : ( ( IMM_P4 & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? ~ IMM_P4 : ( ( IMM_P4 & 0xFFFF00FF ) == 0xFFFF00FF ) ? ~ ( IMM_P4 >> 8 ) : ( ( IMM_P4 & 0xFF00FFFF ) == 0xFF00FFFF ) ? ~ ( IMM_P4 >> 16 ) : ~ ( IMM_P4 >> 24 ))
+      DSyntax:  "xoris%f%f %f,%f,%f":   UPDATE FLAGS RB RA IMM_P4(( (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 16 ) ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 24 ) ) : (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ ( IMM8 << 8 ) ) : (( ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) == 0 ) || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFFFF00FF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0xFF00FFFF ) ) == 0 || ( ( ( 0xFFFFFFFF ^ IMM8 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( 0xFFFFFFFF ^ IMM8 ) : (( ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 24 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 24 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 24 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 24 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 24 ) : (( ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 16 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 16 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 16 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 16 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 16 ) : (( ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) == 0xFFFFFF00 ) ? 3 : ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) == 0xFFFF00FF ) ? 2 : ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) == 0 ) || ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) == 0xFF00FFFF ) ? 1 : 0 ) ==  BS )  &&  (( ( ( ( IMM8 << 8 ) & 0xFFFFFF00 ) ) == 0 || ( ( ( IMM8 << 8 ) & 0xFFFF00FF ) ) == 0 || ( ( ( IMM8 << 8 ) & 0xFF00FFFF ) ) == 0 || ( ( ( IMM8 << 8 ) & 0x00FFFFFF ) ) == 0 ? 0 : 1 ) ==  INVA ) ? ( IMM8 << 8 ) : ( IMM8 ) ))
+      Fields:  OPCD(30) INVA OPCD_ALU(4) UPDATE FLAGS RA RB RSV_B21(0) BS IMM8
+      Action:  {
+     bits < 32 > op1 = GPR ( RA ) ;
+     bits < 32 > imm = imm8e ( IMM8 , BS ) ;
+     bits < 32 > op2 = ( INVA == 1 ) ? ~ imm : imm ;
+     bits < 32 > tmp = op1 ^ op2 ;
+    if ( UPDATE == 1 ) {
+        GPR ( RB ) = tmp ;
+    }
+    if ( FLAGS == 1 ) {
+        cr = CR_status ( tmp , tmp ) ;
+    }
+}
+      Source Registers:  GPR(RA) cr? 
+      Target Registers:  GPR(RB)? cr? 
+      Helper Functions:  CR_status imm8e 
+      -------------------------------
+    
+Instruction Tables:
+    other:
+            Mask:  0xf0000000
+        0(0):  ld_1
+        Mask:  0x7000000
+          6(6000000):  ld_2
+          7(7000000):  ld_4
+        1(10000000):          Mask:  0x8000000
+          0(0):  st_1
+          Mask:  0x7000000
+            6(6000000):  st_2
+            Mask:  0x1f0000
+              31(1f0000):  st_0
+            7(7000000):  st_4
+          1(8000000):            Mask:  0x800000
+            0(0):  ldm_1
+            Mask:  0x7000000
+              6(6000000):  ldm_2m
+              7(7000000):  ldm_4m
+            1(800000):  stm_1
+            Mask:  0x7000000
+              6(6000000):  stm_2
+              Mask:  0x1f0000
+                31(1f0000):  stm_0
+              7(7000000):  stm_4
+        2(20000000):          Mask:  0xa000000
+          0(0):            Mask:  0x1f0000
+            31(1f0000):  pushsch
+          1(2000000):            Mask:  0x41f0000
+            1055(41f0000):  pushschi
+          4(8000000):  ldsch
+          Mask:  0x1f0000
+            26(1a0000):  ldsch_shorthand
+          5(a000000):            Mask:  0x4000000
+            1(4000000):  ldschi
+            Mask:  0x1f0000
+              26(1a0000):  ldschi_shorthand
+        4(40000000):          Mask:  0x8000000
+          0(0):            Mask:  0x7000000
+            0(0):  bcrc
+            1(1000000):  bcam
+            2(2000000):              Mask:  0x200000
+              0(0):  bmin
+              1(200000):  bmax
+            3(3000000):  bcopy
+            4(4000000):              Mask:  0x80000
+              0(0):  bcrci
+            5(5000000):              Mask:  0x180000
+              0(0):  bcami
+            6(6000000):              Mask:  0x380000
+              0(0):  bmini
+              4(200000):  bmaxi
+            7(7000000):  bcopyi
+          1(8000000):  halt
+        5(50000000):          Mask:  0x200000
+          0(0):  dmar
+          1(200000):  dmaw
+        6(60000000):          Mask:  0x8000000
+          0(0):  mtspris_1
+          1(8000000):            Mask:  0xf800
+            31(f800):  mtspri_1
+        7(70000000):          Mask:  0x8000000
+          0(0):  mtspr_1
+          1(8000000):            Mask:  0xf800
+            31(f800):  mfspr_1
+        8(80000000):          Mask:  0x8000000
+          0(0):            Mask:  0xf800
+            31(f800):  mfspr_2
+          1(8000000):  mtspr_2
+        9(90000000):          Mask:  0x8000000
+          0(0):            Mask:  0x3000000
+            0(0):  loop
+            2(2000000):  loopi
+            3(3000000):  cases
+          1(8000000):            Mask:  0x600
+            0(0):  call
+            2(400):  pop
+            3(600):              Mask:  0x3ff0101
+              67043328(3ff0000):  returnn
+        10(a0000000):  calli
+        Mask:  0x8000000
+          0(0):  mtspris_2
+          Mask:  0xf800
+            31(f800):  mtspri_2
+        11(b0000000):  jmp
+        12(c0000000):          Mask:  0x8000000
+          0(0):            Mask:  0x2000000
+            0(0):  push
+            1(2000000):  pushl
+          1(8000000):            Mask:  0x4000001
+            0(0):  merge
+            67108864(4000000):  rland
+            67108865(4000001):  rlandi
+        13(d0000000):          Mask:  0xb800000
+          0(0):            Mask:  0x4000000
+            0(0):  cadd
+            1(4000000):  csub
+          1(800000):            Mask:  0x4000000
+            0(0):  caddc
+            1(4000000):  csubc
+          2(1000000):  cand
+          3(1800000):  cor
+          4(2000000):  cxor
+          5(2800000):            Mask:  0x4000000
+            0(0):  cbset
+          6(3000000):            Mask:  0x4000000
+            0(0):  cbclr
+          7(3800000):  select
+          16(8000000):            Mask:  0x4000006
+            0(0):  add
+            33554432(4000000):  sub
+          17(8800000):            Mask:  0x4000007
+            0(0):  addc
+            67108864(4000000):  subc
+          18(9000000):            Mask:  0x7
+            0(0):  and
+          19(9800000):            Mask:  0x7
+            0(0):  or
+          20(a000000):            Mask:  0x7
+            0(0):  xor
+          21(a800000):            Mask:  0x3
+            0(0):              Mask:  0x3c
+              14(38):  bset
+            1(1):              Mask:  0x1f0000
+              31(1f0000):  cnt
+          22(b000000):            Mask:  0x3
+            0(0):              Mask:  0x3c
+              14(38):  bclr
+            1(1):              Mask:  0x1f0000
+              31(1f0000):  ffs
+          23(b800000):            Mask:  0x3
+            0(0):  shift_
+            1(1):              Mask:  0x4000000
+              0(0):  shifti
+        14(e0000000):          Mask:  0x3800000
+          0(0):            Mask:  0x4000000
+            0(0):  addi
+            1(4000000):  subi
+          1(800000):            Mask:  0x4000000
+            0(0):  addci
+            1(4000000):  subci
+          2(1000000):  andi
+          3(1800000):  ori
+          4(2000000):  xori
+          7(3800000):  movei
+        15(f0000000):          Mask:  0x8000000
+          0(0):            Mask:  0x3800400
+            0(0):              Mask:  0x4000000
+              0(0):  addis
+              1(4000000):  subis
+            8192(800000):              Mask:  0x4000000
+              0(0):  addcis
+              1(4000000):  subcis
+            16384(1000000):  andis
+            24576(1800000):  oris
+            32768(2000000):  xoris
+          1(8000000):            Mask:  0x1
+            0(0):  rlmerge
+            1(1):  mergei
+    
+Post-Exec Handler:  {
+     bits < 24 > s = 1 ;
+    PC ( 0 , 23 ) = ( Fetch == JmpN ) ? NNPC : NPC ;
+    NIA ( 0 , 31 ) = PC ;
+    NPC ( 0 , 23 ) = ( Fetch == JmpN ) ? NNPC + s : NNPC ;
+    NNPC ( 0 , 23 ) = NPC + 1 ;
+    Fetch = Normal ;
+}
+      Source Registers:  NNPC NPC 
+      Target Registers:  NIA NNPC NPC PC 
+    
+Helper Functions:
+      CR_add_status:
+ bits < 32 > CR_add_status ( bits < 33 > A , bits < 33 > B , bits < 1 > Cin ) {
+     bits < 33 > R = A + B + Cin ;
+     bits < 32 > C = concat ( zero ( 1 ) , A ( 2 , 32 ) ) + concat ( zero ( 1 ) , B ( 2 , 32 ) ) + Cin ;
+     bits < 1 > ov = R ( 0 ) ^ C ( 0 ) ;
+     bits < 1 > sov = ov | cr ( 9 ) ;
+     bits < 32 > CR_new = 0 ;
+    CR_new . set ( 0 , 0 , R ( 0 ) ) ;
+    CR_new . set ( 8 , 8 , ov ) ;
+    CR_new . set ( 9 , 9 , sov ) ;
+    return ( ( CR_new & 0x80c00000 ) | ( cr & ~ 0x80c00000 ) ) ;
+}
+        Source Registers:  cr/p 
+
+      CR_status:
+ bits < 32 > CR_status ( bits < 32 > RES_S , bits < 32 > RES ) {
+     bits < 1 > z = ( RES_S == 0 ) ? 1 : 0 ;
+     bits < 1 > neg = ( ( RES_S & 0x80000000 ) == 0 ) ? 0 : 1 ;
+     bits < 1 > leq = ( neg | z ) ;
+     bits < 1 > awz = ( ( ( RES_S & 0xffff0000 ) == 0 ) || ( ( RES_S & 0x0000ffff ) == 0 ) ) ? 1 : 0 ;
+     bits < 1 > lwz = ( ( RES_S & 0x0000ffff ) == 0 ) ? 1 : 0 ;
+     bits < 1 > lwn = ( ( RES_S & 0x00008000 ) == 0 ) ? 0 : 1 ;
+     bits < 1 > lbz = ( ( RES_S & 0x000000ff ) == 0 ) ? 1 : 0 ;
+     bits < 1 > abz = ( ( ( RES_S & 0xff000000 ) == 0 ) || ( ( RES_S & 0x00ff0000 ) == 0 ) || ( ( RES_S & 0x0000ff00 ) == 0 ) || ( ( RES_S & 0x000000ff ) == 0 ) ) ? 1 : 0 ;
+     bits < 1 > odd = ( ( RES_S & 0x00000001 ) == 0 ) ? 0 : 1 ;
+     bits < 1 > min = ( RES == 0x80000000 ) ? 1 : 0 ;
+     bits < 32 > CR_new = 0 ;
+    CR_new . set ( 1 , 1 , z ) ;
+    CR_new . set ( 2 , 2 , neg ) ;
+    CR_new . set ( 3 , 3 , leq ) ;
+    CR_new . set ( 4 , 4 , awz ) ;
+    CR_new . set ( 5 , 5 , lwz ) ;
+    CR_new . set ( 6 , 6 , lwn ) ;
+    CR_new . set ( 7 , 7 , lbz ) ;
+    CR_new . set ( 12 , 12 , abz ) ;
+    CR_new . set ( 13 , 13 , odd ) ;
+    CR_new . set ( 15 , 15 , min ) ;
+    return ( ( CR_new & 0xffbf0000 ) | ( cr & ~ 0xffbf0000 ) ) ;
+}
+        Source Registers:  cr 
+
+      CR_sub_status:
+ bits < 32 > CR_sub_status ( bits < 32 > A , bits < 32 > B , bits < 1 > Cin ) {
+     bits < 33 > AL = A ;
+     bits < 33 > AS = signExtend ( A , 33 ) ;
+     bits < 33 > BL = B ;
+     bits < 33 > BS = signExtend ( B , 33 ) ;
+     bits < 33 > R = AL + BL + Cin ;
+     bits < 32 > C = concat ( zero ( 1 ) , A ( 1 , 31 ) ) + concat ( zero ( 1 ) , B ( 1 , 31 ) ) + Cin ;
+     bits < 1 > ov = R ( 0 ) ^ C ( 0 ) ;
+     bits < 1 > sov = ov | cr ( 9 ) ;
+     bits < 33 > RS = AS + BS + Cin ;
+     bits < 1 > sl = RS ( 0 ) ;
+     bits < 1 > sle = sl | ( R ( 1 , 32 ) == 0 ) ;
+     bits < 32 > CR_new = cr ;
+    CR_new . set ( 0 , 0 , ~ R ( 0 ) ) ;
+    CR_new . set ( 8 , 8 , ov ) ;
+    CR_new . set ( 9 , 9 , sov ) ;
+    CR_new . set ( 10 , 10 , sle ) ;
+    CR_new . set ( 11 , 11 , sl ) ;
+    return CR_new ;
+}
+        Source Registers:  cr/p 
+
+      bit_shift:
+ bits < 33 > bit_shift ( bits < 32 > D , bits < 1 > Cin , bits < 5 > size_ , bits < 3 > type , bits < 1 > dir ) {
+     bits < 1 > Cout = 0 ;
+     bits < 1 > Carry = Cin ;
+     bits < 32 > Dout = D ;
+     bits < 33 > k = 0 ;
+     bits < 6 > i = 0 ;
+    for ( i = 0 ; i < size_ ; i = i + 1 ) {
+        if ( dir == 1 ) {
+            Cout = Dout ( 0 ) ;
+            if ( type == 2 ) {
+                Dout = concat ( Dout ( 1 , 31 ) , Carry ) ;
+                Carry = Cout ;
+            } else if ( type == 3 ) {
+                Dout = concat ( Dout ( 1 , 31 ) , Cout ) ;
+            } else if ( type == 4 ) {
+                Dout = concat ( Dout ( 1 , 31 ) , Carry ) ;
+                Carry = 0 ;
+            } else if ( type == 5 ) {
+                Dout = concat ( Dout ( 1 , 31 ) , zero ( 1 ) ) ;
+            } else if ( type == 6 ) {
+                Dout = concat ( Dout ( 1 , 31 ) , Carry ) ;
+                Carry = 0 ;
+            } else if ( type == 7 ) {
+                Dout = concat ( Dout ( 1 , 31 ) , zero ( 1 ) ) ;
+            }
+        } else {
+            Cout = Dout ( 31 ) ;
+            if ( type == 2 ) {
+                Dout = concat ( Carry , Dout ( 0 , 30 ) ) ;
+                Carry = Cout ;
+            } else if ( type == 3 ) {
+                Dout = concat ( Cout , Dout ( 0 , 30 ) ) ;
+            } else if ( type == 4 ) {
+                Dout = concat ( Carry , Dout ( 0 , 30 ) ) ;
+            } else if ( type == 5 ) {
+                Dout = concat ( Dout ( 0 ) , Dout ( 0 , 30 ) ) ;
+            } else if ( type == 6 ) {
+                Dout = concat ( Carry , Dout ( 0 , 30 ) ) ;
+                Carry = 0 ;
+            } else if ( type == 7 ) {
+                Dout = concat ( zero ( 1 ) , Dout ( 0 , 30 ) ) ;
+            }
+        }
+    }
+     bits < 33 > res = concat ( Cout , Dout ) ;
+    return res ;
+}
+
+      dispatch_bus_access:
+ bits < 65 > dispatch_bus_access (  ) {
+     bits < 1 > ack = 0 ;
+     bits < 8 > snum = zero ( 8 ) ;
+     bits < 24 > iaddr = zero ( 24 ) ;
+     bits < 8 > status = zero ( 8 ) ;
+     bits < 24 > page = zero ( 24 ) ;
+     bits < 65 > disp = concat ( ack , snum , iaddr , status , page ) ;
+    return disp ;
+}
+
+      imm16e:
+ bits < 32 > imm16e ( bits < 16 > IMM16 , bits < 1 > HWS ) {
+     bits < 32 > imm = 0 ;
+    if ( HWS == 1 ) imm = concat ( zero ( 16 ) , IMM16 ) ; else imm = concat ( IMM16 , zero ( 16 ) ) ;
+    return imm ;
+}
+
+      imm8e:
+ bits < 32 > imm8e ( bits < 16 > IMM8 , bits < 2 > BS ) {
+     bits < 32 > imm = 0 ;
+    if ( BS == 0 ) imm = concat ( IMM8 , zero ( 24 ) ) ; else if ( BS == 1 ) imm = concat ( zero ( 8 ) , IMM8 , zero ( 16 ) ) ; else if ( BS == 2 ) imm = concat ( zero ( 16 ) , IMM8 , zero ( 8 ) ) ; else imm = concat ( zero ( 24 ) , IMM8 ) ;
+    return imm ;
+}
+
+      merge:
+ bits < 32 > merge ( bits < 32 > A , bits < 32 > B , bits < 32 > M ) {
+    return ( ( A & M ) | ( B & ~ M ) ) ;
+}
+
+      mmask:
+ bits < 32 > mmask ( bits < 6 > ML , bits < 6 > MR ) {
+     bits < 32 > mask ;
+     bits < 32 > oxffffffff = 0xffffffff ;
+     bits < 6 > sum = ML + MR ;
+    mask = ( sum ( 0 ) == 0 ) ? ( ( oxffffffff >> ML ) & ( oxffffffff << MR ) ) : ( ( oxffffffff >> ML ) | ( oxffffffff << MR ) ) ;
+    return mask ;
+}
+
+      muram_bus_access:
+ bits < 65 > muram_bus_access ( bits < 1 > RDWR , bits < 24 > EA , bits < 8 > BE , bits < 64 > WDATA , bits < 1 > SM ) {
+     bits < 8 > byte ;
+     bits < 5 > sem_ptr = EA ( 16 , 20 ) ;
+     bits < 24 > addr = EA & 0x00fff8 ;
+     bits < 64 > rdata = 0 ;
+     bits < 1 > sm_rdata = DSEM ( sem_ptr ) ;
+     bits < 25 > i = addr ;
+     bits < 25 > e = i + 8 ;
+    if ( RDWR == 1 ) {
+        rdata = DMEM ( addr , 8 ) ;
+        if ( SM == 1 ) DSEM ( sem_ptr ) = 1 ;
+    } else {
+        while ( BE != 0 ) {
+            if ( BE ( 0 ) == 1 ) {
+                DMEM ( addr , 1 ) = WDATA ( 0 , 7 ) ;
+            }
+            WDATA = concat ( WDATA , zero ( 8 ) ) ;
+            BE = concat ( BE , zero ( 1 ) ) ;
+            addr = addr + 1 ;
+        }
+        if ( SM == 1 ) DSEM ( sem_ptr ) = 0 ;
+    }
+    return concat ( sm_rdata , rdata ) ;
+}
+        Source Registers:  DSEM 
+        Target Registers:  DSEM? 
+        Source Memories:  DMEM 
+        Target Memories:  DMEM 
+
+      spr_bus_access:
+ bits < 64 > spr_bus_access ( bits < 1 > RDWR , bits < 15 > ADDR , bits < 8 > BE , bits < 64 > WDATA , bits < 32 > rba , bits < 32 > sst ) {
+     bits < 16 > addr_even = concat ( ADDR , zero ( 1 ) ) ;
+     bits < 16 > addr_odd = concat ( ADDR , ~ zero ( 1 ) ) ;
+     bits < 32 > rdata_even = EXT_SPR ( addr_even ) ;
+     bits < 32 > rdata_odd = EXT_SPR ( addr_odd ) ;
+     bits < 32 > wdata_even ;
+     bits < 32 > wdata_odd ;
+     bits < 64 > rdata = concat ( rdata_even , rdata_odd ) ;
+     bits < 64 > mask = 0 ;
+     bits < 8 > byte_mask ;
+     int i ;
+    if ( RDWR == 0 ) {
+        for ( i = 0 ; i < 8 ; i ++ ) {
+            byte_mask = ( BE ( 0 ) == 1 ) ? 0xff : 0 ;
+            mask = concat ( mask , byte_mask ) ;
+            BE = concat ( BE , zero ( 1 ) ) ;
+        }
+        wdata_even = ( ( WDATA ( 0 , 31 ) & mask ( 0 , 31 ) ) | ( rdata_even & ~ mask ( 0 , 31 ) ) ) ;
+        wdata_odd = ( ( WDATA ( 32 , 63 ) & mask ( 32 , 63 ) ) | ( rdata_odd & ~ mask ( 32 , 63 ) ) ) ;
+        EXT_SPR ( addr_even ) = wdata_even ;
+        EXT_SPR ( addr_odd ) = wdata_odd ;
+    }
+    return rdata ;
+}
+        Source Registers:  EXT_SPR 
+        Target Registers:  EXT_SPR? 
+
+      swap:
+ bits < 32 > swap ( bits < 32 > D , bits < 32 > type ) {
+     bits < 32 > sw = D ;
+    if ( type == 0 ) {
+        sw . set ( 0 , 0 , D ( 7 ) ) ;
+        sw . set ( 1 , 1 , D ( 6 ) ) ;
+        sw . set ( 2 , 2 , D ( 5 ) ) ;
+        sw . set ( 3 , 3 , D ( 4 ) ) ;
+        sw . set ( 4 , 4 , D ( 3 ) ) ;
+        sw . set ( 5 , 5 , D ( 2 ) ) ;
+        sw . set ( 6 , 6 , D ( 1 ) ) ;
+        sw . set ( 7 , 7 , D ( 0 ) ) ;
+        sw . set ( 8 , 8 , D ( 15 ) ) ;
+        sw . set ( 9 , 9 , D ( 14 ) ) ;
+        sw . set ( 10 , 10 , D ( 13 ) ) ;
+        sw . set ( 11 , 11 , D ( 12 ) ) ;
+        sw . set ( 12 , 12 , D ( 11 ) ) ;
+        sw . set ( 13 , 13 , D ( 10 ) ) ;
+        sw . set ( 14 , 14 , D ( 9 ) ) ;
+        sw . set ( 15 , 15 , D ( 8 ) ) ;
+        sw . set ( 16 , 16 , D ( 23 ) ) ;
+        sw . set ( 17 , 17 , D ( 22 ) ) ;
+        sw . set ( 18 , 18 , D ( 21 ) ) ;
+        sw . set ( 19 , 19 , D ( 20 ) ) ;
+        sw . set ( 20 , 20 , D ( 19 ) ) ;
+        sw . set ( 21 , 21 , D ( 18 ) ) ;
+        sw . set ( 22 , 22 , D ( 17 ) ) ;
+        sw . set ( 23 , 23 , D ( 16 ) ) ;
+        sw . set ( 24 , 24 , D ( 31 ) ) ;
+        sw . set ( 25 , 25 , D ( 30 ) ) ;
+        sw . set ( 26 , 26 , D ( 29 ) ) ;
+        sw . set ( 27 , 27 , D ( 28 ) ) ;
+        sw . set ( 28 , 28 , D ( 27 ) ) ;
+        sw . set ( 29 , 29 , D ( 26 ) ) ;
+        sw . set ( 30 , 30 , D ( 25 ) ) ;
+        sw . set ( 31 , 31 , D ( 24 ) ) ;
+    } else if ( type == 1 ) {
+        sw = concat ( D ( 8 , 15 ) , D ( 0 , 7 ) , D ( 24 , 31 ) , D ( 16 , 23 ) ) ;
+    } else if ( type == 2 ) {
+        sw = concat ( D ( 16 , 31 ) , D ( 0 , 15 ) ) ;
+    } else if ( type == 3 ) {
+        sw = concat ( zero ( 8 ) , D ( 0 , 23 ) ) ;
+    } else if ( type == 4 ) {
+        sw = concat ( zero ( 1 ) , D ( 0 , 30 ) ) ;
+    } else if ( type == 5 ) {
+        sw = concat ( zero ( 16 ) , D ( 16 , 31 ) ) ;
+    } else if ( type == 6 ) {
+        sw = concat ( D ( 24 , 31 ) , D ( 16 , 23 ) , D ( 8 , 15 ) , D ( 0 , 7 ) ) ;
+    }
+    return sw ;
+}
+    -------------------------------
+  Constituent Items:
+    core0:  qe_risc
+-------------------------------
+

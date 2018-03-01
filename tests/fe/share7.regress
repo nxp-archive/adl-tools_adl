@@ -1,0 +1,2 @@
+share7.adl:49: Cache L1d is shared but subsequent cache L2 is not.
+share7.adl:49: Cache L1i is shared but subsequent cache L2 is not.

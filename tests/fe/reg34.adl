@@ -1,0 +1,84 @@
+//
+// Makes sure that we can use setfield_ and getfield_ register field helper functions.
+//
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (reg = a) {
+    width = 32;
+    define (field = f0) {
+      bits = (0,10);
+    }
+    define (field = f1) {
+      bits = (11,20);
+    }
+    define (field = f2) {
+      bits = (21,31);
+    }
+  }
+
+  define (regfile = b) {
+    width = 16;
+    size = 32;
+    define (field = X) {
+      bits = (0,10);
+    }
+    define (field = Y) {
+      bits = (11,15);
+    }
+  }
+  
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (instr=foo) {
+    fields=(OPCD(1),RA,RB,XO(0));
+    action = {
+      var x = getfield_a_f0(GPR(RA));
+      var y = setfield_a_f1(x);
+      var z = getfield_b_X(GPR(RB));
+      var q = setfield_b_Y(z);
+    };
+  }
+
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

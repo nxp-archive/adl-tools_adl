@@ -1,0 +1,49 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "AA"
+  Size:  32
+  Width:  32
+  Reset:  0x1234567
+  -------------------------------
+  Name:  "BB"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Reset:  func (  ) {
+    for (  int i = 0 ; i != BB . size (  ) ; ++ i ) {
+        BB ( i ) = i ;
+    }
+}
+  External Write:  func ( unsigned index , bits < 32 > v ) {
+    ThisReg ( index ) = ThisReg ( index ) & ~ v ;
+}
+  -------------------------------
+Registers:
+  Name:  "A"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  Reset:  0xdeadbeaf
+  -------------------------------
+  Name:  "B"
+  Usage:  written
+  Width:  32
+  Reset:  {
+    B = portRead ( 10 ) ;
+}
+  -------------------------------
+  Name:  "C"
+  Width:  128
+  Reset:  0x12345678123456781234567812345678
+  -------------------------------
+Current-instruction-address register:  A
+Next-instruction-address register:  A
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

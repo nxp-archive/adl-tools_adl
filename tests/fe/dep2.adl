@@ -1,0 +1,124 @@
+//
+// Test of dependency-tracking input.
+//
+// Checks for various parsing errors.
+//
+define (arch=minippc) {
+
+  define (reg = NIA) {
+    attrs = nia;
+  }
+
+  define (reg = CIA) {
+    attrs = cia;
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg=CR) {}
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=D) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    dependencies = {
+      GPR = Foo;
+    };
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    dependencies = {
+      GPR(RT) = CR(RA);
+    };
+    action = {
+       if (RA == 0) {
+        GPR(RT) = SI;
+       } else {
+         GPR(RT) = GPR(RA) + SI;
+       }
+    };
+  }
+
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    dependencies = {
+      GPR(RT) = Mem;
+    };
+    action={
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=lwzux) {
+    fields=(OPCD(31),RT,RA,RB,XO(55));
+    dependencies = {
+      GPR(RT) = Mem($0);
+      GPR(RA) = GPR(RA), GPR(RB), Mem($2);
+    };
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+      GPR(RA) = addr; 
+    };
+  }
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,D);
+    dependencies = {
+      Mem = GPR(RS);
+    };
+    action={
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      Mem(addr,4) = GPR(RS);      
+    };
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}
+

@@ -1,0 +1,137 @@
+//
+// Testing of aspect priorities.
+//
+
+define (arch = minippc) {
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    """
+    If RA=0, the sign extended value of the SI field is placed into GPR(RT)
+    """;
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = signExtend(SI,32);
+      } else {
+      Foo:
+        GPR(RT) = GPR(RA) + signExtend(SI,32);
+      }
+    };
+  }
+
+}
+
+define (arch=P) {
+
+  defmod(instr=(addi)) {
+    // Should come last b/c no priority.
+    define (aspect=A) {
+      instr_pre_exec = true;
+      action = { 
+        int i = 1;
+      };
+    }
+    define (aspect=D) {
+      labels = Foo;
+      priority = 10;
+      action = {
+        int l = 4;
+      };
+    }
+  }
+}
+
+define (core=foo) {
+  archs=(minippc,P);
+  
+	define (aspect=B) {
+		instr_pre_exec = true;
+    priority = 1;
+		action = { 
+      int j = 2;
+		};
+	}
+
+  // Should come first b/c has priority 0.
+	define (aspect=C) {
+		instr_pre_exec = true;
+    priority = 0;
+    labels = Foo;
+		action = { 
+      int k = 3;
+		};
+	}
+
+}
+

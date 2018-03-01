@@ -1,0 +1,48 @@
+//
+// Tests that we can see helper functions across architectures.
+//
+
+define (arch=a1) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (cache=L1) {
+    level     = 1;
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+  }
+
+  void bar() { }
+
+}
+
+define (arch=a2) {
+
+  define (reg=L2HitReg) { }
+
+  void foo() { }
+
+  defmod(cache=L1) {
+
+    hit = func (CacheAccess ca,addr_t) {
+      L2HitReg = L2HitReg + 1;
+      foo();
+      bar();
+    };
+    
+  }
+
+}
+
+define(core=c) {
+  archs=(a1,a2);
+}

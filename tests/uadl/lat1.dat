@@ -1,0 +1,88 @@
+#
+# Test of adding latency via the latency counter and
+# of querying instruction field values.
+#
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,1
+	mtspr 50,r1
+	mtspr 51,r1
+	addi r3,r3,1
+	addi r4,r4,1
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000008 d=0x7C320BA6	#	mtspr 50,r1
+MD n=Mem ra=0x0000000c d=0x7C330BA6	#	mtspr 51,r1
+MD n=Mem ra=0x00000010 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000014 d=0x38840001	#	addi r4,r4,1
+# </GEN>
+
+RD n=NIA     d=0x0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=2
+R n=GPR i=1 d=0x00000001
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=3
+R n=GPR i=2 d=0x00000001
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c320ba6
+INSTR op=0x7c320ba6					asm="mtspr HID0,r1"
+ITIME t=6
+R n=HID0 d=0x00000001
+CTIME t=11
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c330ba6
+INSTR op=0x7c330ba6					asm="mtspr HID1,r1"
+ITIME t=9
+R n=HID1 d=0x00000001
+CTIME t=14
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38630001
+INSTR op=0x38630001					asm="addi r3,r3,1"
+ITIME t=12
+R n=GPR i=3 d=0x00000001
+CTIME t=15
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38840001
+INSTR op=0x38840001					asm="addi r4,r4,1"
+ITIME t=13
+R n=GPR i=4 d=0x00000001
+CTIME t=16
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=16
+CTIME t=19
+
+
+RESULTS
+
+RD n=HID0 d=0x00000001
+RD n=HID1 d=0x00000001
+
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0x00000001
+RD n=GPR i=3 d=0x00000001
+RD n=GPR i=4 d=0x00000001

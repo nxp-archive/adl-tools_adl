@@ -1,0 +1,207 @@
+//
+// This tests some more complicated input/output tracking with aliases,
+// including the use of type-conversion methods in switch conditionals.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+  parallel_execution = 3;
+  blk = (ipu, dalu, lsu);
+  attrs = (type1,type2,prefix,first,second);  
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 32;  prefix = r; };
+  // SR (T,...);
+  define (reg = SR) { 
+    define (field = T1) { bits = 0; """ SR.T1 field"""; }; define (field = T6) { bits = 1;}; width = 32; 
+  };
+
+  // -------- INSTRFIELDS ----------
+  
+  define (instrfield=Src1)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Src2)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Res1)
+    {
+      width = 5;
+      pseudo = true;
+    }
+
+  define (instrfield=NonScale)
+    {
+      width = 1;
+      parm = true;
+    }
+
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RT)  { width = 2; pseudo = true; ref=GPR;}
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; reserved = true; } // Serial Grouping
+  define (instrfield = CE)  { width = 4; pseudo = true; assembler = true; value = 0; } // conditional execution
+  define (instrfield = Enc1)   { width = 16;  pseudo = true; }
+  define (instrfield = Enc2)   { width = 32;  pseudo = true; }
+
+  define (instrfield = CondExec) { pseudo = true; prefix = true; indexed = 2; value = 0; }
+
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  = 0; };
+  define (instrfield = IFT)       { indexed = 2; prefix = true; pseudo = true; value  = 0; type=CondExec; };
+
+  define (instrfield = PfxOpcode) { pseudo = true; width=6; }
+
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = LPREFIX) {
+    fields = (
+              (bits(0),PfxOpcode(0),1),
+              (bits(1),PfxOpcode(1),1),
+              (bits(2),PfxOpcode(2),0),
+              (bits(3),PfxOpcode(3),0),
+              (bits(4),PfxOpcode(4),0),
+              (bits(5),PfxOpcode(5),0),
+              (bits(6),IFT(0)),
+              (bits(7),IFT(1)),
+              (bits(8),IFT(2)),
+              (bits(9),IFT(3)),
+              (bits(10),IFT(4)),
+              (bits(11),IFT(5)),
+              (bits(12),0),
+              (bits(13),0),
+              (bits(14),0),
+              (bits(15),0));
+    prefix = true;
+    syntax = ("LPREFIX,  IFT => %f",IFT);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+
+  define(instr = OneWord) 
+    {
+      fields = ((bits(15,0), Enc1),
+                (bits(17,16),CondExec));
+      pseudo = true;
+    }
+
+  define (instr=add_family)
+    {
+      fields = (Src1,Src2,Res1,CE,NonScale);
+      blk = dalu;
+      doc_title = "add Ra,Rb,Rt";
+      define (instr=add2)
+        {
+          attrs = (type1,first("add"));
+          type = OneWord;
+          fields = (
+                    (bits(0),1),
+                    (bits(1),1),
+                    (bits(2),0),
+                    (bits(3),1),
+                    (bits(4),CE(0)),
+                    (bits(5),CE(1)),
+                    (bits(6),RA(2)),		
+                    (bits(7),RA(1)),		
+                    (bits(8),RA(0)),		
+                    (bits(9),RB(0)),
+                    (bits(10),RB(1)),
+                    (bits(11),RB(2)),
+                    (bits(12),RT(0)),
+                    (bits(13),RT(1)),
+                    (bits(14),0),
+                    (bits(15),SG),
+                    (bits(16),CE(2)),
+                    (bits(17),CE(3))
+                    );
+          syntax = ("add %f,%f,%f",RA,RB,RT);
+          alias = add_family(Src1(RA),Src2(RB),Res1(RT),CE(CE),NonScale(0));
+        }
+
+      define (instr=add)
+        {
+          attrs = (type1,first);
+          type = OneWord;
+          fields = (
+                    (bits(0),1),
+                    (bits(1),0),
+                    (bits(2),0),
+                    (bits(3),1),
+                    (bits(4),CE(0)),
+                    (bits(5),CE(1)),
+                    (bits(6),RA(0)),		
+                    (bits(7),RA(1)),		
+                    (bits(8),RA(2)),		
+                    (bits(9),RB(0)),
+                    (bits(10),RB(1)),
+                    (bits(11),RB(2)),
+                    (bits(12),RT(0)),
+                    (bits(13),RT(1)),
+                    (bits(14),0),
+                    (bits(15),SG),
+                    (bits(16),CE(2)),
+                    (bits(17),CE(3))
+                    );
+          syntax = ("add %f,%f,%f",RA,RB,RT);
+          alias = add_family(Src1(RA),Src2(RB),Res1(RT),CE(CE),NonScale(1));
+          doc_title_add = "(premium)";
+        }
+
+     
+
+      action = {
+        GPR(Res1) = GPR(Src2) + add_func(Src1,NonScale);
+      };
+    
+    }
+
+
+  bits<32> add_func(bits<3> src, bits<1> option)
+  {
+    bits<1> op = find_option(option);
+    bits<32> tmp = 0;
+    switch (option.uint32()) {
+    case 0: 
+      tmp = (GPR(src)+GPR(0));
+      break;
+    case 1: 
+      tmp = (GPR(src)+GPR(1));
+      break;
+    case 2: 
+      tmp = (GPR(src)+GPR(2));
+      break;
+    case 3: 
+      tmp = (GPR(src)+GPR(3));
+      break;
+    default: break;
+    }
+    return (tmp);
+  }
+
+  bits<1> find_option(bits<1> opt) {
+    if (opt==1) {
+      return SR.T1;
+    } else {
+      return SR.T6;
+    }
+  }
+
+
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1,type2);
+}

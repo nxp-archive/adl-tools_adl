@@ -1,0 +1,130 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO_X: [21,30] 
+        Extended opcode for X Instruction Format.
+    
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Fields:  OPCD(1) RT RA RB XO_X(10)
+  Action:  {
+     int i = 20 ;
+     int j ;
+    j = 30 ;
+    j = 40 ;
+     int k = 50 ;
+    {
+         int k = 30 ;
+        k = j + i ;
+    }
+    GPR ( j ) = GPR ( i ) ;
+    GPR ( k ) = GPR ( i ) ;
+    GPR ( 30 ) = 20 ;
+    x ( 2 ) ;
+}
+  Source Registers:  GPR(20) 
+  Target Registers:  GPR(2) GPR(30) GPR(40) GPR(50) 
+  Helper Functions:  x 
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  32
+  Fields:  OPCD(2) RT RA RB XO_X(10)
+  Action:  {
+    z ( RT , RA , RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  Helper Functions:  z 
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  32
+  Fields:  OPCD(3) RT RA RB XO_X(10)
+  Action:  {
+    w ( RA , RB , RT ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  Helper Functions:  w z 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    33554442(4000014):  a
+    67108874(8000014):  b
+    100663306(c000014):  c
+
+Helper Functions:
+  w:
+ void w ( int a , int b , int t ) {
+    z ( t , a , b ) ;
+}
+    Source Registers:  GPR(a [parm #0]) GPR(b [parm #1]) 
+    Target Registers:  GPR(t [parm #2]) 
+    Helper Functions:  z 
+
+  x:
+ void x ( int x ) {
+    {
+         int y = 10 ;
+        {
+             int x = y ;
+        }
+        GPR ( x ) = 20 ;
+    }
+}
+    Target Registers:  GPR(x [parm #0]) 
+
+  y:
+ void y ( int x ) {
+    {
+         int y = 10 ;
+        {
+            x = y ;
+        }
+        GPR ( x ) = 20 ;
+    }
+}
+    Target Registers:  GPR 
+
+  z:
+ void z ( int t , int a , int b ) {
+    GPR ( t ) = GPR ( a ) + GPR ( b ) ;
+}
+    Source Registers:  GPR(a [parm #1]) GPR(b [parm #2]) 
+    Target Registers:  GPR(t [parm #0]) 
+-------------------------------
+

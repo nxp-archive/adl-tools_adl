@@ -1,0 +1,120 @@
+=======
+Systems:
+=======
+System:  PMT
+  Type:  minippc
+  Locally-defined Cores:
+    Name:  "Thread"
+    Register Files:
+      Name:  "GPR"
+      Size:  32
+      Width:  32
+      -------------------------------
+    Registers:
+      Name:  "CIA"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia
+      -------------------------------
+      Name:  "CR"
+      Usage:  written
+      Width:  32
+      -------------------------------
+      Name:  "CTR"
+      Width:  32
+      -------------------------------
+      Name:  "FACTIVE"
+      Usage:  read
+      Width:  32
+      -------------------------------
+      Name:  "LR"
+      Width:  32
+      -------------------------------
+      Name:  "NIA"
+      Usage:  read, written
+      Width:  32
+      Attributes:  nia
+      -------------------------------
+      Name:  "NIA0"
+      Read alias/hook:
+        thread(0).NIA
+
+      Write alias/hook:
+        thread(0).NIA
+
+      Width:  32
+      Pseudo:  1
+      -------------------------------
+      Name:  "NIA1"
+      Read alias/hook:
+        thread(1).NIA
+
+      Write alias/hook:
+        thread(1).NIA
+
+      Width:  32
+      Pseudo:  1
+      -------------------------------
+      Name:  "TA0"
+      Write alias/hook:
+        func ( bits < 32 > x ) {
+    if ( thread ( 1 ) . TA0 == 0 ) {
+        CR = x * 2 ;
+    } else {
+        CR = x ;
+    }
+}
+        Target Registers:  CR 
+
+      Usage:  read
+      Width:  32
+      -------------------------------
+      Name:  "TACTIVE"
+      Usage:  read
+      Width:  32
+      -------------------------------
+      Name:  "VPIR"
+      Usage:  written
+      Width:  32
+      Reset:  func ( unsigned index ) {
+    VPIR = index ;
+}
+      -------------------------------
+      Name:  "X"
+      Width:  32
+      -------------------------------
+      Name:  "XER"
+      Width:  32
+      -------------------------------
+      Name:  "Y"
+      Width:  32
+      -------------------------------
+    Contexts:
+      Name:  foo
+      Number contexts:  3
+      Registers:  X Y 
+      Memory layout:  X
+      Context Activity Function:  {
+    return FACTIVE ;
+}
+      -------------------------------
+      Name:  thread (thread)
+      Number contexts:  2
+      Registers:  CIA CR CTR LR NIA TA0 VPIR XER 
+      Register-files:  GPR 
+      Context Activity Function:  {
+    return TACTIVE ;
+}
+      -------------------------------
+    Current-instruction-address register:  CIA
+    Next-instruction-address register:  NIA
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    -------------------------------
+  Constituent Items:
+    t0:  Thread
+    t1:  Thread
+-------------------------------
+

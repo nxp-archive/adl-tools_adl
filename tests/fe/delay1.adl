@@ -1,0 +1,129 @@
+//
+// Test various uses of the delayed_write function.
+//
+
+define (arch=minippc) {
+  
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(X,1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(X(0,1),1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(X.x,1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=d) {
+    fields=(OPCD(4),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(GPR(RT),1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=e) {
+    fields=(OPCD(5),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(GPR(RT).x,1) = GPR(RA)+GPR(RB);
+      delayed_write(GPR(RT)(0,1),1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=f) {
+    fields=(OPCD(6),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(GPR(RT)(0,1),1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=g) {
+    fields=(OPCD(7),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(Y.xx(0),1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=h) {
+    fields=(OPCD(8),RT,RA,RB,XO_X(10));
+    
+    action= {
+      delayed_write(VPR(RT).H(0),1) = GPR(RA)+GPR(RB);
+    };
+  }
+  
+  define (regfile=GPR) {
+    define (field=x) {
+      bits = (0,1);
+    }
+    size = 32;
+  }
+
+  define (regfile=VPR) {
+    size = 32;
+    define (field=B) {
+      indexed = 8;
+    }
+    define (field=H) {
+      indexed = 16;
+    }
+  }
+
+  define (reg=X) {
+    define (field=x) {
+      bits = (0,1);
+    }
+  }
+
+  define (reg=Y) {
+    define (field=xx) {
+      indexed = 8;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

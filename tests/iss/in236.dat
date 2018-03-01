@@ -1,0 +1,46 @@
+#
+# Test the use if ijam with an SMT model.  The results listed here are only
+# correct when used with in236.cli, which jams in extra instructions.
+#
+= asm
+
+	addi r1,r1,1 
+	addi r1,r1,1 
+	
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1 
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1 
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+
+CORE n=PMT
+
+RD n=TEN d=0xc0000000
+
+CORE n=PMT:t0
+
+RD n=NIA d=0x0
+
+CORE n=PMT:t1
+
+RD n=NIA d=0x0
+
+RESULTS
+
+CORE n=PMT:t0
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000003
+RD n=GPR i=4 d=0xdeadbeef
+
+CORE n=PMT:t1
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000004
+RD n=GPR i=3 d=0x00000006
+RD n=GPR i=4 d=0x12345678

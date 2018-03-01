@@ -1,0 +1,49 @@
+//
+// Error handling test.
+//
+
+define (core=P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = Foo;
+      entries = 1;
+      entry_size = 4;
+    }
+    
+    define (pipestage=mID) {
+      size = 2;
+      scheduler = "hello";
+      issue=true;
+    }
+
+    define (pipestage=mEX) {
+      size = 2;
+    }
+
+    define (pipestage=mMM) {
+      size = 2;
+      issue=true;
+    }
+
+    define (pipestage) {
+      size = 8;
+      bandwidth=8;
+      release_policy=inst_order;
+    }
+
+    define (cache L1i) {
+      next_level_memory = Foo;
+      data_width = 32;
+    }
+
+    define (cache L2) {
+      next_level_memory = Foo;
+      data_width = 32;
+    }
+
+
+  }
+
+}

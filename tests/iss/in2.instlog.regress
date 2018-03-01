@@ -1,0 +1,11 @@
+Model:  P
+
+Instr:  lwz r2,4096(r0) [ GPR[2]=(written) ]
+Instr:  addi r10,r10,256 [ GPR[10]=(read) GPR[10]=(written) ]
+Instr:  add r3,r2,r1 [ GPR[2]=(read) GPR[1]=(read) GPR[3]=(written)  ]
+Instr:  addic. r5,r5,-2 [ GPR[5]=(read) GPR[5]=(written read) XER=(written(mask=0x20000000) read(mask=0x80000000)) ]
+Instr:  stw r3,0(r4) [ GPR[4]=(read) GPR[3]=(read) ]
+Instr:  stw r3,0(r6) [ GPR[6]=(read) GPR[3]=(read) ]
+Instr:  halt 
+Instructions issued:  7
+

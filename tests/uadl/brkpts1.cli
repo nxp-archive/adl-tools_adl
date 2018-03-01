@@ -1,0 +1,13 @@
+
+setbrk 0x8
+go
+puts "GPR3:  [reg GPR3]"
+go
+puts "GPR3:  [reg GPR3]"
+go
+puts "GPR3:  [reg GPR3]"
+go
+puts "GPR3:  [reg GPR3]"
+clrbrk 0x8
+go
+quit

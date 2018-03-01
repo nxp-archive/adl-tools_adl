@@ -1,0 +1,20 @@
+# Test to make sure that watchpoints allow the instruction to complete.
+!
+s
+s
+s
+s
+s
+s
+Z2,ffffffe8,4
+c
+c
+c
+c
+c
+c
+c
+z2,ffffffe8,4
+c
+m1004,4
+@

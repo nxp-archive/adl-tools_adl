@@ -1,0 +1,67 @@
+#
+# Trivial test for time-tagged stuff:  Final count should be 1 + # instructions,
+# due to halt instruction being there.
+#
+# <ASM>
+# add r3,r2,r1
+# add r5,r4,r3
+# add r1,r5,r3
+# add r7,r1,r2
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00000004 d=0x7CA41A14	# add r5,r4,r3
+MD n=Mem ra=0x00000008 d=0x7C251A14	# add r1,r5,r3
+MD n=Mem ra=0x0000000c d=0x7CE11214	# add r7,r1,r2
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=1
+RD n=GPR i=3 d=1
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=1
+RD n=GPR i=6 d=1
+RD n=GPR i=7 d=1
+
+TRACE
+
+I id=1 
+M n=Mem t=ifetch
+INSTR
+ITIME t=1
+CTIME t=4
+
+I id=2 
+M n=Mem t=ifetch
+INSTR
+ITIME t=2
+CTIME t=5
+
+I id=3 
+M n=Mem t=ifetch
+INSTR
+ITIME t=3
+CTIME t=6
+
+I id=4 
+M n=Mem t=ifetch
+INSTR
+ITIME t=4
+CTIME t=7
+
+I id=5 
+M n=Mem t=ifetch
+INSTR
+ITIME t=5
+CTIME t=8
+
+RESULTS
+
+RD n=GPR i=1 d=5
+RD n=GPR i=2 d=1
+RD n=GPR i=3 d=2
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=3
+RD n=GPR i=6 d=1
+RD n=GPR i=7 d=6

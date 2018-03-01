@@ -1,0 +1,24 @@
+
+setpath PMT:t0
+setbrk 0x14
+go
+
+puts "t0:GPR4:  [reg PMT:t0:GPR4]"
+puts "t0:GPR5:  [reg PMT:t0:GPR5]"
+clrbrk 0x14
+setbrk 0x1c
+setpath PMT:t1
+setbrk 0x14
+go
+
+puts "t1:GPR4:  [reg PMT:t1:GPR4]"
+puts "t1:GPR5:  [reg PMT:t1:GPR5]"
+clrbrk 0x14
+clrbrk 0x1c
+go
+
+puts "t0:GPR6:  [reg PMT:t0:GPR6]"
+puts "t1:GPR6:  [reg PMT:t1:GPR6]"
+go
+
+quit

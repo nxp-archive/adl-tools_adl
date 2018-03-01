@@ -1,0 +1,79 @@
+//
+// This tests to make sure that we handle source/target register information
+// correctly within conditionals.  If just handled sequentially, the instruction
+// below has an error: We regard the first assignment as a target for
+// GPR(SE_RX), so we ignore GPR(SE_RX) as a source, even though it is in the
+// 'else' portion of the conditional.
+//
+// Instead, we must treat each side of a conditional independently, then merge
+// them back when finished.
+//
+define (arch=minippc) {
+
+  define (instrfield = SE_OPCD8) {
+    """
+    Primary opcode, 8-bit width, for 16-bit instructions.
+    """;
+    bits = (0,7);
+  }
+
+  define (instrfield = SE_RX) {
+    """
+    Field used to specify a General Purpose Register in the ranges R0:R7 or 
+    R24:31 to be used as a source or as a destination.
+    """;
+    bits = (12,15);
+  }
+
+  define (instrfield = SE_RY) {
+    """
+    Field used to specify a General Purpose Register in the ranges R0:R7 or 
+    R24:31 to be used as a source.
+    """;
+    bits = (8,11);
+  }
+
+  define (instr = se_slw) {
+    width = 16;
+    fields = (SE_OPCD8(0x42),SE_RY,SE_RX);
+    action = {
+      uint32_t sh = GPR(SE_RY)(58,63).uint32();
+      if (sh > 31) {
+        GPR(SE_RX)(32,63) = 0;
+      } else {
+        GPR(SE_RX)(32,63) = GPR(SE_RX) << sh;
+      } 
+    };
+  }
+
+  void foobar() {};
+
+  define (instr = foo) {
+    width = 16;
+    fields = (SE_OPCD8(0x43),SE_RY,SE_RX);
+    action = {
+      uint32_t sh = GPR(SE_RY).uint32();
+      if (sh > 31) {
+        GPR(SE_RX) = 0;
+      } else {
+        GPR(SE_RX) = sh;
+      }
+      if (SE_RY > 0) {
+        foobar(GPR(SE_RX));
+      }
+    };
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

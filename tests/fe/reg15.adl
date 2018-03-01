@@ -1,0 +1,46 @@
+//
+// Register aliasing test.
+//
+//
+define (arch = spe) {
+
+  define (reg = USPRG0) {
+    width=32;
+    define (write) {
+      // We should fail because "action" is not given a function
+      // with correct parameters.
+      action = func (unsigned x) { };
+    }
+  }
+
+  define (regfile=gprs) {
+    size = 30;
+    invalid_entry_read = func(unsigned index) {
+      int i = 20;
+    };
+    invalid_entry_write = func(unsigned index,bits<32> value) {
+      int i = 10;
+    };    
+  }
+
+  define (reg=A) {
+    alias = gprs;
+  }
+
+  define (reg=B) {
+    alias = gprs(40);
+  }
+
+  define (regfile=C) {
+    alias = USPRG0;
+  }
+
+  define (regfile=D) {
+    alias = gprs(3);
+  }
+
+}
+
+define (core = P) {
+  archs = spe;
+}

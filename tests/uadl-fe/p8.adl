@@ -1,0 +1,159 @@
+
+define (core=P) {
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) |
+      XER.SO;
+
+    CR(4*field,4*field+3) = r;
+  }
+
+  void setXerField(bool ov, bool so, bool ca,const bits<32>& carry)
+  {
+    if (ov) { XER.OV = carry(0) ^ carry(1);}
+    if (so) { XER.SO = XER.SO | XER.OV ;}
+    if (ca) { XER.CA = carry(0);}
+  }
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+      The condition register.
+      """;
+  }
+
+  define (reg=XER) {
+    """
+      The overflow and carry register.
+      """;
+    width = 32;
+    define (field=SO) { bits = 0; }
+    define (field=OV) { bits = 1; }
+    define (field=CA) { bits = 2; }
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+    define (field=l) { bits = (0,15); };
+    define (field=h) { bits = (16,31); };
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+       if (RA == 0) {
+        GPR(RT) = SI;
+      } else {
+        GPR(RT) = GPR(RT) + SI;
+      }
+    };
+  }
+
+  define (instr=lwzu) {
+    fields=(OPCD(33),RT,RA,D);
+    action = {
+      var addr = GPR(RA.uint32()) + D;
+      GPR(RA) = addr;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+}

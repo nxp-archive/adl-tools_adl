@@ -1,0 +1,139 @@
+#
+# Tests the use of the linefill_request_block_cycle parameter, which blocks
+# requests when the linefill is busy (blocked) due to a hit/end-of-linefill
+# situation.
+#
+= asm
+
+	lwz r1,0x1000(r0)
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r3,r3,1
+	addi r4,r4,1
+	lwz r5,0x1008(r0)
+	addi r6,r6,1
+	lwz r7,0x100c(r0)
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA    d=0x0
+RD n=CCR    d=0x80000000
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000008 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000000c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000010 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000014 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000018 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000001c d=0x80A01008	#	lwz r5,0x1008(r0)
+MD n=Mem ra=0x00000020 d=0x38C60001	#	addi r6,r6,1
+MD n=Mem ra=0x00000024 d=0x80E0100C	#	lwz r7,0x100c(r0)
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1008 d=0x12345678
+MD n=Mem ra=0x100c d=0xaf4832ab
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201000
+INSTR op=0x80201000					asm="lwz r1,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=1 d=0xdeadbeef
+ITIME t=4
+CTIME t=10
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000001
+ITIME t=5
+CTIME t=11
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000002
+ITIME t=6
+CTIME t=14
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000003
+ITIME t=11
+CTIME t=17
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000004
+ITIME t=14
+CTIME t=20
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38630001
+INSTR op=0x38630001					asm="addi r3,r3,1"
+R n=GPR i=3 d=0x00000001
+ITIME t=17
+CTIME t=21
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x38840001
+INSTR op=0x38840001					asm="addi r4,r4,1"
+R n=GPR i=4 d=0x00000001
+ITIME t=18
+CTIME t=22
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x80a01008
+INSTR op=0x80a01008					asm="lwz r5,4104(r0)"
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x12345678
+R n=GPR i=5 d=0x12345678
+ITIME t=19
+CTIME t=23
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x38c60001
+INSTR op=0x38c60001					asm="addi r6,r6,1"
+R n=GPR i=6 d=0x00000001
+ITIME t=20
+CTIME t=24
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x80e0100c
+INSTR op=0x80e0100c					asm="lwz r7,4108(r0)"
+D n=Mem t=read ea=0x100c nb=4
+M n=Mem t=read ea=0x100c ra=0x100c d=0xaf4832ab
+R n=GPR i=7 d=0xaf4832ab
+ITIME t=21
+CTIME t=25
+
+I ea=0x28 id=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=22
+CTIME t=26
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=4
+RD n=GPR i=3 d=1
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=0x12345678
+RD n=GPR i=6 d=1
+RD n=GPR i=7 d=0xaf4832ab
+
+
+

@@ -1,0 +1,388 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests 16-bit instructions and the use of aliases.
+//
+
+define (arch = mixed) {
+
+  // Various helper routines.
+
+  bits<4> compare (bits<32> x,bits<32> y) 
+    {
+      return 
+        ( (x.signedLT(y)) ? 0x8 : 0) |
+        ( (x.signedGT(y)) ? 0x4 : 0) |
+        ( (x == y)        ? 0x2 : 0) ;
+    }
+  
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) 
+    {
+      var cr = CR;
+      var r = compare(x,y);
+      cr.set(4*field,4*field+3,r);
+      CR = cr;
+    }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+  }
+
+  define (reg=XER) {
+    """
+    The overflow and carry register.
+    """;
+    width = 32;
+    define (field=SO) { bits = 0; }
+    define (field=OV) { bits = 1; }
+    define (field=CA) { bits = 2; }
+  }
+
+  define (reg=CTR) {
+    """
+The counter register.
+    """;
+  }
+
+  define (reg=LR) {
+    """
+The link register.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (regfile=SPR) {
+    size = 1024;
+    define (entry=8)  { reg = LR; }
+    define (entry=9)  { reg = CTR; }
+    define (entry=1)  { reg = XER; }
+  }
+
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=OPCD5) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,4);
+  }
+
+  define (instrfield=OPCD8) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,7);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=XO16) {
+    """
+    Extended opcode.
+    """;
+    bits = (6,7);
+  }
+
+  define (instrfield=BO16) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (5,5);
+  }
+
+  define (instrfield=BI16) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (6,7);
+  }
+
+  define (instrfield=BD8) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (8,15);
+  }
+
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    is_signed = true;
+  }
+
+  define (instrfield=RY) {
+    bits = (8,11);
+    ref = GPR;
+    type = regfile;
+  }
+  define (instrfield=RX) {
+    bits = (12,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=BA) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BB) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=BT) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = SI;
+      } else {
+        GPR(RT) = GPR(RA) + SI;
+      }
+    };
+  }
+
+  define (instr=se_add) {
+    width = 16;
+    fields=(OPCD(1),RY,RX);
+    alias = add(RT(RX),RA(RX),RB(RY));
+  }
+
+  define (instr=cmp) {
+    fields=(OPCD(31),BF,RA,RB,XO(0));
+    action = {
+      setCrField(BF,GPR(RA),GPR(RB));
+    };
+  }
+
+  define (instr=crand) {
+    fields=(OPCD(19),BT,BA,BB,XO(257));
+    action = {
+      CR = CR.set(BT+32,CR(BA+32) & CR(BB+32));
+    };
+  }
+
+
+  // Not precisely correct, as the real GPR register file is split using the
+  // lower 8 and upper 8.
+  define (instr=se_mtar) {
+    width = 16;
+    fields = (OPCD8(0x02),RY,RX);
+    action = {
+      GPR(RX+8) = GPR(RY);
+    };    
+  }
+
+  define (instr = se_mfar) {
+    width = 16;
+    fields = (OPCD8(0x03),RY,RX);
+    action = {
+      GPR(RX) = GPR(RY+8);
+    };
+  }
+
+  // Not a real instruction, but tests that we
+  // can include constants in aliases.
+  define (instr=se_inc) {
+    width = 16;
+    fields=(OPCD(2),RX);
+    alias = addi(RT(RX),RA(RX),SI(1));
+  }
+
+  // Not a real instruction, but tests that the target call is to the actual
+  // instruction handler and not to the wrapper which modifies instruction-field
+  // values.  In this case, we want 0x8000 used as the addition constant, and
+  // not a sign-extended version, which we'd get if we called addi's wrapper
+  // rather than the actual instruction handler.
+  define (instr=se_foo) {
+    width = 16;
+    fields=(OPCD(3),RX);
+    alias = addi(RT(RX),RA(RX),SI(0x8000));
+  }
+
+  define (instr="subf.") {
+    fields=(OPCD(0x1f),RT,RA,RB,XO(0x28));
+    action = func() {
+      GPR(RT) = GPR(RB) - GPR(RA);
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=srw) {
+    fields=(OPCD(31),RS,RA,RB,XO(536));
+    action = {
+      var n = GPR(RB)(27,31);
+      GPR(RA) = GPR(RS) >> n;
+    };
+  }
+
+  // Note: Not entirely correct, as we don't model the register splitting effect
+  // here.
+  define (instr = se_slw) {
+    width = 16;
+    fields = (OPCD8(0x42),RY,RX);
+    action = {
+      uint32_t sh = GPR(RY)(58,63).uint32();
+      if (sh > 31) {
+        GPR(RX)(32,63) = 0;
+      } else {
+        GPR(RX)(32,63) = GPR(RX)(32,63) << sh;
+      } 
+    };
+  }
+
+  define (instr=se_bc) {
+    width=16;
+    fields=(OPCD5(0x1c),BO16,BI16,BD8);
+    action = func() {
+      bool cond_ok = (CR(BI16) == BO16);
+      if (cond_ok) {
+        NIA = CIA + signExtend(concat(BD8,zero(1)),32);
+      }
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    width=32;
+    action = {
+      halt();
+    };
+  }
+
+  // The real-address size is fixed.
+  define (ra_mask) {
+    value = 0xffffffff;
+  }
+
+  // Same as the default action, but this tests to make sure that our expansion
+  // uses the correct form of NIA update and thus doesn't mess up branch
+  // reporting.
+  post_fetch = func(unsigned sz) {
+    NIA = CIA + sz;
+  };
+
+}
+
+define (core = P) {
+  archs = mixed;
+}

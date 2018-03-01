@@ -1,0 +1,29 @@
+//
+// This makes sure that we correctly handle the case
+// where a core is removed, but still declared.
+//
+
+define (core=P) {
+
+  define (reg=PC) {
+    attrs=(nia,cia);
+  }
+
+}
+
+defmod (core=P) {
+  remove = 1;
+}
+
+define (sys=S) {
+
+  define (shared) {
+    regs = FOO;
+  }
+
+  P core0;
+  P core1;
+
+}
+ 
+

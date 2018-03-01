@@ -1,0 +1,78 @@
+//
+// Tests various error scenarios with syntax strings.
+//
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,21);
+  }
+
+  define (instrfield=d) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+  }
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,d);
+    syntax = ("%i %f,%f(%f)",RS,d,RA,RA);
+    action={
+      // stuff.
+    };
+  }
+  define (instr=lwz) {
+    fields=(OPCD(32),RS,RA,d);
+    syntax = ("%i %f,%f(%f)",RS,d,RA);
+    action={
+      // stuff.
+    };
+  }
+  define (instr=lwzx) {
+    fields=(OPCD(32),RS,RA,RB);
+    syntax = ("%i %f,%f,%f",RS,RA,RB);
+    action={
+      // stuff.
+    };
+  }
+  define (instr=lwzu) {
+    fields=(OPCD(33),RS,RA,d);
+    syntax = ("%i %f,%f(%f) %f",RS,d,RA);
+    action={
+      // stuff.
+    };
+  }
+  define (instr=foo) {
+    fields=(OPCD(33),RS,RA,d);
+    syntax = "%i %f,%f(%f) %f";
+    action={
+      // stuff.
+    };
+  }
+  define (instr=bar) {
+    fields=(OPCD(33),RS,RA,d);
+    syntax = ("%i %f,%f(%q)",RS,d,RA);
+    action={
+      // stuff.
+    };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

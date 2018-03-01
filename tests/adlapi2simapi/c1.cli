@@ -1,0 +1,10 @@
+
+puts "Running tcl script"
+
+puts "Arguments:  $argv"
+
+clrfilter annotation
+
+proc print_stat { } {
+	puts "Running exit handler."
+}

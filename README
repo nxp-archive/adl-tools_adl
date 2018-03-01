@@ -1,0 +1,320 @@
+========================================
+ADL:  Architectural Description Language
+========================================
+
+ADL is an architecture description language which allows the user to model the
+ISA of a microprocessor.
+
+uADL is a micro-architecture description language, designed to model the
+internal structure of a microprocessor for the purposes of simulating
+cycle-accurate simulation.
+
+Linux is the primary platform for ADL (32-bit or 64-bit).  Most of the suite has
+been ported to Solaris; only the GDB integration and the generatedd assembler
+are not supported.  The run-time environment has been ported to Windows under
+Visual Studio 2008 and should work for Visual Studio 2013.  Please see below for
+build directions on Windows.  In addition, this should also compile on Cygwin
+and MinGW.
+
+Required Software
+-----------------
+
+To build you will need the following tools.  Versions represent minimum version numbers.
+
+  gcc 5.4.0
+  rnumber 2.1.31
+  perl 5.8.8
+	boost 1.58
+
+To build with maintainer mode (able to regenerate Makefiles) you will need:
+
+  Autoconf 2.69
+	Automake 1.15
+	Libtool 2.4.6
+
+The following are only required for non-minimal builds.
+
+  plasma 0.9.6
+  tcl 8.5
+  lz4 1.8.0
+
+The following are required in order to rebuild some of the parsers:
+
+  flex 2.6.0
+  bison 3.0.2
+
+If flex and bison are not present, then the existing C++ files are used.
+
+The following is required to build documentation:
+
+  Text::Restructured CPAN module.
+	Apache FOP
+	convert
+	fig2dev
+	epstopdf
+
+To check the project out from git via http, you will need Git 1.7.11.4 or greater.
+
+To run the extended XML-database regressions, which validates the XML using a
+schema written in Relaxed NG Syntax, you'll need the rnv program.  This may be
+obtained from here:
+
+  http://www.davidashen.net/rnv.html
+
+If this program is not installed, then these regressions will be skipped.
+
+You will also need SystemC 2.3.1 to be installed in order to test SystemC
+integration.  You will then need to set environment variables SYSTEMC_LIB_DIR
+and SYSTEMC_INCLUDE_DIR, e.g.:
+
+  SYSTEMC_LIB_DIR=/run32/pkg/systemc-/2.3.1/lib-linux
+	SYSTEMC_INCLUDE_DIR=/run/pkg/systemc-/2.3.1/include
+
+When using the Freescale Tool Repository (/pkg), this corresponds to the
+following package policies.  Note that these are split into two files: A
+compiler/architecture-specific version and a non-compiler/architecture specific
+version.  To build for 32-bit, add the /run32 path for the
+compiler/architecture-specific collection to your path; use /run for 64-bit
+compilation.
+
+Non-compiler/architecture-specific collection policy:
+
+	OSS-git-/2.7.2
+  OSS-autoconf-/2.69
+	OSS-automake-/1.15
+	OSS-libtool-/2.4.6
+	OSS-lz4-/1.8.0 { add -aslink bin/*  }
+  rnv-/1.7.8
+  prest-/0.003040 { add -aslink bin/*  }
+  apache-fop-/0.95 { add -aslink bin/* }
+  flex-/2.5.37 { add -aslink bin/*  }
+	OSS-bison-/3.0.2
+  tcltk-/8.5.5
+  TWW-perl-/5.8.8
+
+Compiler/architecture specific policy:
+
+  OSS-gcc-/5.4.0 { add -aslink bin/*  }
+  fs-rnumber-/2.1.31-gcc_5.4.0
+  fs-plasma-/0.9.6-gcc_5.4.0
+
+
+To Checkout and Build From Git
+------------------------------
+
+./autogen.sh <options>
+
+  This runs autoreconf and configure using default options.  After it's done,
+	run make.  If you want to simply configure with the default options, but not
+	run autoreconf then set NORECONF=1, e.g.:
+
+	  NORECONF=1 ./autogen.sh
+
+  The above is Bash syntax.
+
+	You need automake 1.11.1 and autoconf 2.68 for autoreconf to be able to run.
+
+	You can also just run ./configure, as described below.  However, you will
+	need to configure with "--enable-maintainer-mode" or run autogen.sh in
+	order to modify any Makefile.am.  This will, of course, require automake.
+
+	The default when running autogen.sh is to build w/o optimization and w/o
+	shared library support, while the default for just plain configure is to
+	enable optimization and to enable shared library support.
+
+  To enable optimization:  --enable-opt
+
+	To enable shared library support:  --enable-shared
+
+	To enable profiling via gprof:  --enable-prof
+
+To Build From A Distribution:
+-----------------------------
+
+./configure <options>
+
+	 Note that bulding in a separate build directory is supported.  Just create a
+	 build directory, then run ADL's configure script form inside the build
+	 directory.  Absolute and relative paths to configure are supported.
+
+   The most common option is "--prefix=<dir>", which specifies the
+   target directory.  You may need to modify your PATH or supply other
+   options so that configure is able to find the programs it needs, such
+   as gcc 4.1.1.
+
+   Other useful options:
+
+	 --enable-maintainer-mode: Turn on Makefile dependencies, so that changes to
+     Makefiles will re-run automake.
+
+	 --disable-shared/--enable-shared: By default, the use libtool is enabled, so
+     that shared objects will be built for all libraries.  You can disable this
+     via --disable-shared, which is often nice for when doing development.  For
+     installs, it is recommended to build shared objects.
+
+	 --disable-opt/--enable-opt.  By default, the project is built with
+     optimization.  For development, disable optimization for faster build times
+     and for debugging.
+
+make
+ 
+   This builds the system.
+
+make check
+
+   This runs the regression.
+
+make pcheck (3.x series)
+
+	 Run the regression with 8 parallel jobs at a time.
+
+make install
+
+   This installs the program.
+
+Building on Windows
+-------------------
+
+Microsoft Visual C++
+++++++++++++++++++++
+
+ADL supports Microsoft Visual C++ 2013.  Only the back-end support libraries,
+standalone models and assemblers/disassemblers are supported on Windows; the
+front-end parser tools are not supported.
+
+A solution file, adl2013.sln, is distributed with the project.  It expects the
+RNumber project to be present in the same directory as the *adl* directory.  It
+also expects for there to be directories called "model", "uadl-model", and
+"asm-disasm" at the same level as the adl directory, which contain example ADL
+ISS, uADL, and assembler/disassembler code.  The "model" project expects to find
+a source file named "model.cc", the uADL project expects to have a source file
+named "uadl-model.cc", and the "as-adl" and "objdump-adl" project expects to
+have files "as-adl.cc" and "objdump-adl.cc" in the "asm-disasm" directory.  You
+can load, unload, or modify these projects as necessary.
+
+The Boost project should be specified via the BOOST_ROOT environment variable
+and SystemC via the SYSTEMC_ROOT environment variable.
+
+These directions assume that you have already installed Microsoft Visual Studio
+2013 and Cygwin.  The scripts referred to below are bash scripts run within a
+Cygwin bash prompt.
+
+To build:
+
+1.  Untar the various projects into a single directory.  You may also check-out
+  	the adl project via git (either Cygwin or TortoiseGit).
+
+2.  Rename the RNumber library to "rnumber" if untarred.
+
+3.  Rename the ADL package to "adl" if untarred.
+
+4.  Run the script adl/scripts/win-env-setup to create the necessary support
+    directories.
+
+5.  Install Boost 1.58 or higher.  Steps for installing boost can be found here:
+    http://www.boost.org/doc/libs/1_58_0/more/getting_started/windows.html.  The
+    steps are equivalent across versions.  In a nutshell, download the boost zip
+    file and unzip it into C:\boost\boost_<version>.
+
+		Then open a command prompt, change to this directory, and run the following:
+
+
+		  C:\WINDOWS> cd C:\boost\boost_1_58_0
+
+			C:\boost\boost_1_58_0> bootstrap.bat
+
+			C:\boost\boost_1_58_0> b2 ^
+			More? --build-dir="C:\Users\bkahne\build-boost" ^
+			More? --build-type=complete --toolset=msvc-12.0 ^
+			More? asmflags=\safeseh stage
+
+		Then, create an environment variable, BOOST_ROOT, set to
+		C:\boost\boost_1_58_0.  Note the use of the asmflags option.  This is needed
+		so that the Boost context library is compatible with ADL's SystemC example.
+
+		Finally, move the libraries in stage/lib to a directory called
+		lib32-msvc-12.0 within the boost directory.
+
+7.  Copy your ADL model into the model directory, copy your uADL model into the
+	  uadl-model directory, and copy the generated assembler and disassembler
+	  files into the asm-disasm directory.  
+
+		This can be run automatically by executing the script "update-win-test3",
+	  created by win-env-setup.  The script simply copies generated ADL/uADL data
+	  from a shared directory.  The script scripts/win-test-setup is intended to
+	  be run on the Linux side to create these files.
+
+		The scrupt update-win-test3 assumes that you have an environment variable
+		named 'adl' which points to the ADL collateral files via a mounted path.
+		This can be either via Cygwin (which automatically shows mounted files) or
+		via the Windows 10 Linux Subsystem, in which case you may need to explicitly
+		mount the shared disk.  For example:
+
+		  sudo mkdir -p /mnt/x
+			sudo mount -t drvfs '\\smb.my.domain\directory' /mnt/x
+
+8.  If desired, build SystemC.  This can be downloaded from
+    http://accellera.org.  For SystemC 2.3.2, a zip file exists.  For older
+    versions, the download is a tarball, so I recommend untarring via Cygwin's
+    tar command.  Once untarred, copy the msvc10 directory to msvc120 and then
+    open the solution file in systemc-2.3.2/msvc120/SystemC and build using
+    Visual C++ 2013.
+
+		ADL is built with the multi-threading DLL (debug for the Debug
+	  configuration), so make sure that this matches with what SystemC is set up
+	  to build.  This means that you'll need to go to Properties -> Configuration
+	  Properties -> C/C++ -> Code Generation and change the Runtime Library
+	  setting to "Multi-threaded Debug DLL" for the Debug configuration and to
+	  "Multi-threaded DLL" for the Release configuration.
+
+		Then set the SYSTEMC_ROOT environment variable:
+
+      SYSTEMC_ROOT=C:\Documents and Settings\bkahne\My Documents\Visual Studio 2013\Projects\systemc-2.3.2
+
+		Note that the use of the /vmg option must match between the SystemC project
+		and the ADL sysc-model project.  By default, both have this enabled.
+
+    At this point, your directory structure will look like this:
+
+    	adl work/
+    		rnumber
+    		adl
+		    include/
+			    FlexLexer.h
+    		model
+		    		model.cc
+    		uadl-model
+		    		uadl-model.cc
+    		asm-disasm
+		    		as-adl.cc
+				    objdump-adl.cc
+
+9. Set the following environment variables:
+
+ 	 * ADL_ROOT: Set this to the full path of the ADL project, e.g.:
+
+		   ADL_ROOT="C:\Documents and Settings\bkahne\My Documents\Visual Studio 2013\Projects\adl work\adl"
+
+			 Note: ADL_ROOT is not required for building ADL itself, but useful for
+			 when other projects or libraries use ADL.
+
+   * BOOST_ROOT: Set this to the full directory path containing boost, e.g.
+
+       BOOST_ROOT="C:\boost\boost_1_58"
+
+   * SYSTEMC_ROOT: Set this to the full directory path of the root of the
+     SystemC installation, e.g. 
+
+		   SYSTEMC_ROOT=C:\Documents and Settings\bkahne\My Documents\Visual Studio 2013\Projects\systemc-2.3.2
+
+10. Open the adl2013 solution.
+
+	  If you do not have an ADL model, uADL model, or assembler, you will want to disable
+	  those projects.
+
+    The result will be various libaries in the respective output directory ("debug"
+    or "release" subdirectories of "adl work"), plus executables named "model.exe"
+    and "uadl-model.exe", which are standalone executables.
+
+11. Run the regression using the script run-test3.  This takes a command-line
+    option of either "release" or "debug" to specify which version to run.

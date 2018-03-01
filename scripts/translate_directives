@@ -1,0 +1,302 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+translate_directives [options] <.asm file>
+
+=head1 SYNOPSIS
+
+translate_directives [options] <.asm file>
+
+Runs assembler on StarCore assembly file by translating StarCore directives and 
+command line options into GNU assembler analogs.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--output,-o=file>
+
+Specify an output file, default is "proc-<input>.asm"
+
+=cut
+
+
+use FindBin;
+use Getopt::Long qw(:config permute);
+use Pod::Usage;
+use strict;
+use File::Copy;
+use Cwd;
+use File::Basename;
+use File::Temp;
+use Data::Dumper;
+my ($output,$help,$man,$input,%defines,$verbose);
+if (!&GetOptions
+	(
+	 "h|help"          => \$help,
+	 "m|man"           => \$man,
+	 "verbose"         => \$verbose,
+	 "D|define:s"      => \%defines,
+ 	 "o|output=s"      => \$output,
+	 "<>"              => \&plusargs,
+	)) 
+{
+          printhelp(1,1);
+}
+
+
+sub plusargs {
+  $input = shift;
+}
+
+printhelp(0,1) unless $input;
+
+$output = "proc-".basename($input) if (!$output);
+
+
+
+
+printhelp(0,1) if $help;
+printhelp(0,2) if $man;
+
+if (!$input) {
+  print "\nError:  No input file was specified.\n\n";
+  printhelp(1,1);
+}
+
+
+open (IN,"<$input") || die;
+open (OUT,">$output") || die;
+my $flush = "dummy_directive\n" x 5;
+
+my %directives = ( 
+# SIMPLE
+# Flush is needed because of commit queue.
+# we need first to write all instructions and only after this to do alignemnt
+   "ALIGN" => "$flush .balign",
+   "ORG"   => "$flush .org",
+   "ELSE"  => ".else",
+   "ENDIF" => ".endif",
+# CONST
+   "DS" => ".space",
+   "DCL" => ".int",
+   "DCW" => ".word",
+# This handled specially because starcore use "DCB" also for ascii constants
+#   "DCB" => ".byte",
+   "DUP" => ".rept",
+# FIXME: check if it is enough (endm = end macro)
+   "ENDM" => ".endr",
+# TO LOWER CASE
+   "LOOPSTART0" => "loopstart0\n",
+   "LOOPEND0" => "loopend0\n",
+   "LOOPSTART1" => "loopstart1\n",
+   "LOOPEND1" => "loopend1\n",
+   "LOOPSTART2" => "loopstart2\n",
+   "LOOPEND2" => "loopend2\n",
+   "LOOPSTART3" => "loopstart3\n",
+   "LOOPEND3" => "loopend3\n",   
+   "SYNCIO" => "syncio\n",
+# IGNORE
+   "GLOBAL" => ';GLOBAL',
+   "ENDSEC" => ";ENDSEC",
+   "LOCAL" => ";LOCAL",
+   "SIZE" => ";SIZE",
+   "FALIGN" => ";FALIGN"
+);
+
+# this is one if we met a system call
+my $syscall_flag = 0;
+while (!eof(IN)) {
+  my $line = <IN>;
+  # processc constants
+  process_dcb(\$line);
+  # process simple directives
+  process_directives(\$line);
+  # process conditional assembly
+  process_ifdefs(\$line);
+  # if it is not eque => it is a label
+  if(!process_equ(\$line)) {
+    # Label cannot be on equ. 
+    process_label(\$line); 
+  }
+  # process sections
+  process_section(\$line);
+  # process syscalls
+  process_syscall(\$line);
+  # remove everything not relevant
+  remove_chars(\$line);
+
+  chomp($line); 
+  print OUT $line,"\n";
+}
+
+
+# In case of string we substitute is to ".ascii" directive.
+sub process_dcb {
+  my $line = shift;
+  if ($$line =~ /(\s+)dcb(\s+)/gi) {
+    $$line =~ /(\s+)dcb(\s+)(.*)/i;
+    my $tmp = $3;
+    if ($tmp =~ /"/) {
+      my $ret = "";
+      my @consts = split (/,/,$tmp);
+      foreach (@consts) {
+        if (/"/) {
+          $ret .= ".ascii $_\n";         
+        } else {
+          $ret .= ".byte $_\n";
+        }
+      }
+      $$line = $ret;
+    } else {
+      $$line = ".byte $tmp";
+    }    
+  }
+}
+
+sub process_section {
+  my $line = shift;
+  if ($$line =~ /section/i) { #TBD, for now just ignore
+    $$line = ";".$$line;
+  }
+}
+
+sub process_syscall {
+  my $line = shift;
+  
+  if ($$line =~ /^___syscall:/) {
+    # Remeber that syscall happened
+    # this means that next "nop" should be replaced by 2 byte 0 number.
+    # This is becaues now the alwayes have prefix but runsim substitutes 
+    # nop by "debug" instruction, which is 16 bit, so the rest of prefix is just
+    # a junc
+    $syscall_flag = 1;
+    return;
+  } 
+  if ($syscall_flag && $$line =~ /nop/) {
+    # Handle syscall
+    $$line = ";".$$line;
+    $$line .= ".word 0\n";
+    $syscall_flag = 0;
+    return;
+  }
+}
+
+# process simple directives: usual substitution
+sub process_directives {
+  my $line = shift;
+  while (my($name,$subst) = each(%directives)) {
+    if ($$line =~ /(\s+)$name(\s+)/gi) {
+      $$line =~ s/(\s+)$name(\s+)/$1$subst$2/ig;
+    } elsif ($$line =~ /^(\s*)$name(\s*)$/g) {
+      $$line =~ s/$name/$subst/ig;
+    }
+  }
+}
+
+# In starcore, the syntax of equ is a little different
+sub process_equ {
+  my $line = shift;
+  if ($$line =~ /equ/i) {
+    $$line =~ s/(\w+)(\W+)equ(\s+)(\$|\w+)/.equ $1,$4/ig;
+    return 1;
+  }
+  return 0;
+}
+
+# Ifdefs are like in GAS, with the exception that
+# "define" directive is actually defines a symbol for starcore
+sub process_ifdefs {
+  my $line = shift;
+  if ($$line =~ /\@DEF/) {
+    if ($$line =~ /(\W*)IF(\W+)!\@DEF/i) {
+      $$line =~ s/(\W*)IF(\W+)!\@DEF\(\'(\.?)(\w+)\'\)(.*)/$1.ifndef $3$4 $5/ig;
+    } else {
+      $$line =~ s/(\W*)IF(\W+)\@DEF\(\'(\.?)(\w+)\'\)(.*)/$1.ifdef $3$4 $5/ig;
+    }
+  } elsif ($$line =~ /DEFINE/i) {
+    $$line =~ s/DEFINE(\s+)(\S+)(\s)/.equ $1$2,$3/i;
+  } else {
+    $$line =~ s/^(\s*)IF(\s+)/\.if /i;
+  }
+}
+
+# add ":" for label
+sub process_label {
+  my $line = shift;
+  if ($$line =~ /^\w+/) {
+    $$line =~ s/^(\w+)(:?)(.*)/$1:$3/ig;
+    $$line =~ s/TYPE(.*)//;
+  }  
+}
+
+# remove any unsupported junk
+sub remove_chars {
+  my $line = shift;
+  $$line =~ s/(\<|\>|\*)//g;
+  if ($$line =~ /^(\W*)size(\s+)(\w*)/) {
+    $$line = ";".$$line;
+  }
+  if ($$line =~ /sectype/i || 
+      $$line =~ /secflags/i||
+      $$line =~ /\.rela\.line\.debug_info\./i||
+      $$line =~ /^(\W*)NOTE/i ||
+      $$line =~ /^(\W*)OPT/i
+
+
+  )
+  {
+    $$line = ";".$$line;
+  }
+
+
+}
+sub plusargs {
+  $input = shift;
+}
+
+
+
+sub printversion {
+}
+
+sub printhelp($$) {
+  my ($eval,$verbose) = (shift,shift);
+  printversion();
+  print "\n";
+  pod2usage(-exitval => $eval,-verbose=>$verbose);
+  exit 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

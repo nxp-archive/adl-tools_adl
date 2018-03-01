@@ -1,0 +1,76 @@
+#
+# This tests to make sure that logging works when wrapping around memory
+# on a transactional ISS.
+#
+
+= asm
+
+  se_add 1,2
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+
+= /asm
+
+= mdopts
+
+  instr-offset: 0xfffffffc
+
+= /mdopts
+
+= aopts
+  -mvle -mregnames
+= /aopts
+
+#
+# <GEN>
+MD n=Mem ra=0xfffffffc d=0x0421 s=2	#	se_add 1,2
+MD n=Mem ra=0xfffffffe d=0x3821	s=2 #	addi r1,r1,1
+MD n=Mem ra=0x00000000 d=0x0001 s=2	#	se_add 1,2
+MD n=Mem ra=0x00000002 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000006 d=0x38210001	#	addi r1,r1,1
+# </GEN>
+CORE n=:P
+
+RD n=NIA d=0xfffffffc
+
+RD n=GPR i=2 d=2
+
+TRACE
+
+I ea=0xfffffffc id=1
+M n=Mem t=ifetch ea=0xfffffffc ra=0xfffffffc d=0x04213821
+INSTR op=0x0421                                 asm="se_add 2,1"
+R n=NIA d=0xfffffffe
+R n=GPR i=1 d=0x00000002
+
+I ea=0xfffffffe id=2
+M n=Mem t=ifetch ea=0xfffffffc ra=0xfffffffc d=0x04213821
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x00013821
+INSTR op=0x38210001                                     asm="addi 1,1,0x1"
+R n=NIA d=0x00000002
+R n=GPR i=1 d=0x00000003
+
+I ea=0x2 id=3
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x00013821
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00013821
+INSTR op=0x38210001                                     asm="addi 1,1,0x1"
+R n=NIA d=0x00000006
+R n=GPR i=1 d=0x00000004
+
+I ea=0x6 id=4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00013821
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00010000
+INSTR op=0x38210001                                     asm="addi 1,1,0x1"
+R n=NIA d=0x0000000a
+R n=GPR i=1 d=0x00000005
+
+I ea=0xa id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00010000
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+R n=NIA d=0x0000000e
+
+RESULTS
+
+RD n=GPR i=1 d=5

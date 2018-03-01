@@ -1,0 +1,171 @@
+#
+# Options:
+#   ./mod40 --trace ./in103.dat -o=in103.out.dat 
+#
+
+TEST id=0
+INIT
+
+CORE n=:le_core
+
+RD n=FOO d=0x0000000000
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000000
+RD n=GPR i=2 d=0xffffffff
+RD n=GPR i=3 d=0xffffffff
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0x00000000
+RD n=GPR i=7 d=0x00000000
+RD n=GPR i=8 d=0x00000000
+RD n=GPR i=9 d=0x00000000
+RD n=GPR i=10 d=0x00000000
+RD n=GPR i=11 d=0x00000000
+RD n=GPR i=12 d=0x00000000
+RD n=GPR i=13 d=0x00000000
+RD n=GPR i=14 d=0x00000000
+RD n=GPR i=15 d=0x00000000
+RD n=GPR i=16 d=0x00000000
+RD n=GPR i=17 d=0x00000000
+RD n=GPR i=18 d=0x00000000
+RD n=GPR i=19 d=0x00000000
+RD n=GPR i=20 d=0x00000000
+RD n=GPR i=21 d=0x00000000
+RD n=GPR i=22 d=0x00000000
+RD n=GPR i=23 d=0x00000000
+RD n=GPR i=24 d=0x00000000
+RD n=GPR i=25 d=0x00000000
+RD n=GPR i=26 d=0x00000000
+RD n=GPR i=27 d=0x00000000
+RD n=GPR i=28 d=0x00000000
+RD n=GPR i=29 d=0x00000000
+RD n=GPR i=30 d=0x00000000
+RD n=GPR i=31 d=0x00000000
+MD n=Mem ra=0x0000000000000000 d=0x11012001	#	(285286401)
+MD n=Mem ra=0x0000000000000004 d=0x02300001	#	(36700161)
+MD n=Mem ra=0x0000000000000008 d=0x03400000	#	(54525952)
+MD n=Mem ra=0x000000000000000c d=0x01045000	#	(17059840)
+MD n=Mem ra=0x0000000000000010 d=0x00000105	#	(261)
+MD n=Mem ra=0x0000000000000014 d=0x60000000	#	(1610612736)
+MD n=Mem ra=0x0000000000000018 d=0x00010670	#	(67184)
+MD n=Mem ra=0x000000000000001c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000020 d=0x00010700	#	(67328)
+MD n=Mem ra=0x0000000000000024 d=0x010002ff	#	(16777983)
+MD n=Mem ra=0x0000000000000028 d=0xffffffff	#	(4294967295)
+
+CORE n=:le_core
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x11012001
+INSTR op=0x1101					asm="I1 0x1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x11012001
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x02300001
+INSTR op=0x200102					asm="I2 0x2"
+R n=GPR i=4 d=0x00000002
+
+I ea=0x5 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x02300001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x03400000
+INSTR op=0x30000103					asm="I3 0x3"
+R n=GPR i=3 d=0x00000003
+
+I ea=0x9 id=4
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x03400000
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x01045000
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x01045000
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000105
+INSTR op=0x4000000104					asm="I4 0x4"
+R n=GPR i=4 d=0x00000004
+
+I ea=0xe id=5
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x01045000
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000105
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000105
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x60000000
+INSTR op=0x500000000105					asm="I5 0x5"
+R n=GPR i=5 d=0x00000005
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x60000000
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00010670
+INSTR op=0x60000000000106					asm="I6 0x6"
+R n=GPR i=6 d=0x00000006
+
+I ea=0x1b id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00010670
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x00010700
+INSTR op=0x7000000000000107					asm="I7 0x7"
+R n=GPR i=7 d=0x00000007
+
+I ea=0x23 id=8
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x00010700
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x010002ff
+INSTR op=0x0001					asm="spl1 "
+R n=FOO d=0x0d0000ead1
+R n=FOO d=0xddead2ead1
+
+I ea=0x25 id=9
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x010002ff
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0xffffffff
+INSTR op=0x0002					asm="spl2 "
+R n=FOO d=0xddead2ead2
+R n=FOO d=0xddead3ead2
+
+I ea=0x27 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x010002ff
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0xffffffff
+INSTR op=0xffff					asm="halt "
+
+RESULTS
+RD n=FOO d=0xddead3ead2
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0xffffffff
+RD n=GPR i=3 d=0x00000003
+RD n=GPR i=4 d=0x00000004
+RD n=GPR i=5 d=0x00000005
+RD n=GPR i=6 d=0x00000006
+RD n=GPR i=7 d=0x00000007
+RD n=GPR i=8 d=0x00000000
+RD n=GPR i=9 d=0x00000000
+RD n=GPR i=10 d=0x00000000
+RD n=GPR i=11 d=0x00000000
+RD n=GPR i=12 d=0x00000000
+RD n=GPR i=13 d=0x00000000
+RD n=GPR i=14 d=0x00000000
+RD n=GPR i=15 d=0x00000000
+RD n=GPR i=16 d=0x00000000
+RD n=GPR i=17 d=0x00000000
+RD n=GPR i=18 d=0x00000000
+RD n=GPR i=19 d=0x00000000
+RD n=GPR i=20 d=0x00000000
+RD n=GPR i=21 d=0x00000000
+RD n=GPR i=22 d=0x00000000
+RD n=GPR i=23 d=0x00000000
+RD n=GPR i=24 d=0x00000000
+RD n=GPR i=25 d=0x00000000
+RD n=GPR i=26 d=0x00000000
+RD n=GPR i=27 d=0x00000000
+RD n=GPR i=28 d=0x00000000
+RD n=GPR i=29 d=0x00000000
+RD n=GPR i=30 d=0x00000000
+RD n=GPR i=31 d=0x00000000
+MD n=Mem ra=0x0000000000000000 d=0x11012001	#	(285286401)
+MD n=Mem ra=0x0000000000000004 d=0x02300001	#	(36700161)
+MD n=Mem ra=0x0000000000000008 d=0x03400000	#	(54525952)
+MD n=Mem ra=0x000000000000000c d=0x01045000	#	(17059840)
+MD n=Mem ra=0x0000000000000010 d=0x00000105	#	(261)
+MD n=Mem ra=0x0000000000000014 d=0x60000000	#	(1610612736)
+MD n=Mem ra=0x0000000000000018 d=0x00010670	#	(67184)
+MD n=Mem ra=0x000000000000001c d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000020 d=0x00010700	#	(67328)
+MD n=Mem ra=0x0000000000000024 d=0x010002ff	#	(16777983)
+MD n=Mem ra=0x0000000000000028 d=0xffffffff	#	(4294967295)

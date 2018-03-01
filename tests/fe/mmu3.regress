@@ -1,0 +1,11 @@
+mmu3.adl:63: Argument 2 of hit-handler function must be of type(s) 'TlbCam_t'.
+mmu3.adl:64: Argument 2 of miss-handler must be of type addr_t.
+mmu3.adl:67: Unknown variable/resource found in action code:  MSR
+mmu3.adl:73: return statements are not allowed here.
+mmu3.adl:76: Expected a function of arity 3 but found arity of 1 for data-store permission function
+mmu3.adl:76: Argument 2 of data-store permission function must be of type addr_t.
+mmu3.adl:76: Argument 3 of data-store permission function must be of type unsigned.
+mmu3.adl:81: Argument 1 of instruction translation miss-handler must be of type addr_t.
+mmu3.adl:82: Unknown variable/resource found in action code:  a
+mmu3.adl:83: Argument 1 of misaligned-write function must be of type 'addr_t'.
+Too many errors.

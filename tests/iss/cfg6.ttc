@@ -1,0 +1,19 @@
+//
+// Defines a dual-issue machine with a single
+// multiplier having a latency of 8, but only
+// able to accept new instructions every 4 cycles.
+//
+define(core=P) {
+
+  define (config) {
+    issue_width = 2;
+  }
+
+  define (group=multiplies) {
+    items = (mullw,mulhw);
+    latency = 8;
+    delay = 4;
+    count = 1;
+  }
+}
+

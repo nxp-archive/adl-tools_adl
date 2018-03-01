@@ -1,0 +1,13 @@
+//
+// This tests that we can have a hierarchy of systems, where one top-level
+// system refers to another top-level system.
+//
+
+#import "share1.adl"
+
+define (sys=PSuperSystem) {
+
+  PSystem zs0;
+  PSystem zs1;
+
+}

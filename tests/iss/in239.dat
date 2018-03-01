@@ -1,0 +1,52 @@
+#
+# Test the use of a predicate for controlling post-fetch logic.
+#
+
+= asm
+
+	addis r1,r1,1
+	add  r31,r31,r1   # Will enable post-fetch logic for halt.
+	.long 0x0
+
+= /asm
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3C210001	#	addis r1,r1,1
+MD n=Mem ra=0x00000004 d=0x7FFF0A14	#	add  r31,r31,r1   # Will enable post-fetch logic for halt.
+MD n=Mem ra=0x00000008 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3c210001
+INSTR op=0x3c210001					asm="addis 1,1,0x0001"
+R n=NIA d=0x00000004
+R n=CTR d=0x0000000a
+R n=CTR d=0x0000000b
+R n=GPR i=20 d=0x00000014
+R n=GPR i=21 d=0x00000015
+R n=GPR i=1 d=0x00010000
+R n=CTR d=0x00000015
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7fff0a14
+INSTR op=0x7fff0a14					asm="add 31,31,1"
+R n=NIA d=0x00000008
+A l=1 m="Instruction pre-exec."
+R n=GPR i=31 d=0x00010000
+A l=1 m="Instruction post-exec."
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x0000000c
+A l=1 m="Instruction pre-exec."
+A l=1 m="Instruction post-exec."
+
+RESULTS
+
+RD n=GPR i=1  d=0x10000
+RD n=GPR i=31 d=0x10000
+RD n=NIA      d=0x0000c

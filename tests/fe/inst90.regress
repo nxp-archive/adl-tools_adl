@@ -1,0 +1,156 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written, slice-read, slice-written, field-read, field-written
+  Width:  32
+    A[0,7]   
+      Usage:  field-read
+    B[8,15]   
+      Usage:  field-written
+    C[16,23]   
+      Usage:  field-read
+    D[24,31]   
+      Usage:  field-read, field-written
+  -------------------------------
+Registers:
+  Name:  "FOO"
+  Usage:  slice-read, slice-written, field-read, field-written
+  Width:  32
+    A[0,7]   
+      Usage:  field-read
+    B[8,15]   
+      Usage:  field-read, field-written
+    C[16,23]   
+      Usage:  field-read
+    D[24,31]   
+      Usage:  field-written
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO_X: [21,30] 
+        Extended opcode for X Instruction Format.
+    
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Fields:  OPCD(1) RT RA RB XO_X(10)
+  Action:  {
+    FOO . D = GPR ( RT ) ;
+    FOO . B = GPR ( 31 ) ;
+}
+  Source Registers:  GPR(31) GPR(RT) 
+  Target Registers:  FOO[mask 0x00ff00ff]/p 
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  32
+  Fields:  OPCD(2) RT RA RB XO_X(10)
+  Action:  {
+    GPR ( RA ) = FOO . A + FOO . C ;
+}
+  Source Registers:  FOO[mask 0xff00ff00]/p 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  32
+  Fields:  OPCD(3) RT RA RB XO_X(10)
+  Action:  {
+    x ( 4 , 15 , RA , RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  FOO[mask 0x0fff0000]/p 
+  Helper Functions:  x 
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  32
+  Fields:  OPCD(4) RT RA RB XO_X(10)
+  Action:  {
+    GPR ( RT ) = FOO ( 0 , 3 ) + FOO ( 28 , 31 ) + FOO ( 20 ) ;
+}
+  Source Registers:  FOO[mask 0xf000080f]/p 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  e (rank: 100)
+  Width:  32
+  Fields:  OPCD(5) RT RA RB XO_X(10)
+  Action:  {
+    GPR ( RT ) . D = FOO . A ;
+    GPR ( RT ) . B = FOO . B ;
+}
+  Source Registers:  FOO[mask 0xffff0000]/p 
+  Target Registers:  GPR(RT)[mask 0x00ff00ff]/p 
+  -------------------------------
+  Name:  f (rank: 100)
+  Width:  32
+  Fields:  OPCD(6) RT RA RB XO_X(10)
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) . A + GPR ( RA ) . C + GPR ( RB ) . D ;
+}
+  Source Registers:  GPR(RA)[mask 0xff00ff00]/p GPR(RB)[mask 0x000000ff]/p 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  g (rank: 100)
+  Width:  32
+  Fields:  OPCD(7) RT RA RB XO_X(10)
+  Action:  {
+    GPR ( RT ) ( 16 , 31 ) = GPR ( RA ) ( 16 , 31 ) + GPR ( RB ) ( 16 , 31 ) ;
+}
+  Source Registers:  GPR(RA)[mask 0x0000ffff]/p GPR(RB)[mask 0x0000ffff]/p 
+  Target Registers:  GPR(RT)[mask 0x0000ffff]/p 
+  -------------------------------
+  Name:  h (rank: 100)
+  Width:  32
+  Fields:  OPCD(8) RT RA RB XO_X(10)
+  Action:  {
+    FOO . B = GPR ( 31 ) . A ;
+}
+  Source Registers:  GPR(31)[mask 0xff000000]/p 
+  Target Registers:  FOO[mask 0x00ff0000]/p 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    33554442(4000014):  a
+    67108874(8000014):  b
+    100663306(c000014):  c
+    134217738(10000014):  d
+    167772170(14000014):  e
+    201326602(18000014):  f
+    234881034(1c000014):  g
+    268435466(20000014):  h
+
+Helper Functions:
+  x:
+ void x ( int t1 , int t2 , int a , int b ) {
+    FOO ( t1 , t2 ) = GPR ( a ) + GPR ( b ) ;
+}
+    Source Registers:  GPR(a [parm #2]) GPR(b [parm #3]) 
+    Target Registers:  FOO/p 
+-------------------------------
+

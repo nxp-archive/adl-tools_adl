@@ -1,0 +1,53 @@
+//
+// Checks to make sure that an unknown shared resource 
+// will generate an error.
+//
+// Checks that aliases registers cannot be shared.
+//
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=HID0) {
+  }
+
+  define (reg=FOO) {
+    define (read) {
+      alias = HID0;
+    }
+    define (write) {
+      alias = HID0;
+    }
+  }
+
+}
+
+define (sys=PSystem) {
+  PChip chip0;
+  PChip chip1;
+  define (sys=PChip) {
+    define (core = P) {
+      archs = minippc;
+    }
+    define (shared) {
+      regs = (HID0,HID1,FOO);
+      parms = Mode;
+    }
+    P context0;
+    P context1;
+    P context2;
+  }
+}
+
+

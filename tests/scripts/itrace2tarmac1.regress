@@ -1,0 +1,4 @@
+
+[ERROR] Incorrect number of arguments.
+
+Usage: itrace2tarmac.py [itrace_file_name] [total_number_of_cores] [(optional) output_file_name]

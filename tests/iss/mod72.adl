@@ -1,0 +1,612 @@
+//
+// A simple test of a memory protection unit.  No translation is done and
+// matches are performed against upper/lower-bound fields.  An exception is
+// thrown if no match is found or if the relevant region does not allow the
+// access.
+//
+
+#import "mod1.adl"
+
+define (arch = ppc_mpu) {
+  
+  attrs = (mtspr_attr,mfspr_attr);
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  defmod (reg=HID0) {
+    define (field=ITD) {
+      """
+      Instruction TLB exception disable.
+      """;
+      bits = 31;
+    }
+    define (field=DTD) {
+      """
+      Data TLB exception disable.
+      """;
+      bits = 30;
+    }
+  }
+
+  define (reg=DEAR) {}
+
+  define (reg=BRREG) {}
+
+  define (reg=BRSTAT) {}
+
+  define (reg=TDEXIT) {}
+
+  define (reg=QEXIT) {}
+
+  define (regfile=BRFSTAT) {
+    size = 2;
+  }
+
+  // These registers exist to make sure that we'll correctly generate code for
+  // them, since they're listed as needing callbacks.
+  define (reg=BRRO) {}
+  define (reg=BRWO) {}
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=PFAULT) {}
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register for protection faults.
+    """;
+  }
+
+  define (reg=IVOR13) {
+    """
+    Interrupt-vector offset register for dtlb misses.
+    """;
+  }
+
+  define (reg=IVOR14) {
+    """
+    Interrupt-vector offset register for itlb misses.
+    """;
+  }
+
+  define (reg=MAS0) {
+    """
+    Memory assist register 0.
+    """;
+    define (field=LB) {
+      bits=(0,31);
+    }
+  }
+
+  define (reg=MAS1) {
+    """
+    Memory assist register 1.
+    """;
+    define (field=UB) {
+      bits=(0,31);
+    }
+  }
+
+  define (reg=MAS2) {
+    """
+    Memory assist register 2.
+    """;
+    define (field=SX) {
+      bits=0;
+    }
+    define (field=SW) {
+      bits=1;
+    }
+    define (field=SR) {
+      bits=2;
+    }
+    define (field=UX) {
+      bits=3;
+    }
+    define (field=UW) {
+      bits=4;
+    }
+    define (field=UR) {
+      bits=5;
+    }
+    define (field=V) {
+      bits=(6);
+    }
+    define (field=Way) {
+      bits=(28,31);
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=62) { reg=ESR; }
+    define (entry=63) { reg = DEAR; }
+    define (entry=26) { reg=SRR0; }
+    define (entry=27) { reg=SRR1; }
+    define (entry=200) { reg=MAS0; }
+    define (entry=201) { reg=MAS1; }
+    define (entry=202) { reg=MAS2; }
+    define (entry=210) { reg=BRREG; }
+    define (entry=211) { reg=BRSTAT; }
+    define (entry=220) { reg = BRFSTAT; }
+    define (entry=230) { reg = TDEXIT; }
+    define (entry=231) { reg = QEXIT; }
+  }
+
+  //
+  // Instructions.
+  //
+
+  defmod (instr=mtspr) {
+    attrs = mtspr_attr;
+  }
+
+  defmod (instr=mfspr) {
+    attrs = mfspr_attr;
+  }
+
+  define (instr=mfmsr) {
+    fields=(OPCD(31),RT,XO(83));
+    action = {
+      GPR(RT) = MSR;
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+# ifndef __NO_MMU__
+  void populateMasRegs(int way) {
+    var t = MpuCam(0,way);
+      
+    MAS0.LB  = t.LB;
+    MAS1.UB  = t.UB;
+    MAS2.V   = t.V;
+    MAS2.SX  = t.SX;
+    MAS2.SW  = t.SW;
+    MAS2.SR  = t.SR;
+    MAS2.UX  = t.UX;
+    MAS2.UW  = t.UW;
+    MAS2.UR  = t.UR;
+  }
+# endif
+
+  define (instr=tlbre) {
+    fields=(OPCD(31),XO(946));
+    action = {
+#     ifndef __NO_MMU__
+      var way = MAS2.Way;
+      populateMasRegs(way.uint32());
+#     endif
+    };
+  }
+
+  define (instr=tlbwe) {
+    fields=(OPCD(31),XO(978));
+    action = {
+#     ifndef __NO_MMU__
+      var way = MAS2.Way;
+      MpuCam_t t;
+      
+      t.LB   = MAS0.LB;
+      t.UB   = MAS1.UB;
+
+      t.V    = MAS2.V; 
+      t.SX   = MAS2.SX;
+      t.SW   = MAS2.SW;
+      t.SR   = MAS2.SR;
+      t.UX   = MAS2.UX;
+      t.UW   = MAS2.UW;
+      t.UR   = MAS2.UR;
+            
+      MpuCam(0,way.uint32()) = t;
+#     endif
+    };
+  }
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+      CIA = NIA;    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      PFAULT = PFAULT + 1;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (exception=ITlb) {
+    define (field=DEAR) { bits = 32; }
+    action = func (ITlb_t info) {
+      DEAR = info.DEAR;
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR14(16,31));
+    };
+  }
+
+  define (exception=DTlb) {
+    define (field=DEAR) { bits = 32; }
+    define (field=ISSTORE) { bits = 1; };
+    action = func (DTlb_t info) {
+      DEAR = info.DEAR;
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      if (info.ISSTORE == 1) {
+        info (1,"DTLB on store.");
+      } else {
+        info (1,"DTLB on load.");
+      }
+      NIA = concat(IVPR(0,15),IVOR13(16,31));
+    };
+  }
+
+  addr_check = func(addr_t ea,addr_t ra,TransType tt,int id,int set,int way) {
+    info(1,"In addr-check.");
+  };
+
+  define (parm=ExecProt) {
+    options = (ExecNotSet,ExecOK,ExecFault);    
+    value = ExecNotSet;
+  }
+
+  define (parm=LoadProt) {
+    options = (LoadNotSet,LoadOK,LoadFault);
+    value = LoadNotSet;
+  }
+
+  define (parm=StoreProt) {
+    options = (StoreNotSet,StoreOK,StoreFault);
+    value = StoreNotSet;
+  }
+
+  void resetParms()
+  {
+    ExecProt = ExecNotSet;
+    LoadProt = LoadNotSet;
+    StoreProt = StoreNotSet;
+  }
+
+  define (reg=MPUREG) {
+    define (field=LOWER) {
+      bits = (0,7);
+    }
+    define (field=UPPER) {
+      bits = (8,15);
+    }
+    define (field=SR) {
+      bits = 16;
+    }
+    define (field=UR) {
+      bits = 17;
+    }
+    define (field=SW) {
+      bits = 18;
+    }
+    define (field=UW) {
+      bits = 19;
+    }
+    define (field=SX) {
+      bits = 20;
+    }
+    define (field=UX) {
+      bits = 21;
+    }
+    define (field=V) {
+      bits = 31;
+    }
+  }
+
+  define (reg=HDBCR0) {
+    """
+    Hardware debug control register 0.
+    """;
+
+    define (field=REALMODE) {
+      bits = 0;
+    }
+    define (field=JAMREAL) {
+      bits = 1;
+    }
+    define (field=JAMPAGE) {
+      bits = (4,11);
+    }
+  }
+
+  define (mmu) {
+
+    // This is a simple page-based translation type to make sure that we can
+    // combine TLBs with Bounded tests with those that are page-based.
+    define (lookup=TlbJamReal) {
+      // Highest priority, but only active when a special mode is set.
+      priority = 0;
+      
+      type = Data;
+
+      define (wayfield=RPN) {
+        bits = 8;
+      }
+      
+      test = Check(HDBCR0.JAMREAL == 1);
+      
+      size = 0x1000000;
+      sizeshift = 24;
+      
+      realpage = RPN;
+      
+      miss = func (TransType tt,addr_t a,unsigned seq) {
+        TlbJamReal_t t;
+        t.RPN = HDBCR0.JAMPAGE;
+        return t;
+      };
+      
+    }
+
+    // The idea is that we should be able to model a bounded region that's based
+    // purely upon registers.
+    define (lookup=MpuReg) {
+      test = Check((MPUREG.V == 1));
+      test = Bounded((MPUREG.LOWER.uint64() << 16),(MPUREG.UPPER.uint64() << 16));
+      priority = 1;
+
+      exec_perm = func(MpuReg_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? MPUREG.SX : MPUREG.UX) == 0 && ExecProt == ExecNotSet) {
+          ExecProt = ExecFault;
+        } else {
+          ExecProt = ExecOK;
+        }
+      };
+
+      load_perm = func (MpuReg_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? MPUREG.SR : MPUREG.UR) == 0 && LoadProt == LoadNotSet ) {
+          LoadProt = LoadFault;
+        } else {
+          LoadProt = LoadOK;
+        }
+      };
+
+      store_perm = func (MpuReg_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? MPUREG.SW : MPUREG.UW) == 0  && StoreProt == StoreNotSet) {
+          StoreProt = StoreFault;
+        } else {
+          StoreProt = StoreOK;
+        }
+      };
+
+      miss = func (TransType tt,addr_t a,unsigned seq) {
+        // Dummy action.
+        MpuReg_t t;
+        return t;
+      };
+
+    }
+
+    define(lookup=MpuCamBase) {
+
+      interface = true;
+
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=IR) {
+        bits = 1;
+      }
+      define (wayfield=LB) {
+        bits = 32;
+      }
+      define (wayfield=UB) {
+        bits = 32;
+      }
+      define (wayfield=UM) {
+        bits = 5;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+
+      // Default array size.
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Bounded(LB,UB, ((0xffffffffull << (UM.uint32()+32)) >> (UM.uint32()+32)) );
+      // This test just exists to make sure that Check tests are properly
+      // translated, including registers.
+      test = Check(MSR.IR == IR);
+
+      valid = { return (V != 0); };
+
+      exec_perm = func(MpuCamBase_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SX : t.UX) == 0 && ExecProt == ExecNotSet) {
+          ExecProt = ExecFault;
+        } else {
+          ExecProt = ExecOK;
+        }
+      };
+
+      load_perm = func (MpuCamBase_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SR : t.UR) == 0 && LoadProt == LoadNotSet ) {
+          LoadProt = LoadFault;
+        } else {
+          LoadProt = LoadOK;
+        }
+      };
+
+      store_perm = func (MpuCamBase_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SW : t.UW) == 0  && StoreProt == StoreNotSet) {
+          StoreProt = StoreFault;
+        } else {
+          StoreProt = StoreOK;
+        }
+      };
+
+      // Dummy function to get a full search of all entries.
+      final_hit = func (TransType,addr_t ea,unsigned,unsigned) {};
+
+      reset = {
+        // Reset state: One 4k access at bottom of memory.
+        MpuCam_t t;
+      
+        t.LB   = 0;
+        t.UB   = 0xfff;
+        t.V    = 1;
+                      
+        t.SX   = 1;
+        t.SW   = 1;
+        t.SR   = 1;
+
+        t.UX   = 1;
+        t.UW   = 1;
+        t.UR   = 1;
+            
+        MpuCam(0,0) = t;
+      };
+
+    }
+
+    // Just for making sure that single-entry arrays compile correctly.
+    define (lookup MpuCam0) {
+      inherit = MpuCamBase;
+
+      define (array) {
+        entries = 1;
+      }
+
+      priority = 2;
+    }
+
+    define (lookup MpuCam) {
+      inherit = MpuCamBase;
+
+      priority = 3;
+
+    }
+
+    instr_miss = func(addr_t ea,unsigned) {
+      if (HID0.ITD == 0) {
+        ITlb_t itlb;
+        itlb.DEAR = ea;
+        raiseException(itlb);
+      }
+      return false;
+    };
+    
+    store_miss = func(addr_t ea,unsigned) {
+      if (HID0.DTD == 0) {
+        DTlb_t dtlb;
+        dtlb.DEAR = ea;
+        dtlb.ISSTORE = 1;
+        raiseException(dtlb);
+      }
+      return false;
+    };
+
+    load_miss = func(addr_t ea,unsigned) {
+      if (HID0.DTD == 0) {
+        DTlb_t dtlb;
+        dtlb.DEAR = ea;
+        dtlb.ISSTORE = 0;
+        raiseException(dtlb);
+      }
+      return false;
+    };
+
+    final_hit = func(TransType tt,addr_t ea,unsigned,unsigned) {
+      // At the end of the process, see if any access violations were found and
+      // raise an exception if so.
+      if ( (ExecProt == ExecFault) || 
+           (LoadProt == LoadFault) || 
+           (StoreProt == StoreFault) ) {
+        // Reset to default first.
+        resetParms();
+        ESR = ea;
+        raiseException(ProtectionFault);
+      }
+      resetParms();
+    };
+    
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,ppc_mpu);
+}

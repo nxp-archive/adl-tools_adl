@@ -1,0 +1,74 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  AA: [30,30] 
+    Absolute address bit.
+    
+  F_LI: [6,29] 
+        Immediate address field for branch instructions.
+    
+  LI: [6,29] 
+    Signed:  1
+    Addr:  PC-relative
+    Shift:  2
+        Immediate address field for branch instructions.
+    
+  LK: [31,31] 
+    LINK bit.
+    
+  OPCD: [0,5] 
+    Primary opcode.
+    
+Instructions:
+  Name:  b (rank: 100)
+  Width:  32
+  Branch:  Unconditional
+  Fields:  OPCD(18) F_LI AA(0) LK(0)
+  Action:  {
+    NIA = F_LI ;
+}
+  Target Registers:  NIA 
+  -------------------------------
+  Name:  b_b (rank: 100)
+  Width:  32
+  Branch:  Unconditional
+  Fields:  OPCD(19) LI AA(0) LK(0)
+  Alias:  b F_LI(LI) 
+  Source Registers:  CIA 
+  Target Registers:  NIA 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000003
+    1207959552(48000000):  b
+    1275068416(4c000000):  b_b
+-------------------------------
+

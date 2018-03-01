@@ -1,0 +1,9 @@
+Stall in IF (cycle 0):  mMEM: no address bandwidth
+Stall in IF (cycle 4):  mMEM: no address bandwidth
+Stall in IF (cycle 8):  mMEM: no address bandwidth
+Stall in IF (cycle 12):  mMEM: no address bandwidth
+Stall in mMM (cycle 13):  mMEM: write in progress
+Stall in IF (cycle 13):  mMEM: no address bandwidth
+Stall in IF (cycle 14):  mMEM: no address bandwidth
+Flush in mEX (cycle 17):  pipeline
+Simulation halted at address: 0x000000000000011c

@@ -1,0 +1,10 @@
+#
+# This injects an external exception in order to make sure that we will take
+# this exception later, when external exceptions are enabled.
+#
+step
+step
+puts "Triggering external exception..."
+triggerexcpt External
+go
+quit

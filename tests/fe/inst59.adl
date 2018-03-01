@@ -1,0 +1,1214 @@
+// StarCore instructions (so far)
+
+
+define (arch = sc3400){
+
+  attrs = (simple1,simple2);
+
+
+  // ------------------------------------------------------------------------------------------
+  // Memories definition
+  // ------------------------------------------------------------------------------------------
+
+
+  define (mem=DMEM)    
+    {
+      size= 0x2000;	// size of memory in bytes
+      addr_unit=1;	
+    }
+	
+  define (mem=IMEM)
+    {
+      size=0x1000;
+      addr_unit=1;
+      instr_mem = true;
+    } 
+
+
+
+  // ------------------------------------------------------------------------------------------
+  // Parameters Definition
+  // ------------------------------------------------------------------------------------------
+
+  // ! doesn't support Big endian yet
+  define (parm=EndianMode) 
+    { 
+      options = (Big , Little); 
+      value = Big; 
+    }
+
+
+  enum Exception { Privelege, Overflow, IllegalAddress};
+
+  blk = (agu, dalu); 
+
+  parallel_execution = 6 ;
+
+  // ------------------------------------------------------------------------------------------
+  // Control Registers Definition
+  // ------------------------------------------------------------------------------------------
+
+
+  define (reg=SR)
+    {  
+      """
+	Status Register
+	""";
+
+      reset = 0x03E40000;
+	
+      define (field = C)
+        {
+          bits=0;
+        }
+      define (field = T)
+        {
+          bits=1;
+        }
+      define (field = SM)
+        {
+          bits=2;
+        }
+      define (field = RM)
+        {
+          bits=3;
+        }
+      define (field = SCM)
+        {
+          bits=(4,5);
+        }
+      define (field = S)
+        {
+          bits=6;
+        }
+      define (field = SM2)
+        {
+          bits=7;
+        }
+      define (field = VF0)
+        {
+          bits=8;
+        }
+      define (field = VF1)
+        {
+          bits=9;
+        }
+      define (field = VF2)
+        {
+          bits=10;
+        }
+      define (field = VF3)
+        {
+          bits=11;
+        }
+      define (field = PE)
+        {
+          bits=17;
+        }
+      define (field = EXP)
+        {
+          bits=18;
+        }
+      define (field = DI)
+        {
+          bits=19;
+        }
+      define (field = OVE)
+        {
+          bits=20;
+        }
+      define (field = I)
+        {
+          bits=(21,25);
+        }
+      define (field = LF0)
+        {
+          bits=27;
+        }
+      define (field = LF1)
+        {
+          bits=28;
+        }
+      define (field = LF2)
+        {
+          bits=29;
+        }
+      define (field = LF3)
+        {
+          bits=30;
+        }
+      define (field = SLF)
+        {
+          bits=31;
+        }
+	
+      //  not all bits are defined by fields, these bits are regarded as reserved 
+
+	
+      define (read) // This mask is used to differentiate USR/ PSR 
+      {
+        action = {
+          if (SR.PE == 1 && SR.EXP==0) return (SR & 0xFF03FFFF);
+          else return SR;
+        };
+      }
+	
+      define (write)  // no access in the USR Mode to certain fields
+      {
+        action = func (bits<32> x) 
+          { 
+            if (SR.PE == 1 && SR.EXP==0) SR = x & 0xFF03FFFF;
+            else SR=x;
+          };
+      }
+    }
+
+
+
+  define (reg=EMR)
+    {  
+      """
+	Exception and Mode Register
+	""";
+	
+      define (field = ILIN)
+        {
+          bits=0;
+        }
+      define (field = ILST)
+        {
+          bits=1;
+        }
+      define (field = DOVF)		// ! not implement the sticky bit
+        {
+          bits=2;		
+        }
+      define (field = NIMID)
+        {
+          bits=3;
+        }
+      define (field = ILPR)		// If this bit is set, need to throw exception
+        {
+          bits=4;
+        }
+      define (field = BEM)
+        {
+          bits=16;
+        }
+      define (field = GP0)
+        {
+          bits=17;
+        }
+      define (field = GP1)
+        {
+          bits=18;
+        }
+      define (field = GP2)
+        {
+          bits=19;
+        }
+      define (field = GP3)
+        {
+          bits=20;
+        }
+      define (field = GP4)
+        {
+          bits=21;
+        }
+      define (field = GP5)
+        {
+          bits=22;
+        }
+      define (field = GP6)
+        {
+          bits=23;
+        }
+
+      define (field = SDD)
+        {
+          bits=24;
+        }
+      define (field = EAP)
+        {
+          bits=25;
+        }
+      define (field = MEM)
+        {
+          bits=26;
+        }
+	
+      // ! doesn't support Big endian yet
+      reset = 			// ! just take care of Endian Mode, not all the Pin - see definition 
+        {
+          if (EndianMode == Little) EMR= 0;
+          else EMR=0x00010000;
+        };
+	
+
+      define (read)	// 
+      {
+        action = {
+          if (SR.PE == 1 && SR.EXP==0) return ( EMR & 0x00000004);
+          else return EMR; 
+        };
+      }
+	
+      define (write)  // no access in the USR Mode to certain fields
+      {
+        action = func (bits<32> x) 	
+          { 
+            if (EMR.DOVF==0 && x(2)==1)	// EMR.DOVF set in the 2nd if 
+              {
+                if (SR.OVE==1) raiseException(Overflow);
+              }
+            if (SR.PE==1 && SR.EXP==0) EMR = ((x^0x00000004)& 0x00000004);
+            else 		// Supervisior Privelege level
+              {	
+                EMR= x^EMR;
+                if (EMR.ILPR==1) raiseException(Privelege);
+              }
+          };
+      }
+    }
+
+
+
+  define (reg=PC)
+    {  
+      """
+	Program Counter
+	""";
+      attrs = cia;
+	
+      define (write) {
+        action = func (bits<32> x) { 
+          if (x(0)!=0) raiseException(IllegalAddress);	// the LSB must be tied to 0
+          else PC = x; 
+        };
+      }
+
+    }
+
+
+  define (reg=NSP)
+    {  
+      """
+	Normal-Mode Stack Pointer
+	""";
+      define (write) {
+        action = func (bits<32> x) { 
+          if (x & 00000007!=0) raiseException(IllegalAddress);	// the 3 LSBs must be tied to 0
+          else NSP = x; 
+        };
+      }
+
+    }
+
+  define (reg=ESP)
+    {  
+      """
+	Exception-Mode Stack Pointer
+	""";
+	
+      define (read) {
+        action = 
+          {
+            if (SR.PE == 1 && SR.EXP==0) EMR.ILPR=1;	// no access in User Mode
+            else return ESP;	
+          };
+      } 
+      define (write) {
+        action = func (bits<32> x) { 
+          if (SR.PE == 1 && SR.EXP==0) EMR.ILPR=1;
+          if (x & 00000007!=0) raiseException(IllegalAddress);	// the 3 LSBs must be tied to 0
+          else ESP = x; 
+        };
+      }
+    }
+
+
+
+  define (reg=VBA)
+    {  
+      """
+	Vector Base Address Register
+	""";
+      reset=0x00000000;
+      define (read) {
+        action = 
+          {
+            if (SR.PE == 1 && SR.EXP==0) EMR.ILPR=1;	// no access in User Mode
+            else return VBA;	
+          };
+      } 
+      define (write) {
+        action = func (bits<32> x) { 
+          if (SR.PE == 1 && SR.EXP==0) EMR.ILPR=1;
+          else VBA = x; 
+        };
+      }
+    }
+
+
+  define (reg=GCR)
+    {  
+      """
+	General Configuration Register
+	""";
+	
+      width = 32;
+      define (field = BAM0)
+        {
+          bits=0;
+        }
+      define (field = BAM1)
+        {
+          bits=1;
+        }
+      define (field = BAM2)
+        {
+          bits=2;
+        }
+
+    }
+
+  define (reg=IDCR)
+    {  
+      """
+	Implementation Dependent Configuration Register
+	""";
+	
+      width = 32;
+      define (field = DSO)
+        {
+          bits=0;
+        }
+      define (field = DBTB)
+        {
+          bits=1;
+        }
+      define (field = DHLB)
+        {
+          bits=2;
+        }
+
+      reset=0x00000000;
+	
+      define (read) {
+        action = 
+          {
+            if (SR.PE == 1 && SR.EXP==0) EMR.ILPR=1;	// no access in User Mode
+            else return IDCR;	
+          };
+      } 
+      define (write) {
+        action = func (bits<32> x) { 
+          if (SR.PE == 1 && SR.EXP==0) EMR.ILPR=1;
+          else IDCR = x; 
+        };
+      }
+    }
+
+
+  // ------------------------------------------------------------------------------------------
+  // define Hardware Loops Registers
+  // ------------------------------------------------------------------------------------------
+
+
+  define (regfile=SA)
+    {
+      size = 4;
+      width = 32;
+      prefix = SA;
+    }
+
+  define (regfile=LC)
+    {
+      size = 4;
+      width = 32;
+      prefix = LC;
+    }
+
+
+
+  // ------------------------------------------------------------------------------------------
+  // define DALU Registers
+  // ------------------------------------------------------------------------------------------
+
+
+  define (regfile=D) 
+    {
+      size = 16;
+      width = 40;
+      prefix = d;
+	
+      define (field=H)
+        {
+          bits=(16,31);
+        }
+      define (field=L)
+        {
+          bits=(0,15);
+        }
+      define (field=E)
+        {
+          bits=(32,39);
+        }
+      define (field=HH)
+        {
+          bits=(24,31);
+        }
+      define (field=HL)
+        {
+          bits=(16,23);
+        }
+      define (field=LH)
+        {
+          bits=(8,15);
+        }
+      define (field=LL)
+        {
+          bits=(0,7);
+        }
+      /*define (field=WH)
+        {
+        bits =((36,39),(16,31));
+        }
+        define (field=WL)
+        {
+        bits=((32,35),(0,15));
+        }*/
+
+    }
+
+
+  define (regfile=L)
+    {
+      size = 16;
+      width = 1;
+		
+    }
+
+
+
+  // ------------------------------------------------------------------------------------------
+  // define AGU Registers
+  // ------------------------------------------------------------------------------------------
+
+
+  define (regfile=R)
+    {
+      size = 16;
+      width = 32;
+      prefix = r;
+    }
+
+  define (regfile=N)
+    {
+      size = 4;
+      width = 32;
+    }
+
+  define (regfile=B)
+    {
+      size = 8;
+      width = 32;
+      define (read) {
+        alias = R;
+        regs = ((8,15));	// a minor bug. means that B(0,7) --> R(8,15)
+    	}
+    	define (write) {
+        alias = R;
+        regs = ((8,15));
+    	}
+
+    }
+
+  define (regfile=M)
+    {
+      size = 4;
+      width = 32;	
+    }
+
+  define (reg=MCTL)
+    {
+      width = 32;
+      reset = 0;
+	
+      define (field=AM_R)
+        {
+          indexed=4;	// The register is divided to 8 subfields : 8*[4bits]  
+        }
+    }
+
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+""";
+    attrs = nia;
+  }
+
+
+
+
+  define (instr=OneWord) 
+    {  
+      fields = ((bits(0,15), Enc1),
+                (bits(16,18), HighRegister),
+                (bits(19,19), ESG));
+      width = 20;
+      pseudo = true;
+	
+    }
+
+
+  define (instr=ESG_Prefix)  
+    {
+      fields = ((bits(0,5),yyyyyy),
+                (bits(6,15), b0011000000));
+		  
+      prefix = true;  // This is a prefix description.
+      width = 16;
+    }
+
+
+  define (instr=OW_Prefix)  	// One word prefix
+    {
+      fields =((bits(0,2), ccc),	// Conditional execution
+               (bits(3), lpmarkA),		 
+               (bits(4), lpmarkB),	
+               (bits(9,11), VlesSize),		// ! attention: this field is defined different from the OW_HR_Prefix
+               (bits(12,15), b1001));
+
+      prefix = true;  
+      width = 16;
+    }
+
+  define (instrfield=HighReg) 
+    {
+      prefix = true;      
+      indexed = 3;      // consists of 3 bits subfields, implicitly indexed Dalu instruction position in VLES
+      value = 0; 	// ! delete value comment when support
+      pseudo=true;
+    }
+
+  define (instrfield=HighRegister) 
+    {
+      prefix = true;      
+      pseudo=true;
+      indexed = 3;   
+    }
+
+
+  define (instrfield=Enc1) 
+    {
+      width = 16;  
+      pseudo=true;
+    }
+
+  define (instrfield=Enc2) 
+    {
+      width  = 16; 
+      pseudo = true;
+    }
+
+  define (instrfield=Enc3) 
+    {
+      width = 16; 
+      pseudo = true;
+    }
+
+  define (instrfield=ESG) 
+    {
+      indexed = 1;  
+      prefix = true;
+      pseudo = true;
+    }
+
+  define (instrfield=yyyyyy) 
+    {
+      width = 6;  
+      prefix = true;
+      pseudo=true;
+    }
+
+  define (instrfield=VlesSize) 
+    {
+      width = 3;  
+      prefix = true;
+      pseudo=true;
+    }
+
+  define (instrfield=ccc) 
+    {
+      width = 3; 
+      pseudo=true;
+      prefix = true;
+    }
+
+  define (instrfield=lpmarkA) 
+    {
+      width = 1; 
+      prefix = true;
+      pseudo=true;
+
+    }
+
+  define (instrfield=lpmarkB) 
+    {
+      width = 1; 
+      prefix = true;
+      pseudo=true;
+    }
+
+  define (instrfield=OPCD) 
+    {
+      width = variable; 
+      pseudo = true;
+    }
+
+
+  define (instrfield=Src1) 
+    {
+      width = 4; 
+      pseudo = true;
+      pseudo=true;
+    }
+
+  define (instrfield=Src2) 
+    {
+      width = 4; 
+      pseudo = true;
+    }
+
+  define (instrfield=Res) 
+    {
+      width = 4; 
+      pseudo = true;
+    }
+
+
+  define (instrfield=iiiii) 
+    {
+      width = 6;
+      pseudo = true;
+    }
+
+
+  define (instrfield=FFF)  
+    {
+      width = 4;	// the MSB for High Register
+      type = regfile;	
+      ref = D;
+      pseudo = true;
+    }
+
+  define (instrfield=JJJ)  
+    {
+      width = 4;
+      type = regfile;
+      ref = D;
+      pseudo = true;
+    }
+
+  define (instrfield=RRR)  
+    {
+      width = 4;
+      ref = R;
+      pseudo = true;
+    }
+
+  define (instrfield=MMM)  
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=RRRR)  
+    {
+      width = 5;
+      pseudo = true;
+    }
+  define (instrfield=rrrr)  
+    {
+      width = 5;
+      pseudo = true;
+    }
+  define (instrfield=eeeee)  
+    {
+      width = 6;
+      pseudo = true;
+    }
+  define (instrfield=EEEEE)  
+    {
+      width = 6;
+      pseudo = true;
+    }
+
+  define (instrfield=a32)  
+    {
+      width = 32;
+      pseudo = true;
+    }
+
+
+  define (instrfield = DaDb) 
+    { 
+      width = 7; // number of  input  bits 
+      size = 8; // number of  output bits
+      blk = dalu; 
+      ref = D; 
+      pseudo = true;
+	
+      define (instrfield=JJJJJ) 
+        { 
+          bits = (0,4); 
+          table = ((0,4),(0,5),(0,6),(0,7), 
+                   (1,4),(1,5),(1,6),(1,7), 
+                   (2,4),(2,5),(2,6),(2,7),
+                   (3,4),(3,5),(3,6),(3,7), 
+                   (0,0),(0,1),(0,2),(0,3),
+                   (4,4),(4,5),(4,6),(4,7),
+                   (1,2),(1,3),(5,6),(5,7),
+                   (2,2),(2,3),(6,6),(6,7)); 
+        }
+	
+      fields = (6,JJJJJ(1),5,JJJJJ(0));
+    	
+      define(instrfield=Da) { // This nested field refers to the computed value of DaDb
+        width = 4;
+        fields = (0,3);  // ! changed from bits (0,3) of ThisField.
+      }	
+      define(instrfield=Db) {
+        width=4;
+        fields = (4,7);	  // ! changed from (7,4)
+      }	
+
+    }
+
+  define (instrfield=DaDa) { 
+    width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    blk = dalu; 
+    ref = D; 
+    pseudo = true;
+	
+    define(instrfield=jj) { 
+      bits = (0,1); 
+      table = ((1,1),(3,3),(5,5),(7,7)); 
+    } 
+    
+    fields = (3,jj(1),2,jj(0));		// ThisField will hold 8 bits, 2 pairs of the same field
+    
+    define(instrfield=Da) {
+    	width = 4;
+      fields = (0,3);		// ! (3,0)  
+    }	
+    define(instrfield=Db) { 
+    	width = 4;
+      fields = (4,7);  	// ! (7,4)
+    }	
+
+  }
+
+
+  define (instrfield=DgDh) { 
+    width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    blk = dalu; 
+    ref = D; 
+    pseudo = true;
+    	
+	
+    define(instrfield=GG) { 
+      bits = (0,1); 
+      table = ((0,4),(1,5),(2,6),(3,7)); 
+    } 
+    
+    fields = (3,GG(1), 2,GG(0));	
+     
+    define(instrfield=Dg) { 
+      width = 4;
+      fields = (0,3);  
+    }	
+    define(instrfield=Dh) { 
+      width = 4;
+      fields = (4,7);  
+    }	
+  }
+
+
+  define (regfile=rxTable_ESP)
+    {
+      width = 32;
+      size = 32;
+	
+      define (entry=0)   { reg = N(0); }
+      define (entry=1)   { reg = N(1); }
+      define (entry=2)   { reg = N(2); }
+      define (entry=3)   { reg = N(3); }
+      define (entry=6)   { reg = PC  ; }
+      define (entry=7)   { reg = ESP;  }
+      define (entry=8)   { reg = R(0); }
+      define (entry=9)   { reg = R(1); }
+      define (entry=10)  { reg = R(2); }
+      define (entry=11)  { reg = R(3); }
+      define (entry=12)  { reg = R(4); }
+      define (entry=13)  { reg = R(5); }
+      define (entry=14)  { reg = R(6); }
+      define (entry=15)  { reg = R(7); }
+      define (entry=24)  { reg = R(8); }
+      define (entry=25)  { reg = R(9); }
+      define (entry=26)  { reg = R(10); }
+      define (entry=27)  { reg = R(11); }
+      define (entry=28)  { reg = R(12); }
+      define (entry=29)  { reg = R(13); }
+      define (entry=30)  { reg = R(14); }
+      define (entry=31)  { reg = R(15); }
+    }
+
+  define (regfile=rxTable_NSP)
+    {
+      width = 32;
+      size = 32;
+	
+      define (entry=0)   { reg = N(0); }
+      define (entry=1)   { reg = N(1); }
+      define (entry=2)   { reg = N(2); }
+      define (entry=3)   { reg = N(3); }
+      define (entry=6)   { reg = PC  ; }
+      define (entry=7)   { reg = NSP;  }
+      define (entry=8)   { reg = R(0); }
+      define (entry=9)   { reg = R(1); }
+      define (entry=10)  { reg = R(2); }
+      define (entry=11)  { reg = R(3); }
+      define (entry=12)  { reg = R(4); }
+      define (entry=13)  { reg = R(5); }
+      define (entry=14)  { reg = R(6); }
+      define (entry=15)  { reg = R(7); }
+      define (entry=24)  { reg = R(8); }
+      define (entry=25)  { reg = R(9); }
+      define (entry=26)  { reg = R(10); }
+      define (entry=27)  { reg = R(11); }
+      define (entry=28)  { reg = R(12); }
+      define (entry=29)  { reg = R(13); }
+      define (entry=30)  { reg = R(14); }
+      define (entry=31)  { reg = R(15); }
+    }
+
+
+  define (regfile=RxTable_ESP)
+    {
+      width = 32;
+      size = 32;
+	
+      define (entry=0)   { reg = N(0); }
+      define (entry=1)   { reg = N(1); }
+      define (entry=2)   { reg = N(2); }
+      define (entry=3)   { reg = N(3); }
+      define (entry=7)   { reg = ESP;  }
+      define (entry=8)   { reg = R(0); }
+      define (entry=9)   { reg = R(1); }
+      define (entry=10)  { reg = R(2); }
+      define (entry=11)  { reg = R(3); }
+      define (entry=12)  { reg = R(4); }
+      define (entry=13)  { reg = R(5); }
+      define (entry=14)  { reg = R(6); }
+      define (entry=15)  { reg = R(7); }
+      define (entry=24)  { reg = R(8); }
+      define (entry=25)  { reg = R(9); }
+      define (entry=26)  { reg = R(10); }
+      define (entry=27)  { reg = R(11); }
+      define (entry=28)  { reg = R(12); }
+      define (entry=29)  { reg = R(13); }
+      define (entry=30)  { reg = R(14); }
+      define (entry=31)  { reg = R(15); }
+    }
+
+  define (regfile=RxTable_NSP)
+    {
+      width = 32;
+      size = 32;
+	
+      define (entry=0)   { reg = N(0); }
+      define (entry=1)   { reg = N(1); }
+      define (entry=2)   { reg = N(2); }
+      define (entry=3)   { reg = N(3); }
+      define (entry=7)   { reg = NSP;  }
+      define (entry=8)   { reg = R(0); }
+      define (entry=9)   { reg = R(1); }
+      define (entry=10)  { reg = R(2); }
+      define (entry=11)  { reg = R(3); }
+      define (entry=12)  { reg = R(4); }
+      define (entry=13)  { reg = R(5); }
+      define (entry=14)  { reg = R(6); }
+      define (entry=15)  { reg = R(7); }
+      define (entry=24)  { reg = R(8); }
+      define (entry=25)  { reg = R(9); }
+      define (entry=26)  { reg = R(10); }
+      define (entry=27)  { reg = R(11); }
+      define (entry=28)  { reg = R(12); }
+      define (entry=29)  { reg = R(13); }
+      define (entry=30)  { reg = R(14); }
+      define (entry=31)  { 
+        syntax = "foo";
+        reg = R(15); 
+      }
+    }
+
+  define (regfile=DRTable)
+    {
+      size = 32;
+	
+      define (entry=0)   { reg = D(0); }
+      define (entry=1)   { reg = D(1); }
+      define (entry=2)   { reg = D(2); }
+      define (entry=3)   { reg = D(3); }
+      define (entry=4)   { reg = D(4); }
+      define (entry=5)   { reg = D(5); }
+      define (entry=6)   { reg = D(6); }
+      define (entry=7)   { reg = D(7); }
+      define (entry=8)   { reg = R(0); }
+      define (entry=9)   { reg = R(1); }
+      define (entry=10)  { reg = R(2); }
+      define (entry=11)  { reg = R(3); }
+      define (entry=12)  { reg = R(4); }
+      define (entry=13)  { reg = R(5); }
+      define (entry=14)  { reg = R(6); }
+      define (entry=15)  { reg = R(7); }
+      define (entry=16)  { reg = D(8); }
+      define (entry=17)  { reg = D(9); }
+      define (entry=18)  { reg = D(10); }
+      define (entry=19)  { reg = D(11); }
+      define (entry=20)  { reg = D(12); }
+      define (entry=21)  { reg = D(13); }
+      define (entry=22)  { reg = D(14); }
+      define (entry=23)  { reg = D(15); }
+      define (entry=24)  { reg = R(8); }
+      define (entry=25)  { reg = R(9); }
+      define (entry=26)  { reg = R(10); }
+      define (entry=27)  { reg = R(11); }
+      define (entry=28)  { reg = R(12); }
+      define (entry=29)  { reg = R(13); }
+      define (entry=30)  { reg = R(14); }
+      define (entry=31)  { reg = R(15); }
+    }
+
+
+
+
+
+
+  define(instr=cmpeq)  			// if Da==Dn , then 1-> SR.T , else 0 -> SR.T
+    { 
+      type = OneWord;  
+      blk = dalu;
+      width = 20;
+   
+      fields= ((bits(0,2), JJJ(0,2)),  
+               (bits(3,6),  b1100),  
+               (bits(7,9),  FFF(0,2)),
+               (bits(10,13),b1100),
+               (bits(14),   reserved),  // for serial grouping 
+               (bits(15),   b0),
+               (bits(16),   FFF(3)),
+               (bits(17),   reserved),
+               (bits(18),   JJJ(3)),
+               (bits(19),   b0));
+	   
+      syntax = ("%i %f,%f",JJJ, FFF);
+
+      action = 
+        {	
+          if ( D(JJJ) == D(FFF) ) SR.T=1;
+          else SR.T=0;	
+        };
+    
+    }
+
+
+  define(instr=add) 
+    { 
+      fields = (OPCD, Src1, Src2, Res); 
+      syntax = ( "add %f,%f,%f ", Src1, Src2, Res); 
+      type = OneWord;  
+      blk = dalu;
+      width = 20; 
+      attrs = simple1;
+      define(instr=add1) {
+        attrs = simple2; 
+        fields =((bits(0,4), DaDb(0,4)),  
+                 (bits(5,6), b10),  
+                 (bits(7,9), FFF(0,2)),
+                 (bits(10,13), b1011),
+                 (bits(14), reserved),  		// for serial grouping 
+                 (bits(15), b0),
+                 (bits(16), FFF(3)),		// High Register to op3
+                 (bits(17,18), DaDb(5,6)),  	// bit 18 --> DaDb(6) - op2, bit 17 --> DaDb(5) - op1   
+                 (bits(19), b0)); 
+     		alias = add(OPCD(OPCD), Src1(DaDb.Da), Src2(DaDb.Db), Res(FFF) ); 
+      } 
+
+      define(instr=add2) { 
+        fields =((bits(0,1), DaDa(0,1)),  
+                 (bits(2,6), b11000),  
+                 (bits(7,9), FFF(0,2)),
+                 (bits(10,13), b1000),
+                 (bits(14), reserved),  		// for serial grouping 
+                 (bits(15), b0),
+                 (bits(16), FFF(3)),		// High Register to op3
+                 (bits(17,18), DaDa(2,3)),   
+                 (bits(19), b0));
+        alias = add(OPCD(OPCD), Src1(DaDa.Da), Src2(DaDa.Db), Res(FFF) ); 
+      }  
+    
+    		
+    	action = { 
+     		bits <41> OVF_result = signExtend(D(Src1),41) + signExtend(D(Src2),41);	// for computing the Overflow
+        bits <41> result = D(Src1) + D(Src2);
+        SR.C = result(40);
+        D(Res) = result(0,39);
+    		L(Res) = LnComputation(Res);			
+        D(Res) = saturation32(Res);
+		
+        if ( (SR.SM==0) && (OVF_result(40)^OVF_result(39)==1) ) // checking Overflow
+          EMR.DOVF = 1;	
+      };
+    }
+
+
+
+  define(instr=addu5) 
+    { 
+      type = OneWord;  
+      blk = dalu;
+      width = 20;	// prefix information included. 
+
+      fields =((bits(0,4), iiiii(0,4)),  
+               (bits(5,6), b10),  
+               (bits(7,9), FFF(0,2)),
+               (bits(10,13), b1110),
+               (bits(14), reserved),  // for serial grouping 
+               (bits(15), iiiii(5)),
+               (bits(16), FFF(3)),
+               (bits(17,18), reserved),	// these bits have no meaning in this instruction
+               (bits(19), b0));
+		
+      syntax = ( "add #%f,%f ", iiiii, FFF);    
+		
+      action = {
+        bits <41> OVF_result = concat(zero(36),iiiii) + signExtend(D(FFF),41);// for computing the OVF
+        bits <41> result = concat(zero(35),iiiii) + D(FFF);
+        SR.C = result(40);
+        D(FFF) = result(39,0);
+        L(FFF) = LnComputation(FFF);			
+        D(FFF) = saturation32(FFF);
+	
+        if ( (SR.SM==0) && (OVF_result(40)^OVF_result(39)==1) ) // checking Overflow
+          EMR.DOVF = 1;	
+			};	
+    }
+
+
+  bits<1> LnComputation ( bits<4> n)  //this function comutes the Ln bit
+  {
+	
+    if (SR.SM==0)  		// if the saturation Mode is set, scaling isn't considered in the calaulation of Ln
+      {
+        if (SR.SCM==0) 		// Ln computed by bits (39,31)
+          return ((D(n) & 0xFF80000000 == 0) || (D(n) & 0xFF80000000 == 0xFF80000000) ? 0 : 1);
+        else if (SR.SCM==1)		// Ln computed by bits (39,32)
+          return ((D(n) & 0xFF00000000 == 0) || (D(n) & 0xFF00000000 == 0xFF00000000) ? 0 : 1);
+        else 			// Ln computed by bits (39,30)
+          return ((D(n) & 0xFFC0000000 == 0) || (D(n) & 0xFFC0000000 == 0xFFC0000000) ? 0 : 1);
+      }
+    else return 0;		// if in saturation mode, then clear the Ln bit
+  }
+	
+
+  bits<40> saturation32 ( bits<4> n)  //this function implements the saturation mode 
+  {
+    if (SR.SM==1) 		// Saturation mode is set
+      {
+        if ((D(n) & 0xFF80000000 != 0) || (D(n) & 0xFF80000000 != 0xFF80000000))  // bits(39,31) not all 1's or 0's 
+          {
+            EMR.DOVF = 1;
+            if (D(n)(39) == 1) return 0xFF80000000;  // negative saturation 
+            else return 0x007FFFFFFF;  // positive saturation 
+          }
+      }		
+  }
+
+
+  // -----------------------------------------------------------------------------------------
+
+  define(instr=max)  			// if Dg>Dh , then Dg->Dh
+    { 
+      type = OneWord;  
+      blk = dalu;
+      width = 20;
+   
+      fields= ((bits(0,7), b01111100),  
+               (bits(8,9), DgDh(0,1)),  
+               (bits(10,13), b1011),
+               (bits(14), reserved),  // for serial grouping 
+               (bits(15), b0),
+               (bits(16), DgDh(3)),		// High register for destination
+               (bits(17), reserved),
+               (bits(18), DgDh(2)),
+               (bits(19), b0));
+      syntax = ("%i %f,%f", DgDh.Dg, DgDh.Dh);
+	   
+      action = 
+        {	
+          if ( D(DgDh.Dg)>D(DgDh.Dh) ) D(DgDh.Dh)=D(DgDh.Dg);
+          L(DgDh.Dh)=0;
+        };
+    
+    }
+
+  define (instr=brev)  		// Da(31,..,0) -> Dn(0,..,31)	;asm: BREV Da,Dn
+    { 
+      type = OneWord;  
+      blk = dalu;
+      width = 20;
+
+      fields =((bits(0,2), JJJ(0,2)),  
+               (bits(3,6), b1111),  
+               (bits(7,9), FFF(0,2)),
+               (bits(10,13), b1000),
+               (bits(14), reserved),
+               (bits(15), b0),
+               (bits(16), FFF(3)),
+               (bits(17), reserved),
+               (bits(18), JJJ(3)),
+               (bits(19),b0));
+		
+      syntax = ("%i %f,%f",JJJ,FFF); // Assembler definition
+      action = 
+        {
+          /*	bits <32> tmp = D(FFF);
+              tmp.swap_bytes();  
+              D(FFF) = tmp;*/
+
+          D(FFF).swap_bytes();
+          L(FFF)=0;
+        };
+
+
+
+
+
+    } 
+
+
+  // --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

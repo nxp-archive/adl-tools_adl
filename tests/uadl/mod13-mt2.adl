@@ -1,0 +1,29 @@
+//
+// This adds support for some extra scheduling logic.
+//
+
+#define UADL
+
+#import "mod13.adl"
+
+defmod (sys = PMT) {
+
+  defmod(core=Thread) {
+
+    define (reg=CfxIndex) {}
+
+    bool cfxProceed(unsigned tid,unsigned numthreads)
+    {
+      if (CfxIndex == tid) {
+        CfxIndex = (CfxIndex + 1) % numthreads;
+        return true;
+      }
+      return false;
+    }
+
+  }
+
+  defmod (shared) {
+    regs = (HID0,TEN,CCR,CfxIndex);
+  }
+}

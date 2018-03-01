@@ -1,0 +1,138 @@
+#
+# Tests that an exception thrown by post_cycle can be caught.
+#
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  .long 0
+  mfspr r10,SRR0
+  addi  r10,r10,4
+  mtspr SRR0,r10
+  addi  r2,r2,0x5678
+  addis r2,r2,0x1234
+  rfi
+  .long 0
+
+= /asm
+
+CORE n=:P
+
+RD n=IVOR7   d=0x1c
+RD n=PCEXCPT d=3
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0
+MD n=Mem ra=0x0000001c d=0x7D5A02A6	#	mfspr r10,SRR0
+MD n=Mem ra=0x00000020 d=0x394A0004	#	addi  r10,r10,4
+MD n=Mem ra=0x00000024 d=0x7D5A03A6	#	mtspr SRR0,r10
+MD n=Mem ra=0x00000028 d=0x38425678	#	addi  r2,r2,0x5678
+MD n=Mem ra=0x0000002c d=0x3C421234	#	addis r2,r2,0x1234
+MD n=Mem ra=0x00000030 d=0x4C000064	#	rfi
+MD n=Mem ra=0x00000034 d=0x00000000	#	.long 0
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=GPR i=1 d=0x00000001
+R n=PCCNT d=0x00000001
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=GPR i=1 d=0x00000002
+R n=PCCNT d=0x00000002
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=GPR i=1 d=0x00000003
+R n=PCCNT d=0x00000003
+E n=pcex
+R n=SRR0 d=0x00000008
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+
+I ea=0x1c id=4
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7d5a02a6
+INSTR op=0x7d5a02a6					asm="mfspr 10,0x1a"
+R n=GPR i=10 d=0x00000008
+R n=PCCNT d=0x00000004
+R n=PCCNT d=0x00000005
+
+I ea=0x20 id=5
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x394a0004
+INSTR op=0x394a0004					asm="addi 10,10,0x4"
+R n=GPR i=10 d=0x0000000c
+R n=PCCNT d=0x00000006
+
+I ea=0x24 id=6
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x7d5a03a6
+INSTR op=0x7d5a03a6					asm="mtspr 10,0x1a"
+R n=SRR0 d=0x0000000c
+R n=PCCNT d=0x00000007
+R n=PCCNT d=0x00000008
+
+I ea=0x28 id=7
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x38425678
+INSTR op=0x38425678					asm="addi 2,2,0x5678"
+R n=GPR i=2 d=0x00005678
+R n=PCCNT d=0x00000009
+
+I ea=0x2c id=8
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x3c421234
+INSTR op=0x3c421234					asm="addis 2,2,0x1234"
+R n=GPR i=2 d=0x12345678
+R n=PCCNT d=0x0000000a
+
+I ea=0x30 id=9
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi 0,0,0"
+R n=MSR d=0x00000000
+R n=PCCNT d=0x0000000b
+
+I ea=0xc id=10
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=GPR i=1 d=0x00000004
+R n=PCCNT d=0x0000000c
+
+I ea=0x10 id=11
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=GPR i=1 d=0x00000005
+R n=PCCNT d=0x0000000d
+R n=PCCNT d=0x0000000e
+
+I ea=0x14 id=12
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=GPR i=1 d=0x00000006
+R n=PCCNT d=0x0000000f
+
+I ea=0x18 id=13
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=PCCNT d=0x00000010
+
+RESULTS
+
+RD n=PCCNT d=0x10
+
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=0x12345678
+

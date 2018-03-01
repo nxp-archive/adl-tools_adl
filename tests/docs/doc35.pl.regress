@@ -1,0 +1,4329 @@
+$data = {
+"cores" => {
+"P" => {
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+      Current instruction address.
+      
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"CR" => {
+"doc" => <<DATA
+      The condition register.
+      
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"CTR" => {
+"doc" => <<DATA
+      The counter register.
+      
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"HID0" => {
+"width" => 32,
+"attributes" => {
+"privileged" => "",
+},
+"shared" => 0,
+},
+"HID1" => {
+"width" => 32,
+"attributes" => {
+"privileged" => "",
+},
+"shared" => 0,
+},
+"LR" => {
+"doc" => <<DATA
+      The link register.
+      
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+      Next instruction address.
+      
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+"XER" => {
+"doc" => <<DATA
+      The overflow and carry register.
+      
+DATA
+,
+"width" => 32,
+"fields" => {
+"CA" => {
+"bits" => [
+[
+2,
+2,
+],
+],
+},
+"OV" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"SO" => {
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+},
+"reserved_mask" => "0b00011111111111111111111111111111",
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"doc" => <<DATA
+      General purpose registers.
+      
+DATA
+,
+"width" => 32,
+"size" => 32,
+"prefix" => "r",
+"shared" => 0,
+},
+"SPR" => {
+"doc" => <<DATA
+      Special purpose registers.
+      
+DATA
+,
+"width" => 32,
+"size" => 1024,
+"shared" => 0,
+"entries" => {
+"1" => {
+"syntax" => "XER",
+"reg" => "XER",
+},
+"8" => {
+"syntax" => "LR",
+"reg" => "LR",
+},
+"9" => {
+"syntax" => "CTR",
+"reg" => "CTR",
+},
+"50" => {
+"syntax" => "HID0",
+"reg" => "HID0",
+},
+"51" => {
+"syntax" => "HID1",
+"reg" => "HID1",
+},
+},
+},
+},
+"instrfields" => {
+"AA" => {
+"doc" => <<DATA
+Absolute address bit.
+    
+DATA
+,
+"bits" => [
+[
+30,
+30,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x2",
+"type" => "imm",
+},
+"BD" => {
+"doc" => <<DATA
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    
+DATA
+,
+"bits" => [
+[
+16,
+29,
+],
+],
+"width" => 14,
+"size" => 14,
+"shift" => 2,
+"offset" => 0,
+"mask" => "0xfffc",
+"addr" => "pc",
+"type" => "imm",
+"signed" => 1,
+},
+"BF" => {
+"doc" => <<DATA
+Field used to specify one of the Condition Register fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+8,
+],
+],
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3800000",
+"type" => "imm",
+},
+"BI" => {
+"doc" => <<DATA
+Field used to specify a bit in the Condition Register to be used
+as the condition of a Branch Conditional instruction.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"display" => "hex",
+"type" => "imm",
+},
+"BO" => {
+"doc" => <<DATA
+Field used to specify options for the Branch Conditional instructions.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"display" => "hex",
+"type" => "imm",
+},
+"CRn" => {
+"doc" => <<DATA
+Assembler field used to specify a CR field for a conditional branch.
+    
+DATA
+,
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"D" => {
+"doc" => <<DATA
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"display" => "dec",
+"type" => "imm",
+"signed" => 1,
+},
+"L" => {
+"doc" => <<DATA
+Unused for 32-bit implementations.
+    
+DATA
+,
+"bits" => [
+[
+10,
+10,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x200000",
+"type" => "imm",
+},
+"LI" => {
+"doc" => <<DATA
+    Immediate address field for branch instructions.
+    
+DATA
+,
+"bits" => [
+[
+6,
+29,
+],
+],
+"width" => 24,
+"size" => 24,
+"shift" => 2,
+"offset" => 0,
+"mask" => "0x3fffffc",
+"addr" => "pc",
+"type" => "imm",
+"signed" => 1,
+},
+"LK" => {
+"doc" => <<DATA
+LINK bit.
+    
+DATA
+,
+"bits" => [
+[
+31,
+31,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1",
+"type" => "imm",
+},
+"MB" => {
+"bits" => [
+[
+21,
+25,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"MBE" => {
+"doc" => <<DATA
+In order to support a 4-operand form of rlwinm, we use this field, which is
+interpreted as a bitmask.
+    
+DATA
+,
+"pseudo" => 1,
+"width" => 32,
+"size" => 32,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"ME" => {
+"bits" => [
+[
+26,
+30,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e",
+"type" => "imm",
+},
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+0,
+5,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfc000000",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RC" => {
+"doc" => <<DATA
+    Extended RC opcode.
+    
+DATA
+,
+"bits" => [
+[
+31,
+31,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"SH" => {
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"SI" => {
+"doc" => <<DATA
+Signed immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"display" => "dec",
+"type" => "imm",
+"signed" => 1,
+},
+"SPRN" => {
+"doc" => <<DATA
+Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+[
+11,
+15,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1ff800",
+"type" => "regfile",
+"ref" => "SPR",
+},
+"UI" => {
+"doc" => <<DATA
+Unsigned immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+21,
+30,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe",
+"type" => "imm",
+},
+"Y" => {
+"doc" => <<DATA
+This is a hint bit for conditional branches.
+    
+DATA
+,
+"bits" => [
+[
+10,
+10,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x200000",
+"type" => "imm",
+"overlay" => 1,
+},
+},
+"instrs" => {
+"add" => {
+"width" => 32,
+"doc" => <<DATA
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    
+DATA
+,
+"syntax" => "add RT, RA, RB",
+"dsyntax" => "add ${RT}, ${RA}, ${RB}",
+"attributes" => {
+"doc_group_1" => "",
+},
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 266,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"addi" => {
+"width" => 32,
+"syntax" => "addi RT, RA, SI",
+"dsyntax" => "addi ${RT}, ${RA}, ${SI}",
+"attributes" => {
+"doc_group_2" => "",
+},
+"fields" => {
+"OPCD" => 14,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI ;
+    } else GPR ( RT ) = GPR ( RA ) + SI ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"addic" => {
+"width" => 32,
+"syntax" => "addic RT, RA, SI",
+"dsyntax" => "addic ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 12,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+    GPR ( RT ) = GPR ( RA ) + SI ;
+    setXerField ( false , false , true , carry ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+"XER[mask 0x20000000]/p",
+],
+"helpers" => [
+"setXerField",
+],
+},
+"addic." => {
+"width" => 32,
+"syntax" => "addic. RT, RA, SI",
+"dsyntax" => "addic. ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 13,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+    GPR ( RT ) = GPR ( RA ) + SI ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+    setXerField ( false , false , true , carry ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR[mask 0xf0000000]/p",
+"GPR(RT)",
+"XER[mask 0x20000000]/p",
+],
+"helpers" => [
+"setCrField",
+"setXerField",
+],
+},
+"addis" => {
+"width" => 32,
+"syntax" => "addis RT, RA, SI",
+"dsyntax" => "addis ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 15,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI << 16 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + ( SI << 16 ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"addme" => {
+"width" => 32,
+"syntax" => "addme RT, RA",
+"dsyntax" => "addme ${RT}, ${RA}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"XO" => 234,
+},
+"action" => <<DATA
+{
+     var carry = Carry ( GPR ( RA ) , 0xffffffff , XER . CA ) ;
+    GPR ( RT ) = GPR ( RA ) + 0xffffffff + XER . CA ;
+    setXerField ( false , false , true , carry ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0x20000000]/p",
+],
+"outputs" => [
+"GPR(RT)",
+"XER[mask 0x20000000]/p",
+],
+"helpers" => [
+"setXerField",
+],
+},
+"addme." => {
+"width" => 32,
+"syntax" => "addme. RT, RA",
+"dsyntax" => "addme. ${RT}, ${RA}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"XO" => 234,
+"RC" => 1,
+},
+"action" => <<DATA
+{
+     var carry = Carry ( GPR ( RA ) , 0xffffffff , XER . CA ) ;
+    GPR ( RT ) = GPR ( RA ) + 0xffffffff + XER . CA ;
+    setXerField ( false , false , true , carry ) ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0xa0000000]/p",
+],
+"outputs" => [
+"CR[mask 0xf0000000]/p",
+"GPR(RT)",
+"XER[mask 0x20000000]/p",
+],
+"helpers" => [
+"setCrField",
+"setXerField",
+],
+},
+"addmeo" => {
+"width" => 32,
+"syntax" => "addmeo RT, RA",
+"dsyntax" => "addmeo ${RT}, ${RA}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"XO" => 746,
+},
+"action" => <<DATA
+{
+     var carry = Carry ( GPR ( RA ) , 0xffffffff , XER . CA ) ;
+    GPR ( RT ) = GPR ( RA ) + 0xffffffff + XER . CA ;
+    setXerField ( true , true , true , carry ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0xe0000000]/p",
+],
+"outputs" => [
+"GPR(RT)",
+"XER[mask 0xe0000000]/p",
+],
+"helpers" => [
+"setXerField",
+],
+},
+"addo" => {
+"width" => 32,
+"syntax" => "addo RT, RA, RB",
+"dsyntax" => "addo ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 778,
+},
+"action" => <<DATA
+{
+     var carry = Carry ( GPR ( RA ) , GPR ( RB ) , 0 ) ;
+    setXerField ( true , true , false , carry ) ;
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+"XER[mask 0xc0000000]/p",
+],
+"outputs" => [
+"GPR(RT)",
+"XER[mask 0xc0000000]/p",
+],
+"helpers" => [
+"setXerField",
+],
+},
+"andi." => {
+"width" => 32,
+"syntax" => "andi. RS, RA, UI",
+"dsyntax" => "andi. ${RS}, ${RA}, ${UI}",
+"fields" => {
+"OPCD" => 28,
+"RS" => "",
+"RA" => "",
+"UI" => "",
+},
+"action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) & UI ;
+    setCrField ( 0 , GPR ( RA ) , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR[mask 0xf0000000]/p",
+"GPR(RA)",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"b" => {
+"width" => 32,
+"syntax" => "b LI",
+"dsyntax" => "b ${LI}",
+"fields" => {
+"OPCD" => 18,
+"LI" => "",
+"AA" => 0,
+"LK" => 0,
+},
+"action" => <<DATA
+{
+    NIA = LI ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+],
+"outputs" => [
+"NIA",
+],
+},
+"bc" => {
+"width" => 32,
+"syntax" => "bc BO,BI,BD",
+"dsyntax" => "bc ${BO},${BI},${BD}",
+"fields" => {
+"OPCD" => 16,
+"BO" => "",
+"Y" => "",
+"BI" => "",
+"BD" => "",
+"AA" => 0,
+"LK" => 0,
+},
+"action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bcl" => {
+"width" => 32,
+"syntax" => "bcl BO,BI,BD",
+"dsyntax" => "bcl ${BO},${BI},${BD}",
+"fields" => {
+"OPCD" => 16,
+"BO" => "",
+"Y" => "",
+"BI" => "",
+"BD" => "",
+"AA" => 0,
+"LK" => 1,
+},
+"action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    LR = CIA + 4 ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"LR",
+"NIA?",
+],
+},
+"bclr" => {
+"width" => 32,
+"syntax" => "bclr BO,BI",
+"dsyntax" => "bclr ${BO},${BI}",
+"fields" => {
+"OPCD" => 19,
+"BO" => "",
+"Y" => "",
+"BI" => "",
+"XO" => 16,
+"LK" => 0,
+},
+"action" => <<DATA
+{
+    if ( BO ( 2 ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = LR & ~ 0x3ULL ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR/p",
+"CTR?",
+"LR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bclrl" => {
+"width" => 32,
+"syntax" => "bclrl BO,BI",
+"dsyntax" => "bclrl ${BO},${BI}",
+"fields" => {
+"OPCD" => 19,
+"BO" => "",
+"Y" => "",
+"BI" => "",
+"XO" => 16,
+"LK" => 1,
+},
+"action" => <<DATA
+{
+    if ( BO ( 2 ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = LR & ~ 0x3ULL ;
+        LR = CIA + 4 ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA?",
+"CR/p",
+"CTR?",
+"LR?",
+],
+"outputs" => [
+"CTR?",
+"LR?",
+"NIA?",
+],
+},
+"bdnz" => {
+"width" => 32,
+"syntax" => "bdnz BD",
+"dsyntax" => "bdnz ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 16,
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bdnz+" => {
+"width" => 32,
+"syntax" => "bdnz+ BD",
+"dsyntax" => "bdnz+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 16,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bdnz-" => {
+"width" => 32,
+"syntax" => "bdnz- BD",
+"dsyntax" => "bdnz- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 16,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"beq" => {
+"width" => 32,
+"syntax" => "beq BD",
+"dsyntax" => "beq ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "BI",
+"value" => 2,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR[mask 0x20000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"beq+" => {
+"width" => 32,
+"syntax" => "beq+ CRn,BD",
+"dsyntax" => "beq+ ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 2",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"beq+_" => {
+"width" => 32,
+"syntax" => "beq+ BD",
+"dsyntax" => "beq+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 2,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x20000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"beq-" => {
+"width" => 32,
+"syntax" => "beq- CRn,BD",
+"dsyntax" => "beq- ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 2",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"beq-_" => {
+"width" => 32,
+"syntax" => "beq- BD",
+"dsyntax" => "beq- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 2,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x20000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bge" => {
+"width" => 32,
+"syntax" => "bge BD",
+"dsyntax" => "bge ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bge+" => {
+"width" => 32,
+"syntax" => "bge+ CRn,BD",
+"dsyntax" => "bge+ ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bge+_" => {
+"width" => 32,
+"syntax" => "bge+ BD",
+"dsyntax" => "bge+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bge-" => {
+"width" => 32,
+"syntax" => "bge- CRn,BD",
+"dsyntax" => "bge- ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bge-_" => {
+"width" => 32,
+"syntax" => "bge- BD",
+"dsyntax" => "bge- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bgt" => {
+"width" => 32,
+"syntax" => "bgt BD",
+"dsyntax" => "bgt ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "BI",
+"value" => 1,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR[mask 0x40000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bgt+" => {
+"width" => 32,
+"syntax" => "bgt+ CRn,BD",
+"dsyntax" => "bgt+ ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 1",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bgt+_" => {
+"width" => 32,
+"syntax" => "bgt+ BD",
+"dsyntax" => "bgt+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 1,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x40000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bgt-" => {
+"width" => 32,
+"syntax" => "bgt- CRn,BD",
+"dsyntax" => "bgt- ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 1",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bgt-_" => {
+"width" => 32,
+"syntax" => "bgt- BD",
+"dsyntax" => "bgt- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 1,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x40000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bl" => {
+"width" => 32,
+"syntax" => "bl LI",
+"dsyntax" => "bl ${LI}",
+"fields" => {
+"OPCD" => 18,
+"LI" => "",
+"AA" => 0,
+"LK" => 1,
+},
+"action" => <<DATA
+{
+    NIA = LI ;
+    LR = CIA + 4 ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+],
+"outputs" => [
+"LR",
+"NIA",
+],
+},
+"ble" => {
+"width" => 32,
+"syntax" => "ble BD",
+"dsyntax" => "ble ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "BI",
+"value" => 1,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR[mask 0x40000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"ble+" => {
+"width" => 32,
+"syntax" => "ble+ CRn,BD",
+"dsyntax" => "ble+ ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 1",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"ble+_" => {
+"width" => 32,
+"syntax" => "ble+ BD",
+"dsyntax" => "ble+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 1,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x40000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"ble-" => {
+"width" => 32,
+"syntax" => "ble- CRn,BD",
+"dsyntax" => "ble- ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 1",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"ble-_" => {
+"width" => 32,
+"syntax" => "ble- BD",
+"dsyntax" => "ble- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 1,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x40000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"blr" => {
+"width" => 32,
+"syntax" => "blr",
+"dsyntax" => "blr",
+"aliases" => {
+"bclr" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 20,
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+],
+"parent_action" => <<DATA
+{
+    if ( 20 ( 2 ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( 20 ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ 20 ( 3 ) ) != 0 ) ;
+     var cond_ok = ( 20 ( 0 ) != 0 ) || ( CR ( 0 ) == 20 ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = LR & ~ 0x3ULL ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CR[mask 0x80000000]/p",
+"CTR?",
+"LR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"blt" => {
+"width" => 32,
+"syntax" => "blt BD",
+"dsyntax" => "blt ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"blt+" => {
+"width" => 32,
+"syntax" => "blt+ CRn,BD",
+"dsyntax" => "blt+ ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"blt+_" => {
+"width" => 32,
+"syntax" => "blt+ BD",
+"dsyntax" => "blt+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"blt-" => {
+"width" => 32,
+"syntax" => "blt- CRn,BD",
+"dsyntax" => "blt- ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"blt-_" => {
+"width" => 32,
+"syntax" => "blt- BD",
+"dsyntax" => "blt- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 12,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 0,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x80000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bne" => {
+"width" => 32,
+"syntax" => "bne BD",
+"dsyntax" => "bne ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "BI",
+"value" => 2,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x20000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bne+" => {
+"width" => 32,
+"syntax" => "bne+ CRn,BD",
+"dsyntax" => "bne+ ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 2",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bne+_" => {
+"width" => 32,
+"syntax" => "bne+ BD",
+"dsyntax" => "bne+ ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 0 : 1",
+},
+"misc" => {
+"field" => "BI",
+"value" => 2,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x20000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bne-" => {
+"width" => 32,
+"syntax" => "bne- CRn,BD",
+"dsyntax" => "bne- ${CRn},${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => "CRn * 4 + 2",
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"CIA",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"bne-_" => {
+"width" => 32,
+"syntax" => "bne- BD",
+"dsyntax" => "bne- ${BD}",
+"aliases" => {
+"bc" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BO",
+"value" => 4,
+},
+"misc" => {
+"field" => "Y",
+"value" => "( BD < 0 ) ? 1 : 0",
+},
+"misc" => {
+"field" => "BI",
+"value" => 2,
+},
+"misc" => {
+"field" => "BD",
+"value" => "BD",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+     var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = BD ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"CR[mask 0x20000000]/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"clrlwi" => {
+"width" => 32,
+"syntax" => "clrlwi RA,RS,MB",
+"dsyntax" => "clrlwi ${RA},${RS},${MB}",
+"aliases" => {
+"rlwinm" => {
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "SH",
+"value" => 0,
+},
+"misc" => {
+"field" => "MB",
+"value" => "MB",
+},
+"misc" => {
+"field" => "ME",
+"value" => 31,
+},
+],
+"parent_action" => <<DATA
+{
+     var r = GPR ( RS ) . left_rotate ( 0 ) ;
+     bits < 32 > m ;
+    m . mask ( MB , 31 ) ;
+    GPR ( RA ) = r & m ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"cmp" => {
+"width" => 32,
+"syntax" => "cmp BF, RA, RB",
+"dsyntax" => "cmp ${BF}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"BF" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 0,
+},
+"action" => <<DATA
+{
+    setCrField ( BF , GPR ( RA ) , GPR ( RB ) ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR/p",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"cmpi" => {
+"width" => 32,
+"syntax" => "cmpi BF, L, RA, SI",
+"dsyntax" => "cmpi ${BF}, ${L}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 11,
+"BF" => "",
+"L" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+    setCrField ( BF , GPR ( RA ) , SI ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR/p",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"cmpwi" => {
+"width" => 32,
+"syntax" => "cmpwi BF, RA, SI",
+"dsyntax" => "cmpwi ${BF}, ${RA}, ${SI}",
+"aliases" => {
+"cmpi" => {
+"sources" => [
+"source" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BF",
+"value" => "BF",
+},
+"misc" => {
+"field" => "L",
+"value" => 0,
+},
+"misc" => {
+"field" => "SI",
+"value" => "SI",
+},
+],
+"parent_action" => <<DATA
+{
+    setCrField ( BF , GPR ( RA ) , SI ) ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR/p",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"cmpwi_" => {
+"width" => 32,
+"syntax" => "cmpwi RA,SI",
+"dsyntax" => "cmpwi ${RA},${SI}",
+"aliases" => {
+"cmpi" => {
+"sources" => [
+"source" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "BF",
+"value" => 0,
+},
+"misc" => {
+"field" => "L",
+"value" => 0,
+},
+"misc" => {
+"field" => "SI",
+"value" => "SI",
+},
+],
+"parent_action" => <<DATA
+{
+    setCrField ( BF , GPR ( RA ) , SI ) ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR[mask 0xf0000000]/p",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"halt" => {
+"width" => 32,
+"syntax" => "halt",
+"dsyntax" => "halt",
+"fields" => {
+"OPCD" => 0,
+},
+"action" => <<DATA
+{
+    halt (  ) ;
+}
+DATA
+,
+"disassemble" => 1,
+},
+"la" => {
+"width" => 32,
+"syntax" => "la RT,SI(RA)",
+"dsyntax" => "la ${RT},${SI}(${RA})",
+"attributes" => {
+"doc_group_2" => "",
+},
+"aliases" => {
+"addi" => {
+"sources" => [
+"source" => {
+"conditional" => 1,
+"field" => "RA",
+"value" => "RA",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RT",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "SI",
+"value" => "SI",
+},
+],
+"parent_action" => <<DATA
+{
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI ;
+    } else GPR ( RT ) = GPR ( RA ) + SI ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"lbz" => {
+"width" => 32,
+"syntax" => "lbz RT,D(RA)",
+"dsyntax" => "lbz ${RT},${D}(${RA})",
+"attributes" => {
+"load" => "",
+},
+"fields" => {
+"OPCD" => 34,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    GPR ( RT ) = Mem ( addr , 1 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"lhz" => {
+"width" => 32,
+"syntax" => "lhz RT,D(RA)",
+"dsyntax" => "lhz ${RT},${D}(${RA})",
+"attributes" => {
+"load" => "",
+},
+"fields" => {
+"OPCD" => 40,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    GPR ( RT ) = Mem ( addr , 2 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"li" => {
+"width" => 32,
+"syntax" => "li RT, SI",
+"dsyntax" => "li ${RT}, ${SI}",
+"attributes" => {
+"doc_group_2" => "",
+},
+"aliases" => {
+"addi" => {
+"sources" => [
+],
+"destinations" => [
+"destination" => {
+"field" => "RT",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "RA",
+"value" => 0,
+},
+"misc" => {
+"field" => "SI",
+"value" => "SI",
+},
+],
+"parent_action" => <<DATA
+{
+    {
+        GPR ( RT ) = SI ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"outputs" => [
+"GPR(RT)",
+],
+},
+"lis" => {
+"width" => 32,
+"syntax" => "lis RT, SI",
+"dsyntax" => "lis ${RT}, ${SI}",
+"aliases" => {
+"addis" => {
+"sources" => [
+],
+"destinations" => [
+"destination" => {
+"field" => "RT",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "RA",
+"value" => 0,
+},
+"misc" => {
+"field" => "SI",
+"value" => "SI",
+},
+],
+"parent_action" => <<DATA
+{
+    {
+        GPR ( RT ) = SI << 16 ;
+    }
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"outputs" => [
+"GPR(RT)",
+],
+},
+"lmw" => {
+"width" => 32,
+"syntax" => "lmw RT,D(RA)",
+"dsyntax" => "lmw ${RT},${D}(${RA})",
+"attributes" => {
+"load" => "",
+},
+"fields" => {
+"OPCD" => 46,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+     int r = RT . uint32 (  ) ;
+    do {
+        GPR ( r ) = Mem ( addr , 4 ) ;
+        r = r + 1 ;
+        addr = addr + 4 ;
+    } while ( r <= 31 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT . uint32 (  ),31)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"lwz" => {
+"width" => 32,
+"syntax" => "lwz RT,D(RA)",
+"dsyntax" => "lwz ${RT},${D}(${RA})",
+"attributes" => {
+"load" => "",
+},
+"fields" => {
+"OPCD" => 32,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"lwzu" => {
+"width" => 32,
+"syntax" => "lwzu RT,D(RA)",
+"dsyntax" => "lwzu ${RT},${D}(${RA})",
+"attributes" => {
+"load" => "",
+},
+"fields" => {
+"OPCD" => 33,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var addr = GPR ( RA . uint32 (  ) ) + D ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+    GPR ( RA . uint32 (  ) ) = addr ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA . uint32 (  ))",
+],
+"outputs" => [
+"GPR(RA . uint32 (  ))",
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"lwzx" => {
+"width" => 32,
+"syntax" => "lwzx RT, RA, RB",
+"dsyntax" => "lwzx ${RT}, ${RA}, ${RB}",
+"attributes" => {
+"load" => "",
+},
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 23,
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"mflr" => {
+"width" => 32,
+"syntax" => "mflr RT",
+"dsyntax" => "mflr ${RT}",
+"aliases" => {
+"mfspr" => {
+"sources" => [
+],
+"destinations" => [
+"destination" => {
+"field" => "RT",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "SPRN",
+"value" => 8,
+},
+],
+"parent_action" => <<DATA
+{
+    GPR ( RT ) = SPR ( 8 ) ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"SPR(8)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"mfspr" => {
+"width" => 32,
+"syntax" => "mfspr RT,SPRN",
+"dsyntax" => "mfspr ${RT},${SPRN}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"SPRN" => "",
+"XO" => 339,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = SPR ( SPRN ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"SPR(SPRN)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"mr" => {
+"width" => 32,
+"syntax" => "mr RA,RS",
+"dsyntax" => "mr ${RA},${RS}",
+"aliases" => {
+"or" => {
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+"source" => {
+"field" => "RB",
+"value" => "RS",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+"parent_action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | GPR ( RS ) ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"mtctr" => {
+"width" => 32,
+"syntax" => "mtctr RS",
+"dsyntax" => "mtctr ${RS}",
+"aliases" => {
+"mtspr" => {
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "SPRN",
+"value" => 9,
+},
+],
+"parent_action" => <<DATA
+{
+    SPR ( 9 ) = GPR ( RS ) ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"SPR(9)",
+],
+},
+"mtlr" => {
+"width" => 32,
+"syntax" => "mtlr RS",
+"dsyntax" => "mtlr ${RS}",
+"aliases" => {
+"mtspr" => {
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "SPRN",
+"value" => 8,
+},
+],
+"parent_action" => <<DATA
+{
+    SPR ( 8 ) = GPR ( RS ) ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"SPR(8)",
+],
+},
+"mtspr" => {
+"width" => 32,
+"syntax" => "mtspr SPRN,RS",
+"dsyntax" => "mtspr ${SPRN},${RS}",
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"SPRN" => "",
+"XO" => 467,
+},
+"action" => <<DATA
+{
+    SPR ( SPRN ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"SPR(SPRN)",
+],
+},
+"mulli" => {
+"width" => 32,
+"syntax" => "mulli RT, RA, SI",
+"dsyntax" => "mulli ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 7,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) * SI ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"mullw" => {
+"width" => 32,
+"syntax" => "mullw RT, RA, RB",
+"dsyntax" => "mullw ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 235,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"or" => {
+"width" => 32,
+"syntax" => "or RA,RS,RB",
+"dsyntax" => "or ${RA},${RS},${RB}",
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 444,
+},
+"action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RB)",
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"ori" => {
+"width" => 32,
+"syntax" => "ori RA,RS,UI",
+"dsyntax" => "ori ${RA},${RS},${UI}",
+"fields" => {
+"OPCD" => 24,
+"RS" => "",
+"RA" => "",
+"UI" => "",
+},
+"action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | UI ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"oris" => {
+"width" => 32,
+"syntax" => "oris RA,RS,UI",
+"dsyntax" => "oris ${RA},${RS},${UI}",
+"fields" => {
+"OPCD" => 25,
+"RS" => "",
+"RA" => "",
+"UI" => "",
+},
+"action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | concat ( UI , zero ( 16 ) ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"rlwinm" => {
+"width" => 32,
+"syntax" => "rlwinm RA,RS,SH,MB,ME",
+"dsyntax" => "rlwinm ${RA},${RS},${SH},${MB},${ME}",
+"fields" => {
+"OPCD" => 21,
+"RS" => "",
+"RA" => "",
+"SH" => "",
+"MB" => "",
+"ME" => "",
+},
+"action" => <<DATA
+{
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( MB , ME ) ;
+    GPR ( RA ) = r & m ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"rlwinm_" => {
+"width" => 32,
+"syntax" => "rlwinm RA,RS,SH,MBE",
+"dsyntax" => "rlwinm ${RA},${RS},${SH},${MBE}",
+"aliases" => {
+"rlwinm" => {
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "SH",
+"value" => "SH",
+},
+"misc" => {
+"field" => "MB",
+"value" => "count_leading_zeros ( MBE , 32 )",
+},
+"misc" => {
+"field" => "ME",
+"value" => "31 - count_trailing_zeros ( MBE )",
+},
+],
+"parent_action" => <<DATA
+{
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( count_leading_zeros ( MBE , 32 ) , 31 - count_trailing_zeros ( MBE ) ) ;
+    GPR ( RA ) = r & m ;
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"slwi" => {
+"width" => 32,
+"syntax" => "slwi RA,RS,SH",
+"dsyntax" => "slwi ${RA},${RS},${SH}",
+"aliases" => {
+"rlwinm" => {
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "SH",
+"value" => "SH",
+},
+"misc" => {
+"field" => "MB",
+"value" => 0,
+},
+"misc" => {
+"field" => "ME",
+"value" => "31 - SH",
+},
+],
+"parent_action" => <<DATA
+{
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( 0 , 31 - SH ) ;
+    GPR ( RA ) = r & m ;
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"srw" => {
+"width" => 32,
+"syntax" => "srw RA,RS,RB",
+"dsyntax" => "srw ${RA},${RS},${RB}",
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 536,
+},
+"action" => <<DATA
+{
+     var n = GPR ( RB ) ( 27 , 31 ) ;
+    GPR ( RA ) = GPR ( RS ) >> n ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RB)[mask 0x0000001f]/p",
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"stb" => {
+"width" => 32,
+"syntax" => "stb RS,D(RA)",
+"dsyntax" => "stb ${RS},${D}(${RA})",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 38,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+    Mem ( ( ( ( RA == 0 ) ? 0 : GPR ( RA ) ) + D ) , 1 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"sth" => {
+"width" => 32,
+"syntax" => "sth RS,D(RA)",
+"dsyntax" => "sth ${RS},${D}(${RA})",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 44,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    Mem ( addr , 2 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"sthx" => {
+"width" => 32,
+"syntax" => "sthx RS, RA, RB",
+"dsyntax" => "sthx ${RS}, ${RA}, ${RB}",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 407,
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    Mem ( addr , 2 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"stmw" => {
+"width" => 32,
+"syntax" => "stmw RS,D(RA)",
+"dsyntax" => "stmw ${RS},${D}(${RA})",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 47,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+     int r = RS . uint32 (  ) ;
+    do {
+        Mem ( addr , 4 ) = GPR ( r ) ;
+        r = r + 1 ;
+        addr = addr + 4 ;
+    } while ( r <= 31 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS . uint32 (  ),31)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"stw" => {
+"width" => 32,
+"syntax" => "stw RS,D(RA)",
+"dsyntax" => "stw ${RS},${D}(${RA})",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 36,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"stwu" => {
+"width" => 32,
+"syntax" => "stwu RS,D(RA)",
+"dsyntax" => "stwu ${RS},${D}(${RA})",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 37,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var addr = GPR ( RA ) + D ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+    GPR ( RA ) = addr ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"stwx" => {
+"width" => 32,
+"syntax" => "stwx RS, RA, RB",
+"dsyntax" => "stwx ${RS}, ${RA}, ${RB}",
+"attributes" => {
+"store" => "",
+},
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 151,
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"groups" => [
+"doc_group_1" => {
+"doc" => <<DATA
+A description for the first document group.
+    
+DATA
+,
+"type" => "instr",
+"items" => [
+"add",
+],
+"attributes" => {
+"title" => "Document Group 1",
+},
+},
+"doc_group_2" => {
+"doc" => <<DATA
+A description for the second document group.
+    
+DATA
+,
+"type" => "instr",
+"items" => [
+"addi",
+],
+"attributes" => {
+"title" => "The Real Document Group 2",
+},
+},
+],
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+"helpers" => {
+"setCrField" => {
+"action" => <<DATA
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) | XER . SO ;
+    CR ( 4 * field , 4 * field + 3 ) = r ;
+}
+DATA
+,
+"inputs" => [
+"XER[mask 0x80000000]/p",
+],
+"outputs" => [
+"CR/p",
+],
+},
+"setXerField" => {
+"action" => <<DATA
+ void setXerField ( bool ov , bool so , bool ca , const bits < 32 > & carry ) {
+    if ( ov ) {
+        XER . OV = carry ( 0 ) ^ carry ( 1 ) ;
+    }
+    if ( so ) {
+        XER . SO = XER . SO | XER . OV ;
+    }
+    if ( ca ) {
+        XER . CA = carry ( 0 ) ;
+    }
+}
+DATA
+,
+"inputs" => [
+"XER[mask 0xc0000000]/p?",
+],
+"outputs" => [
+"XER[mask 0xe0000000]/p?",
+],
+},
+},
+},
+},
+"systems" => {
+},
+};
+

@@ -1,0 +1,511 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+  Name:  "SPR"
+  Size:  1024
+  Contained registers:
+    9:  CTR
+    26:  SRR0
+    27:  SRR1
+    50:  SPRG0
+      Read hook:  {
+    if ( MSR . PR == 1 ) {
+        raiseException ( Program ) ;
+    }
+    return SPRG0 ;
+}
+        Source Registers:  MSR[mask 0x00200000]/p SPRG0 
+        Does raise exceptions.
+
+      Write hook:  func ( bits < 32 > x ) {
+    if ( MSR . PR == 1 ) {
+        raiseException ( Program ) ;
+    }
+    SPRG0 = x ;
+}
+        Source Registers:  MSR[mask 0x00200000]/p 
+        Target Registers:  SPRG0 
+        Does raise exceptions.
+
+    51:  SPRG0
+      Write hook:  (ignored)
+
+    62:  ESR
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Exceptions:
+  Name:  External (level sensitive)
+  Enable:  {
+    return MSR . EE == 1 ;
+}
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR . get < 16 > ( 0 , 15 ) , IVOR5 . get < 16 > ( 16 , 31 ) ) ;
+}
+  -------------------------------
+  Name:  Program (priority:  1)
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR . get < 16 > ( 0 , 15 ) , IVOR6 . get < 16 > ( 16 , 31 ) ) ;
+}
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CR"
+  Usage:  read, slice-read
+  Width:  32
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "CTR"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    The counter register.
+    
+  -------------------------------
+  Name:  "ESR"
+  Usage:  read, written, slice-written
+  Width:  32
+  Documention:
+
+    Exception syndrome register.
+    
+  -------------------------------
+  Name:  "IVOR5"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 5.
+    
+  -------------------------------
+  Name:  "IVOR6"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 6.
+    
+  -------------------------------
+  Name:  "IVPR"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector prefix register.
+    
+  -------------------------------
+  Name:  "MSR"
+  Usage:  read, written, field-read
+  Width:  32
+    EE[9]   
+      Usage:  field-read
+    PR[10]   
+      Usage:  field-read
+  Documention:
+
+    Machine state register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+  Name:  "SPRG0"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "SRR0"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    Save-restore register 0.
+    
+  -------------------------------
+  Name:  "SRR1"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    Save-restore register 1.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  AA: [30,30] 
+        Absolute address bit.
+    
+  BD: [16,29] 
+        Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    
+  BF: [6,8] 
+        Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    
+  BI: [11,15] 
+        Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    
+  BO: [6,10] 
+        Field used to specify options for the Branch Conditional instructions.
+    
+  D: [16,31] 
+        Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    
+  LK: [31,31] 
+        LINK bit.
+    
+  MB: [21,25] 
+  ME: [26,30] 
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] 
+        Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SH: [16,20] 
+  SI: [16,31] 
+        Signed immediate field for arithmetic operations.
+    
+  SPRN: [16,20] [11,15] 
+        Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  UI: [16,31] 
+        Unsigned immediate field for arithmetic operations.
+    
+  XO: [21,30] 
+        Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  addi (rank: 100)
+  Width:  32
+  Fields:  OPCD(14) RT RA SI
+  Action:  {
+     var si = signExtend ( SI , 32 ) ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + si ;
+    }
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  addic. (rank: 100)
+  Width:  32
+  Fields:  OPCD(13) RT RA SI
+  Action:  {
+     var si = signExtend ( SI , 32 ) ;
+    GPR ( RT ) = GPR ( RA ) + si ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+  Source Registers:  CR GPR(RA) 
+  Target Registers:  GPR(RT) 
+  Helper Functions:  setCrField 
+  -------------------------------
+  Name:  addis (rank: 100)
+  Width:  32
+  Fields:  OPCD(15) RT RA SI
+  Action:  {
+     bits < 32 > si = SI ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si << 16 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + ( si << 16 ) ;
+    }
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  bc (rank: 100)
+  Width:  32
+  Branch:  Conditional
+  Fields:  OPCD(16) BO BI BD AA(0) LK(0)
+  Action:  func (  ) {
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = BO ( 2 ) || ( ( CTR != 0 ) ^ BO ( 3 ) ) ;
+     var cond_ok = BO ( 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+         var ea = signExtend ( concat ( BD , zero ( 2 ) ) , 32 ) ;
+        NIA = CIA + ea ;
+    }
+}
+  Source Registers:  CIA? CR/p CTR? 
+  Target Registers:  CTR? NIA? 
+  -------------------------------
+  Name:  cmp (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) BF RA RB XO(0)
+  Action:  {
+    setCrField ( BF , GPR ( RA ) , GPR ( RB ) ) ;
+}
+  Source Registers:  CR GPR(RA) GPR(RB) 
+  Helper Functions:  setCrField 
+  -------------------------------
+  Name:  cmpi (rank: 100)
+  Width:  32
+  Fields:  OPCD(11) BF RA SI
+  Action:  func (  ) {
+     var si = signExtend ( SI , 32 ) ;
+    setCrField ( BF , GPR ( RA ) , si ) ;
+}
+  Source Registers:  CR GPR(RA) 
+  Helper Functions:  setCrField 
+  -------------------------------
+  Name:  halt (rank: 100)
+  Width:  8
+  Fields:  OPCD(0)
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+  Name:  lwz (rank: 100)
+  Width:  32
+  Fields:  OPCD(32) RT RA D
+  Action:  {
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + d ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  lwzx (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(23)
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  mfspr (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT SPRN XO(339)
+  Action:  {
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR ( 4 ) = 1 ;
+        raiseException ( Program ) ;
+    }
+    GPR ( RT ) = SPR ( SPRN ) ;
+}
+  Source Registers:  SPR(SPRN) 
+  Target Registers:  ESR[mask 0x08000000]/p? GPR(RT) 
+  Does raise exceptions.
+  -------------------------------
+  Name:  mtspr (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS SPRN XO(467)
+  Action:  {
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR ( 4 ) = 1 ;
+        raiseException ( Program ) ;
+    }
+    SPR ( SPRN ) = GPR ( RS ) ;
+}
+  Source Registers:  GPR(RS) 
+  Target Registers:  ESR[mask 0x08000000]/p? SPR(SPRN) 
+  Does raise exceptions.
+  -------------------------------
+  Name:  mullw (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(235)
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  or (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO(444)
+  Action:  {
+    GPR ( RA ) = GPR ( RS ) | GPR ( RB ) ;
+}
+  Source Registers:  GPR(RB) GPR(RS) 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+  Name:  ori (rank: 100)
+  Width:  32
+  Fields:  OPCD(24) RS RA UI
+  Action:  {
+    GPR ( RA ) = GPR ( RS ) | UI ;
+}
+  Source Registers:  GPR(RS) 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+  Name:  rfi (rank: 100)
+  Width:  32
+  Branch:  Unconditional
+  Fields:  OPCD(19) RS RA RB XO(50)
+  Action:  {
+    MSR = SRR1 ;
+    NIA = SRR0 ;
+}
+  Source Registers:  SRR0 SRR1 
+  Target Registers:  MSR NIA 
+  -------------------------------
+  Name:  rlwinm (rank: 100)
+  Width:  32
+  Fields:  OPCD(21) RS RA SH MB ME
+  Action:  {
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( MB , ME ) ;
+    GPR ( RA ) = r & m ;
+}
+  Source Registers:  GPR(RS) 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+  Name:  stw (rank: 100)
+  Width:  32
+  Fields:  OPCD(36) RS RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var d = signExtend ( D , 32 ) ;
+     var addr = b + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+  Source Registers:  GPR(RA) GPR(RS) 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  stwu (rank: 100)
+  Width:  32
+  Fields:  OPCD(37) RS RA D
+  Action:  {
+     var d = signExtend ( D , 32 ) ;
+     var addr = GPR ( RA ) + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+    GPR ( RA ) = addr ;
+}
+  Source Registers:  GPR(RA) GPR(RS) 
+  Target Registers:  GPR(RA) 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  stwx (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO(151)
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) GPR(RS) 
+  Target Memories:  Mem 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    0(0):  halt
+    11(2c000000):  cmpi
+    13(34000000):  addic.
+    14(38000000):  addi
+    15(3c000000):  addis
+    16(40000000):      Mask:  0x3
+      0(0):  bc
+    19(4c000000):      Mask:  0x7fe
+      50(64):  rfi
+    21(54000000):  rlwinm
+    24(60000000):  ori
+    31(7c000000):      Mask:  0x7fe
+      0(0):  cmp
+      23(2e):  lwzx
+      151(12e):  stwx
+      235(1d6):  mullw
+      266(214):  add
+      339(2a6):  mfspr
+      444(378):  or
+      467(3a6):  mtspr
+    32(80000000):  lwz
+    36(90000000):  stw
+    37(94000000):  stwu
+
+Decode-Miss Handler:  func ( addr_t ea , unsigned  ) {
+    ESR ( 4 ) = 1 ;
+    raiseException ( Program ) ;
+}
+  Target Registers:  ESR[mask 0x08000000]/p 
+  Does raise exceptions.
+
+Post-Fetch Handler:  func ( unsigned size ) {
+    NIA = NIA + size ;
+}
+  Source Registers:  NIA 
+  Target Registers:  NIA 
+
+Helper Functions:
+  setCrField:
+ void setCrField ( bits < 32 > field , bits < 32 > x , bits < 32 > y ) {
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    CR . set ( 4 * field , 4 * field + 3 , r ) ;
+}
+    Source Registers:  CR 
+-------------------------------
+

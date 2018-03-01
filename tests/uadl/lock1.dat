@@ -1,0 +1,30 @@
+#
+# Test locking and delayed unlocking.
+#
+
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,1
+  mtspr 50,r1
+  addi r2,r2,2
+  addi r2,r2,2
+
+= /asm
+
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x7C320BA6	#	mtspr 50,r1
+MD n=Mem ra=0x0000000c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000010 d=0x38420002	#	addi r2,r2,2
+# </GEN>
+CORE n=:P
+
+
+RESULTS
+
+RD n=GPR i=1 d=2
+RD n=GPR i=2 d=4

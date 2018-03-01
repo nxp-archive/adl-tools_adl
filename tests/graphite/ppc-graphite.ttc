@@ -1,0 +1,42 @@
+
+define (config) {
+  // Log commit times so we can view the performance model results in a trace.
+  log_td_commit = true;
+}
+
+
+define (core=powerpc) {
+
+  //
+  // These groupings make use of attributes in powerpc.adl
+  //  
+
+  define (graphite_group=load_instrs) {
+    items = load;
+  }
+
+  define (graphite_group=store_instrs) {
+    items = store;
+  }
+
+  define (graphite_group=multiply_instrs) {
+    items = multiply;
+  }
+
+  define (graphite_group=divide_instrs) {
+    items = divide;
+  }
+
+  define (graphite_group=simple_instrs) {
+    items = default_instruction;
+  }
+
+  define (config) {
+    // On a cache miss, however, they'll take an extra 10 cycles.
+    cache_miss_latency = (
+                          L1d = 7,
+                          L1i = 7,
+                          L2  = 100
+                          );
+  }
+}

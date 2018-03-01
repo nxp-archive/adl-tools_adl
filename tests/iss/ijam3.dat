@@ -1,0 +1,66 @@
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+# </GEN>
+
+RD n=GPR i=1 d=10
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+
+#
+# Note: ERW (external register write) commands come from the scripting
+# interface.
+#
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x0000000b
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x0000000c
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x0000000d
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+ERW n=GPR i=2 d=0x0000000a id=5
+R n=GPR i=2 d=0x0000000b
+
+I ea=0xc id=6
+INSTR op=0x38420002					asm="addi r2,r2,2"
+R n=GPR i=2 d=0x0000000c
+
+ERW n=GPR i=3 d=0x00000014 id=7
+R n=GPR i=3 d=0x00000014
+
+I ea=0xc id=8
+INSTR op=0x38630003					asm="addi r3,r3,3"
+R n=GPR i=3 d=0x00000017
+
+I ea=0xc id=9
+INSTR op=0x80801000					asm="lwz r4,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=4 d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000000d
+# These results are only valid b/c the script injects instructions
+# to modify these registers.
+RD n=GPR i=2 d=0x0000000c
+RD n=GPR i=3 d=0x00000017
+RD n=GPR i=4 d=0xdeadbeef

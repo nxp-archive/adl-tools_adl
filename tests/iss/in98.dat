@@ -1,0 +1,135 @@
+#
+# Test to make sure that our write-allocation predicate works.
+#
+
+CORE n=:P
+
+= asm
+
+  # In no-write-alloc on write-through mode, these will miss and not cause a load.
+  stw r5,0x1000(r0)
+  stw r5,0x1004(r0)
+
+  # This will read the data into the cache.
+  lwz r6,0x1000(r0)
+
+  # These will now hit.
+  stw r7,0x1008(r0)
+  stw r7,0x100c(r0)
+
+  # This then switches back to write-allocate mode.
+  mtspr 52,r31
+
+  # This will miss but will cause a load to occur.
+  stw r5,0x2000(r0)
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x90A01000	#	stw r5,0x1000(r0)
+MD n=Mem ra=0x00000104 d=0x90A01004	#	stw r5,0x1004(r0)
+MD n=Mem ra=0x00000108 d=0x80C01000	#	lwz r6,0x1000(r0)
+MD n=Mem ra=0x0000010c d=0x90E01008	#	stw r7,0x1008(r0)
+MD n=Mem ra=0x00000110 d=0x90E0100C	#	stw r7,0x100c(r0)
+MD n=Mem ra=0x00000114 d=0x7FF40BA6	#	mtspr 52,r31
+MD n=Mem ra=0x00000118 d=0x90A02000	#	stw r5,0x2000(r0)
+# </GEN>
+
+RD n=NIA d=0x0100
+
+RD n=CCR d=0xf0000000
+
+RD n=GPR i=5  d=0xdeadbeef
+RD n=GPR i=7  d=0x12345678
+RD n=GPR i=31 d=0xe0000000
+
+TRACE
+
+I ea=0x100 id=1
+C n=L1i a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L2 a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L2 a=load t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L1i a=load t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x90a01000
+INSTR op=0x90a01000					asm="stw r5,4096(r0)"
+D n=Mem t=write ea=0x1000 nb=4
+C n=L1d a=miss t=write lm=0x7f ra=0x1000
+C n=L2 a=miss t=write lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0xdeadbeef
+
+I ea=0x104 id=2
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x90a01004
+INSTR op=0x90a01004					asm="stw r5,4100(r0)"
+D n=Mem t=write ea=0x1004 nb=4
+C n=L1d a=miss t=write lm=0x7f ra=0x1000
+C n=L2 a=miss t=write lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0xdeadbeef
+
+I ea=0x108 id=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x80c01000
+INSTR op=0x80c01000					asm="lwz r6,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=0 lm=0x7f ra=0x1000
+C n=L2 a=miss t=read lm=0x7f ra=0x1000
+C n=L1d a=load t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=6 d=0xdeadbeef
+
+I ea=0x10c id=4
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x90e01008
+INSTR op=0x90e01008					asm="stw r7,4104(r0)"
+D n=Mem t=write ea=0x1008 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+C n=L2 a=miss t=write lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x12345678
+
+I ea=0x110 id=5
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x90e0100c
+INSTR op=0x90e0100c					asm="stw r7,4108(r0)"
+D n=Mem t=write ea=0x100c nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+C n=L2 a=miss t=write lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x100c ra=0x100c d=0x12345678
+
+I ea=0x114 id=6
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x7ff40ba6
+INSTR op=0x7ff40ba6					asm="mtspr r31,52"
+R n=CCR d=0xe0000000
+
+I ea=0x118 id=7
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x90a02000
+INSTR op=0x90a02000					asm="stw r5,8192(r0)"
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=0 way=0 lm=0x7f ra=0x2000
+C n=L2 a=miss t=write lm=0x7f ra=0x2000
+C n=L1d a=load t=write set=0 way=0 lm=0x7f ra=0x2000
+C n=L2 a=miss t=write set=64 way=0 lm=0x7f ra=0x2000
+C n=L2 a=load t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0xdeadbeef
+
+I ea=0x11c id=8
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0xdeadbeef
+MD n=Mem ra=0x1008 d=0x12345678
+MD n=Mem ra=0x100c d=0x12345678
+
+MD n=Mem ra=0x2000 d=0xdeadbeef
+

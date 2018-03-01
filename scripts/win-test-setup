@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# Use this script to generate test files needed for running regressions on Windows.
+#
+# The 'adl' environment variable must be set to the full path of the adl project.
+#
+# Generated files are then placd into ${adl}/win-test-files.  The script
+# update-win-test can then be run on Cygwin to copy these files into the
+# appropriate locations in a Windows test setup, assuming that update-win-test
+# is pointing to the same adl directory.
+#
+
+if [ -z "$adl" ]; then
+	echo "adl environment variable not set"
+	exit 1
+fi
+
+ati=${adl}/tests/iss
+atu=${adl}/tests/uadl
+base=${adl}/win-test-files
+
+mkdir -p ${base}/model ${base}/asm-disasm ${base}/uadl-model ${base}/sysc-model ${base}/mt-uadl-model
+
+ADLFLAGS="--no-line-directives --config=./mod23.ttc --decode-cache --extern-dmi --jobs=3 --no-log-usage"
+
+ASMFLAGS="--no-log-usage --no-warn-redefine --arch-pfx=ppc"
+
+MOUT=model.cc
+cd $ati
+${adl}/bin/make-iss ${ADLFLAGS} mod23.adl -o=model.cc
+rm -f ${base}/model/*
+cp model.cc model-0.cc model-1.cc model-2.cc ${base}/model
+
+DOUT=objdump-adl.cc
+AOUT=as-adl.cc
+${adl}/bin/make-asm ${ASMFLAGS} mod1.adl -dis-output=${DOUT} -asm-output=${AOUT}
+cp $DOUT $AOUT ${base}/asm-disasm
+rm $DOUT $AOUT
+
+cd $atu
+uadlmodel="dlx-cache-split-safe"
+syscmodel="dlx-sysc-base"
+mtmodel="dlx-mt1-safe"
+
+make ${uadlmodel}.cc ${syscmodel}.cc ${mtmodel}.cc
+rm -f ${base}/uadl-model/*
+rm -f ${base}/sysc-model/*
+rm -f ${base}/mt-uadl-model/*
+
+cp ${uadlmodel}{-iss.cc,.cc,.h} ${base}/uadl-model
+cp ${base}/uadl-model/${uadlmodel}.cc ${base}/uadl-model/uadl-model.cc
+cp ${syscmodel}{-iss.cc,.cc,.h} ${base}/sysc-model
+cp ${mtmodel}{-iss.cc,.cc,.h} MyCache.h ${base}/mt-uadl-model

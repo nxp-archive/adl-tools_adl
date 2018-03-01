@@ -1,0 +1,124 @@
+
+--------------------------------------------------------------------------------------------------------------
+| NAME                           | ENC                                      | ACTION                         |
+--------------------------------------------------------------------------------------------------------------
+| add                            | 011111RRRRRIIIIIiiiii0100001010*         | {     GPR ( RT ) = GPR ( RA ) +|
+|                                |                                          | GPR ( RB ) ; }                 |
+| add2                           | ********************************         | alias = "add RA(0) RB(0) RT(0)"|
+| addi                           | 001110iiiiiIIIIISSSSSSSSSSSSSSSS         | {      var si = signExtend ( SI|
+|                                |                                          | , 32 ) ;     if ( RA == 0 ) {  |
+|                                |                                          | GPR ( RT ) = si ;     } else { |
+|                                |                                          | GPR ( RT ) = GPR ( RA ) + si ; |
+|                                |                                          | } }                            |
+| addic.                         | 001101iiiiiIIIIISSSSSSSSSSSSSSSS         | {      var si = signExtend ( SI|
+|                                |                                          | , 32 ) ;     GPR ( RT ) = GPR (|
+|                                |                                          | RA ) + si ;     setCrField ( 0 |
+|                                |                                          | , GPR ( RT ) , 0 ) ; }         |
+| addis                          | 001111iiiiiIIIIISSSSSSSSSSSSSSSS         | {      bits < 32 > si = SI ;   |
+|                                |                                          | if ( RA == 0 ) {         GPR ( |
+|                                |                                          | RT ) = si << 16 ;     } else { |
+|                                |                                          | GPR ( RT ) = GPR ( RA ) + ( si |
+|                                |                                          | << 16 ) ;     } }              |
+| bc                             | 010000BBBBBiiiiiIIIIIIIIIIIIII00         | {     if ( ( BO ( 2 ) ) == 0 ) |
+|                                |                                          | {         CTR = CTR - 1 ;     }|
+|                                |                                          | var ctr_ok = BO ( 2 ) || ( (   |
+|                                |                                          | CTR != 0 ) ^ BO ( 3 ) ) ;      |
+|                                |                                          | var cond_ok = BO ( 0 ) || ( CR |
+|                                |                                          | ( BI ) == BO ( 1 ) ) ;     if (|
+|                                |                                          | ctr_ok && cond_ok ) {          |
+|                                |                                          | var ea = signExtend ( concat ( |
+|                                |                                          | BD , zero ( 2 ) ) , 32 ) ;     |
+|                                |                                          | NIA = CIA + ea ;     } }       |
+| cmp                            | 011111III**iiiiiRRRRR0000000000*         | {     setCrField ( BF , GPR (  |
+|                                |                                          | RA ) , GPR ( RB ) ) ; }        |
+| cmpi                           | 001011III**iiiiiSSSSSSSSSSSSSSSS         | {      var si = signExtend ( SI|
+|                                |                                          | , 32 ) ;     setcrfield ( BF , |
+|                                |                                          | GPR ( RA ) , si ) ; }          |
+| crand                          | 010011RRRRRIIIIIiiiii0100000001*         | {     if ( RB == 0 ) {         |
+|                                |                                          | GPR ( RT ) = FOO2 . X ( RA ) ; |
+|                                |                                          | } else if ( RB == 1 ) {        |
+|                                |                                          | GPR ( RT ) = FOO2 . Y ( RA ) ; |
+|                                |                                          | } else {         GPR ( RT ) =  |
+|                                |                                          | FOO2 . Z ( RA ) ;     } }      |
+| crandc                         | 010011RRRRRIIIIIiiiii0010000001*         | {     if ( RB == 0 ) {         |
+|                                |                                          | FOO2 . X ( RA ) = GPR ( RS ) ; |
+|                                |                                          | } else if ( RB == 1 ) {        |
+|                                |                                          | FOO2 . Y ( RA ) = GPR ( RS ) ; |
+|                                |                                          | } else {         FOO2 . Z ( RA |
+|                                |                                          | ) = GPR ( RS ) ;     } }       |
+| dum1                           | 100010RRRRRiiiii************IIII         | {      ; }                     |
+| halt                           | 000000**************************         | {     halt (  ) ; }            |
+| li                             | ****************                         |                                |
+| lwz                            | 100000RRRRRiiiiiIIIIIIIIIIIIIIII         | {      var d = signExtend ( D ,|
+|                                |                                          | 32 ) ;      var b = ( RA == 0 )|
+|                                |                                          | ? 0 : GPR ( RA ) ;      var    |
+|                                |                                          | addr = b + d ;     GPR ( RT ) =|
+|                                |                                          | Mem ( addr , 4 ) ; }           |
+| lwzx                           | 011111RRRRRIIIIIiiiii0000010111*         | {      var b = ( RA == 0 ) ? 0 |
+|                                |                                          | : GPR ( RA ) ;      var addr = |
+|                                |                                          | b + GPR ( RB ) ;     GPR ( RT )|
+|                                |                                          | = Mem ( addr , 4 ) ; }         |
+| mfspr                          | 011111IIIIIiiiiiiiiii0101010011*         | {     if ( ! SPR . validIndex (|
+|                                |                                          | SPRN ) ) {         ESR . set ( |
+|                                |                                          | 4 ) ;         raiseException ( |
+|                                |                                          | Program ) ;     }     GPR ( RT |
+|                                |                                          | ) = SPR ( SPRN ) ; }           |
+| mr                             | ********************************         | alias = "or RA(RA) RB(RS)      |
+|                                |                                          | RS(RS)"                        |
+| mtspr                          | 011111IIIIIiiiiiiiiii0111010011*         | {     if ( ! SPR . validIndex (|
+|                                |                                          | SPRN ) ) {         ESR . set ( |
+|                                |                                          | 4 ) ;         raiseException ( |
+|                                |                                          | Program ) ;     }     SPR (    |
+|                                |                                          | SPRN ) = GPR ( RS ) ; }        |
+| mullw                          | 011111RRRRRIIIIIiiiii0011101011*         | {     GPR ( RT ) = GPR ( RA ) *|
+|                                |                                          | GPR ( RB ) ; }                 |
+| or                             | 011111RRRRRIIIIIiiiii0110111100*         | {     GPR ( RA ) = GPR ( RS ) ||
+|                                |                                          | GPR ( RB ) ; }                 |
+| ori                            | 011000iiiiiIIIIIUUUUUUUUUUUUUUUU         | {     GPR ( RA ) = GPR ( RS ) ||
+|                                |                                          | UI ; }                         |
+| rfi                            | 010011RRRRRIIIIIiiiii0000110010*         | {     MSR = SRR1 ;     NIA =   |
+|                                |                                          | SRR0 ; }                       |
+| rlwinm                         | 010101RRRRRRRRRRSSSSSIIIIIiiiii*         | {      var r = GPR ( RS ) .    |
+|                                |                                          | left_rotate ( SH ) ;      bits |
+|                                |                                          | < 32 > m ;     m . mask ( MB , |
+|                                |                                          | ME ) ;     GPR ( RA ) = r & m ;|
+|                                |                                          | }                              |
+| se_add                         | 000001**iiiiIIII                         | alias = "add RA(RX) RB(RY)     |
+|                                |                                          | RT(RX)"                        |
+| se_addi                        | 0010000IIIIIiiii                         | {     rGPR ( RX ) = rGPR ( RX )|
+|                                |                                          | + OIM5 ; }                     |
+| stw                            | 100100RRRRRiiiiiIIIIIIIIIIIIIIII         | {      var b = ( RA == 0 ) ? 0 |
+|                                |                                          | : GPR ( RA ) ;      var d =    |
+|                                |                                          | signExtend ( D , 32 ) ;        |
+|                                |                                          | var addr = b + d ;     Mem (   |
+|                                |                                          | addr , 4 ) = GPR ( RS ) ; }    |
+| stwu                           | 100101RRRRRiiiiiIIIIIIIIIIIIIIII         | {      var d = signExtend ( D ,|
+|                                |                                          | 32 ) ;      var addr = GPR ( RA|
+|                                |                                          | ) + d ;     Mem ( addr , 4 ) = |
+|                                |                                          | GPR ( RS ) ;     GPR ( RA ) =  |
+|                                |                                          | addr ; }                       |
+| stwx                           | 011111RRRRRIIIIIiiiii0010010111*         | {      var b = ( RA == 0 ) ? 0 |
+|                                |                                          | : GPR ( RA ) ;      var addr = |
+|                                |                                          | b + GPR ( RB ) ;     Mem ( addr|
+|                                |                                          | , 4 ) = GPR ( RS ) ; }         |
+| tw                             | 011111*****IIIIIiiiii0000000100*         | {     FOO1 = GPR ( RA ) ;      |
+|                                |                                          | GPR ( RB ) = FOO1 . A + 1 ;    |
+|                                |                                          | FOO1 . C = GPR ( RB + 1 ) ; }  |
+| vaddubm                        | 000100RRRRRIIIIIiiiii0000000000*         | {     for (  unsigned i = 0 ; i|
+|                                |                                          | != VPR ( RT ) . size (  ) / 8 ;|
+|                                |                                          | ++ i ) {         VPR ( RT ) . B|
+|                                |                                          | ( i ) = VPR ( RA ) . B ( i ) + |
+|                                |                                          | VPR ( RB ) . B ( i ) ;     } } |
+| vadduhm                        | 000100RRRRRIIIIIiiiii0000100000*         | {     for (  unsigned i = 0 ; i|
+|                                |                                          | != VPR ( RT ) . size (  ) / 16 |
+|                                |                                          | ; ++ i ) {         VPR ( RT ) .|
+|                                |                                          | H ( i ) = VPR ( RA ) . H ( i ) |
+|                                |                                          | + VPR ( RB ) . H ( i ) ;     } |
+|                                |                                          | }                              |
+| vadduwm                        | 000100RRRRRIIIIIiiiii0001000000*         | {     for (  unsigned i = 0 ; i|
+|                                |                                          | != VPR ( RT ) . size (  ) / 32 |
+|                                |                                          | ; ++ i ) {         VPR ( RT ) .|
+|                                |                                          | W ( i ) = VPR ( RA ) . W ( i ) |
+|                                |                                          | + VPR ( RB ) . W ( i ) ;     } |
+|                                |                                          | }                              |
+--------------------------------------------------------------------------------------------------------------

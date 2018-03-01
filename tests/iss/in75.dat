@@ -1,0 +1,42 @@
+#
+# Simple infinite loop which increments memory at two locations.
+# Used in conjunction with gdbtest5.dat to test the ability to query
+# a running program. 
+#
+= asm
+
+start:
+  lwz  r2,0x1000(0)
+  lwz  r3,0x2000(0)
+  addi r2,r2,1
+  addi r3,r3,2
+  stw  r2,0x1000(0)
+  stw  r3,0x2000(0)
+  b start
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x10000
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x80401000	#	lwz  r2,0x1000(0)
+MD n=Mem ra=0x00010004 d=0x80602000	#	lwz  r3,0x2000(0)
+MD n=Mem ra=0x00010008 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0001000c d=0x38630002	#	addi r3,r3,2
+MD n=Mem ra=0x00010010 d=0x90401000	#	stw  r2,0x1000(0)
+MD n=Mem ra=0x00010014 d=0x90602000	#	stw  r3,0x2000(0)
+MD n=Mem ra=0x00010018 d=0x4BFFFFE8	#	b start
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x10000
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x2000 d=0
+
+

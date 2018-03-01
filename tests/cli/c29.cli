@@ -1,0 +1,67 @@
+#
+# Test of various callback functions.
+#
+
+proc c1 {id name index value} {
+	puts [format "Write to $name\[$index\]:  0x%x" $value ]
+}
+
+proc dne {id name index value} {
+	puts "Should not be executed."
+}
+
+proc c2 {id name index value} {
+	puts [format "Write to general-purpose-register $index:  0x%x" $value ]
+}
+
+proc c3 {id name value} {
+	puts [format "Write to register $name:  0x%x" $value ]
+}
+
+proc c4 {id name value} {
+	puts [format "Write to XER:  0x%x" $value ]
+}
+
+proc c5 {ea opc name} {
+	puts "Executing $name"
+}
+
+proc c6 {id name pre seq ea ra value} {
+	if { !$pre } {
+		puts [format "Write to memory at 0x%x:  0x%x" $ra $value]
+	}
+}
+
+proc c7 {id name pre seq ea ra value} {
+	if { !$pre } {
+		puts [format "Read from memory at 0x%x:  0x%x" $ra $value]
+	}
+}
+
+proc c8 {id name index value} {
+	puts [format "Write to GPR2 (specific):  0x%x" $value ]
+}
+
+proc c9 {id name pre seq ea ra value} {
+	if { !$pre } {
+		puts [format "Write to 0x2000-0x2ffff memory at 0x%x:  0x%x" $ra $value]
+	}
+}
+
+setlogcmd regfile_write c1
+setlogcmd regfile_write dne
+setlogcmd regfile_write c2 GPR
+setlogcmd regfile_write c8 GPR 2
+
+setlogcmd reg_write c3
+setlogcmd reg_write c4 XER
+
+setlogcmd instr c5
+
+clrlogcmd regfile_write dne
+
+setlogcmd mem_write c6
+setlogcmd mem_write c9 Mem 0x2000 0x2fff
+setlogcmd mem_read c7
+
+go

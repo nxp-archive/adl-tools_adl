@@ -1,0 +1,128 @@
+#!@PERL@ 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+#
+# Basic usage (invocation) tracking library.
+#
+
+package usagelog;
+use strict;
+require 5.004;
+use Text::ParseWords;
+use File::Basename;
+use IO::Socket;
+use Cwd;
+use  Exporter ();
+use vars qw(@EXPORT @ISA @EXPORT_OK);
+@ISA = qw(Exporter);
+@EXPORT = qw(&get_username
+	     &get_userhome
+	     &log_usage
+	     &udp_send
+	    );
+@EXPORT_OK = qw();
+use vars @EXPORT, @EXPORT_OK;
+
+my $usage_log_server = "@USAGE_LOG_SERVER@";
+my $usage_log_port   = "@USAGE_LOG_PORT@";
+my $adl_version      = "@PACKAGE_VERSION@";
+
+# Perl counter part of C++ usagelog client/server program
+# Usage1 : log_usage($program_name, \@cmdline, $rc, $usagelog_server, $port_num);
+# Usage2 : log_usage($program_name, \@cmdline, $rc);
+# Example
+## &log_usage("myprgname","This is the rest of argv");
+## &log_usage($0,\@ARGV);
+## &log_usage($0,\@ARGV,4,"briscoe",1999);
+## &log_usage($0,\@ARGV,8,"briscoe:1999");
+## &log_usage($0,\@ARGV,16,"briscoe");
+sub log_usage {
+	# If usage logging is disabled, then return immediately.
+	return if (!$usage_log_server);
+
+	my $prgname = shift;
+	my $msg = shift;
+	my $rc = shift;
+	my $tohost = shift;
+	my $portnum = shift;
+	my @arr;
+
+	if (ref($msg) eq "ARRAY") {
+		@arr = @{$msg};
+	} else {
+		$arr[0] = $msg;
+	}
+	if (!defined $tohost) {
+		if (defined $ENV{'USAGELOG_SERVER'}) {
+			$tohost = $ENV{'USAGELOG_SERVER'};
+		} else {
+			$tohost = $usage_log_server;
+		}
+	}
+	if ($tohost =~ /^(\S+):(\d+)$/) {
+		($tohost,$portnum) = ($1,$2);
+	}
+
+	if (!defined $portnum) {
+		if ($usage_log_port) {
+			$portnum = $usage_log_port;
+		}
+		elsif (defined $ENV{'USAGELOG_PORT'}) {
+			$portnum = $ENV{'USAGELOG_PORT'};
+		} 
+		else {
+			$portnum = '1999';
+		}
+	}
+	if (!defined $rc) {
+		$rc = 0;
+	}
+
+	my $username = get_username();
+	my $fullmsg = sprintf "%s:%s:rc=%d:cwd=%s: %s ##VERSION=$adl_version## ##KEYWORDS=adl,tool##", $username,$prgname,$rc,
+                  Cwd::getcwd(),join(' ',@arr);
+	# printf "// Debug - Send to %s:%d by %s '%s'\n",$tohost,$portnum,$username,$fullmsg;
+	return &udp_send($tohost,$portnum,$fullmsg);
+}
+
+sub udp_send {
+	my $tohost = shift;
+	my $portnum = shift;
+	my $msg = shift;
+
+	my $sock = new IO::Socket::INET(PeerAddr => $tohost,
+					PeerPort => $portnum,
+					Proto => 'udp');
+	if (!$sock) {
+	  return undef;
+	}
+
+	my $rc = $sock->send($msg);
+	undef $sock;
+	return $rc;
+	
+}
+
+sub get_username {
+	return (getlogin() ||  (getpwuid($<))[0]);
+}
+
+sub get_userhome {
+  return((getpwuid($<))[7]);
+}
+
+sub getuid {
+  return ($<);
+}
+
+__END__
+
+# $Log$
+
+1;	

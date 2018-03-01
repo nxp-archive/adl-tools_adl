@@ -1,0 +1,6 @@
+inst73.adl:75: Bad format code: i
+inst73.adl:174: Bad format code: p
+inst73.adl:92: No nested output fields defined.
+inst73.adl:140: Bad field name in syntax specifier: TT
+inst73.adl:116: Bad field name in syntax specifier: Dd
+inst73.adl:51: No nested fields defined.

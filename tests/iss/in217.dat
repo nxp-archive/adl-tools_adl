@@ -1,0 +1,124 @@
+#
+# Make sure that sparse register-file entries can use child-id indexing.  We
+# just move values to an SPR which is indexed using this method.
+#
+= asm
+
+	addi r1,r1,10
+	mtspr 60,r1
+	addi r1,r1,5
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x7C3C0BA6	#	mtspr 60,r1
+MD n=Mem ra=0x00000008 d=0x38210005	#	addi r1,r1,5
+# </GEN>
+
+CORE n=PMT
+
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA     d=0x0
+
+RD n=GPR i=1 d=10
+
+CORE n=:PMT:t1
+
+RD n=NIA     d=0x0
+
+RD n=GPR i=1 d=20
+
+TRACE
+
+
+CORE n=:PMT:t0
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+R n=NIA d=0x00000004
+R n=GPR i=1 d=0x00000014
+
+CORE n=:PMT:t1
+
+
+I ea=0x0 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+R n=NIA d=0x00000004
+R n=GPR i=1 d=0x0000001e
+
+CORE n=:PMT:t0
+
+
+I ea=0x4 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c3c0ba6
+INSTR op=0x7c3c0ba6					asm="mtspr TCR-2,r1"
+R n=NIA d=0x00000008
+R n=TCR i=0 d=0x00000014
+
+CORE n=:PMT:t1
+
+
+I ea=0x4 id=4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c3c0ba6
+INSTR op=0x7c3c0ba6					asm="mtspr TCR-2,r1"
+R n=NIA d=0x00000008
+R n=TCR i=1 d=0x0000001e
+
+CORE n=:PMT:t0
+
+
+I ea=0x8 id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210005
+INSTR op=0x38210005					asm="addi r1,r1,5"
+R n=NIA d=0x0000000c
+R n=GPR i=1 d=0x00000019
+
+CORE n=:PMT:t1
+
+
+I ea=0x8 id=6
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210005
+INSTR op=0x38210005					asm="addi r1,r1,5"
+R n=NIA d=0x0000000c
+R n=GPR i=1 d=0x00000023
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=7
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x00000010
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=8
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x00000010
+
+RESULTS
+
+CORE n=:PMT
+
+RD n=TCR i=0 d=20
+RD n=TCR i=1 d=30
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=25
+RD n=NIA d=0x00000010
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=35
+RD n=NIA d=0x00000010

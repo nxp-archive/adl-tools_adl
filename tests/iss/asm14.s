@@ -1,0 +1,13 @@
+.align 8
+	mv d0:d2:d4:d6,d4		
+	mv d8:d10:d12:d14,d11
+        add d0,d2,d5
+	add d8,d0,d12	
+	add d8,-d0,d12	
+	add d8.L,d0.H,d12	
+	add d8.H,d0.L,d12	
+	doen0 d1;
+	doen1 d3;
+	doen2 d4;
+	doen3 d5;
+	mv sp,d1

@@ -1,0 +1,53 @@
+//
+// A simple model to check code generation with register files mapped to
+// multiple entries in a sparse register file.  This checks for a particular bug
+// which generates conflicting IDs for the sparse register file.
+//
+
+#import "mod1.adl"
+
+define (core = P) {
+  archs = (MiniPPC);
+
+  define (regfile = VA) {
+    size = 2;
+  }
+
+  define (regfile = VB) {
+    size = 2;
+  }
+
+  define (regfile = VC) {
+    size = 2;
+  }
+
+  define (regfile = VD) {
+    size = 2;
+  }
+
+  define (regfile = VE) {
+    size = 2;
+  }
+
+  define (regfile=VG) {
+    size = 32;
+    define (entry=10) { reg = VA; };
+    define (entry=12) { reg = VB; };
+  }
+
+  define (instrfield=VRN) {
+    bits = (19,23);
+    ref = VG;
+    type = regfile;
+  }
+
+  define (instr=mtvr) {
+    fields=(OPCD(60),RA,VRN);
+    width = 24;
+    syntax = ("%i %f,%f",VRN,RA);
+    action = {
+      VG(VRN) = GPR(RA);
+    };
+  } 
+
+}

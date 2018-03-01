@@ -1,0 +1,36 @@
+#
+# This makes sure that we don't consider a partially fetched instruction to be
+# illegal.  For example, we fetch 2 bytes and try to decode, but those 2 bytes
+# correlate to an illegal 4-byte instruction.  Instead, we should not decode
+# because the illegal instruction is smaller than the max instruction size, so
+# it could be legal if we fetch more.
+#
+= asm
+
+	se_add r2,r1
+	crand 0,8,12
+	
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0412 s=2	#	se_add r2,r1
+MD n=Mem ra=0x00000002 d=0x4C086202	#	crand 0,8,12
+# </GEN>
+
+RD n=NIA     d=0x0
+RD n=CR      d=0x00a90000
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+
+RESULTS
+
+RD n=CR      d=0x80a90000
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=30
+

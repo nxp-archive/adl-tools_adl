@@ -1,0 +1,5 @@
+
+Register mismatch:
+Expected TPRI = 0x3
+Found 0x3000003
+Error:  Test 1:  Core powerpc:t1:  Register mismatch

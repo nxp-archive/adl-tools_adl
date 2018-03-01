@@ -1,0 +1,28 @@
+#
+# Another test of callback functions.  This one tests the use
+# of callbacks with a model that uses contexts.
+#
+
+proc c1 {id name index value} {
+	puts [format "Write to $name\[$index\]:  0x%x" $value ]
+}
+
+proc c2 {id name value} {
+	puts [format "Write to register $name:  0x%x" $value ]
+}
+
+proc c3 {id name} {
+    puts "Exception $name"
+}
+
+# We want to make sure that we don't alter the default path
+# when we do this operation.
+setreg DEC 0x1
+
+# These will only trigger for a particular context instance.
+setlogcmd P:thread1:regfile_write c1
+setlogcmd P:thread0:reg_write c2 TEN0
+# This will trigger for all contexts because the default path
+# is the core node.
+setlogcmd reg_write c2 SWAP
+go

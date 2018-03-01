@@ -1,0 +1,125 @@
+in2.uadl:5: warning: Instructions access no data memory
+P (for architecture P):
+  First-level instruction memory:  L1i
+
+  Fetch Unit:  Fetcher
+    Fetch Memory:  L1i
+    Entries     :  1
+    Entry Size  :  4
+    Fetch Sizes :  4 
+
+  Pipeline Stage:  mEX
+    Size             :  2
+    Bandwidth        :  2
+    Rigid  :  1
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mID
+    Size             :  2
+    Bandwidth        :  2
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mMM
+    Size             :  2
+    Bandwidth        :  2
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mWB
+    Size             :  8
+    Bandwidth        :  8
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+
+  Semaphore:  Bar
+	  Count: 1
+  Semaphore:  Foo
+    Count: 10
+
+  Flag:  stall
+
+  Register:  Foo
+    ID        :  0
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  GPR
+    ID        :  2
+    Size      :  32
+    Width     :  32
+    Latency   :  1
+    Is aliased:  0
+  Register:  PC
+    ID        :  1
+    Size      :  1
+    Width     :  32
+    Latency   :  1
+    Is aliased:  0
+
+  Forwarding Path:  reorder
+	  Broadcast:  0
+    Size     :  4
+    Width    :  64
+
+  Branch Predictor:  BP
+    Algorithm    :  Counter
+    Size         :  8
+    Counter width:  2
+
+  Memory:  mMEM
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Cache:  L1d
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory      :  mMEM
+    consecutive_linefills      :  1
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  128
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+  Cache:  L1i
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory      :  mMEM
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lazy_writeback    :  1
+    linefill_lock_cycle        :  1
+    linefill_lock_holdoff_cycle:  2
+    linefill_lock_on_valid     :  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+

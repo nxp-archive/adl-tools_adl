@@ -1,0 +1,384 @@
+#
+# Tests a basic cache-coherency model.
+#
+
+CORE n=MP:core0
+
+= asm
+
+  # Core0 program.
+  stw r3,0x1000(r1)
+  stw r3,0x1004(r1)
+  stw r3,0x2000(r1)
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  nop
+  lwz r4,0x1000(r1)
+  lwz r5,0x1004(r1)
+  lwz r6,0x4000(r1)
+  .long 0
+  # Core1 program.
+  nop
+  nop
+  nop
+  lwz r4,0x1000(r1)
+  lwz r5,0x1004(r1)
+  lwz r6,0x3000(r1)
+  lwz r7,0x4000(r1)
+  addi r4,r4,2
+  addi r5,r5,3
+  stw r4,0x1000(r1)
+  stw r5,0x1004(r1)
+  .long 0
+
+= /asm
+
+= aopts
+
+ -mregnames
+
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90611000	#	stw r3,0x1000(r1)
+MD n=Mem ra=0x00000004 d=0x90611004	#	stw r3,0x1004(r1)
+MD n=Mem ra=0x00000008 d=0x90612000	#	stw r3,0x2000(r1)
+MD n=Mem ra=0x0000000c d=0x60000000	#	nop
+MD n=Mem ra=0x00000010 d=0x60000000	#	nop
+MD n=Mem ra=0x00000014 d=0x60000000	#	nop
+MD n=Mem ra=0x00000018 d=0x60000000	#	nop
+MD n=Mem ra=0x0000001c d=0x60000000	#	nop
+MD n=Mem ra=0x00000020 d=0x60000000	#	nop
+MD n=Mem ra=0x00000024 d=0x60000000	#	nop
+MD n=Mem ra=0x00000028 d=0x60000000	#	nop
+MD n=Mem ra=0x0000002c d=0x60000000	#	nop
+MD n=Mem ra=0x00000030 d=0x60000000	#	nop
+MD n=Mem ra=0x00000034 d=0x80811000	#	lwz r4,0x1000(r1)
+MD n=Mem ra=0x00000038 d=0x80A11004	#	lwz r5,0x1004(r1)
+MD n=Mem ra=0x0000003c d=0x80C14000	#	lwz r6,0x4000(r1)
+MD n=Mem ra=0x00000040 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000044 d=0x60000000	#	nop
+MD n=Mem ra=0x00000048 d=0x60000000	#	nop
+MD n=Mem ra=0x0000004c d=0x60000000	#	nop
+MD n=Mem ra=0x00000050 d=0x80811000	#	lwz r4,0x1000(r1)
+MD n=Mem ra=0x00000054 d=0x80A11004	#	lwz r5,0x1004(r1)
+MD n=Mem ra=0x00000058 d=0x80C13000	#	lwz r6,0x3000(r1)
+MD n=Mem ra=0x0000005c d=0x80E14000	#	lwz r7,0x4000(r1)
+MD n=Mem ra=0x00000060 d=0x38840002	#	addi r4,r4,2
+MD n=Mem ra=0x00000064 d=0x38A50003	#	addi r5,r5,3
+MD n=Mem ra=0x00000068 d=0x90811000	#	stw r4,0x1000(r1)
+MD n=Mem ra=0x0000006c d=0x90A11004	#	stw r5,0x1004(r1)
+MD n=Mem ra=0x00000070 d=0x00000000	#	.long 0
+# </GEN>
+
+CORE n=MP:core0
+
+RD n=GPR i=3 d=0x100
+
+CORE n=MP:core1
+
+RD n=NIA d=0x44
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x2000 d=0
+MD n=Mem ra=0x3000 d=0xdeadbeef
+MD n=Mem ra=0x4000 d=0x12345678
+
+TRACE
+
+CORE n=MP:core0
+
+I ea=0x0 id=1
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+C n=L1i a=load t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x90611000
+INSTR op=0x90611000 asm="stw    r3,4096(r1)"
+C n=L1d a=miss t=write set=32 way=0 lm=0x7f ra=0x1000
+C n=L1d a=load t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x00000100
+
+CORE n=MP:core1
+
+I ea=0x44 id=2
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+C n=L1i a=load t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core0
+
+I ea=0x4 id=3
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x90611004
+INSTR op=0x90611004 asm="stw    r3,4100(r1)"
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000100
+
+CORE n=MP:core1
+
+I ea=0x48 id=4
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core0
+
+I ea=0x8 id=5
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x90612000
+INSTR op=0x90612000 asm="stw    r3,8192(r1)"
+C n=L1d a=miss t=write set=64 way=0 lm=0x7f ra=0x2000
+C n=L1d a=load t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x00000100
+
+CORE n=MP:core1
+
+I ea=0x4c id=6
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core0
+
+I ea=0xc id=7
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x50 id=8
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x80811000
+INSTR op=0x80811000 asm="lwz    r4,4096(r1)"
+C n=L1d a=miss t=read set=32 way=0 lm=0x7f ra=0x1000
+A l=1 m="read message for address 0x00001000" cn=MP:core0
+C n=L1d a=evict t=flush set=32 way=0 lm=0x7f ra=0x1000 cn=MP:core0
+A l=1 m="share message for address 0x00001000"
+C n=L1d a=load t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000100
+R n=GPR i=4 d=0x00000100
+
+CORE n=MP:core0
+
+I ea=0x10 id=9
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x54 id=10
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x80a11004
+INSTR op=0x80a11004 asm="lwz    r5,4100(r1)"
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000100
+R n=GPR i=5 d=0x00000100
+
+CORE n=MP:core0
+
+I ea=0x14 id=11
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x58 id=12
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x80c13000
+INSTR op=0x80c13000 asm="lwz    r6,12288(r1)"
+C n=L1d a=miss t=read set=96 way=0 lm=0x7f ra=0x3000
+C n=L1d a=load t=read set=96 way=0 lm=0x7f ra=0x3000
+M n=Mem t=read ea=0x3000 ra=0x3000 d=0xdeadbeef
+R n=GPR i=6 d=0xdeadbeef
+
+CORE n=MP:core0
+
+I ea=0x18 id=13
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x5c id=14
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x5c ra=0x5c d=0x80e14000
+INSTR op=0x80e14000 asm="lwz    r7,16384(r1)"
+C n=L1d a=miss t=read set=0 way=0 lm=0x7f ra=0x4000
+C n=L1d a=load t=read set=0 way=0 lm=0x7f ra=0x4000
+M n=Mem t=read ea=0x4000 ra=0x4000 d=0x12345678
+R n=GPR i=7 d=0x12345678
+
+CORE n=MP:core0
+
+I ea=0x1c id=15
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x60 id=16
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x38840002
+INSTR op=0x38840002 asm="addi   r4,r4,2"
+R n=GPR i=4 d=0x00000102
+
+CORE n=MP:core0
+
+I ea=0x20 id=17
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x64 id=18
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x38a50003
+INSTR op=0x38a50003 asm="addi   r5,r5,3"
+R n=GPR i=5 d=0x00000103
+
+CORE n=MP:core0
+
+I ea=0x24 id=19
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x68 id=20
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x90811000
+INSTR op=0x90811000 asm="stw    r4,4096(r1)"
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=MP:core0
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x00000102
+
+CORE n=MP:core0
+
+I ea=0x28 id=21
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x6c id=22
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x90a11004
+INSTR op=0x90a11004 asm="stw    r5,4100(r1)"
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000103
+
+CORE n=MP:core0
+
+I ea=0x2c id=23
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:core1
+
+I ea=0x70 id=24
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x0
+INSTR op=0x0 asm="halt   "
+
+CORE n=MP:core0
+
+I ea=0x30 id=25
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+I ea=0x34 id=26
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x80811000
+INSTR op=0x80811000 asm="lwz    r4,4096(r1)"
+C n=L1d a=miss t=read set=32 way=1 lm=0x7f ra=0x1000
+A l=1 m="read message for address 0x00001000" cn=MP:core1
+C n=L1d a=evict t=flush set=32 way=0 lm=0x7f ra=0x1000 cn=MP:core1
+A l=1 m="share message for address 0x00001000"
+C n=L1d a=load t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000102
+R n=GPR i=4 d=0x00000102
+
+I ea=0x38 id=27
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x80a11004
+INSTR op=0x80a11004 asm="lwz    r5,4100(r1)"
+C n=L1d a=hit t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000103
+R n=GPR i=5 d=0x00000103
+
+I ea=0x3c id=28
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x80c14000
+INSTR op=0x80c14000 asm="lwz    r6,16384(r1)"
+C n=L1d a=miss t=read set=0 way=0 lm=0x7f ra=0x4000
+A l=1 m="read message for address 0x00004000" cn=MP:core1
+A l=1 m="share message for address 0x00004000"
+C n=L1d a=load t=read set=0 way=0 lm=0x7f ra=0x4000
+M n=Mem t=read ea=0x4000 ra=0x4000 d=0x12345678
+R n=GPR i=6 d=0x12345678
+
+I ea=0x40 id=29
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x0
+INSTR op=0x0 asm="halt   "
+
+RESULTS
+
+CORE n=MP:core0
+
+RD n=GPR i=3 d=0x00000100
+RD n=GPR i=4 d=0x00000102
+RD n=GPR i=5 d=0x00000103
+RD n=GPR i=6 d=0x12345678
+
+CD n=L1d set=0 way=0 ra=0x0000000000004000 valid=1 dirty=0 locked=0 exclusive=0 d=0x12345678,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=32 way=1 ra=0x0000000000001000 valid=1 dirty=0 locked=0 exclusive=0 d=0x00000102,0x00000103,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=64 way=0 ra=0x0000000000002000 valid=1 dirty=1 locked=0 exclusive=1 d=0x00000100,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+
+CORE n=MP:core1
+
+RD n=GPR i=4 d=0x00000102
+RD n=GPR i=5 d=0x00000103
+RD n=GPR i=6 d=0xdeadbeef
+RD n=GPR i=7 d=0x12345678
+
+CD n=L1d set=0 way=0 ra=0x0000000000004000 valid=1 dirty=0 locked=0 exclusive=0 d=0x12345678,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=32 way=0 ra=0x0000000000001000 valid=1 dirty=0 locked=0 exclusive=0 d=0x00000102,0x00000103,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=96 way=0 ra=0x0000000000003000 valid=1 dirty=0 locked=0 exclusive=1 d=0xdeadbeef,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+
+MD n=Mem ra=0x0000000000001000 d=0x00000102	#	(258)
+MD n=Mem ra=0x0000000000001004 d=0x00000103	#	(259)
+MD n=Mem ra=0x0000000000002000 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000003000 d=0xdeadbeef	#	(3735928559)
+MD n=Mem ra=0x0000000000004000 d=0x12345678	#	(305419896)

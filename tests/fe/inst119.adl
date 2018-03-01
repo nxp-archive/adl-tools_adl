@@ -1,0 +1,324 @@
+//
+// A simple example of prefix bits with instructions.
+//
+
+define (arch=minippc) {
+
+  bit_endianness = little;
+
+  // We need this defined so that indexed prefix instruction-fields can be used.
+  parallel_execution = 8 ;
+
+  attrs = (prefix,serial_two_word);
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+ 
+  define (instrfield=n) {
+    width = 2;
+    pseudo = true;
+  }
+
+  define (instrfield=x) {
+    width = 10;
+    pseudo = true;
+  }
+
+  define (instrfield=Da) {
+    width = 6;
+    pseudo = true;
+  }
+
+  define (instrfield=Dn) {
+    width = 6;
+    pseudo = true;
+  }
+
+  define (instrfield=Db) {
+    width = 6;
+    pseudo = true;
+  }
+
+  define (instrfield=PR) {
+    width = 3;
+    pseudo = true;
+    assembler = true;
+    disassemble = prefix;
+    enumerated = (("","pr0"),"pr1","pr2","pr3","pr4","pr5","pr6","pr7");
+  }
+
+  define (instrfield = SG) {
+    width = 1;
+    pseudo = true;
+    value = 0;
+    reserved = true;
+  }
+
+  define (instrfield=u16) {
+    width = 16;
+    pseudo = true;
+  }
+
+  define (instrfield = CondExec) {
+    pseudo = true;
+    prefix = true;
+    indexed = 1;
+    value = 0;
+  }
+
+  define (instrfield = PR_Hi_Bits) {
+    width = 8;
+    indexed = 1;
+    prefix = true;
+    pseudo = true;
+    value = 0;
+    type=CondExec;
+  }
+
+  define (instrfield=Enc2) {
+    width = 32;
+    pseudo = true;
+  }
+
+  define (instrfield=HighRegister) {
+    indexed = 3;
+    pseudo = true;
+    prefix = true;
+    value = 0;
+  }
+  
+  define(instr = TwoWords) {
+    fields = ((bits(31,0), Enc2),
+              (bits(32,32),CondExec),
+              (bits(35,33),HighRegister));
+    pseudo = true;
+  }
+
+  define (instr=a) {
+    fields=(
+            (bits(0),b1),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b1),
+            (bits(4),b0),
+            (bits(5),b1),
+            (bits(6),b1),
+            (bits(7),b0),
+            (bits(8),n(0)),
+            (bits(9),n(1)),
+            (bits(10),b1),
+            (bits(11),u16(0)),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),u16(1)),
+            (bits(17),u16(2)),
+            (bits(18),u16(3)),
+            (bits(19),u16(4)),
+            (bits(20),u16(5)),
+            (bits(21),u16(6)),
+            (bits(22),u16(7)),
+            (bits(23),u16(8)),
+            (bits(24),u16(9)),
+            (bits(25),u16(10)),
+            (bits(26),u16(11)),
+            (bits(27),u16(12)),
+            (bits(28),u16(13)),
+            (bits(29),u16(14)),
+            (bits(30),u16(15)),
+            (bits(31),b0),
+            (bits(32),PR(2)),
+            (bits(33),reserved),
+            (bits(34),reserved),
+            (bits(35),reserved));
+
+    type = TwoWords;
+    attrs = (serial_two_word);
+
+    action = {};
+  }
+
+  define (instr=b) {
+    fields=(
+            (bits(0),b1),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b0),
+            (bits(4),b0),
+            (bits(5),x(0)),
+            (bits(6),x(1)),
+            (bits(7),x(2)),
+            (bits(8),x(3)),
+            (bits(9),x(4)),
+            (bits(10),b1),
+            (bits(11),b0),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),Dn(0)),
+            (bits(17),Dn(1)),
+            (bits(18),Dn(2)),
+            (bits(19),Dn(3)),
+            (bits(20),Dn(4)),
+            (bits(21),x(0)),
+            (bits(22),x(1)),
+            (bits(23),x(2)),
+            (bits(24),x(3)),
+            (bits(25),x(4)),
+            (bits(26),Da(0)),
+            (bits(27),Da(1)),
+            (bits(28),Da(2)),
+            (bits(29),Da(3)),
+            (bits(30),Da(4)),
+            (bits(31),b0),
+            (bits(32),PR(2)),
+            (bits(33),Da(5)),
+            (bits(34),reserved),
+            (bits(35),Dn(5)));
+
+    type = TwoWords;
+    attrs = (serial_two_word);
+
+    action = { };
+  }
+
+  define (instr=c) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b1),
+            (bits(2),b0),
+            (bits(3),b0),
+            (bits(4),b0),
+            (bits(5),b0),
+            (bits(6),b0),
+            (bits(7),b0),
+            (bits(8),b0),
+            (bits(9),b0),
+            (bits(10),b0),
+            (bits(11),b1),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),Dn(0)),
+            (bits(17),Dn(1)),
+            (bits(18),Dn(2)),
+            (bits(19),Dn(3)),
+            (bits(20),Dn(4)),
+            (bits(21),Db(0)),
+            (bits(22),Db(1)),
+            (bits(23),Db(2)),
+            (bits(24),Db(3)),
+            (bits(25),Db(4)),
+            (bits(26),Da(0)),
+            (bits(27),Da(1)),
+            (bits(28),Da(2)),
+            (bits(29),Da(3)),
+            (bits(30),Da(4)),
+            (bits(31),b0),
+            (bits(32),PR(2)),
+            (bits(33),Da(5)),
+            (bits(34),Db(5)),
+            (bits(35),Dn(5)));
+
+    type = TwoWords;
+    attrs = (serial_two_word);
+    action = {};
+  }
+
+  define (instr=d) {
+    fields=(
+            (bits(0),b1),
+            (bits(1),b1),
+            (bits(2),b0),
+            (bits(3),b0),
+            (bits(4),b0),
+            (bits(5),b0),
+            (bits(6),b0),
+            (bits(7),b0),
+            (bits(8),b0),
+            (bits(9),b0),
+            (bits(10),b0),
+            (bits(11),b1),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),Da(0)),
+            (bits(17),Da(1)),
+            (bits(18),Da(2)),
+            (bits(19),Da(3)),
+            (bits(20),Da(4)),
+            (bits(21),Db(0)),
+            (bits(22),Db(1)),
+            (bits(23),Db(2)),
+            (bits(24),Db(3)),
+            (bits(25),Db(4)),
+            (bits(26),Dn(0)),
+            (bits(27),Dn(1)),
+            (bits(28),Dn(2)),
+            (bits(29),Dn(3)),
+            (bits(30),Dn(4)),
+            (bits(31),b0),
+            (bits(32),PR(2)),
+            (bits(33),Dn(5)),
+            (bits(34),Db(5)),
+            (bits(35),Da(5)));
+
+    type = TwoWords;
+    attrs = (serial_two_word);
+
+    action= {};
+
+  }
+
+  define (instr = prefix) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b1),
+            (bits(2),b1),
+            (bits(3),b1),
+            (bits(4),b1),
+            (bits(5),b1),
+            (bits(6),b1),
+            (bits(7),b1),
+            (bits(8),b1),
+            (bits(9),b1),
+            (bits(10),reserved),
+            (bits(11),reserved),
+            (bits(12),reserved),
+            (bits(13),reserved),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),b1),
+            (bits(17),b1),
+            (bits(18),b1),
+            (bits(19),b1),
+            (bits(20),b1),
+            (bits(21),b1),
+            (bits(22),b1),
+            (bits(23),PR_Hi_Bits(0)),
+            (bits(24),PR_Hi_Bits(1)),
+            (bits(25),PR_Hi_Bits(2)),
+            (bits(26),PR_Hi_Bits(3)),
+            (bits(27),PR_Hi_Bits(4)),
+            (bits(28),PR_Hi_Bits(5)),
+            (bits(29),PR_Hi_Bits(6)),
+            (bits(30),PR_Hi_Bits(7)),
+            (bits(31),b0));
+    prefix = true;
+    attrs = prefix;
+    action = { };
+  }
+
+
+}
+ 
+
+define (core=P) {
+  archs=minippc;
+  instrtables = (prefix,serial_two_word);
+}

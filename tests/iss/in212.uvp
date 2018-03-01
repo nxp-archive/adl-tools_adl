@@ -1,0 +1,54 @@
+format=huvp;
+//------------------------------------------------------------------------------
+//
+// Note:  This is just used for results checking of an ijam test with UVP output.
+//
+// Options:
+//   ./mod1 --script=in212.cli in212.dat -trace -o=in212.out.uvp 
+//
+//------------------------------------------------------------------------------
+test => in212 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  I : D {ea=0x0000000000001000; ra=0x0000000000001000; d=0xdeadbeef;};
+  P => P {
+    E : I {asm="addi r1,r1,1"; c=1; gc=1;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0x38210001; op=0x38210001; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x0000000b],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000004],};};
+    E : I {asm="addi r1,r1,1"; c=2; gc=2;
+                   ea=0x0000000000000004; ra=0x0000000000000004; d=0x38210001; op=0x38210001; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x0000000c],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000008],};};
+    E : I {asm="addi r1,r1,1"; c=3; gc=3;
+                   ea=0x0000000000000008; ra=0x0000000000000008; d=0x38210001; op=0x38210001; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x0000000d],
+                       [ t=>"reg", rn=>"NIA", d=>0x0000000c],};};
+    E : I {asm="halt "; c=4; gc=4;
+                   ea=0x000000000000000c; ra=0x000000000000000c; d=0x00000000; op=0x00000000; op_size=32;
+                   ir={[ t=>"reg", rn=>"NIA", d=>0x00000010],};};
+    E : A {t="ijam"; c=5;
+                   data=[ asm=>"addi r2,r2,2", op=>0x38420002];
+                   ir={[ t=>"reg", rn=>"GPR2", d=>0x00000002],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000010],};};
+    E : A {t="ijam"; c=6;
+                   data=[ asm=>"addi r3,r3,3", op=>0x38630003];
+                   ir={[ t=>"reg", rn=>"GPR3", d=>0x00000003],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000010],};};
+    E : A {t="ijam"; c=7;
+                   data=[ asm=>"lwz r4,4096(r0)", op=>0x80801000];
+                   ir={[ t=>"reg", rn=>"GPR4", d=>0xdeadbeef],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000010],
+                       [ t=>"load",  ra=>0x0000000000001000, d=>0xdeadbeef ],};};
+    R : RES {ea=0x0000000000000010; ra=0x0000000000000010;};
+    R : R {nm="GPR1"; d=0x0000000d;};
+    R : R {nm="GPR2"; d=0x00000002;};
+    R : R {nm="GPR3"; d=0x00000003;};
+    R : R {nm="GPR4"; d=0xdeadbeef;};
+  } // P
+  R : D {ea=0x0000000000001000; ra=0x0000000000001000; d=0xdeadbeef;};
+} 

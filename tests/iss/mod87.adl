@@ -1,0 +1,58 @@
+//
+// A simple little-endian design for testing of relocations.
+//
+
+define (arch=Little) {
+
+  attrs = (nia,cia);
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  bit_endianness = little;
+
+  define (instrfield=OPCD) {
+    bits = (31,24);
+  }
+
+  define (reloc=RELOC_A) {
+    value = 1;
+    instrfield = A;
+  }
+
+  define (reloc=RELOC_B) {
+    value = 2;
+    instrfield = B;
+  }
+
+  define (reloc=RELOC_C) {
+    value = 3;
+    instrfield = C;
+  }
+
+  define (instrfield=A) {
+    bits = (23,16);
+    display = dec;
+  }
+
+  define (instrfield=B) {
+    bits = (15,8);
+    display = dec;
+  }
+
+  define (instrfield=C) {
+    bits = (7,0);
+    display = dec;
+  }
+
+  define (instr=a) {    
+    fields = (OPCD(1),A,B,C);
+    action = {};
+  }
+
+}
+
+define (core=Little) {
+  archs = Little;
+}

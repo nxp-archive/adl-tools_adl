@@ -1,0 +1,4 @@
+powerpc:t0:  Instr 5 (local count 5):  IR element 1 of type I:  Bad tags:  (d => 0x822c08e5 )
+  Found data:  (d => 0x82c08e5 ea => 0xb6363614d472e44c op => 0x822c08e5 ra => 0x0000055185baf44c ta => 0x7 )
+powerpc:t0:  Differences were found when checking intermediate results.
+Error:  Test 2:  Intermediate result mismatches were found.

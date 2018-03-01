@@ -1,0 +1,31 @@
+#
+# Make sure that the internal DMI works correctly when interfaced with an
+# external DMI.  To that end, we do an initial store, then repeatedly read the
+# same address to make sure that the DMI address calculations are correct.
+#
+= asm
+
+	stw r1,0x110(r0)
+	lwz r2,0x110(r0)
+	lwz r3,0x110(r0)
+
+= /asm
+
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90200110	#	stw r1,0x110(r0)
+MD n=Mem ra=0x00000004 d=0x80400110	#	lwz r2,0x110(r0)
+MD n=Mem ra=0x00000008 d=0x80600110	#	lwz r3,0x110(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678
+RD n=GPR i=3 d=0xb0f0babe
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeadbeef

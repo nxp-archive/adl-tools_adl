@@ -1,0 +1,5113 @@
+======
+P Core
+======
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+
+
+.. _adl-internal-target-1:
+Registers
+---------
+
+
+.. _adl-internal-target-2:
+*CIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Current instruction address.
+  
+  
+
+
+.. _adl-internal-target-3:
+*CR*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The condition register.
+  
+  
+
+
+.. _adl-internal-target-4:
+*CTR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CTR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The counter register.
+  
+  
+
+
+.. _adl-internal-target-5:
+*ESR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">ESR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Exception syndrome register.
+  
+  
+
+
+.. _adl-internal-target-6:
+*FOOCTRL*
+`````````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">FOOCTRL</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-7:
+*HDBCR0*
+````````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td width="3.125%" class="field">REALMODE</td>
+   <td colspan="2" width="96.875%" class="reserved" title="Reserved"></td>
+   </tr>
+   <tr>
+   <td class="singleodd">0</td>
+   <td class="lefteven">1</td><td class="righteven">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Hardware debug control register 0.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - REALMODE
+       -  [0] 
+       - 
+
+
+.. _adl-internal-target-8:
+*HID0*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">HID0</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-9:
+*HID1*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">HID1</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-10:
+*HitReg*
+````````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">HitReg</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Tracks MMU TlbCam hits.
+  
+  
+
+
+.. _adl-internal-target-11:
+*IVOR6*
+```````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">IVOR6</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Interrupt-vector offset register 6.
+  
+  
+
+
+.. _adl-internal-target-12:
+*IVOR7*
+```````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">IVOR7</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Interrupt-vector offset register 7.
+  
+  
+
+
+.. _adl-internal-target-13:
+*IVPR*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">IVPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Interrupt-vector prefix register.
+  
+  
+
+
+.. _adl-internal-target-14:
+*LR*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">LR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The link register.
+  
+  
+
+
+.. _adl-internal-target-15:
+*MAS0*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="75%" class="field">EPN</td>
+   <td colspan="2" width="18.75%" class="field">TID</td>
+   <td width="3.125%" class="field">V</td>
+   <td width="3.125%" class="field">TS</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">23</td>
+   <td class="lefteven">24</td><td class="righteven">29</td>
+   <td class="singleodd">30</td>
+   <td class="singleeven">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Memory assist register 0.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - EPN
+       -  [0,23] 
+       - 
+     * - TID
+       -  [24,29] 
+       - 
+     * - V
+       -  [30] 
+       - 
+     * - TS
+       -  [31] 
+       - 
+
+
+.. _adl-internal-target-16:
+*MAS2*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td width="3.125%" class="field">SX</td>
+   <td width="3.125%" class="field">SW</td>
+   <td width="3.125%" class="field">SR</td>
+   <td width="3.125%" class="field">UX</td>
+   <td width="3.125%" class="field">UW</td>
+   <td width="3.125%" class="field">UR</td>
+   <td colspan="2" width="43.75%" class="reserved" title="Reserved"></td>
+   <td colspan="2" width="25%" class="field">Set</td>
+   <td colspan="2" width="12.5%" class="field">Way</td>
+   </tr>
+   <tr>
+   <td class="singleodd">0</td>
+   <td class="singleeven">1</td>
+   <td class="singleodd">2</td>
+   <td class="singleeven">3</td>
+   <td class="singleodd">4</td>
+   <td class="singleeven">5</td>
+   <td class="leftodd">6</td><td class="rightodd">19</td>
+   <td class="lefteven">20</td><td class="righteven">27</td>
+   <td class="leftodd">28</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Memory assist register 2.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - SX
+       -  [0] 
+       - 
+     * - SW
+       -  [1] 
+       - 
+     * - SR
+       -  [2] 
+       - 
+     * - UX
+       -  [3] 
+       - 
+     * - UW
+       -  [4] 
+       - 
+     * - UR
+       -  [5] 
+       - 
+     * - Set
+       -  [20,27] 
+       - 
+     * - Way
+       -  [28,31] 
+       - 
+
+
+.. _adl-internal-target-17:
+*MSR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="28.125%" class="reserved" title="Reserved"></td>
+   <td width="3.125%" class="field">PR</td>
+   <td width="3.125%" class="field">IR</td>
+   <td width="3.125%" class="field">DR</td>
+   <td colspan="2" width="62.5%" class="reserved" title="Reserved"></td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">8</td>
+   <td class="singleeven">9</td>
+   <td class="singleodd">10</td>
+   <td class="singleeven">11</td>
+   <td class="leftodd">12</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Machine state register.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - PR
+       -  [9] 
+       - 
+     * - IR
+       -  [10] 
+       - 
+     * - DR
+       -  [11] 
+       - 
+
+
+.. _adl-internal-target-18:
+*NIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">NIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Next instruction address.
+  
+  
+
+
+.. _adl-internal-target-19:
+*PID0*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">PID0</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-20:
+*PID1*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">PID1</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-21:
+*RESRV*
+```````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">RESRV</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-22:
+*SRR0*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">SRR0</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Save-restore register 0.
+  
+  
+
+
+.. _adl-internal-target-23:
+*SRR1*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">SRR1</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Save-restore register 1.
+  
+  
+
+
+.. _adl-internal-target-24:
+*XER*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">XER</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The integer status register.
+  
+  
+
+
+.. _adl-internal-target-25:
+Register Files
+--------------
+
+
+.. _adl-internal-target-26:
+*GPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">GPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  32
+
+Description:
+
+  General purpose registers.
+  
+  
+
+
+.. _adl-internal-target-27:
+*SPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">SPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  1024
+
+Description:
+
+  Special purpose registers.
+  
+  
+
+.. list-table:: Constituent Registers
+   :class: sparsecontents
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Index
+     - Register Usage
+   * - 1
+     - `XER <#adl-internal-target-24>`__
+   * - 9
+     - `CTR <#adl-internal-target-4>`__
+   * - 26
+     - `SRR0 <#adl-internal-target-22>`__
+   * - 27
+     - `SRR1 <#adl-internal-target-23>`__
+   * - 50
+     - `HID0 <#adl-internal-target-8>`__
+   * - 51
+     - `HID1 <#adl-internal-target-9>`__
+   * - 62
+     - `ESR <#adl-internal-target-5>`__
+   * - 100
+     - `HDBCR0 <#adl-internal-target-7>`__
+   * - 200
+     - `MAS0 <#adl-internal-target-15>`__
+   * - 202
+     - `MAS2 <#adl-internal-target-16>`__
+   
+
+.. _adl-internal-target-28:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-a">&nbsp;&nbsp;A&nbsp;&nbsp;</a> <a href="#ifield-section-b">&nbsp;&nbsp;B&nbsp;&nbsp;</a> <a href="#ifield-section-d">&nbsp;&nbsp;D&nbsp;&nbsp;</a> <a href="#ifield-section-l">&nbsp;&nbsp;L&nbsp;&nbsp;</a> <a href="#ifield-section-m">&nbsp;&nbsp;M&nbsp;&nbsp;</a> <a href="#ifield-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#ifield-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#ifield-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> <a href="#ifield-section-u">&nbsp;&nbsp;U&nbsp;&nbsp;</a> <a href="#ifield-section-x">&nbsp;&nbsp;X&nbsp;&nbsp;</a> <a href="#ifield-section-y">&nbsp;&nbsp;Y&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-a:
+
+
+.. _adl-internal-target-29:
+*AA*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 1
+   * - Bits
+     - [30,30] 
+
+Description:
+
+  Absolute address bit.
+  
+  
+
+
+.. _ifield-section-b:
+
+
+.. _adl-internal-target-30:
+*BD*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 14
+   * - Shift
+     - 2
+   * - Bits
+     - [16,29] 
+   * - Addressing
+     - PC-Relative
+   * - Signed
+     - True
+
+Description:
+
+  Immediate field specifying a 14-bit signed two's complement branch displacement
+  which is concatenated on the right with 0b00 and sign-extended.
+  
+  
+
+
+Semantics:  **CIA + (SignExtend(BD << 2))**
+
+
+.. _adl-internal-target-31:
+*BF*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+   * - Bits
+     - [6,8] 
+
+Description:
+
+  Field used to specify one of the Condition Register fields or one of the
+  Floating-Point Status and Control Register fields to be used as a target.
+  
+  
+
+
+.. _adl-internal-target-32:
+*BI*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [11,15] 
+
+Description:
+
+  Field used to specify a bit in the Condition Register to be used
+  as the condition of a Branch Conditional instruction.
+  
+  
+
+
+.. _adl-internal-target-33:
+*BO*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify options for the Branch Conditional instructions.
+  
+  
+
+
+.. _ifield-section-d:
+
+
+.. _adl-internal-target-34:
+*D*
+```
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 16
+   * - Bits
+     - [16,31] 
+   * - Signed
+     - True
+
+Description:
+
+  Immediate field used to specify a 16-bit signed two's complement integer
+  which is sign-extended to 64-bits.
+  
+  
+
+
+Semantics:  **SignExtend(D)**
+
+
+.. _ifield-section-l:
+
+
+.. _adl-internal-target-35:
+*L*
+```
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 1
+   * - Bits
+     - [10,10] 
+
+Description:
+
+  Unused for 32-bit implementations.
+  
+  
+
+
+.. _adl-internal-target-36:
+*LI*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 24
+   * - Shift
+     - 2
+   * - Bits
+     - [6,29] 
+   * - Addressing
+     - PC-Relative
+   * - Signed
+     - True
+
+Description:
+
+  Immediate address field for branch instructions.
+  
+  
+
+
+Semantics:  **CIA + (SignExtend(LI << 2))**
+
+
+.. _adl-internal-target-37:
+*LK*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 1
+   * - Bits
+     - [31,31] 
+
+Description:
+
+  LINK bit.
+  
+  
+
+
+.. _ifield-section-m:
+
+
+.. _adl-internal-target-38:
+*MB*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [21,25] 
+
+
+.. _adl-internal-target-39:
+*ME*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [26,30] 
+
+
+.. _ifield-section-o:
+
+
+.. _adl-internal-target-40:
+*OPCD*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 6
+   * - Bits
+     - [0,5] 
+
+Description:
+
+  Primary opcode.
+  
+  
+
+
+.. _ifield-section-r:
+
+
+.. _adl-internal-target-41:
+*RA*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [11,15] 
+
+Description:
+
+  Field used to specify a General Purpose Register to be used as a source.
+  
+  
+
+
+Reference: **`GPR <#adl-internal-target-26>`__**
+
+Permitted values:
+  r0 - r31
+
+
+.. _adl-internal-target-42:
+*RB*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [16,20] 
+
+Description:
+
+  Field used to specify a General Purpose Register to be used as a source.
+  
+  
+
+
+Reference: **`GPR <#adl-internal-target-26>`__**
+
+Permitted values:
+  r0 - r31
+
+
+.. _adl-internal-target-43:
+*RS*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify a General Purpose Register as a target.
+  
+  
+
+
+Reference: **`GPR <#adl-internal-target-26>`__**
+
+Permitted values:
+  r0 - r31
+
+
+.. _adl-internal-target-44:
+*RT*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify a General Purpose Register to be used as a target.
+  
+  
+
+
+Reference: **`GPR <#adl-internal-target-26>`__**
+
+Permitted values:
+  r0 - r31
+
+
+.. _ifield-section-s:
+
+
+.. _adl-internal-target-45:
+*SH*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [16,20] 
+
+
+.. _adl-internal-target-46:
+*SI*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 16
+   * - Bits
+     - [16,31] 
+   * - Signed
+     - True
+
+Description:
+
+  Signed immediate field for arithmetic operations.
+  
+  
+
+
+Semantics:  **SignExtend(SI)**
+
+
+.. _adl-internal-target-47:
+*SPRN*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 10
+   * - Bits
+     - [16,20] [11,15] 
+
+Description:
+
+  Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+  
+  
+
+
+Reference: **`SPR <#adl-internal-target-27>`__**
+
+Permitted values:
+  0 - 1023
+
+
+.. _ifield-section-u:
+
+
+.. _adl-internal-target-48:
+*UI*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 16
+   * - Bits
+     - [16,31] 
+
+Description:
+
+  Unsigned immediate field for arithmetic operations.
+  
+  
+
+
+.. _ifield-section-x:
+
+
+.. _adl-internal-target-49:
+*XO*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 10
+   * - Bits
+     - [21,30] 
+
+Description:
+
+  Extended opcode.
+  
+  
+
+
+.. _ifield-section-y:
+
+
+.. _adl-internal-target-50:
+*Y*
+```
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 1
+   * - Bits
+     - [10,10] 
+
+Description:
+
+  This is a hint bit for conditional branches.
+  
+  
+
+
+.. _adl-internal-target-51:
+Instructions
+------------
+
+.. raw:: html
+
+   <a href="#instr-section-a">&nbsp;&nbsp;A&nbsp;&nbsp;</a> <a href="#instr-section-b">&nbsp;&nbsp;B&nbsp;&nbsp;</a> <a href="#instr-section-c">&nbsp;&nbsp;C&nbsp;&nbsp;</a> <a href="#instr-section-h">&nbsp;&nbsp;H&nbsp;&nbsp;</a> <a href="#instr-section-l">&nbsp;&nbsp;L&nbsp;&nbsp;</a> <a href="#instr-section-m">&nbsp;&nbsp;M&nbsp;&nbsp;</a> <a href="#instr-section-n">&nbsp;&nbsp;N&nbsp;&nbsp;</a> <a href="#instr-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#instr-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#instr-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> <a href="#instr-section-t">&nbsp;&nbsp;T&nbsp;&nbsp;</a> 
+
+
+.. _instr-section-a:
+
+
+.. _adl-internal-target-52:
+*add RT, RA, RB*
+````````````````
+
+Description:
+  
+  The sum GPR(RA) + GPR(RB) is placed into RD.
+  
+  The add instruction is preferred for additions because it sets few status bits.
+  
+  
+  
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">266&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-53:
+*addi RT, RA, SI*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        if ( RA == 0 ) {
+            GPR ( RT ) = SI ;
+        } else {
+            GPR ( RT ) = GPR ( RA ) + SI ;
+        }
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - Conditional
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">14&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-54:
+*la RT,SI(RA)*
+::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">14&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-55:
+*li RT, SI*
+:::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">14&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **addi RT, RA, SI**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20 30
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+       - Applies To
+     * - `RA <#adl-internal-target-41>`__
+       - `RA <#adl-internal-target-41>`__
+       - ::
+          
+            la RT,SI(RA)
+     * - `RT <#adl-internal-target-44>`__
+       - `RT <#adl-internal-target-44>`__
+       - ::
+          
+            la RT,SI(RA)
+            li RT, SI
+     * - `SI <#adl-internal-target-46>`__
+       - `SI <#adl-internal-target-46>`__
+       - ::
+          
+            la RT,SI(RA)
+            li RT, SI
+
+
+.. _adl-internal-target-56:
+*addic RT, RA, SI*
+``````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = GPR ( RA ) + SI ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">12&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-57:
+*addic. RT, RA, SI*
+```````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = GPR ( RA ) + SI ;
+        setCrField ( 0 , GPR ( RT ) , 0 ) ;
+    }
+    
+  The code above uses the following routines (directly or indirectly): `setCrField <#adl-internal-target-58>`__
+  
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">13&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-59:
+*addis RT, RA, SI*
+``````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        if ( RA == 0 ) {
+            GPR ( RT ) = SI << 16 ;
+        } else {
+            GPR ( RT ) = GPR ( RA ) + ( SI << 16 ) ;
+        }
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - Conditional
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">15&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-60:
+*lis RT, SI*
+::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">15&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **addis RT, RA, SI**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `RT <#adl-internal-target-44>`__
+       - `RT <#adl-internal-target-44>`__
+  
+     * - `SI <#adl-internal-target-46>`__
+       - `SI <#adl-internal-target-46>`__
+  
+
+
+.. _instr-section-b:
+
+
+.. _adl-internal-target-61:
+*bc BO,BI,BD*
+`````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        if ( ( BO ( 2 ) ) == 0 ) {
+            CTR = CTR - 1 ;
+        }
+         var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+         var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+        if ( ctr_ok && cond_ok ) {
+            NIA = BD ;
+        }
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CIA <#adl-internal-target-2>`__
+       - Entire Register
+       - 
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - Partial
+     * - `CTR <#adl-internal-target-4>`__
+       - Entire Register
+       - Conditional
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CTR <#adl-internal-target-4>`__
+       - Entire Register
+       - Conditional
+     * - `NIA <#adl-internal-target-18>`__
+       - Entire Register
+       - Conditional
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-62:
+*bdnz BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">16&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-63:
+*bdnz+ BD*
+::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">16&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-64:
+*bdnz- BD*
+::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">16&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-65:
+*beq BD*
+::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">2&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-66:
+*beq+ BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">2&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-67:
+*beq- BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">2&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-68:
+*bge BD*
+::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">4&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-69:
+*bge+ BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">4&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-70:
+*bge- BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">4&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-71:
+*bgt BD*
+::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">1&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-72:
+*bgt+ BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">1&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-73:
+*bgt- BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">1&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-74:
+*ble BD*
+::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">4&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">1&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-75:
+*ble+ BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">4&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">1&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-76:
+*ble- BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">4&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">1&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-77:
+*blt BD*
+::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-78:
+*blt+ BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-79:
+*blt- BD*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">16&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">12&nbsp;BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="43.75%" class="field">BD</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **bc BO,BI,BD**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20 30
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+       - Applies To
+     * - `BD <#adl-internal-target-30>`__
+       - `BD <#adl-internal-target-30>`__
+       - ::
+          
+            bdnz BD
+            bdnz+ BD
+            bdnz- BD
+            beq BD
+            beq+ BD
+            beq- BD
+            bge BD
+            bge+ BD
+            bge- BD
+            bgt BD
+            bgt+ BD
+            bgt- BD
+            ble BD
+            ble+ BD
+            ble- BD
+            blt BD
+            blt+ BD
+            blt- BD
+     * - `Y <#adl-internal-target-50>`__
+       - Y(( BD < 0 ) ? 0 : 1)
+       - ::
+          
+            bdnz+ BD
+            beq+ BD
+            bge+ BD
+            bgt+ BD
+            ble+ BD
+            blt+ BD
+     * - `Y <#adl-internal-target-50>`__
+       - Y(( BD < 0 ) ? 1 : 0)
+       - ::
+          
+            bdnz- BD
+            beq- BD
+            bge- BD
+            bgt- BD
+            ble- BD
+            blt- BD
+
+
+.. _adl-internal-target-80:
+*bclr BO,BI*
+````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        if ( BO ( 2 ) == 0 ) {
+            CTR = CTR - 1 ;
+        }
+         var ctr_ok = ( BO ( 2 ) != 0 ) || ( ( ( CTR != 0 ) ^ BO ( 3 ) ) != 0 ) ;
+         var cond_ok = ( BO ( 0 ) != 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+        if ( ctr_ok && cond_ok ) {
+            NIA = LR & ~ 0x3ULL ;
+        }
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - Partial
+     * - `CTR <#adl-internal-target-4>`__
+       - Entire Register
+       - Conditional
+     * - `LR <#adl-internal-target-14>`__
+       - Entire Register
+       - Conditional
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CTR <#adl-internal-target-4>`__
+       - Entire Register
+       - Conditional
+     * - `NIA <#adl-internal-target-18>`__
+       - Entire Register
+       - Conditional
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">19&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">BO<table class="subfield"><tr>
+     <td class="subfieldunused" title="Reserved" width="80%">[6,9]</td>
+     <td class="subfield" width="20%">Y[10]</td>
+     </tr></table>
+     </td>
+     <td colspan="2" width="15.625%" class="field">BI</td>
+     <td colspan="2" width="15.625%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0</td>
+     <td colspan="2" width="31.25%" class="field">16&nbsp;XO</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-81:
+*blr*
+:::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">19&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">20&nbsp;BO</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;BI</td>
+     <td colspan="2" width="15.625%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0</td>
+     <td colspan="2" width="31.25%" class="field">16&nbsp;XO</td>
+     <td width="3.125%" class="field">0&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+
+.. _adl-internal-target-82:
+*bl LI*
+```````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        NIA = LI ;
+        LR = CIA + 4 ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CIA <#adl-internal-target-2>`__
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `LR <#adl-internal-target-14>`__
+       - Entire Register
+       - 
+     * - `NIA <#adl-internal-target-18>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">18&nbsp;OPCD</td>
+     <td colspan="2" width="75%" class="field">LI</td>
+     <td width="3.125%" class="field">0&nbsp;AA</td>
+     <td width="3.125%" class="field">1&nbsp;LK</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">29</td>
+     <td class="singleodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+.. _instr-section-c:
+
+
+.. _adl-internal-target-83:
+*cmp BF, RA, RB*
+````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        setCrField ( BF , GPR ( RA ) , GPR ( RB ) ) ;
+    }
+    
+  The code above uses the following routines (directly or indirectly): `setCrField <#adl-internal-target-58>`__
+  
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="9.375%" class="field">BF</td>
+     <td colspan="2" width="6.25%" class="reserved" title="Reserved">00</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">0&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">8</td>
+     <td class="leftodd">9</td><td class="rightodd">10</td>
+     <td class="lefteven">11</td><td class="righteven">15</td>
+     <td class="leftodd">16</td><td class="rightodd">20</td>
+     <td class="lefteven">21</td><td class="righteven">30</td>
+     <td class="singleodd">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-84:
+*cmpi BF, L, RA, SI*
+````````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        setCrField ( BF , GPR ( RA ) , SI ) ;
+    }
+    
+  The code above uses the following routines (directly or indirectly): `setCrField <#adl-internal-target-58>`__
+  
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">11&nbsp;OPCD</td>
+     <td colspan="2" width="9.375%" class="field">BF</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     <td width="3.125%" class="field">L</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">8</td>
+     <td class="singleodd">9</td>
+     <td class="singleeven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-85:
+*cmpwi BF, RA, SI*
+::::::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">11&nbsp;OPCD</td>
+     <td colspan="2" width="9.375%" class="field">BF</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     <td width="3.125%" class="field">0&nbsp;L</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">8</td>
+     <td class="singleodd">9</td>
+     <td class="singleeven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-86:
+*cmpwi RA,SI*
+:::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">11&nbsp;OPCD</td>
+     <td colspan="2" width="9.375%" class="field">0&nbsp;BF</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     <td width="3.125%" class="field">0&nbsp;L</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">SI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">8</td>
+     <td class="singleodd">9</td>
+     <td class="singleeven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **cmpi BF, L, RA, SI**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20 30
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+       - Applies To
+     * - `BF <#adl-internal-target-31>`__
+       - `BF <#adl-internal-target-31>`__
+       - ::
+          
+            cmpwi BF, RA, SI
+     * - `RA <#adl-internal-target-41>`__
+       - `RA <#adl-internal-target-41>`__
+       - ::
+          
+            cmpwi BF, RA, SI
+            cmpwi RA,SI
+     * - `SI <#adl-internal-target-46>`__
+       - `SI <#adl-internal-target-46>`__
+       - ::
+          
+            cmpwi BF, RA, SI
+            cmpwi RA,SI
+
+
+.. _instr-section-h:
+
+
+.. _adl-internal-target-87:
+*Halt Instruction*
+``````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        halt (  ) ;
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">0&nbsp;OPCD</td>
+     <td colspan="2" width="81.25%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _instr-section-l:
+
+
+.. _adl-internal-target-88:
+*lbz RT,D(RA)*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + D ;
+        GPR ( RT ) = Mem ( addr , 1 ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">34&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  load
+
+
+.. _adl-internal-target-89:
+*lhz RT,D(RA)*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + D ;
+        GPR ( RT ) = Mem ( addr , 2 ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">40&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  load
+
+
+.. _adl-internal-target-90:
+*lwarx RT, RA, RB*
+``````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + GPR ( RB ) ;
+        GPR ( RT ) = Mem ( addr , 4 ) ;
+        RESRV = lastRealAddr (  ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+     * - `RESRV <#adl-internal-target-21>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">20&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  load
+
+
+.. _adl-internal-target-91:
+*lwz RT,D(RA)*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + D ;
+        GPR ( RT ) = Mem ( addr , 4 ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">32&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  load
+
+
+.. _adl-internal-target-92:
+*lwzx RT, RA, RB*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + GPR ( RB ) ;
+        GPR ( RT ) = Mem ( addr , 4 ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">23&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  load
+
+
+.. _instr-section-m:
+
+
+.. _adl-internal-target-93:
+*mfmsr RT*
+``````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = MSR ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `MSR <#adl-internal-target-17>`__
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="31.25%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;00</td>
+     <td colspan="2" width="31.25%" class="field">83&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">20</td>
+     <td class="lefteven">21</td><td class="righteven">30</td>
+     <td class="singleodd">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-94:
+*mfspr RT, SPRN*
+````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = SPR ( SPRN ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `SPR <#adl-internal-target-27>`__ (SPRN)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">SPRN</td>
+     <td colspan="2" width="15.625%" class="field">SPRN</td>
+     <td colspan="2" width="31.25%" class="field">339&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-95:
+*mflr RT*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">8&nbsp;SPRN</td>
+     <td colspan="2" width="15.625%" class="field">8&nbsp;SPRN</td>
+     <td colspan="2" width="31.25%" class="field">339&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **mfspr RT, SPRN**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `RT <#adl-internal-target-44>`__
+       - `RT <#adl-internal-target-44>`__
+  
+
+
+.. _adl-internal-target-96:
+*mtmsr RS*
+``````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        MSR = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `MSR <#adl-internal-target-17>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="31.25%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;00</td>
+     <td colspan="2" width="31.25%" class="field">146&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">20</td>
+     <td class="lefteven">21</td><td class="righteven">30</td>
+     <td class="singleodd">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-97:
+*mtspr RS, SPRN*
+````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        SPR ( SPRN ) = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `SPR <#adl-internal-target-27>`__ (SPRN)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">SPRN</td>
+     <td colspan="2" width="15.625%" class="field">SPRN</td>
+     <td colspan="2" width="31.25%" class="field">467&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-98:
+*mtctr RS*
+::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">9&nbsp;SPRN</td>
+     <td colspan="2" width="15.625%" class="field">9&nbsp;SPRN</td>
+     <td colspan="2" width="31.25%" class="field">467&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-99:
+*mtlr RS*
+:::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">8&nbsp;SPRN</td>
+     <td colspan="2" width="15.625%" class="field">8&nbsp;SPRN</td>
+     <td colspan="2" width="31.25%" class="field">467&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **mtspr RS, SPRN**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20 30
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+       - Applies To
+     * - `RS <#adl-internal-target-43>`__
+       - `RS <#adl-internal-target-43>`__
+       - ::
+          
+            mtctr RS
+            mtlr RS
+
+
+.. _adl-internal-target-100:
+*mullw RT, RA, RB*
+``````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RT)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">235&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+.. _instr-section-n:
+
+
+.. _adl-internal-target-101:
+*n1   (x, y)*
+```````````````
+
+Description:
+  
+  This description should represent the entire family
+  and appear at the top.
+  
+  
+  **n1 (premium)   (x)**:
+    This description should be appended
+    to that of the family.
+    
+  
+  **n2   (y)**:
+    This description should also be appended
+    to that of the family.
+    
+  
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Aliases:
+
+.. _adl-internal-target-102:
+*n1 (premium)   (x)*
+:::::::::::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="75%" class="field">20&nbsp;OPCD</td>
+     <td colspan="2" width="25%" class="reserved" title="Reserved">00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-103:
+*n2   (y)*
+::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="75%" class="field">21&nbsp;OPCD</td>
+     <td colspan="2" width="25%" class="reserved" title="Reserved">00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     </tr>
+     </table>
+     
+
+
+
+.. _adl-internal-target-104:
+*n2*
+````
+
+Description:
+  
+  This should not appear 3 times.
+  
+  
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Aliases:
+
+*n2*
+::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="75%" class="field">22&nbsp;OPCD</td>
+     <td colspan="2" width="25%" class="reserved" title="Reserved">00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     </tr>
+     </table>
+     
+
+
+*n2*
+::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="75%" class="field">23&nbsp;OPCD</td>
+     <td colspan="2" width="25%" class="reserved" title="Reserved">00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     </tr>
+     </table>
+     
+
+
+
+.. _adl-internal-target-105:
+*nest\_test\_3 OPCD*
+````````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Aliases:
+
+.. _adl-internal-target-106:
+*n5*
+::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="75%" class="field">22&nbsp;OPCD</td>
+     <td colspan="2" width="25%" class="reserved" title="Reserved">00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-107:
+*n6*
+::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="75%" class="field">23&nbsp;OPCD</td>
+     <td colspan="2" width="25%" class="reserved" title="Reserved">00</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     </tr>
+     </table>
+     
+
+
+
+Attributes:
+  load, special
+
+
+.. _instr-section-o:
+
+
+.. _adl-internal-target-108:
+*or RA,RS,RB*
+`````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RA ) = GPR ( RS ) | GPR ( RB ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">444&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-109:
+*mr RA,RS*
+::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="31.25%" class="field">444&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **or RA,RS,RB**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `RA <#adl-internal-target-41>`__
+       - `RA <#adl-internal-target-41>`__
+  
+     * - `RB <#adl-internal-target-42>`__
+       - `RS <#adl-internal-target-43>`__
+  
+     * - `RS <#adl-internal-target-43>`__
+       - `RS <#adl-internal-target-43>`__
+  
+
+
+.. _adl-internal-target-110:
+*ori RA,RS,UI*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RA ) = GPR ( RS ) | UI ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">24&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">UI</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+.. _instr-section-r:
+
+
+.. _adl-internal-target-111:
+*rfi RS, RA, RB   (x)*
+````````````````````````
+
+Description:
+  
+  This description should override because it is a single son.
+  
+  
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        MSR = SRR1 ;
+        NIA = SRR0 ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `SRR0 <#adl-internal-target-22>`__
+       - Entire Register
+       - 
+     * - `SRR1 <#adl-internal-target-23>`__
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `MSR <#adl-internal-target-17>`__
+       - Entire Register
+       - 
+     * - `NIA <#adl-internal-target-18>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">19&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">50&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `RA <#adl-internal-target-41>`__
+       - `RA <#adl-internal-target-41>`__
+  
+     * - `RB <#adl-internal-target-42>`__
+       - `RB <#adl-internal-target-42>`__
+  
+     * - `RS <#adl-internal-target-43>`__
+       - `RS <#adl-internal-target-43>`__
+  
+
+
+.. _adl-internal-target-112:
+*rlwinm RA,RS,SH,MB,ME*
+```````````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var r = GPR ( RS ) . left_rotate ( SH ) ;
+         bits < 32 > m ;
+        m . mask ( MB , ME ) ;
+        GPR ( RA ) = r & m ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">21&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">SH</td>
+     <td colspan="2" width="15.625%" class="field">MB</td>
+     <td colspan="2" width="15.625%" class="field">ME</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">25</td>
+     <td class="lefteven">26</td><td class="righteven">30</td>
+     <td class="singleodd">31</td>
+     </tr>
+     </table>
+     
+Aliases:
+
+.. _adl-internal-target-113:
+*slwi RA,RS,SH*
+:::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">21&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">SH</td>
+     <td colspan="2" width="15.625%" class="field">0&nbsp;MB</td>
+     <td colspan="2" width="15.625%" class="field">ME</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">25</td>
+     <td class="lefteven">26</td><td class="righteven">30</td>
+     <td class="singleodd">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **rlwinm RA,RS,SH,MB,ME**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `ME <#adl-internal-target-39>`__
+       - ME(31 - SH)
+  
+     * - `RA <#adl-internal-target-41>`__
+       - `RA <#adl-internal-target-41>`__
+  
+     * - `RS <#adl-internal-target-43>`__
+       - `RS <#adl-internal-target-43>`__
+  
+     * - `SH <#adl-internal-target-45>`__
+       - `SH <#adl-internal-target-45>`__
+  
+
+
+.. _instr-section-s:
+
+
+.. _adl-internal-target-114:
+*srw RS, RA, RB*
+````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var n = GPR ( RB ) ( 27 , 31 ) ;
+        GPR ( RS ) = GPR ( RA ) >> n ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Mask:  0x0000001f
+       - Partial
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">536&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-115:
+*stb RS,D(RA)*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + D ;
+        Mem ( addr , 1 ) = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">38&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  store
+
+
+.. _adl-internal-target-116:
+*sth RS,D(RA)*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + D ;
+        Mem ( addr , 2 ) = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">44&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  store
+
+
+.. _adl-internal-target-117:
+*sthx RS, RA, RB*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + GPR ( RB ) ;
+        Mem ( addr , 2 ) = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">407&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  store
+
+
+.. _adl-internal-target-118:
+*stw RS,D(RA)*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + D ;
+        Mem ( addr , 4 ) = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">36&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  store
+
+
+.. _adl-internal-target-119:
+*stwu RS,D(RA)*
+```````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var addr = GPR ( RA ) + D ;
+        Mem ( addr , 4 ) = GPR ( RS ) ;
+        GPR ( RA ) = addr ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">37&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="50%" class="field">D</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  store
+
+
+.. _adl-internal-target-120:
+*stwx RS, RA, RB*
+`````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+         var addr = b + GPR ( RB ) ;
+        Mem ( addr , 4 ) = GPR ( RS ) ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `GPR <#adl-internal-target-26>`__ (RA)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RB)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-26>`__ (RS)
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RS</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">151&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  store
+
+
+.. _instr-section-t:
+
+
+.. _adl-internal-target-121:
+*tlbre*
+```````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var set = MAS2 . Set ;
+         var way = MAS2 . Way ;
+         var t = TlbCam ( set , way ) ;
+        MAS0 . EPN = t . EPN ;
+        MAS0 . TID = t . TID ;
+        MAS0 . V = t . V ;
+        MAS0 . TS = t . TS ;
+        MAS1 . RPN = t . RPN ;
+        MAS1 . SIZE = t . SIZE ;
+        MAS2 . SX = t . SX ;
+        MAS2 . SW = t . SW ;
+        MAS2 . SR = t . SR ;
+        MAS2 . UX = t . UX ;
+        MAS2 . UW = t . UW ;
+        MAS2 . UR = t . UR ;
+        MAS2 . WIMG = t . WIMG ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `MAS2 <#adl-internal-target-16>`__
+       - Set, Way
+       - Partial
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `MAS0 <#adl-internal-target-15>`__
+       - Entire Register
+       - 
+     * - `MAS2 <#adl-internal-target-16>`__
+       - SR, SW, SX, UR, UW, UX
+       - Partial
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="46.875%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;000</td>
+     <td colspan="2" width="31.25%" class="field">946&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-122:
+*tlbwe*
+```````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         var set = MAS2 . Set ;
+         var way = MAS2 . Way ;
+         TlbCam_t t ;
+        t . EPN = MAS0 . EPN ;
+        t . TID = MAS0 . TID ;
+        t . V = MAS0 . V ;
+        t . TS = MAS0 . TS ;
+        t . RPN = MAS1 . RPN ;
+        t . SIZE = MAS1 . SIZE ;
+        t . SX = MAS2 . SX ;
+        t . SW = MAS2 . SW ;
+        t . SR = MAS2 . SR ;
+        t . UX = MAS2 . UX ;
+        t . UW = MAS2 . UW ;
+        t . UR = MAS2 . UR ;
+        t . WIMG = MAS2 . WIMG ;
+        TlbCam ( set , way ) = t ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `MAS0 <#adl-internal-target-15>`__
+       - Entire Register
+       - 
+     * - `MAS2 <#adl-internal-target-16>`__
+       - Set, Way, SR, SW, SX, UR, UW, UX
+       - Partial
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="46.875%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;000</td>
+     <td colspan="2" width="31.25%" class="field">978&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-123:
+Instructions by Attribute
+-------------------------
+
+
+.. _adl-internal-target-124:
+*load*
+``````
+
+* `lbz RT,D(RA) <#adl-internal-target-88>`__
+* `lhz RT,D(RA) <#adl-internal-target-89>`__
+* `lwarx RT, RA, RB <#adl-internal-target-90>`__
+* `lwz RT,D(RA) <#adl-internal-target-91>`__
+* `lwzx RT, RA, RB <#adl-internal-target-92>`__
+* `nest_test_3 OPCD <#adl-internal-target-105>`__
+
+.. _adl-internal-target-125:
+*special*
+`````````
+
+* `nest_test_3 OPCD <#adl-internal-target-105>`__
+
+.. _adl-internal-target-126:
+*store*
+```````
+
+* `stb RS,D(RA) <#adl-internal-target-115>`__
+* `sth RS,D(RA) <#adl-internal-target-116>`__
+* `sthx RS, RA, RB <#adl-internal-target-117>`__
+* `stw RS,D(RA) <#adl-internal-target-118>`__
+* `stwu RS,D(RA) <#adl-internal-target-119>`__
+* `stwx RS, RA, RB <#adl-internal-target-120>`__
+
+.. _adl-internal-target-127:
+Instructions by Block
+---------------------
+
+
+.. _adl-internal-target-128:
+*Unit "x"*
+``````````
+
+* `n1   (x, y) <#adl-internal-target-101>`__
+* `n1 (premium)   (x) <#adl-internal-target-102>`__
+* `rfi RS, RA, RB   (x) <#adl-internal-target-111>`__
+
+.. _adl-internal-target-129:
+*Unit "y"*
+``````````
+
+* `n1   (x, y) <#adl-internal-target-101>`__
+
+.. _adl-internal-target-130:
+Exceptions
+----------
+
+
+.. _adl-internal-target-131:
+*Program Exception*
+```````````````````
+
+Priority:  0
+
+Action taken when exception occurs:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        SRR0 = CIA ;
+        SRR1 = MSR ;
+        MSR = 0 ;
+        NIA = concat ( IVPR ( 0 , 15 ) , IVOR6 ( 16 , 31 ) ) ;
+    }
+    
+
+.. _adl-internal-target-132:
+*ProtectionFault Exception*
+```````````````````````````
+
+Priority:  0
+
+Action taken when exception occurs:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        SRR0 = CIA ;
+        SRR1 = MSR ;
+        MSR = 0 ;
+        NIA = concat ( IVPR ( 0 , 15 ) , IVOR7 ( 16 , 31 ) ) ;
+    }
+    
+
+.. _adl-internal-target-133:
+Context
+-------
+
+
+.. _adl-internal-target-134:
+*Foo*
+`````
+
+    Example context documentatino.
+    
+
+Number of contexts:  4
+
+**Registers:**  CIA NIA 
+
+**Register Files:**  
+
+
+
+**MMU Lookups:**  
+
+Enable:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return FOOCTRL . uint32 (  ) ;
+    }
+    
+
+.. _adl-internal-target-135:
+MMU
+---
+
+
+Interleaved fetch :  true
+Interleaved reads :  true
+Interleaved writes:  true
+
+
+.. _adl-internal-target-136:
+*Lookup:  TlbCam*
+`````````````````
+
+      Fully associative variable-sized page TLB.
+      
+
+Priority:  0
+
+Page Size:  2^(2 * SIZE + 0) << 10
+
+16 entries, fully associative.
+
+.. list-table:: **Way Fields**
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Name
+     - Bits
+     - Description
+   * - EPN
+     - 24
+     -         Example documentation
+       string for an MMU field.
+               
+   * - RPN
+     - 24
+     - 
+   * - SIZE
+     - 6
+     - 
+   * - SR
+     - 1
+     - 
+   * - SW
+     - 1
+     - 
+   * - SX
+     - 1
+     - 
+   * - TID
+     - 6
+     - 
+   * - TS
+     - 1
+     - 
+   * - UR
+     - 1
+     - 
+   * - UW
+     - 1
+     - 
+   * - UX
+     - 1
+     - 
+   * - V
+     - 1
+     - 
+   * - WIMG
+     - 4
+     - 
+   
+Tests::
+
+   Compare ( V , 1 )
+   
+   Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) )
+   
+   Compare ( TID , 0 , PID0 , PID1 )
+   
+   AddrComp ( EPN )
+   
+Execute permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbCam_t t , addr_t  , unsigned  ) {
+        if ( ( ( MSR . PR == 0 ) ? t . SX : t . UX ) == 0 ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Load permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbCam_t t , addr_t  , unsigned  ) {
+        if ( ( ( MSR . PR == 0 ) ? t . SR : t . UR ) == 0 ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Store permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbCam_t t , addr_t  , unsigned  ) {
+        if ( ( ( MSR . PR == 0 ) ? t . SW : t . UW ) == 0 ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Valid predicate:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return ( V != 0 ) ;
+    }
+    
+Translation-hit function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TransType tt , TlbCam_t t , addr_t a , unsigned  ) {
+        HitReg = HitReg + 1 ;
+    }
+    
+Translation-miss function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TransType tt , addr_t a , unsigned  ) {
+         TlbCam_t t ;
+        t . RPN = a >> 10 ;
+        t . SIZE = 4 ;
+        return t ;
+    }
+    
+Reset function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+         TlbCam_t t ;
+        t . EPN = 0x3fffff ;
+        t . TID = 0 ;
+        t . V = 1 ;
+        t . TS = 0 ;
+        t . RPN = 0 ;
+        t . SIZE = 1 ;
+        t . SX = 1 ;
+        t . SW = 1 ;
+        t . SR = 1 ;
+        t . UX = 0 ;
+        t . UW = 0 ;
+        t . UR = 0 ;
+        t . WIMG = 0 ;
+        TlbCam ( 0 , 0 ) = t ;
+    }
+    
+Instruction-enable predicate:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return ( HDBCR0 . REALMODE (  ) == 0 ) ;
+    }
+    
+Data-enable predicate:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return ( HDBCR0 . REALMODE (  ) == 0 ) ;
+    }
+    
+
+.. _adl-internal-target-137:
+Core-level Hook Functions
+-------------------------
+
+Action taken on a decode miss:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t ea , unsigned  ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    
+
+.. _adl-internal-target-138:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+
+In addition, the following helper routines are defined for P:
+
+
+.. _adl-internal-target-58:
+*setCrField*
+````````````
+
+  
+  .. code_block:: cpp
+     :color:
+  
+     void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+         var cr = CR ;
+         bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+        cr . set ( 4 * field , 4 * field + 3 , r ) ;
+        CR = cr ;
+    }
+    

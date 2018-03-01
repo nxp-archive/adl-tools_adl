@@ -1,0 +1,188 @@
+#
+# Tests basic multithreading with activity switching.
+#
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	mtspr 50,r10
+	addi r1,r1,1
+	addi r1,r1,1
+	mtspr 50,r10
+	addi r1,r1,1
+	addi r1,r1,1
+	mtspr 50,r11
+	addi r1,r1,1
+	addi r1,r1,1
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000104 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000108 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x0000010c d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000110 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000114 d=0x7D520BA6	# mtspr 50,r10
+MD n=Mem ra=0x00000118 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x0000011c d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000120 d=0x7D520BA6	# mtspr 50,r10
+MD n=Mem ra=0x00000124 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000128 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x0000012c d=0x7D720BA6	# mtspr 50,r11
+MD n=Mem ra=0x00000130 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000134 d=0x38210001	# addi r1,r1,1
+# </GEN>
+
+RD n=NIA0 d=0x100
+RD n=NIA1 d=0x118
+
+CORE n=:PMT:t0
+
+RD n=GPR i=10 d=0x00000000
+
+#R HID0 0  0
+
+CORE n=:PMT:t1
+
+RD n=GPR i=10 d=0x40000000
+RD n=GPR i=11 d=0xC0000000
+
+#R HID0 0  0
+
+TRACE
+
+CORE n=:PMT:t0
+I id=1 ea=0x100
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x38210001
+INSTR op=0x38210001 asm="#1 addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+R n=ICNT d=0x00000001
+
+CORE n=:PMT:t1
+I id=2 ea=0x118
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x38210001
+INSTR op=0x38210001 asm="#2 addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+R n=ICNT d=0x00000001
+
+CORE n=:PMT:t0
+I id=3 ea=0x104
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x38210001
+INSTR op=0x38210001 asm="#3 addi 1,1,1"
+R n=GPR i=1 d=0x00000002
+R n=ICNT d=0x00000002
+
+CORE n=:PMT:t1
+I id=4 ea=0x11c
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0x38210001
+INSTR op=0x38210001 asm="#4 addi 1,1,1"
+R n=GPR i=1 d=0x00000002
+R n=ICNT d=0x00000002
+
+CORE n=:PMT:t0
+I id=5 ea=0x108
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x38210001
+INSTR op=0x38210001 asm="#5 addi 1,1,1"
+R n=GPR i=1 d=0x00000003
+R n=ICNT d=0x00000003
+
+CORE n=:PMT:t1
+I id=6 ea=0x120
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x7d520ba6
+INSTR op=0x7d520ba6 asm="#6 mtspr 10,50"
+R n=HID0 d=0x40000000
+R n=ICNT d=0x00000003
+
+I id=7 ea=0x124
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x38210001
+INSTR op=0x38210001 asm="#7 addi 1,1,1"
+R n=GPR i=1 d=0x00000003
+R n=ICNT d=0x00000004
+
+I id=8 ea=0x128
+R n=FCNT d=0x00000005
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0x38210001
+INSTR op=0x38210001 asm="#8 addi 1,1,1"
+R n=GPR i=1 d=0x00000004
+R n=ICNT d=0x00000005
+
+I id=9 ea=0x12c
+R n=FCNT d=0x00000006
+M n=Mem t=ifetch ea=0x12c ra=0x12c d=0x7d720ba6
+INSTR op=0x7d720ba6 asm="#9 mtspr 11,50"
+R n=HID0 d=0xc0000000
+R n=ICNT d=0x00000006
+
+CORE n=:PMT:t0
+I id=10 ea=0x10c
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x38210001
+INSTR op=0x38210001 asm="#10 addi 1,1,1"
+R n=GPR i=1 d=0x00000004
+R n=ICNT d=0x00000004
+
+CORE n=:PMT:t1
+I id=11 ea=0x130
+R n=FCNT d=0x00000007
+M n=Mem t=ifetch ea=0x130 ra=0x130 d=0x38210001
+INSTR op=0x38210001 asm="#11 addi 1,1,1"
+R n=GPR i=1 d=0x00000005
+R n=ICNT d=0x00000007
+
+CORE n=:PMT:t0
+I id=12 ea=0x110
+R n=FCNT d=0x00000005
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x38210001
+INSTR op=0x38210001 asm="#12 addi 1,1,1"
+R n=GPR i=1 d=0x00000005
+R n=ICNT d=0x00000005
+
+CORE n=:PMT:t1
+I id=13 ea=0x134
+R n=FCNT d=0x00000008
+M n=Mem t=ifetch ea=0x134 ra=0x134 d=0x38210001
+INSTR op=0x38210001 asm="#13 addi 1,1,1"
+R n=GPR i=1 d=0x00000006
+R n=ICNT d=0x00000008
+
+CORE n=:PMT:t0
+I id=14 ea=0x114
+R n=FCNT d=0x00000006
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x7d520ba6
+INSTR op=0x7d520ba6 asm="#14 mtspr 10,50"
+R n=HID0 d=0x00000000
+R n=ICNT d=0x00000006
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=FCNT d=6
+RD n=ICNT d=6
+RD n=GPR i=1 d=5
+
+#R HID0 0  0
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=6
+RD n=FCNT d=8
+RD n=ICNT d=8

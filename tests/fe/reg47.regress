@@ -1,0 +1,2 @@
+reg47.adl:25: Fields with the 'writable' attribute and write-hooks are not supported.
+reg47.adl:44: Fields with the 'writable' attribute and write-hooks are not supported.

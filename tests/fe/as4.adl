@@ -1,0 +1,218 @@
+//
+// Testing of aspects with instruction pre and post triggers.
+//
+
+define (arch = minippc) {
+
+  void setCrField(int field,int x,int y)
+    {
+      unsigned r = 
+        ( (x <  y) ? 0x8 : 0) |
+        ( (x >  y) ? 0x4 : 0) |
+        ( (x == y) ? 0x2 : 0);
+
+      unsigned mask = 0xf << ((7-field) * 4);
+      r = r << ((7-field) * 4);
+      CR = (CR & ~mask) | r;
+    }
+
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+  }
+
+	define (reg=PREG) {}
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    """
+    If RA=0, the sign extended value of the SI field is placed into GPR(RT)
+    """;
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = signExtend(SI,32);
+      } else {
+        GPR(RT) = GPR(RA) + signExtend(SI,32);
+      }
+    };
+  }
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      GPR(RT) = GPR(RA) + signExtend(SI,32);
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = signExtend(concat(SI,zero(16)),32);
+      } else {
+        GPR(RT) = GPR(RA) + signExtend(concat(SI,zero(16)),32);
+      }
+    };
+  }
+
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+    };
+  }
+
+}
+
+define (arch=P) {
+
+  defmod(instr=(addi,"addic.")) {
+    define (aspect=A) {
+      instr_pre_exec = true;
+      action = { 
+        raiseException(Program); 
+      };
+    }
+  }
+}
+
+define (core=foo) {
+  archs=(minippc,P);
+  
+	define (aspect=B) {
+		instr_post_exec = true;
+		action = { 
+			PREG = PREG + 1;
+		};
+	}
+
+  void clearCR() {
+    CR = 0;
+  };
+}

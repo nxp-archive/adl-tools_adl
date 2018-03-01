@@ -1,0 +1,45 @@
+//
+// Test nested instruction fields with little endian bit order
+//
+
+ define (arch=minippc) {
+ bit_endianness = little;
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+
+ blk = (agu,dalu);
+
+ define(instrfield=OPCD) {
+   bits =(31,26);
+   define(instrfield=A) {
+     bits = (1,0);
+   }
+   fields = (0,A,(3,1));	
+ }
+
+
+ define(instrfield=OPCD1) {
+   bits =(22,(21,16));
+   define(instrfield=C) {
+     bits = (3,2);
+     table = ((0,0),(1,1),(2,2),(3,3));
+   }
+   fields = (0, C(0),1,C(1));
+ }
+
+
+ define(instr=Foo) {
+   fields = (OPCD(0),OPCD1);
+   syntax = ("%i %f",OPCD1.C(0));
+   action = {
+   } ;
+  }
+
+} 
+
+ 
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,80 @@
+//
+// Simple test of instruction fields.
+// Support for table construct 
+//
+define (arch=minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    table = ((0,1),reserved,(2,3),reserved);
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=E) {
+    """
+    Immediate field used to specify a 1-bit value used by *wrteei* to place in the
+    EE (External Input Enable) bit of the Machine State Register.
+    """;
+    bits = 16;
+  }
+  define (instrfield=UI) {
+    bits = (16,31);
+  }
+
+
+  define (instr=ori) {
+    fields=(OPCD(24),RS,RA,UI);
+    syntax=("%i %f %f %f",RS,RA(1),UI);	
+    action = {
+	var t = RA(0);
+    };
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

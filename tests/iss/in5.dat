@@ -1,0 +1,224 @@
+#
+# A basic counter loop using some VLE
+# instructions to demonstrate the functioning
+# of instructions of different lengths.
+#
+#
+= asm
+
+ loop:
+      se_add  r2,r1
+      subf.   r3,r4,r3
+      se_bne  loop
+      .long 0x0
+
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0412 s=2	#	se_add  r2,r1
+MD n=Mem ra=0x00000002 d=0x7C641851	#	subf.   r3,r4,r3
+MD n=Mem ra=0x00000006 d=0xE2FD s=2	#	se_bne  loop
+MD n=Mem ra=0x00000008 d=0x00000000	#	.long 0x0
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=GPR i=4 d=1
+
+BP ea=0x6
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x00000082
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000009
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=4
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x000000a0
+
+I ea=0x2 id=5
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000008
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=7
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x000000be
+
+I ea=0x2 id=8
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000007
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=9
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=10
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x000000dc
+
+I ea=0x2 id=11
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000006
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=12
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=13
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x000000fa
+
+I ea=0x2 id=14
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000005
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=15
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=16
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x00000118
+
+I ea=0x2 id=17
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000004
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=18
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=19
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x00000136
+
+I ea=0x2 id=20
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000003
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=21
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=22
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x00000154
+
+I ea=0x2 id=23
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000002
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=24
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=25
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x00000172
+
+I ea=0x2 id=26
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000001
+R n=CR d=0x40000000
+BP ea=0x6
+
+I ea=0x6 id=27
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+B taken=1 ea=0x0
+
+I ea=0x0 id=28
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412				asm="se_add 1,2"
+R n=GPR i=2 d=0x00000190
+
+I ea=0x2 id=29
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851				asm="subf.  3,4,3"
+R n=GPR i=3 d=0x00000000
+R n=CR d=0x20000000
+BP ea=0x6
+
+I ea=0x6 id=30
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd				asm="se_bc  0,2,0xfd"
+
+I ea=0x8 id=31
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x0				asm="halt   "
+
+RESULTS
+
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+

@@ -1,0 +1,96 @@
+// Correct instrfield syntax 
+
+
+define (arch = sc3400){
+
+
+define (mem=DMEM)    
+{
+	size= 0x2000;	// size of memory in bytes
+	addr_unit=1;	
+}
+	
+define (mem=IMEM)
+{
+	size=0x1000;
+	addr_unit=1;
+	instr_mem = true;
+} 
+
+
+define (reg=PC)
+{  
+  attrs = cia;
+}
+
+define (reg=NIA) {
+attrs = nia;
+}
+
+
+define (regfile=D) 
+{
+	size = 16;
+	width = 40;
+	prefix = d;
+}
+
+
+define (instrfield=FFF)  
+{
+	width = 4;	// the MSB for High Register
+	type = regfile;	
+	ref = D;
+	pseudo = true;
+}
+
+define (instrfield=DaDa) { 
+	width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    	ref = D; 
+	pseudo = true;
+	
+    	define(instrfield=jj) { 
+		bits = (0,1); 
+		table = ((1,1),(3,3),(5,5),(7,7)); 
+    	} 
+    
+    fields = (3,jj(1),2,jj(0));		// ThisField will hold 8 bits, 2 pairs of the same field
+    
+    define(instrfield=Da) {
+    	width = 4;
+        fields = (0,3);		// ! (3,0)  
+    }	
+    define(instrfield=Db) { 
+    	width = 4;
+        fields = (4,7);  	// ! (7,4)
+    }	
+    syntax = ("%f,%f",Da,Db);
+
+}
+
+
+define(instr=add) 
+{ 
+	width = 24; 
+	fields =((bits(0,3), DaDa),  
+               	(bits(4,6), b10),  
+               	(bits(7,9), FFF(0,2)),
+               	(bits(10,13), b1011),
+               	(bits(14), reserved),
+		(bits(15), b0),
+		(bits(16), FFF(3)),	
+		(bits(17,23), 0)); 
+     		action = { ;} ;
+	syntax = ("%i %f,%f",DaDa,FFF);
+} 
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (other);
+}

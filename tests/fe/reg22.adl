@@ -1,0 +1,53 @@
+//
+// Makes sure that we catch the case where a register
+// file alias has a different number of registers than
+// the size of that register file.
+//
+
+define (arch = minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  define (regfile = gprs) {
+    size = 32;
+    width = 64;
+  }
+
+  define (reg = SPRG0) {
+    width = 32;
+  }
+
+}
+
+define (arch = mixed) {
+
+  define (regfile = mixed_gprs) {
+    size = 16;
+    width = 32;
+    define (read) {
+      alias = gprs;
+      regs = ((0,7),(24,30)); // <- the problem
+    }
+    define (write) {
+      alias = gprs;
+      regs = ((0,7),(24,31));
+    }
+  }
+
+  define (reg = USPRG0) {
+    pseudo = 1;
+    define (read) {
+      alias = SPRG0;
+    }
+    define (write) {
+      ignore = true;
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc,mixed);
+}

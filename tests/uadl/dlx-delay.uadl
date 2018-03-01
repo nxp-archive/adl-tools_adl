@@ -1,0 +1,401 @@
+//
+// A basic four-stage (DLX-like) model.  Uses power-like instructions and
+// demonstrates basic register-register and load/store operands.
+//
+
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit IF) {
+      fetch_memory = Mem.I;
+      entries = 14;
+      entry_size = 2;
+      fetch_size = (8,4);
+      min_fetch_entries = 4;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+      scheduler = lock_step;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {
+      scheduler = lock_step;
+    };
+
+    // memory system
+    // memory interface:
+    define (memory Mem) {
+      data_width = 64;
+      max_requests = 2;                 
+      read_latency = 3;
+
+      define (port I){
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+      }
+      
+      define (port D){
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+      }
+    }
+
+    define (semaphore MulFlag) {}
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_EXp, S_MM, S_MMp, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = (S_EX,S_EXp);
+      mMM = (S_MM,S_MMp);
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     add, or, 
+                     cmpi, cmp, 
+                     mfspr, srw, halt );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+      Flags = CR;
+      Flags = XER;
+      Foo   = 1;
+    };
+
+    define (instr=(ori, xori, "andi.", "andis.", rlwimi, "rlwimi.", 
+                   rlwinm, "rlwinm.", and, or, "or.", xor, slw, sraw, "sraw.", srawi, "srawi.",
+                   srw )) {
+      define (operands) {
+        Src1 = GPR(RS);
+        Src2 = GPR(RB);
+        Trg  = GPR(RA);
+        Foo  = 2;
+      };
+    }
+
+    define (instr=(cmpli,cmpi,cmp,cmpl)) {
+      define (operands) {
+        Src1 = GPR(RA);
+        Src2 = GPR(RB);
+        Trg  = CR;
+        Foo  = 3;
+      }
+    }
+
+    define (instr=(mfspr)) {
+      define (operands) {
+        Src1 = SPR(SPRN);
+        Trg  = GPR(RT);
+      }
+    }
+
+    define (instr=(crxor,creqv)) {
+      define (operands) {
+        Src1 = CR;
+        Trg  = CR;
+        Foo = 2;
+      }
+    } 
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read() && Src2.can_read() && Flags.can_read() &&
+							Trg.can_write() && mEX.has_space() && Foo.value()) {
+				Src1.read();
+				Src2.read();
+        Flags.read();
+        Flags.allocate();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+		// No space-check, so one will be inserted.
+		S_EX: {
+			exec();
+			change_state(S_MM);
+		}
+		S_MM: { 
+			change_state(S_WB); 
+		}
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+  int mull_delay(int x)
+  {
+    return 0;
+  }
+
+  int div_delay(int y)
+  {
+    // Just to test signExtend's compilation, which requires a translation.
+    bits<16> tmp = 0x8000;
+    var foo = signExtend(tmp,32);
+    return 5;
+  }
+
+  define (instr_class mul) {
+    instructions = ( mulli,  mullw );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+    };
+
+    define (functions) {
+      delay = mull_delay;
+    }
+
+    define (instr=(divw,"divw.")) {
+      define (functions) {
+        delay = div_delay;
+      }
+    }
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space() && MulFlag.can_allocate()) {
+        read_ops();
+        allocate_ops();
+        MulFlag.allocate();
+				change_state(S_EX);
+			}
+		// No space-check, so one will be inserted.
+		S_EX: {
+			exec();
+      set_latency(delay(2));
+			change_state(S_MM);
+		}
+		S_MM: if (check_latency() && mWB.has_space()) {
+			change_state(S_WB); 
+		} else {
+      decr_latency();
+    }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+      MulFlag.deallocate();
+			change_state(S_INIT);
+		}
+    };
+  }
+
+ define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzu, lwzx );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      Imm = field(D);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space()) {
+        Src.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.D.can_request_read()) {
+        // Calc ea.
+        exec();
+        Mem.D.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.D.can_read()) { 
+        exec_and_read(Mem.D);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.D.can_request_read()) {
+        Mem.D.send_read_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+ define (instr_class store) {
+    instructions = (stb, sth, sthx, stw, stwu, stwx);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space()) {
+				Src.read();
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.D.can_request_write()) {
+        // Calc ea.
+        exec();
+        Mem.D.send_write_request();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.D.can_write()) { 
+        exec_and_write(Mem.D);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.D.can_request_write()) {
+        Mem.D.send_write_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+ define (instr_class branch) {
+   instructions = ( bc, b, bl, bclr );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+   
+   action = {
+   S_INIT :{
+     change_state(S_ID);
+   };
+   S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space()) {
+       read_ops();
+       allocate_ops();
+       change_state(S_EX);
+     }
+   S_EX: if (mMM.has_space()) {
+       exec();
+       write_ops();
+       if (branch_taken()) {
+         taken_flush();
+       }
+       change_state(S_MM);
+     }
+   S_MM: if (mWB.has_space()) {
+       change_state(S_WB);
+     }
+   S_WB: {
+     change_state(S_INIT);
+   }
+   };
+ }
+
+  define (instr_class mtspr) {
+    instructions = mtspr;
+    machine = normal;
+
+    define (operands) {
+      Src = GPR(RS);
+      Trg = SPR;
+    };
+
+#   define HID0_INDEX 50
+#   define HID1_INDEX 51
+
+    action = {
+    S_INIT: {
+      change_state(S_ID);
+    }
+    S_ID: {
+      if (Src.can_read() && mEX.has_space()) {
+        Src.read();
+        Trg.allocate();
+        change_state(S_EX);
+      }
+    }
+    S_EX: {
+      exec();
+      if (Trg.field_value() == HID0_INDEX || Trg.field_value() == HID1_INDEX) {
+        set_latency(2);
+      }
+      change_state(S_EXp);
+    }
+    S_EXp: if (check_latency() && mMM.has_space()) {
+        change_state(S_MM);
+      } else {
+        decr_latency();
+      }
+    S_MM: {
+      change_state(S_WB);
+    }
+    S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+    S_WBp: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+}

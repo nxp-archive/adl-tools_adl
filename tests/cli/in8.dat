@@ -1,0 +1,37 @@
+#
+# Simple test for testing watchpoint functionality.
+#
+
+= asm
+
+	li r1,10
+	li r2,20
+	lwz r1,0x2000(r0)
+	addi r2,r2,10
+	stw r2,0x2010(r0)
+	addi r2,r2,10
+	stw r2,0x2014(r0)
+	addi r2,r2,10
+	stw r2,0x2018(r0)
+	addi r2,r2,10
+	stw r2,0x201c(r0)
+	addi r2,r2,10
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3820000A	#	li r1,10
+MD n=Mem ra=0x00000004 d=0x38400014	#	li r2,20
+MD n=Mem ra=0x00000008 d=0x80202000	#	lwz r1,0x2000(r0)
+MD n=Mem ra=0x0000000c d=0x3842000A	#	addi r2,r2,10
+MD n=Mem ra=0x00000010 d=0x90402010	#	stw r2,0x2010(r0)
+MD n=Mem ra=0x00000014 d=0x3842000A	#	addi r2,r2,10
+MD n=Mem ra=0x00000018 d=0x90402014	#	stw r2,0x2014(r0)
+MD n=Mem ra=0x0000001c d=0x3842000A	#	addi r2,r2,10
+MD n=Mem ra=0x00000020 d=0x90402018	#	stw r2,0x2018(r0)
+MD n=Mem ra=0x00000024 d=0x3842000A	#	addi r2,r2,10
+MD n=Mem ra=0x00000028 d=0x9040201C	#	stw r2,0x201c(r0)
+MD n=Mem ra=0x0000002c d=0x3842000A	#	addi r2,r2,10
+# </GEN>
+
+MD n=Mem ra=0x2000 d=100

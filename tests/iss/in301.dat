@@ -1,0 +1,26 @@
+#
+# Test to make sure that a sparse-register-file entry with ignore=true
+# works as expected (writes should be ignored).
+#
+= asm
+
+	li r1,100
+	mtspr 304,r1
+	mfspr r1,304
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38200064	#	li r1,100
+MD n=Mem ra=0x00000004 d=0x7C304BA6	#	mtspr 304,r1
+MD n=Mem ra=0x00000008 d=0x7C304AA6	#	mfspr r1,304
+# </GEN>
+
+CORE n=:P
+
+RD n=ITEST d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=ITEST   d=0xdeadbeef

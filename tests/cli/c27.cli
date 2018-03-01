@@ -1,0 +1,19 @@
+#
+# Test of miscellaneous functions.
+#
+
+simload $env(srcdir)/sieve.elf
+puts "Entry point:  [symbol main]"
+
+proc checkfor {list item} {
+	if { [lsearch $list $item] > -1 } {
+		puts "The $item item was found."
+	} else {
+		puts "The $item item was *NOT* found."
+	}
+}
+
+set t_items [filterlist]
+checkfor $t_items core_mem_read
+checkfor [excptlist] Program
+checkfor $t_items foobar

@@ -1,0 +1,462 @@
+//
+// Simple example based on RISC-V for little-endian variable-length encoding.
+//
+
+// Default register width.
+#ifndef XLEN
+# define XLEN 32
+#endif
+
+
+define (arch = rv_test) {
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+  
+  attrs = (nia,cia,debug);
+
+  define (reloc=R_RISCV_BRANCH) {
+    value = 16;
+    abbrev = "b12";
+    field_width = 12;
+    instrfield= imm_sb;
+  }
+  
+  define (reloc=R_RISCV_RVC_BRANCH) {
+    value = 44;
+    abbrev = "b8";
+    field_width = 8;
+    instrfield= imm_cb;
+  }
+  
+  define (reg=PC) {
+    """
+    Current instruction address.
+    """;
+    attrs = (cia);
+    width = XLEN;
+    reset = 0;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = (nia,debug(1));
+    width = XLEN;
+    reset = 0;    
+  }
+ 
+  define (regfile=GPR) {
+    """
+      The complete general-purpose register file.  r0 always reads as 0.
+    """;
+    size = 32;
+    width = XLEN;
+    prefix = x;
+    attrs = debug(0);
+
+    define (read) {
+      action = func (unsigned index) {
+        return (index == 0) ? 0 : ThisReg(index);
+      };
+    }
+
+    define (write) {
+      action = func (unsigned index,bits<XLEN> x) {
+        if (index != 0) {
+          ThisReg(index) = x;
+        }
+      };
+    }
+  }
+
+  define (reloc=R_RISCV_LO12_I) {
+    value = 27;
+    abbrev = "lo";
+    field_width = 12;
+    // Turn off overflow checking, since we're just taking a low-slice of the
+    // value.  Basically, we can't truly overflow...
+    check_overflow = false;
+    instrfield = imm_i;
+  }
+  
+  define (instrfield = opcode) {
+    """
+    Primary opcode field.
+    """;
+    bits = (6,0);
+  }
+  
+  define (instrfield = op_c) {
+    """
+    Primary opcode for compressed instructions.
+    """;
+    bits = (1,0);
+  }
+  
+  define (instrfield = funct3_c) {
+    """
+    Secondary opcode for compressed instructions.
+    """;
+    bits = (15,13);
+  }
+
+  define (instrfield = funct3) {
+    """
+    Secondary opcode (function) field.
+    """;
+    bits = (14,12);
+  }
+
+  define (instrfield = imm_cb) {
+    """
+    Immediate offset for branch instructions.
+    """;
+    bits = ( 12,(6,5),2,(11,10),(4,3) );
+    is_signed = true;
+    shift = 1;
+    display = dec;
+    addr = pc;
+  }
+
+  define (instrfield = imm_sb) {
+    """
+    Signed 12-bit immediate for SB-type instructions.
+    """;
+    bits = ( 31 , 7 , (30,25) , (11,8) );
+    shift = 1;
+    is_signed = true;
+    display = dec;
+    addr = pc;
+  } 
+  
+  define (instrfield = imm_sp_ci) {
+    """
+    Immediate for sign-extended scaled stack-pointer additions.
+    """;
+    bits = (12,(4,3),5,2,6);
+    is_signed = true;
+    shift = 4;
+    display = dec;
+  }
+  
+  define (instrfield = imm_i) {
+    """
+    Signed 12-bit immediate for I-type instructions.
+    """;
+    bits = (31,20);
+    display = dec;
+    is_signed = true;
+  }
+  
+  define (instrfield = imm_ciw) {
+    """
+    Immediate offset for zero-extended addition.
+    """;
+    bits = ( (10,7),(12,11),5,6 );
+    shift = 2;
+    display = dec;
+  }
+
+  define (instrfield = immw_cl) {
+    """
+    Immediate offset value for compressed-instruction word loads.
+    """;
+    bits = ( 5, (12,10), 6 );
+    shift = 2;
+  }
+
+  define (instrfield = imm_ci) {
+    """
+    Immediate for sign-extended constant loads.
+    """;
+    bits = (12,(6,2));
+    is_signed = true;
+  }
+
+  define (instrfield = immw_cs) {
+    """
+    Immediate offset value for compressed-instruction word stores.
+    """;
+    bits = ( 5, (12,10), 6 );    
+    shift = 2;
+  } 
+  
+  // We need to clean this up...  There should be an easier way to re-use this.
+# define XPR_LIST (("zero","x0"), /* Hard-wired to zero. */     \
+                   ("ra","x1"),   /* Return address. */         \
+                   ("sp","x2"),   /* Stack pointer. */          \
+                   ("gp","x3"),   /* Global pointer. */         \
+                   ("tp","x4"),   /* Thread pointer. */         \
+                   ("t0","x5"),   /* Temporary registers. */    \
+                   ("t1","x6"),                                 \
+                   ("t2","x7"),                                 \
+                   ("s0","x8"),   /* Callee-saved registers. */ \
+                   ("s1","x9"),                                 \
+                   ("a0","x10"),  /* Argument registers. */     \
+                   ("a1","x11"),                                \
+                   ("a2","x12"),                                \
+                   ("a3","x13"),                                \
+                   ("a4","x14"),                                \
+                   ("a5","x15"),                                \
+                   ("a6","x16"),                                \
+                   ("a7","x17"),                                \
+                   ("s2","x18"),   /* Callee-saved registers. */  \
+                   ("s3","x19"),                                  \
+                   ("s4","x20"),                                  \
+                   ("s5","x21"),                                  \
+                   ("s6","x22"),                                  \
+                   ("s7","x23"),                                  \
+                   ("s8","x24"),                                  \
+                   ("s9","x25"),                                  \
+                   ("s10","x26"),                                 \
+                   ("s11","x27"),                                 \
+                   ("t3","x28"),                                  \
+                   ("t4","x29"),                                  \
+                   ("t5","x30"),                                  \
+                   ("t6","x31")                                   \
+                   )
+  
+  define (instrfield = rd) {
+    """
+    Destination/target register field.
+    """;
+    bits = (11,7);
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;
+  }
+
+  define (instrfield = rs1) {
+    """
+    First source register field.
+    """;
+    bits = (19,15);
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;    
+  }
+
+  define (instrfield = rs2) {
+    """
+    Second source register field.
+    """;
+    bits = (24,20);
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;    
+  }
+  
+  define (instrfield = rdc_p) {
+    """
+    Destination/target register (limited range) for compressed instructions.
+    """;
+    bits = (4,2);
+    offset = 8;
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;
+  }
+
+  define (instrfield = rs1c_p) {
+    """
+    First source register (limited range) for compressed instructions.
+    """;
+    bits = (9,7);
+    offset = 8;
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;
+  }
+
+  define (instrfield = rs2c_p) {
+    """
+    Second source register (limited range) for compressed instructions.
+    """;
+    bits = (4,2);
+    offset = 8;
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;
+  }    
+
+  define (instr = "c.addi") {
+    """
+    Add-immediate.
+    """;
+    fields = (funct3_c(0),imm_ci,rd,op_c(1));
+    syntax = ("%i %f,%f",rd,imm_ci);
+    action = {
+      GPR(rd) = GPR(rd) + imm_ci;
+    };
+  }
+  
+  define (instr = "c.addi16sp") {
+    """
+    Add-immediate to stack pointer scaled.
+    """;
+    fields = (funct3_c(3),imm_sp_ci,rd(2),op_c(1));
+    syntax = ("%i sp,%f",imm_sp_ci);
+    action = {
+      GPR(2) = GPR(2) + imm_sp_ci;
+    };
+  }   
+  
+  define (instr = "c.addi4spn") {
+    """
+    Add scaled immediate to stack pointer.
+    """;
+    fields = (funct3_c(0),imm_ciw,rdc_p,op_c(0));
+    syntax = ("%i %f,sp,%f",rdc_p,imm_ciw);
+    action = {
+        GPR(rdc_p) = GPR(2) + imm_ciw;
+    };
+  }
+
+  define (instr = "c.lw") {
+    """
+    Load sign-extended word.
+    """;
+    fields = (funct3_c(2),rdc_p,rs1c_p,immw_cl,op_c(0));
+    syntax = ("%i %f,%f(%f)",rdc_p,immw_cl,rs1c_p);
+    action = {
+      var ea = GPR(rs1c_p) + immw_cl;
+
+      GPR(rdc_p) = signExtend(Mem(ea,4),XLEN);
+    };
+  }
+
+  define (instr = "c.sw") {
+    """
+    Store word.
+    """;
+    fields = (funct3_c(6),rs2c_p,rs1c_p,immw_cs,op_c(0));
+    syntax = ("%i %f,%f(%f)",rs2c_p,immw_cs,rs1c_p);
+    action = {
+      var ea = GPR(rs1c_p) + immw_cs;
+
+      Mem(ea,4) = GPR(rs2c_p);
+    };
+  }
+  
+
+  define (instr = addi) {
+    """
+    Add-immediate operation.
+    """;
+    fields = (imm_i,rs1,funct3(0),rd,opcode(19));
+    syntax = ("%i %f,%f,%f",rd,rs1,imm_i);
+    action = {
+      GPR(rd) = GPR(rs1) + imm_i;
+    };
+  }
+
+  define (instr = beq) {
+    """
+    Branch-if-equal instruction.
+    """;
+    fields = (imm_sb,rs2,rs1,funct3(0),opcode(99));
+    syntax = ("%i %f,%f,%f",rs1,rs2,imm_sb);
+    action = {
+      if (GPR(rs1) == GPR(rs2)) {
+        NIA = imm_sb;
+      }
+    };
+  }
+  
+  define (instr = "c.beqz") {
+    """
+    Branch if equal to zero.
+    """;
+    fields = (funct3_c(6),imm_cb,rs1c_p,op_c(1));
+    syntax = ("%i %f,%f",rs1c_p,imm_cb);
+    action = {
+      if (GPR(rs1c_p) == 0) {
+        NIA = imm_cb;
+      }
+    };
+  }
+
+ define (instr = beqz) {
+    """
+    Alias for branch-if-equal-to-zero.  We use the compressed form if the source
+    register is valid.  The assembler will relax this branch later if the target
+    is too far away.
+    """;
+    fields = (rs1,imm_sb);
+    syntax = ("%i %f,%f",rs1,imm_sb);
+    alias_action = func(const InstrArgs &args) {
+      InstrBundle b;
+      if (valid_rvc_reg(args[0])) {
+        b.push_back(createInstr("c.beqz",args[0],args[1]));
+      } else {
+        b.push_back(createInstr("beq",args[0],0,args[1]));
+      }
+      return b;
+    };
+  }
+  
+  define (instr = halt) {
+    fields = (funct3_c(0),imm_ciw(0),rdc_p(0),op_c(0));
+    //fields = (funct3(0),opcode(0));
+    action = {
+      halt();
+    };
+  }
+
+  // Remove addi from consideration for assembly, since a macro will handle
+  // instruction selection.
+  defmod (instr = addi) { assemble = false; };
+
+  bool valid_rvc_reg(const InstrArg &r)
+  {
+    return r.value() >= 8 && r.value() < 16;
+  }
+
+  bool is_stack_reg(const InstrArg &r)
+  {
+    return r.value() == 2;
+  }
+
+  bool valid_addi4spn_imm(const InstrArg &imm)
+  {
+    return imm.is_constant() && ((imm.value() & 0x3) == 0) && (imm.value() < 1020);
+  }
+
+  bool valid_addi16spn_imm(const InstrArg &imm)
+  {
+    return imm.is_constant() && ((imm.value() & 0xf) == 0) && (imm.value() >= -496) && (imm.value() <= 496);
+  }
+
+  bool valid_c_addi_imm(const InstrArg &imm)
+  {
+    return (imm.value() >= -31) && (imm.value() <= 31);
+  } 
+  
+  define (instr = addi_macro) {
+    fields = (rd,rs1,imm_i);
+    syntax = ("addi %f,%f,%f",rd,rs1,imm_i);
+    alias_action = func(const InstrArgs &args) {
+      InstrBundle b;
+      if (valid_rvc_reg(args[0]) && is_stack_reg(args[1]) && valid_addi4spn_imm(args[2])) {
+        b.push_back(createInstr("c.addi4spn",args[0],args[2]));
+      } else if ((args[0].value() == args[1].value()) && valid_c_addi_imm(args[2])) {
+        b.push_back(createInstr("c.addi",args[0],args[2]));
+      } else if (is_stack_reg(args[0]) && is_stack_reg(args[1]) && valid_addi16spn_imm(args[2])) {
+        b.push_back(createInstr("c.addi16sp",args[2]));
+      } else {
+        b.push_back(createInstr("addi",args[0],args[1],args[2]));
+      }
+      return b;
+    };
+  }
+  
+  
+}
+
+define (core = rv) {
+  archs = rv_test;
+}

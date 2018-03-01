@@ -1,0 +1,44 @@
+#
+# Make sure that a forced flush on a dual-issue machine, where the instruction
+# causing the forced flush is in the second slot, works properly, and doesn't
+# put the stage into an inconsistent state.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	b L0
+	addi r2,r2,2
+	addi r2,r2,2
+L0:
+	addi r3,r3,3
+	addi r3,r3,3
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x4800000C	#	b L0
+MD n=Mem ra=0x00000018 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000001c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000020 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000024 d=0x38630003	#	addi r3,r3,3
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA     d=0x00000000
+
+RESULTS
+
+RD n=GPR i=1 d=5
+RD n=GPR i=2 d=0
+RD n=GPR i=3 d=6
+

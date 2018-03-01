@@ -1,0 +1,512 @@
+//
+// A test of a TLB with a lookup that's per-context as well as a per-core
+// lookup.
+//
+
+#import "mod1.adl"
+
+define (arch = ppc_mpu) {
+  
+  define (reg=TACTIVE) {}
+
+  define (reg=TEN) {}
+
+  define (reg=DEAR) {}
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register for protection faults.
+    """;
+  }
+
+  define (reg=IVOR13) {
+    """
+    Interrupt-vector offset register for dtlb misses.
+    """;
+  }
+
+  define (reg=IVOR14) {
+    """
+    Interrupt-vector offset register for itlb misses.
+    """;
+  }
+
+  define (reg=MAS0) {
+    """
+    Memory assist register 0.
+    """;
+    define (field=EPN) {
+      bits=(0,23);
+    }
+    define (field=V) {
+      bits=31;
+    }
+  }
+
+  define (reg=MAS1) {
+    """
+    Memory assist register 1.
+    """;
+    define (field=RPN) {
+      bits=(0,23);
+    }
+    define (field=SIZE) {
+      bits=(24,29);
+    }
+  }
+
+  define (reg=MAS2) {
+    """
+    Memory assist register 2.
+    """;
+    define (field=SX) {
+      bits=0;
+    }
+    define (field=SW) {
+      bits=1;
+    }
+    define (field=SR) {
+      bits=2;
+    }
+    define (field=UX) {
+      bits=3;
+    }
+    define (field=UW) {
+      bits=4;
+    }
+    define (field=UR) {
+      bits=5;
+    }
+    define (field=Type) {
+      bits = 19;
+    }
+    define (field=Set) {
+      bits=(20,27);
+    }
+    define (field=Way) {
+      bits=(28,31);
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=63) { reg = DEAR; }
+    define (entry=26) { reg=SRR0; }
+    define (entry=27) { reg=SRR1; }
+    define (entry=200) { reg=MAS0; }
+    define (entry=201) { reg=MAS1; }
+    define (entry=202) { reg=MAS2; }
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=trload) {
+    """
+Load a context from memory at GPR(RA)+D into the context specified by GPR(RT).
+""";
+    fields=(OPCD(50),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    action = {
+      unsigned ctx = GPR(RT).uint32();
+      var ea = GPR(RA) + D;
+
+      Thread.read(ctx,ea.uint64());
+    };
+  }
+
+  define (instr=trsave) {
+    """
+Save the context specified by GPR(RS) to memory at GPR(RA)+D.
+""";
+    fields=(OPCD(51),RS,RA,D);
+    syntax = ("%i %f,%f(%f)",RS,D,RA);
+    action = {
+      unsigned ctx = GPR(RS).uint32();
+      var ea = GPR(RA) + D;
+
+      Thread.write(ctx,ea.uint64());
+    };
+  }
+
+  define (instr=trclear) {
+    """
+Clear the specified context.
+""";
+    fields=(OPCD(52),RT);
+    width = 32;
+    action = {
+      unsigned ctx = GPR(RT).uint32();
+
+      Thread.clear(ctx);
+    };
+  }
+
+
+  define (instr=yield) {
+    fields=(OPCD(31),XO(84));
+    action = {
+      for (unsigned i = (TACTIVE.uint32()+1) % Thread.num_contexts(); i != TACTIVE.uint32(); i = (i + 1) % Thread.num_contexts()) {
+        if ( Thread(i).TEN != 0) {
+          TACTIVE = i;
+          break;
+        }
+      }
+    };
+  }
+
+  define (instr=mfmsr) {
+    fields=(OPCD(31),RT,XO(83));
+    action = {
+      GPR(RT) = MSR;
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  void populateMasRegs(int type,int set,int way) {
+    TlbCam_t t;
+    if (type == 0) {
+      t = TlbCam0(0,way);
+    } else {
+      t = TlbCam1(0,way);
+    }
+      
+    MAS0.EPN  = t.EPN;
+    MAS0.V    = t.V;
+
+    MAS1.RPN  = t.RPN;
+    MAS1.SIZE = t.SIZE;
+
+    MAS2.SX   = t.SX;
+    MAS2.SW   = t.SW;
+    MAS2.SR   = t.SR;
+    MAS2.UX   = t.UX;
+    MAS2.UW   = t.UW;
+    MAS2.UR   = t.UR;
+  }
+
+  define (instr=tlbre) {
+    fields=(OPCD(31),XO(946));
+    action = {
+      var set  = MAS2.Set.uint32();
+      var way  = MAS2.Way.uint32();
+      var type = MAS2.Type.uint32();
+      populateMasRegs(type,set,way);
+    };
+  }
+
+  define (instr=tlbwe) {
+    fields=(OPCD(31),XO(978));
+    action = {
+      var way  = MAS2.Way.uint32();
+      var type = MAS2.Type.uint32();
+
+      if (type == 0) {
+        TlbCam0_t t;
+      
+        t.EPN  = MAS0.EPN;
+        t.V    = MAS0.V; 
+                      
+        t.RPN  = MAS1.RPN;
+        t.SIZE = MAS1.SIZE;
+                      
+        t.SX   = MAS2.SX;
+        t.SW   = MAS2.SW;
+        t.SR   = MAS2.SR;
+        t.UX   = MAS2.UX;
+        t.UW   = MAS2.UW;
+        t.UR   = MAS2.UR;
+        TlbCam0(0,way) = t;
+      } else {
+        TlbCam1_t t;
+      
+        t.EPN  = MAS0.EPN;
+        t.V    = MAS0.V; 
+                      
+        t.RPN  = MAS1.RPN;
+        t.SIZE = MAS1.SIZE;
+                      
+        t.SX   = MAS2.SX;
+        t.SW   = MAS2.SW;
+        t.SR   = MAS2.SR;
+        t.UX   = MAS2.UX;
+        t.UW   = MAS2.UW;
+        t.UR   = MAS2.UR;
+
+        TlbCam1(0,way) = t;
+      }
+    };
+  }
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+      CIA = NIA;    
+    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+
+      interface = true;
+
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      
+      define (tests=Normal) {
+        test = Compare(V,1);
+        test = AddrComp(EPN);
+      }
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+
+      exec_perm = func(TlbCam_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SX : t.UX) == 0) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      load_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SR : t.UR) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      store_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SW : t.UW) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      reset = {
+        // Reset state: One 4k translation at top of memory.  In this case,
+        // it maps the top 4k to the bottom 4k.
+        TlbCam0_t t;
+      
+        t.EPN  = 0x3fffff;
+        t.V    = 1;
+                      
+        t.RPN  = 0;
+        t.SIZE = 1;
+                      
+        t.SX   = 1;
+        t.SW   = 1;
+        t.SR   = 1;
+
+        t.UX   = 0;
+        t.UW   = 0;
+        t.UR   = 0;
+            
+        TlbCam0(0,0) = t;
+      };
+
+      // Three words to store an entry.
+      entry_mem_size = 12;
+
+      mem_write = func(unsigned set,unsigned way,addr_t addr) {
+        bits<32> mas0, mas1, mas2;
+        getTlbCam1(way,mas0,mas1,mas2);
+
+        Mem(addr,4) = mas0;
+        addr += 4;
+        Mem(addr,4) = mas1;
+        addr += 4;
+        Mem(addr,4) = mas2;
+        addr += 4;
+
+        return addr;
+      };
+
+      mem_read = func(unsigned set,unsigned way,addr_t addr) {
+        bits<32> mas0 = Mem(addr,4);
+        addr += 4;
+        bits<32> mas1 = Mem(addr,4);
+        addr += 4;
+        bits<32> mas2 = Mem(addr,4);
+        addr += 4;
+        
+        setTlbCam1(way,mas0,mas1,mas2);
+
+        return addr;
+      };
+
+    }
+
+    // Global to all cores.
+    define (lookup TlbCam0) {
+      inherit = TlbCam;
+
+      priority = 0;
+
+      define (array) {
+        entries = 8;
+      }
+
+    }   
+
+#define NumLocalEntries 2
+
+    // Local to each thread.
+    define (lookup TlbCam1) {
+      inherit = TlbCam;
+
+      priority = 1;
+
+      define (array) {
+        entries = NumLocalEntries;
+      }
+
+    }   
+  }
+
+  void getTlbCam1(unsigned way,bits<32> &mas0,bits<32> &mas1,bits<32> &mas2)
+  {
+    TlbCam_t t = TlbCam1(0,way);
+      
+    mas0 = setfield_MAS0_EPN(mas0,t.EPN);
+    mas0 = setfield_MAS0_V(mas0,t.V);
+
+    mas1 = setfield_MAS1_RPN(mas1,t.RPN);
+    mas1 = setfield_MAS1_SIZE(mas1,t.SIZE);
+
+    mas2 = setfield_MAS2_SX(mas2,t.SX);
+    mas2 = setfield_MAS2_SW(mas2,t.SW);
+    mas2 = setfield_MAS2_SR(mas2,t.SR);
+    mas2 = setfield_MAS2_UX(mas2,t.UX);
+    mas2 = setfield_MAS2_UW(mas2,t.UW);
+    mas2 = setfield_MAS2_UR(mas2,t.UR);
+  }
+
+  void setTlbCam1(unsigned way,const bits<32> &mas0,const bits<32> &mas1,const bits<32> &mas2)
+  {
+    TlbCam1_t t;
+      
+    t.EPN  = getfield_MAS0_EPN(mas0);
+    t.V    = getfield_MAS0_V(mas0);
+                      
+    t.RPN  = getfield_MAS1_RPN(mas1);
+    t.SIZE = getfield_MAS1_SIZE(mas1);
+                      
+    t.SX   = getfield_MAS2_SX(mas2);
+    t.SW   = getfield_MAS2_SW(mas2);
+    t.SR   = getfield_MAS2_SR(mas2);
+    t.UX   = getfield_MAS2_UX(mas2);
+    t.UW   = getfield_MAS2_UW(mas2);
+    t.UR   = getfield_MAS2_UR(mas2);
+
+    TlbCam1(0,way) = t;
+  }  
+
+  define (context=Thread) {
+    regs = (CIA,NIA,LR,CR,CTR,XER,MSR,SRR0,SRR1,TEN);
+    regfiles = GPR;
+    mmulookups = TlbCam1;
+    mem_layout = (NIA,TEN,LR,CR,CTR,XER,MSR,SRR0,SRR1,GPR,TlbCam1);
+    mem_omit = CIA;
+    num_contexts = 2;
+    active = { return TACTIVE.uint32(); };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,ppc_mpu);
+}

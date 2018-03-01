@@ -1,0 +1,81 @@
+#
+# Tests that we will classify instructions correctly based upon operand-value
+# constraints.  This also tests that we can lock the fetch unit and memory.
+#
+
+= asm
+  
+  addi r1,r1,1
+  mtspr 50,r2
+  mtspr 51,r2
+  addi r1,r1,1
+  addi r2,r1,1
+  addi r3,r1,1
+  mtspr 1,r1
+
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA     d=0
+
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x7C520BA6	#	mtspr 50,r2
+MD n=Mem ra=0x00000008 d=0x7C530BA6	#	mtspr 51,r2
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38410001	#	addi r2,r1,1
+MD n=Mem ra=0x00000014 d=0x38610001	#	addi r3,r1,1
+MD n=Mem ra=0x00000018 d=0x7C2103A6	#	mtspr 1,r1
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=1
+CTIME t=7
+
+# Should take longer b/c this is in the special move-to-hid class.
+I ea=0x4 id=2
+INSTR op=0x7c520ba6					asm="mtspr r2,HID0"
+ITIME t=1
+CTIME t=7
+
+# Should take longer b/c this is in the special move-to-hid class.
+I ea=0x8 id=3
+INSTR op=0x7c530ba6					asm="mtspr r2,HID1"
+ITIME t=2
+CTIME t=11
+
+I ea=0xc id=4
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=2
+CTIME t=11
+
+# The mtspr instructions locks memory, causing the delay in 
+# the following instructions.
+I ea=0x10 id=5
+INSTR op=0x38410001					asm="addi r2,r1,1"
+ITIME t=5
+CTIME t=14
+
+I ea=0x14 id=6
+INSTR op=0x38610001					asm="addi r3,r1,1"
+ITIME t=7
+CTIME t=14
+
+# No extra delay because it's just a normal mtspr.
+I ea=0x18 id=7
+INSTR op=0x7c2103a6					asm="mtspr r1,XER"
+ITIME t=12
+CTIME t=16
+
+I ea=0x1c id=8
+INSTR op=0x00000000					asm="halt "
+ITIME t=12
+CTIME t=16
+
+RESULTS

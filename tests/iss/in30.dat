@@ -1,0 +1,52 @@
+#
+# Basic example of a delay slot.
+#
+# <ASM>
+#  addi r1,r1,1
+#  bc 20,0,L1
+#  addi r2,r2,1
+#  addi r3,r3,1
+# L1:
+#  addi r4,r4,1
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x4280000C	# bc 20,0,L1
+MD n=Mem ra=0x00000008 d=0x38420001	# addi r2,r2,1
+MD n=Mem ra=0x0000000c d=0x38630001	# addi r3,r3,1
+MD n=Mem ra=0x00000010 d=0x38840001	# addi r4,r4,1
+# </GEN>
+CORE n=:P
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001 asm="#1 addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x4280000c
+INSTR op=0x4280000c asm="#2 bc 20,0,3"
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38420001
+INSTR op=0x38420001 asm="#3 addi 2,2,1"
+R n=GPR i=2 d=0x00000001
+R n=NIA d=0x00000010
+
+I id=4 ea=0x10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38840001
+INSTR op=0x38840001 asm="#4 addi 4,4,1"
+R n=GPR i=4 d=0x00000001
+
+I id=5 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x0
+INSTR op=0x0 asm="#5 halt"
+
+
+RESULTS
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=1
+RD n=GPR i=4 d=1

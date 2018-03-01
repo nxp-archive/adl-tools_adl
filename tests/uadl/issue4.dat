@@ -1,0 +1,55 @@
+#
+# Test the use of a flag within a release-test function.  In this case,
+# dlx2 will stall an entire stage if a HID instruction is being written
+# and a load/store instruction is in decode.
+#
+= asm
+
+  addi r3,r3,1
+  mtspr 50,r0
+  addi r1,r1,1
+  lwz r2,0x1000(r0)
+  
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000004 d=0x7C120BA6	#	mtspr 50,r0
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x80401000	#	lwz r2,0x1000(r0)
+# </GEN>
+
+RD n=NIA d=0x0
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+
+TRACE
+
+I ea=0x0 id=1
+ITIME t=1
+CTIME t=7
+
+I ea=0x4 id=2
+ITIME t=1
+CTIME t=7
+
+I ea=0x8 id=3
+ITIME t=2
+CTIME t=8
+
+I ea=0xc id=4
+ITIME t=2
+CTIME t=12
+
+I ea=0x10 id=5
+ITIME t=5
+CTIME t=12
+
+RESULTS
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=1
+

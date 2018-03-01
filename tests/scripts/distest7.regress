@@ -1,0 +1,58 @@
+Registers:  r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r20 r21 r22 r23 r24 r25 r26 r27 r28 r29 r30 r31 cr ctr lr nia xer
+
+Disassembly:
+       0:  addi 7 0 100
+     0x4:  mtspr 7 9
+     0x8:  addis 9 0 0
+     0xc:  addis 11 0 0
+    0x10:  addi 9 9 4096
+    0x14:  addi 11 11 8192
+    0x18:  addi 8 0 1
+    0x1c:  addi 0 0 0
+    0x20:  addi 10 0 0
+    0x24:  stwx 8 10 9
+    0x28:  stwx 0 10 11
+    0x2c:  addi 10 10 4
+    0x30:  bc 16 0 -12
+    0x34:  addis 9 0 0
+    0x38:  addi 9 9 4096
+    0x3c:  or 9 5 9
+    0x40:  addi 8 0 2
+    0x44:  rlwinm 8 7 2 0 29
+    0x48:  lwzx 0 9 7
+    0x4c:  addi 6 8 1
+    0x50:  cmpi 0 0 0 0
+    0x54:  bc 12 2 52
+    0x58:  add 10 8 8
+    0x5c:  cmpi 0 0 10 99
+    0x60:  bc 12 1 40
+    0x64:  rlwinm 10 0 2 0 29
+    0x68:  add 11 0 5
+    0x6c:  or 7 0 7
+    0x70:  addi 7 0 0
+    0x74:  add 10 10 8
+    0x78:  cmpi 0 0 10 99
+    0x7c:  stw 7 11 0
+    0x80:  add 11 11 0
+    0x84:  bc 4 1 -16
+    0x88:  or 6 8 6
+    0x8c:  mullw 0 8 8
+    0x90:  cmpi 0 0 0 99
+    0x94:  bc 4 1 -80
+    0x98:  addi 0 0 98
+    0x9c:  mtspr 0 9
+    0xa0:  addis 9 0 0
+    0xa4:  addi 9 9 4096
+    0xa8:  addis 11 0 0
+    0xac:  addi 9 9 8
+    0xb0:  addi 11 11 8192
+    0xb4:  addi 10 0 2
+    0xb8:  lwz 0 9 0
+    0xbc:  addi 9 9 4
+    0xc0:  cmpi 0 0 0 0
+    0xc4:  bc 12 2 12
+    0xc8:  stw 10 11 0
+    0xcc:  addi 11 11 4
+    0xd0:  addi 10 10 1
+    0xd4:  bc 16 0 -28
+    0xd8:  addi 3 0 0

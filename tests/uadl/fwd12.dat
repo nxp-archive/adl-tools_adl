@@ -1,0 +1,61 @@
+#
+# This checks for a particular problem with forwarding paths: The third
+# instruction should be able to issue right after the first two due to the
+# forwarding paths, but if we're not correctly checking the allocator tags, we
+# might get that wrong and stall.
+#
+
+= asm
+
+	addi r1,r2,1
+	addi r1,r3,1
+	addi r5,r1,2
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38220001	#	addi r1,r2,1
+MD n=Mem ra=0x00000004 d=0x38230001	#	addi r1,r3,1
+MD n=Mem ra=0x00000008 d=0x38A10002	#	addi r5,r1,2
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA   d=0x0
+
+TRACE
+
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38220001
+INSTR op=0x38220001					asm="addi r1,r2,1"
+R n=GPR i=1 d=0x00000001
+ITIME t=2
+CTIME t=5
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38230001
+INSTR op=0x38230001					asm="addi r1,r3,1"
+R n=GPR i=1 d=0x00000001
+ITIME t=2
+CTIME t=5
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38a10002
+INSTR op=0x38a10002					asm="addi r5,r1,2"
+R n=GPR i=5 d=0x00000003
+ITIME t=3
+CTIME t=6
+
+I ea=0xc id=4 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=3
+CTIME t=6
+
+RESULTS
+
+RD n=GPR i=1  d=1
+RD n=GPR i=5  d=3
+
+

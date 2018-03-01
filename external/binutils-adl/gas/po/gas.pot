@@ -1,0 +1,2500 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-12 14:38-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: adl-asm-impl.C:299
+#, c-format
+msgid "%s:  Multi-instructin alias targets (%s) are not allowed."
+msgstr ""
+
+#. TBD
+#: adl-asm-impl.C:575
+msgid "Improperly formed .switch directive."
+msgstr ""
+
+#: adl-asm-impl.C:605
+#, c-format
+msgid "Internal assembler error for instruction %s:  %s"
+msgstr ""
+
+#: adl-asm-impl.C:627
+#, c-format
+msgid "Internal assembler error for instruction-prefix-field value %s:  %s"
+msgstr ""
+
+#: adl-asm-impl.C:701
+#, c-format
+msgid "Internal assembler error for instruction %s: %s"
+msgstr ""
+
+#: adl-asm-impl.C:718
+#, c-format
+msgid "Error in allocating memory for regex of '%s'"
+msgstr ""
+
+#: adl-asm-impl.C:727
+#, c-format
+msgid "Error in compiling regex for %s (%s): %s"
+msgstr ""
+
+#: adl-asm-impl.C:761
+#, c-format
+msgid "Internal assembler error for %s %s:  %s"
+msgstr ""
+
+#: adl-asm-impl.C:895 adl-asm-impl.C:920 adl-asm-impl.C:1037
+msgid ""
+"Empty InstrInfo object:  No opcode associated with this instruction item."
+msgstr ""
+
+#: adl-asm-impl.C:982 adl-asm-impl.C:1002 adl-asm-impl.C:1021
+#, c-format
+msgid "Bad field access:  Field %s does not exist for this instruction."
+msgstr ""
+
+#: adl-asm-impl.C:999
+#, c-format
+msgid "Unknown enumeration value for field %s."
+msgstr ""
+
+#: adl-asm-impl.C:1018
+#, c-format
+msgid "Bad field access:  Field %s does not contain a constant."
+msgstr ""
+
+#: adl-asm-impl.C:1117
+#, c-format
+msgid "replaceInstr:  No instruction named %s"
+msgstr ""
+
+#: adl-asm-impl.C:1150
+#, c-format
+msgid "createInstr:  No instruction named %s"
+msgstr ""
+
+#: adl-asm-impl.C:1272
+#, c-format
+msgid "combineInstr:  No real instruction is named %s"
+msgstr ""
+
+#: adl-asm-impl.C:1277
+#, c-format
+msgid "combineInstr: The number of arguments is invalid: %d"
+msgstr ""
+
+#: adl-asm-impl.C:1286
+msgid "combineInstr: Unable to combine instructions"
+msgstr ""
+
+#. int() type-conversion is required!
+#: adl-asm-impl.C:1301
+#, c-format
+msgid "combineInstr: The specified instruction index %d is invalid"
+msgstr ""
+
+#: adl-asm-impl.C:1310
+#, c-format
+msgid ""
+"combineInstr: The width of the micro instruction, %d, is greater than or "
+"equal to that of the macro one, %d"
+msgstr ""
+
+#: adl-asm-impl.C:1352 adl-asm-impl.C:1363
+msgid "combineInstr: Unable to combine micro instructions"
+msgstr ""
+
+#: adl-asm-impl.C:1434
+msgid "patchInstr: The specified patch instruction is invalid"
+msgstr ""
+
+#: adl-asm-impl.C:1439
+#, c-format
+msgid "patchInstr: The specified instruction patch location %d is invalid"
+msgstr ""
+
+#: adl-asm-impl.C:1444
+#, c-format
+msgid ""
+"patchInstr: The width of the micro instruction, %d, is greater than or equal "
+"to that of the macro one, %d"
+msgstr ""
+
+#: adl-asm-impl.C:1456 adl-asm-impl.C:1494 adl-asm-impl.C:1505
+msgid "patchInstr: Unable to patch instruction"
+msgstr ""
+
+#: adl-asm-impl.C:1601
+msgid "Internal assembler error, instruction size exceeded maximal length."
+msgstr ""
+
+#. At this point, we have to have either a constant or a symbol.  If
+#. it's a symbol plus an offset, then the expression parser has
+#. already handled that.  Anything else implies some kind of complex
+#. expression with a symbol, which probably means an unhandled
+#. preprocessor define.
+#: adl-asm-impl.C:2167
+#, c-format
+msgid "Bad expression for operand %d: %s"
+msgstr ""
+
+#: adl-asm-impl.C:2174
+#, c-format
+msgid "Operand %d:  illegal operand"
+msgstr ""
+
+#: adl-asm-impl.C:2181 adl-asm-impl.C:2192
+#, c-format
+msgid "Operand %d:  missing operand"
+msgstr ""
+
+#: adl-asm-impl.C:2311
+msgid "Can not handle fix"
+msgstr ""
+
+#. Need a fixup.  Value will be 0 in the instruction until the fixup is
+#. applied later.  Call a callback in order to determine whether we have
+#. a relocation.  The callback should return a relocation value, or
+#. BFD_RELOC_UNUSED if not applicable.
+#. TBD
+#: adl-asm-impl.C:2334
+msgid "too many fixups"
+msgstr ""
+
+#: adl-asm-impl.C:2571
+msgid "Cannot find appropriate prefix."
+msgstr ""
+
+#: adl-asm-impl.C:3000
+msgid "Wrong grouping character"
+msgstr ""
+
+#: adl-asm-impl.C:3002
+#, c-format
+msgid "Unrecognized instruction:  '%s'"
+msgstr ""
+
+#: adl-asm-impl.C:3090
+#, c-format
+msgid "%s:  No version of instruction %s matched the given arguments."
+msgstr ""
+
+#: adl-asm-impl.C:3317
+#, c-format
+msgid "%d assembler rule violations were found."
+msgstr ""
+
+#: app.c:494 app.c:508
+msgid "end of file in comment"
+msgstr ""
+
+#: app.c:586 app.c:633
+#, c-format
+msgid "end of file in string; '%c' inserted"
+msgstr ""
+
+#: app.c:659
+#, c-format
+msgid "unknown escape '\\%c' in string; ignored"
+msgstr ""
+
+#: app.c:832
+msgid "end of file not at end of a line; newline inserted"
+msgstr ""
+
+#: app.c:995
+msgid "end of file in multiline comment"
+msgstr ""
+
+#: app.c:1070
+msgid "end of file after a one-character quote; \\0 inserted"
+msgstr ""
+
+#: app.c:1078
+msgid "end of file in escape character"
+msgstr ""
+
+#: app.c:1090
+msgid "missing close quote; (assumed)"
+msgstr ""
+
+#: app.c:1159 app.c:1214 app.c:1226 app.c:1306
+msgid "end of file in comment; newline inserted"
+msgstr ""
+
+#: as.c:161
+msgid "missing emulation mode name"
+msgstr ""
+
+#: as.c:176
+#, c-format
+msgid "unrecognized emulation name `%s'"
+msgstr ""
+
+#: as.c:223
+#, c-format
+msgid "GNU assembler version %s (%s) using BFD version %s\n"
+msgstr ""
+
+#: as.c:230
+#, c-format
+msgid "Usage: %s [option...] [asmfile...]\n"
+msgstr ""
+
+#: as.c:232
+#, c-format
+msgid ""
+"Options:\n"
+"  -a[sub-option...]\t  turn on listings\n"
+"                      \t  Sub-options [default hls]:\n"
+"                      \t  c      omit false conditionals\n"
+"                      \t  d      omit debugging directives\n"
+"                      \t  g      include general info\n"
+"                      \t  h      include high-level source\n"
+"                      \t  l      include assembly\n"
+"                      \t  m      include macro expansions\n"
+"                      \t  n      omit forms processing\n"
+"                      \t  s      include symbols\n"
+"                      \t  =FILE  list to FILE (must be last sub-option)\n"
+msgstr ""
+
+#: as.c:246
+#, c-format
+msgid "  --alternate             initially turn on alternate macro syntax\n"
+msgstr ""
+
+#: as.c:249
+#, c-format
+msgid ""
+"  --compress-debug-sections\n"
+"                          compress DWARF debug sections using zlib\n"
+msgstr ""
+
+#: as.c:252
+#, c-format
+msgid ""
+"  --nocompress-debug-sections\n"
+"                          don't compress DWARF debug sections\n"
+msgstr ""
+
+#: as.c:256
+#, c-format
+msgid "  -D                      produce assembler debugging messages\n"
+msgstr ""
+
+#: as.c:258
+#, c-format
+msgid ""
+"  --debug-prefix-map OLD=NEW\n"
+"                          map OLD to NEW in debug information\n"
+msgstr ""
+
+#: as.c:261
+#, c-format
+msgid "  --defsym SYM=VAL        define symbol SYM to given value\n"
+msgstr ""
+
+#: as.c:277
+#, c-format
+msgid "                          emulate output (default %s)\n"
+msgstr ""
+
+#: as.c:282
+#, c-format
+msgid "  --execstack             require executable stack for this object\n"
+msgstr ""
+
+#: as.c:284
+#, c-format
+msgid ""
+"  --noexecstack           don't require executable stack for this object\n"
+msgstr ""
+
+#: as.c:286
+#, c-format
+msgid ""
+"  --size-check=[error|warning]\n"
+"\t\t\t  ELF .size directive check (default --size-check=error)\n"
+msgstr ""
+
+#: as.c:290
+#, c-format
+msgid "  -f                      skip whitespace and comment preprocessing\n"
+msgstr ""
+
+#: as.c:292
+#, c-format
+msgid "  -g --gen-debug          generate debugging information\n"
+msgstr ""
+
+#: as.c:294
+#, c-format
+msgid "  --gstabs                generate STABS debugging information\n"
+msgstr ""
+
+#: as.c:296
+#, c-format
+msgid ""
+"  --gstabs+               generate STABS debug info with GNU extensions\n"
+msgstr ""
+
+#: as.c:298
+#, c-format
+msgid "  --gdwarf-2              generate DWARF2 debugging information\n"
+msgstr ""
+
+#: as.c:300
+#, c-format
+msgid ""
+"  --gdwarf-sections       generate per-function section names for DWARF line "
+"information\n"
+msgstr ""
+
+#: as.c:302
+#, c-format
+msgid "  --hash-size=<value>     set the hash table size close to <value>\n"
+msgstr ""
+
+#: as.c:304
+#, c-format
+msgid "  --help                  show this message and exit\n"
+msgstr ""
+
+#: as.c:306
+#, c-format
+msgid "  --target-help           show target specific options\n"
+msgstr ""
+
+#: as.c:308
+#, c-format
+msgid ""
+"  -I DIR                  add DIR to search list for .include directives\n"
+msgstr ""
+
+#: as.c:310
+#, c-format
+msgid "  -J                      don't warn about signed overflow\n"
+msgstr ""
+
+#: as.c:312
+#, c-format
+msgid ""
+"  -K                      warn when differences altered for long "
+"displacements\n"
+msgstr ""
+
+#: as.c:314
+#, c-format
+msgid "  -L,--keep-locals        keep local symbols (e.g. starting with `L')\n"
+msgstr ""
+
+#: as.c:316
+#, c-format
+msgid "  -M,--mri                assemble in MRI compatibility mode\n"
+msgstr ""
+
+#: as.c:318
+#, c-format
+msgid ""
+"  --MD FILE               write dependency information in FILE (default "
+"none)\n"
+msgstr ""
+
+#: as.c:320
+#, c-format
+msgid "  -nocpp                  ignored\n"
+msgstr ""
+
+#: as.c:322
+#, c-format
+msgid ""
+"  -o OBJFILE              name the object-file output OBJFILE (default a."
+"out)\n"
+msgstr ""
+
+#: as.c:324
+#, c-format
+msgid "  -R                      fold data section into text section\n"
+msgstr ""
+
+#: as.c:326
+#, c-format
+msgid ""
+"  --reduce-memory-overheads \n"
+"                          prefer smaller memory use at the cost of longer\n"
+"                          assembly times\n"
+msgstr ""
+
+#: as.c:330
+#, c-format
+msgid ""
+"  --statistics            print various measured statistics from execution\n"
+msgstr ""
+
+#: as.c:332
+#, c-format
+msgid "  --strip-local-absolute  strip local absolute symbols\n"
+msgstr ""
+
+#: as.c:334
+#, c-format
+msgid ""
+"  --traditional-format    Use same format as native assembler when possible\n"
+msgstr ""
+
+#: as.c:336
+#, c-format
+msgid "  --version               print assembler version number and exit\n"
+msgstr ""
+
+#: as.c:338
+#, c-format
+msgid "  -W  --no-warn           suppress warnings\n"
+msgstr ""
+
+#: as.c:340
+#, c-format
+msgid "  --warn                  don't suppress warnings\n"
+msgstr ""
+
+#: as.c:342
+#, c-format
+msgid "  --fatal-warnings        treat warnings as errors\n"
+msgstr ""
+
+#: as.c:345
+#, c-format
+msgid ""
+"  --itbl INSTTBL          extend instruction set to include instructions\n"
+"                          matching the specifications defined in file "
+"INSTTBL\n"
+msgstr ""
+
+#: as.c:349
+#, c-format
+msgid "  -w                      ignored\n"
+msgstr ""
+
+#: as.c:351
+#, c-format
+msgid "  -X                      ignored\n"
+msgstr ""
+
+#: as.c:353
+#, c-format
+msgid "  -Z                      generate object file even after errors\n"
+msgstr ""
+
+#: as.c:355
+#, c-format
+msgid ""
+"  --listing-lhs-width     set the width in words of the output data column "
+"of\n"
+"                          the listing\n"
+msgstr ""
+
+#: as.c:358
+#, c-format
+msgid ""
+"  --listing-lhs-width2    set the width in words of the continuation lines\n"
+"                          of the output data column; ignored if smaller "
+"than\n"
+"                          the width of the first line\n"
+msgstr ""
+
+#: as.c:362
+#, c-format
+msgid ""
+"  --listing-rhs-width     set the max width in characters of the lines from\n"
+"                          the source file\n"
+msgstr ""
+
+#: as.c:365
+#, c-format
+msgid ""
+"  --listing-cont-lines    set the maximum number of continuation lines used\n"
+"                          for the output data column of the listing\n"
+msgstr ""
+
+#: as.c:368
+#, c-format
+msgid "  @FILE                   read options from FILE\n"
+msgstr ""
+
+#: as.c:376
+#, c-format
+msgid "Report bugs to %s\n"
+msgstr ""
+
+#: as.c:590
+#, c-format
+msgid "unrecognized option -%c%s"
+msgstr ""
+
+#. This output is intended to follow the GNU standards document.
+#: as.c:629
+#, c-format
+msgid "GNU assembler %s\n"
+msgstr ""
+
+#: as.c:630
+#, c-format
+msgid "Copyright (C) 2014 Free Software Foundation, Inc.\n"
+msgstr ""
+
+#: as.c:631
+#, c-format
+msgid ""
+"This program is free software; you may redistribute it under the terms of\n"
+"the GNU General Public License version 3 or later.\n"
+"This program has absolutely no warranty.\n"
+msgstr ""
+
+#: as.c:635
+#, c-format
+msgid "This assembler was configured for a target of `%s'.\n"
+msgstr ""
+
+#: as.c:642
+msgid "multiple emulation names specified"
+msgstr ""
+
+#: as.c:644
+msgid "emulations not handled in this configuration"
+msgstr ""
+
+#: as.c:649
+#, c-format
+msgid "alias = %s\n"
+msgstr ""
+
+#: as.c:650
+#, c-format
+msgid "canonical = %s\n"
+msgstr ""
+
+#: as.c:651
+#, c-format
+msgid "cpu-type = %s\n"
+msgstr ""
+
+#: as.c:653
+#, c-format
+msgid "format = %s\n"
+msgstr ""
+
+#: as.c:656
+#, c-format
+msgid "bfd-target = %s\n"
+msgstr ""
+
+#: as.c:664
+msgid "cannot compress debug sections (zlib not installed)"
+msgstr ""
+
+#: as.c:685
+msgid "bad defsym; format is --defsym name=value"
+msgstr ""
+
+#: as.c:705
+msgid "no file name following -t option"
+msgstr ""
+
+#: as.c:720
+#, c-format
+msgid "failed to read instruction table %s\n"
+msgstr ""
+
+#: as.c:836
+#, c-format
+msgid "Invalid --size-check= option: `%s'"
+msgstr ""
+
+#: as.c:904
+#, c-format
+msgid "invalid listing option `%c'"
+msgstr ""
+
+#: as.c:957
+msgid "--hash-size needs a numeric argument"
+msgstr ""
+
+#: as.c:982
+#, c-format
+msgid "%s: total time in assembly: %ld.%06ld\n"
+msgstr ""
+
+#: as.c:985
+#, c-format
+msgid "%s: data size %ld\n"
+msgstr ""
+
+#: as.c:1269
+#, c-format
+msgid "%d warning"
+msgstr ""
+
+#: as.c:1271
+#, c-format
+msgid "%d warnings"
+msgstr ""
+
+#: as.c:1273
+#, c-format
+msgid "%d error"
+msgstr ""
+
+#: as.c:1275
+#, c-format
+msgid "%d errors"
+msgstr ""
+
+#: as.c:1280
+#, c-format
+msgid "%s, treating warnings as errors"
+msgstr ""
+
+#: as.c:1291
+#, c-format
+msgid "%s, %s, generating bad object file\n"
+msgstr ""
+
+#: as.h:192
+#, c-format
+msgid "Case value %ld unexpected at line %d of file \"%s\"\n"
+msgstr ""
+
+#.
+#. * We have a GROSS internal error.
+#. * This should never happen.
+#.
+#: atof-generic.c:416
+msgid "failed sanity check"
+msgstr ""
+
+#: cond.c:82
+msgid "invalid identifier for \".ifdef\""
+msgstr ""
+
+#: cond.c:149
+msgid "non-constant expression in \".if\" statement"
+msgstr ""
+
+#: cond.c:276
+msgid "bad format for ifc or ifnc"
+msgstr ""
+
+#: cond.c:306
+msgid "\".elseif\" without matching \".if\""
+msgstr ""
+
+#: cond.c:310
+msgid "\".elseif\" after \".else\""
+msgstr ""
+
+#: cond.c:313 cond.c:419
+msgid "here is the previous \".else\""
+msgstr ""
+
+#: cond.c:316 cond.c:422
+msgid "here is the previous \".if\""
+msgstr ""
+
+#: cond.c:345
+msgid "non-constant expression in \".elseif\" statement"
+msgstr ""
+
+#: cond.c:383
+msgid "\".endif\" without \".if\""
+msgstr ""
+
+#: cond.c:412
+msgid "\".else\" without matching \".if\""
+msgstr ""
+
+#: cond.c:416
+msgid "duplicate \".else\""
+msgstr ""
+
+#: cond.c:467
+msgid ".ifeqs syntax error"
+msgstr ""
+
+#: cond.c:548
+msgid "end of macro inside conditional"
+msgstr ""
+
+#: cond.c:550
+msgid "end of file inside conditional"
+msgstr ""
+
+#: cond.c:553
+msgid "here is the start of the unterminated conditional"
+msgstr ""
+
+#: cond.c:557
+msgid "here is the \"else\" of the unterminated conditional"
+msgstr ""
+
+#: config/atof-ieee.c:141
+msgid "cannot create floating-point number"
+msgstr ""
+
+#: config/atof-ieee.c:293
+msgid "NaNs are not supported by this target\n"
+msgstr ""
+
+#: config/atof-ieee.c:332 config/atof-ieee.c:373
+msgid "Infinities are not supported by this target\n"
+msgstr ""
+
+#: config/atof-ieee.c:788
+msgid "Unrecognized or unsupported floating point constant"
+msgstr ""
+
+#: config/obj-elf.c:340
+#, c-format
+msgid "bad .common segment %s"
+msgstr ""
+
+#: config/obj-elf.c:417
+msgid "Missing symbol name in directive"
+msgstr ""
+
+#: config/obj-elf.c:623
+#, c-format
+msgid "setting incorrect section type for %s"
+msgstr ""
+
+#: config/obj-elf.c:628
+#, c-format
+msgid "ignoring incorrect section type for %s"
+msgstr ""
+
+#: config/obj-elf.c:678
+#, c-format
+msgid "setting incorrect section attributes for %s"
+msgstr ""
+
+#: config/obj-elf.c:733
+#, c-format
+msgid "ignoring changed section type for %s"
+msgstr ""
+
+#: config/obj-elf.c:745
+#, c-format
+msgid "ignoring changed section attributes for %s"
+msgstr ""
+
+#: config/obj-elf.c:747
+#, c-format
+msgid "ignoring changed section entity size for %s"
+msgstr ""
+
+#: config/obj-elf.c:807
+msgid "unrecognized .section attribute: want a,e,w,x,M,S,G,T"
+msgstr ""
+
+#: config/obj-elf.c:849 read.c:2890
+msgid "unrecognized section type"
+msgstr ""
+
+#: config/obj-elf.c:881
+msgid "unrecognized section attribute"
+msgstr ""
+
+#: config/obj-elf.c:912
+msgid "missing name"
+msgstr ""
+
+#: config/obj-elf.c:1043
+msgid "invalid merge entity size"
+msgstr ""
+
+#: config/obj-elf.c:1050
+msgid "entity size for SHF_MERGE not specified"
+msgstr ""
+
+#: config/obj-elf.c:1056
+msgid "? section flag ignored with G present"
+msgstr ""
+
+#: config/obj-elf.c:1080
+msgid "group name for SHF_GROUP not specified"
+msgstr ""
+
+#: config/obj-elf.c:1103
+msgid "character following name is not '#'"
+msgstr ""
+
+#: config/obj-elf.c:1222
+msgid ".previous without corresponding .section; ignored"
+msgstr ""
+
+#: config/obj-elf.c:1248
+msgid ".popsection without corresponding .pushsection; ignored"
+msgstr ""
+
+#: config/obj-elf.c:1294
+msgid "expected comma after name in .symver"
+msgstr ""
+
+#: config/obj-elf.c:1318
+#, c-format
+msgid "missing version name in `%s' for symbol `%s'"
+msgstr ""
+
+#: config/obj-elf.c:1329
+#, c-format
+msgid "multiple versions [`%s'|`%s'] for symbol `%s'"
+msgstr ""
+
+#: config/obj-elf.c:1366
+#, c-format
+msgid "expected `%s' to have already been set for .vtable_inherit"
+msgstr ""
+
+#: config/obj-elf.c:1376
+msgid "expected comma after name in .vtable_inherit"
+msgstr ""
+
+#: config/obj-elf.c:1429
+msgid "expected comma after name in .vtable_entry"
+msgstr ""
+
+#: config/obj-elf.c:1561
+#, c-format
+msgid "Attribute name not recognised: %s"
+msgstr ""
+
+#: config/obj-elf.c:1576
+msgid "expected numeric constant"
+msgstr ""
+
+#: config/obj-elf.c:1585
+msgid "expected comma"
+msgstr ""
+
+#: config/obj-elf.c:1618
+msgid "bad string constant"
+msgstr ""
+
+#: config/obj-elf.c:1622
+msgid "expected <tag> , <value>"
+msgstr ""
+
+#: config/obj-elf.c:1741
+msgid "expected quoted string"
+msgstr ""
+
+#: config/obj-elf.c:1761
+#, c-format
+msgid "expected comma after name `%s' in .size directive"
+msgstr ""
+
+#: config/obj-elf.c:1770
+msgid "missing expression in .size directive"
+msgstr ""
+
+#: config/obj-elf.c:1894
+#, c-format
+msgid "symbol '%s' is already defined"
+msgstr ""
+
+#: config/obj-elf.c:1915
+#, c-format
+msgid "symbol type \"%s\" is supported only by GNU and FreeBSD targets"
+msgstr ""
+
+#: config/obj-elf.c:1927
+#, c-format
+msgid "symbol type \"%s\" is supported only by GNU targets"
+msgstr ""
+
+#: config/obj-elf.c:1938
+#, c-format
+msgid "unrecognized symbol type \"%s\""
+msgstr ""
+
+#: config/obj-elf.c:2118
+msgid ".size expression too complicated to fix up"
+msgstr ""
+
+#: config/obj-elf.c:2152
+#, c-format
+msgid ""
+"invalid attempt to declare external version name as default in symbol `%s'"
+msgstr ""
+
+#: config/obj-elf.c:2214 ecoff.c:3605
+#, c-format
+msgid "symbol `%s' can not be both weak and common"
+msgstr ""
+
+#: config/obj-elf.c:2331
+#, c-format
+msgid "assuming all members of group `%s' are COMDAT"
+msgstr ""
+
+#: config/obj-elf.c:2343
+#, c-format
+msgid "can't create group: %s"
+msgstr ""
+
+#: config/obj-elf.c:2481
+#, c-format
+msgid "failed to set up debugging information: %s"
+msgstr ""
+
+#: config/obj-elf.c:2501
+#, c-format
+msgid "can't start writing .mdebug section: %s"
+msgstr ""
+
+#: config/obj-elf.c:2509
+#, c-format
+msgid "could not write .mdebug section: %s"
+msgstr ""
+
+#: config/ppc-support.C:329
+msgid "identifier+constant@got means identifier@got+constant"
+msgstr ""
+
+#: config/ppc-support.C:515
+msgid "Relocation cannot be done when using -mrelocatable"
+msgstr ""
+
+#: config/ppc-support.C:557
+msgid "unresolved expression that must be resolved"
+msgstr ""
+
+#: config/ppc-support.C:560
+#, c-format
+msgid "unsupported relocation against %s"
+msgstr ""
+
+#: config/ppc-support.C:625
+#, c-format
+msgid "cannot emit PC relative %s relocation against %s"
+msgstr ""
+
+#: config/ppc-support.C:630
+#, c-format
+msgid "cannot emit PC relative %s relocation"
+msgstr ""
+
+#: config/ppc-support.C:807
+#, c-format
+msgid "Unable to handle reference to symbol %s"
+msgstr ""
+
+#: config/ppc-support.C:810
+msgid "Unable to resolve expression"
+msgstr ""
+
+#: config/ppc-support.C:837
+msgid "must branch to an address a multiple of 4"
+msgstr ""
+
+#: config/ppc-support.C:841
+#, c-format
+msgid "@local or @plt branch destination is too far away, %ld bytes"
+msgstr ""
+
+#: config/ppc-support.C:871
+#, c-format
+msgid "Gas failure, reloc value %d\n"
+msgstr ""
+
+#: depend.c:194
+#, c-format
+msgid "can't open `%s' for writing"
+msgstr ""
+
+#: depend.c:206
+#, c-format
+msgid "can't close `%s'"
+msgstr ""
+
+#: dw2gencfi.c:198 read.c:2392
+#, c-format
+msgid "bfd_set_section_flags: %s"
+msgstr ""
+
+#: dw2gencfi.c:213
+#, c-format
+msgid "Inserting \"%s\" into structure table failed: %s"
+msgstr ""
+
+#: dw2gencfi.c:456
+#, c-format
+msgid "register save offset not a multiple of %u"
+msgstr ""
+
+#: dw2gencfi.c:539
+msgid "CFI state restore without previous remember"
+msgstr ""
+
+#: dw2gencfi.c:588
+msgid "missing separator"
+msgstr ""
+
+#: dw2gencfi.c:638
+msgid "bad register expression"
+msgstr ""
+
+#: dw2gencfi.c:659 dw2gencfi.c:782 dw2gencfi.c:820 dw2gencfi.c:890
+#: dw2gencfi.c:962
+msgid "CFI instruction used without previous .cfi_startproc"
+msgstr ""
+
+#: dw2gencfi.c:844
+msgid "invalid or unsupported encoding in .cfi_personality"
+msgstr ""
+
+#: dw2gencfi.c:851
+msgid ".cfi_personality requires encoding and symbol arguments"
+msgstr ""
+
+#: dw2gencfi.c:874
+msgid "wrong second argument to .cfi_personality"
+msgstr ""
+
+#: dw2gencfi.c:914 dw2gencfi.c:990
+msgid "invalid or unsupported encoding in .cfi_lsda"
+msgstr ""
+
+#: dw2gencfi.c:921
+msgid ".cfi_lsda requires encoding and symbol arguments"
+msgstr ""
+
+#: dw2gencfi.c:946
+msgid "wrong second argument to .cfi_lsda"
+msgstr ""
+
+#: dw2gencfi.c:1011
+msgid "wrong third argument to .cfi_val_encoded_addr"
+msgstr ""
+
+#: dw2gencfi.c:1082
+msgid "previous CFI entry not closed (missing .cfi_endproc)"
+msgstr ""
+
+#: dw2gencfi.c:1122
+msgid ".cfi_endproc without corresponding .cfi_startproc"
+msgstr ""
+
+#: dw2gencfi.c:1919 dw2gencfi.c:1982
+msgid "open CFI at the end of file; missing .cfi_endproc directive"
+msgstr ""
+
+#: dw2gencfi.c:2008
+msgid "CFI is not supported for this target"
+msgstr ""
+
+#: dwarf2dbg.c:592 dwarf2dbg.c:627
+msgid "file number less than one"
+msgstr ""
+
+#: dwarf2dbg.c:602
+#, c-format
+msgid "file number %ld already allocated"
+msgstr ""
+
+#: dwarf2dbg.c:632 dwarf2dbg.c:1434
+#, c-format
+msgid "unassigned file number %ld"
+msgstr ""
+
+#: dwarf2dbg.c:701
+msgid "is_stmt value not 0 or 1"
+msgstr ""
+
+#: dwarf2dbg.c:713
+msgid "isa number less than zero"
+msgstr ""
+
+#: dwarf2dbg.c:725
+msgid "discriminator less than zero"
+msgstr ""
+
+#: dwarf2dbg.c:731
+#, c-format
+msgid "unknown .loc sub-directive `%s'"
+msgstr ""
+
+#: dwarf2dbg.c:751
+msgid "expected 0 or 1"
+msgstr ""
+
+#: dwarf2dbg.c:1497
+msgid "internal error: unknown dwarf2 format"
+msgstr ""
+
+#: ecoff.c:1559
+#, c-format
+msgid "string too big (%lu bytes)"
+msgstr ""
+
+#: ecoff.c:1585
+#, c-format
+msgid "inserting \"%s\" into string hash table: %s"
+msgstr ""
+
+#: ecoff.c:1616 ecoff.c:1809 ecoff.c:1832 ecoff.c:1863 ecoff.c:2016
+#: ecoff.c:2127
+msgid "no current file pointer"
+msgstr ""
+
+#: ecoff.c:1703
+msgid "too many st_End's"
+msgstr ""
+
+#: ecoff.c:2041
+#, c-format
+msgid "inserting \"%s\" into tag hash table: %s"
+msgstr ""
+
+#: ecoff.c:2202
+msgid "fake .file after real one"
+msgstr ""
+
+#: ecoff.c:2292
+msgid "filename goes over one page boundary"
+msgstr ""
+
+#: ecoff.c:2425
+msgid ".begin directive without a preceding .file directive"
+msgstr ""
+
+#: ecoff.c:2432
+msgid ".begin directive without a preceding .ent directive"
+msgstr ""
+
+#: ecoff.c:2463
+msgid ".bend directive without a preceding .file directive"
+msgstr ""
+
+#: ecoff.c:2470
+msgid ".bend directive without a preceding .ent directive"
+msgstr ""
+
+#: ecoff.c:2483
+msgid ".bend directive names unknown symbol"
+msgstr ""
+
+#: ecoff.c:2526
+msgid ".def pseudo-op used inside of .def/.endef; ignored"
+msgstr ""
+
+#: ecoff.c:2528
+msgid "empty symbol name in .def; ignored"
+msgstr ""
+
+#: ecoff.c:2565
+msgid ".dim pseudo-op used outside of .def/.endef; ignored"
+msgstr ""
+
+#: ecoff.c:2580
+msgid "badly formed .dim directive"
+msgstr ""
+
+#: ecoff.c:2593
+msgid "too many .dim entries"
+msgstr ""
+
+#: ecoff.c:2613
+msgid ".scl pseudo-op used outside of .def/.endef; ignored"
+msgstr ""
+
+#: ecoff.c:2638
+msgid ".size pseudo-op used outside of .def/.endef; ignored"
+msgstr ""
+
+#: ecoff.c:2653
+msgid "badly formed .size directive"
+msgstr ""
+
+#: ecoff.c:2666
+msgid "too many .size entries"
+msgstr ""
+
+#: ecoff.c:2688
+msgid ".type pseudo-op used outside of .def/.endef; ignored"
+msgstr ""
+
+#. FIXME: We could handle this by setting the continued bit.
+#. There would still be a limit: the .type argument can not
+#. be infinite.
+#: ecoff.c:2706
+#, c-format
+msgid "the type of %s is too complex; it will be simplified"
+msgstr ""
+
+#: ecoff.c:2717
+msgid "Unrecognized .type argument"
+msgstr ""
+
+#: ecoff.c:2755
+msgid ".tag pseudo-op used outside of .def/.endef; ignored"
+msgstr ""
+
+#: ecoff.c:2780
+msgid ".val pseudo-op used outside of .def/.endef; ignored"
+msgstr ""
+
+#: ecoff.c:2788
+msgid ".val expression is too complex"
+msgstr ""
+
+#: ecoff.c:2818
+msgid ".endef pseudo-op used before .def; ignored"
+msgstr ""
+
+#: ecoff.c:2844 ecoff.c:2925
+msgid "bad COFF debugging information"
+msgstr ""
+
+#: ecoff.c:2893
+#, c-format
+msgid "no tag specified for %s"
+msgstr ""
+
+#: ecoff.c:2995
+msgid ".end directive without a preceding .file directive"
+msgstr ""
+
+#: ecoff.c:3002
+msgid ".end directive without a preceding .ent directive"
+msgstr ""
+
+#: ecoff.c:3012
+msgid ".end directive has no name"
+msgstr ""
+
+#: ecoff.c:3024
+msgid ".end directive names unknown symbol"
+msgstr ""
+
+#: ecoff.c:3051
+msgid "second .ent directive found before .end directive"
+msgstr ""
+
+#: ecoff.c:3061
+msgid ".ent directive has no name"
+msgstr ""
+
+#: ecoff.c:3123
+msgid "no way to handle .file within .ent/.end section"
+msgstr ""
+
+#: ecoff.c:3147
+msgid ".fmask outside of .ent"
+msgstr ""
+
+#: ecoff.c:3154
+msgid "bad .fmask directive"
+msgstr ""
+
+#: ecoff.c:3175
+msgid ".frame outside of .ent"
+msgstr ""
+
+#: ecoff.c:3186
+msgid "bad .frame directive"
+msgstr ""
+
+#: ecoff.c:3211
+msgid ".mask outside of .ent"
+msgstr ""
+
+#: ecoff.c:3218
+msgid "bad .mask directive"
+msgstr ""
+
+#: ecoff.c:3240
+msgid ".loc before .file"
+msgstr ""
+
+#: ecoff.c:3247
+msgid ".loc outside of .text"
+msgstr ""
+
+#: ecoff.c:3362 read.c:1735 read.c:1841 read.c:2578 read.c:3208 read.c:3570
+#: symbols.c:339 symbols.c:435
+#, c-format
+msgid "symbol `%s' is already defined"
+msgstr ""
+
+#: ecoff.c:3375
+msgid "bad .weakext directive"
+msgstr ""
+
+#: ecoff.c:3443
+#, c-format
+msgid ".stab%c is not supported"
+msgstr ""
+
+#: ecoff.c:3453
+#, c-format
+msgid ".stab%c: ignoring non-zero other field"
+msgstr ""
+
+#: ecoff.c:3487
+#, c-format
+msgid ""
+"line number (%d) for .stab%c directive cannot fit in index field (20 bits)"
+msgstr ""
+
+#: ecoff.c:3523
+#, c-format
+msgid "illegal .stab%c directive, bad character"
+msgstr ""
+
+#: ecoff.c:3982 ecoff.c:4171 ecoff.c:4196
+msgid ".begin/.bend in different segments"
+msgstr ""
+
+#: ecoff.c:4692
+msgid "missing .end or .bend at end of file"
+msgstr ""
+
+#: ecoff.c:5177
+msgid "GP prologue size exceeds field size, using 0 instead"
+msgstr ""
+
+#: expr.c:84 read.c:3741
+msgid "bignum invalid"
+msgstr ""
+
+#: expr.c:86 read.c:3743 read.c:4241 read.c:5136
+msgid "floating point number invalid"
+msgstr ""
+
+#: expr.c:209
+msgid "bad floating-point constant: exponent overflow"
+msgstr ""
+
+#: expr.c:213
+#, c-format
+msgid "bad floating-point constant: unknown error code=%d"
+msgstr ""
+
+#: expr.c:392
+msgid ""
+"a bignum with underscores may not have more than 8 hex digits in any word"
+msgstr ""
+
+#: expr.c:415
+msgid "a bignum with underscores must have exactly 4 words"
+msgstr ""
+
+#. Either not seen or not defined.
+#. @@ Should print out the original string instead of
+#. the parsed number.
+#: expr.c:538
+#, c-format
+msgid "backward ref to unknown label \"%d:\""
+msgstr ""
+
+#: expr.c:656
+msgid "character constant too large"
+msgstr ""
+
+#: expr.c:903
+#, c-format
+msgid "expr.c(operand): bad atof_generic return val %d"
+msgstr ""
+
+#: expr.c:966
+#, c-format
+msgid "missing '%c'"
+msgstr ""
+
+#: expr.c:977 read.c:4618
+msgid "EBCDIC constants are not supported"
+msgstr ""
+
+#: expr.c:1103
+#, c-format
+msgid "Unary operator %c ignored because bad operand follows"
+msgstr ""
+
+#: expr.c:1149 expr.c:1174
+msgid "syntax error in .startof. or .sizeof."
+msgstr ""
+
+#: expr.c:1255 expr.c:1626
+#, c-format
+msgid "invalid use of operator \"%s\""
+msgstr ""
+
+#: expr.c:1371 read.c:2560
+msgid "bad expression"
+msgstr ""
+
+#: expr.c:1810
+msgid "missing operand; zero assumed"
+msgstr ""
+
+#: expr.c:1849
+msgid "left operand is a bignum; integer 0 assumed"
+msgstr ""
+
+#: expr.c:1851
+msgid "left operand is a float; integer 0 assumed"
+msgstr ""
+
+#: expr.c:1860
+msgid "right operand is a bignum; integer 0 assumed"
+msgstr ""
+
+#: expr.c:1862
+msgid "right operand is a float; integer 0 assumed"
+msgstr ""
+
+#: expr.c:1933 symbols.c:1387
+msgid "division by zero"
+msgstr ""
+
+#: expr.c:1939
+msgid "shift count"
+msgstr ""
+
+#: expr.c:2060
+msgid "operation combines symbols in different segments"
+msgstr ""
+
+#: frags.c:60
+msgid "attempt to allocate data in absolute section"
+msgstr ""
+
+#: frags.c:66
+msgid "attempt to allocate data in common section"
+msgstr ""
+
+#: frags.c:115
+#, c-format
+msgid "can't extend frag %lu chars"
+msgstr ""
+
+#. For error messages.
+#. Detect if we are reading from stdin by examining the file
+#. name returned by as_where().
+#.
+#. [FIXME: We rely upon the name in the strcmp below being the
+#. same as the one used by input_scrub_new_file(), if that is
+#. not true, then this code will fail].
+#.
+#. If we are reading from stdin, then we need to save each input
+#. line here (assuming of course that we actually have a line of
+#. input to read), so that it can be displayed in the listing
+#. that is produced at the end of the assembly.
+#: input-file.c:134 input-scrub.c:241 listing.c:351
+msgid "{standard input}"
+msgstr ""
+
+#: input-file.c:139
+#, c-format
+msgid "can't open %s for reading: %s"
+msgstr ""
+
+#: input-file.c:148 input-file.c:222
+#, c-format
+msgid "can't read from %s: %s"
+msgstr ""
+
+#: input-file.c:250 listing.c:1448 output-file.c:71
+#, c-format
+msgid "can't close %s: %s"
+msgstr ""
+
+#: input-scrub.c:268
+msgid "macros nested too deeply"
+msgstr ""
+
+#: input-scrub.c:379 input-scrub.c:403
+msgid "partial line at end of file ignored"
+msgstr ""
+
+#: listing.c:257 messages.c:162 messages.c:164 messages.c:167
+msgid "Warning: "
+msgstr ""
+
+#: listing.c:263 messages.c:251 messages.c:253 messages.c:256
+msgid "Error: "
+msgstr ""
+
+#: listing.c:627
+#, c-format
+msgid "unable to rebuffer file: %s\n"
+msgstr ""
+
+#: listing.c:1334
+#, c-format
+msgid ""
+"\n"
+" time stamp    \t: %s\n"
+"\n"
+msgstr ""
+
+#: listing.c:1344
+#, c-format
+msgid "%s "
+msgstr ""
+
+#: listing.c:1349
+#, c-format
+msgid ""
+"\n"
+"\t%s "
+msgstr ""
+
+#: listing.c:1359
+msgid ""
+"\n"
+" options passed\t: "
+msgstr ""
+
+#: listing.c:1398
+#, c-format
+msgid ""
+" GNU assembler version %s (%s)\n"
+"\t using BFD version %s."
+msgstr ""
+
+#: listing.c:1401
+#, c-format
+msgid ""
+"\n"
+" input file    \t: %s"
+msgstr ""
+
+#: listing.c:1402
+#, c-format
+msgid ""
+"\n"
+" output file   \t: %s"
+msgstr ""
+
+#: listing.c:1403
+#, c-format
+msgid ""
+"\n"
+" target        \t: %s"
+msgstr ""
+
+#: listing.c:1427
+#, c-format
+msgid "can't open %s: %s"
+msgstr ""
+
+#: listing.c:1512
+msgid "strange paper height, set to no form"
+msgstr ""
+
+#: listing.c:1576
+msgid "new line in title"
+msgstr ""
+
+#. Turns the next expression into a string.
+#: macro.c:382
+#, no-c-format
+msgid "% operator needs absolute expression"
+msgstr ""
+
+#: macro.c:536
+#, c-format
+msgid "Missing parameter qualifier for `%s' in macro `%s'"
+msgstr ""
+
+#: macro.c:546
+#, c-format
+msgid "`%s' is not a valid parameter qualifier for `%s' in macro `%s'"
+msgstr ""
+
+#: macro.c:563
+#, c-format
+msgid "Pointless default value for required parameter `%s' in macro `%s'"
+msgstr ""
+
+#: macro.c:575
+#, c-format
+msgid "A parameter named `%s' already exists for macro `%s'"
+msgstr ""
+
+#: macro.c:612
+#, c-format
+msgid "Reserved word `%s' used as parameter in macro `%s'"
+msgstr ""
+
+#: macro.c:670
+#, c-format
+msgid "unexpected end of file in macro `%s' definition"
+msgstr ""
+
+#: macro.c:682
+#, c-format
+msgid "missing `)' after formals in macro definition `%s'"
+msgstr ""
+
+#: macro.c:697
+msgid "Missing macro name"
+msgstr ""
+
+#: macro.c:706
+#, c-format
+msgid "Bad parameter list for macro `%s'"
+msgstr ""
+
+#: macro.c:712
+#, c-format
+msgid "Macro `%s' was already defined"
+msgstr ""
+
+#: macro.c:837 macro.c:839
+msgid "missing `)'"
+msgstr ""
+
+#: macro.c:936
+#, c-format
+msgid "`%s' was already used as parameter (or another local) name"
+msgstr ""
+
+#: macro.c:1094
+msgid "confusion in formal parameters"
+msgstr ""
+
+#: macro.c:1102
+#, c-format
+msgid "Parameter named `%s' does not exist for macro `%s'"
+msgstr ""
+
+#: macro.c:1113
+#, c-format
+msgid "Value for parameter `%s' of macro `%s' was already specified"
+msgstr ""
+
+#: macro.c:1127
+msgid "can't mix positional and keyword arguments"
+msgstr ""
+
+#: macro.c:1138
+msgid "too many positional arguments"
+msgstr ""
+
+#: macro.c:1186
+#, c-format
+msgid "Missing value for required parameter `%s' of macro `%s'"
+msgstr ""
+
+#: macro.c:1305
+#, c-format
+msgid "Attempt to purge non-existant macro `%s'"
+msgstr ""
+
+#: macro.c:1324
+msgid "unexpected end of file in irp or irpc"
+msgstr ""
+
+#: macro.c:1332
+msgid "missing model parameter"
+msgstr ""
+
+#: messages.c:80
+#, c-format
+msgid "Assembler messages:\n"
+msgstr ""
+
+#: messages.c:328 messages.c:346
+#, c-format
+msgid "Fatal error: "
+msgstr ""
+
+#: messages.c:364
+#, c-format
+msgid "Internal error!\n"
+msgstr ""
+
+#: messages.c:366
+#, c-format
+msgid "Assertion failure in %s at %s line %d.\n"
+msgstr ""
+
+#: messages.c:369
+#, c-format
+msgid "Assertion failure at %s line %d.\n"
+msgstr ""
+
+#: messages.c:370 messages.c:387
+#, c-format
+msgid "Please report this bug.\n"
+msgstr ""
+
+#: messages.c:382
+#, c-format
+msgid "Internal error, aborting at %s line %d in %s\n"
+msgstr ""
+
+#: messages.c:385
+#, c-format
+msgid "Internal error, aborting at %s line %d\n"
+msgstr ""
+
+#: messages.c:434
+#, c-format
+msgid "%s out of domain (%d is not a multiple of %d)"
+msgstr ""
+
+#: messages.c:452
+#, c-format
+msgid "%s out of range (%d is not between %d and %d)"
+msgstr ""
+
+#. xgettext:c-format.
+#: messages.c:475
+#, c-format
+msgid "%s out of range (0x%s is not between 0x%s and 0x%s)"
+msgstr ""
+
+#: output-file.c:34
+#, c-format
+msgid "can't open a bfd on stdout %s"
+msgstr ""
+
+#: output-file.c:41
+#, c-format
+msgid "selected target format '%s' unknown"
+msgstr ""
+
+#: output-file.c:43
+#, c-format
+msgid "can't create %s: %s"
+msgstr ""
+
+#: read.c:500
+msgid "bad or irreducible absolute expression"
+msgstr ""
+
+#: read.c:526
+#, c-format
+msgid "error constructing %s pseudo-op table: %s"
+msgstr ""
+
+#: read.c:706
+msgid "cannot change section or subsection inside .bundle_lock"
+msgstr ""
+
+#: read.c:722
+#, c-format
+msgid ""
+".bundle_lock sequence at %u bytes but .bundle_align_mode limit is %u bytes"
+msgstr ""
+
+#: read.c:731
+#, c-format
+msgid "single instruction is %u bytes long but .bundle_align_mode limit is %u"
+msgstr ""
+
+#: read.c:1061
+#, c-format
+msgid "unknown pseudo-op: `%s'"
+msgstr ""
+
+#: read.c:1148
+#, c-format
+msgid "label \"%d$\" redefined"
+msgstr ""
+
+#: read.c:1295
+msgid ".bundle_lock with no matching .bundle_unlock"
+msgstr ""
+
+#: read.c:1392
+msgid ".abort detected.  Abandoning ship."
+msgstr ""
+
+#: read.c:1410 read.c:2761
+msgid "ignoring fill value in absolute section"
+msgstr ""
+
+#: read.c:1492 read.c:2491
+msgid "alignment not a power of 2"
+msgstr ""
+
+#: read.c:1501
+#, c-format
+msgid "alignment too large: %u assumed"
+msgstr ""
+
+#: read.c:1533
+msgid "expected fill pattern missing"
+msgstr ""
+
+#: read.c:1650
+msgid "symbol name not recognised in the current locale"
+msgstr ""
+
+#: read.c:1679
+msgid "expected symbol name"
+msgstr ""
+
+#: read.c:1717
+msgid "missing size expression"
+msgstr ""
+
+#: read.c:1723
+#, c-format
+msgid "size (%ld) out of range, ignored"
+msgstr ""
+
+#: read.c:1750
+#, c-format
+msgid "size of \"%s\" is already %ld; not changing to %ld"
+msgstr ""
+
+#. Some of the back ends can't deal with non-positive line numbers.
+#. Besides, it's silly.  GCC however will generate a line number of
+#. zero when it is pre-processing builtins for assembler-with-cpp files:
+#.
+#. # 0 "<built-in>"
+#.
+#. We do not want to barf on this, especially since such files are used
+#. in the GCC and GDB testsuites.  So we check for negative line numbers
+#. rather than non-positive line numbers.
+#: read.c:1993
+#, c-format
+msgid "line numbers must be positive; line number %d rejected"
+msgstr ""
+
+#: read.c:2030
+#, c-format
+msgid "incompatible flag %i in line directive"
+msgstr ""
+
+#: read.c:2042
+#, c-format
+msgid "unsupported flag %i in line directive"
+msgstr ""
+
+#: read.c:2081
+msgid "start address not supported"
+msgstr ""
+
+#: read.c:2090
+msgid ".err encountered"
+msgstr ""
+
+#: read.c:2106
+msgid ".error directive invoked in source file"
+msgstr ""
+
+#: read.c:2107
+msgid ".warning directive invoked in source file"
+msgstr ""
+
+#: read.c:2113
+#, c-format
+msgid "%s argument must be a string"
+msgstr ""
+
+#: read.c:2145 read.c:2147
+#, c-format
+msgid ".fail %ld encountered"
+msgstr ""
+
+#: read.c:2187
+#, c-format
+msgid ".fill size clamped to %d"
+msgstr ""
+
+#: read.c:2192
+msgid "size negative; .fill ignored"
+msgstr ""
+
+#: read.c:2198
+msgid "repeat < 0; .fill ignored"
+msgstr ""
+
+#: read.c:2358
+#, c-format
+msgid "unrecognized .linkonce type `%s'"
+msgstr ""
+
+#: read.c:2370
+msgid ".linkonce is not supported for this object file format"
+msgstr ""
+
+#: read.c:2418
+#, c-format
+msgid "error setting flags for \".sbss\": %s"
+msgstr ""
+
+#: read.c:2465
+msgid "expected alignment after size"
+msgstr ""
+
+#: read.c:2479
+msgid "alignment negative; 0 assumed"
+msgstr ""
+
+#: read.c:2550 read.c:3244 read.c:3581 stabs.c:468
+#, c-format
+msgid "expected comma after \"%s\""
+msgstr ""
+
+#: read.c:2683
+#, c-format
+msgid "attempt to redefine pseudo-op `%s' ignored"
+msgstr ""
+
+#: read.c:2702
+msgid "ignoring macro exit outside a macro definition."
+msgstr ""
+
+#: read.c:2756
+#, c-format
+msgid "invalid segment \"%s\""
+msgstr ""
+
+#: read.c:2764
+msgid "only constant offsets supported in absolute section"
+msgstr ""
+
+#: read.c:2803
+msgid "MRI style ORG pseudo-op not supported"
+msgstr ""
+
+#: read.c:2906
+#, c-format
+msgid "error setting flags for \"%s\": %s"
+msgstr ""
+
+#: read.c:2956
+#, c-format
+msgid "unrecognized section type `%s'"
+msgstr ""
+
+#: read.c:2970
+msgid "absolute sections are not supported"
+msgstr ""
+
+#: read.c:2985
+#, c-format
+msgid "unrecognized section command `%s'"
+msgstr ""
+
+#: read.c:3049
+#, c-format
+msgid ".end%c encountered without preceding %s"
+msgstr ""
+
+#: read.c:3079 read.c:3109
+#, c-format
+msgid "%s without %s"
+msgstr ""
+
+#: read.c:3340
+msgid "unsupported variable size or fill value"
+msgstr ""
+
+#: read.c:3368
+msgid ".space repeat count is zero, ignored"
+msgstr ""
+
+#: read.c:3370
+msgid ".space repeat count is negative, ignored"
+msgstr ""
+
+#: read.c:3399
+msgid "space allocation too complex in absolute section"
+msgstr ""
+
+#: read.c:3405
+msgid "space allocation too complex in common section"
+msgstr ""
+
+#: read.c:3457
+msgid "missing value"
+msgstr ""
+
+#: read.c:3496 read.c:4864
+#, c-format
+msgid "bad floating literal: %s"
+msgstr ""
+
+#: read.c:3629
+#, c-format
+msgid "%s: would close weakref loop: %s"
+msgstr ""
+
+#: read.c:3676
+#, c-format
+msgid "junk at end of line, first unrecognized character is `%c'"
+msgstr ""
+
+#: read.c:3679
+#, c-format
+msgid "junk at end of line, first unrecognized character valued 0x%x"
+msgstr ""
+
+#: read.c:3735
+msgid "illegal expression"
+msgstr ""
+
+#: read.c:3737
+msgid "missing expression"
+msgstr ""
+
+#: read.c:3807
+#, c-format
+msgid "`%s' can't be equated to common symbol '%s'"
+msgstr ""
+
+#: read.c:3943
+msgid "unexpected `\"' in expression"
+msgstr ""
+
+#: read.c:3955
+msgid "rva without symbol"
+msgstr ""
+
+#: read.c:4015
+msgid "missing or bad offset expression"
+msgstr ""
+
+#: read.c:4036
+msgid "missing reloc type"
+msgstr ""
+
+#: read.c:4048
+msgid "unrecognized reloc type"
+msgstr ""
+
+#: read.c:4064
+msgid "bad reloc expression"
+msgstr ""
+
+#: read.c:4197
+msgid "attempt to store value in absolute section"
+msgstr ""
+
+#: read.c:4235 read.c:5130
+msgid "zero assumed for missing expression"
+msgstr ""
+
+#: read.c:4247 read.c:5142 write.c:264 write.c:1008
+msgid "register value used as expression"
+msgstr ""
+
+#: read.c:4333
+#, c-format
+msgid "value 0x%llx truncated to 0x%llx"
+msgstr ""
+
+#: read.c:4336
+msgid "value 0x%I64x truncated to 0x%I64x"
+msgstr ""
+
+#: read.c:4340
+#, c-format
+msgid "value 0x%lx truncated to 0x%lx"
+msgstr ""
+
+#: read.c:4367
+#, c-format
+msgid "bignum truncated to %d bytes"
+msgstr ""
+
+#: read.c:4443
+#, c-format
+msgid "%s relocations do not fit in %u bytes\n"
+msgstr ""
+
+#: read.c:4456
+#, c-format
+msgid "unsupported BFD relocation size %u"
+msgstr ""
+
+#: read.c:4528
+msgid "using a bit field width of zero"
+msgstr ""
+
+#: read.c:4536
+#, c-format
+msgid "field width \"%s\" too complex for a bitfield"
+msgstr ""
+
+#: read.c:4544
+#, c-format
+msgid "field width %lu too big to fit in %d bytes: truncated to %d bits"
+msgstr ""
+
+#: read.c:4566
+#, c-format
+msgid "field value \"%s\" too complex for a bitfield"
+msgstr ""
+
+#: read.c:4691 read.c:4886
+msgid "unresolvable or nonpositive repeat count; using 1"
+msgstr ""
+
+#: read.c:4740
+#, c-format
+msgid "unknown floating type type '%c'"
+msgstr ""
+
+#: read.c:4762
+msgid "floating point constant too large"
+msgstr ""
+
+#: read.c:5298
+msgid "strings must be placed into a section"
+msgstr ""
+
+#: read.c:5346
+msgid "expected <nn>"
+msgstr ""
+
+#. To be compatible with BSD 4.2 as: give the luser a linefeed!!
+#: read.c:5379 read.c:5465
+msgid "unterminated string; newline inserted"
+msgstr ""
+
+#: read.c:5473
+msgid "bad escaped character in string"
+msgstr ""
+
+#: read.c:5498
+msgid "expected address expression"
+msgstr ""
+
+#: read.c:5517
+#, c-format
+msgid "symbol \"%s\" undefined; zero assumed"
+msgstr ""
+
+#: read.c:5520
+msgid "some symbol undefined; zero assumed"
+msgstr ""
+
+#: read.c:5555
+msgid "this string may not contain '\\0'"
+msgstr ""
+
+#: read.c:5591
+msgid "missing string"
+msgstr ""
+
+#: read.c:5682
+#, c-format
+msgid ".incbin count zero, ignoring `%s'"
+msgstr ""
+
+#: read.c:5708
+#, c-format
+msgid "file not found: %s"
+msgstr ""
+
+#: read.c:5722
+#, c-format
+msgid "seek to end of .incbin file failed `%s'"
+msgstr ""
+
+#: read.c:5733
+#, c-format
+msgid "skip (%ld) or count (%ld) invalid for file size (%ld)"
+msgstr ""
+
+#: read.c:5740
+#, c-format
+msgid "could not skip to %ld in file `%s'"
+msgstr ""
+
+#: read.c:5749
+#, c-format
+msgid "truncated file `%s', %ld of %ld bytes read"
+msgstr ""
+
+#: read.c:5908
+msgid "missing .func"
+msgstr ""
+
+#: read.c:5925
+msgid ".endfunc missing for previous .func"
+msgstr ""
+
+#: read.c:5986
+#, c-format
+msgid ".bundle_align_mode alignment too large (maximum %u)"
+msgstr ""
+
+#: read.c:5991
+msgid "cannot change .bundle_align_mode inside .bundle_lock"
+msgstr ""
+
+#: read.c:6005
+msgid ".bundle_lock is meaningless without .bundle_align_mode"
+msgstr ""
+
+#: read.c:6026
+msgid ".bundle_unlock without preceding .bundle_lock"
+msgstr ""
+
+#: read.c:6039
+#, c-format
+msgid ".bundle_lock sequence is %u bytes, but bundle size only %u"
+msgstr ""
+
+#: read.c:6137
+#, c-format
+msgid "missing closing `%c'"
+msgstr ""
+
+#: read.c:6139
+msgid "stray `\\'"
+msgstr ""
+
+#: remap.c:53
+#, c-format
+msgid "invalid argument '%s' to -fdebug-prefix-map"
+msgstr ""
+
+#: stabs.c:214 stabs.c:222 stabs.c:230 stabs.c:249
+#, c-format
+msgid ".stab%c: missing comma"
+msgstr ""
+
+#. This could happen for example with a source file with a huge
+#. number of lines.  The only cure is to use a different debug
+#. format, probably DWARF.
+#: stabs.c:242
+#, c-format
+msgid ".stab%c: description field '%x' too big, try a different debug format"
+msgstr ""
+
+#: stabs.c:423
+msgid "comma missing in .xstabs"
+msgstr ""
+
+#: symbols.c:286
+#, c-format
+msgid "cannot define symbol `%s' in absolute section"
+msgstr ""
+
+#: symbols.c:420
+#, c-format
+msgid "symbol `%s' is already defined as \"%s\"/%s%ld"
+msgstr ""
+
+#: symbols.c:495 symbols.c:502
+#, c-format
+msgid "inserting \"%s\" into symbol table failed: %s"
+msgstr ""
+
+#: symbols.c:1016
+#, c-format
+msgid "invalid operands (%s and %s sections) for `%s'"
+msgstr ""
+
+#: symbols.c:1020
+#, c-format
+msgid "invalid operand (%s section) for `%s'"
+msgstr ""
+
+#: symbols.c:1028
+#, c-format
+msgid "invalid operands (%s and %s sections) for `%s' when setting `%s'"
+msgstr ""
+
+#: symbols.c:1031
+#, c-format
+msgid "invalid operand (%s section) for `%s' when setting `%s'"
+msgstr ""
+
+#: symbols.c:1080
+#, c-format
+msgid "symbol definition loop encountered at `%s'"
+msgstr ""
+
+#: symbols.c:1107
+#, c-format
+msgid "cannot convert expression symbol %s to complex relocation"
+msgstr ""
+
+#: symbols.c:1389
+#, c-format
+msgid "division by zero when setting `%s'"
+msgstr ""
+
+#: symbols.c:1470 write.c:2126
+#, c-format
+msgid "can't resolve value for symbol `%s'"
+msgstr ""
+
+#: symbols.c:1917
+#, c-format
+msgid "\"%d\" (instance number %d of a %s label)"
+msgstr ""
+
+#: symbols.c:1946
+#, c-format
+msgid "attempt to get value of unresolved symbol `%s'"
+msgstr ""
+
+#: symbols.c:2234
+msgid "section symbols are already global"
+msgstr ""
+
+#: symbols.c:2347
+#, c-format
+msgid "Accessing function `%s' as thread-local object"
+msgstr ""
+
+#: symbols.c:2351
+#, c-format
+msgid "Accessing `%s' as thread-local object"
+msgstr ""
+
+#: write.c:166
+#, c-format
+msgid "field fx_size too small to hold %d"
+msgstr ""
+
+#: write.c:452
+#, c-format
+msgid "attempt to .org/.space backwards? (%ld)"
+msgstr ""
+
+#: write.c:689
+msgid "invalid offset expression"
+msgstr ""
+
+#: write.c:711
+msgid "invalid reloc expression"
+msgstr ""
+
+#: write.c:1011
+#, c-format
+msgid "can't resolve `%s' {%s section} - `%s' {%s section}"
+msgstr ""
+
+#: write.c:1096
+#, c-format
+msgid "value of %s too large for field of %d bytes at %s"
+msgstr ""
+
+#: write.c:1108
+#, c-format
+msgid "signed .word overflow; switch may be too large; %ld at 0x%lx"
+msgstr ""
+
+#: write.c:1149
+msgid "redefined symbol cannot be used on reloc"
+msgstr ""
+
+#: write.c:1159
+msgid "relocation overflow"
+msgstr ""
+
+#: write.c:1162
+msgid "relocation out of range"
+msgstr ""
+
+#: write.c:1165
+#, c-format
+msgid "%s:%u: bad return from bfd_install_relocation: %x"
+msgstr ""
+
+#: write.c:1188
+msgid "reloc not within (fixed part of) section"
+msgstr ""
+
+#: write.c:1258
+msgid "internal error: fixup not contained within frag"
+msgstr ""
+
+#: write.c:1376 write.c:1506
+msgid "can't extend frag"
+msgstr ""
+
+#: write.c:1430
+#, c-format
+msgid "can't extend frag %u chars"
+msgstr ""
+
+#: write.c:1568 write.c:1589
+#, c-format
+msgid "can't write %s: %s"
+msgstr ""
+
+#: write.c:1619
+#, c-format
+msgid "cannot write to output file '%s': %s"
+msgstr ""
+
+#: write.c:2041
+#, c-format
+msgid "%s: global symbols not supported in common sections"
+msgstr ""
+
+#: write.c:2055
+#, c-format
+msgid "local label `%s' is not defined"
+msgstr ""
+
+#: write.c:2077
+#, c-format
+msgid "Local symbol `%s' can't be equated to common symbol `%s'"
+msgstr ""
+
+#: write.c:2084
+#, c-format
+msgid "can't make global register symbol `%s'"
+msgstr ""
+
+#: write.c:2377
+#, c-format
+msgid "alignment padding (%lu bytes) not a multiple of %ld"
+msgstr ""
+
+#: write.c:2539
+#, c-format
+msgid ".word %s-%s+%s didn't fit"
+msgstr ""
+
+#: write.c:2633
+msgid "padding added"
+msgstr ""
+
+#: write.c:2683
+msgid "attempt to move .org backwards"
+msgstr ""
+
+#: write.c:2707
+msgid ".space specifies non-absolute value"
+msgstr ""
+
+#: write.c:2722
+msgid ".space or .fill with negative value, ignored"
+msgstr ""
+
+#: write.c:2793
+#, c-format
+msgid ""
+"Infinite loop encountered whilst attempting to compute the addresses of "
+"symbols in section %s"
+msgstr ""

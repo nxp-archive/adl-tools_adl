@@ -1,0 +1,104 @@
+//
+// This makes sure that if an instruction shorthand has an expression
+// in its alias declaration, that we issue an error if that expression
+// contains any variables that aren't instruction fields for that shorthand.
+// 
+
+define (arch=minippc) {
+
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    syntax= ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  // The field FOO does not exist at all.
+  define (instr=slwi) {
+    alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(0),ME(0-FOO));
+    syntax= ("%i %f,%f,%f",RA,RS,SH);
+  }
+
+  // RT is a valid field, but slwi2 does not use it.
+  define (instr=slwi2) {
+    fields = (OPCD,RS,RA,SH,MB,ME);
+    alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(0),ME(RT));
+    syntax= ("%i %f,%f,%f",RA,RS,SH);
+  }
+
+  // slwi3 uses slwi2, which has an error, so this should be detected.
+  define (instr=slwi3) {
+    fields = (OPCD,RS,RA,SH,MB);
+    alias=slwi2(RS(RS),RA(RA),SH(SH),MB(0),ME(0));
+    syntax= ("%i %f,%f,%f",RA,RS,SH);
+  }
+
+  // Unknown helper function twizzle.
+  define (instr=slwi4) {
+    alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(0),ME(twizzle(SH,2)));
+    syntax= ("%i %f,%f,%f",RA,RS,SH);
+  }
+
+  unsigned foozle(unsigned x)
+  {
+    return x;
+  }
+
+  // We only allow helpers in shorthand expressions.
+  define (instr=slwi5) {
+    fields = (OPCD(22),RS,RA,SH,MB);
+    alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(MB),ME(foozle(0)));
+    syntax= ("%i %f,%f,%f",RA,RS,SH);
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

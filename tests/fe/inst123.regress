@@ -1,0 +1,71 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CG: 
+    Conflict allowed.
+    Pseudo:  1
+    Width:   1
+  CG_imp_bits__4_4_: [4,4] 
+    Implements:  CG
+  R1: 
+    Pseudo:  1
+    Width:   6
+  R1_imp_bits__11_16_: [11,16] 
+    Implements:  R1
+  R2: 
+    Pseudo:  1
+    Width:   6
+  R2_imp_bits__17_22_: [17,22] 
+    Implements:  R2
+  R3: 
+    Pseudo:  1
+    Width:   6
+  R3_imp_bits__26_31_: [26,31] 
+    Implements:  R3
+  VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_x_54_63_: [0,3] [5,10] [54,63] 
+Instructions:
+  Name:  a (rank: 100)
+  Width:  64
+  Attributes:  one
+  Fields:  CG_imp_bits__4_4_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_x_54_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  64
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_x_54_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  64
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_x_54_63_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+one:
+    Mask:  0xf7e0000000000000
+    1572(c480000000000000):      Mask:  0x00000000000003ff
+      253(00000000000000fd):  c
+      254(00000000000000fe):  b
+      255(00000000000000ff):  a
+-------------------------------
+

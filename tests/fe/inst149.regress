@@ -1,0 +1,125 @@
+======
+Cores:
+======
+Name:  "foo"
+Bit Order:              little endian
+Instruction Byte Order: little endian
+Data Byte Order:        little endian
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "cIA"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia
+  Documention:
+
+   Current instruction address
+   
+  -------------------------------
+  Name:  "nIA"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  nia
+  Documention:
+
+   Next instruction address
+   
+  -------------------------------
+Current-instruction-address register:  cIA
+Next-instruction-address register:  nIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  COND: 
+    Pseudo:  1
+    Width:   4
+    Enums:  ( '' '.al' ) ( '.cs' '.lo' ) '.vs' '.hi' ( '.eq' '.clr' ) '.ge' '.gt' '.pl' '.mi' '.le' '.lt' ( '.ne' '.set' ) '.ls' '.vc' ( '.cc' '.hs' ) ( '.nv' '.xc' ) 
+  COND_imp_bits__19_16_: [19,16] 
+    Implements:  COND
+  GX: [regfile:  GPR] 
+    Display:  dec
+    Conflict allowed.
+    Pseudo:  1
+    Width:   4
+    Enums:  'g0' 'g1' 'g2' 'g3' 'g4' 'g5' 'g6' 'g7' 'g8' 'g9' 'g10' 'g11' 'reserved' 'reserved' 'reserved' 'reserved' 
+  GX_imp_bits__7_4_: [7,4] 
+    Implements:  GX
+  GY: [regfile:  GPR] [not used] 
+    Display:  dec
+    Pseudo:  1
+    Width:   4
+    Enums:  'g0' 'g1' 'g2' 'g3' 'g4' 'g5' 'g6' 'g7' 'g8' 'g9' 'g10' 'g11' 'reserved' 'reserved' 'reserved' 'reserved' 
+  GZ: [regfile:  GPR] 
+    Display:  dec
+    Pseudo:  1
+    Width:   4
+    Enums:  'g0' 'g1' 'g2' 'g3' 'g4' 'g5' 'g6' 'g7' 'g8' 'g9' 'g10' 'g11' 'reserved' 'reserved' 'reserved' 'reserved' 
+  GZ_imp_bits__3_0_: [3,0] 
+    Implements:  GZ
+  VPRegPair: 
+    Display:  dec
+    Pseudo:  1
+    Width:   1
+    Enums:  'VP[1:0]' 'VP[3:2]' 
+      0: VP[1:0]
+  1: VP[3:2]
+  
+  VPRegPair_imp_bits__4_4_: [4,4] 
+    Implements:  VPRegPair
+  VarInstrOpcode_imp_bits__28_20_x_15_13_x_12_12_x_9_8_: [28,20] [15,12] [9,8] 
+  VarInstrOpcode_imp_bits__28_20_x_15_13_x_7_5_x_3_0_: [28,20] [15,13] [7,5] [3,0] 
+  VarInstrOpcode_imp_bits__28_20_x_19_16_x_15_15_x_7_4_: [28,15] [7,4] 
+  opc: [63,61] [not used] 
+  reserved_imp_bits__11_10_: [11,10] 
+    Reserved:  1
+  reserved_imp_bits__14_8_: [14,8] 
+    Reserved:  1
+  reserved_imp_bits__19_16_x_12_8_: [19,16] [12,8] 
+    Reserved:  1
+Instructions:
+  Name:  exg_cc_gZ_gX (rank: 100)
+  Width:  32
+  Syntax:  "exg%p %f,%f":   COND GZ GX
+  Fields:  VarInstrOpcode_imp_bits__28_20_x_15_13_x_12_12_x_9_8_ COND_imp_bits__19_16_ reserved_imp_bits__11_10_(reserved) GX_imp_bits__7_4_ GZ_imp_bits__3_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  mv (rank: 100)
+  Width:  32
+  Syntax:  "mv %f,cc":   GZ
+  Fields:  VarInstrOpcode_imp_bits__28_20_x_19_16_x_15_15_x_7_4_ reserved_imp_bits__14_8_(reserved) GZ_imp_bits__3_0_
+  Action:  {
+    GPR ( GZ ) = 1 ;
+}
+  Target Registers:  GPR(GZ) 
+  -------------------------------
+  Name:  mv_h_VPX_Iu1 (rank: 100)
+  Width:  29
+  Syntax:  "mv h,%p":   VPRegPair
+  Fields:  VarInstrOpcode_imp_bits__28_20_x_15_13_x_7_5_x_3_0_ reserved_imp_bits__19_16_x_12_8_(reserved) VPRegPair_imp_bits__4_4_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xf0
+    0(0):  mv_h_VPX_Iu1
+    13(d0):      Mask:  0x1fff8000
+      3776(7600000):  mv
+    default:      Mask:  0x1ff0e000
+      15104(7600000):        Mask:  0x1300
+        16(1000):  exg_cc_gZ_gX
+      15105(7602000):        Mask:  0xef
+        12(c):  -------------------------------
+

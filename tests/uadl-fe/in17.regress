@@ -1,0 +1,7 @@
+Error:  Custom resource class 'A_t' not found in file 'Foo.h'.
+in17.uadl:36: Error parsing custom resource header Foo.h.
+in17.uadl:40: Argument x for custom resource B has no default value and no value was specified.
+in17.uadl:40: Argument y for custom resource B has no default value and no value was specified.
+in17.uadl:67: Exec() was never called in any state action for this instruction class.
+in17.uadl:4: warning: Instructions access no data memory
+Could not parse in17.uadl

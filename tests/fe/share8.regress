@@ -1,0 +1,107 @@
+=======
+Systems:
+=======
+System:  PMT
+  Type:  minippc
+  Shared Resources:
+    Registers:  HID0 NIA0 NIA1 
+  Locally-defined Cores:
+    Name:  "Thread0"
+    Type:  Thread
+    Registers:
+      Name:  "CIA"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia
+      -------------------------------
+      Name:  "HID0"
+      Usage:  field-read
+      Width:  32
+        EN0[0]   
+          Usage:  field-read
+        EN1[1]   
+      Reset:  0xC0000000
+      -------------------------------
+      Name:  "NIA"
+      Read alias/hook:
+        NIA0
+
+      Write alias/hook:
+        NIA0
+
+      Usage:  read, written
+      Width:  32
+      Pseudo:  1
+      Attributes:  nia
+      -------------------------------
+      Name:  "NIA0"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+      Name:  "NIA1"
+      Width:  32
+      -------------------------------
+    Current-instruction-address register:  CIA
+    Next-instruction-address register:  NIA
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    
+Core Activity Function:
+{
+    return ( HID0 . EN0 == 1 ) ;
+}
+    -------------------------------
+    Name:  "Thread1"
+    Type:  Thread
+    Registers:
+      Name:  "CIA"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia
+      -------------------------------
+      Name:  "HID0"
+      Usage:  field-read
+      Width:  32
+        EN0[0]   
+        EN1[1]   
+          Usage:  field-read
+      Reset:  0xC0000000
+      -------------------------------
+      Name:  "NIA"
+      Read alias/hook:
+        NIA1
+
+      Write alias/hook:
+        NIA1
+
+      Usage:  read, written
+      Width:  32
+      Pseudo:  1
+      Attributes:  nia
+      -------------------------------
+      Name:  "NIA0"
+      Width:  32
+      -------------------------------
+      Name:  "NIA1"
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+    Current-instruction-address register:  CIA
+    Next-instruction-address register:  NIA
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    
+Core Activity Function:
+{
+    return ( HID0 . EN1 == 1 ) ;
+}
+    -------------------------------
+  Constituent Items:
+    t0:  Thread0
+    t1:  Thread1
+-------------------------------
+

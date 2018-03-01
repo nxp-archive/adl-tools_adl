@@ -1,0 +1,100 @@
+//
+// Make sure that we expand out disassembly strings, so that we don't directly
+// reference pseudo fields.
+//
+define (arch=minippc) {
+  attrs = (up,down,ff); 
+  
+  //REGISTERS
+
+  define (reg=A) {}
+  define (reg=B) {}
+  define (reg=C) {}
+  define (reg=D) {}
+  define (reg=E) {}
+
+  define (regfile=S) {
+    size=1024;
+    define (entry=8)  { reg = A; }
+    define (entry=9)  { reg = B; }
+    define (entry=1)  { reg = C; }
+    define (entry=50) { reg = D; }
+    define (entry=51) { reg = E; }    
+  }
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+  define(instrfield=R1){
+    display = dec;
+    bits = (13,17);
+  }
+  define(instrfield=R2){
+    display = dec;
+    bits = (18,22);
+  }
+  
+  define (instrfield=X) {
+    pseudo = true;
+    width = 4;
+  }
+
+  define (instrfield=Y) {
+    pseudo = true;
+    width = 4;
+  }
+
+  define (instrfield=R3) {
+    bits = (18,27);
+    ref=S;
+  }
+
+  define(instrfield=OPCD){
+    bits =(1,3);
+  }
+  
+  define(instrfield=F1){
+    bits = (9,10);
+    enumerated = (("",".up"),".down",(".up1",".up2"),(".a1",".a2",".a3",".a4"));
+  }
+
+  define(instrfield=F2){
+    bits = (11,12);
+    enumerated = (("",".left0"),".right0",(".left1",".left2",".left3"),".right1");
+  }
+
+  define (instrfield=NG) {
+    bits = (4,5);
+  }
+
+  define (instrfield=PR) {
+    bits = (6,7);
+  }
+
+  define (instrfield=PRn0) {
+    pseudo = true;
+    enumerated = (("","if0"),"if1","if2","if3");
+    width = 2;
+  }
+
+  define (instrfield=PRn1) {
+    pseudo = true;
+    enumerated = (("","ife0"),"ife1","ife2","ife3");
+    width = 2;
+  }
+
+  define (instr = foo){
+    fields = (OPCD(1),NG,PR,F1,F2,R1,R2);
+    syntax = ("%p %p %i%p%p %f,%f",PRn1,PRn0,F1,F2,R1,R2,PR(PRn1),NG(PRn0 ? PRn0 : PRn1));
+    action={};
+  }
+
+  define (assembler) {
+    comments = "//";
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

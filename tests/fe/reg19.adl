@@ -1,0 +1,49 @@
+//
+// This should pass, as all variables referenced in the
+// code refer to registers or helper functions.
+//
+
+define (arch = minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg = MSR) {
+    width = 32;
+  }
+
+  define (reg = TBR2) {
+    width = 32;
+  }
+
+  define (regfile = GPRS) {
+    width = 32;
+    size = 32;
+  }
+
+  int foo(int b) {
+    return 10*b;
+  }
+
+  define (reg = Foo) {
+    define (write) {
+      action = func(bits<32> v) { 
+        int f = foo(10); 
+        int g = MSR(20); 
+        int h = GPRS(4);
+        TBR2 = v; 
+        g = f;
+      };
+    }
+
+    external_write = func(bits<32> v) {
+      ThisReg = ThisReg & ~v;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

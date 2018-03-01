@@ -1,0 +1,31 @@
+Stall in IF (cycle 0):  mMEM: no address bandwidth
+Stall in IF (cycle 4):  mMEM: no address bandwidth
+Flush in mEX (cycle 7):  pipeline
+Stall in IF (cycle 7):  mMEM: no address bandwidth
+Stall in IF (cycle 11):  mMEM: no address bandwidth
+Flush in mEX (cycle 14):  pipeline
+Stall in IF (cycle 14):  mMEM: no address bandwidth
+Stall in IF (cycle 18):  mMEM: no address bandwidth
+Flush in mEX (cycle 21):  pipeline
+Stall in IF (cycle 21):  mMEM: no address bandwidth
+Stall in IF (cycle 25):  mMEM: no address bandwidth
+Flush in mEX (cycle 28):  pipeline
+Stall in IF (cycle 28):  mMEM: no address bandwidth
+Stall in IF (cycle 32):  mMEM: no address bandwidth
+Flush in mEX (cycle 35):  pipeline
+Stall in IF (cycle 35):  mMEM: no address bandwidth
+Stall in IF (cycle 39):  mMEM: no address bandwidth
+Flush in mEX (cycle 42):  pipeline
+Stall in IF (cycle 42):  mMEM: no address bandwidth
+Stall in IF (cycle 46):  mMEM: no address bandwidth
+Flush in mEX (cycle 49):  pipeline
+Stall in IF (cycle 49):  mMEM: no address bandwidth
+Stall in IF (cycle 53):  mMEM: no address bandwidth
+Flush in mEX (cycle 56):  pipeline
+Stall in IF (cycle 56):  mMEM: no address bandwidth
+Stall in IF (cycle 60):  mMEM: no address bandwidth
+Flush in mEX (cycle 63):  pipeline
+Stall in IF (cycle 63):  mMEM: no address bandwidth
+Stall in IF (cycle 67):  mMEM: no address bandwidth
+Flush in mEX (cycle 71):  pipeline
+Simulation halted at address: 0x0000000000000010

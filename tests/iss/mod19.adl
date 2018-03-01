@@ -1,0 +1,103 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Example of having a shared cache.
+//
+
+#import "mod1.adl"
+
+define (arch=mt) {
+
+  define (reg=NIA0) { }
+  define (reg=NIA1) { }
+
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+    define (field=L2E) {
+      bits = 1;
+    }
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=30) { reg = NIA0; }
+    define (entry=31) { reg = NIA1; }
+    define (entry=52) { reg = CCR; }
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 65536;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L2E == 1); };
+  }
+
+}
+
+define(core=P) {
+  remove = true;
+}
+
+define (sys=PMT) {
+  type="PowerPC";
+  define (core = Thread0) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+    define (reg=NIA) {
+      attrs = nia;
+      define (write) {
+        alias = NIA0;
+      }
+      define (read) {
+        alias = NIA0;
+      }
+    }
+  }
+  define (core = Thread1) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+    define (reg=NIA) {
+      attrs = nia;
+      define (write) {
+        alias = NIA1;
+      }
+      define (read) {
+        alias = NIA1;
+      }
+    }
+  }
+  define (shared) {
+    regs = (NIA0,NIA1);
+    caches = (L1i,L1d,L2);
+  }
+  Thread0 t0;
+  Thread1 t1;
+}

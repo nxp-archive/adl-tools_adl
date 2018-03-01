@@ -1,0 +1,17 @@
+#
+# This tests to make sure that statements supplied via "eval"
+# command-line options are evaluated and available within executed scripts.
+#
+# This script is first run as a config script and then as a main script.
+# That's why it modifies foo and bar- the second pass should show the modified values.
+#
+
+if {[info exists foo] && [info exists bar]} {
+	puts "The value of foo is $foo"
+	puts "The value of bar is $bar"
+
+	set foo [expr $foo * $foo]
+	set bar [expr $bar * $bar]
+} else {
+	puts "Either foo or bar do not exist."
+}

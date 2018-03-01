@@ -1,0 +1,28 @@
+#
+# Tests the max-instr-count 
+#
+
+= asm
+
+	L1:
+		addi 1,1,1
+		addi 2,2,2
+		bc 0x14,0,L1
+		addi 3,3,3
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi 1,1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi 2,2,2
+MD n=Mem ra=0x00000008 d=0x4280FFF8	#	bc 0x14,0,L1
+MD n=Mem ra=0x0000000c d=0x38630003	#	addi 3,3,3
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=1 d=333
+RD n=GPR i=2 d=666
+

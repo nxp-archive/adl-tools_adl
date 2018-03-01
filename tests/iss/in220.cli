@@ -1,0 +1,15 @@
+#
+# Test instruction jamming via the 'ijam' function.
+#
+
+go
+#	addi r2,r2,2
+ijam 0x38420002
+#	addi r3,r3,3
+ijam 0x38630003
+#	mtspr 100,r1	
+ijam 0x7C241BA6
+#	addi r3,r3,3
+ijam 0x38630003
+	
+quit

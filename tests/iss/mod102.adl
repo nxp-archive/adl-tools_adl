@@ -1,0 +1,22 @@
+//
+// This takes the packet-op concept and applies it to a harvard architecture.
+// Only the imem is separate- we use the default global memory for dmem.
+//
+
+#include "mod101.adl"
+
+define (arch = harvard) {
+
+    define(mem=IMEM)
+    {
+      size = 0x8000;
+      instr_mem = true;
+      addr_unit = 1;
+    }
+  
+}
+
+defmod (core = packet_ops) {
+  archs = (packet_ops, harvard); 
+  instrtables = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+}

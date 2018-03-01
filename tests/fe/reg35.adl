@@ -1,0 +1,98 @@
+//
+// Makes sure that we detect bad setfield_ getfield_ functions.
+//
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (reg = a) {
+    width = 32;
+    define (field = f0) {
+      bits = (0,10);
+    }
+    define (field = f1) {
+      bits = (11,20);
+    }
+    define (field = f2) {
+      bits = (21,31);
+    }
+  }
+
+  define (regfile = b) {
+    width = 16;
+    size = 32;
+    define (field = X) {
+      bits = (0,10);
+    }
+    define (field = Y) {
+      bits = (11,15);
+    }
+  }
+  
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (instr=a) {
+    fields=(OPCD(1),RA,RB,XO(0));
+    action = {
+      // Error:  Unknown symbol.
+      var x = getfield_(GPR(RA));
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RA,RB,XO(0));
+    action = {
+      // Unknown field.
+      var y = setfield_a_f3(GPR(RA));
+    };
+  }
+
+  define (instr=c) {
+    fields=(OPCD(3),RA,RB,XO(0));
+    action = {
+     // Unknown register.
+      var z = getfield_B_X(GPR(RB));
+    };
+  }
+
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

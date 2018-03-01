@@ -1,0 +1,60 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] [not used]
+        Primary opcode.
+    
+  RA: [11,15] [not used] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: 
+    Pseudo:  1
+    Width:   3
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB_imp_bits__21_23_: [21,23] 
+    Implements:  RB
+  SPRN: [16,20] [11,15] 
+        Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  XO: [21,30] [not used] 
+        Extended opcode.
+    
+Instructions:
+  Name:  Foo (rank: 100)
+  Width:  32
+  Fields:  SPRN(3) RB_imp_bits__21_23_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x1ff800
+    96(30000):  Foo
+
+Groups:
+  Name:  all_if
+  Type:  instrfield
+  Items: OPCD RA RB SPRN XO 
+  -------------------------------
+  Name:  all_relocs
+  Type:  reloc
+  Items: D1 R1 R2 R8 
+  -------------------------------
+-------------------------------
+

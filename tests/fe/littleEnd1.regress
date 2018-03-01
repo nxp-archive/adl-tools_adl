@@ -1,0 +1,118 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Register Files:
+  Name:  "D"
+  Size:  32
+  Width:  32
+    A[31,4]   
+  -------------------------------
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Parallel execution packet size: 2
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D1: 
+    Pseudo:  1
+    Width:   5
+  D1_imp_bits__14_13_x_8_6_: [14,13] [8,6] 
+    Implements:  D1
+  D2: 
+    Pseudo:  1
+    Width:   3
+  D2_imp_bits__18_18_x_17_17_x_16_16_: [18,16] 
+    Implements:  D2
+  ESG: [not used]  
+    Pseudo:  1
+    Width:   1
+  Enc1: [not used]  
+    Pseudo:  1
+    Width:   16
+  F1: [25,25] 
+  F1_imp_bits__29_29_: [29,29] 
+    Implements:  F1
+  F2: [23,23] 
+  F3: [22,20] 
+  Action:  {
+     unsigned pospopos = 0 ;
+    ThisField = pospopos ;
+}
+  F3_imp_bits__27_27_x_29_28_: [27,27] [29,28] 
+    Implements:  F3
+  HighReg: 
+    Pseudo:  1
+    Width:   6
+    Size: 3
+    Prefix:  1
+    Indexed:  3 
+  Action:  func ( unsigned IN ) {
+    ThisField = bits ( ( IN + 1 ) * 3 - 1 , IN * 3 ) ;
+}
+  HighReg_imp_bits__9_7_x_3_1_: [9,7] [3,1] 
+    Implements:  HighReg
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  VarInstrOpcode_imp_bits__31_19_x_15_15_x_12_9_x_5_0_: [31,19] [15,15] [12,9] [5,0] 
+  VarInstrOpcode_imp_bits__31_30_: [31,30] 
+  VarPrefixOpcode_imp_bits__15_10_x_6_4_: [15,10] [6,4] 
+    Prefix:  1
+Instructions:
+  Name:  Bar1 (rank: 100)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__31_19_x_15_15_x_12_9_x_5_0_ D2_imp_bits__18_18_x_17_17_x_16_16_ D1_imp_bits__14_13_x_8_6_
+  Action:  {
+}
+  -------------------------------
+  Name:  Foo10 (rank: 100)
+  Fields:  OPCD F2 F3
+  Action:  {
+}
+  Nested insructions:  
+    Name:  Foo11 (rank: 100)
+    Width:  32
+    Fields:  VarInstrOpcode_imp_bits__31_30_ F3_imp_bits__27_27_x_29_28_
+    Alias:  Foo10 OPCD(3) F2(10) F3(F3) 
+    -------------------------------
+  -------------------------------
+  Name:  Foo2 (rank: 100)
+  Fields:  OPCD F1 F2
+  Action:  {
+}
+  Nested insructions:  
+    Name:  Foo3 (rank: 100)
+    Width:  32
+    Fields:  VarInstrOpcode_imp_bits__31_30_ F1_imp_bits__29_29_
+    Alias:  Foo2 OPCD(2) F1(F1) F2(23) 
+    -------------------------------
+  -------------------------------
+  Name:  HighReg (rank: 100)
+  Width:  16
+  Attributes:  prefix
+  Fields:  VarPrefixOpcode_imp_bits__15_10_x_6_4_ HighReg_imp_bits__9_7_x_3_1_
+  Prefix:  1
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0xfc700000
+    4034(fc200000):  HighReg
+other:
+    Mask:  0xc0000000
+    0(0):      Mask:  0x3ff89e3f
+      133731903(7f8963f):  Bar1
+    2(80000000):  Foo3
+    3(c0000000):  Foo11
+-------------------------------
+

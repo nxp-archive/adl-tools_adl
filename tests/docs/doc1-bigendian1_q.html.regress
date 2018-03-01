@@ -1,0 +1,490 @@
+     <html>
+     <big>
+     <head>
+     <title>ADL Database Report</title>
+     </head>
+     <body>
+     <table border="10">
+     <tr bgcolor="lightblue">
+
+<tr bgcolor="lightblue">
+<td>
+<big><b>NAME</big></b></td>
+<td>
+<big><b>ENC</big></b></td>
+<td>
+<big><b>ACTION</big></b></td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add</td>
+<td>
+011111RRRRRIIIIIiiiii0100001010*</td>
+<td>
+<pre>
+ {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add2</td>
+<td>
+********************************</td>
+<td>
+<pre>
+ alias = "add RA(0) RB(0) RT(0)"</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addi</td>
+<td>
+001110iiiiiIIIIISSSSSSSSSSSSSSSS</td>
+<td>
+<pre>
+ {
+     var si = signExtend ( SI , 32 ) ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + si ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addic.</td>
+<td>
+001101iiiiiIIIIISSSSSSSSSSSSSSSS</td>
+<td>
+<pre>
+ {
+     var si = signExtend ( SI , 32 ) ;
+    GPR ( RT ) = GPR ( RA ) + si ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addis</td>
+<td>
+001111iiiiiIIIIISSSSSSSSSSSSSSSS</td>
+<td>
+<pre>
+ {
+     bits < 32 > si = SI ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si << 16 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + ( si << 16 ) ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+bc</td>
+<td>
+010000BBBBBiiiiiIIIIIIIIIIIIII00</td>
+<td>
+<pre>
+ {
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = BO ( 2 ) || ( ( CTR != 0 ) ^ BO ( 3 ) ) ;
+     var cond_ok = BO ( 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+         var ea = signExtend ( concat ( BD , zero ( 2 ) ) , 32 ) ;
+        NIA = CIA + ea ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+cmp</td>
+<td>
+011111III**iiiiiRRRRR0000000000*</td>
+<td>
+<pre>
+ {
+    setCrField ( BF , GPR ( RA ) , GPR ( RB ) ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+cmpi</td>
+<td>
+001011III**iiiiiSSSSSSSSSSSSSSSS</td>
+<td>
+<pre>
+ {
+     var si = signExtend ( SI , 32 ) ;
+    setcrfield ( BF , GPR ( RA ) , si ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+crand</td>
+<td>
+010011RRRRRIIIIIiiiii0100000001*</td>
+<td>
+<pre>
+ {
+    if ( RB == 0 ) {
+        GPR ( RT ) = FOO2 . X ( RA ) ;
+    } else if ( RB == 1 ) {
+        GPR ( RT ) = FOO2 . Y ( RA ) ;
+    } else {
+        GPR ( RT ) = FOO2 . Z ( RA ) ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+crandc</td>
+<td>
+010011RRRRRIIIIIiiiii0010000001*</td>
+<td>
+<pre>
+ {
+    if ( RB == 0 ) {
+        FOO2 . X ( RA ) = GPR ( RS ) ;
+    } else if ( RB == 1 ) {
+        FOO2 . Y ( RA ) = GPR ( RS ) ;
+    } else {
+        FOO2 . Z ( RA ) = GPR ( RS ) ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+dum1</td>
+<td>
+100010RRRRRiiiii************IIII</td>
+<td>
+<pre>
+ {
+     ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+halt</td>
+<td>
+000000**************************</td>
+<td>
+<pre>
+ {
+    halt (  ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+li</td>
+<td>
+****************</td>
+<td>
+<pre>
+ </pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+lwz</td>
+<td>
+100000RRRRRiiiiiIIIIIIIIIIIIIIII</td>
+<td>
+<pre>
+ {
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + d ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+lwzx</td>
+<td>
+011111RRRRRIIIIIiiiii0000010111*</td>
+<td>
+<pre>
+ {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mfspr</td>
+<td>
+011111IIIIIiiiiiiiiii0101010011*</td>
+<td>
+<pre>
+ {
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    GPR ( RT ) = SPR ( SPRN ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mr</td>
+<td>
+********************************</td>
+<td>
+<pre>
+ alias = "or RA(RA) RB(RS) RS(RS)"</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mtspr</td>
+<td>
+011111IIIIIiiiiiiiiii0111010011*</td>
+<td>
+<pre>
+ {
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    SPR ( SPRN ) = GPR ( RS ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mullw</td>
+<td>
+011111RRRRRIIIIIiiiii0011101011*</td>
+<td>
+<pre>
+ {
+    GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+or</td>
+<td>
+011111RRRRRIIIIIiiiii0110111100*</td>
+<td>
+<pre>
+ {
+    GPR ( RA ) = GPR ( RS ) | GPR ( RB ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+ori</td>
+<td>
+011000iiiiiIIIIIUUUUUUUUUUUUUUUU</td>
+<td>
+<pre>
+ {
+    GPR ( RA ) = GPR ( RS ) | UI ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+rfi</td>
+<td>
+010011RRRRRIIIIIiiiii0000110010*</td>
+<td>
+<pre>
+ {
+    MSR = SRR1 ;
+    NIA = SRR0 ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+rlwinm</td>
+<td>
+010101RRRRRRRRRRSSSSSIIIIIiiiii*</td>
+<td>
+<pre>
+ {
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( MB , ME ) ;
+    GPR ( RA ) = r & m ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+se_add</td>
+<td>
+000001**iiiiIIII</td>
+<td>
+<pre>
+ alias = "add RA(RX) RB(RY) RT(RX)"</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+se_addi</td>
+<td>
+0010000IIIIIiiii</td>
+<td>
+<pre>
+ {
+    rGPR ( RX ) = rGPR ( RX ) + OIM5 ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stw</td>
+<td>
+100100RRRRRiiiiiIIIIIIIIIIIIIIII</td>
+<td>
+<pre>
+ {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var d = signExtend ( D , 32 ) ;
+     var addr = b + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stwu</td>
+<td>
+100101RRRRRiiiiiIIIIIIIIIIIIIIII</td>
+<td>
+<pre>
+ {
+     var d = signExtend ( D , 32 ) ;
+     var addr = GPR ( RA ) + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+    GPR ( RA ) = addr ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stwx</td>
+<td>
+011111RRRRRIIIIIiiiii0010010111*</td>
+<td>
+<pre>
+ {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+tw</td>
+<td>
+011111*****IIIIIiiiii0000000100*</td>
+<td>
+<pre>
+ {
+    FOO1 = GPR ( RA ) ;
+    GPR ( RB ) = FOO1 . A + 1 ;
+    FOO1 . C = GPR ( RB + 1 ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vaddubm</td>
+<td>
+000100RRRRRIIIIIiiiii0000000000*</td>
+<td>
+<pre>
+ {
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 8 ; ++ i ) {
+        VPR ( RT ) . B ( i ) = VPR ( RA ) . B ( i ) + VPR ( RB ) . B ( i ) ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vadduhm</td>
+<td>
+000100RRRRRIIIIIiiiii0000100000*</td>
+<td>
+<pre>
+ {
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 16 ; ++ i ) {
+        VPR ( RT ) . H ( i ) = VPR ( RA ) . H ( i ) + VPR ( RB ) . H ( i ) ;
+    }
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vadduwm</td>
+<td>
+000100RRRRRIIIIIiiiii0001000000*</td>
+<td>
+<pre>
+ {
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 32 ; ++ i ) {
+        VPR ( RT ) . W ( i ) = VPR ( RA ) . W ( i ) + VPR ( RB ) . W ( i ) ;
+    }
+}
+</pre>
+</td>
+</tr>
+</table>
+</body>
+</html>

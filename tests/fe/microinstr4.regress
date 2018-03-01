@@ -1,0 +1,109 @@
+======
+Cores:
+======
+Name:  "rubber"
+Bit Order:              little endian
+Instruction Byte Order: little endian
+Data Byte Order:        little endian
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  HfWd: [53,52] 
+    Display:  dec
+  VarInstrOpcode_imp_bits__24_17_: [24,17] 
+  VarInstrOpcode_imp_bits__55_46_: [55,46] 
+  opHw1: [instr table: instr_micro]
+    Display:  hex
+    Pseudo:  1
+    Width:   25
+  opHw1_imp_bits__51_27_: [51,27] 
+    Implements:  opHw1
+  opHw2: [instr table: instr_micro]
+    Display:  hex
+    Pseudo:  1
+    Width:   25
+  opHw2_imp_bits__26_2_: [26,2] 
+    Implements:  opHw2
+  reserved_imp_bits__16_0_: [16,0] 
+    Reserved:  1
+  reserved_imp_bits__1_0_: [1,0] 
+    Reserved:  1
+  reserved_imp_bits__45_0_: [45,0] 
+    Reserved:  1
+Instructions:
+  Name:  done (rank: 100)
+  Width:  64
+  Syntax:  "done":  
+  Attributes:  instr_ctrl
+  Fields:  VarInstrOpcode_imp_bits__55_46_ reserved_imp_bits__45_0_(reserved)
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+  Name:  null (rank: 100)
+  Width:  25
+	Is micro op.
+  Syntax:  "null":  
+  Attributes:  instr_micro
+  Fields:  VarInstrOpcode_imp_bits__24_17_ reserved_imp_bits__16_0_(reserved)
+  Action:  {
+}
+  -------------------------------
+  Name:  two_opHw_1 (rank: 100)
+  Width:  64
+	Micro ops:  2
+  Syntax:  "exec1":  
+  Attributes:  instr_macro
+  Fields:  HfWd(0) opHw1_imp_bits__51_27_ opHw2_imp_bits__26_2_ reserved_imp_bits__1_0_(reserved)
+  Action:  {
+    run ( opHw2 ) ;
+    run ( opHw1 ) ;
+}
+  -------------------------------
+  Name:  two_opHw_2 (rank: 100)
+  Width:  64
+	Micro ops:  2	
+  Syntax:  "exec2":  
+  Attributes:  instr_macro
+  Fields:  HfWd(1) opHw1_imp_bits__51_27_ opHw2_imp_bits__26_2_ reserved_imp_bits__1_0_(reserved)
+  Action:  {
+    run ( opHw2 , opHw1 ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x0000000000ffc000
+    0(0000000000000000):  done
+instr_micro:
+    Mask:  0x1fe0000
+    63(7e0000):  null
+instr_macro:
+    Mask:  0x0000000000300000
+    0(0000000000000000):  two_opHw_1
+    1(0000000000100000):  two_opHw_2
+
+Assember configuration:
+  Comment strings: '//' '#' 
+  Line comment strings: '.' '//' '#' 
+  Line separators: ';' 
+  Explicit regnames: 0
+  Assembler instruction tables: other instr_macro
+	Disassembler instruction tables: other instr_macro 
+-------------------------------
+

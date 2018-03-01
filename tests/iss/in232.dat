@@ -1,0 +1,73 @@
+#
+# Tests writing to alias which have reserve masks, to make sure that those
+# reserve masks are followed.
+#
+
+= asm
+
+	mtspr 81,r1
+	mtspr 91,r2
+	mtspr 96,r3
+	
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C3113A6	#	mtspr 81,r1
+MD n=Mem ra=0x00000004 d=0x7C5B13A6	#	mtspr 91,r2
+MD n=Mem ra=0x00000008 d=0x7C601BA6	#	mtspr 96,r3
+# </GEN>
+
+CORE n=:PMT
+
+RD n=NIA    d=0x0
+
+RD n=FOOs i=0 d=0x01a00000
+RD n=FOOs i=1 d=0x02b00000
+RD n=BARs i=1 d=0x01c00000
+
+CORE n=:PMT:t0
+
+RD n=GPR  i=1 d=0xd9812345
+RD n=GPR  i=2 d=0x13567890
+RD n=GPR  i=3 d=0x24899abc
+
+TRACE
+
+CORE n=:PMT:t0
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c3113a6
+INSTR op=0x7c3113a6					asm="mtspr FOO,r1"
+R n=FOO d=0x09a00000
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c5b13a6
+INSTR op=0x7c5b13a6					asm="mtspr UFOO1,r2"
+R n=FOOs i=1 d=0x03b00000
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c601ba6
+INSTR op=0x7c601ba6                                     asm="mtspr BARs1,r3"
+R n=BARs i=1 d=0x06c00000
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+
+RESULTS
+
+CORE n=:PMT
+
+RD n=BARs i=0 d=0x00000000
+RD n=BARs i=1 d=0x06c00000
+RD n=FOOs i=0 d=0x09a00000
+RD n=FOOs i=1 d=0x03b00000
+
+CORE n=:PMT:t0
+
+RD n=FOO d=0x09a00000
+
+CORE n=:PMT:t1
+
+RD n=FOO d=0x03b00000

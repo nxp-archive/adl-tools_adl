@@ -1,0 +1,99 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  field-read, field-written
+  Width:  32
+    H[0,15]   
+      Usage:  field-read, field-written
+    L[16,31]   
+      Usage:  field-written
+  -------------------------------
+Registers:
+  Name:  "FLAG"
+  Usage:  field-written
+  Width:  32
+    F[10]   
+      Usage:  field-written
+    X[20]   
+      Usage:  field-written
+  -------------------------------
+  Name:  "FOO"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RT: [6,10] 
+  SI: [16,31] 
+  XO: [21,30] [not used]
+Instructions:
+  Name:  add1 (rank: 100)
+  Width:  32
+  Attributes:  fxu base
+  Fields:  OPCD(40) RT RA SI
+  Action:  {
+    set_foo1 ( 20 , false ) ;
+    set_foo2 (  ) ;
+}
+  Target Registers:  FLAG[mask 0x00000800]/p 
+  Helper Functions:  set_foo1 set_foo2 
+  -------------------------------
+  Name:  add2 (rank: 100)
+  Width:  32
+  Attributes:  fxu base
+  Fields:  OPCD(41) RT RA SI
+  Action:  {
+    GPR ( RA ) . L = SI ;
+    GPR ( RA ) . H = SI ;
+    GPR ( RT ) . L = SI ;
+    GPR ( RT ) . H = GPR ( RA ) . H ;
+    set_foo1 ( 40 , true , true ) ;
+    set_foo2 ( false ) ;
+}
+  Target Registers:  FLAG[mask 0x00200000]/p FOO GPR(RA) GPR(RT) 
+  Helper Functions:  set_foo1 set_foo2 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    40(a0000000):  add1
+    41(a4000000):  add2
+
+Helper Functions:
+  set_foo1:
+ void set_foo1 ( const bits < 32 > & data , bool set_foo = true , bool set_flag = false ) {
+    if ( set_foo ) {
+        FOO = data ;
+    }
+    if ( set_flag ) {
+        FLAG . F = 1 ;
+    }
+}
+    Target Registers:  FLAG[mask 0x00200000]/p? FOO? 
+
+  set_foo2:
+ void set_foo2 ( bool set_flag = true ) {
+    if ( set_flag ) {
+        FLAG . X = 1 ;
+    }
+}
+    Target Registers:  FLAG[mask 0x00000800]/p? 
+-------------------------------
+

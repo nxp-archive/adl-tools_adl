@@ -1,0 +1,44 @@
+#
+# Make sure that the signed_dec format works within a model.
+#
+
+= asm
+
+	lwsp r5,[sp+512],r0
+	addi r5,r5,10
+	swsp r5,[sp+516]
+	addi r2,r2,530
+	lwsp r7,[sp-10],r0
+	addi r7,r7,20
+	swsp r7,[sp-6]
+
+= /asm
+
+= mdopts
+endian: little
+as: ./as-mod101
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x00145285	#	addi r5,r5,10
+MD n=Mem ra=0x00000004 d=0x02000154
+MD n=Mem ra=0x00000008 d=0x04242105	#	addi r2,r2,530
+MD n=Mem ra=0x0000000c d=0x02040156
+MD n=Mem ra=0x00000010 d=0x00287385	#	addi r7,r7,20
+MD n=Mem ra=0x00000014 d=0xFFF601D4
+MD n=Mem ra=0x00000018 d=0x00000001	#	
+MD n=Mem ra=0x0000001c d=0xFFFA01D6
+# </GEN>
+
+MD n=Mem ra=0x200 d=10
+MD n=Mem ra=0x204 d=0
+MD n=Mem ra=0x208 d=20
+MD n=Mem ra=0x20c d=0
+
+RESULTS
+
+MD n=Mem ra=0x200 d=10
+MD n=Mem ra=0x204 d=20
+MD n=Mem ra=0x208 d=20
+MD n=Mem ra=0x20c d=40
+

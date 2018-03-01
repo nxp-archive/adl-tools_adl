@@ -1,0 +1,70 @@
+Disassembly of section .text:
+
+00000000 <main>:
+   0:	3c 60 00 00 	lis     r3,0
+			2: R_PPC_ADDR16_HA	results
+   4:	3c 80 00 00 	lis     r4,0
+			6: R_PPC_ADDR16_HA	sieve
+   8:	39 63 00 00 	addi    r11,r3,0
+			a: R_PPC_ADDR16_LO	results
+   c:	39 24 00 00 	addi    r9,r4,0
+			e: R_PPC_ADDR16_LO	sieve
+  10:	38 60 00 64 	li      r3,100
+  14:	39 00 00 00 	li      r8,0
+  18:	7c 69 03 a6 	mtctr   r3
+  1c:	38 e0 00 01 	li      r7,1
+  20:	39 40 00 00 	li      r10,0
+  24:	55 05 10 3a 	rlwinm  r5,r8,2,0,29
+  28:	39 08 00 01 	addi    r8,r8,1
+  2c:	7d 45 59 2e 	stwx    r10,r5,r11
+  30:	7c e5 49 2e 	stwx    r7,r5,r9
+  34:	42 00 ff f0 	bdnz+   24 <main+0x24>
+  38:	3c c0 00 00 	lis     r6,0
+			3a: R_PPC_ADDR16_HA	sieve
+  3c:	39 00 00 02 	li      r8,2
+  40:	38 e6 00 00 	addi    r7,r6,0
+			42: R_PPC_ADDR16_LO	sieve
+  44:	3c c0 00 00 	lis     r6,0
+			46: R_PPC_ADDR16_HA	sieve
+  48:	55 09 10 3a 	rlwinm  r9,r8,2,0,29
+  4c:	7d 49 38 2e 	lwzx    r10,r9,r7
+  50:	2c 0a 00 00 	cmpwi   r10,0
+  54:	41 82 00 2c 	beq-    80 <main+0x80>
+  58:	55 0a 08 3c 	rlwinm  r10,r8,1,0,30
+  5c:	2c 0a 00 63 	cmpwi   r10,99
+  60:	41 81 00 20 	bgt-    80 <main+0x80>
+  64:	39 66 00 00 	addi    r11,r6,0
+			66: R_PPC_ADDR16_LO	sieve
+  68:	39 20 00 00 	li      r9,0
+  6c:	55 4c 10 3a 	rlwinm  r12,r10,2,0,29
+  70:	7d 4a 42 14 	add     r10,r10,r8
+  74:	2c 0a 00 63 	cmpwi   r10,99
+  78:	7d 2c 59 2e 	stwx    r9,r12,r11
+  7c:	40 81 ff f0 	ble+    6c <main+0x6c>
+  80:	39 08 00 01 	addi    r8,r8,1
+  84:	7d 68 41 d6 	mullw   r11,r8,r8
+  88:	2c 0b 00 63 	cmpwi   r11,99
+  8c:	40 81 ff bc 	ble+    48 <main+0x48>
+  90:	38 e0 00 62 	li      r7,98
+  94:	3d 00 00 00 	lis     r8,0
+			96: R_PPC_ADDR16_HA	results
+  98:	7c e9 03 a6 	mtctr   r7
+  9c:	3c 60 00 00 	lis     r3,0
+			9e: R_PPC_ADDR16_HA	sieve
+  a0:	39 68 00 00 	addi    r11,r8,0
+			a2: R_PPC_ADDR16_LO	results
+  a4:	38 c3 00 00 	addi    r6,r3,0
+			a6: R_PPC_ADDR16_LO	sieve
+  a8:	39 40 00 02 	li      r10,2
+  ac:	39 00 00 00 	li      r8,0
+  b0:	55 45 10 3a 	rlwinm  r5,r10,2,0,29
+  b4:	55 07 10 3a 	rlwinm  r7,r8,2,0,29
+  b8:	7c 85 30 2e 	lwzx    r4,r5,r6
+  bc:	2c 04 00 00 	cmpwi   r4,0
+  c0:	41 82 00 0c 	beq-    cc <main+0xcc>
+  c4:	39 08 00 01 	addi    r8,r8,1
+  c8:	7d 47 59 2e 	stwx    r10,r7,r11
+  cc:	39 4a 00 01 	addi    r10,r10,1
+  d0:	42 00 ff e0 	bdnz+   b0 <main+0xb0>
+  d4:	38 60 00 00 	li      r3,0
+  d8:	4e 80 00 20 	blr

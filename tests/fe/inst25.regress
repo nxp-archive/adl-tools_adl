@@ -1,0 +1,140 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+Current instruction address.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  AA: [30,30] [not used] 
+    Absolute address bit.
+    
+  BC: [21,25] 
+  BD: [16,29] [not used] 
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    
+  BF: [6,8] [not used] 
+    Field used to specify one of the Condition Register fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    
+  BI: [11,15] [not used] 
+    Field used to specify a bit in the Condition Register to be used
+as the condition of a Branch Conditional instruction.
+    
+  BO: [6,10] [not used] 
+    Field used to specify options for the Branch Conditional instructions.
+    
+  D: [16,31] [not used] 
+    Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+  LK: [31,31] [not used] 
+    LINK bit.
+    
+  MB: [21,25] [not used] 
+  ME: [26,30] [not used] 
+  OPCD: [0,5] 
+    Primary opcode.
+    
+  RA: [11,15] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] 
+    Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  SH: [16,20] [not used] 
+  SI: [16,31] [not used] 
+    Signed immediate field for arithmetic operations.
+    
+  SPRN: [16,20] [11,15] [not used] 
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  UI: [16,31] [not used] 
+    Unsigned immediate field for arithmetic operations.
+    
+  XO: [21,30] 
+    Extended opcode.
+    
+  XO_A: [26,30] 
+  XO_XS: [21,29] 
+Instructions:
+  Name:  isel (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB BC XO_A(15)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  srad (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO(794)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  sradi (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO_XS(413)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  srw (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO(536)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  subfc (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(8)
+  Action:  {
+     ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc00003c
+    520093700(7c000010):      Mask:  0x7c2
+      0(0):  subfc
+    520093703(7c00001c):      Mask:  0x2
+      1(2):  isel
+    520093708(7c000030):      Mask:  0x7c2
+      512(400):  srw
+    520093709(7c000034):      Mask:  0x7c0
+      24(600):        Mask:  0x2
+        0(0):  srad
+      25(640):  sradi
+-------------------------------
+

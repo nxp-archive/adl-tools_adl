@@ -1,0 +1,36 @@
+// Assembler pre_asm/post_asm/post_packet_asm - failures
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  
+  parallel_execution = 3;
+
+  pre_asm = { 
+    SG = 1;
+    if (instrHasAttr(undefined)) {
+    }
+  };	
+
+  post_asm = func(unsigned i) {
+    SG = 1;
+  };
+  post_packet_asm = func(ValueBundle b) {
+  };
+
+  void foo() {
+    // Not an assembler helper function, so RT is an escape.
+    if (RT) {
+      int i = 10;
+    }
+  }
+
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

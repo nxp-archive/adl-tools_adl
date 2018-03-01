@@ -1,0 +1,5 @@
+asm17.s: Assembler messages:
+asm17.s:2: Error: unsupported relocation against dd
+Warning: asm17.s:2: undefined symbol: dd
+ Input: stwu dd,-16(1) 
+

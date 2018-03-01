@@ -1,0 +1,22 @@
+//
+// Tests to make sure we'll catch overlapping bit sequences in
+// an instruction field.
+//
+define (arch=minippc) {
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,16));
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

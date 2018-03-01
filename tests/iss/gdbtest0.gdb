@@ -1,0 +1,10 @@
+Hc-1
+qC
+qOffsets
+?
+Hg0
+p40
+g
+m0,4
+mfffffffc,4
+@

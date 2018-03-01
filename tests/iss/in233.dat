@@ -1,0 +1,93 @@
+#
+# Tests the use of immediate write-hooks.
+#
+
+= asm
+
+	addi r1,r1,10
+	addi r1,r1,20
+	cadd 0,5
+	eadd 0,6
+	cadd 1,5
+	eadd 1,6
+	cadd 1,0
+	eadd 0,10
+	
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	
+MD n=Mem ra=0x00000004 d=0x38210014
+MD n=Mem ra=0x00000008 d=0xC0050000
+MD n=Mem ra=0x0000000c d=0xD8060000
+MD n=Mem ra=0x00000010 d=0xC0250000
+MD n=Mem ra=0x00000014 d=0xD8260000
+MD n=Mem ra=0x00000018 d=0xC0200000
+MD n=Mem ra=0x0000001c d=0xD80A0000
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA    d=0x0
+
+RD n=SCR d=0x80000000
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210014
+INSTR op=0x38210014					asm="addi r1,r1,20"
+R n=GPR i=1 d=0x0000000a
+R n=GPR i=1 d=0x00000014
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0xc0050000
+INSTR op=0xc0050000					asm="cadd 0x00,0x05"
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xd8060000
+INSTR op=0xd8060000					asm="eadd 0x00,0x06"
+R n=CReg d=0x00000005
+R n=CReg d=0x50000005
+R n=EReg d=0x00000000
+R n=EReg d=0x00000006
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0xc0250000
+INSTR op=0xc0250000					asm="cadd 0x01,0x05"
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0xd8260000
+INSTR op=0xd8260000					asm="eadd 0x01,0x06"
+R n=CReg d=0x50000005
+R n=CReg d=0x55000005
+R n=EReg d=0x80000006
+R n=EReg d=0x8000000c
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0xc0200000
+INSTR op=0xc0200000					asm="cadd 0x01,0x00"
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0xd80a0000
+INSTR op=0xd80a0000					asm="eadd 0x00,0x0a"
+R n=CReg d=0x55000000
+R n=CReg d=0x50000000
+R n=EReg d=0x8000000c
+R n=EReg d=0x80000016
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+
+
+RESULTS
+
+RD n=CReg d=0x50000000
+RD n=EReg d=0x80000016

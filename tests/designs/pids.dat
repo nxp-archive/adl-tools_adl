@@ -1,0 +1,60 @@
+
+CORE n=:procs:powerpc0
+
+RD n=PIR     d=0
+RD n=GPR i=1 d=0xffffff80
+
+CORE n=:procs:powerpc1
+
+RD n=PIR     d=1
+RD n=GPR i=1 d=0xffffdf80
+
+CORE n=:procs:powerpc2
+
+RD n=PIR     d=2
+RD n=GPR i=1 d=0xffffbf80
+
+CORE n=:procs:powerpc3
+
+RD n=PIR     d=3
+RD n=GPR i=1 d=0xffff9f80
+
+CORE n=:procs:powerpc4
+
+RD n=PIR     d=4
+RD n=GPR i=1 d=0xffff7f80
+
+CORE n=:procs:powerpc5
+
+RD n=PIR     d=5
+RD n=GPR i=1 d=0xffff5f80
+
+CORE n=:procs:powerpc6
+
+RD n=PIR     d=6
+RD n=GPR i=1 d=0xffff3f80
+
+CORE n=:procs:powerpc7
+
+RD n=PIR     d=7
+RD n=GPR i=1 d=0xffff1f80
+
+CORE n=:procs:powerpc8
+
+RD n=PIR     d=8
+RD n=GPR i=1 d=0xfffeff80
+
+CORE n=:procs:powerpc9
+
+RD n=PIR     d=9
+RD n=GPR i=1 d=0xfffedf80
+
+CORE n=:procs:powerpc10
+
+RD n=PIR     d=10
+RD n=GPR i=1 d=0xfffebf80
+
+CORE n=:procs:powerpc11
+
+RD n=PIR     d=11
+RD n=GPR i=1 d=0xfffe9f80

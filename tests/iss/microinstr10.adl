@@ -1,0 +1,310 @@
+// Test that the fix-ups are correctly processed in macro instructions
+// Both PC-relative and absolute jumps are used
+
+define (core = rubber) {
+  archs = rubber; 
+  instrtables = (other, instr_opA, instr_opB, instr_opV, instr_opZ, instr_opCTRL);
+}
+
+define (arch = rubber) {
+
+
+
+
+//##############################################################################
+// Parameters
+//##############################################################################
+
+  bit_endianness = little;
+  instr_endianness = little;
+
+//==============================================================================
+
+//##############################################################################
+// Attributes
+//##############################################################################
+   
+    attrs = (log_as_reg, 
+             instr_format, 
+             instr_opA, instr_opB, instr_opV, instr_opZ,
+             instr_opCTRL);
+
+//============================================================================== 
+
+
+//##############################################################################
+// Registers
+//##############################################################################
+
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+  }
+
+//============================================================================== 
+
+
+//##############################################################################
+// Instruction Fields
+//##############################################################################
+
+
+  define (instrfield=LI17p) {
+    """
+    Immediate address field for branch instructions.
+    """;
+    display = hex;
+    bits = (16, 0);
+    addr = pc;
+  }
+
+  define (instrfield=LI16a) {
+    """
+    Immediate address field for branch instructions.
+    """;
+    display = hex;
+    bits = (15, 0);
+    addr = abs;
+  }  
+  
+  
+  define(instrfield=opA) {
+    display = hex;
+	pseudo = true;
+	width = 15;
+	type = instr;
+	ref = instr_opA;
+  }
+  
+  define(instrfield=opB) {
+    display = hex;
+	pseudo = true;
+	width = 15;
+	type = instr;
+	ref = instr_opB;
+  }  
+
+  define(instrfield=opV) {
+    display = hex;
+	pseudo = true;
+	width = 18;
+	type = instr;
+	ref = instr_opV;
+  }
+
+  define(instrfield=opZ) {
+    display = hex;
+	pseudo = true;
+	width = 2;
+	type = instr;
+	ref = instr_opZ;
+  }
+  
+  
+  define(instrfield=opCTRL) {
+    display = hex;
+	pseudo = true;
+	width = 29;
+	type = instr;
+	ref = instr_opCTRL;
+  }  
+  
+//============================================================================== 
+
+//##############################################################################
+// Instructions
+//##############################################################################
+
+  define (instr = format1){ 
+    width = 64;
+    fields = ((bits(53,50),b0001),
+             (bits(48,34),opA), (bits(49),opB(14)), (bits(33,20),opB(13,0)),
+             (bits(19,2),opV), (bits(1,0),opZ)
+             );
+    syntax = ("format1 %f, %f, %f, %f", opA, opB, opV, opZ);
+    attrs = (instr_format);
+	action={ 
+            run(opA, opB, opV, opZ); 
+           };    
+  }
+
+  define (instr = format2){ 
+    width = 64;
+    fields = ((bits(53,49),00010), 
+             (bits(48,20),opCTRL),
+             (bits(19,2),opV), (bits(1,0),opZ)
+             );
+    syntax = ("format2 %f, %f, %f", opCTRL, opV, opZ);
+    attrs = (instr_format);
+	action={ 
+            run(opCTRL); 
+            run(opV); 
+            run(opZ); 
+           };    
+  }  
+  
+   define (instr = A0){  
+    width = 15;
+    fields = (
+             (bits(14,8),b1111111),(bits(7),b0),(bits(6,0),b1111111)
+             );
+    syntax = ("a0");
+    attrs = (instr_opA);    
+    action={};
+  }
+  
+  define (instr = A1){  
+    width = 15;
+    fields = (
+             (bits(14,8),b0000000),(bits(7),b1),(bits(6,0),b0000000)
+             );
+    syntax = ("a1");
+    attrs = (instr_opA);    
+    action={};
+  }  
+
+  define (instr = B0){  
+    width = 15;
+    fields = (
+             (bits(14,8),b0000000),(bits(7),b0),(bits(6,0),b1111111)
+             );
+    syntax = ("b0");
+    attrs = (instr_opB);    
+    action={};
+  }
+  
+  define (instr = B1){  
+    width = 15;
+    fields = (
+             (bits(14,8),b1111111),(bits(7),b1),(bits(6,0),b0000000)
+             );
+    syntax = ("b1");
+    attrs = (instr_opB);    
+    action={};
+  }  
+  
+  define (instr = V1){  
+    width = 18;
+    fields = (
+             (bits(17,9),b111111111), (bits(8,0),b000000000)
+             );
+    syntax = ("v1");
+    attrs = (instr_opV);    
+    action={};
+  }
+  
+  define (instr = V0){  
+    width = 18;
+    fields = (
+             (bits(17,9),b000000000), (bits(8,0),b111111111)
+             );
+    syntax = ("v0");
+    attrs = (instr_opV);    
+    action={};
+  }   
+
+    define (instr = Z1){  
+    width = 2;
+    fields = (
+             (bits(1,0),b10)
+             );
+    syntax = ("z1");
+    attrs = (instr_opZ);    
+    action={};
+  }  
+  
+  define (instr = Z0){  
+    width = 2;
+    fields = (
+             (bits(1,0),b01)
+             );
+    syntax = ("z0");
+    attrs = (instr_opZ);    
+    action={};
+  }
+  
+
+  define (instr=jmp_p) {
+    width = 29;
+    fields=((bits(28,26),b111), (bits(25,19),0), 
+            (bits(18,17),reserved), LI17p);
+    syntax = ("jmpp %f", LI17p);
+    attrs = (instr_opCTRL);              
+    action =  {
+                NIA = CIA + LI17p;
+              };
+  }   
+
+  define (instr=jmp_a) {
+    width = 29;
+    fields=((bits(28,26),b011), (bits(25,19),0), 
+            (bits(18,16),reserved), LI16a);
+    syntax = ("jmpa %f", LI16a);
+    attrs = (instr_opCTRL);              
+    action =  {
+                NIA = LI16a;
+              };
+  } 
+  
+  define (instr = done){ 
+    width = 64;
+    fields = ((bits(55,46),0), (bits(45,0),0));  
+    syntax = ("done");
+    action={ 
+            halt(); 
+           };
+  }  
+
+//============================================================================== 
+
+//##############################################################################
+// Assembler
+//##############################################################################
+  
+  parallel_execution = 1;
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = ("//", "#");
+    packet_grouping = ("\n");
+    line_separators = ("\n"); // In additional to new-line separator, default is ";"
+    asm_instrtables = (other, instr_opA, instr_opB, instr_opV, instr_opZ, instr_opCTRL);
+    disasm_instrtables = (other, instr_opA, instr_opB, instr_opV, instr_opZ, instr_opCTRL);
+  }
+  
+//============================================================================== 
+
+//##############################################################################
+// Hooks
+//##############################################################################
+
+  post_packet_asm = func(InstrBundle b) {
+    InstrBundle newb;
+    
+    if (b.size() == 1) {
+        newb.push_back(b[0]);
+    } 
+     
+    if (b.size() == 3) { 
+        newb.push_back(combineInstr("format2", 0, 1, 2));
+    }
+
+    if (b.size() == 4) { 
+        newb.push_back(combineInstr("format1", 0, 1, 2, 3));
+    }    
+    
+    b = newb;
+  };
+
+}
+
+
+

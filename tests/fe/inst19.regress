@@ -1,0 +1,117 @@
+======
+Cores:
+======
+Name:  "z0"
+Registers:
+  Name:  "HID0"
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+Instructions:
+  Name:  add (rank: 100)
+  Width:  24
+  Attributes:  mixed
+  Fields:  OPCD(11) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  addi (rank: 100)
+  Width:  24
+  Attributes:  other mixed
+  Fields:  OPCD(10) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo (rank: 100)
+  Width:  24
+  Attributes:  mixed
+  Fields:  OPCD(12) RA RB
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+mixed:
+    Mask:  0xfc000000
+    10(28000000):  addi
+    11(2c000000):  add
+    12(30000000):  foo
+-------------------------------
+Name:  "z6"
+Registers:
+  Name:  "HID0"
+  Usage:  slice-read
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+Instructions:
+  Name:  add (rank: 100)
+  Width:  24
+  Attributes:  mixed
+  Fields:  OPCD(11) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  addi (rank: 100)
+  Width:  24
+  Attributes:  other mixed
+  Fields:  OPCD(10) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo (rank: 100)
+  Width:  24
+  Attributes:  mixed
+  Fields:  OPCD(12) RA RB
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+mixed:
+    Mask:  0xfc000000
+    10(28000000):  addi
+    11(2c000000):  add
+    12(30000000):  foo
+other:
+    Mask:  0xfc000000
+    10(28000000):  addi
+
+Core Instruction-table Watch Function:
+{
+    if ( HID0 ( 0 ) == 0 ) {
+        return other ;
+    } else {
+        return mixed ;
+    }
+}
+-------------------------------
+

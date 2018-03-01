@@ -1,0 +1,75 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A simple test of MT.  Whether a thread is active or not is
+// dependent upon an enable bit in the HID0 register.
+//
+
+#import "mod1.adl"
+#import "stat.adl"
+
+define (arch=mt) {
+
+  define (reg=NIA0) { }
+  define (reg=NIA1) { }
+
+  defmod (reg=HID0) {
+    define (field=EN0) {
+      bits = 0;
+    }
+    define (field=EN1) {
+      bits = 1;
+    }
+
+    reset = 0xC0000000;
+
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=30) { reg = NIA0; }
+    define (entry=31) { reg = NIA1; }
+    define (entry=50) { reg = HID0; }
+  }
+
+  pre_fetch = { register_fetch(); };
+
+  post_exec = { register_commit(); };
+
+}
+
+define (core = P) {
+  remove = 1;
+}
+
+define (sys=PMT) {
+  type="PowerPC";
+  define (core = Thread0) {
+    type="Thread";
+    archs = (MiniPPC,mt,stat);
+    define (reg=NIA) {
+      attrs = nia;
+      alias = NIA0;
+    }
+    active = { return (HID0.EN0 == 1); };
+  }
+  define (core = Thread1) {
+    type="Thread";
+    archs = (MiniPPC,mt,stat);
+    define (reg=NIA) {
+      attrs = nia;
+      alias = NIA1;
+    }
+    active = { return (HID0.EN1 == 1); };
+  }
+  define (shared) {
+    regs = (NIA0,NIA1,HID0);
+  }
+  Thread0 t0;
+  Thread1 t1;
+}
+

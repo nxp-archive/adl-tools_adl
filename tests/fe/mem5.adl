@@ -1,0 +1,66 @@
+//
+// Simple test of an MP/MT system with shared memories.
+//
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=HID1) {
+  }
+
+  define (regfile=PMR) {
+    size = 32;
+  }
+
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+    value = Mode32;
+  }
+
+  define (mem=data) {
+    size=1024;
+    addr_unit = 4;	
+  }
+
+  define (mem=instr) {
+    size=1024;
+    addr_unit = 4;	
+    instr_mem = true;	
+  }
+
+
+}
+
+
+
+define (sys=PSystem) {
+  PChip chip0;
+  PChip chip1;
+  define (shared) {
+    mems = data;
+  }
+  define (sys=PChip) {
+    define (core = P) {
+      archs = minippc;
+    }
+    define (shared) {
+      mems = data;
+    }
+    P context0;
+    P context1;
+    P context2;
+  }
+}
+
+

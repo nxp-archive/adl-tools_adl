@@ -1,0 +1,15 @@
+ADL-library version: 1.2.3
+
+ Encoding Succeeded 
+   ADL_code[0] = 0xCC02
+   ADL_code[1] = 0x100C
+
+ ADL_num_of_bits = 32
+
+ ADL_code->size() = 2
+
+ ADL_relocation_info->size() = 0
+
+ ADL_messages->size() = 0
+
+DONE

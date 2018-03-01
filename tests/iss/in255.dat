@@ -1,0 +1,79 @@
+#
+# Testing the use of translation-time conditionals.  In this case, the parm Mode
+# selects between 32-bit and 64-bit.  The JIT can consider that to be a constant
+# when compiling basic blocks.
+#
+= asm
+
+	add r3,r1,r2
+	add r5,r3,r4
+	mtmsr r31
+	b L1
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+L1:
+	add r10,r1,r2
+	add r11,r10,r4
+	mtmsr r30
+	b L2
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+L2:
+	add r20,r1,r2
+	add r21,r3,r4
+		
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C611214	#	add r3,r1,r2
+MD n=Mem ra=0x00000004 d=0x7CA32214	#	add r5,r3,r4
+MD n=Mem ra=0x00000008 d=0x7FE00124	#	mtmsr r31
+MD n=Mem ra=0x0000000c d=0x48000018	#	b L1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x7D411214	#	add r10,r1,r2
+MD n=Mem ra=0x00000028 d=0x7D6A2214	#	add r11,r10,r4
+MD n=Mem ra=0x0000002c d=0x7FC00124	#	mtmsr r30
+MD n=Mem ra=0x00000030 d=0x48000018	#	b L2
+MD n=Mem ra=0x00000034 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000038 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000003c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000040 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000044 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000048 d=0x7E811214	#	add r20,r1,r2
+MD n=Mem ra=0x0000004c d=0x7EA32214	#	add r21,r3,r4
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA     d=0x0
+RD n=MSR     d=0x00000000
+
+RD n=GPR i=1 d=0xdeadbeefdeadbeef
+RD n=GPR i=2 d=0x1234567812345678
+RD n=GPR i=4 d=0x2532459872374324
+
+RD n=GPR i=31 d=0x80000000
+
+RESULTS
+
+RD n=GPR i=1  d=0xdeadbeefdeadbeef
+RD n=GPR i=2  d=0x1234567812345678
+RD n=GPR i=3  d=0x00000000f0e21567
+RD n=GPR i=4  d=0x2532459872374324
+RD n=GPR i=5  d=0x000000006319588b
+RD n=GPR i=10 d=0xf0e21567f0e21567
+RD n=GPR i=11 d=0x16145b006319588b
+RD n=GPR i=20 d=0x00000000f0e21567
+RD n=GPR i=21 d=0x000000006319588b

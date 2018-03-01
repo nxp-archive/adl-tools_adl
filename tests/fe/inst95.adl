@@ -1,0 +1,62 @@
+//
+// Mask tracking should work with little-endian designs.
+//
+
+define (arch=minippc) {
+  
+  bit_endianness = little;
+
+  define (instrfield=OPCD) {
+    bits = (5,0);
+  }
+
+  define (instrfield=XO_X) {
+    bits = (30,21);
+  }   
+
+  define (instrfield=RA) {
+    bits = (15,11);
+  }
+  
+  define (instrfield=RB) {
+    bits = (20,16);
+  }
+
+  define (instrfield=RT) {
+    bits = (10,6);
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    
+    action= {
+      if (SR.SCM) {
+        GPR(RT) = 1;
+      } else {
+        GPR(RT) = GPR(RA);
+      }
+    };
+  }
+  
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg=SR) {
+	
+    define (field = SCM)
+      {
+        bits=(5,4);
+      }
+
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

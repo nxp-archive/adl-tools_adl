@@ -1,0 +1,79 @@
+//
+// Test parsing of a complex alias.
+//
+
+define (arch = MiniPPC) {
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = (nia);
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+  
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield = SI32) {
+    pseudo = true;
+    width = 32;
+  }
+
+  // Example helper used by alias action code.
+  void create_constant_loader(InstrBundle &b,unsigned r,uint64_t c)
+  {
+    unsigned upper = ( c >> 16 ) + ( (c & 0x8000) ? 1 : 0);
+    b.push_back(createInstr("addis",r,0,upper));
+    b.push_back(createInstr("addi",r,r, (c & 0xffff) ));
+  }
+  
+  // An example of a complex alias.  In this case, we'll eliminate the addi if
+  // the constant will fit within the upper bits (just the addis).
+  define (instr = li_c_big) {
+    fields = (RT,SI32);
+    syntax = ("lic %f,%f",RT,SI32);
+    alias_action = func(const InstrArgs &args) {
+      unsigned r = args[0];
+      uint64_t c = args[1];
+      InstrBundle b;
+      if ( (c & 0xffff) == 0) {
+        // Only an upper constant.
+        b.push_back(createInstr("addis",r,0,(c >> 16)));
+      } else if ( (c & 0xffff) == c) {
+        // Only a lower constant.
+        b.push_back(createInstr("ori",r,0,c));
+      } else {
+        // Need an instruction pair.
+        create_constant_loader(b,r,c);
+      }
+      return b;
+    };
+  }
+  
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

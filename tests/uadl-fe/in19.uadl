@@ -1,0 +1,127 @@
+//
+// Test parsing of memory port expressions.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = Mem.I;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {};
+
+    define (memory Mem) {
+      data_width = 32;
+      max_requests = 3;                 
+      
+      define (port I){
+        type = instr;
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+      }
+      define (port D){
+        type = data;
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+        read_latency = 2;
+        write_latency = 2;
+      }
+    }
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_MM, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class foo1) {
+    instructions = ( add );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (can_read_ops() && Trg.can_write() && mEX.has_space()) {
+        read_ops();
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.D.can_request_read()) {
+        exec();
+        Mem.D.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.D.can_read()) { 
+        exec_and_read(Mem.D);
+        change_state(S_WB);
+      }
+		S_WB: { 
+      write_ops();
+			change_state(S_INIT); 
+		}
+    };
+  }
+
+  define (instr_class foo2) {
+    instructions = ( add );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (can_read_ops() && Trg.can_write() && mEX.has_space()) {
+        read_ops();
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.Foo.can_request_read()) {
+        exec();
+        Mem.D.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.D.can_read()) { 
+        exec_and_read(Mem.Foo);  // Error.
+        change_state(S_WB);
+      }
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+  }
+
+}

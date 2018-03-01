@@ -1,0 +1,59 @@
+=======
+Systems:
+=======
+System:  A
+  Locally-defined Cores:
+    Name:  "T0"
+    Registers:
+      Name:  "A"
+      Width:  32
+      -------------------------------
+      Name:  "C"
+      Width:  32
+      -------------------------------
+      Name:  "D"
+      Width:  32
+      -------------------------------
+      Name:  "PC"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  PC
+    Next-instruction-address register:  PC
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    -------------------------------
+    Name:  "T1"
+    Registers:
+      Name:  "A"
+      Width:  32
+      -------------------------------
+      Name:  "B"
+      Width:  32
+      -------------------------------
+      Name:  "C"
+      Width:  32
+      -------------------------------
+      Name:  "D"
+      Width:  32
+      -------------------------------
+      Name:  "PC"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  PC
+    Next-instruction-address register:  PC
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    -------------------------------
+  Constituent Items:
+    t0:  T0
+    t1:  T1
+-------------------------------
+

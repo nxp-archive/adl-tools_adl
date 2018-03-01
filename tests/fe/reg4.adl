@@ -1,0 +1,29 @@
+//
+// If a regfile references a register, its name
+// must be valid.
+//
+
+define (arch=Base) {
+
+
+  attrs = (foo,stuff);
+
+  define (reg = a) {
+    width = 32;
+  }
+
+}
+
+define (arch = minippc) {
+
+  define (regfile=sprs) {
+    size = 1024;
+    define (entry=20) { reg = c; };
+  }
+
+}
+
+define (core = P) {
+  archs = (Base,minippc);
+}
+

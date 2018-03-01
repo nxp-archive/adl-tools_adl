@@ -1,0 +1,37 @@
+
+asm76.o:     file format elf32-powerpc
+asm76.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         0000002c  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000060  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000060  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000024 l       .text	00000000 L2
+
+
+
+Disassembly of section .text:
+
+00000000 <L2-0x24>:
+   0:	80 20 00 24 	lwz    r1,36(r0)
+			2: RELOC_LO16	.text+0x24
+   4:	3c 41 00 00 	addis  r2,r1,0
+			6: RELOC_HI16	.text+0x24
+   8:	38 41 00 24 	addi   r2,r1,36
+			a: RELOC_LO16	.text+0x24
+	...
+
+00000024 <L2>:
+  24:	00 00 00 28 	.long 0x28
+  28:	00 00 00 00 

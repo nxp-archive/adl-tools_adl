@@ -1,0 +1,31 @@
+#
+# This file will execute correctly w/a non-pipelined transactional ISS
+# but not with a pipelined model because of the operand depenencies
+# (assuming that the pipeline has no hazard detection).
+#
+
+= asm
+  addi r1,r1,0x1000
+  lwz  r2,0x10(r1)
+  addi r2,r2,0x2000
+  
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38211000	#	addi r1,r1,0x1000
+MD n=Mem ra=0x00000004 d=0x80410010	#	lwz  r2,0x10(r1)
+MD n=Mem ra=0x00000008 d=0x38422000	#	addi r2,r2,0x2000
+# </GEN>
+
+MD n=Mem ra=0x1010 d=0xdead0000
+
+CORE n=:P
+
+TRACE
+
+RESULT
+
+# Will be 0 becaus the calculated address will not have been committed by the
+# time that the load executes.
+RD n=GPR i=2 d=0x2000
+

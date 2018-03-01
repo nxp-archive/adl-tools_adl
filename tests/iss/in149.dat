@@ -1,0 +1,58 @@
+#
+# This makes sure that multiple exceptions, in different
+# basic blocks, can be handled.
+#
+= asm
+
+  addi r1,r1,1
+  mtspr 20,r1   # will cause an exception.
+  addi r1,r1,1
+  bc 0x14,0,L1
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+L1:
+  mtspr 20,r1   # will cause an exception.
+  addi r1,r1,1
+  addi r1,r1,1
+  .long 0x0
+  mfspr r30,SRR0
+  addi r30,r30,4
+  addi r31,r31,1
+  mtspr SRR0,r30
+  rfi  
+
+= /asm
+
+
+CORE n=:P
+
+RD n=IVOR6 d=0x34
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x7C3403A6	#	mtspr 20,r1   # will cause an exception.
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x42800018	#	bc 0x14,0,L1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x7C3403A6	#	mtspr 20,r1   # will cause an exception.
+MD n=Mem ra=0x00000028 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000002c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000030 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000034 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x00000038 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x0000003c d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x00000040 d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x00000044 d=0x4C000064	#	rfi  
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=1  d=4
+RD n=GPR i=31 d=2

@@ -1,0 +1,101 @@
+//
+// This checks to make sure that, given an expression which looks to the parser
+// like a declaration, that we treat the rhs before the lhs so that source/target
+// tracking is correct.
+//
+
+#ifndef regSize
+#define regSize 32
+#endif
+
+ bits<regSize> MASK(const bits<regSize>& x,const bits<regSize>& y) {
+   bits<regSize> m;
+   return m.mask(x%regSize,y%regSize);
+ }
+
+
+define (arch=minippc) {
+
+  define (mem=MemA) {
+    size = 2048;
+    addr_unit = 1;
+  }
+
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=Rc) {
+    bits = (31,31);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+    ref = GPR;
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+    ref = GPR;
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    syntax= ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+    action = {
+      var m = 32;
+      var b = MB+32;
+      var e = ME+32;
+      var r = ROTL32(GPR(RS),SH);
+      var k = MASK(b,e);
+      // The parser thinggs this is a declaration, even though it's not.
+      // However, we want to make sure that GPR(RA) is also considered a source
+      // and not just a partial-write target.
+      GPR(RA)(m,regSize-1) = (r & k) | (GPR(RA) & ~k);
+    };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  bits<32> ROTL32(const bits<32> &x,unsigned sh)
+  {
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,51 @@
+#
+# A simple test to make sure that, if an exception is squashed by an
+# instruction, it doesn't leave the MMU cache in an invalid stete.
+#
+
+= asm
+
+  lwz    r1,0x1000(r0)  # This should work.
+  dcbtep 0,r0,r10       # This should cause an exception.
+  lwz    r3,0x1004(r0)  # This should use the correct translation.
+
+= /asm
+
+= aopts
+  -mregnames -me500mc
+= /aopts
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz    r1,0x1000(r0)  # This should work.
+MD n=Mem ra=0x00000004 d=0x7C00527E	#	dcbtep 0,r0,r10       # This should cause an exception.
+MD n=Mem ra=0x00000008 d=0x80601004	#	lwz    r3,0x1004(r0)  # This should use the correct translation.
+# </GEN>
+CORE n=:P
+
+RD n=NIA d=0x00000000
+
+RD n=GPR i=10 d=0x1000
+
+RD n=ELPC d=0x0000000a
+
+RD n=IVOR7 d=0x10
+
+MD n=Mem ra=0x01000 d=0xdeadbeef
+MD n=Mem ra=0x01004 d=0x12345678
+MD n=Mem ra=0xa1004 d=0xa5a5a5a5
+
+# ea=0x0000 ra=0x0000
+TD n=TlbCam set=0 way=0 V=1 TID=0x0 SIZE=1 TS=0 RPN=0x0 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x0
+
+# ea=0x1000 ra=0x1000
+TD n=TlbCam set=0 way=1 V=1 TID=0x0 SIZE=1 TS=0 RPN=0x4 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0x4
+
+# ea=0x1000 ra=0xa1000
+TD n=TlbCam set=0 way=2 V=1 TID=0xa SIZE=1 TS=0 RPN=0x284 WIMG=0x1 SX=0 SR=0 SW=0 EPN=0x4
+
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=3 d=0x12345678

@@ -1,0 +1,44 @@
+#
+# Testing of basic block tracing.  We use tracing of basic-block-end to minimize
+# the total number of instructions we trace- we turn off instruction tracing
+# after a first instruction, then re-enable at the end of each basic block.
+#
+
+simload $env(srcdir)/bbtest.elf setpc
+
+set syms [dict create                    \
+					[symbol a1] a1                 \
+					[symbol a2] a2                 \
+					[symbol b1] b1                 \
+					[symbol b2] b2                 \
+					[symbol c1] c1                 \
+					[symbol c2] c2                 \
+					[symbol main] main             \
+					[symbol "exit"] "exit"         \
+				 ]
+
+proc bbstart {ea opc name} {
+		upvar syms lsyms
+		set addr [format "0x%x" $ea]
+		if { [dict exist $lsyms $addr ] } {
+				set f [dict get $lsyms $addr]
+				puts [format "Start of function $f at 0x%x" $ea ]
+				clrfilter instr instr_prefetch
+		}
+					
+}
+
+proc bbend {ea} {
+		upvar curfunc lcurfunc
+		setfilter instr instr_prefetch
+}
+
+clrfilter
+setfilter instr instr_prefetch basic_block_end
+
+setlogcmd instr bbstart
+setlogcmd basic_block_end bbend
+
+simmode $argv
+go
+quit

@@ -1,0 +1,40 @@
+#
+# Tests shared registers.
+#
+# Assembly:
+#
+#       mtspr 50,r1
+#       mtspr 51,r2
+
+CORE n=PSystem:chip0:core0
+
+MD n=Mem ra=0x00000100 d=0x7C320BA6	# mtspr 50,r1
+MD n=Mem ra=0x00000104 d=0x7C530BA6	# mtspr 51,r2
+MD n=Mem ra=0x00000108 d=0x00000000	# halt
+
+RD n=NIA d=0x100
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678
+
+CORE n=PSystem:chip1:core0
+
+MD n=Mem ra=0x00001000 d=0x7C530BA6	# mtspr 51,r2
+MD n=Mem ra=0x00001004 d=0x00000000	# halt
+
+RD n=NIA d=0x1000
+RD n=GPR i=2 d=0xb0f0babe
+
+RESULTS
+CORE n=:PSystem
+RD n=HID0 d=0xdeadbeef
+
+CORE n=PSystem:chip0
+
+RD n=HID1 d=0x12345678
+
+
+CORE n=PSystem:chip1
+
+RD n=HID1 d=0xb0f0babe
+
+

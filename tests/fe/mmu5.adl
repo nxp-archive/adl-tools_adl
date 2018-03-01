@@ -1,0 +1,196 @@
+//
+// Example MMU.  The intent is that this is what a Classic MMU
+// might look like.
+//
+define (arch=foo) {
+
+  define (reg=MSR) {
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 10;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  // Classic MMU
+  define(mmu) {
+
+    instr_enable = { return MSR.IR(); };
+    data_enable = { return MSR.DR(); };
+
+    define (lookup=BatBase) {
+      interface = true;
+      priority = 0;
+
+      define (wayfield=BEPI) {
+        bits = 15;
+      }
+      define (wayfield=BL) {
+        bits = 11;
+      }
+      define (wayfield=Vs) {
+        bits = 1;
+      }
+      define (wayfield=Vp) {
+        bits = 1;
+      }
+      define (wayfield=BRPN) {
+        bits = 15;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+      }
+      define (wayfield=PP) {
+        bits = 2;
+      }
+
+      define (array) {
+        entries = 8;
+      }
+      size = BL;
+      sizetype = LeftMask;
+      realpage = BRPN;
+      test = Check( (MSR.PR() == 0) ? Vs : Vp );
+      test = AddrComp(BEPI);
+      exec_perm = func(TransType t,addr_t,unsigned seq) { 
+        if (!(t.PP(1) == 1)) {
+          raiseException(ProtectionFault);
+        }
+      };
+      load_perm = func(TransType t,addr_t,unsigned seq)  {
+        if (!(t.PP(1) == 1)) {
+          raiseException(ProtectionFault);
+        }
+      };
+      store_perm = func(TransType t,addr_t,unsigned seq) {
+        if (!(t.PP == 2)) {
+          raiseException(ProtectionFault);
+        }
+      };
+    }
+
+    define (lookup=IBat) {
+      inherit = BatBase;
+      type = Instr;
+    }
+
+    define (lookup=DBat) {
+      inherit = BatBase;
+      type = Data;
+    }
+
+    define (lookup=Seg) {
+      type = Both;
+      priority = 1;
+
+      define (wayfield=T) {
+        bits = 1;
+      }
+      define (wayfield=Ks) {
+        bits = 1;
+      }
+      define (wayfield=Kp) {
+        bits = 1;
+      }
+      define (wayfield=N) {
+        bits = 1;
+      }
+      define (wayfield=VSID) {
+        bits = 24;
+      }
+    
+      define (array) {
+        entries = 16;
+        set_assoc = 1;
+      }
+      test = AddrIndex(0,3);
+    
+      define (lookup=PTE) {
+        priority = 0;
+
+        define (wayfield=V) {
+          bits = 1;
+        }
+        define (wayfield=VSID) {
+          bits = 24;
+        }
+        define (wayfield=H) {
+          bits = 1;
+        }
+        define (wayfield=API) {
+          bits = 16;
+        }
+        define (wayfield=RPN) {
+          bits = 20;
+        }
+        define (wayfield=R) {
+          bits = 1;
+        }
+        define (wayfield=C) {
+          bits = 1;
+        }
+        define (wayfield=WIMG) {
+          bits = 4;
+        }
+        define (wayfield=PP) {
+          bits = 2;
+        }
+      
+        define (array) {
+          entries = 128;
+          set_assoc = 2;
+        }
+        size = 4096;
+        test = Compare(VSID,Seg.VSID);
+        test = AddrComp(API);
+        realpage = RPN;
+        exec_perm = func(PTE_t p,Seg_t s,addr_t,unsigned seq) {
+          if (!(s.N == 1)) {
+            raiseException(ProtectionFault);
+          }
+        };
+        load_perm = func(PTE_t p,Seg_t s,addr_t,unsigned seq) {
+          if ((MSR.PR() ? s.KS : s.KP) == 1 && (p.PP == 0)) {
+            raiseException(ProtectionFault);
+          }
+        };
+        store_perm = func(PTE_t p,Seg_t s,addr_t,unsigned seq) {
+          if (((MSR.PR() ? s.KS : s.KP) == 1 && (p.PP == 1)) || (p.PP==11)) {
+            raiseException(ProtectionFault);
+          }
+        };
+      }
+    }
+  
+    instr_miss = func (addr_t,unsigned) {
+      raiseException(ITlbMiss);
+    };
+
+    data_miss = func (addr_t,unsigned) {
+      raiseException(DTlbMiss);
+    };
+
+  }
+
+}
+
+define (core=P) {
+  archs=foo;
+}

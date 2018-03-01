@@ -1,0 +1,70 @@
+#
+# Test to make sure that forwarding paths correctly handle aliased register
+# files.  The forwarding path should detect the fact that the adds and se_add
+# instructions are using the same registers.
+# 
+#
+CORE n=:P
+
+= asm
+
+	addi r25,r25,2
+	addi r26,r26,3
+	se_add r26,r25
+	add r2,r25,r26
+
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3B390002	#	addi r25,r25,2
+MD n=Mem ra=0x00000004 d=0x3B5A0003	#	addi r26,r26,3
+MD n=Mem ra=0x00000008 d=0x049A s=2	#	se_add r26,r25
+MD n=Mem ra=0x0000000a d=0x7C59D214	#	add r2,r25,r26
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3b390002
+INSTR op=0x3b390002                                     asm="addi r25,r25,2"
+ITIME t=2
+R n=GPR i=25 d=0x00000002
+CTIME t=6
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3b5a0003
+INSTR op=0x3b5a0003                                     asm="addi r26,r26,3"
+ITIME t=4
+R n=GPR i=26 d=0x00000003
+CTIME t=8
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x049a7c59
+INSTR op=0x049a                                 asm="se_add rr10,rr9"
+ITIME t=5
+R n=GPR i=26 d=0x00000005
+CTIME t=9
+
+I ea=0xa id=4
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x049a7c59
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xd2140000
+INSTR op=0x7c59d214                                     asm="add r2,r25,r26"
+ITIME t=7
+R n=GPR i=2 d=0x00000007
+CTIME t=11
+
+I ea=0xe id=5
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xd2140000
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=9
+CTIME t=13
+
+RESULTS
+
+RD n=GPR i=2 d=0x00000007
+RD n=GPR i=25 d=0x00000002
+RD n=GPR i=26 d=0x00000005

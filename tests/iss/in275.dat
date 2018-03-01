@@ -1,0 +1,42 @@
+#
+# Tests to make sure that we can set the program counter using --entry-point,
+# even with a DAT file.
+#
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	.long 0x0
+	addi r2,r2,2
+	addi r3,r3,3
+	addi r4,r4,4
+	addi r5,r5,5
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000018 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000001c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000020 d=0x38A50005	#	addi r5,r5,5
+# </GEN>
+
+CORE n=:P
+
+RESULTS
+
+# These results will only occur if the DAT is started with --entry-point=0x14
+RD n=GPR i=1 d=0
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=4
+RD n=GPR i=5 d=5
+

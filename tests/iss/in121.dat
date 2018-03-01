@@ -1,0 +1,37 @@
+
+= asm
+
+##      se_add  r2,r1
+	  se_slw  r2,r3
+      .long 0x0
+
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4232 s=2	#	se_slw  r2,r3
+MD n=Mem ra=0x00000002 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=161
+RD n=GPR i=3 d=8
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42320000
+INSTR op=0x4232                                 asm="se_slw 3,2"
+R n=GPR i=2 d=0x0000a100
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42320000
+INSTR op=0x00                                   asm="halt "
+
+RESULTS
+
+RD n=GPR i=2 d=0xa100

@@ -1,0 +1,5 @@
+cfg5.ttc:6: Group name 'ori' conflicts with an instruction in this core.
+
+cfg5.ttc:10: Group name 'load' conflicts with an instruction class in this core.
+
+Error:  Error parsing ISS configuration file.

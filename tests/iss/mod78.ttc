@@ -1,0 +1,12 @@
+//
+// Set up mod78 with Mode as a translation-time conditional, so that LLVM can
+// fold the constant out and eliminate any dead code that results.
+//
+define (core = P) {
+
+  define (config) {
+
+    trans_const_parms = Mode;
+  }
+
+}

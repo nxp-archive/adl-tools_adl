@@ -1,0 +1,1253 @@
+$data = {
+"cores" => {
+"P" => {
+"bit_endianness" => "little",
+"blocks" => [
+"dalu",
+"ipu",
+"lsu",
+],
+"parallel_execution" => 3,
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"LC" => {
+"width" => 32,
+"shared" => 0,
+},
+"PC" => {
+"width" => 32,
+"serial" => 1,
+"attributes" => {
+"cia" => "",
+"nia" => "",
+},
+"shared" => 0,
+},
+"SP" => {
+"doc" => <<DATA
+ Stack Pointer
+ 
+DATA
+,
+"width" => 32,
+"attributes" => {
+"doc_hidden" => "",
+},
+"shared" => 0,
+"read" => {
+<<DATA
+{
+    if ( SR . T1 == 0 ) {
+        return GPR ( 0 ) ;
+    } else if ( SR . T1 == 1 ) {
+        return GPR ( 1 ) ;
+    }
+}
+DATA
+,
+},
+"write" => {
+<<DATA
+{
+    if ( SR . T1 == 0 ) {
+        LC = x ;
+    } else if ( SR . T1 == 1 ) {
+        PC = x ;
+    }
+}
+DATA
+,
+},
+},
+"SR" => {
+"width" => 32,
+"fields" => {
+"T1" => {
+"doc" => <<DATA
+ SR.T1 field
+DATA
+,
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"T6" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+},
+"reserved_mask" => "0b11111111111111111111111111111100",
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"width" => 32,
+"size" => 32,
+"prefix" => "r",
+"shared" => 0,
+},
+},
+"instrfields" => {
+"CE" => {
+"pseudo" => 1,
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+},
+"CE1" => {
+"pseudo" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+},
+"CE_imp_bits__17_17_x_16_16_x_13_13_x_12_12_" => {
+"bits" => [
+[
+17,
+16,
+],
+[
+13,
+12,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000033000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+"implements" => "CE",
+},
+"CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_" => {
+"bits" => [
+[
+17,
+16,
+],
+[
+5,
+4,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000030030",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+"implements" => "CE",
+},
+"CondEx" => {
+"pseudo" => 1,
+"prefix" => 1,
+"width" => 6,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0000000000000000",
+"type" => "regfield",
+"value" => 0,
+},
+"CondExec" => {
+"pseudo" => 1,
+"prefix" => 1,
+"width" => 6,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"value" => 0,
+},
+"CondExec_imp_bits__17_16_" => {
+"bits" => [
+[
+17,
+16,
+],
+],
+"prefix" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0000000000030000",
+"type" => "imm",
+"value" => 0,
+"implements" => "CondExec",
+},
+"CondExec_imp_bits__33_32_" => {
+"bits" => [
+[
+33,
+32,
+],
+],
+"prefix" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0000000300000000",
+"type" => "imm",
+"value" => 0,
+"implements" => "CondExec",
+},
+"Enc1" => {
+"pseudo" => 1,
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"Enc1_imp_bits__15_0_" => {
+"bits" => [
+[
+15,
+0,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000000000ffff",
+"type" => "imm",
+"implements" => "Enc1",
+},
+"Enc2" => {
+"pseudo" => 1,
+"width" => 32,
+"size" => 32,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"Enc2_imp_bits__31_0_" => {
+"bits" => [
+[
+31,
+0,
+],
+],
+"width" => 32,
+"size" => 32,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000ffffffff",
+"type" => "imm",
+"implements" => "Enc2",
+},
+"FIDD11" => {
+"pseudo" => 1,
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 11,
+},
+"FIDD11_imp_bits__3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+3,
+0,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000000000000f",
+"type" => "imm",
+"assembler" => 1,
+"value" => 11,
+"implements" => "FIDD11",
+},
+"IFT" => {
+"pseudo" => 1,
+"prefix" => 1,
+"width" => 6,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0000000000000000",
+"type" => "regfield",
+"value" => 0,
+},
+"IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_" => {
+"bits" => [
+[
+11,
+6,
+],
+],
+"prefix" => 1,
+"width" => 6,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"indexed" => 2,
+"mask" => "0x0000000000000fc0",
+"type" => "regfield",
+"value" => 0,
+"implements" => "IFT",
+},
+"IMM" => {
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"signed" => 1,
+},
+"NonScale" => {
+"pseudo" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"OP1" => {
+"pseudo" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"OP2" => {
+"pseudo" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"OPCD" => {
+"pseudo" => 1,
+"width" => 0,
+"size" => 0,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"RA" => {
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RA2_tmp" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RA_imp_bits__6_6_x_7_7_x_8_8_" => {
+"bits" => [
+[
+6,
+6,
+],
+[
+7,
+7,
+],
+[
+8,
+8,
+],
+],
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000001c0",
+"type" => "regfile",
+"implements" => "RA",
+"ref" => "GPR",
+},
+"RA_imp_bits__8_8_x_7_7_x_6_6_" => {
+"bits" => [
+[
+8,
+6,
+],
+],
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000001c0",
+"type" => "regfile",
+"implements" => "RA",
+"ref" => "GPR",
+},
+"RA_tmp" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RB" => {
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RB_imp_bits__11_11_x_10_10_x_9_9_" => {
+"bits" => [
+[
+11,
+9,
+],
+],
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000e00",
+"type" => "regfile",
+"implements" => "RB",
+"ref" => "GPR",
+},
+"RT" => {
+"pseudo" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RT_imp_bits__13_13_x_12_12_" => {
+"bits" => [
+[
+13,
+12,
+],
+],
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000003000",
+"type" => "regfile",
+"implements" => "RT",
+"ref" => "GPR",
+},
+"Res1" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"Rk" => {
+"pseudo" => 1,
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"enumerated" => {
+"0" => "r0::r7",
+"1" => "r1::r8",
+"2" => "r2::r10",
+"3" => "r3::r11",
+"4" => "r4::r12",
+"5" => "r5::r13",
+"6" => "r6::r14",
+"7" => "r7::r15",
+},
+"type" => "regfile",
+"ref" => "GPR",
+},
+"Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_" => {
+"bits" => [
+[
+12,
+12,
+],
+[
+8,
+6,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000011c0",
+"enumerated" => {
+"0" => "r0::r7",
+"1" => "r1::r8",
+"2" => "r2::r10",
+"3" => "r3::r11",
+"4" => "r4::r12",
+"5" => "r5::r13",
+"6" => "r6::r14",
+"7" => "r7::r15",
+},
+"type" => "regfile",
+"implements" => "Rk",
+"ref" => "GPR",
+},
+"SG" => {
+"pseudo" => 1,
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+},
+"SG_imp_bits__15_15_" => {
+"bits" => [
+[
+15,
+15,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000008000",
+"type" => "imm",
+"assembler" => 1,
+"value" => 0,
+"implements" => "SG",
+},
+"Src1" => {
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"Src2" => {
+"pseudo" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"VarInstrOpcode_imp_bits__14_14_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+14,
+14,
+],
+[
+11,
+0,
+],
+],
+"width" => 13,
+"size" => 13,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000004fff",
+"type" => "imm",
+},
+"VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_" => {
+"bits" => [
+[
+14,
+13,
+],
+[
+11,
+10,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000006c00",
+"type" => "imm",
+},
+"VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+14,
+14,
+],
+[
+3,
+0,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000000000400f",
+"type" => "imm",
+},
+"VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => {
+"bits" => [
+[
+15,
+12,
+],
+[
+5,
+0,
+],
+],
+"prefix" => 1,
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000000000f03f",
+"type" => "imm",
+},
+"VlesSize" => {
+"pseudo" => 1,
+"prefix" => 1,
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+"value" => 0,
+},
+"flag" => {
+"pseudo" => 1,
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"enumerated" => {
+"0" => "",
+"0" => "-aab",
+"1" => "-aad",
+},
+"type" => "imm",
+},
+"flag2" => {
+"pseudo" => 1,
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"enumerated" => {
+"0" => "",
+"0" => "-b",
+"1" => "-d",
+},
+"type" => "imm",
+},
+"flag_imp_bits__9_9_" => {
+"bits" => [
+[
+9,
+9,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000200",
+"enumerated" => {
+"0" => "",
+"0" => "-aab",
+"1" => "-aad",
+},
+"type" => "imm",
+"implements" => "flag",
+},
+"n" => {
+"pseudo" => 1,
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"enumerated" => {
+"0" => "0",
+"1" => "1",
+"2" => "2",
+"3" => "3",
+},
+"type" => "imm",
+},
+},
+"instrs" => {
+"LPREFIX" => {
+"width" => 16,
+"syntax" => "LPREFIX,  IFT => IFT",
+"dsyntax" => "LPREFIX,  IFT => ${IFT}",
+"attributes" => {
+"prefix" => "",
+},
+"fields" => {
+"VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => 3,
+"IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_" => "",
+},
+"prefix" => 1,
+"disassemble" => 1,
+},
+"OneWord" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "OneWord CondExec, Enc1",
+"dsyntax" => "OneWord ${CondExec}, ${Enc1}",
+"fields" => {
+"CondExec_imp_bits__17_16_" => "",
+"Enc1_imp_bits__15_0_" => "",
+},
+"pseudo" => 1,
+"disassemble" => 1,
+},
+"TwoWord" => {
+"width" => 34,
+"fetch_width" => 32,
+"syntax" => "TwoWord CondExec, Enc2",
+"dsyntax" => "TwoWord ${CondExec}, ${Enc2}",
+"fields" => {
+"CondExec_imp_bits__33_32_" => "",
+"Enc2_imp_bits__31_0_" => "",
+},
+"pseudo" => 1,
+"disassemble" => 1,
+},
+"add_family" => {
+"syntax" => "add_family OPCD, Src1, Src2, Res1, CE, NonScale",
+"dsyntax" => "add_family ${OPCD}, ${Src1}, ${Src2}, ${Res1}, ${CE}, ${NonScale}",
+"block" => "dalu",
+"fields" => {
+"OPCD" => "",
+"Src1" => "",
+"Src2" => "",
+"Res1" => "",
+"CE" => "",
+"NonScale" => "",
+},
+"action" => <<DATA
+{
+    info ( 1 , "CE= " << CE , ", Src1= " << Src1 , ", Src2= " << Src2 , ", Res1= " << Res1 ) ;
+    GPR ( Res1 ) = GPR ( Src2 ) + add_func ( Src1 , NonScale ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(0)?",
+"GPR(2)?",
+"GPR(Src1)?",
+"GPR(Src2)",
+"SR[mask 0x00000003]/p?",
+],
+"outputs" => [
+"GPR(Res1)",
+],
+"helpers" => [
+"add_func",
+"find_option",
+],
+},
+"add" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "add RA,RB,RT",
+"dsyntax" => "add ${RA},${RB},${RT}",
+"block" => "dalu",
+"attributes" => {
+"type1" => "",
+"first" => "",
+"second" => 10,
+},
+"fields" => {
+"CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_" => "",
+"SG_imp_bits__15_15_" => "reserved",
+"VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_" => 9,
+"RT_imp_bits__13_13_x_12_12_" => "",
+"RB_imp_bits__11_11_x_10_10_x_9_9_" => "",
+"RA_imp_bits__8_8_x_7_7_x_6_6_" => "",
+},
+"aliases" => {
+"add_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Res1",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "OPCD",
+"value" => 9,
+},
+"misc" => {
+"field" => "CE",
+"value" => "CE",
+},
+"misc" => {
+"field" => "NonScale",
+"value" => 2,
+},
+],
+"parent_action" => <<DATA
+{
+    info ( 1 , "CE= " << CE , ", Src1= " << RA , ", Src2= " << RB , ", Res1= " << RT ) ;
+    GPR ( RT ) = GPR ( RB ) + add_func ( RA , 2 ) ;
+}
+DATA
+,
+},
+},
+"parent" => "add_family",
+"disassemble" => 0,
+"type" => "OneWord",
+"inputs" => [
+"GPR(2)",
+"GPR(RA)",
+"GPR(RB)",
+"SR[mask 0x00000002]/p",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"helpers" => [
+"add_func",
+"find_option",
+],
+},
+"add2" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "add RA,RB,RT",
+"dsyntax" => "add ${RA},${RB},${RT}",
+"block" => "dalu",
+"attributes" => {
+"type1" => "",
+"first" => "add",
+"second" => 5,
+},
+"fields" => {
+"CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_" => "",
+"SG_imp_bits__15_15_" => "reserved",
+"VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_" => 11,
+"RT_imp_bits__13_13_x_12_12_" => "",
+"RB_imp_bits__11_11_x_10_10_x_9_9_" => "",
+"RA_imp_bits__6_6_x_7_7_x_8_8_" => "",
+},
+"aliases" => {
+"add_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Res1",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "OPCD",
+"value" => 11,
+},
+"misc" => {
+"field" => "CE",
+"value" => "CE",
+},
+"misc" => {
+"field" => "NonScale",
+"value" => 0,
+},
+],
+"parent_action" => <<DATA
+{
+    info ( 1 , "CE= " << CE , ", Src1= " << RA , ", Src2= " << RB , ", Res1= " << RT ) ;
+    GPR ( RT ) = GPR ( RB ) + add_func ( RA , 0 ) ;
+}
+DATA
+,
+},
+},
+"parent" => "add_family",
+"disassemble" => 0,
+"type" => "OneWord",
+"inputs" => [
+"GPR(0)",
+"GPR(RA)",
+"GPR(RB)",
+"SR[mask 0x00000001]/p",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"helpers" => [
+"add_func",
+"find_option",
+],
+},
+"mv_family" => {
+"syntax" => "mv_family OPCD, flag, Src1, Res1, CE",
+"dsyntax" => "mv_family ${OPCD}, ${flag}, ${Src1}, ${Res1}, ${CE}",
+"block" => "dalu",
+"fields" => {
+"OPCD" => "",
+"flag" => "",
+"Src1" => "",
+"Res1" => "",
+"CE" => "",
+},
+"action" => <<DATA
+{
+    info ( 1 , "CE= " << CE , ", Res1= " << Res1 , ", Src1= " << Src1 , "flag = " << flag ) ;
+    GPR ( Res1 ) = Mem ( SP , 1 ) ;
+    GPR ( Res1 + 1 ) = Mem ( SP + 1 , 1 ) ;
+    GPR ( Res1 + 2 ) = Mem ( SP + 2 , 1 ) ;
+    GPR ( Res1 + 3 ) = Mem ( SP + 3 , 1 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(0)?",
+"GPR(1)?",
+"SP",
+"SR[mask 0x00000001]/p",
+],
+"outputs" => [
+"GPR(Res1)",
+"GPR(Res1 + 1)",
+"GPR(Res1 + 2)",
+"GPR(Res1 + 3)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"mv" => {
+"width" => 18,
+"fetch_width" => 16,
+"doc" => <<DATA
+ Move
+  Instr 
+DATA
+,
+"syntax" => "mv flag Rk",
+"dsyntax" => "mv ${flag} ${Rk}",
+"block" => "dalu",
+"attributes" => {
+"type1" => "",
+"first" => "",
+"second" => 7,
+},
+"fields" => {
+"CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_" => "",
+"SG_imp_bits__15_15_" => "reserved",
+"VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_" => 14,
+"Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_" => "",
+"flag_imp_bits__9_9_" => "",
+"FIDD11_imp_bits__3_3_x_2_2_x_1_1_x_0_0_" => "",
+},
+"aliases" => {
+"mv_family" => {
+"sources" => [
+],
+"destinations" => [
+"destination" => {
+"field" => "Res1",
+"value" => "Rk + 7",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "OPCD",
+"value" => 14,
+},
+"misc" => {
+"field" => "flag",
+"value" => "flag",
+},
+"misc" => {
+"field" => "Src1",
+"value" => "Rk",
+},
+"misc" => {
+"field" => "CE",
+"value" => "CE",
+},
+],
+"parent_action" => <<DATA
+{
+    info ( 1 , "CE= " << CE , ", Res1= " << Rk + 7 , ", Src1= " << Rk , "flag = " << flag ) ;
+    GPR ( Rk + 7 ) = Mem ( SP , 1 ) ;
+    GPR ( Rk + 7 + 1 ) = Mem ( SP + 1 , 1 ) ;
+    GPR ( Rk + 7 + 2 ) = Mem ( SP + 2 , 1 ) ;
+    GPR ( Rk + 7 + 3 ) = Mem ( SP + 3 , 1 ) ;
+}
+DATA
+,
+},
+},
+"parent" => "mv_family",
+"disassemble" => 0,
+"doc-op" => <<DATA
+PC = {AbsAdd31,0} 
+Mem(SP,8) = {return PC,SR} SP = SP + 8
+DATA
+,
+"type" => "OneWord",
+"inputs" => [
+"GPR(0)?",
+"GPR(1)?",
+"SP",
+"SR[mask 0x00000001]/p",
+],
+"outputs" => [
+"GPR(Rk + 7)",
+"GPR(Rk + 7 + 1)",
+"GPR(Rk + 7 + 2)",
+"GPR(Rk + 7 + 3)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"nop" => {
+"width" => 18,
+"fetch_width" => 16,
+"syntax" => "nop",
+"dsyntax" => "nop",
+"attributes" => {
+"type1" => "",
+"first" => "nop",
+},
+"fields" => {
+"CE_imp_bits__17_17_x_16_16_x_13_13_x_12_12_" => "",
+"SG_imp_bits__15_15_" => "reserved",
+"VarInstrOpcode_imp_bits__14_14_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_" => 3335,
+},
+"action" => <<DATA
+{
+}
+DATA
+,
+"disassemble" => 1,
+"type" => "OneWord",
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+"helpers" => {
+"add_func" => {
+"action" => <<DATA
+ bits < 32 > add_func ( bits < 3 > src , bits < 2 > option ) {
+     bits < 1 > op = find_option ( option ) ;
+     bits < 32 > tmp = 0 ;
+    if ( option == 0 || option == 1 ) {
+        tmp = ( GPR ( src ) + GPR ( 0 ) ) ;
+    } else if ( option == 2 || option == 3 ) {
+        tmp = ( GPR ( src ) + GPR ( 2 ) ) ;
+    }
+    return ( tmp ) ;
+}
+DATA
+,
+"inputs" => [
+"GPR(0)?",
+"GPR(2)?",
+"GPR(src [parm #0])?",
+"SR[mask 0x00000003]/p?",
+],
+"helpers" => [
+"find_option",
+],
+},
+"calc_instr_size" => {
+"action" => <<DATA
+ unsigned calc_instr_size ( uint32_t pc ) {
+     bits < 16 > a = Mem ( pc , 2 ) ;
+     bits < 16 > b = Mem ( pc + 2 , 2 ) ;
+    if ( a ( 15 ) == 1 ) {
+        return 1 ;
+    } else if ( b ( 15 ) == 1 ) {
+        return 2 ;
+    }
+}
+DATA
+,
+"input_mems" => [
+"Mem",
+],
+},
+"find_option" => {
+"action" => <<DATA
+ bits < 1 > find_option ( bits < 1 > opt ) {
+    switch ( opt . uint32 (  ) ) {
+        case 0 : return SR . T1 ;
+        break ;
+        case 2 : return SR . T6 ;
+        break ;
+        default : break ;
+    }
+}
+DATA
+,
+"inputs" => [
+"SR[mask 0x00000003]/p?",
+],
+},
+},
+},
+},
+"systems" => {
+},
+};
+

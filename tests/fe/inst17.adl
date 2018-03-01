@@ -1,0 +1,159 @@
+
+//
+// Tests that we will parse 'var' statements.
+//
+
+define (arch = minippc) {
+
+  // Various helper routines.
+  uint32 signExtend16 ( uint32 i )
+    {
+      if ( i & 0x8000 ) {
+        i |= 0xffff0000;
+      }
+      return i;
+    }
+
+  bool getBit(uint32 r,int index,int width)
+    {
+      return (r & (1 << (width-1-index))) >> (width-1-index);
+    }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+    define (field=CR) {
+      indexed=4;
+    }
+    define (field=LT) {
+      bits = 0;
+    }
+    define (field=GT) {
+      bits = 1;
+    }
+    define (field=EQ) {
+      bits = 2;
+    }
+    define (field=SO) {
+      bits = 3;
+    }
+    define (field=FX) {
+      bits = 4;
+    }
+    define (field=FEX) {
+      bits = 5;
+    }
+    define (field=VX) {
+      bits = 6;
+    }
+    define (field=OX) {
+      bits = 7;
+    }
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    action = {
+      var foo = 1;
+      var bar = 2;
+      if ( (BO & 0x4) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = getBit(BO,2,5) || ( (CTR!=0) ^ getBit(BO,2,5));
+      var cond_ok = getBit(BO,0,5) || ( getBit(CR,BI,32) == getBit(BO,1,5));
+      if ( ctr_ok && cond_ok ) {
+        NIA = CIA + ( signExtend16(BD<<2) );
+      }
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

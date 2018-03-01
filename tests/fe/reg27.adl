@@ -1,0 +1,43 @@
+//
+// Demonstrates the defining of architectural elements
+// directly within a core.  This avoids having to create
+// single-use architectures when making minor modifications
+// to a core.
+//
+
+define (arch=foo) {
+
+  define (reg=PC) { 
+    attrs = (nia, cia);
+  }
+
+  define (reg=A) {}
+
+  define (reg=B) {}
+
+  define (reg=C) {}
+
+}
+
+define (sys=A) {
+
+  define (core=T0) {
+    archs = foo;
+
+    define (reg=D) { }
+
+    defmod (reg=B) {
+      remove = true;
+    }
+
+  }
+
+  define (core=T1) {
+    archs = foo;
+    define (reg=D) {}
+  }
+
+  T0 t0;
+  T1 t1;
+
+}

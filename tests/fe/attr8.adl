@@ -1,0 +1,66 @@
+//
+// Testing of adding and removing attributes from shorthands, which inherit
+// attributes from their target instructions.
+//
+
+define (arch=minippc) {
+
+  attrs = (fxu,base,foo,group,bar);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (regfile=GPR) { size = 32; };
+
+  define (instr=addi) {
+    attrs=(fxu,base,group("add"),bar(123));
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = SI;
+      } else {
+        GPR(RT) = GPR(RA) + SI;
+      }
+    };
+  }
+
+  define (instr=li) {
+    alias = addi(RT(RT),RA(0),SI(SI));
+    remove_attrs = (foo,group); // Legal to remove, since li will inherit from the parent.
+  }
+
+  define (instr=la) {
+    alias = addi(RT(RT),RA(0),SI(SI));
+    attrs = group("move");  // Should override the existing group.
+  }
+
+  defmod (instr=addi) {
+    attrs = (foo,bar(456));
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,56 @@
+======
+Cores:
+======
+Name:  "P"
+Type:  Thread
+Registers:
+  Name:  "FCNT"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "ICNT"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+
+Pre-Fetch Handler:  {
+    register_fetch (  ) ;
+}
+  Source Registers:  FCNT 
+  Target Registers:  FCNT 
+  Helper Functions:  register_fetch 
+
+Post-Exec Handler:  {
+    register_commit (  ) ;
+}
+  Source Registers:  ICNT 
+  Target Registers:  ICNT 
+  Helper Functions:  register_commit 
+
+Helper Functions:
+  register_commit:
+ void register_commit (  ) {
+    ICNT = ICNT + 1 ;
+}
+    Source Registers:  ICNT 
+    Target Registers:  ICNT 
+
+  register_fetch:
+ void register_fetch (  ) {
+    FCNT = FCNT + 1 ;
+}
+    Source Registers:  FCNT 
+    Target Registers:  FCNT 
+-------------------------------
+

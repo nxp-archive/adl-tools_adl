@@ -1,0 +1,80 @@
+//
+// Test database printing of various encoding types, when opcodes are specified
+// using named fields.
+//
+define (arch = Foo) {
+
+  bit_endianness = little;
+  attrs = (type1);  
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 32;  prefix = r; };
+
+  // -------- INSTRFIELDS ----------
+
+  define (instrfield=Src1)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Src2)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Res1)
+    {
+      width = 5;
+      pseudo = true;
+    }
+
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RT)  { width = 2; pseudo = true; ref=GPR;}
+  define (instrfield=OPCD)  { width = variable; 	pseudo = true; }
+  define (instrfield=OPCD1) { width = 8; 	pseudo = true; }
+
+  define (instr=add_family) {
+    fields = (OPCD,Src1,Src2,Res1);
+
+    define (instr=add) {
+      attrs = (type1);
+      fields = (
+                (bits(0),OPCD1(0),1),
+                (bits(1),OPCD1(1),0),
+                (bits(2),OPCD1(2),0),
+                (bits(3),OPCD1(3),1),
+                (bits(4),OPCD1(4),0),
+                (bits(5),OPCD1(5),0),
+                (bits(6),RA(0)),		
+                (bits(7),RA(1)),		
+                (bits(8),RA(2)),		
+                (bits(9),RB(0)),
+                (bits(10),RB(1)),
+                (bits(11),RB(2)),
+                (bits(12),RT(0)),
+                (bits(13),RT(1)),
+                (bits(14),OPCD1(6),0),
+                (bits(15),OPCD1(7),0)
+                );
+      syntax = ("add %f,%f,%f",RA,RB,RT);
+      alias = add_family(OPCD(OPCD1),Src1(RA),Src2(RB),Res1(RT));
+    }
+
+    action = {
+      GPR(Res1) = GPR(Src2) + GPR(Src1);
+    };
+    
+  }
+
+}
+
+define (core = P) {
+  archs = Foo;
+  instrtables = (type1);
+}

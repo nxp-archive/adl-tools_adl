@@ -1,0 +1,11 @@
+littleEnd2.adl:17: Left bit index must be >= right bit index.
+littleEnd2.adl:27: Left bit index must be >= right bit index.
+littleEnd2.adl:31: Overlapping bit ranges for instruction field.
+littleEnd2.adl:37: Expected a function of arity 0 but found arity of 1 for field action.
+littleEnd2.adl:70: Expected a function of arity 1 but found arity of 0 for indexed field action.
+littleEnd2.adl:58: Left bit index must be >= right bit index.
+littleEnd2.adl:46: Index out of field 'GOOD' range.
+littleEnd2.adl:75: Target field size is smaller than source field size.
+littleEnd2.adl:83: Left bit index must be >= right bit index.
+littleEnd2.adl:75: No fields defined for this instruction.
+Too many errors.

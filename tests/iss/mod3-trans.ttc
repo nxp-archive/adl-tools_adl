@@ -1,0 +1,17 @@
+//
+// Transactional-ISS configuration file for mod3.cc.h
+//
+
+define (config) {
+  trans_pool_size = 3;
+  mem_if = blocking;
+  max_delay_slots = 4;
+  rollback_mode = true;
+  gen_instr_info = true;
+}
+
+define (core=P) {
+  define (config) {
+    log_original_mem_access = true;
+  }
+}

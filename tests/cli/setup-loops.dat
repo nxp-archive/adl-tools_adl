@@ -1,0 +1,9 @@
+
+CORE n=:procs:P0
+
+RD n=NIA d=0x1800074
+
+CORE n=:procs:P1
+
+RD n=NIA d=0x1800120
+

@@ -1,0 +1,339 @@
+//
+// If we have a relocation mapped to a field of a micro-op, then that micro-op
+// can only exist in a single macro-op, or otherwise the relocation has to
+// specify which macro-op it is associated with.
+//
+
+define (arch = packet_ops) {
+   
+  attrs = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+  
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+    width = 64;
+  }
+
+  define (reloc=RELOC_1) {
+    value = 1;
+    abbrev = "lo1";
+    instrfield = simm_p;
+  }
+  
+  define (regfile=GPR) {
+    width = 64;
+    size = 32;
+    prefix = r;
+  }
+
+
+  define (instrfield=fop) {
+    """
+    Outer 'envelope' instruction opcode.
+
+    Encodings:
+      0:  Single large 62-bit instruction.
+      1:  Two 32-bit instructions (serial execution).
+      2:  Three 20-bit instructions (serial execution).
+      3:  Two 32-bit instructions (parallel execution).
+    """;    
+    bits = (1,0);
+  }
+
+  define (instrfield=opAA) {
+    """
+    Instruction field for storing a 62-bit instruction.
+    """;
+    bits = (63,2);
+    type = instr;
+    ref = instr_subinstr3;
+  }
+  
+  define(instrfield=opA) {
+    """
+    Instruction field for storing a 31-bit instruction (first slot).
+    """;
+    bits = (32,2);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+  
+  define(instrfield=opB) {
+    """
+    Instruction field for storing a 31-bit instruction (second slot).
+    """;    
+    bits = (63,33);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+
+  define(instrfield=opC) {
+    """
+    Instruction field for storing a 20-bit instruction (first slot).
+    """;    
+    bits = (21,2);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+
+  define(instrfield=opD) {
+    """
+    Instruction field for storing a 20-bit instruction (second slot).
+    """;    
+    bits = (41,22);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+
+  define(instrfield=opE) {
+    """
+    Instruction field for storing a 20-bit instruction (third slot).
+    """;    
+    bits = (61,42);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+  
+
+  define(instrfield=op) {
+    """
+    Primary opcode for sub-instrutions.
+    """;
+    bits = (4,0);
+  }
+
+  define (instrfield=bsimm) {
+    """
+    Big signed immediate field.
+    """;
+    bits = (61,10);
+    display = hex;
+    is_signed = true;    
+  }
+  
+  define(instrfield=ra) {
+    """
+    First operand source instruction field.
+    """;
+    bits = (14,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=ra_p) {
+    """
+    First operand source instruction field.
+    """;
+    pseudo = true;
+    width = 5;
+    ref = GPR;
+    type = regfile;
+  }  
+
+  define(instrfield=rb) {
+    """
+    Second operand source instruction field.
+    """;   
+    bits = (19,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rt) {
+    """
+    Standard target instruction field. 
+    """;
+    bits = (9,5);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rt_p) {
+    """
+    Standard target instruction field. 
+    """;
+    pseudo = true;
+    width = 5;
+    ref = GPR;
+    type = regfile;
+  }  
+
+  define(instrfield=rs) {
+    """
+    Standard source instruction field. 
+    """;
+    bits = (9,5);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=simm) {
+    """
+    Signed immediate field.
+    """;
+    bits = (30,15);
+    display = dec;
+    is_signed = true;    
+  }
+
+  define (instrfield=simm_p) {
+    """
+    Unsigned immediate field.
+    """;
+    pseudo = true;
+    display = dec;
+    is_signed = true;
+    width = 16;
+  }
+
+  
+  define (instrfield=bdp) {
+    """
+    PC-relative branch destination-packet field.
+
+    This is used to specify the address of the instruction.
+    """;
+    bits = (28,10);
+    addr = pc;
+    is_signed = true;
+    shift = 3;
+  }
+
+  define (instrfield=bdo) {
+    """
+    Branch destination packet offset field.
+
+    This specifies the micro-op to execute within the target instruction.
+    """;
+    bits = (30,29);
+  }
+
+  define (instrfield = scale) {
+    width = 32;
+    pseudo = true;
+  }
+
+  define (instr = big) {
+    """
+    Contains one 62-bit instruction.
+    """;
+    width = 64;
+    fields = (fop(0),opAA);
+    dsyntax = ("%f",opAA);
+    attrs = (other);
+  }
+  
+  define (instr = serial1) {
+    """
+    Contains two 31-bit instructions.  Implies serial execution.
+    """;
+    width = 64;
+    fields = (fop(1),opA,opB);
+    dsyntax = ("%f ; %f", opB, opA );
+    attrs = (other);
+  }
+
+  define (instr = serial2) {
+    """
+    Contains three 20-bit instructions.  Implies serial execution.
+    """;
+    width = 64;
+    fields = (fop(2),opC,opD,opE);
+    dsyntax = ("%f ; %f ; %f", opE, opD, opC );
+    attrs = (other);
+  }
+  
+  define (instr = parallel) {
+    """
+    Contains two 31-bit instructions.  Implies parallel execution.
+    """;
+    width = 64;
+    fields = (fop(3),opA,opB);
+    dsyntax = ("%f = %f", opB, opA );
+    attrs = (other);
+  }  
+  
+  define (instr = li) {
+    """
+    Load large immediate.
+    """;
+    width = 62;
+    attrs = (instr_subinstr3);
+    fields = ( op(1), rt, bsimm );
+    syntax = ("%i %f,%f",rt,bsimm);
+    action = {
+      GPR(rt) = signExtend(bsimm,64);
+    };
+  }
+
+  define (instr = halt) {
+    """
+    Halt simulation.
+    """;
+    width = 62;
+    attrs = (instr_subinstr3);
+    fields = ( op(0) );  
+    action={ 
+      halt(); 
+    };
+  }
+  
+
+  define (instr = addi) {
+    """
+    Add immediate.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    // I hate this bitwise encoding format, but we need to make sure that this
+    // works, since this forces the creation of implementation fields.
+    fields = ( op(1),
+               (bits(9,5),rt_p),
+               (bits(14,10),ra_p),
+               (bits(30,15),simm_p)
+               );
+    syntax = ("%i %f,%f,%f",rt_p,ra_p,simm_p);
+
+    action = {
+
+      GPR(rt_p) = GPR(ra_p) + simm_p;
+
+    };
+  }
+
+  define (instr = addi_) {
+    syntax = ("addi %f,%f",rt_p,simm_p);
+    alias = addi(rt_p(rt_p),ra_p(rt_p),simm_p(simm_p));
+  }
+
+  attrs = (addi_replace);
+  
+  define (instr = addi_test_replace) {
+    syntax = ("addit %f,%f",rt_p,simm_p);
+    alias = addi(rt_p(rt_p),ra_p(rt_p),simm_p(simm_p));
+    attrs = (addi_replace);
+  }  
+
+
+
+}
+
+
+define (core = packet_ops) {
+  archs = packet_ops; 
+  instrtables = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+}

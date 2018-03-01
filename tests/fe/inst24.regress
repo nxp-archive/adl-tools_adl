@@ -1,0 +1,120 @@
+======
+Cores:
+======
+Name:  "qe_risc"
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+  Current instruction address for fetch.
+  
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+  Next instruction address for fetch.
+     
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [20,23] 
+      Primary opcode.
+  
+  OPCD_2A: [0,3] 
+      Secondary opcode type 1.
+  
+  OPCD_2B: [4,7] 
+            Secondary opcode type 2.
+  
+Instructions:
+  Name:  A (rank: 100)
+  Width:  24
+  Fields:  OPCD(1)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  AA (rank: 100)
+  Width:  24
+  Fields:  OPCD(4)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  AAA (rank: 100)
+  Width:  24
+  Fields:  OPCD(5)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  B (rank: 100)
+  Width:  24
+  Fields:  OPCD_2A(1) OPCD(2)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  C (rank: 100)
+  Width:  24
+  Fields:  OPCD_2A(2) OPCD(2)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  D (rank: 100)
+  Width:  24
+  Fields:  OPCD_2A(3) OPCD(2)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  E (rank: 100)
+  Width:  24
+  Fields:  OPCD_2B(1) OPCD(3)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  F (rank: 100)
+  Width:  24
+  Fields:  OPCD_2B(2) OPCD(3)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  G (rank: 100)
+  Width:  24
+  Fields:  OPCD_2B(3) OPCD(3)
+  Action:  {
+     ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xf00
+    1(100):  A
+    2(200):      Mask:  0xf0000000
+      1(10000000):  B
+      2(20000000):  C
+      3(30000000):  D
+    3(300):      Mask:  0xf000000
+      1(1000000):  E
+      2(2000000):  F
+      3(3000000):  G
+    4(400):  AA
+    5(500):  AAA
+-------------------------------
+

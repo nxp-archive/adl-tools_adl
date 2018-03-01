@@ -1,0 +1,726 @@
+/* AUTOMATICALLY GENERATED, DO NOT EDIT */
+/*
+universal.css
+
+Standard styles intended to be available to all local
+web sites.  The gencss.sh script is used to include
+this file in other files; in general, don't reference
+this file directly from web pages.
+
+Kevin Grant (Kevin.Grant@freescale.com)
+January 5, 2001
+
+The use of a cascading style sheet minimizes the work
+required both in creating new web pages and in updating
+"old" ones, creating a standard look and feel for the
+entire intranet with very little effort.  As you become
+more familiar with CSS, you can infinitely customize
+this file, and your changes will automatically cause
+*every* HTML page that uses this style sheet to follow
+suit!  This extremely powerful language is described in
+detail at this site: "http://www.w3.org/TR/REC-CSS1".
+
+The HTML templates show how to include this file in
+a typical HTML document, thereby causing the document
+to render itself based on this style sheet.  The W3C
+site contains information on how to override formatting
+from style sheets, if that becomes necessary.
+
+(c) Freescale Semiconductor, Inc. 2001-2004
+Internal Use Only
+
+$Id$
+*/
+
+
+
+/* Make every page have the same color, with a standard text color. */
+BODY
+{
+	background:	white;
+	color:		black;
+	margin-left:	4px;
+	margin-top:	2px;
+	margin-right:	0;
+	margin-bottom:	0;
+}
+
+/* Boldface definition terms by default. */
+DT
+{
+	font-weight:	bold;
+}
+
+/* The default specifications for anchors (hypertext links). */
+A:link
+{
+	background:	transparent;
+	color:		black;
+	border-bottom:	solid transparent 0.05em;
+}
+A:visited
+{
+	background:	transparent;
+	color:		#b3b3b3;
+	border-bottom:	solid transparent 0.05em;
+}
+A:active
+{
+	background:	transparent;
+	color:		#e6ccb3;
+	border-bottom:	solid transparent 0.05em;
+}
+A:hover
+{
+	background:	white;
+	color:		#ff6600;
+	border-bottom:	solid #ff6600 0.05em;
+	text-decoration:	none;
+}
+
+/* For paragraphs at the top of a document representing an abstract. */
+.abstract
+{
+	color:			#111;
+	background:		#f5f5f5;
+	border-style:		solid;
+	border-color:		#ccc;
+	border-top-width:	0.05em;
+	border-bottom-width:	0.1em;
+	border-left-width:	0.05em;
+	border-right-width:	0.1em;
+	padding:		0.5em;
+}
+
+/* Quoted text; used in particular for search results. */
+BLOCKQUOTE
+{
+	background:	transparent;
+	color:		#666;
+}
+
+/* The color of heading columns (except the sort column). */
+TR.header
+{
+	background:	#b3b3b3;
+	border:		solid 0.2em black;
+	color:		black;
+}
+
+TR.header TH
+{
+	background:	#b3b3b3;
+	color:		black;
+}
+
+TR.header TH A
+{
+	/* make links visible when in headings */
+	background:	transparent;
+	color:		black;
+}
+
+TR.header TH.sortColumn
+{
+	background:	#999;
+	color:		black;
+	font-weight:	bold;
+	text-decoration:	underline;
+}
+
+/* rowOdd is deprecated, use odd instead */
+TR.rowOdd, TR.odd
+{
+	background:	#fafafa;
+	color:		black;
+}
+
+/* rowEven is deprecated, use even instead */
+TR.rowEven, TR.even
+{
+	background:	white;
+	color:		black;
+}
+
+/* used for the search results pages */
+.relevanceBar .border
+{
+	background:	black;
+	color:		white;
+}
+
+.relevanceBar .meter .full
+{
+	background:	#6699cc;
+	color:		white;
+	font-weight:	bold;
+	text-align:	center;
+}
+
+.relevanceBar .meter .empty
+{
+	background:	#80cce6;
+	color:		black;
+}
+
+/* rowOdd is deprecated, use odd instead */
+TR.rowOdd TD.sortColumn, TR.odd TD.sortColumn, TD.sortColumn
+{
+	background:	#e9e9e9;
+	color:		black;
+}
+
+/* rowEven is deprecated, use even instead */
+TR.rowEven TD.sortColumn, TR.even TD.sortColumn
+{
+	background:	#ededed;
+	color:		black;
+}
+
+/* Sections-off a piece of text with no particular adornments. */
+DIV.box
+{
+	background-color:	white;
+	border-style:		solid;
+	border-color:		#ccc;
+	border-width:		0.2em;
+	color:			black;
+	padding-top:		1em;
+	padding-left:		1.3em;
+	padding-bottom:		1em;
+	padding-right:		1.3em;
+}
+
+/* Sections-off a piece of text, usually to draw notice to its contents. */
+DIV.important, DIV.note, DIV.tip
+{
+	background-color:	white;
+	border-style:		solid;
+	border-color:		#ccc;
+	color:			black;
+	padding-top:		0;
+	/*padding-left*/
+	padding-bottom:		0;
+	padding-right:		0;
+}
+
+/* These attributes are specific to "important". */
+DIV.important
+{
+	background-image:	url('/swo/images/ImportantInfo.png');
+	background-position:	20px 10px;
+	background-repeat:	no-repeat;
+	border-top-width:	0.1em;
+	border-left-width:	0.15em;
+	border-bottom-width:	0.1em;
+	border-right-width:	0.15em;
+	padding-left:		70px; /* considers size of image and background position */
+}
+
+/* These attributes are specific to "note". */
+DIV.note                                      
+{                                             
+	background-image:	url('/swo/images/Info.png');
+	background-position:	20px 10px;
+	background-repeat:	no-repeat;                                                         
+	border-top-width:	0.1em;
+	border-left-width:	0.15em;
+	border-bottom-width:	0.1em;
+	border-right-width:	0.15em;
+	padding-left:		70px; /* considers size of image and background position */
+}
+
+/* These attributes are specific to "tip". */
+DIV.tip
+{
+	background-image:	url('/swo/images/AquaBackground.jpg');
+	border-top-width:	0.1em;
+	border-left-width:	0.1em;
+	border-bottom-width:	0.1em;
+	border-right-width:	0.1em;
+	padding-left:		0; /* specified only because the common spec. above does not include "left" */
+}
+
+/* Blocks that should have a thick gray bar on their left side. */
+DIV.brace
+{
+	border-style:		solid;
+	border-color:		#eeefff;
+	border-top-width:	0;
+	border-left-width:	0.2em;
+	border-bottom-width:	0;
+	border-right-width:	0;
+	padding-top:		0.4em;
+	padding-left:		1em;
+	padding-bottom:		0.4em;
+	padding-right:		2em;
+	display:		block;
+}
+
+/* Sections-off content (usually a form), to make it look like a dialog box. */
+DIV.dialog
+{
+	background:		#ccc;
+	border-color:		#333;
+	border-style:		solid;
+	color:			black;
+	
+	margin-top:		0;
+	border-top-width:	0.3em;
+	padding-top:		1em;
+	height:			auto;
+	padding-bottom:		1em;
+	border-bottom-width:	0.3em;
+	margin-bottom:		1em;
+	
+	margin-left:		0;
+	border-left-width:	0;
+	padding-left:		1em;
+	width:			auto;
+	padding-right:		1em;
+	border-right-width:	0;
+	margin-right:		34px;
+}
+DIV.dialog A:link, DIV.dialog A:visited
+{
+	background:		#ccc;
+	color:			#333;
+	border-color:		#333;
+}
+DIV.dialog A:active, DIV.dialog A:hover
+{
+	background:		#ddd;
+	color:			black;
+}
+DIV.dialog A:active
+{
+	border-color:		#333;
+}
+DIV.dialog A:hover
+{
+	border-color:		black;
+}
+DIV.dialog TABLE TR, DIV.dialog TABLE TD
+{
+	background:		#ccc;
+	color:			black;
+}
+
+/* The page footer layout. */
+DIV.footer, DIV.footerNoLogo
+{
+	background:		white;
+	border-color:		#6699cc;
+	border-style:		solid;
+	color:			black;
+	
+	margin-top:		3em;
+	border-top-width:	0.25em;
+	padding-top:		1em;
+	height:			auto;
+	padding-bottom:		1em;
+	border-bottom-width:	0;
+	margin-bottom:		0;
+	
+	margin-left:		7%;
+	border-left-width:	0;
+	/*padding-left:		0;*/
+	width:			auto;
+	padding-right:		0;
+	border-right-width:	0;
+	margin-right:		7%;
+}
+
+/* Padding for "footerNoLogo". */
+DIV.footerNoLogo
+{
+	padding-left:		0;
+}
+
+/* The default footer also includes a logo, but this can be disabled with "footerNoLogo". */
+DIV.footer
+{
+	background-position:	center left;
+	background-repeat:	no-repeat;
+	padding-left:		170px;
+}
+
+/* Used for tools group web pages, surrounding the title graphics. */
+DIV.groupPageTitle
+{
+	border-style:		solid;
+	border-color:		#eee;
+	border-top-width:	0;
+	border-left-width:	0;
+	border-bottom-width:	0;
+	border-right-width:	0;
+	padding-top:		15px;
+	padding-left:		20px;
+	padding-bottom:		15px;
+	padding-right:		20px;
+	width:			420px;
+}
+
+/* Manages spacing of top-level hierarchy links (rare). */
+.hierarchyTop
+{
+	padding-top:		0;
+	padding-left:		2em;
+	padding-bottom:		1.5em;
+	padding-right:		0;
+}
+
+/* Since brace headings are indented, indent links to align properly. */
+.brace .linkGroup
+{
+	padding-top:		0;
+	padding-left:		3em;
+	padding-bottom:		1em;
+	padding-right:		0;
+}
+
+/* Makes links within link groups boldface. */
+.linkGroup A
+{
+	font-weight:		bold;
+}
+
+/* Similar to a link group, but within a tree-like view. */
+.linkGroupTreeBranch
+{
+	border-style:		solid;
+	border-color:		#eeefff;
+	border-top-width:	0.2em;
+	border-left-width:	0.2em;
+	border-bottom-width:	0.4em;
+	border-right-width:	0;
+	font-size:		smaller;
+	line-height:		16pt;
+}
+
+/* Indents links within a link group. */
+.linkGroup .linkSubGroup
+{
+	padding-left:		2em;
+}
+
+/* Text for "recommended" or "good" things, or some other kind of "green flag". */
+SPAN.greenFlagged
+{
+	background:	transparent;
+	color:		#5b5;
+	font-weight:	bold;
+}
+
+/* Highlighted, enlarged text; used in search result excerpts, or for, well, highlighting text! */
+SPAN.highlighted
+{
+	background:	aqua;
+	color:		black;
+}
+
+/* "New" text, used to highlight recent additions to a web page. */
+SPAN.new
+{
+	background:	#ffcc00;
+	color:		black;
+	font-weight:	bold;
+}
+
+/* Warning text, or some other kind of "red flag". */
+SPAN.redFlagged
+{
+	background:	transparent;
+	color:		red;
+	font-weight:	bold;
+}
+
+/* Cautionary text that is not as severe as a "red flag". */
+SPAN.yellowFlagged
+{
+	background:	transparent;
+	color:		#bb5;
+	font-weight:	bold;
+}
+
+/* Preliminary - use as a watermark for things that are not finalized. */
+.preliminary
+{
+	background-image:	url('/swo/images/Preliminary.png');
+	background-repeat:	no-repeat;
+}
+
+/* Tabs - render list items horizontally. */
+ul.tabs 
+{       
+	list-style:		none;
+	
+	margin-top:		0.5em;
+	border-top:		0;
+	padding-top:		0.2em;
+	height:			auto;
+	padding-bottom:		0.1em;
+	border-bottom:		solid #69c 0.3em;
+	margin-bottom:		1em;
+	
+	margin-left:		-1.5em;
+	border-left:		0;
+	padding-left:		3em;
+	width:			auto;
+	padding-right:		3em;
+	border-right:		0;
+	margin-right:		-1.5em;
+}
+
+/* Tabs - by default all list items look like background tabs. */
+.tabs li
+{
+	background:		#e8edff;
+	color:			black;
+	display:		inline;
+	
+	margin-top:		0.5em;
+	border-top:		solid #e8edff 0.2em;
+	padding-top:		0.2em;
+	height:			auto;
+	padding-bottom:		0.1em;
+	border-bottom:		solid #69c 0.3em;
+	margin-bottom:		1em;
+	
+	margin-left:		0;
+	border-left:		0;
+	padding-left:		1em;
+	width:			auto;
+	padding-right:		1em;
+	border-right:		0;
+	margin-right:		0.2em;
+}
+
+/* Tabs - recolor links. */
+.tabs a
+{
+	background:		transparent;
+	color:			black;
+}
+
+/* Tabs - give one list item this class to show it as the "front" tab. */
+.tabs li.active
+{
+	background:		#69c;
+	color:			white;
+	
+	border-color:		#69c;
+	border-bottom:		solid #69c 0.3em;
+}
+
+/* Tabs - optional terminator, a purely visual "bottom" for a set of tabs. */
+.tabsBottom
+{       
+	margin-top:		1em;
+	border-top:		solid #69c 0.3em;
+	padding-top:		0.1em;
+	height:			auto;
+	padding-bottom:		0.2em;
+	border-bottom:		0;
+	margin-bottom:		0.5em;
+	
+	margin-left:		-1.5em;
+	border-left:		0;
+	padding-left:		3em;
+	width:			auto;
+	padding-right:		3em;
+	border-right:		0;
+	margin-right:		-1.5em;
+}
+
+/*
+tools-specific.css
+
+DO NOT INCLUDE THIS FILE DIRECTLY; use tools.css.
+
+A set of styles NOT present in universal.css that are
+specific to Freescale High Performance Tools/Methodology
+team web pages (as opposed to PowerPC web pages).
+
+Kevin Grant
+May 9, 2002
+
+(c) Freescale Semiconductor, Inc. 2002-2004
+Internal Use Only
+
+$Source$
+$Id$
+*/
+
+BODY
+{
+	background:		white;
+	background-position:	top left;
+	background-repeat:	no-repeat;
+	color:			black;
+	margin:			1.5em;
+}
+
+/* The default specification for H1 (the reserved navigation heading). */
+H1
+{
+	background:		#6699cc;
+	background-image:	url('/swo/images/header_gnav_angle.gif');
+	background-position:	bottom right;
+	background-repeat:	no-repeat;
+	border-color:		white;
+	border-style:		solid;
+	color:			white;
+	font-family:		Arial, Helvetica, sans-serif;
+	font-size:		large;
+	font-weight:		bold;
+	line-height:		1.4;
+	
+	margin-top:		60px;
+	border-top-width:	0em;
+	padding-top:		0.25em;
+	height:			auto;
+	padding-bottom:		0.05em;
+	border-bottom-width:	0em;
+	margin-bottom:		0.25em;
+	
+	margin-left:		0em;
+	border-left-width:	0em;
+	padding-left:		0.5em;
+	width:			auto;
+	padding-right:		0.5em;
+	border-right-width:	0em;
+	margin-right:		0em;
+}
+
+H1 A:link, H1 A:visited
+{
+	background:		#6699cc;
+	color:			white;
+	border-color:		#6699cc;
+}
+
+H1 A:hover
+{
+	border-color:		white;
+}
+
+/* The default specifications for headings (can be overridden, see below). */
+H2, H3, H4, H5, H6
+{
+	background:		#80cce6;
+	border-color:		white;
+	border-style:		solid;
+	color:			white;
+	font-family:		Arial, Helvetica, sans-serif;
+	font-size:		larger;
+	font-weight:		bold;
+	
+	margin-top:		0em;
+	border-top-width:	0em;
+	padding-top:		0.25em;
+	height:			auto;
+	padding-bottom:		0.25em;
+	border-bottom-width:	0em;
+	margin-bottom:		0.25em;
+	
+	margin-left:		0em;
+	border-left-width:	0em;
+	padding-left:		1em;
+	width:			auto;
+	padding-right:		1em;
+	border-right-width:	0em;
+	/*margin-right:		0em;*/ /* see below */
+}
+H2
+{
+	margin-right:		34px;
+}
+H3, H4, H5, H6
+{
+	margin-right:		0em;
+}
+
+H2 A:link, H2 A:visited,
+H3 A:link, H3 A:visited,
+H4 A:link, H4 A:visited,
+H5 A:link, H5 A:visited,
+H6 A:link, H6 A:visited
+{
+	background:		#80cce6;
+	color:			white;
+	border-color:		#80cce6;
+}
+
+/* Headings have a unique appearance within braces. */
+.brace H1, .brace H2, .brace H3, .brace H4, .brace H5, .brace H6
+{
+	background:		white;
+	border-color:		#bbd5bb;
+	border-style:		solid;
+	color:			black;
+	font-size:		smaller;
+	font-weight:		bold;
+	
+	margin-top:		0em;
+	border-top-width:	0em;
+	padding-top:		0.15em;
+	height:			auto;
+	padding-bottom:		0.15em;
+	border-bottom-width:	0.15em;
+	margin-bottom:		0.15em;
+	
+	margin-left:		0em;
+	border-left-width:	0em;
+	padding-left:		0.5em;
+	width:			auto;
+	padding-right:		0.5em;
+	border-right-width:	0em;
+	margin-right:		1em;
+}
+
+/* A reStructuredText class for meta-data presented in the document header. */
+.docinfo-name
+{
+	text-align:	left;
+}
+
+/* Unique look for software process information. */
+.swprocess dt
+{
+	background-color:	white;
+	color:			black;
+	font-family:		Arial, Helvetica, sans-serif;
+	font-size:		medium;
+	padding-left:		0.5em;
+}
+
+.swprocess dd
+{
+	background-color:	#eeeeee;
+	border:			solid #ccc;
+	color:			black;
+	
+	margin-top:		0.25em;
+	border-top-width:	0.05em;
+	padding-top:		0.15em;
+	height:			auto;
+	padding-bottom:		0.15em;
+	border-bottom-width:	0.05em;
+	margin-bottom:		1.25em;
+	
+	margin-left:		1.5em;
+	border-left-width:	0.5em;
+	padding-left:		0.5em;
+	width:			auto;
+	padding-right:		0.5em;
+	border-right-width:	0.05em;
+	margin-right:		0.5em;
+}
+
+h2.ichange
+{
+		color: #d80000;
+		background-color: #f0f0f0;
+		text-align: center;
+}

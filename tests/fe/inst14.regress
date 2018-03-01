@@ -1,0 +1,4 @@
+inst14.adl:64: Bad format code:  q
+inst14.adl:57: Field 'RS' not handled in syntax field.
+inst14.adl:50: Too many format codes were found than fields listed in the syntax field.
+inst14.adl:29: Fewer format codes were found than fields listed in the syntax field.

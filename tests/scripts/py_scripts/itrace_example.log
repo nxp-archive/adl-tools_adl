@@ -1,0 +1,1184 @@
+Chronologic VCS simulator copyright 1991-2012
+Contains Synopsys proprietary information.
+Compiler version G-2012.09-3; Runtime version G-2012.09-3;  Jan 14 10:28 2015
+
+UPLI version 2.6.2    [UPLI] 
+
+The pli entry '$fsdbEvent_begin' has size of return type '64'.
+
+The pli will not be loaded in the data structure.Use of pli '$fsdbEvent_begin' using UPLI in the design
+
+will result in fatal error.    [UPLI]
+
+The pli entry '$fsdbEvent_begin' has size of return type '64'.
+
+The pli will not be loaded in the data structure.Use of pli '$fsdbEvent_begin' using UPLI in the design
+
+will result in fatal error.    [UPLI]
+Message: From $vcdplusfile at time 0 in file /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/alldump.v line 92: [VCD+-SVFN]: 
+Setting VPD File by "+vpdfile+" switch to /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/vectors/sanity/results/aliveVCunitM.vpd.
+
+----------------------------------------------------------------
+UVM-1.1d
+(C) 2007-2013 Mentor Graphics Corporation
+(C) 2007-2013 Cadence Design Systems, Inc.
+(C) 2006-2013 Synopsys, Inc.
+(C) 2011-2013 Cypress Semiconductor Corp.
+----------------------------------------------------------------
+UVM_INFO @ 0: [RNTST] Running test default_test...
+
+********************************************************************************************
+ [ Important ] PS and PD constraints:
+
+ (1) Please set PS=L except for programming.
+ (2) PS should be stable at high voltage before start programming.
+ (3) Maximum accumulative time for the entire macro exposed under high voltage(PS=H)
+     should be less than 200000000 ns.
+
+ [ Important ] Read access time constraints:
+
+ (1) Max accumulative read access time MUST be less than 2 seconds per each bit
+     when CSB=L,LOAD=H,PGENB=H,STROBE=H
+ (2) Max accumulative numbers of read MUST be less than 2 million reads per each bit
+     when CSB=L,LOAD=H,PGENB=H,STROBE=H
+********************************************************************************************
+
+********************************************************************************************
+Initializing all fuse data as 0
+********************************************************************************************
+max_acc_poweron_time: 200000000.000 (ns)
+UVM_INFO @ 0.000ns: [testbench.show_args] ==================================================
+UVM_INFO @ 0.000ns: [testbench.show_args] SoC Parameter Manager report
+UVM_INFO @ 0.000ns: [testbench.show_args] SOC_TESTNAME = alive
+UVM_INFO @ 0.000ns: [testbench.show_args] SOC_VECTORS_DIR = /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/vectors/sanity
+UVM_INFO @ 0.000ns: [testbench.show_args] SOC_CURRENT_VECTORSET = sanity
+UVM_INFO @ 0.000ns: [testbench.show_args] SOC_STIMULUS_DIR = /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/vectors/sanity/stimulus/
+UVM_INFO @ 0.000ns: [testbench.show_args] CORE_A0_STIM = /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/vcsmx/vcsmx_FILENAMES_lvd1010_9700/alive_CORE_A0
+UVM_INFO @ 0.000ns: [testbench.show_args] ==================================================
+UVM_INFO @ 0.000ns: [testbench.p9_objections] Raising Core 0 objection
+Warning! From $vcdplusfile at time 0 in file /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/alldump.v line 92: [VCD+-VTIFS]: 
+$vcdplusfile tasks prior to the first $vcdpluson task are ignored when 
+	VPD file name set by command line switch "+vpdfile+".
+
+---------------------------------------
+Name          Type          Size  Value
+---------------------------------------
+uvm_test_top  default_test  -     @455 
+---------------------------------------
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+Warning: Illegal value for fca1_ 1111111
+Warning: Illegal value for fca2_ 1111111
+
+Warning-[STASKW_SDILTA64B] Scaled delay exceeds 64 bit limit
+/proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/top_modules_v/A_IP_PLL_GP_1300M_FM_CLN28HPM.V, 245
+  Scaled delay                                                              
+  inf (                                                             inf) is 
+  larger than a 64 bit integer, using 1 instead.
+
+
+Warning-[STASKW_SDILTA64B] Scaled delay exceeds 64 bit limit
+/proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/top_modules_v/A_IP_PLL_GP_1300M_FM_CLN28HPM.V, 280
+  Scaled delay                                                              
+  inf (                                                             inf) is 
+  larger than a 64 bit integer, using 1 instead.
+
+
+Warning-[STASKW_SDILTA64B] Scaled delay exceeds 64 bit limit
+/proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/top_modules_v/A_IP_PLL_GP_1300M_FM_CLN28HPM.V, 281
+  Scaled delay                                                              
+  inf (                                                             inf) is 
+  larger than a 64 bit integer, using 1 instead.
+
+UVM_INFO @ 12.500ns: [testbench] EXTAL has started
+spr_trace.0.zen:edbsr0=40000000
+spr_trace.0.zen:edbsr0=00000400
+spr_trace.0.zen:edbsr0=00000200
+spr_trace.2.zen:edbsr0=40000000
+spr_trace.2.zen:edbsr0=00000400
+spr_trace.2.zen:edbsr0=00000200
+UVM_INFO @ 2000.000ns: [testbench.load_hex2mem] Loading memory image from file: /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/vcsmx/vcsmx_FILENAMES_lvd1010_9700/alive_CORE_A0.rom.hex
+UVM_INFO @ 2000.000ns: [testbench.load_hex2mem] Loading memory image from file: /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/vcsmx/vcsmx_FILENAMES_lvd1010_9700/alive_CORE_A0.romu.hex
+
+reset.0.trace: reset asserted :  p_rstbase=400000 p_rstivpr=0 p_pvrin=81950000 p_sysvers=0 p_cpuid=0 p_cpuid1=0
+
+reset.2.trace: reset asserted :  p_rstbase=600000 p_rstivpr=0 p_pvrin=81950000 p_sysvers=0 p_cpuid=2 p_cpuid1=2
+mode.0.zen @ 15215ns: ARCH=mpe
+itrace.0.zen @ 15215ns: 01000000 71c0e100 0r14[32:63]=01000000
+itrace.0.zen @ 15236ns: 01000004 71c0c100 0r14[32:63]=01000100
+itrace.2.zen: #fault#
+itrace.2.zen: #halted#=1
+htrace.2.zen @ 15340ns: #halted#=0 lpc=10
+itrace.2.zen @ 15340ns: #halted#=0
+itrace.2.zen: #fault#
+itrace.2.zen: #stopped#=1
+itrace.0.zen @ 15382ns: 01000008 7dc903a6 0ctr=01000100
+itrace.0.zen @ 15402ns: 0100000c 0007     0lr=0100000e
+branch.0.zen @ 15402ns: cof taken 
+itrace.0.zen @ 16047ns: 01000100 70000000  0r0[32:63]=00000000
+itrace.0.zen @ 16047ns: 01000104 70200000  0r1[32:63]=00000000
+itrace.0.zen @ 16214ns: 01000108 70400000  0r2[32:63]=00000000
+itrace.0.zen @ 16214ns: 0100010c 70600000  0r3[32:63]=00000000
+itrace.0.zen @ 16380ns: 01000110 70800000  0r4[32:63]=00000000
+itrace.0.zen @ 16380ns: 01000114 70a00000  0r5[32:63]=00000000
+itrace.0.zen @ 16546ns: 01000118 70c00000  0r6[32:63]=00000000
+itrace.0.zen @ 16546ns: 0100011c 70e00000  0r7[32:63]=00000000
+itrace.0.zen @ 16879ns: 01000120 71000000  0r8[32:63]=00000000
+itrace.0.zen @ 16879ns: 01000124 71200000  0r9[32:63]=00000000
+itrace.0.zen @ 17046ns: 01000128 71400000 0r10[32:63]=00000000
+itrace.0.zen @ 17046ns: 0100012c 71600000 0r11[32:63]=00000000
+itrace.0.zen @ 17212ns: 01000130 71800000 0r12[32:63]=00000000
+itrace.0.zen @ 17212ns: 01000134 71a00000 0r13[32:63]=00000000
+itrace.0.zen @ 17378ns: 01000138 71c00000 0r14[32:63]=00000000
+itrace.0.zen @ 17378ns: 0100013c 71e00000 0r15[32:63]=00000000
+itrace.0.zen @ 17711ns: 01000140 72000000 0r16[32:63]=00000000
+itrace.0.zen @ 17711ns: 01000144 72200000 0r17[32:63]=00000000
+itrace.0.zen @ 17878ns: 01000148 72400000 0r18[32:63]=00000000
+itrace.0.zen @ 17878ns: 0100014c 72600000 0r19[32:63]=00000000
+itrace.0.zen @ 18044ns: 01000150 72800000 0r20[32:63]=00000000
+itrace.0.zen @ 18044ns: 01000154 72a00000 0r21[32:63]=00000000
+itrace.0.zen @ 18210ns: 01000158 72c00000 0r22[32:63]=00000000
+itrace.0.zen @ 18210ns: 0100015c 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 18543ns: 01000160 73000000 0r24[32:63]=00000000
+itrace.0.zen @ 18543ns: 01000164 73200000 0r25[32:63]=00000000
+itrace.0.zen @ 18710ns: 01000168 73400000 0r26[32:63]=00000000
+itrace.0.zen @ 18710ns: 0100016c 73600000 0r27[32:63]=00000000
+itrace.0.zen @ 18876ns: 01000170 73800000 0r28[32:63]=00000000
+itrace.0.zen @ 18876ns: 01000174 73a00000 0r29[32:63]=00000000
+itrace.0.zen @ 19042ns: 01000178 73c00000 0r30[32:63]=00000000
+itrace.0.zen @ 19042ns: 0100017c 73e00000 0r31[32:63]=00000000
+itrace.0.zen @ 19375ns: 01000180 4800      0r0[32:63]=00000000
+itrace.0.zen @ 19396ns: 01000182 7c0903a6 0ctr=00000000
+itrace.0.zen @ 19542ns: 01000186 7c0803a6 0lr=00000000
+itrace.0.zen @ 19542ns: 0100018a 7c0ff120  0cr=00000000
+itrace.0.zen @ 19708ns: 0100018e 7c1a03a6 0srr0=00000000
+itrace.0.zen @ 19708ns: 01000192 7c1b03a6 0srr1=00000000
+itrace.0.zen @ 19874ns: 01000196 7c1a0ba6 0csrr0=00000000
+itrace.0.zen @ 19874ns: 0100019a 7c1b0ba6 0csrr1=00000000
+itrace.0.zen @ 20207ns: 0100019e 7060e100  0r3[32:63]=01000000
+itrace.0.zen @ 20228ns: 010001a2 7060c400  0r3[32:63]=01000400
+itrace.0.zen @ 20374ns: 010001a6 7c7f0ba6 0ivpr=01000400
+itrace.0.zen @ 20374ns: 010001aa 7060e006  0r3[32:63]=00060000
+itrace.0.zen @ 20540ns: 010001ae 7072c000  0r3[32:63]=00069000
+itrace.0.zen @ 20561ns: 010001b2 7c600124  0msr=00069000
+itrace.0.zen @ 20706ns: 010001b6 7070e000  0r3[32:63]=80000000
+itrace.0.zen @ 20727ns: 010001ba 7060c000  0r3[32:63]=80000000
+itrace.0.zen @ 21039ns: 010001be 7c70fba6 0hid0=80000000
+itrace.0.zen @ 21039ns: 010001c2 78000004
+branch.0.zen @ 21039ns: cof taken 
+itrace.0.zen @ 21705ns: 010001c6 71c0e100 0r14[32:63]=01000000
+itrace.0.zen @ 21726ns: 010001ca 71d0c000 0r14[32:63]=01008000
+itrace.0.zen @ 21871ns: 010001ce 7dc903a6 0ctr=01008000
+itrace.0.zen @ 21892ns: 010001d2 0006    
+branch.0.zen @ 21892ns: cof taken 
+itrace.0.zen @ 22703ns: 01008000 7028e000  0r1[32:63]=40000000
+itrace.0.zen @ 22724ns: 01008004 7027c300  0r1[32:63]=40003b00
+itrace.0.zen @ 22870ns: 01008008 78000004
+branch.0.zen @ 22870ns: cof taken 
+itrace.0.zen @ 23369ns: 0100800c 71c0e100 0r14[32:63]=01000000
+itrace.0.zen @ 23535ns: 01008010 71d3c5d8 0r14[32:63]=01009dd8
+itrace.0.zen @ 23556ns: 01008014 7dc903a6 0ctr=01009dd8
+itrace.0.zen @ 23702ns: 01008018 0007     0lr=0100801a
+branch.0.zen @ 23702ns: cof taken 
+itrace.0.zen @ 24534ns: 01009dd8 182106e0 w(40003ae0) 40003b00  0r1[32:63]=40003ae0
+itrace.0.zen @ 24534ns: 01009ddc 0080      0r0[32:63]=0100801a
+itrace.0.zen @ 24866ns: 01009dde 57a10014 w(40003af4) 00000000
+itrace.0.zen @ 24887ns: 01009de2 54010024 w(40003b04) 0100801a
+itrace.0.zen @ 25033ns: 01009de6 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 25054ns: 01009dea 1d29976c  0r9[32:63]=0100976c
+itrace.0.zen @ 25199ns: 01009dee 7d2803a6 0lr=0100976c
+itrace.0.zen @ 25220ns: 01009df2 0005     0lr=01009df4
+branch.0.zen @ 25220ns: cof taken 
+itrace.0.zen @ 26031ns: 0100976c 182106e0 w(40003ac0) 40003ae0  0r1[32:63]=40003ac0
+itrace.0.zen @ 26198ns: 01009770 0080      0r0[32:63]=01009df4
+itrace.0.zen @ 26198ns: 01009772 5761000c w(40003acc) 00000000
+itrace.0.zen @ 26364ns: 01009776 57810010 w(40003ad0) 00000000
+itrace.0.zen @ 26385ns: 0100977a 57a10014 w(40003ad4) 00000000
+itrace.0.zen @ 26697ns: 0100977e 54010024 w(40003ae4) 01009df4
+itrace.0.zen @ 26697ns: 01009782 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 26884ns: 01009786 30092100 r(40002100) 0r0[32:63]=00000000
+itrace.0.zen @ 26967ns: 0100978a 2000      0r0[32:63]=00000001
+itrace.0.zen @ 26988ns: 0100978c 34092100 w(40002100) 01
+itrace.0.zen @ 27030ns: 01009790 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 27050ns: 01009794 1c630330  0r3[32:63]=44000330
+itrace.0.zen @ 27196ns: 01009798 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 27217ns: 0100979c 1c84033c  0r4[32:63]=4400033c
+itrace.0.zen @ 27529ns: 010097a0 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 27550ns: 010097a4 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 27695ns: 010097a8 7d2803a6 0lr=01009994
+itrace.0.zen @ 27716ns: 010097ac 0005     0lr=010097ae
+branch.0.zen @ 27716ns: cof taken 
+itrace.0.zen @ 28361ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 28527ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 28548ns: 0100999c 54690000 w(40000010) 44000330
+itrace.0.zen @ 28860ns: 010099a0 54890000 w(40000010) 4400033c
+itrace.0.zen @ 28860ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 29026ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 29047ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 29068.000ns: [ CORE_A0        ] pre_main: init
+itrace.0.zen @ 29193ns: 010099b0 0004    
+branch.0.zen @ 29193ns: cof taken 
+itrace.0.zen @ 30025ns: 010097ae 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 30046ns: 010097b2 1d299000  0r9[32:63]=01009000
+itrace.0.zen @ 30191ns: 010097b6 7d2803a6 0lr=01009000
+itrace.0.zen @ 30212ns: 010097ba 0005     0lr=010097bc
+branch.0.zen @ 30212ns: cof taken 
+itrace.0.zen @ 31023ns: 01009000 182106e0 w(40003aa0) 40003ac0  0r1[32:63]=40003aa0
+itrace.0.zen @ 31023ns: 01009004 0080      0r0[32:63]=010097bc
+itrace.0.zen @ 31190ns: 01009006 57a10014 w(40003ab4) 00000000
+itrace.0.zen @ 31210ns: 0100900a 54010024 w(40003ac4) 010097bc
+itrace.0.zen @ 31356ns: 0100900e 7120e100  0r9[32:63]=01000000
+itrace.0.zen @ 31377ns: 01009012 1d290200  0r9[32:63]=01000200
+itrace.0.zen @ 31522ns: 01009016 7d2803a6 0lr=01000200
+itrace.0.zen @ 31543ns: 0100901a 0005     0lr=0100901c
+branch.0.zen @ 31543ns: cof taken 
+itrace.0.zen @ 32354ns: 01000200 7c7e42a6  0r3[32:63]=00000000
+itrace.0.zen @ 32354ns: 01000204 0004    
+branch.0.zen @ 32354ns: cof taken 
+itrace.0.zen @ 32854ns: 0100901c 013d     0r29[32:63]=00000000
+itrace.0.zen @ 33020ns: 0100901e 7120e100  0r9[32:63]=01000000
+itrace.0.zen @ 33041ns: 01009022 1d290210  0r9[32:63]=01000210
+itrace.0.zen @ 33186ns: 01009026 7d2803a6 0lr=01000210
+itrace.0.zen @ 33207ns: 0100902a 0005     0lr=0100902c
+branch.0.zen @ 33207ns: cof taken 
+itrace.0.zen @ 33686ns: 01000210 7c7e6aa6  0r3[32:63]=00000000
+itrace.0.zen @ 33686ns: 01000214 0004    
+branch.0.zen @ 33686ns: cof taken 
+itrace.0.zen @ 34351ns: 0100902c 71400000 0r10[32:63]=00000000
+itrace.0.zen @ 34518ns: 01009030 7fa81b79  0r8[32:63]=00000000 0cr0=2
+itrace.0.zen @ 34538ns: 01009034 7a1200b0
+branch.0.zen @ 34538ns: cof taken 
+itrace.0.zen @ 35350ns: 010090e4 0323      0r3[32:63]=00000000
+itrace.0.zen @ 35537ns: 010090e6 50010024 r(40003ac4) 0r0[32:63]=010097bc
+itrace.0.zen @ 35641ns: 010090ea 0090     0lr=010097bc
+itrace.0.zen @ 35641ns: 010090ec 53a10014 r(40003ab4) 0r29[32:63]=00000000
+itrace.0.zen @ 35703ns: 010090f0 21f1      0r1[32:63]=40003ac0
+itrace.0.zen @ 35703ns: 010090f2 0004    
+branch.0.zen @ 35703ns: cof taken 
+itrace.0.zen @ 36514ns: 010097bc 72e00001 0r23[32:63]=00000001
+itrace.0.zen @ 36847ns: 010097c0 7c83b800  0cr=28000000
+itrace.0.zen @ 36868ns: 010097c4 7a160040
+itrace.0.zen @ 37014ns: 010097c8 72e00001 0r23[32:63]=00000001
+itrace.0.zen @ 37034ns: 010097cc 7c83b840  0cr=28000000
+itrace.0.zen @ 37180ns: 010097d0 7a140020
+branch.0.zen @ 37180ns: cof taken 
+itrace.0.zen @ 37846ns: 010097f0 713fe404  0r9[32:63]=fc040000
+itrace.0.zen @ 37866ns: 010097f4 1929d010  0r9[32:63]=fc040010
+itrace.0.zen @ 38012ns: 010097f8 70000000  0r0[32:63]=00000000
+itrace.0.zen @ 38137ns: 010097fc 54090000 w(fc040010) 00000000
+itrace.0.zen @ 38345ns: 01009800 7800003c
+branch.0.zen @ 38345ns: cof taken 
+itrace.0.zen @ 39010ns: 0100983c 7368e400 0r27[32:63]=44000000
+itrace.0.zen @ 39343ns: 01009840 1c7b0330  0r3[32:63]=44000330
+itrace.0.zen @ 39343ns: 01009844 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 39510ns: 01009848 1c840344  0r4[32:63]=44000344
+itrace.0.zen @ 39510ns: 0100984c 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 39676ns: 01009850 1fa99994 0r29[32:63]=01009994
+itrace.0.zen @ 39697ns: 01009854 009d     0lr=01009994
+itrace.0.zen @ 39718ns: 01009856 0005     0lr=01009858
+branch.0.zen @ 39718ns: cof taken 
+itrace.0.zen @ 40508ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 40674ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 40695ns: 0100999c 54690000 w(40000010) 44000330
+itrace.0.zen @ 41007ns: 010099a0 54890000 w(40000010) 44000344
+itrace.0.zen @ 41007ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 41174ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 41194ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 41215.200ns: [ CORE_A0        ] pre_main: completed intc_cpr writes
+itrace.0.zen @ 41340ns: 010099b0 0004    
+branch.0.zen @ 41340ns: cof taken 
+itrace.0.zen @ 42172ns: 01009858 7388e400 0r28[32:63]=44000000
+itrace.0.zen @ 42193ns: 0100985c 1c7c0360  0r3[32:63]=44000360
+itrace.0.zen @ 42505ns: 01009860 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 42526ns: 01009864 1c840370  0r4[32:63]=44000370
+itrace.0.zen @ 42671ns: 01009868 009d     0lr=01009994
+itrace.0.zen @ 42692ns: 0100986a 0005     0lr=0100986c
+branch.0.zen @ 42692ns: cof taken 
+itrace.0.zen @ 43337ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 43503ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 43524ns: 0100999c 54690000 w(40000010) 44000360
+itrace.0.zen @ 43836ns: 010099a0 54890000 w(40000010) 44000370
+itrace.0.zen @ 43836ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 44002ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 44023ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 44044.000ns: [ CORE_A0        ] pre_post_main: Configure SYSCLK_DIV for PLL1 DIVIDERS 1-2-4-8
+itrace.0.zen @ 44169ns: 010099b0 0004    
+branch.0.zen @ 44169ns: cof taken 
+itrace.0.zen @ 44834ns: 0100986c 70600000  0r3[32:63]=00000000
+itrace.0.zen @ 45001ns: 01009870 70800001  0r4[32:63]=00000001
+itrace.0.zen @ 45001ns: 01009874 70a00003  0r5[32:63]=00000003
+itrace.0.zen @ 45167ns: 01009878 70c00007  0r6[32:63]=00000007
+itrace.0.zen @ 45167ns: 0100987c 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 45500ns: 01009880 1d2996ec  0r9[32:63]=010096ec
+itrace.0.zen @ 45521ns: 01009884 7d2803a6 0lr=010096ec
+itrace.0.zen @ 45666ns: 01009888 0005     0lr=0100988a
+branch.0.zen @ 45666ns: cof taken 
+itrace.0.zen @ 46332ns: 010096ec 182106e0 w(40003aa0) 40003ac0  0r1[32:63]=40003aa0
+itrace.0.zen @ 46498ns: 010096f0 0080      0r0[32:63]=0100988a
+itrace.0.zen @ 46498ns: 010096f2 57410008 w(40003aa8) 00000000
+itrace.0.zen @ 46665ns: 010096f6 5761000c w(40003aac) 44000000
+itrace.0.zen @ 46686ns: 010096fa 57810010 w(40003ab0) 44000000
+itrace.0.zen @ 46998ns: 010096fe 57a10014 w(40003ab4) 01009994
+itrace.0.zen @ 47018ns: 01009702 54010024 w(40003ac4) 0100988a
+itrace.0.zen @ 47018ns: 01009706 013d     0r29[32:63]=00000000
+itrace.0.zen @ 47164ns: 01009708 014c     0r28[32:63]=00000001
+itrace.0.zen @ 47164ns: 0100970a 015b     0r27[32:63]=00000003
+itrace.0.zen @ 47185ns: 0100970c 016a     0r26[32:63]=00000007
+itrace.0.zen @ 47330ns: 0100970e 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 47351ns: 01009712 1d299588  0r9[32:63]=01009588
+itrace.0.zen @ 47497ns: 01009716 7d2803a6 0lr=01009588
+itrace.0.zen @ 47518ns: 0100971a 0005     0lr=0100971c
+branch.0.zen @ 47518ns: cof taken 
+itrace.0.zen @ 48329ns: 01009588 182106f0 w(40003a90) 40003aa0  0r1[32:63]=40003a90
+itrace.0.zen @ 48329ns: 0100958c 0080      0r0[32:63]=0100971c
+itrace.0.zen @ 48495ns: 0100958e 54010014 w(40003aa4) 0100971c
+itrace.0.zen @ 48495ns: 01009592 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 48662ns: 01009596 1c6301d0  0r3[32:63]=440001d0
+itrace.0.zen @ 48662ns: 0100959a 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 48994ns: 0100959e 1c840298  0r4[32:63]=44000298
+itrace.0.zen @ 48994ns: 010095a2 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 49161ns: 010095a6 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 49182ns: 010095aa 7d2803a6 0lr=01009994
+itrace.0.zen @ 49202ns: 010095ae 0005     0lr=010095b0
+branch.0.zen @ 49202ns: cof taken 
+itrace.0.zen @ 49826ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 49993ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 50014ns: 0100999c 54690000 w(40000010) 440001d0
+itrace.0.zen @ 50326ns: 010099a0 54890000 w(40000010) 44000298
+itrace.0.zen @ 50326ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 50492ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 50513ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 50533.600ns: [ CORE_A0        ] /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/compiler/include/mc_functions.h: Use CGM triggered divider update with AXBS halt
+itrace.0.zen @ 50658ns: 010099b0 0004    
+branch.0.zen @ 50658ns: cof taken 
+itrace.0.zen @ 51324ns: 010095b0 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 51345ns: 010095b4 7120c7d0  0r9[32:63]=fbe107d0
+itrace.0.zen @ 51490ns: 010095b8 70000001  0r0[32:63]=00000001
+itrace.0.zen @ 51615ns: 010095bc 54090000 w(fbe107d0) 00000001
+itrace.0.zen @ 51823ns: 010095c0 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 51844ns: 010095c4 7120c7d4  0r9[32:63]=fbe107d4
+itrace.0.zen @ 51990ns: 010095c8 7010e000  0r0[32:63]=80000000
+itrace.0.zen @ 52114ns: 010095cc 54090000 w(fbe107d4) 80000000
+itrace.0.zen @ 52218ns: 010095d0 50010014 r(40003aa4) 0r0[32:63]=0100971c
+itrace.0.zen @ 52302ns: 010095d4 0090     0lr=0100971c
+itrace.0.zen @ 52302ns: 010095d6 20f1      0r1[32:63]=40003aa0
+itrace.0.zen @ 52322ns: 010095d8 0004    
+branch.0.zen @ 52322ns: cof taken 
+itrace.0.zen @ 53154ns: 0100971c 01d3      0r3[32:63]=00000000
+itrace.0.zen @ 53154ns: 0100971e 01c4      0r4[32:63]=00000001
+itrace.0.zen @ 53487ns: 01009720 01b5      0r5[32:63]=00000003
+itrace.0.zen @ 53487ns: 01009722 01a6      0r6[32:63]=00000007
+itrace.0.zen @ 53508ns: 01009724 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 53654ns: 01009728 1d2995dc  0r9[32:63]=010095dc
+itrace.0.zen @ 53674ns: 0100972c 7d2803a6 0lr=010095dc
+itrace.0.zen @ 53820ns: 01009730 0005     0lr=01009732
+branch.0.zen @ 53820ns: cof taken 
+itrace.0.zen @ 54652ns: 010095dc 182106e0 w(40003a80) 40003aa0  0r1[32:63]=40003a80
+itrace.0.zen @ 54985ns: 010095e0 0080      0r0[32:63]=01009732
+itrace.0.zen @ 54985ns: 010095e2 57410008 w(40003a88) 00000007
+itrace.0.zen @ 55151ns: 010095e6 5761000c w(40003a8c) 00000003
+itrace.0.zen @ 55172ns: 010095ea 57810010 w(40003a90) 00000001
+itrace.0.zen @ 55318ns: 010095ee 57a10014 w(40003a94) 00000000
+itrace.0.zen @ 55338ns: 010095f2 54010024 w(40003aa4) 01009732
+itrace.0.zen @ 55338ns: 010095f6 013d     0r29[32:63]=00000000
+itrace.0.zen @ 55484ns: 010095f8 014c     0r28[32:63]=00000001
+itrace.0.zen @ 55484ns: 010095fa 015b     0r27[32:63]=00000003
+itrace.0.zen @ 55505ns: 010095fc 016a     0r26[32:63]=00000007
+itrace.0.zen @ 55817ns: 010095fe 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 55838ns: 01009602 1c6301d0  0r3[32:63]=440001d0
+itrace.0.zen @ 55983ns: 01009606 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 56004ns: 0100960a 1c8402c8  0r4[32:63]=440002c8
+itrace.0.zen @ 56150ns: 0100960e 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 56170ns: 01009612 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 56316ns: 01009616 7d2803a6 0lr=01009994
+itrace.0.zen @ 56337ns: 0100961a 0005     0lr=0100961c
+branch.0.zen @ 56337ns: cof taken 
+itrace.0.zen @ 57148ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 57314ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 57335ns: 0100999c 54690000 w(40000010) 440001d0
+itrace.0.zen @ 57647ns: 010099a0 54890000 w(40000010) 440002c8
+itrace.0.zen @ 57647ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 57814ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 57834ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 57855.200ns: [ CORE_A0        ] /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/compiler/include/mc_functions.h: Pre-load the CGM sysclk divider value to registers
+itrace.0.zen @ 57980ns: 010099b0 0004    
+branch.0.zen @ 57980ns: cof taken 
+itrace.0.zen @ 58812ns: 0100961c 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 59145ns: 01009620 7120c7e8  0r9[32:63]=fbe107e8
+itrace.0.zen @ 59145ns: 01009624 6d0d     0r29[32:63]=00000000
+itrace.0.zen @ 59311ns: 01009626 73b0d000 0r29[32:63]=80000000
+itrace.0.zen @ 59436ns: 0100962a 57a90000 w(fbe107e8) 80000000
+itrace.0.zen @ 59519ns: 0100962e 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 59540ns: 01009632 7120c7ec  0r9[32:63]=fbe107ec
+itrace.0.zen @ 59540ns: 01009636 6d0c     0r28[32:63]=00010000
+itrace.0.zen @ 59644ns: 01009638 7390d000 0r28[32:63]=80010000
+itrace.0.zen @ 59769ns: 0100963c 57890000 w(fbe107ec) 80010000
+itrace.0.zen @ 59977ns: 01009640 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 59998ns: 01009644 7120c7f0  0r9[32:63]=fbe107f0
+itrace.0.zen @ 60143ns: 01009648 6d0b     0r27[32:63]=00030000
+itrace.0.zen @ 60164ns: 0100964a 7370d000 0r27[32:63]=80030000
+itrace.0.zen @ 60414ns: 0100964e 57690000 w(fbe107f0) 80030000
+itrace.0.zen @ 60414ns: 01009652 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 60497ns: 01009656 7120c7f4  0r9[32:63]=fbe107f4
+itrace.0.zen @ 60497ns: 0100965a 6d0a     0r26[32:63]=00070000
+itrace.0.zen @ 60518ns: 0100965c 7350d000 0r26[32:63]=80070000
+itrace.0.zen @ 60913ns: 01009660 57490000 w(fbe107f4) 80070000
+itrace.0.zen @ 60934ns: 01009664 50010024 r(40003aa4) 0r0[32:63]=01009732
+itrace.0.zen @ 61038ns: 01009668 0090     0lr=01009732
+itrace.0.zen @ 61038ns: 0100966a 53410008 r(40003a88) 0r26[32:63]=00000007
+itrace.0.zen @ 61162ns: 0100966e 5361000c r(40003a8c) 0r27[32:63]=00000003
+itrace.0.zen @ 61183ns: 01009672 53810010 r(40003a90) 0r28[32:63]=00000001
+itrace.0.zen @ 61329ns: 01009676 53a10014 r(40003a94) 0r29[32:63]=00000000
+itrace.0.zen @ 61329ns: 0100967a 21f1      0r1[32:63]=40003aa0
+itrace.0.zen @ 61350ns: 0100967c 0004    
+branch.0.zen @ 61350ns: cof taken 
+itrace.0.zen @ 62140ns: 01009732 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 62306ns: 01009736 1d299680  0r9[32:63]=01009680
+itrace.0.zen @ 62327ns: 0100973a 7d2803a6 0lr=01009680
+itrace.0.zen @ 62348ns: 0100973e 0005     0lr=01009740
+branch.0.zen @ 62348ns: cof taken 
+itrace.0.zen @ 62972ns: 01009680 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 62993ns: 01009684 7120c7d8  0r9[32:63]=fbe107d8
+itrace.0.zen @ 63138ns: 01009688 701fe6ed  0r0[32:63]=feed0000
+itrace.0.zen @ 63159ns: 0100968c 701fc2ce  0r0[32:63]=feedface
+itrace.0.zen @ 63409ns: 01009690 54090000 w(fbe107d8) feedface
+itrace.0.zen @ 63409ns: 01009694 0004    
+branch.0.zen @ 63409ns: cof taken 
+itrace.0.zen @ 66383ns: 01009740 7070e000  0r3[32:63]=80000000
+itrace.0.zen @ 66383ns: 01009744 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 66799ns: 01009748 1d299698  0r9[32:63]=01009698
+itrace.0.zen @ 66820ns: 0100974c 7d2803a6 0lr=01009698
+itrace.0.zen @ 67215ns: 01009750 0005     0lr=01009752
+branch.0.zen @ 67215ns: cof taken 
+itrace.0.zen @ 69129ns: 01009698 182106f0 w(40003a90) 40003aa0  0r1[32:63]=40003a90
+itrace.0.zen @ 69129ns: 0100969c 0080      0r0[32:63]=01009752
+itrace.0.zen @ 69545ns: 0100969e 57e1000c w(40003a9c) 00000000
+itrace.0.zen @ 69566ns: 010096a2 54010014 w(40003aa4) 01009752
+itrace.0.zen @ 69566ns: 010096a6 013f     0r31[32:63]=80000000
+itrace.0.zen @ 69961ns: 010096a8 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 69982ns: 010096ac 1c6301d0  0r3[32:63]=440001d0
+itrace.0.zen @ 70377ns: 010096b0 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 70398ns: 010096b4 1c8402fc  0r4[32:63]=440002fc
+itrace.0.zen @ 70793ns: 010096b8 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 70814ns: 010096bc 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 71874ns: 010096c0 7d2803a6 0lr=01009994
+itrace.0.zen @ 71895ns: 010096c4 0005     0lr=010096c6
+branch.0.zen @ 71895ns: cof taken 
+itrace.0.zen @ 73788ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 74204ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 74225ns: 0100999c 54690000 w(40000010) 440001d0
+itrace.0.zen @ 75286ns: 010099a0 54890000 w(40000010) 440002fc
+itrace.0.zen @ 75286ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 75702ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 75722ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 75784.800ns: [ CORE_A0        ] /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/compiler/include/mc_functions.h: Wait for CGM sysclk divider updated status to clear
+itrace.0.zen @ 76118ns: 010099b0 0004    
+branch.0.zen @ 76118ns: cof taken 
+itrace.0.zen @ 78447ns: 010096c6 713fe3e1  0r9[32:63]=fbe10000
+itrace.0.zen @ 78468ns: 010096ca 7120c7dc  0r9[32:63]=fbe107dc
+itrace.0.zen @ 79113ns: 010096ce 50090000 r(fbe107dc) 0r0[32:63]=00000000
+itrace.0.zen @ 79113ns: 010096d2 01f7      0r7[32:63]=80000000
+itrace.0.zen @ 79196ns: 010096d4 4607      0r7[32:63]=00000000
+itrace.0.zen @ 79217ns: 010096d6 2a07      0cr=28000000
+itrace.0.zen @ 79362ns: 010096d8 7a02fff6
+itrace.0.zen @ 79362ns: 010096dc 50010014 r(40003aa4) 0r0[32:63]=01009752
+itrace.0.zen @ 80444ns: 010096e0 0090     0lr=01009752
+itrace.0.zen @ 80444ns: 010096e2 53e1000c r(40003a9c) 0r31[32:63]=00000000
+itrace.0.zen @ 80465ns: 010096e6 20f1      0r1[32:63]=40003aa0
+itrace.0.zen @ 80777ns: 010096e8 0004    
+branch.0.zen @ 80777ns: cof taken 
+itrace.0.zen @ 82774ns: 01009752 50010024 r(40003ac4) 0r0[32:63]=0100988a
+itrace.0.zen @ 82857ns: 01009756 0090     0lr=0100988a
+itrace.0.zen @ 83190ns: 01009758 53410008 r(40003aa8) 0r26[32:63]=00000000
+itrace.0.zen @ 83231ns: 0100975c 5361000c r(40003aac) 0r27[32:63]=44000000
+itrace.0.zen @ 84271ns: 01009760 53810010 r(40003ab0) 0r28[32:63]=44000000
+itrace.0.zen @ 84313ns: 01009764 53a10014 r(40003ab4) 0r29[32:63]=01009994
+itrace.0.zen @ 84604ns: 01009768 21f1      0r1[32:63]=40003ac0
+itrace.0.zen @ 84604ns: 0100976a 0004    
+branch.0.zen @ 84604ns: cof taken 
+itrace.0.zen @ 86518ns: 0100988a 1c7c0360  0r3[32:63]=44000360
+itrace.0.zen @ 86934ns: 0100988e 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 86954ns: 01009892 1c8403a0  0r4[32:63]=440003a0
+itrace.0.zen @ 86954ns: 01009896 009d     0lr=01009994
+itrace.0.zen @ 87350ns: 01009898 0005     0lr=0100989a
+branch.0.zen @ 87350ns: cof taken 
+itrace.0.zen @ 89929ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 90345ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 90366ns: 0100999c 54690000 w(40000010) 44000360
+itrace.0.zen @ 91426ns: 010099a0 54890000 w(40000010) 440003a0
+itrace.0.zen @ 91426ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 91842ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 91863ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 91925.600ns: [ CORE_A0        ] pre_post_main: Configure PLL1
+itrace.0.zen @ 92258ns: 010099b0 0004    
+branch.0.zen @ 92258ns: cof taken 
+itrace.0.zen @ 94838ns: 0100989a 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 95919ns: 0100989e 1d299514  0r9[32:63]=01009514
+itrace.0.zen @ 95940ns: 010098a2 7d2803a6 0lr=01009514
+itrace.0.zen @ 95961ns: 010098a6 0005     0lr=010098a8
+branch.0.zen @ 95961ns: cof taken 
+itrace.0.zen @ 97833ns: 01009514 182106f0 w(40003ab0) 40003ac0  0r1[32:63]=40003ab0
+itrace.0.zen @ 98249ns: 01009518 0080      0r0[32:63]=010098a8
+itrace.0.zen @ 98270ns: 0100951a 54010014 w(40003ac4) 010098a8
+itrace.0.zen @ 99330ns: 0100951e 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 99351ns: 01009522 1c6301d0  0r3[32:63]=440001d0
+itrace.0.zen @ 99746ns: 01009526 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 99767ns: 0100952a 1c84023c  0r4[32:63]=4400023c
+itrace.0.zen @ 100162ns: 0100952e 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 100183ns: 01009532 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 100578ns: 01009536 7d2803a6 0lr=01009994
+itrace.0.zen @ 100599ns: 0100953a 0005     0lr=0100953c
+branch.0.zen @ 100599ns: cof taken 
+itrace.0.zen @ 103158ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 103574ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 103594ns: 0100999c 54690000 w(40000010) 440001d0
+itrace.0.zen @ 104655ns: 010099a0 54890000 w(40000010) 4400023c
+itrace.0.zen @ 104655ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 105071ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 105092ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 105154.400ns: [ CORE_A0        ] /proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/tool_data/compiler/include/mc_functions.h: **** Configure PLL1  ****
+itrace.0.zen @ 105487ns: 010099b0 0004    
+branch.0.zen @ 105487ns: cof taken 
+itrace.0.zen @ 108066ns: 0100953c 18618008  0r3[32:63]=40003ab8
+itrace.0.zen @ 109148ns: 01009540 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 109169ns: 01009544 1d29941c  0r9[32:63]=0100941c
+itrace.0.zen @ 109564ns: 01009548 7d2803a6 0lr=0100941c
+itrace.0.zen @ 109585ns: 0100954c 0005     0lr=0100954e
+branch.0.zen @ 109585ns: cof taken 
+itrace.0.zen @ 111478ns: 0100941c 7148e000 0r10[32:63]=40000000
+itrace.0.zen @ 112559ns: 01009420 1d6a2200 0r11[32:63]=40002200
+itrace.0.zen @ 112559ns: 01009424 7128e400  0r9[32:63]=44000000
+itrace.0.zen @ 112975ns: 01009428 1d290188  0r9[32:63]=44000188
+itrace.0.zen @ 112996ns: 0100942c 552a2200 w(40002200) 44000188
+itrace.0.zen @ 113391ns: 01009430 70000001  0r0[32:63]=00000001
+itrace.0.zen @ 113412ns: 01009434 340b0004 w(40002204) 01
+itrace.0.zen @ 113807ns: 01009438 701fe3e0  0r0[32:63]=fbe00000
+itrace.0.zen @ 113828ns: 0100943c 1800d140  0r0[32:63]=fbe04000
+itrace.0.zen @ 114889ns: 01009440 540b0008 w(40002208) fbe04000
+itrace.0.zen @ 114889ns: 01009444 70000040  0r0[32:63]=00000040
+itrace.0.zen @ 115305ns: 01009448 5c0b000c w(4000220c) 0040
+itrace.0.zen @ 115326ns: 0100944c 5c0b000e w(4000220e) 0040
+itrace.0.zen @ 115721ns: 01009450 55630000 w(40003ab8) 40002200
+itrace.0.zen @ 115721ns: 01009454 0004    
+branch.0.zen @ 115721ns: cof taken 
+itrace.0.zen @ 118716ns: 0100954e 713fe7f0  0r9[32:63]=fff00000
+itrace.0.zen @ 118737ns: 01009552 1929d1c0  0r9[32:63]=fff0c000
+itrace.0.zen @ 119132ns: 01009556 7002e101  0r0[32:63]=11010000
+itrace.0.zen @ 119153ns: 0100955a 1800d120  0r0[32:63]=11012000
+itrace.0.zen @ 120567ns: 0100955e 54090000 w(fff0c000) 11012000
+itrace.0.zen @ 120588ns: 01009562 50610008 r(40003ab8) 0r3[32:63]=40002200
+
+Warning-[STASKW_SDILTA64B] Scaled delay exceeds 64 bit limit
+/proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/top_modules_v/A_IP_PLL_GP_1300M_FM_CLN28HPM.V, 245
+  Scaled delay                                                              
+  inf (                                                             inf) is 
+  larger than a 64 bit integer, using 1 instead.
+
+
+Warning-[STASKW_SDILTA64B] Scaled delay exceeds 64 bit limit
+/proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/top_modules_v/A_IP_PLL_GP_1300M_FM_CLN28HPM.V, 280
+  Scaled delay                                                              
+  inf (                                                             inf) is 
+  larger than a 64 bit integer, using 1 instead.
+
+
+Warning-[STASKW_SDILTA64B] Scaled delay exceeds 64 bit limit
+/proj/tec_59p9cc/users/ra8307/build.00.08/testbench/blocks/soc_tb/testbench/top_modules_v/A_IP_PLL_GP_1300M_FM_CLN28HPM.V, 281
+  Scaled delay                                                              
+  inf (                                                             inf) is 
+  larger than a 64 bit integer, using 1 instead.
+
+itrace.0.zen @ 120650ns: 01009566 70800028  0r4[32:63]=00000028
+itrace.0.zen @ 120650ns: 0100956a 70a003e8  0r5[32:63]=000003e8
+itrace.0.zen @ 121046ns: 0100956e 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 121066ns: 01009572 1d299458  0r9[32:63]=01009458
+itrace.0.zen @ 121462ns: 01009576 7d2803a6 0lr=01009458
+itrace.0.zen @ 121482ns: 0100957a 0005     0lr=0100957c
+branch.0.zen @ 121482ns: cof taken 
+itrace.0.zen @ 124041ns: 01009458 182106d0 w(40003a80) 40003ab0  0r1[32:63]=40003a80
+itrace.0.zen @ 124041ns: 0100945c 0080      0r0[32:63]=0100957c
+itrace.0.zen @ 125122ns: 0100945e 56c10008 w(40003a88) 00000000
+itrace.0.zen @ 125143ns: 01009462 57c10028 w(40003aa8) 00000000
+itrace.0.zen @ 125538ns: 01009466 57e1002c w(40003aac) 00000000
+itrace.0.zen @ 125559ns: 0100946a 54010034 w(40003ab4) 0100957c
+itrace.0.zen @ 125559ns: 0100946e 023e     0r22[32:63]=40002200
+itrace.0.zen @ 125954ns: 01009470 014f     0r31[32:63]=00000028
+itrace.0.zen @ 125954ns: 01009472 015e     0r30[32:63]=000003e8
+itrace.0.zen @ 125975ns: 01009474 1c04ffdb  0r0[32:63]=00000003
+itrace.0.zen @ 126370ns: 01009478 72e0002a 0r23[32:63]=0000002a
+itrace.0.zen @ 126391ns: 0100947c 7c80b840  0cr=28000000
+itrace.0.zen @ 127452ns: 01009480 7a050022
+branch.0.zen @ 127452ns: cof taken 
+itrace.0.zen @ 129366ns: 010094a2 71200015  0r9[32:63]=00000015
+itrace.0.zen @ 129782ns: 010094a6 7000e001  0r0[32:63]=00010000
+itrace.0.zen @ 129782ns: 010094aa 72e00028 0r23[32:63]=00000028
+itrace.0.zen @ 130198ns: 010094ae 7c9fb800  0cr=22000000
+itrace.0.zen @ 130218ns: 010094b2 7a060030
+itrace.0.zen @ 130614ns: 010094b6 71200019  0r9[32:63]=00000019
+itrace.0.zen @ 130614ns: 010094ba 7000e008  0r0[32:63]=00080000
+itrace.0.zen @ 131695ns: 010094be 72e0007d 0r23[32:63]=0000007d
+itrace.0.zen @ 131716ns: 010094c2 7c9eb800  0cr=24000000
+itrace.0.zen @ 132111ns: 010094c6 7a16001c
+itrace.0.zen @ 132111ns: 010094ca 7000e001  0r0[32:63]=00010000
+itrace.0.zen @ 132527ns: 010094ce 72e003e8 0r23[32:63]=000003e8
+itrace.0.zen @ 132548ns: 010094d2 7c9eb800  0cr=22000000
+itrace.0.zen @ 132943ns: 010094d6 7a16000c
+branch.0.zen @ 132943ns: cof taken 
+itrace.0.zen @ 134940ns: 010094e2 50760008 r(40002208) 0r3[32:63]=fbe04000
+itrace.0.zen @ 135273ns: 010094e6 18638028  0r3[32:63]=fbe04028
+itrace.0.zen @ 135273ns: 010094ea 7d240378  0r4[32:63]=00010019
+itrace.0.zen @ 135689ns: 010094ee 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 135710ns: 010094f2 1d299ac4  0r9[32:63]=01009ac4
+itrace.0.zen @ 136105ns: 010094f6 7d2803a6 0lr=01009ac4
+itrace.0.zen @ 136126ns: 010094fa 0005     0lr=010094fc
+branch.0.zen @ 136126ns: cof taken 
+itrace.0.zen @ 139038ns: 01009ac4 54830000 w(fbe04028) 00010019
+itrace.0.zen @ 139121ns: 01009ac8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 139142ns: 01009acc 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 139516ns: 01009ad0 54690000 w(40000010) fbe04028
+itrace.0.zen @ 139537ns: 01009ad4 54890000 w(40000010) 00010019
+itrace.0.zen @ 139932ns: 01009ad8 7000002a  0r0[32:63]=0000002a
+itrace.0.zen @ 139932ns: 01009adc 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 141014ns: 01009ae0 34090000 w(40000000) 2a
+itrace.0.zen @ 141014ns: 01009ae4 0004    
+branch.0.zen @ 141014ns: cof taken 
+UVM_INFO @ 141096.800ns: [ CORE_A0        ] W32: A=fbe04028 W=00010019
+itrace.0.zen @ 142345ns: 010094fc 50010034 r(40003ab4) 0r0[32:63]=0100957c
+itrace.0.zen @ 142761ns: 01009500 0090     0lr=0100957c
+itrace.0.zen @ 142761ns: 01009502 52c10008 r(40003a88) 0r22[32:63]=00000000
+itrace.0.zen @ 143177ns: 01009506 53c10028 r(40003aa8) 0r30[32:63]=00000000
+itrace.0.zen @ 143218ns: 0100950a 53e1002c r(40003aac) 0r31[32:63]=00000000
+itrace.0.zen @ 143510ns: 0100950e 18218030  0r1[32:63]=40003ab0
+itrace.0.zen @ 143510ns: 01009512 0004    
+branch.0.zen @ 143510ns: cof taken 
+itrace.0.zen @ 146172ns: 0100957c 50010014 r(40003ac4) 0r0[32:63]=010098a8
+itrace.0.zen @ 147170ns: 01009580 0090     0lr=010098a8
+itrace.0.zen @ 147170ns: 01009582 20f1      0r1[32:63]=40003ac0
+itrace.0.zen @ 147191ns: 01009584 0004    
+branch.0.zen @ 147191ns: cof taken 
+itrace.0.zen @ 149084ns: 010098a8 1c7b0330  0r3[32:63]=44000330
+itrace.0.zen @ 149084ns: 010098ac 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 149500ns: 010098b0 1c8403b0  0r4[32:63]=440003b0
+itrace.0.zen @ 149500ns: 010098b4 009d     0lr=01009994
+itrace.0.zen @ 149521ns: 010098b6 0005     0lr=010098b8
+branch.0.zen @ 149521ns: cof taken 
+itrace.0.zen @ 152079ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 152495ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 152516ns: 0100999c 54690000 w(40000010) 44000330
+itrace.0.zen @ 153577ns: 010099a0 54890000 w(40000010) 440003b0
+itrace.0.zen @ 153577ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 153993ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 154014ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 154076.000ns: [ CORE_A0        ] pre_main: Turn on PLL1 first
+itrace.0.zen @ 154409ns: 010099b0 0004    
+branch.0.zen @ 154409ns: cof taken 
+itrace.0.zen @ 156988ns: 010098b8 713fe7fb  0r9[32:63]=fffb0000
+itrace.0.zen @ 157009ns: 010098bc 7130c030  0r9[32:63]=fffb8030
+itrace.0.zen @ 158319ns: 010098c0 50090000 r(fffb8030) 0r0[32:63]=00130010
+itrace.0.zen @ 158402ns: 010098c4 1800d0a0  0r0[32:63]=001300b0
+itrace.0.zen @ 158839ns: 010098c8 54090000 w(fffb8030) 001300b0
+itrace.0.zen @ 158839ns: 010098cc 713fe7fb  0r9[32:63]=fffb0000
+itrace.0.zen @ 158922ns: 010098d0 7130c270  0r9[32:63]=fffb8270
+itrace.0.zen @ 159318ns: 010098d4 50090000 r(fffb8270) 0r0[32:63]=00000000
+itrace.0.zen @ 159401ns: 010098d8 1800d040  0r0[32:63]=00000040
+itrace.0.zen @ 159838ns: 010098dc 54090000 w(fffb8270) 00000040
+itrace.0.zen @ 160399ns: 010098e0 7068e000  0r3[32:63]=40000000
+itrace.0.zen @ 160399ns: 010098e4 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 160815ns: 010098e8 1d299274  0r9[32:63]=01009274
+itrace.0.zen @ 160836ns: 010098ec 7d2803a6 0lr=01009274
+itrace.0.zen @ 161231ns: 010098f0 0005     0lr=010098f2
+branch.0.zen @ 161231ns: cof taken 
+itrace.0.zen @ 163810ns: 01009274 182106e0 w(40003aa0) 40003ac0  0r1[32:63]=40003aa0
+itrace.0.zen @ 164226ns: 01009278 0080      0r0[32:63]=010098f2
+itrace.0.zen @ 164226ns: 0100927a 57a10014 w(40003ab4) 01009994
+itrace.0.zen @ 165308ns: 0100927e 57c10018 w(40003ab8) 00000000
+itrace.0.zen @ 165329ns: 01009282 57e1001c w(40003abc) 00000000
+itrace.0.zen @ 165724ns: 01009286 54010024 w(40003ac4) 010098f2
+itrace.0.zen @ 165724ns: 0100928a 013f     0r31[32:63]=40000000
+itrace.0.zen @ 165745ns: 0100928c 7014e000  0r0[32:63]=a0000000
+itrace.0.zen @ 166140ns: 01009290 7c830000  0cr=24000000
+itrace.0.zen @ 166161ns: 01009294 7a06001c
+branch.0.zen @ 166161ns: cof taken 
+itrace.0.zen @ 168054ns: 010092b0 7010e000  0r0[32:63]=80000000
+itrace.0.zen @ 168074ns: 010092b4 7c830000  0cr=24000000
+itrace.0.zen @ 168470ns: 010092b8 7a060018
+branch.0.zen @ 168470ns: cof taken 
+itrace.0.zen @ 170383ns: 010092d0 01f3      0r3[32:63]=40000000
+itrace.0.zen @ 170383ns: 010092d2 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 170799ns: 010092d6 1d2990f4  0r9[32:63]=010090f4
+itrace.0.zen @ 170820ns: 010092da 7d2803a6 0lr=010090f4
+itrace.0.zen @ 170841ns: 010092de 0005     0lr=010092e0
+branch.0.zen @ 170841ns: cof taken 
+itrace.0.zen @ 173378ns: 010090f4 182106f0 w(40003a90) 40003aa0  0r1[32:63]=40003a90
+itrace.0.zen @ 173794ns: 010090f8 0080      0r0[32:63]=010092e0
+itrace.0.zen @ 173815ns: 010090fa 54010014 w(40003aa4) 010092e0
+itrace.0.zen @ 174876ns: 010090fe 700ae000  0r0[32:63]=50000000
+itrace.0.zen @ 174897ns: 01009102 7c830000  0cr=28000000
+itrace.0.zen @ 175292ns: 01009106 7a1600f0
+itrace.0.zen @ 175292ns: 0100910a 7c830040  0cr=28000000
+itrace.0.zen @ 175708ns: 0100910e 7a150050
+itrace.0.zen @ 175708ns: 01009112 7004e000  0r0[32:63]=20000000
+itrace.0.zen @ 176124ns: 01009116 7c830000  0cr=24000000
+itrace.0.zen @ 176145ns: 0100911a 7a1600ac
+itrace.0.zen @ 177206ns: 0100911e 7c830040  0cr=24000000
+itrace.0.zen @ 177226ns: 01009122 7a150020
+branch.0.zen @ 177226ns: cof taken 
+itrace.0.zen @ 179119ns: 01009142 7006e000  0r0[32:63]=30000000
+itrace.0.zen @ 179535ns: 01009146 7c830000  0cr=24000000
+itrace.0.zen @ 179556ns: 0100914a 7a16008c
+itrace.0.zen @ 179951ns: 0100914e 7008e000  0r0[32:63]=40000000
+itrace.0.zen @ 179972ns: 01009152 7c830000  0cr=22000000
+itrace.0.zen @ 180367ns: 01009156 7a160090
+branch.0.zen @ 180367ns: cof taken 
+itrace.0.zen @ 183362ns: 010091e6 713fe7fb  0r9[32:63]=fffb0000
+itrace.0.zen @ 183383ns: 010091ea 7130c030  0r9[32:63]=fffb8030
+itrace.0.zen @ 184111ns: 010091ee 50690000 r(fffb8030) 0r3[32:63]=001300b0
+itrace.0.zen @ 184111ns: 010091f2 78000076
+branch.0.zen @ 184111ns: cof taken 
+itrace.0.zen @ 186441ns: 01009268 50010014 r(40003aa4) 0r0[32:63]=010092e0
+itrace.0.zen @ 186524ns: 0100926c 0090     0lr=010092e0
+itrace.0.zen @ 186524ns: 0100926e 20f1      0r1[32:63]=40003aa0
+itrace.0.zen @ 186774ns: 01009270 0004    
+branch.0.zen @ 186774ns: cof taken 
+itrace.0.zen @ 189353ns: 010092e0 013e     0r30[32:63]=001300b0
+itrace.0.zen @ 189353ns: 010092e2 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 189769ns: 010092e6 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 189769ns: 010092ea 7000024f  0r0[32:63]=0000024f
+itrace.0.zen @ 190185ns: 010092ee 5c090000 w(40000010) 024f
+itrace.0.zen @ 190185ns: 010092f2 7168e000 0r11[32:63]=40000000
+itrace.0.zen @ 190601ns: 010092f6 70000061  0r0[32:63]=00000061
+itrace.0.zen @ 190622ns: 010092fa 340b0000 w(40000000) 61
+UVM_INFO @ 190684.000ns: [ CORE_A0        ] C TRIGGER_SET: Setting trigger 591
+itrace.0.zen @ 191682ns: 010092fe 7000025e  0r0[32:63]=0000025e
+itrace.0.zen @ 191703ns: 01009302 5c090000 w(40000010) 025e
+itrace.0.zen @ 192098ns: 01009306 54690000 w(40000010) 001300b0
+itrace.0.zen @ 192098ns: 0100930a 70000069  0r0[32:63]=00000069
+itrace.0.zen @ 192514ns: 0100930e 340b0000 w(40000000) 69
+itrace.0.zen @ 192514ns: 01009312 73bfe7fb 0r29[32:63]=fffb0000
+UVM_INFO @ 192597.600ns: [ CORE_A0        ] C MB_PUT32: Putting into mailbox 606, data is 001300b0
+itrace.0.zen @ 192930ns: 01009316 73b0c004 0r29[32:63]=fffb8004
+itrace.0.zen @ 192930ns: 0100931a 712b02f0  0r9[32:63]=00005af0
+itrace.0.zen @ 192951ns: 0100931e 0310      0r0[32:63]=00005af0
+itrace.0.zen @ 194012ns: 01009320 44f0      0r0[32:63]=40005af0
+itrace.0.zen @ 194449ns: 01009322 541d0000 w(fffb8004) 40005af0
+itrace.0.zen @ 194532ns: 01009326 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 194553ns: 0100932a 1c630084  0r3[32:63]=44000084
+itrace.0.zen @ 194844ns: 0100932e 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 194865ns: 01009332 1c84009c  0r4[32:63]=4400009c
+itrace.0.zen @ 195260ns: 01009336 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 195281ns: 0100933a 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 196342ns: 0100933e 7d2803a6 0lr=01009994
+itrace.0.zen @ 196362ns: 01009342 0005     0lr=01009344
+branch.0.zen @ 196362ns: cof taken 
+itrace.0.zen @ 198255ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 198671ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 198692ns: 0100999c 54690000 w(40000010) 44000084
+itrace.0.zen @ 199753ns: 010099a0 54890000 w(40000010) 4400009c
+itrace.0.zen @ 199753ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 200169ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 200190ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 200252.000ns: [ CORE_A0        ] entry_to_target_mode: changing MC mode
+itrace.0.zen @ 200585ns: 010099b0 0004    
+branch.0.zen @ 200585ns: cof taken 
+itrace.0.zen @ 202498ns: 01009344 71200000  0r9[32:63]=00000000
+itrace.0.zen @ 202914ns: 01009348 7134c50f  0r9[32:63]=0000a50f
+itrace.0.zen @ 202935ns: 0100934c 0310      0r0[32:63]=0000a50f
+itrace.0.zen @ 202956ns: 0100934e 44f0      0r0[32:63]=4000a50f
+itrace.0.zen @ 203767ns: 01009350 541d0000 w(fffb8004) 4000a50f
+itrace.0.zen @ 203767ns: 01009354 713fe7fb  0r9[32:63]=fffb0000
+itrace.0.zen @ 203850ns: 01009358 1929d180  0r9[32:63]=fffb8000
+itrace.0.zen @ 204246ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 204828ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 204828ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 205244ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 205265ns: 0100936c 7a06fff0
+branch.0.zen @ 205265ns: cof taken 
+itrace.0.zen @ 206742ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 206908ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 206908ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 207324ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 207345ns: 0100936c 7a06fff0
+branch.0.zen @ 207345ns: cof taken 
+itrace.0.zen @ 208905ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 208988ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 208988ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 209404ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 209425ns: 0100936c 7a06fff0
+branch.0.zen @ 209425ns: cof taken 
+itrace.0.zen @ 210902ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 211068ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 211068ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 211484ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 211505ns: 0100936c 7a06fff0
+branch.0.zen @ 211505ns: cof taken 
+itrace.0.zen @ 213065ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 213148ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 213148ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 213564ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 213585ns: 0100936c 7a06fff0
+branch.0.zen @ 213585ns: cof taken 
+itrace.0.zen @ 215062ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 215228ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 215228ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 215644ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 215665ns: 0100936c 7a06fff0
+branch.0.zen @ 215665ns: cof taken 
+itrace.0.zen @ 217225ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130010
+itrace.0.zen @ 217308ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 217308ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 217724ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 217745ns: 0100936c 7a06fff0
+branch.0.zen @ 217745ns: cof taken 
+itrace.0.zen @ 219222ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=38130030
+itrace.0.zen @ 219388ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 219388ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 219804ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 219825ns: 0100936c 7a06fff0
+branch.0.zen @ 219825ns: cof taken 
+itrace.0.zen @ 220299ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=381300b0
+itrace.0.zen @ 220303ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 220303ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 220323ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 220324ns: 0100936c 7a06fff0
+branch.0.zen @ 220324ns: cof taken 
+itrace.0.zen @ 220395ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=381300b0
+itrace.0.zen @ 220403ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 220403ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 220423ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 220424ns: 0100936c 7a06fff0
+branch.0.zen @ 220424ns: cof taken 
+itrace.0.zen @ 220499ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=381300b0
+itrace.0.zen @ 220503ns: 01009360 740b2fff 0r11[32:63]=00000001
+itrace.0.zen @ 220503ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 220523ns: 01009368 7c8bb800  0cr=24000000
+itrace.0.zen @ 220524ns: 0100936c 7a06fff0
+branch.0.zen @ 220524ns: cof taken 
+itrace.0.zen @ 220595ns: 0100935c 50090000 r(fffb8000) 0r0[32:63]=401300b0
+itrace.0.zen @ 220603ns: 01009360 740b2fff 0r11[32:63]=00000000
+itrace.0.zen @ 220603ns: 01009364 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 220623ns: 01009368 7c8bb800  0cr=22000000
+itrace.0.zen @ 220624ns: 0100936c 7a06fff0
+itrace.0.zen @ 220643ns: 01009370 7014e000  0r0[32:63]=a0000000
+itrace.0.zen @ 220644ns: 01009374 7fe00278  0r0[32:63]=e0000000
+itrace.0.zen @ 220663ns: 01009378 7c09fe70  0r9[32:63]=ffffffff        0xer[0:2]=1
+itrace.0.zen @ 220664ns: 0100937c 7d200278  0r0[32:63]=1fffffff
+itrace.0.zen @ 220715ns: 01009380 7c004850  0r0[32:63]=e0000000
+itrace.0.zen @ 220715ns: 01009384 7130e000  0r9[32:63]=80000000
+itrace.0.zen @ 220735ns: 01009388 7fe94a78  0r9[32:63]=c0000000
+itrace.0.zen @ 220736ns: 0100938c 7d2bfe70 0r11[32:63]=ffffffff        0xer[0:2]=1
+itrace.0.zen @ 220755ns: 01009390 7d694a78  0r9[32:63]=3fffffff
+itrace.0.zen @ 220756ns: 01009394 7d295850  0r9[32:63]=c0000000
+itrace.0.zen @ 220775ns: 01009398 7d2b0038 0r11[32:63]=c0000000
+itrace.0.zen @ 220776ns: 0100939c 700b9800  0cr=82000000
+itrace.0.zen @ 220827ns: 010093a0 7a000064
+itrace.0.zen @ 220827ns: 010093a4 707fe7fb  0r3[32:63]=fffb0000
+itrace.0.zen @ 220847ns: 010093a8 1863d180  0r3[32:63]=fffb8000
+itrace.0.zen @ 220847ns: 010093ac 01f4      0r4[32:63]=40000000
+itrace.0.zen @ 220867ns: 010093ae 70bee000  0r5[32:63]=f0000000
+itrace.0.zen @ 220867ns: 010093b2 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 220887ns: 010093b6 1fa99a54 0r29[32:63]=01009a54
+itrace.0.zen @ 220888ns: 010093ba 009d     0lr=01009a54
+itrace.0.zen @ 220889ns: 010093bc 0005     0lr=010093be
+branch.0.zen @ 220889ns: cof taken 
+itrace.0.zen @ 221027ns: 01009a54 51630000 r(fffb8000) 0r11[32:63]=401300b0
+itrace.0.zen @ 221031ns: 01009a58 7d602838  0r0[32:63]=40000000
+itrace.0.zen @ 221031ns: 01009a5c 7c892838  0r9[32:63]=40000000
+itrace.0.zen @ 221083ns: 01009a60 7c804800  0cr=82000000
+itrace.0.zen @ 221084ns: 01009a64 7a06002a
+itrace.0.zen @ 221103ns: 01009a68 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 221104ns: 01009a6c 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 221123ns: 01009a70 54690000 w(40000010) fffb8000
+itrace.0.zen @ 221124ns: 01009a74 55690000 w(40000010) 401300b0
+itrace.0.zen @ 221143ns: 01009a78 54890000 w(40000010) 40000000
+itrace.0.zen @ 221144ns: 01009a7c 54a90000 w(40000010) f0000000
+itrace.0.zen @ 221195ns: 01009a80 70000009  0r0[32:63]=00000009
+itrace.0.zen @ 221195ns: 01009a84 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 221215ns: 01009a88 34090000 w(40000000) 09
+itrace.0.zen @ 221215ns: 01009a8c 0004    
+branch.0.zen @ 221215ns: cof taken 
+UVM_INFO @ 221218.502ns: [ CORE_A0        ] REM32: A=fffb8000 R=401300b0 E=40000000 M=f0000000
+itrace.0.zen @ 221359ns: 010093be 7004e000  0r0[32:63]=20000000
+itrace.0.zen @ 221360ns: 010093c2 7c9f0000  0cr=84000000
+itrace.0.zen @ 221379ns: 010093c6 7a16001e
+itrace.0.zen @ 221379ns: 010093ca 707fe7fb  0r3[32:63]=fffb0000
+itrace.0.zen @ 221399ns: 010093ce 1863d180  0r3[32:63]=fffb8000
+itrace.0.zen @ 221399ns: 010093d2 01e4      0r4[32:63]=001300b0
+itrace.0.zen @ 221400ns: 010093d4 70a0e003  0r5[32:63]=00030000
+itrace.0.zen @ 221419ns: 010093d8 18a5d0ff  0r5[32:63]=000300ff
+itrace.0.zen @ 221419ns: 010093dc 009d     0lr=01009a54
+itrace.0.zen @ 221420ns: 010093de 0005     0lr=010093e0
+branch.0.zen @ 221420ns: cof taken 
+itrace.0.zen @ 221555ns: 01009a54 51630000 r(fffb8000) 0r11[32:63]=401300b0
+itrace.0.zen @ 221563ns: 01009a58 7d602838  0r0[32:63]=000300b0
+itrace.0.zen @ 221563ns: 01009a5c 7c892838  0r9[32:63]=000300b0
+itrace.0.zen @ 221615ns: 01009a60 7c804800  0cr=82000000
+itrace.0.zen @ 221616ns: 01009a64 7a06002a
+itrace.0.zen @ 221635ns: 01009a68 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 221636ns: 01009a6c 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 221655ns: 01009a70 54690000 w(40000010) fffb8000
+itrace.0.zen @ 221656ns: 01009a74 55690000 w(40000010) 401300b0
+itrace.0.zen @ 221675ns: 01009a78 54890000 w(40000010) 001300b0
+itrace.0.zen @ 221676ns: 01009a7c 54a90000 w(40000010) 000300ff
+itrace.0.zen @ 221727ns: 01009a80 70000009  0r0[32:63]=00000009
+itrace.0.zen @ 221727ns: 01009a84 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 221747ns: 01009a88 34090000 w(40000000) 09
+itrace.0.zen @ 221747ns: 01009a8c 0004    
+branch.0.zen @ 221747ns: cof taken 
+UVM_INFO @ 221750.502ns: [ CORE_A0        ] REM32: A=fffb8000 R=401300b0 E=001300b0 M=000300ff
+itrace.0.zen @ 221807ns: 010093e0 78000024
+branch.0.zen @ 221807ns: cof taken 
+itrace.0.zen @ 221903ns: 01009404 50010024 r(40003ac4) 0r0[32:63]=010098f2
+itrace.0.zen @ 221923ns: 01009408 0090     0lr=010098f2
+itrace.0.zen @ 221923ns: 0100940a 53a10014 r(40003ab4) 0r29[32:63]=01009994
+itrace.0.zen @ 221943ns: 0100940e 53c10018 r(40003ab8) 0r30[32:63]=00000000
+itrace.0.zen @ 221945ns: 01009412 53e1001c r(40003abc) 0r31[32:63]=00000000
+itrace.0.zen @ 221945ns: 01009416 21f1      0r1[32:63]=40003ac0
+itrace.0.zen @ 221959ns: 01009418 0004    
+branch.0.zen @ 221959ns: cof taken 
+itrace.0.zen @ 222083ns: 010098f2 713fe7fb  0r9[32:63]=fffb0000
+itrace.0.zen @ 222103ns: 010098f6 1929d180  0r9[32:63]=fffb8000
+itrace.0.zen @ 222123ns: 010098fa 50090000 r(fffb8000) 0r0[32:63]=401300b0
+itrace.0.zen @ 222155ns: 010098fe 740b2fff 0r11[32:63]=00000000
+itrace.0.zen @ 222155ns: 01009902 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 222175ns: 01009906 7c8bb800  0cr=82000000
+itrace.0.zen @ 222176ns: 0100990a 7a06fff0
+itrace.0.zen @ 222199ns: 0100990e 50010024 r(40003ae4) 0r0[32:63]=01009df4
+itrace.0.zen @ 222207ns: 01009912 0090     0lr=01009df4
+itrace.0.zen @ 222207ns: 01009914 5361000c r(40003acc) 0r27[32:63]=00000000
+itrace.0.zen @ 222219ns: 01009918 53810010 r(40003ad0) 0r28[32:63]=00000000
+itrace.0.zen @ 222221ns: 0100991c 53a10014 r(40003ad4) 0r29[32:63]=00000000
+itrace.0.zen @ 222267ns: 01009920 21f1      0r1[32:63]=40003ae0
+itrace.0.zen @ 222267ns: 01009922 0004    
+branch.0.zen @ 222267ns: cof taken 
+itrace.0.zen @ 222359ns: 01009df4 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 222379ns: 01009df8 1d299e28  0r9[32:63]=01009e28
+itrace.0.zen @ 222380ns: 01009dfc 7d2803a6 0lr=01009e28
+itrace.0.zen @ 222431ns: 01009e00 0005     0lr=01009e02
+branch.0.zen @ 222431ns: cof taken 
+itrace.0.zen @ 222523ns: 01009e28 182106f0 w(40003ad0) 40003ae0  0r1[32:63]=40003ad0
+itrace.0.zen @ 222523ns: 01009e2c 0080      0r0[32:63]=01009e02
+itrace.0.zen @ 222543ns: 01009e2e 54010014 w(40003ae4) 01009e02
+itrace.0.zen @ 222543ns: 01009e32 79ff640d 0lr=01009e36
+branch.0.zen @ 222543ns: cof taken 
+itrace.0.zen @ 222667ns: 0100023e 0004    
+branch.0.zen @ 222667ns: cof taken 
+itrace.0.zen @ 222779ns: 01009e36 70000000  0r0[32:63]=00000000
+itrace.0.zen @ 222780ns: 01009e3a 54010008 w(40003ad8) 00000000
+itrace.0.zen @ 222803ns: 01009e3e 50010008 r(40003ad8) 0r0[32:63]=00000000
+itrace.0.zen @ 222803ns: 01009e42 72e00001 0r23[32:63]=00000001
+itrace.0.zen @ 222819ns: 01009e46 7c80b840  0cr=88000000
+itrace.0.zen @ 222820ns: 01009e4a 7a15001e
+itrace.0.zen @ 222843ns: 01009e4e 50010008 r(40003ad8) 0r0[32:63]=00000000
+itrace.0.zen @ 222847ns: 01009e52 2000      0r0[32:63]=00000001
+itrace.0.zen @ 222848ns: 01009e54 54010008 w(40003ad8) 00000001
+itrace.0.zen @ 222863ns: 01009e58 50010008 r(40003ad8) 0r0[32:63]=00000001
+itrace.0.zen @ 222863ns: 01009e5c 72e00001 0r23[32:63]=00000001
+itrace.0.zen @ 222911ns: 01009e60 7c80b840  0cr=82000000
+itrace.0.zen @ 222912ns: 01009e64 7a05ffea
+branch.0.zen @ 222912ns: cof taken 
+itrace.0.zen @ 222995ns: 01009e4e 50010008 r(40003ad8) 0r0[32:63]=00000001
+itrace.0.zen @ 222999ns: 01009e52 2000      0r0[32:63]=00000002
+itrace.0.zen @ 223000ns: 01009e54 54010008 w(40003ad8) 00000002
+itrace.0.zen @ 223015ns: 01009e58 50010008 r(40003ad8) 0r0[32:63]=00000002
+itrace.0.zen @ 223015ns: 01009e5c 72e00001 0r23[32:63]=00000001
+itrace.0.zen @ 223031ns: 01009e60 7c80b840  0cr=84000000
+itrace.0.zen @ 223032ns: 01009e64 7a05ffea
+itrace.0.zen @ 223055ns: 01009e68 70600000  0r3[32:63]=00000000
+itrace.0.zen @ 223055ns: 01009e6c 50010014 r(40003ae4) 0r0[32:63]=01009e02
+itrace.0.zen @ 223071ns: 01009e70 0090     0lr=01009e02
+itrace.0.zen @ 223071ns: 01009e72 20f1      0r1[32:63]=40003ae0
+itrace.0.zen @ 223072ns: 01009e74 0004    
+branch.0.zen @ 223072ns: cof taken 
+itrace.0.zen @ 223195ns: 01009e02 013d     0r29[32:63]=00000000
+itrace.0.zen @ 223195ns: 01009e04 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 223215ns: 01009e08 1d299924  0r9[32:63]=01009924
+itrace.0.zen @ 223216ns: 01009e0c 7d2803a6 0lr=01009924
+itrace.0.zen @ 223235ns: 01009e10 0005     0lr=01009e12
+branch.0.zen @ 223235ns: cof taken 
+itrace.0.zen @ 223359ns: 01009924 182106f0 w(40003ad0) 40003ae0  0r1[32:63]=40003ad0
+itrace.0.zen @ 223379ns: 01009928 0080      0r0[32:63]=01009e12
+itrace.0.zen @ 223380ns: 0100992a 54010014 w(40003ae4) 01009e12
+itrace.0.zen @ 223399ns: 0100992e 7068e400  0r3[32:63]=44000000
+itrace.0.zen @ 223400ns: 01009932 1c630364  0r3[32:63]=44000364
+itrace.0.zen @ 223419ns: 01009936 7088e400  0r4[32:63]=44000000
+itrace.0.zen @ 223420ns: 0100993a 1c8403c4  0r4[32:63]=440003c4
+itrace.0.zen @ 223471ns: 0100993e 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 223472ns: 01009942 1d299994  0r9[32:63]=01009994
+itrace.0.zen @ 223491ns: 01009946 7d2803a6 0lr=01009994
+itrace.0.zen @ 223492ns: 0100994a 0005     0lr=0100994c
+branch.0.zen @ 223492ns: cof taken 
+itrace.0.zen @ 223583ns: 01009994 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 223603ns: 01009998 1929d010  0r9[32:63]=40000010
+itrace.0.zen @ 223604ns: 0100999c 54690000 w(40000010) 44000364
+itrace.0.zen @ 223655ns: 010099a0 54890000 w(40000010) 440003c4
+itrace.0.zen @ 223655ns: 010099a4 7000005a  0r0[32:63]=0000005a
+itrace.0.zen @ 223675ns: 010099a8 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 223676ns: 010099ac 34090000 w(40000000) 5a
+UVM_INFO @ 223678.502ns: [ CORE_A0        ] post_main: finish
+itrace.0.zen @ 223695ns: 010099b0 0004    
+branch.0.zen @ 223695ns: cof taken 
+itrace.0.zen @ 223791ns: 0100994c 50010014 r(40003ae4) 0r0[32:63]=01009e12
+itrace.0.zen @ 223807ns: 01009950 0090     0lr=01009e12
+itrace.0.zen @ 223807ns: 01009952 20f1      0r1[32:63]=40003ae0
+itrace.0.zen @ 223808ns: 01009954 0004    
+branch.0.zen @ 223808ns: cof taken 
+itrace.0.zen @ 223931ns: 01009e12 01d3      0r3[32:63]=00000000
+itrace.0.zen @ 223931ns: 01009e14 7120e101  0r9[32:63]=01010000
+itrace.0.zen @ 223951ns: 01009e18 1d299958  0r9[32:63]=01009958
+itrace.0.zen @ 223952ns: 01009e1c 7d2803a6 0lr=01009958
+itrace.0.zen @ 224003ns: 01009e20 0005     0lr=01009e22
+branch.0.zen @ 224003ns: cof taken 
+itrace.0.zen @ 224063ns: 01009958 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 224064ns: 0100995c 7c83b800  0cr=82000000
+itrace.0.zen @ 224083ns: 01009960 7a060026
+itrace.0.zen @ 224083ns: 01009964 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 224107ns: 01009968 30092101 r(40002101) 0r0[32:63]=00000000
+itrace.0.zen @ 224107ns: 0100996c 72e00000 0r23[32:63]=00000000
+itrace.0.zen @ 224123ns: 01009970 7c80b800  0cr=82000000
+itrace.0.zen @ 224124ns: 01009974 7a060012
+itrace.0.zen @ 224143ns: 01009978 701f7faa  0r0[32:63]=ffffffaa
+itrace.0.zen @ 224143ns: 0100997c 7128e000  0r9[32:63]=40000000
+itrace.0.zen @ 224195ns: 01009980 34090000 w(40000000) aa
+itrace.0.zen @ 224195ns: 01009984 0004    
+branch.0.zen @ 224195ns: cof taken 
+UVM_INFO @ 224198.502ns: [testbench.END_TEST] END_TEST called - C code finished
+
+--- UVM Report Summary ---
+
+Quit count :     0 of    10
+** Report counts by severity
+UVM_INFO :   30
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[ CORE_A0        ]    16
+[RNTST]     1
+[testbench]     1
+[testbench.END_TEST]     1
+[testbench.load_hex2mem]     2
+[testbench.p9_objections]     1
+[testbench.show_args]     8
+UVM_INFO @44840 END_SIM: Testcases completed Total= 1; T=224199
+UVM_INFO @44840 END_SIM: Testcases completed Successfully= 1; T=224199
+UVM_INFO @44840 END_SIM: Testcases with Warnings= 0; T=224199
+UVM_INFO @44840 END_SIM: Testcases with Errors= 0; T=224199
+UVM_INFO @44840 END_SIM: Cycles= 44840; T=224199
+UVM_INFO @44840 END_SIM: Infos= 30; T=224199
+UVM_INFO @44840 END_SIM: Warns= 0; T=224199
+UVM_INFO @44840 END_SIM: Errors= 0; T=224199
+UVM_INFO @44840 END_SIM: Fatals= 0; T=224199
+UVM_INFO @44840 END_SIM:    PPPPP      AA        SSSS    SSSS     ; T=224199
+UVM_INFO @44840 END_SIM:    PP  PP    AAAA      SS  SS  SS  SS    ; T=224199
+UVM_INFO @44840 END_SIM:    PPPPP    AA  AA      SS      SS       ; T=224199
+UVM_INFO @44840 END_SIM:    PP      AAAAAAAA       SS      SS     ; T=224199
+UVM_INFO @44840 END_SIM:    PP     AA      AA   SS  SS  SS  SS    ; T=224199
+UVM_INFO @44840 END_SIM:    PP    AA        AA   SSSS    SSSS     ; T=224199
+UVM_INFO @44840 END_SIM: Simulation completed Successfully; T=224199
+$finish called from file "/pkg/uvm-/1.1d/src/base/uvm_root.svh", line 430.
+$finish at simulation time          22419850200
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 224198502000 fs
+CPU Time:     81.250 seconds;       Data structure size:  68.6Mb
+Wed Jan 14 10:30:23 2015
+Stingray command line: soc vcsmx -vectors sanity -test alive -collect_arg -keeptemps -vpd -session VPD

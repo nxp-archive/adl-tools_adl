@@ -1,0 +1,73 @@
+//
+// Make sure that we can catch bad instruction table names.
+//
+define (arch=minippc) {
+
+  attrs = mixed;
+
+  define (reg=HID0) {
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instr=addi) {
+    attrs=mixed;
+    fields=(OPCD(10),RA,RB);
+    action = { };
+  }
+
+  define (instr=add) {
+    fields=(OPCD(11),RA,RB);
+    attrs=mixed;
+    action = { };
+  }
+
+  define (instr=foo) {
+    attrs=mixed;
+    fields=(OPCD(12),RA,RB);
+    action = { };
+  }
+
+  defmod(instr=addi) {
+    attrs=(other,mixed);
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  itable_watch = {
+    if (HID0(0) == 0) {
+      return other;
+    } else {
+      return mixed;
+    }
+  };
+
+}
+
+define (core=z6) {
+  archs=minippc;
+  // Because mixed is mentioned first, it should be listed as the first (default)
+  // instruction table.
+  instrtables=(mixed,other,foo);
+}
+
+define (core=z0) {
+  archs=minippc;
+  instrtables=(mixed,bar);
+  
+  // No need for this function to exist, since we only have one table.
+  remove itable_watch;
+
+}

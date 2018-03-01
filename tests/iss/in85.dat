@@ -1,0 +1,102 @@
+#
+# This makes sure that if we raise an exception within a register write
+# hook, we will still log the register modification and that the write
+# will actually occur.
+#
+
+CORE n=:P
+
+= asm
+
+  addi r3,r3,0x3f3f
+  mtspr 211,r3
+  mfspr r4,211
+  .long 0
+  # Program-interrupt handler.
+  addi  r31,r31,1
+  mfspr r30,SRR0
+  addi r30,r30,4
+  mtspr SRR0,r30
+  rfi  
+
+= /asm
+
+RD n=IVOR6 d=0x14
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38633F3F	#	addi r3,r3,0x3f3f
+MD n=Mem ra=0x00000004 d=0x7C7333A6	#	mtspr 211,r3
+MD n=Mem ra=0x00000008 d=0x7C9332A6	#	mfspr r4,211
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000010 d=0x3BFF0001	#	addi  r31,r31,1
+MD n=Mem ra=0x00000014 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x00000018 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x0000001c d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x00000020 d=0x4C000064	#	rfi  
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38633f3f
+INSTR op=0x38633f3f					asm="addi 3,3,0x3f3f"
+R n=GPR i=3 d=0x00003f3f
+R n=ICNT d=0x00000001
+
+I ea=0x4 id=2
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c7333a6
+INSTR op=0x7c7333a6					asm="mtspr 3,0xd3"
+R n=FOO11 d=0x00003f3f
+E n=Program
+R n=SRR0 d=0x00000004
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+
+I ea=0x14 id=3
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7fda02a6
+INSTR op=0x7fda02a6					asm="mfspr 30,0x1a"
+R n=GPR i=30 d=0x00000004
+R n=ICNT d=0x00000002
+
+I ea=0x18 id=4
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x3bde0004
+INSTR op=0x3bde0004					asm="addi 30,30,0x4"
+R n=GPR i=30 d=0x00000008
+R n=ICNT d=0x00000003
+
+I ea=0x1c id=5
+R n=FCNT d=0x00000005
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7fda03a6
+INSTR op=0x7fda03a6					asm="mtspr 30,0x1a"
+R n=SRR0 d=0x00000008
+R n=ICNT d=0x00000004
+
+I ea=0x20 id=6
+R n=FCNT d=0x00000006
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi 0,0,0"
+R n=MSR d=0x00000000
+R n=ICNT d=0x00000005
+
+I ea=0x8 id=7
+R n=FCNT d=0x00000007
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c9332a6
+INSTR op=0x7c9332a6					asm="mfspr 4,0xd3"
+R n=GPR i=4 d=0x00003f3f
+R n=ICNT d=0x00000006
+
+I ea=0xc id=8
+R n=FCNT d=0x00000008
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=ICNT d=0x00000007
+
+RESULTS
+
+RD n=FOO11   d=0x00003f3f
+RD n=GPR i=3 d=0x00003f3f
+RD n=GPR i=4 d=0x00003f3f

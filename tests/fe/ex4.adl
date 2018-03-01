@@ -1,0 +1,63 @@
+//
+// A test of bad exception specifications.
+//
+
+define (arch=minippc) {
+
+  define (reg = FOO) {
+    width = 32;
+  }
+
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (reg=ESR) {};
+
+  attrs = (user,super);
+
+  define (exception=Program) {
+    "Program interrupt.";
+    attrs = (user,super);
+    
+    action = func (Program_t p) {
+      FOO = 12;
+      IAR = 0x0000700;
+      ESR = p.ESR;
+    };
+  }
+
+  define (exception=Foo) {
+    "Program interrupt.";
+    attrs = (user,super);
+    
+    define (field=ESR) {
+      bits=32;
+      reset = 0x80000000;
+    }
+
+    action = {
+      FOO = 12;
+      IAR = 0x0000700;
+    };
+  }
+
+  define (exception=Bar) {
+    
+    // Error:  Field EE does not exist in FOO.
+    enable = { return BAR == 1; };
+
+    sensitivity = whoknows;
+
+    action = {
+      FOO = 13;
+      IAR = 0x0000800;
+    };
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

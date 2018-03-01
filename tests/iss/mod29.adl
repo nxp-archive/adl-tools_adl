@@ -1,0 +1,178 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// An MP model with cache coherency on the data cache.
+//
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  enum CoherencyMesgType { Read, Shared, Invalidate };
+
+  define (eventbus=coherency) {
+    define (field=addr) {
+      bits = 32;
+    }
+    define (field=type) {
+      reset = Read;
+    }
+
+    action = func (coherency_t data) {
+      int set,way;
+      // If the line is in the cache, then it's valid.
+      if (L1d.find(set,way,data.addr.uint32())) {
+        switch (data.type) {
+        case Shared: {
+          // It's a shared announcement, so move the line away from being exclusive.
+          info(1,"share message for address 0x",hex,data.addr);
+          L1d(set,way).exclusive = false;
+          } break;
+        case Read: {
+          // It's a read transaction, so if we're dirty, we must flush.
+          // In either case, we move to the shared state.
+          info(1,"read message for address 0x",hex,data.addr);
+          if (L1d(set,way).dirty) {
+            // It's in a modified state, so flush it to memory.
+            L1d.flush(data.addr.uint32());
+          }
+          L1d(set,way).exclusive = false;
+          // Finally, since it's in our cache, we can't let the other cache have
+          // it exclusively.
+          coherency_t reply;
+          reply.type = Shared;
+          reply.addr = data.addr;
+          coherency.send(reply);
+          } break;
+        case Invalidate: {
+          // It's an invalidate, so our line should not be in a modified state.
+          // We simply invalidate the line.
+          info(1,"invalidate message for address 0x",hex,data.addr);
+          L1d(set,way).valid = false;
+          } break;
+        }
+      }
+    };
+  }
+
+  define (reg=X) {}
+
+  define (reg=FOOCTRL) {}
+
+  define (context=foo) {
+    num_contexts = 2;
+    regs = X;
+    active = { return FOOCTRL.uint32(); };
+  }
+
+  define (reg=DBELL) {}
+
+  define (reg=OCTX) {}
+
+  define (reg=DBELL_INIT) {
+    pseudo = true;
+    
+    define (read) {
+      action = { return 0; };
+    }
+
+    define (write) {
+      action = func (bits<32> x) { 
+        doorbell_t d;
+        d.id = x;
+        d.ctx = OCTX;
+        doorbell.send(d,true);
+      };
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=300) {
+      reg = DBELL_INIT;
+    }
+    define (entry=301) {
+      reg = DBELL;
+    }
+    define (entry=302) {
+      reg = OCTX;
+    }
+    define (entry=303) {
+      reg = X;
+    }
+  }
+
+  define (eventbus=doorbell) {
+    define (field=id) {
+      bits = 32;
+    }
+    define (field=ctx) {
+      bits = 1;
+    }
+
+    action = func(doorbell_t data) {
+      DBELL = data.id;
+      if (data.ctx != FOOCTRL) {
+        FOOCTRL = data.ctx;
+      }
+    };
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 65536;
+    linesize  = 128;
+    set_assoc = 4;
+
+    // If true, then it's exclusive, otherwise it's shared (if line is valid).
+    define (wayfield=exclusive) { }
+
+    read_line = func(CacheAccess ca, unsigned set,unsigned way,addr_t addr) {
+      coherency_t d;
+      d.addr = addr;
+      d.type = Read;
+      // We assume we have exclusive access.  If we don't we'll get a message
+      // reporting that the state should be shared.
+      ThisCache(set,way).exclusive = true;
+      coherency.send(d);
+      ThisCache.read_from_next(ca,set,way,addr,true);
+    };
+
+    line_access = func(CacheAccess ca,unsigned set,unsigned way,addr_t addr) {
+      if (ca == CacheWrite) {
+        if (ThisCache(set,way).exclusive == false) {
+          coherency_t d;
+          d.type = Invalidate;
+          d.addr = addr;
+          coherency.send(d);
+        }
+        ThisCache(set,way).exclusive = true;
+      }
+    };
+
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}
+
+define (sys=MP) {
+  P core0;
+  P core1;
+}
+

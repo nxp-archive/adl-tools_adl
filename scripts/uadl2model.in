@@ -1,0 +1,804 @@
+#!@PERL@ 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+uadl2model [options] <.adl file> <.uadl file>
+
+=head1 SYNOPSIS
+
+uadl2model [options] <.adl file> <.uadl file>
+
+Produces a cycle-accurate/approximate performance simulator from an ADL
+description and uADL description.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--man, -m>
+
+Display the complete help as a man page.
+
+=item B<--version, -v>
+
+Display the ADL/uADL version number.
+
+=item B<--prefix=str>
+
+Specify the prefix directory.
+
+=item B<--verbose[=level]>
+
+Show the output of all internally executed commands.  This may be set to a
+numerical value, in which case extra verbosity may be enabled.  Off is equal to
+a value of 0, 1 is minimal, 2 is more, etc.
+
+=item B<--config-file=file, -cf=file>
+
+Specify a configuration file for model generation.
+
+=item B<--trace-mode, -t>
+
+Generate code for tracing (producing intermediate results).  This is a negatable
+option.  The default is TRUE.
+
+=item B<--debug-mode, -dm>
+
+Generate a model with debug support.  This is a negatable option.  The default
+is TRUE.
+
+=item B<--syscall-enabled>
+
+Enable system-call support.  This is a negatable option.  The default is TRUE.
+
+=item B<--extern-syscalls>
+
+Enable the use of the external system-call interface.
+
+=item B<--rnumber>
+
+Generate the model with RNumber support.  This is a negatable option.  The
+default value is TRUE.
+
+=item B<--safe-mode>
+
+Create a model that always produces correct functional results.
+
+=item B<--iss-mem-mode>
+
+Create a model using the ISS memory interface.  This option is ignored if safe
+mode is not enabled.
+
+=item B<--hybrid-iss>
+
+Generate a hybrid ISS.  This is only applicable for safe mode.  With this
+option, no data is stored within each individual instruction packet.
+
+=item B<--trans-pool-size=int>
+
+Specify the maximum number of outstanding instruction packets for the model.
+
+=item B<--mem-pool-size=int>
+
+Specify the maximum number of outstanding memory transactions for the model.
+
+=item B<--log-usage[=prog:verr]>
+
+Turn usage logging on or off.  The user may supply an optional program-name
+and version string to be logged.  If omitted, then the input-file root will
+be used as the program-name and the version will default to
+<year>.<month>.<day>.
+
+To disable the option, use --log-usage=false or --log-usage=no.  You may also
+use the negated form of --no-log-usage.
+
+=item B<--namespace=str>
+
+Specify the model namespace.  The default namespace is "uadl".  This option
+implies "compile-only" because the default main() function requires namespace
+"uadl".
+
+=item B<--detect-deadlock[=cycle-count]>
+
+Specify a cycle-count for detecting deadlock.  Valid only for safe-mod models.
+A value of 0 disables this feature or the option may be negated to disable it,
+e.g. B<--no-detect-deadlock>.  The default is 0 (the feature is disabled).
+
+=item B<--systemc[=type]>
+
+Create the model as a SystemC module.  This option implies "compile-only" or a
+shared-object target because it is incompatible with the default main()
+function.
+
+The B<type> may be either B<method> or B<thread>, implying the use of their
+SC_METHOD or SC_THREAD.  If no value is specified, B<method> is assumed.
+
+=item B<--tags-only-caches>
+
+When enabled, caches in the model will only store tags and not data.  This is
+convenient for modeling a multi-core system with caches without having to model
+cache coherency.  This option may be negated.
+
+=item B<--mt-support>
+
+Enable multi-threaded simulation support.  This turns on thread-safe memory if
+using the default, internal global memory, and adds necessary support to ensure
+thread safety with event buses, etc.
+
+=item B<--mt-locked-mem>
+
+If compiling a model with B<--mt-support>, this causes all memory accesses to
+invoke a lock.  Normally, locking is only done for atomic instructions.
+
+=item B<--extern-mem>
+
+Use external memory models.  This option implies B<compile-only> or
+B<--target=base-so> because it is incompatible with the default I<main()>
+function.
+
+=item B<--extern-cycle-mem>
+
+Generate code in the model to cycle the external memory.  Normally, this is done
+by the external system model, but in some cases, it makes sense for the core to
+treat the external memory as if it were its own object.  This option may be
+negated.  The default is false.
+
+=item B<--extern-dmi>
+
+Toggle support for an external direct-memory-interface cache.  This is
+only valid if *--extern-mem* is also set.
+
+=item B<--extern-dmi-entry-size=int>
+
+Specify the entry size of the external dmi cache in bits, e.g. 7 = 128
+byte entries.
+
+=item B<--extern-dmi-size=int>
+
+Specify the number of entries in the external dmi cache.
+
+=item B<--preamble=str>
+
+Add a preamble string to the model, which is displayed at startup time.
+
+=item B<--define=str, -D=str>
+
+Specify a preprocessor define.
+
+=item B<--include=path, -I=path>
+
+Specify a preprocessor include directory.
+
+=item B<--depfile=file, -df=file>
+
+Instruct the preprocessor to generate a dependency file suitable for inclusion
+by a Makefile.  This is done as a side-effect and does not affect the
+compilation process.
+
+=item B<--gen>
+
+Controls whether new C++ files are generated or not.  If negated,
+e.g. I<--no-gen>, then the model is just recompiled.  This feature can be used
+to compile a model when only generated C++ files are distributed.
+
+=item B<--gen-only, -go>
+
+Generate the model source code only.
+
+=item B<--compile-only, -co>
+
+Generate the model source code and compile it, producing an object file.
+
+=item B<--target=[exe|so|base-so]>
+
+Specify the target type.  The default is I<exe> which means that a standalone
+executable will be produced.  If the I<so> option is selected, a standalone
+shared object will be generated.  
+
+If the I<base-so> option is selected, a barebones shared object will be created
+which contains only the minimum support libraries.  This is generally only
+useful if the model is to be linked against another application.
+
+=item B<--output=file, -o=file>
+
+Specify the output file name.  If not specified, the base name of the uADL input
+file will be used.
+
+=item B<--src-prefix=path>
+
+Specify a directory for storing the generated source files.
+
+=item B<--no-optimize>
+
+Turn off compiler optimization.
+
+=item B<--optimize=[level]>
+
+Compile the model with optimization.  The default optimization level is 3,
+corresponding to compiling with -O3.  Another level may be specified.  A value
+of 0 turns off optimization (equivalent to using the B<--no-optimize> option).
+
+=item B<--static>
+
+Link everything statically.
+
+=item B<--cc=path>
+
+Specify an alternative compiler to use for preprocessing, compiling, and linking.
+
+=item B<--mflags=str>
+
+Specify flags to be given to the model generator.
+
+=item B<--cflags=str>
+
+Specify flags to be given to the compiler.  This option may be repeated.
+
+=item B<--ldflags=str>
+
+Specify flags to be given to the linker.  This option may be repeated.
+
+=item B<--cleanup=all|obj|none>
+
+Remove temporary, intermediate files.  By default, this is set to I<obj>, which
+means that object file sare cleaned up.  if I<none> is selected, then no cleanup
+is performed.  If I<all> is selected, then all intermediate files, including
+source files, are removed.
+
+=item B<--iss-separate-compile, -isc>
+
+Compile the ISS as a separate object file.  This can reduce compile times and is
+the default for non-optimized builds.  This option may be negated.
+
+=item B<--jobs=n,-j=n>
+
+Specify the number of jobs into which to break the model compilation.
+
+=item B<--low-mem,-lm>       
+
+Enable code generation that requires less memory to compile.  Logic in the
+decode tree is broken up into separate functions.
+
+=item B<--uadl-low-mem,-ulm>       
+
+Enable code generation for uADL that requires less memory to compile.  Each
+instruction class is written to a separate file.
+
+=item B<--instr-class-vd>
+
+Use virtual dispatch, rather than templates, for instruction class operands.
+This will produce a slower model, but with a faster compilation time.  The
+default is false.  This option may be negated.
+
+=item B<--instr-cache>
+
+Generate an instruction cache for the model.  This improves performance by
+caching instruction packets but does not currently support self-modifying code.
+
+=item B<--instr-cache-page-size=int>
+
+Specify the size of a page (maps to number of instructions, based upon
+instruction size.
+
+=item B<--instr-cache-size=int>
+
+Specify the size of the instruction object cache (number of pages).
+
+=item B<--parallel-build[=max-jobs],-p[=max-jobs]>
+
+Run the compile jobs in parallel.  This is the default.  Negate this feature to
+compile all items sequentially.  An optional maximum number of parallel jobs may
+be specified.  This option may be negated to disable parallel builds.
+
+=item B<--disassembler>
+
+Generate a disassembler function in the model.  This allows an external program
+to disassemble arbitrary memory, using the model's memory-hierarchy access
+routines.
+
+=item B<--tlm2-endianness>
+
+Specify that TLM 2.0 compatible address swizzling should be used for handling
+endianness conversions, rather than byte-swapping.  The default is B<false>.
+
+=item B<--strict>
+
+Use strict mode for parsering ADL and uADL.
+
+=item B<--adl-strict>
+
+Use strict mode for parsering ADL only.
+
+=item B<--uadl-strict>
+
+Use strict mode for parsering uADL only.
+
+=item B<--check-cr-args>
+
+Parse custom-resource headers and check arguments.  False by default if
+B<--print-data> is true.
+
+=item B<--warn-redefine>
+
+Warn if a define block overwrites another define block.  This option may be
+negated.  The default is true.
+
+=item B<--lsf=str>
+
+Use as a prefix for running commands. The string defining prefix is optional,
+default value is 'bsub -Ip -P adl'
+
+=item B<--distcc>
+
+If enabled, use distcc to distribute compile jobs if distcc is currently set up
+on the system.  This requires that B<distcc> and B<pump> be in the current path
+and that the B<DISTCC_POTENTIAL_HOSTS> or B<DISTCC_HOSTS> environment variables
+be set.  This option may be negated and is on by default.
+
+=item B<--print-data>
+
+Print the uADL data model and exit.
+
+=item B<--print-all-data>
+
+Print both the ADL and uADL data model and exit.
+
+=back
+
+=cut
+
+use FindBin;
+use Getopt::Long 2.33 qw(:config permute);
+use Pod::Usage;
+use strict;
+use File::Basename;
+use File::Temp;
+#use Data::Dumper;
+
+use lib "@prefix@/share";
+use lib "@adl_top_srcdir@/scripts";
+use adl_wrapper_support;
+
+## function declarations
+sub printversion();
+sub runcmd(@);
+
+## main program
+
+# The default prefix is the installation prefix set by Autoconf.
+# This may be overridden using the "prefix" command-line option.
+my $bdir = $FindBin::RealBin;
+my $prefix = "@prefix@";
+my $ver = "@PACKAGE_VERSION@";
+my $cc = '@CXXPROG@';
+
+my ($adl_model, $uadl_model, $help, $man, $strict, $warn_redefine, $adl_strict,
+		$uadl_strict, $version, $safe_mode, $depfile, $disassembler,
+		$trans_pool_size, $mem_pool_size, $namespace, $systemc, $extern_mem,
+		$extern_syscalls, $extern_cycle_mem, $extern_mem_hybrid, $preamble,
+		$configfile, $syscall_enabled, $srcprefix, $output, $trace_mode,
+		$debug_mode, @user_defines, @user_includes, $genonly, $compile_only,
+		$rnumber, $low_mem, $ulow_mem, @user_mflags,@user_cflags, @user_ldflags,
+		$print_data, $print_all_data, $log_usage,
+		$iss_sep_comp,$ic_vd,$instr_cache,$instr_cache_size,$instr_cache_page_size,$detect_deadlock_flag,
+		$extern_dmi,$extern_dmi_entry_size,$extern_dmi_size,
+		$detect_deadlock,$check_cr_args,$tlm2_endianness,$tags_only_caches,$mt_support,$mt_locked_mem,$static_link);
+
+my $do_gen = 1;
+my $optimize = 3;
+my $rnumber = 1;
+my $iss_mem = 0;
+my $hybrid_iss = 0;
+my $target = "exe";
+my $cleanup = "obj";
+
+# process options
+if (!&GetOptions(
+				"h|help"                    => \$help,
+				"m|man"                     => \$man,
+				"v|version"                 => \$version,
+				"setpfx|prefix=s"           => \$prefix,
+				"verbose:i"                 => \$verbose,
+				"strict!"                   => \$strict,
+				"adl-strict!"               => \$adl_strict,
+				"uadl-strict!"              => \$uadl_strict,
+				"check-cr-args!"            => \$check_cr_args,
+				"warn-redefine!"            => \$warn_redefine,
+				"t|trace-mode!"             => \$trace_mode,
+				"dm|debug-mode!"            => \$debug_mode,
+				"rnumber!"                  => \$rnumber,
+				"safe-mode"                 => \$safe_mode,
+				"iss-mem-mode"              => \$iss_mem,
+				"hybrid-iss"                => \$hybrid_iss,
+				"trans-pool-size=i"         => \$trans_pool_size,
+				"mem-pool-size=i"           => \$mem_pool_size,
+				"namespace=s"               => \$namespace,
+				"cf|config-file=s"          => \$configfile,
+				"df|depfile=s"              => \$depfile,
+				"syscall-enabled!"          => \$syscall_enabled,
+				"systemc:s"                 => \$systemc,
+				"detect-deadlock=i"         => \$detect_deadlock,
+				"no-detect-deadlock"        => sub { $detect_deadlock = 0; },
+		"extern-mem"                => \$extern_mem,
+		"extern-syscalls!"          => \$extern_syscalls,
+		"extern-cycle-mem"          => \$extern_cycle_mem,
+		"extern-dmi!"               => \$extern_dmi,
+		"extern-dmi-entry-size=i"   => \$extern_dmi_entry_size,
+		"extern-dmi-size=i"         => \$extern_dmi_size,
+		"preamble=s"                => \$preamble,
+		"D|define=s"                => \@user_defines,
+		"I|include=s"               => \@user_includes,
+		"gen!"                      => \$do_gen,
+		"go|gen-only"               => \$genonly,
+		"co|compile-only"           => \$compile_only,
+		"target=s"                  => \$target,
+		"o|output=s"                => \$output,
+		"src-prefix=s"              => \$srcprefix,
+		"no-optimize"               => sub { $optimize = 0; },
+		"optimize:i"                => \$optimize,
+		"static"                    => \$static_link,
+		"mflags=s"                  => \@user_mflags,
+		"cflags=s"                  => \@user_cflags,
+		"ldflags=s"                 => \@user_ldflags,
+		"cleanup=s"                 => \$cleanup,
+		"j|jobs=i"                  => \$jobs,
+		"lsf:s"                     => \$lsf,
+		"distcc!"                   => \$distcc,
+		"isc|iss-separate-compile!" => \$iss_sep_comp,
+		"lm|low-mem"                => \$low_mem,
+		"ulm|uadl-low-mem"          => \$ulow_mem,
+		"p|parallel-build:i"        => \$parallel_build,
+		"no-p|no-parallel-build"    => sub { $parallel_build = -1; },
+		"print-data!"               => \$print_data,
+		"print-all-data!"           => \$print_all_data,
+		"disassembler!"             => \$disassembler,
+		"instr-class-vd!"           => \$ic_vd,
+		"instr-cache!"              => \$instr_cache,
+		"instr-cache-size=i"        => \$instr_cache_size,
+		"instr-cache-page-size=i"   => \$instr_cache_page_size,
+		"log-usage:s"               => \$log_usage,
+		"no-log-usage"              => sub { $log_usage="false"; },
+		"tlm2-endianness!"          => \$tlm2_endianness,
+		"tags-only-caches!"         => \$tags_only_caches,
+		"mt-support!"               => \$mt_support,
+		"mt-locked-mem!"            => \$mt_locked_mem,
+		"cc=s"                      => \$cc,
+		))
+{ printhelp(1,\&printversion,1); }
+
+
+# Print help if requested to do so.
+printhelp(0,\&printversion,1) if $help;
+
+printhelp(0,\&printversion,2) if $man;
+
+if ($version) {
+  printversion();
+
+  exit 0;
+}
+
+if ( $target !~ /^exe|so|base-so$/ ) {
+  print "Error:  Unknown target type $target.  Valid options are 'exe', 'so', and 'base-so'.\n";
+  die;
+}
+
+# Options that require compile-only unless generating a shared object.
+if ($target !~ /so$/ ) {
+  if ($namespace or $systemc) {
+		print "Switching to compile-only.\n";
+    $compile_only = 1;
+  }
+	# If we're creating a standalone executable with external memory, then the
+	# core has to cycle that memory or else no progress will be made.
+	if ($extern_mem) {
+		$extern_cycle_mem = 1;
+	}
+}
+
+# If not otherwise specified, then compile the ISS separately if no optimization
+# is selected, to compile slightly faster.
+if (!defined $iss_sep_comp) {
+	$iss_sep_comp = ($optimize) ? 0 : 1;
+}
+
+# Assume 'method' if no systemc interface type is specified.
+if (defined $systemc && !$systemc) {
+	$systemc = "method";
+}
+
+# Options that require safe mode
+if (!$safe_mode) {
+  $iss_mem = 0;
+  $hybrid_iss = 0;
+}
+
+my $shared = ($target =~ "so\$");
+my $basic  = ($target eq "base-so");
+
+# Process arguments
+if (@ARGV != 2) {
+  printhelp(1,\&printversion,1);
+}
+else {
+  ($adl_model, $uadl_model) = @ARGV;
+}
+
+my ($ac_options,$gen_options);
+
+if (!$rnumber && ($target eq "base-so")) {
+  $ac_options .= " --no-rnumber";
+}
+
+if ($shared) {
+  $ac_options .= " --so-target";
+}
+
+if ($basic) {
+  $ac_options .= " --basic";
+}
+
+my $adl_pfx    = `$bdir/adl-config --setpfx=$prefix $ac_options --prefix`;
+my $adl_cflags = `$bdir/adl-config --setpfx=$prefix $ac_options --uadl --cflags`;
+
+my $lib_opt    = ($static_link) ? "--static-libs" : "--libs";
+my $adl_libs   = `$bdir/adl-config --setpfx=$prefix $ac_options --uadl $lib_opt`;
+
+chomp $adl_pfx;
+chomp $adl_cflags;
+chomp $adl_libs;
+
+if ($static_link) {
+	$adl_libs .= " -static-libstdc++ -static-libgcc";
+}
+
+my $default_gen     = "$adl_pfx/bin/make-uadl";
+my ($cc_base,$cc_path) = fileparse("$cc");
+my $default_cpp     = "$cc_path/cpp";
+my $default_cflags  = "-Wall -g -O$optimize $adl_cflags";
+my $default_ldflags = "$adl_libs";
+
+# Massage any defines into the appropriate form.
+my @m_user_defines = map { "--define=$_"; } @user_defines;
+my @m_user_includes= map { "--include=$_"; } @user_includes;
+my @c_user_defines = map { "-D$_"; } @user_defines;
+
+my ($base,$path,$type) = fileparse($uadl_model, qr/\.(uadl|cc)/);
+
+# If the user supplies a C++ file, then we assume that they don't want to
+# generate!
+if ($type eq ".cc") {
+  $do_gen = 0;
+}
+
+my $obase;
+
+if (!$do_gen) {
+  # If we're not generating, then we use the full path for the intermediate
+  # file (which is actually the source file in this case.
+  $obase = "$path$base";
+} else {
+  if ($output) {
+    # Remove the extension from the base.  The extension might be a shared object
+    # or a C++ file extension; we don't know, so we'll try and be really general.
+    my ($tbase,$tpath) = fileparse($output,qr/\.([^.]+)$/);  
+		$obase = "$tpath$tbase";
+  } else {
+    $obase = $base;
+  }
+}
+
+if ($srcprefix && $do_gen) {
+  if ( ! -d $srcprefix ) {
+	`install -d $srcprefix 2>&1`;
+	if ($?) {
+	  "Could not create source directory $srcprefix: $?";
+	}
+  }
+  $obase = "$srcprefix/$obase";
+}
+
+# We append -so to shared object source files in order to differentiate them, in
+# case both a shared object and an executable are being built in the same
+# directory.
+if ($target ne "exe" and $obase !~ /-so$/ ) {
+  $obase .= "-so";
+}
+
+
+my $cpp       = $default_cpp;
+my $mflags    = "@user_mflags";
+my $cflags    = "$default_cflags @user_cflags @c_user_defines";
+my $ldflags   = "@user_ldflags $default_ldflags ";
+
+my $sfile      = "$obase.cc";
+my $ofile      = "$obase.o";
+my @hfiles     = ( "$obase-iss.cc", "$obase.h" );
+my $efile      = $output ? $output : $base;
+
+# First, generate the source code.
+my $deptarget = ($genonly) ? $sfile : $efile;
+
+my $gen       = $default_gen;
+my $gen_flags = 
+		$gen_options . 
+		($safe_mode         ? " --safe-mode"              : "") .
+		($iss_mem           ? " --iss-mem-mode"           : "") .
+		($hybrid_iss        ? " --hybrid-iss"             : "") .
+		($extern_mem        ? " --extern-mem"             : "") .
+		($extern_cycle_mem  ? " --extern-cycle-mem"       : "") .
+		($namespace         ? " --namespace=$namespace"   : "") .
+		($preamble          ? " --preamble=\"$preamble\"" : "") .
+		($configfile        ? " --config=\"$configfile\"" : "") .
+		($depfile           ? " --depfile=$depfile --deptarget=$deptarget" : "") .
+		addOption("verbose", $verbose) .
+		addFlag("rnumber", $rnumber) .
+		addFlag("trace-mode", $trace_mode) .
+		addFlag("debug-mode", $debug_mode) .
+		addFlag("strict",$strict) .
+		addFlag("adl-strict",$adl_strict) .
+		addFlag("check-cr-args",$check_cr_args) .
+		addFlag("uadl-strict",$uadl_strict) .
+		addFlag("warn-redefine",$warn_redefine) .
+		addFlag("disassembler",$disassembler) .
+		addFlag("syscall-enabled",$syscall_enabled) .
+		addFlag("extern-syscalls",$extern_syscalls) .
+		addFlag("instr-class-vd",$ic_vd) .
+		addFlag("instr-cache",$instr_cache) .
+		addOption("systemc",$systemc) .
+		addOption("detect-deadlock",$detect_deadlock) .
+		addOption("log-usage",$log_usage) .
+		addOption("jobs",$jobs) .
+		addOption("trans-pool-size",$trans_pool_size) .
+		addOption("mem-pool-size",$mem_pool_size) .
+		addOption("instr-cache-size",$instr_cache_size) .
+		addOption("instr-cache-page-size",$instr_cache_page_size) .
+		addFlag("extern-dmi",$extern_dmi) .
+		addFlag("tlm2-endianness",$tlm2_endianness) .
+		addOption("extern-dmi-entry-size",$extern_dmi_entry_size) .
+		addOption("extern-dmi-size",$extern_dmi_size) .
+		# If generating with the low-memory option, then always have the
+		# ISS compiled as a separate unit.
+		addFlag("low-mem",$low_mem) .
+		addFlag("uadl-low-mem",$ulow_mem) .
+		addFlag("tags-only-caches",$tags_only_caches) . 
+		addFlag("mt-support",$mt_support) .
+		addFlag("mt-locked-mem",$mt_locked_mem).
+		" -o $obase";
+
+if ($target =~ "so\$") {
+  if ( $efile !~ /\.so$/ ) {
+    $efile = "$efile.so";
+  }
+
+  $ldflags .= " -shared";
+}
+
+# If printing data, then just do that and exit (via just calling exec).
+if ($print_all_data) {
+  exec "$gen $adl_model $uadl_model --print-all-data @m_user_defines @m_user_includes";
+}
+
+if ($print_data) {
+  exec "$gen $adl_model $uadl_model --print-data @m_user_defines @m_user_includes";
+}
+
+# First, generate the source code.
+my @ic_files;
+if ($do_gen) {
+	my $out = runcmd_stdio("$gen $mflags $gen_flags $adl_model $uadl_model @m_user_defines @m_user_includes");
+	@ic_files = get_ic_files($out);
+}
+
+if ($genonly || $print_data || $print_all_data) { exit 0; }
+
+# Next, we must compile the model.
+
+$cc = modify_path_for_os($cc);
+
+my @ofiles = dobuild($sfile,$ofile,\@ic_files);
+
+if ($compile_only) { exit 0; }
+
+# Next, we link.
+my $olist = join ' ',(map { $_->{obj}; } @ofiles);
+my $ldcmd = "$cc $olist $ldflags";
+$ldcmd .= " -o $efile";
+runcmd $ldcmd;
+
+
+cleanupFiles(@ofiles);
+# We're done at this point.
+exit 0;
+
+sub cleanupFiles {
+  
+  if ($cleanup eq "all") {
+    print "Removing header files:  @hfiles\n" if (defined $verbose);
+    unlink @hfiles;
+  }
+
+  if ($cleanup ne "none") {
+	for (@_) {
+	  unlink $_->{obj};
+	  next if ($cleanup ne "all");
+	  unlink $_->{src};
+	}
+  }  
+}
+
+
+## functions
+sub printversion() {
+  print "ADL/uADL Version $ver\n";
+}
+
+
+# Parses the output of the generation command to extract instruction class file
+# names, if there are any.
+sub get_ic_files {
+	my @ics = ( $_[0] =~ /Instruction Class File:\s+(\S+)/g);
+	return @ics;
+}
+
+# Perform the build.  This sets up the source and object files, then passes it
+# to the runbuild routine which invokes the compiler.
+sub dobuild {
+  my ($sfile,$ofile,$ic_files) = @_;
+
+  my ($sbase,$spath,$sext) = fileparse($sfile,".cc");
+  my ($obase,$opath,$oext) = fileparse($ofile,".o");
+  my @ofiles;
+
+	my ($uadl_cflags,$iss_cflags);
+	if ($iss_sep_comp) {
+		$uadl_cflags = "-DUADL_SEPARATE_COMPILE";
+		$iss_cflags = "-fkeep-inline-functions";
+	}
+
+  # We store source-file/object-file info as pairs in an array.
+  push @ofiles,{ cmd => $cc, src => $sfile, obj => $ofile, flags => "$cflags -c $uadl_cflags" };
+
+	# If we have additional instruction-class files, store those as well.
+	for my $icf (@$ic_files) {
+		my ($icbase,$icpath,$icext) = fileparse($icf,".cc");
+		push @ofiles,{ cmd => $cc, src => $icf, obj => "$icbase.o", flags => "$cflags -c $uadl_cflags" };
+	}
+
+	# Always push on the basic ISS if we're doing separate ISS compilation, plus
+	# possibly more if we're doing multiple jobs.
+	my ($sf,$of);
+	if ($iss_sep_comp) {
+		$sf = "$spath$sbase-iss.cc";
+		$of = "$opath$obase-iss.o";
+		push @ofiles,{ cmd => $cc, src => $sf, obj => $of, flags => "$cflags -c $iss_cflags" };
+	}
+  if ($jobs) {
+		for (0..$jobs-1) {
+			$sf = "$spath$sbase-iss-$_.cc";
+			$of = "$opath$obase-iss-$_.o";
+			push @ofiles,{ cmd => $cc, src => $sf, obj => $of, flags => "$cflags -c $iss_cflags" };
+		}
+  }
+
+	#print "Data for runbuild:  ",Dumper(\@ofiles),"\n\n";
+	runbuild \@ofiles;
+	return @ofiles;
+}
+
+
+
+

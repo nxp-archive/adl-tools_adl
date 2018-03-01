@@ -1,0 +1,15 @@
+
+
+#ifdef ERROR
+#error "I already defined this!"
+#endif
+#define ERROR
+
+define (arch = minippc) {
+
+  define (reg = Example1) {
+    " Example register declaration.";
+    bits = (0,31);
+  }
+
+}

@@ -1,0 +1,16 @@
+//
+// Should produce an error b/c of a mispelled instruction.
+//
+define(core=P) {
+  define(group=loadstores) {
+    items = (load,store,stuff); // 'stuff' does not exist; load/store are instr. classes.
+  }
+
+  define(group=multiplies) {
+    items = mull;
+  }
+
+  define (group=foo) {
+    lutancy = 20;
+  }
+}

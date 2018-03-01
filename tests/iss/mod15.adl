@@ -1,0 +1,918 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Another model with an MMU, this one with two tables:  A fully-associative one and
+// a 2-way set associative one.
+// 
+// This also tests to make sure that we can define hooks in the base lookup
+// class that are then used by any lookups which use that interface.
+//
+// This also contains an array-less lookup, top test that we can generate such a
+// thing.  If HDBCR0.JAMREAL is set, then an ea is translated to an ra by
+// replacing the top eight bits with HDBCR0.JAMPAGE.
+
+define (arch = MiniPPC) {
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+    var cr = CR;
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  attrs = (translation_attr,load,store);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=PID1) {
+  }
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=HDBCR0) {
+    """
+    Hardware debug control register 0.
+    """;
+
+    define (field=REALMODE) {
+      bits = 0;
+    }
+    define (field=JAMREAL) {
+      bits = 1;
+    }
+    define (field=JAMPAGE) {
+      bits = (4,11);
+    }
+  }
+
+  define (reg=MAS0) {
+    """
+    Memory assist register 0.
+    """;
+    define (field=EPN) {
+      bits=(0,23);
+    }
+    define (field=TID) {
+      bits=(24,29);
+    }
+    define (field=V) {
+      bits=30;
+    }
+    define (field=TS) {
+      bits=31;
+    }
+  }
+
+  define (reg=MAS1) {
+    """
+    Memory assist register 1.
+    """;
+    define (field=RPN) {
+      bits=(0,23);
+    }
+    define (field=SIZE) {
+      bits=(24,29);
+    }
+    define (field=TLBSEL) {
+      bits = 30;
+    }
+    define (field=NV) {
+      bits = 31;
+    }
+  }
+
+  define (reg=MAS2) {
+    """
+    Memory assist register 2.
+    """;
+    define (field=SX) {
+      bits=0;
+    }
+    define (field=SW) {
+      bits=1;
+    }
+    define (field=SR) {
+      bits=2;
+    }
+    define (field=UX) {
+      bits=3;
+    }
+    define (field=UW) {
+      bits=4;
+    }
+    define (field=UR) {
+      bits=5;
+    }
+    define (field=WIMG) {
+      bits=(6,9);
+    }
+    define (field=IRT) {
+      bits=10;
+    }
+    define (field=Set) {
+      bits=(20,27);
+    }
+    define (field=Way) {
+      bits=(28,31);
+    }
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7.
+    """;
+  }
+
+  define (reg=HitReg) {
+    """
+    Tracks MMU TlbCam hits.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 30;
+
+    invalid_entry_read = func(unsigned index) {
+      ESR(4,4) = 1;
+      raiseException(Program);
+      return 0;  // Shouldn't be necessary...
+    };
+
+    invalid_entry_write = func(unsigned index,bits<32> value) {
+      ESR(4,4) = 1;
+      raiseException(Program);
+    };    
+
+  }
+
+  define (regfile=SPR) {
+    size=1024;
+    define (entry=9)  { reg = CTR; }
+    define (entry=62) { reg = ESR; }
+    define (entry=100) { reg = HDBCR0; }
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+    define (entry=200) { reg=MAS0; }
+    define (entry=201) { reg=MAS1; }
+    define (entry=202) { reg=MAS2; }
+
+    invalid_entry_read = func(unsigned index) {
+      ESR(4,4) = 1;
+      raiseException(Program);
+      return 0;  // Shouldn't be necessary...
+    };
+
+    invalid_entry_write = func(unsigned index,bits<32> value) {
+      ESR(4,4) = 1;
+      raiseException(Program);
+    };
+    
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=D) {
+    """
+    Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=UI) {
+    """
+    Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      if (RA == 0) {
+        GPR(RT) = si;
+      } else {
+        GPR(RT) = GPR(RA) + si;
+      }
+    };
+  }
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      var si = SI.signExtend<32>();
+      GPR(RT) = GPR(RA) + si;
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      bits<32> si = SI;
+      if (RA == 0) {
+        GPR(RT) = si << 16;
+      } else {
+        GPR(RT) = GPR(RA) + (si << 16);
+      }
+    };
+  }
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    action = func() {
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = (BO(2)!=0) || (( (CTR!=0) ^ BO(3))!=0);
+      var cond_ok = (BO(0)!=0) || ( CR(BI) == BO(1));
+      if ( ctr_ok && cond_ok ) {
+        var ea = signExtend(concat(BD,zero(2)),32);
+        NIA = CIA + ea;
+      }
+    };
+  }
+
+  define (instr=cmpi) {
+    fields=(OPCD(11),BF,RA,SI);
+    action = func () {
+      var si = signExtend(SI,32);
+      setCrField(BF,GPR(RA),si);
+    };
+  }
+
+  define (instr=cmp) {
+    fields=(OPCD(31),BF,RA,RB,XO(0));
+    action = {
+      setCrField(BF,GPR(RA),GPR(RB));
+    };
+  }
+
+  define (instr=lhz) {
+    fields=(OPCD(40),RT,RA,D);
+    attrs = load;
+    action = {
+      var d = signExtend(D,32);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,2);
+    };
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    attrs = load;
+    action = {
+      var d = D.signExtend<32>();
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=lwzx) {
+    fields=(OPCD(31),RT,RA,RB,XO(23));
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=mfmsr) {
+    fields=(OPCD(31),RT,XO(83));
+    action = {
+      GPR(RT) = MSR;
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  define (instr=mfspr) {
+    fields=(OPCD(31),RT,SPRN,XO(339));
+    action = {
+      GPR(RT) = SPR(SPRN);
+    };
+  }
+
+  define (instr=mullw) {
+    fields=(OPCD(31),RT,RA,RB,XO(235));
+    action = {
+      GPR(RT) = GPR(RA) * GPR(RB);
+    };
+  }
+
+  define (instr=mulhw) {
+    fields=(OPCD(31),RT,RA,RB,XO(75));
+    action = {
+      bits<64> a = GPR(RA);
+      bits<64> b = GPR(RB);
+      GPR(RT) = (a*b)(0,31);
+    };
+  }
+
+  define (instr=or) {
+    fields=(OPCD(31),RS,RA,RB,XO(444));
+    action = {
+      GPR(RA) = GPR(RS) | GPR(RB);
+    };
+  }
+
+  define (instr=ori) {
+    fields=(OPCD(24),RS,RA,UI);
+    action = {
+      GPR(RA) = GPR(RS) | UI;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var d = D.signExtend<32>();
+      var addr = b + d;
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  define (instr=stwu) {
+    fields=(OPCD(37),RS,RA,D);
+    action = {
+      var d = D.signExtend<32>();
+      var addr = GPR(RA) + d;
+      Mem(addr,4) = GPR(RS);
+      GPR(RA) = addr;
+    };
+  }
+
+  define (instr=stwx) {
+    fields=(OPCD(31),RS,RA,RB,XO(151));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  void populateMasRegFromEntry(const TlbBase_t &t)
+  {
+    MAS0.EPN  = t.EPN;
+    MAS0.TID  = t.TID;
+    MAS0.V    = t.V;
+    MAS0.TS   = t.TS;
+      
+    MAS1.RPN  = t.RPN;
+    MAS1.SIZE = t.SIZE;
+      
+    MAS2.SX   = t.SX;
+    MAS2.SW   = t.SW;
+    MAS2.SR   = t.SR;
+    MAS2.UX   = t.UX;
+    MAS2.UW   = t.UW;
+    MAS2.UR   = t.UR;
+    MAS2.WIMG = t.WIMG;
+  }
+
+  void populateMasRegs(int set,int way, bool use_cam) {
+    if (use_cam) {
+      var t = TlbCam(set,way);
+      populateMasRegFromEntry(t);
+    } else {
+      var t = Tlb4k(set,way);
+      populateMasRegFromEntry(t);
+      MAS1.NV   = Tlb4k(set).NV;
+    }
+  }
+
+  define (instr=tlbre) {
+    fields=(OPCD(31),XO(946));
+    action = {
+      var set = MAS2.Set;
+      var way = MAS2.Way;
+      bool use_cam = MAS1.TLBSEL.uint32();
+      populateMasRegs(set.uint32(),way.uint32(),use_cam);
+    };
+  }
+
+  void setTlbEntry(TlbBase_t &t)
+  {
+    t.EPN  = MAS0.EPN;
+    t.TID  = MAS0.TID;
+    t.V    = MAS0.V; 
+    t.TS   = MAS0.TS;
+        
+    t.RPN  = MAS1.RPN;
+    t.SIZE = MAS1.SIZE;
+        
+    t.SX   = MAS2.SX;
+    t.SW   = MAS2.SW;
+    t.SR   = MAS2.SR;
+    t.UX   = MAS2.UX;
+    t.UW   = MAS2.UW;
+    t.UR   = MAS2.UR;
+    t.WIMG = MAS2.WIMG;  
+  }
+
+  define (instr=tlbwe) {
+    fields=(OPCD(31),XO(978));
+    action = {
+      var set = MAS2.Set;
+      var way = MAS2.Way;
+      bool use_cam = MAS1.TLBSEL.uint32();
+      bool use_irat = MAS2.IRT.uint32();
+
+      int num_sets, num_ways;
+      if (use_irat) {
+        TlbIrat_t t;
+
+        t.RPN1 = MAS0.EPN;
+        t.RPN2 = MAS1.RPN;
+
+        TlbIrat(set,way) = t;
+        num_sets = TlbIrat.num_sets();
+        num_ways = TlbIrat.num_ways();
+        
+      } else if (use_cam) {
+        TlbCam_t t;
+      
+        setTlbEntry(t);
+        
+        TlbCam(set,way) = t;
+
+        num_sets = TlbCam.num_sets();
+        num_ways = TlbCam.num_ways();
+      } else {
+        Tlb4k_t t;
+      
+        setTlbEntry(t);
+
+        // We have to do a transformation on the RPN by looking up Irat and
+        // seeing if there's a match.  Note: Type doesn't matter- just included
+        // b/c required by arguments.
+        unsigned iset,iway;
+        addr_t ra = t.RPN.uint64();
+        if (TlbIrat.search(iset,iway,(ra << 12),StoreTrans)) {
+          // Found a match, so modify final RPN.
+          t.RPN = TlbIrat(iset,iway).RPN2;
+        }
+
+        Tlb4k(set).NV = MAS1.NV;        
+        Tlb4k(set,way) = t;
+
+        num_sets = Tlb4k.num_sets();
+        num_ways = Tlb4k.num_ways();
+      }
+      info (1,"Wrote to lookup with ",num_sets," sets and ",num_ways," ways.");
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+  //
+  // Decode miss handler.
+  // 
+  decode_miss = func (addr_t ea,unsigned) {
+    ESR.set(4);
+    raiseException(Program);
+  };
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (mmu) {
+
+    both_enable = { return (HDBCR0.REALMODE == 0); };
+
+    define (lookup=TlbOrig) {
+      interface = true;
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+      }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+    }
+
+    define(lookup=TlbBase) {
+
+      inherit = TlbOrig;
+      interface = true;
+      
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      sizescale = 2;
+      sizeshift = 10;
+
+      realpage = RPN;
+
+      exec_perm = func(TlbBase_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SX : t.UX) == 0) {
+          raiseException(ProtectionFault);
+        }
+      };
+    }
+
+    define (lookup=TlbCam) {
+      
+      inherit = TlbBase;
+
+      priority = 1;
+
+      define (array) {
+        entries = 16;
+      }
+
+      size      = SIZE;
+      sizetype  = BitSize;
+
+    }
+
+    define (lookup=Tlb4k) {
+      inherit = TlbBase;
+
+      priority = 2;
+
+      define (setfield=NV) {
+        bits = 1;
+      }
+
+      define (array) {
+        entries = 512;
+        set_assoc = 2;
+      }
+
+      size = 4096;
+
+    }
+
+    define (lookup=TlbIrat) {
+      priority = ignore;
+ 
+     define (wayfield=RPN1) {
+        bits = 24;
+      }
+      define (wayfield=RPN2) {
+        bits = 24;
+      }
+
+      size = 4096;
+      sizeshift = 12;
+
+      define (array) {
+        entries = 8;
+      }
+
+      realpage = RPN2;
+
+      test = AddrComp(RPN1);
+      
+    }
+
+    define (lookup=TlbJamReal) {
+      // Highest priority, but only active when a special mode is set.
+      priority = 0;
+      
+      type = Data;
+
+      define (wayfield=RPN) {
+        bits = 8;
+      }
+      
+      test = Check(HDBCR0.JAMREAL == 1);
+      
+      size = 0x1000000;
+      sizeshift = 24;
+      
+      realpage = RPN;
+      
+      miss = func (TransType tt,addr_t a,unsigned seq) {
+        TlbJamReal_t t;
+        t.RPN = HDBCR0.JAMPAGE;
+        return t;
+      };
+      
+    }
+
+  }
+
+  addr_check = func(addr_t ea,addr_t ra,TransType tt,int id,int set,int way) {
+    info (1,"Translated using tlb ",id," at ",set,",",way);
+  };
+
+
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

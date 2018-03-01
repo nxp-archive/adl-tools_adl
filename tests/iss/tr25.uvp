@@ -1,0 +1,423 @@
+format=huvp;
+test => zen_mpu7 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  I : D {ea=0x00000000bbbbb000; ra=0x00000000bbbbb000; d=0x50caf61e; ta=0x3;};
+  zen_z420 => powerpc {
+    I : R {nm="ACC"; d=0x0000000000000000;};
+    I : R {nm="ATBL"; d=0x00000000;};
+    I : R {nm="ATBU"; d=0x00000000;};
+    I : R {nm="BUCSR"; d=0x00000000;};
+    // BALLOC:0 BBFI:0 BPEN:0 BPRED:0 
+    I : R {nm="BUCSR0"; d=0x00000000;};
+    I : R {nm="CDACNTL"; d=0x00000000;};
+    I : R {nm="CDADATA"; d=0x00000000;};
+    I : R {nm="CR"; d=0x2bcd168a;};
+    // bit:0 
+    I : R {nm="CSRR0"; d=0x00000000;};
+    I : R {nm="CSRR1"; d=0x00000000;};
+    // CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 ICM:0 IS:0 ME:0 PR:0 WE:0 rsrv0:0 rsrv1:0 
+    // rsrv2:0 rsrv3:0 rsrv4:0 
+    I : R {nm="CTR"; d=0x37b8df42;};
+    I : R {nm="DAC1"; d=0x22c6bc8e;};
+    I : R {nm="DAC2"; d=0x11fdc416;};
+    I : R {nm="DBCR0"; d=0x00000000;};
+    // BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 DEVT1:0 DEVT2:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:0 
+    // IDM:0 IRPT:0 RET:0 RST:0 TRAP:0 
+    I : R {nm="DBCR1"; d=0x00000000;};
+    // IAC12M:0 IAC1ER:0 IAC1US:0 IAC2ER:0 IAC2US:0 IAC34M:0 IAC3ER:0 IAC3US:0 IAC4ER:0 
+    // IAC4US:0 
+    I : R {nm="DBCR2"; d=0x00000000;};
+    // DAC12M:0 DAC1ER:0 DAC1LNK:0 DAC1US:0 DAC2ER:0 DAC2LNK:0 DAC2US:0 
+    I : R {nm="DBCR3"; d=0x00000000;};
+    I : R {nm="DBCR4"; d=0x00000000;};
+    I : R {nm="DBCR5"; d=0x00000000;};
+    I : R {nm="DBCR6"; d=0x00000000;};
+    I : R {nm="DBCR7"; d=0x00000000;};
+    I : R {nm="DBCR8"; d=0x00000000;};
+    I : R {nm="DBSR"; d=0x00000000;};
+    // BRT:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:0 IDE:0 IRPT:0 
+    // MRR:0 RET:0 TRAP:0 UDE:0 
+    I : R {nm="DDAM"; d=0x00000000;};
+    I : R {nm="DEAR"; d=0xd322b675;};
+    I : R {nm="DEC"; d=0x00000000;};
+    I : R {nm="DECAR"; d=0x00000000;};
+    I : R {nm="DEVENT"; d=0x00000000;};
+    I : R {nm="DMEMCTL0"; d=0x00000000;};
+    // DBAPD:0 DCECE:0 DDAUEC:0 DECUE:0 DIWE:0 DMEM_BASE_ADDR:0 DPEIE:0 DSECE:0 DSWCE:0 
+    I : R {nm="DSRR0"; d=0x00000000;};
+    I : R {nm="DSRR1"; d=0x00000000;};
+    I : R {nm="DVC1"; d=0x00000000;};
+    I : R {nm="DVC2"; d=0x00000000;};
+    I : R {nm="EDBCR0"; d=0x00000000;};
+    // DNH_EM:0 EDM:0 
+    I : R {nm="ESR"; d=0x00000000;};
+    // AP:0 BO:0 DLK:0 FP:0 MIF:0 PIE:0 PIL:0 PPR:0 PTR:0 PUO:0 SPV:0 ST:0 VLEMI:0 XTE:0 
+    I : R {nm="HDBCR0"; d=0x00000009;};
+    // DSB:1 DSTRM:0 ISTRM:1 
+    I : R {nm="HID0"; d=0x80431800;};
+    // CICLRDE:0 DCLRCE:1 DCLREE:1 DOZE:0 EMCP:1 ICR:1 MCCLRDE:0 NAP:1 NHR:1 NOPTI:0 SLEEP:0 
+    I : R {nm="HID1"; d=0x00005c00;};
+    // ATS:0 SYSCTL:5c 
+    I : R {nm="IAC1"; d=0xe2ae7364;};
+    I : R {nm="IAC2"; d=0xdb73feac;};
+    I : R {nm="IAC3"; d=0x245cc970;};
+    I : R {nm="IAC4"; d=0x03672a14;};
+    I : R {nm="IAC5"; d=0x2966d646;};
+    I : R {nm="IAC6"; d=0x6436d612;};
+    I : R {nm="IAC7"; d=0xfdd11702;};
+    I : R {nm="IAC8"; d=0x1e9a6746;};
+    I : R {nm="IMEMCTL0"; d=0x00000000;};
+    // IBAPD:0 ICECE:0 IDAUEC:0 IECUE:0 IIWE:0 IMEM_BASE_ADDR:0 IPEIE:0 ISECE:0 ISWCE:0 
+    I : R {nm="IVOR0"; d=0x00000000;};
+    I : R {nm="IVOR1"; d=0x00000010;};
+    I : R {nm="IVOR10"; d=0x00000000;};
+    I : R {nm="IVOR11"; d=0x00000000;};
+    I : R {nm="IVOR12"; d=0x00000000;};
+    I : R {nm="IVOR13"; d=0x00000000;};
+    I : R {nm="IVOR14"; d=0x00000000;};
+    I : R {nm="IVOR15"; d=0x00000090;};
+    I : R {nm="IVOR2"; d=0x00000020;};
+    I : R {nm="IVOR3"; d=0x00000030;};
+    I : R {nm="IVOR32"; d=0x00000000;};
+    I : R {nm="IVOR33"; d=0x000000a0;};
+    I : R {nm="IVOR34"; d=0x000000b0;};
+    I : R {nm="IVOR4"; d=0x00000040;};
+    I : R {nm="IVOR5"; d=0x00000050;};
+    I : R {nm="IVOR6"; d=0x00000060;};
+    I : R {nm="IVOR7"; d=0x00000000;};
+    I : R {nm="IVOR8"; d=0x00000080;};
+    I : R {nm="IVOR9"; d=0x00000000;};
+    I : R {nm="IVPR"; d=0x4b396a00;};
+    I : R {nm="L1CFGPR0"; d=0x28680804;};
+    I : R {nm="L1CFGPR1"; d=0x08680808;};
+    I : R {nm="L1CSR0"; d=0x80098001;};
+    // DCABT:0 DCE:1 DCEA:0 DCECE:1 DCEI:1 DCINV:0 DCLOC:0 DCLOINV:0 DCWA:1 WDD:0 WID:0 
+    I : R {nm="L1CSR1"; d=0x0000a020;};
+    // ICABT:0 ICE:0 ICEA:1 ICECE:0 ICEI:1 ICINV:0 ICLOC:1 ICLOINV:0 
+    I : R {nm="L1FINVPR0"; d=0x00000000;};
+    // CCMD:0 CSET:0 CWAY:0 
+    I : R {nm="L1FINVPR1"; d=0x00000000;};
+    // CCMD:0 CSET:0 CWAY:0 
+    I : R {nm="LR"; d=0x00000000;};
+    I : R {nm="MAS0"; d=0xe1001130;};
+    // DEBUG:0 E:0 ESEL:0 G:0 GOVR:0 I:0 INST:1 IOVR:0 IPROT:1 M:0 RO:0 SEL:0 SHD:0 SW:0 
+    // SX_SR:1 UAMSK:1 UW:0 UX_UR:0 VALID:1 VLE:1 W:1 
+    I : R {nm="MAS1"; d=0x00000000;};
+    // TID:0 TIDMSK:0 
+    I : R {nm="MAS2"; d=0xaaaaafff;};
+    // LOWER_BOUND:2aaaafff 
+    I : R {nm="MAS3"; d=0xaaaaa000;};
+    // UPPER_BOUND:2aaaa000 
+    I : R {nm="MCAR"; d=0x00000000;};
+    I : R {nm="MCSR"; d=0x00000000;};
+    // BUS_DRERR:0 BUS_WRERR:0 DC_DPERR:0 DC_LKERR:0 DC_TPERR:0 DMEM_RDPERR:0 DMEM_WRPERR:0 
+    // EXCP_ERR:0 G:0 IC_DPERR:0 IC_LKERR:0 IC_TPERR:0 IF:0 IMEM_ERR:0 LD:0 MAV:0 MCP:0 
+    // MEA:0 NMI:0 ST:0 STACK_ERR:0 U:0 
+    I : R {nm="MCSRR0"; d=0x00000000;};
+    I : R {nm="MCSRR1"; d=0x00000000;};
+    I : R {nm="MMUCFG"; d=0x004001d3;};
+    // MAVN:1 NMPUS:1 NTLBS:0 PIDSIZE:7 RASIZE:20 
+    I : R {nm="MPU0CFG"; d=0x800ba0a2;};
+    // DENTRY:0 FASSOC:1 IENTRY:2 IPROT:1 MAXSIZE:3 MINSIZE:0 SHENTRY:2 UAMSKA:1 
+    I : R {nm="MPU0CSR0"; d=0x00006061;};
+    // BYPSR:0 BYPSW:1 BYPSX:1 BYPUR:0 BYPUW:0 BYPUX:0 DRDEN:0 DWDEN:1 IDEN:1 MPUEN:1 MPUFI:0 
+    // TIDCTL:0 
+    I : R {nm="MSR"; d=0x00000900;};
+    // CE:0 CM:0 DE:0 DS:0 EE:0 FE0:1 FE1:1 FP:0 ICM:0 ILE:0 IP:0 IS:0 LE:0 ME:0 PMM:0 PR:0 
+    // RI:0 SPE:0 UCLE:0 WE:0 allocated:0 
+    I : R {nm="NIA"; d=0x12345678;};
+    I : R {nm="PID"; d=0x00000000;};
+    I : R {nm="PID0"; d=0x0000008f;};
+    I : R {nm="PIR"; d=0x00000000;};
+    I : R {nm="PVR"; d=0x815d0000;};
+    // revision:0 version:15d 
+    I : R {nm="RESRV"; d=0x0000000000000000;};
+    // ADDR:0000000000000000 RES:0 
+    I : R {nm="SPEFSCR"; d=0x00000000;};
+    // FDBZ:0 FDBZE:0 FDBZS:0 FG:0 FINV:0 FINVE:0 FINVS:0 FINXE:0 FINXS:0 FOVF:0 FOVFE:0 
+    // FOVFS:0 FRMC:0 FUNF:0 FUNFE:0 FUNFS:0 FX:0 MODE:0 OV:0 SOV:0 
+    I : R {nm="SPRGPR0"; d=0x00000000;};
+    I : R {nm="SPRGPR1"; d=0x00000000;};
+    I : R {nm="SPRGPR2"; d=0x00000000;};
+    I : R {nm="SPRGPR3"; d=0x00000000;};
+    I : R {nm="SRR0"; d=0x00000000;};
+    I : R {nm="SRR1"; d=0x00000000;};
+    I : R {nm="SVR"; d=0x00000000;};
+    I : R {nm="TBL"; d=0x00000000;};
+    I : R {nm="TBU"; d=0x00000000;};
+    I : R {nm="TCR"; d=0x00000000;};
+    // ARE:0 DIE:0 FIE:0 FP:0 FPEXT:0 WIE:0 WP:0 WPEXT:0 WRC:0 
+    I : R {nm="TSR"; d=0x00000000;};
+    // DIS:0 ENW:0 FIS:0 WIS:0 WRS:0 
+    I : R {nm="USPRGPR0"; d=0x00000000;};
+    I : R {nm="XER"; d=0x20000006;};
+    // Bytecnt:6 CA:1 OV:0 SO:0 
+    I : R {nm="dmem_baseaddr_port"; d=0x0001;};
+    I : R {nm="gr0Addren"; d=0xfff;};
+    I : R {nm="gr0Baseaddr"; d=0x000;};
+    I : R {nm="gr1Addren"; d=0xfff;};
+    I : R {nm="gr1Baseaddr"; d=0x000;};
+    I : R {nm="imem_baseaddr_port"; d=0x0000;};
+    I : R {nm="GPR0"; d=0x00000000;};
+    I : R {nm="GPR1"; d=0x00000000;};
+    I : R {nm="GPR2"; d=0x00000000;};
+    I : R {nm="GPR3"; d=0x00000000;};
+    I : R {nm="GPR4"; d=0x00000000;};
+    I : R {nm="GPR5"; d=0xbac45d44;};
+    I : R {nm="GPR6"; d=0x00000000;};
+    I : R {nm="GPR7"; d=0xbbbbb000;};
+    I : R {nm="GPR8"; d=0x00f752bc;};
+    I : R {nm="GPR9"; d=0x00000000;};
+    I : R {nm="GPR10"; d=0x00000000;};
+    I : R {nm="GPR11"; d=0x00000000;};
+    I : R {nm="GPR12"; d=0x00000000;};
+    I : R {nm="GPR13"; d=0x00000000;};
+    I : R {nm="GPR14"; d=0x00000000;};
+    I : R {nm="GPR15"; d=0xbbbbbfff;};
+    I : R {nm="GPR16"; d=0x00000000;};
+    I : R {nm="GPR17"; d=0x00000000;};
+    I : R {nm="GPR18"; d=0x00000000;};
+    I : R {nm="GPR19"; d=0x00000000;};
+    I : R {nm="GPR20"; d=0x00000000;};
+    I : R {nm="GPR21"; d=0x00000000;};
+    I : R {nm="GPR22"; d=0x00000000;};
+    I : R {nm="GPR23"; d=0x00000000;};
+    I : R {nm="GPR24"; d=0x00000000;};
+    I : R {nm="GPR25"; d=0x00000000;};
+    I : R {nm="GPR26"; d=0x00000000;};
+    I : R {nm="GPR27"; d=0x00000000;};
+    I : R {nm="GPR28"; d=0x00000000;};
+    I : R {nm="GPR29"; d=0x00000000;};
+    I : R {nm="GPR30"; d=0x00000000;};
+    I : R {nm="GPR31"; d=0x08961ae5;};
+    I : T {n="MPU0_DATA"; t="ID"; way=0; 
+            d={{"DEBUG",0x0},{"E",0x0},{"G",0x0},{"GOVR",0x0},{"I",0x0},
+              {"INST",0x0},{"IOVR",0x0},{"IPROT",0x0},{"LOWER_BOUND",0xbbbb000},{"M",0x0},{"RO",0x0},
+              {"SR",0x1},{"SW",0x1},{"SX",0x1},{"TID",0x0},{"TIDMSK",0x0},{"UAMSK",0x4},
+              {"UPPER_BOUND",0xbbbbfff},{"UR",0x0},{"UW",0x0},{"UX",0x0},{"V",0x1},{"VLE",0x0},
+              {"W",0x0},};};
+    I : T {n="MPU0_INST"; t="ID"; way=0; 
+            d={{"DEBUG",0x0},{"E",0x0},{"G",0x1},{"GOVR",0x0},{"I",0x0},
+              {"INST",0x1},{"IOVR",0x0},{"IPROT",0x0},{"LOWER_BOUND",0x0},{"M",0x0},{"RO",0x1},
+              {"SR",0x1},{"SW",0x1},{"SX",0x0},{"TID",0x8f},{"TIDMSK",0x0},{"UAMSK",0x4},
+              {"UPPER_BOUND",0xfffffff},{"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},{"VLE",0x0},
+              {"W",0x0},};};
+    E : I {asm="mpuwe "; c=1; gc=1;
+                   ea=0x0000000012345678; ra=0x0000000012345678; d=0x7e0007a4; op=0x7e0007a4; ta=0x3; op_size=32;};
+    E : I {asm="mtspr 15,0x272"; c=2; gc=2;
+                   ea=0x000000001234567c; ra=0x000000001234567c; d=0x7df29ba6; op=0x7df29ba6; ta=0x3; op_size=32;
+                   ir={[ t=>"reg", rn=>"MAS2", d=>0xbbbbbfff],};};
+    E : I {asm="mtspr 7,0x273"; c=3; gc=3;
+                   ea=0x0000000012345680; ra=0x0000000012345680; d=0x7cf39ba6; op=0x7cf39ba6; ta=0x3; op_size=32;
+                   ir={[ t=>"reg", rn=>"MAS3", d=>0xbbbbb000],};};
+    E : I {asm="mpuwe "; c=4; gc=4;
+                   ea=0x0000000012345684; ra=0x0000000012345684; d=0x7e0007a4; op=0x7e0007a4; ta=0x3; op_size=32;};
+    E : I {asm="stwx 31,8,5"; c=5; gc=5;
+                   ea=0x0000000012345688; ra=0x0000000012345688; d=0x7fe8292e; op=0x7fe8292e; ta=0x3; op_size=32;
+                   ir={[ t=>"store", ra=>0x00000000bbbbb000, d=>0x08961ae5, ta=>0x3 ],};};
+    R : RES {ea=0x000000001234568c; ra=0x000000001234568c;ta=0x3;};
+    R : R {nm="ACC"; d=0x0000000000000000;};
+    R : R {nm="ATBL"; d=0x00000000;};
+    R : R {nm="ATBU"; d=0x00000000;};
+    R : R {nm="BUCSR"; d=0x00000000;};
+    // BALLOC:0 BBFI:0 BPEN:0 BPRED:0 
+    R : R {nm="BUCSR0"; d=0x00000000;};
+    R : R {nm="CDACNTL"; d=0x00000000;};
+    R : R {nm="CDADATA"; d=0x00000000;};
+    R : R {nm="CR"; d=0x2bcd168a;};
+    // bit:0 
+    R : R {nm="CSRR0"; d=0x00000000;};
+    R : R {nm="CSRR1"; d=0x00000000;};
+    // CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 ICM:0 IS:0 ME:0 PR:0 WE:0 rsrv0:0 rsrv1:0 
+    // rsrv2:0 rsrv3:0 rsrv4:0 
+    R : R {nm="CTR"; d=0x37b8df42;};
+    R : R {nm="DAC1"; d=0x22c6bc8e;};
+    R : R {nm="DAC2"; d=0x11fdc416;};
+    R : R {nm="DBCR0"; d=0x00000000;};
+    // BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 DEVT1:0 DEVT2:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:0 
+    // IDM:0 IRPT:0 RET:0 RST:0 TRAP:0 
+    R : R {nm="DBCR1"; d=0x00000000;};
+    // IAC12M:0 IAC1ER:0 IAC1US:0 IAC2ER:0 IAC2US:0 IAC34M:0 IAC3ER:0 IAC3US:0 IAC4ER:0 
+    // IAC4US:0 
+    R : R {nm="DBCR2"; d=0x00000000;};
+    // DAC12M:0 DAC1ER:0 DAC1LNK:0 DAC1US:0 DAC2ER:0 DAC2LNK:0 DAC2US:0 
+    R : R {nm="DBCR3"; d=0x00000000;};
+    R : R {nm="DBCR4"; d=0x00000000;};
+    R : R {nm="DBCR5"; d=0x00000000;};
+    R : R {nm="DBCR6"; d=0x00000000;};
+    R : R {nm="DBCR7"; d=0x00000000;};
+    R : R {nm="DBCR8"; d=0x00000000;};
+    R : R {nm="DBSR"; d=0x00000000;};
+    // BRT:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:0 IDE:0 IRPT:0 
+    // MRR:0 RET:0 TRAP:0 UDE:0 
+    R : R {nm="DDAM"; d=0x00000000;};
+    R : R {nm="DEAR"; d=0xd322b675;};
+    R : R {nm="DEC"; d=0x00000000;};
+    R : R {nm="DECAR"; d=0x00000000;};
+    R : R {nm="DEVENT"; d=0x00000000;};
+    R : R {nm="DMEMCTL0"; d=0x00000000;};
+    // DBAPD:0 DCECE:0 DDAUEC:0 DECUE:0 DIWE:0 DMEM_BASE_ADDR:0 DPEIE:0 DSECE:0 DSWCE:0 
+    R : R {nm="DSRR0"; d=0x00000000;};
+    R : R {nm="DSRR1"; d=0x00000000;};
+    R : R {nm="DVC1"; d=0x00000000;};
+    R : R {nm="DVC2"; d=0x00000000;};
+    R : R {nm="EDBCR0"; d=0x00000000;};
+    // DNH_EM:0 EDM:0 
+    R : R {nm="ESR"; d=0x00000000;};
+    // AP:0 BO:0 DLK:0 FP:0 MIF:0 PIE:0 PIL:0 PPR:0 PTR:0 PUO:0 SPV:0 ST:0 VLEMI:0 XTE:0 
+    R : R {nm="HDBCR0"; d=0x00000009;};
+    // DSB:1 DSTRM:0 ISTRM:1 
+    R : R {nm="HID0"; d=0x80431800;};
+    // CICLRDE:0 DCLRCE:1 DCLREE:1 DOZE:0 EMCP:1 ICR:1 MCCLRDE:0 NAP:1 NHR:1 NOPTI:0 SLEEP:0 
+    R : R {nm="HID1"; d=0x00005c00;};
+    // ATS:0 SYSCTL:5c 
+    R : R {nm="IAC1"; d=0xe2ae7364;};
+    R : R {nm="IAC2"; d=0xdb73feac;};
+    R : R {nm="IAC3"; d=0x245cc970;};
+    R : R {nm="IAC4"; d=0x03672a14;};
+    R : R {nm="IAC5"; d=0x2966d646;};
+    R : R {nm="IAC6"; d=0x6436d612;};
+    R : R {nm="IAC7"; d=0xfdd11702;};
+    R : R {nm="IAC8"; d=0x1e9a6746;};
+    R : R {nm="IMEMCTL0"; d=0x00000000;};
+    // IBAPD:0 ICECE:0 IDAUEC:0 IECUE:0 IIWE:0 IMEM_BASE_ADDR:0 IPEIE:0 ISECE:0 ISWCE:0 
+    R : R {nm="IVOR0"; d=0x00000000;};
+    R : R {nm="IVOR1"; d=0x00000010;};
+    R : R {nm="IVOR10"; d=0x00000000;};
+    R : R {nm="IVOR11"; d=0x00000000;};
+    R : R {nm="IVOR12"; d=0x00000000;};
+    R : R {nm="IVOR13"; d=0x00000000;};
+    R : R {nm="IVOR14"; d=0x00000000;};
+    R : R {nm="IVOR15"; d=0x00000090;};
+    R : R {nm="IVOR2"; d=0x00000020;};
+    R : R {nm="IVOR3"; d=0x00000030;};
+    R : R {nm="IVOR32"; d=0x00000000;};
+    R : R {nm="IVOR33"; d=0x000000a0;};
+    R : R {nm="IVOR34"; d=0x000000b0;};
+    R : R {nm="IVOR4"; d=0x00000040;};
+    R : R {nm="IVOR5"; d=0x00000050;};
+    R : R {nm="IVOR6"; d=0x00000060;};
+    R : R {nm="IVOR7"; d=0x00000000;};
+    R : R {nm="IVOR8"; d=0x00000080;};
+    R : R {nm="IVOR9"; d=0x00000000;};
+    R : R {nm="IVPR"; d=0x4b396a00;};
+    R : R {nm="L1CFGPR0"; d=0x28680804;};
+    R : R {nm="L1CFGPR1"; d=0x08680808;};
+    R : R {nm="L1CSR0"; d=0x80098001;};
+    // DCABT:0 DCE:1 DCEA:0 DCECE:1 DCEI:1 DCINV:0 DCLOC:0 DCLOINV:0 DCWA:1 WDD:0 WID:0 
+    R : R {nm="L1CSR1"; d=0x0000a020;};
+    // ICABT:0 ICE:0 ICEA:1 ICECE:0 ICEI:1 ICINV:0 ICLOC:1 ICLOINV:0 
+    R : R {nm="L1FINVPR0"; d=0x00000000;};
+    // CCMD:0 CSET:0 CWAY:0 
+    R : R {nm="L1FINVPR1"; d=0x00000000;};
+    // CCMD:0 CSET:0 CWAY:0 
+    R : R {nm="LR"; d=0x00000000;};
+    R : R {nm="MAS0"; d=0xe1001130;};
+    // DEBUG:0 E:0 ESEL:0 G:0 GOVR:0 I:0 INST:1 IOVR:0 IPROT:1 M:0 RO:0 SEL:0 SHD:0 SW:0 
+    // SX_SR:1 UAMSK:1 UW:0 UX_UR:0 VALID:1 VLE:1 W:1 
+    R : R {nm="MAS1"; d=0x00000000;};
+    // TID:0 TIDMSK:0 
+    R : R {nm="MAS2"; d=0xbbbbbfff;};
+    // LOWER_BOUND:3bbbbfff 
+    R : R {nm="MAS3"; d=0xbbbbb000;};
+    // UPPER_BOUND:3bbbb000 
+    R : R {nm="MCAR"; d=0x00000000;};
+    R : R {nm="MCSR"; d=0x00000000;};
+    // BUS_DRERR:0 BUS_WRERR:0 DC_DPERR:0 DC_LKERR:0 DC_TPERR:0 DMEM_RDPERR:0 DMEM_WRPERR:0 
+    // EXCP_ERR:0 G:0 IC_DPERR:0 IC_LKERR:0 IC_TPERR:0 IF:0 IMEM_ERR:0 LD:0 MAV:0 MCP:0 
+    // MEA:0 NMI:0 ST:0 STACK_ERR:0 U:0 
+    R : R {nm="MCSRR0"; d=0x00000000;};
+    R : R {nm="MCSRR1"; d=0x00000000;};
+    R : R {nm="MMUCFG"; d=0x004001d3;};
+    // MAVN:1 NMPUS:1 NTLBS:0 PIDSIZE:7 RASIZE:20 
+    R : R {nm="MPU0CFG"; d=0x800ba0a2;};
+    // DENTRY:0 FASSOC:1 IENTRY:2 IPROT:1 MAXSIZE:3 MINSIZE:0 SHENTRY:2 UAMSKA:1 
+    R : R {nm="MPU0CSR0"; d=0x00006061;};
+    // BYPSR:0 BYPSW:1 BYPSX:1 BYPUR:0 BYPUW:0 BYPUX:0 DRDEN:0 DWDEN:1 IDEN:1 MPUEN:1 MPUFI:0 
+    // TIDCTL:0 
+    R : R {nm="MSR"; d=0x00000900;};
+    // CE:0 CM:0 DE:0 DS:0 EE:0 FE0:1 FE1:1 FP:0 ICM:0 ILE:0 IP:0 IS:0 LE:0 ME:0 PMM:0 PR:0 
+    // RI:0 SPE:0 UCLE:0 WE:0 allocated:0 
+    R : R {nm="NIA"; d=0x1234568c;};
+    R : R {nm="PID"; d=0x00000000;};
+    R : R {nm="PID0"; d=0x0000008f;};
+    R : R {nm="PIR"; d=0x00000000;};
+    R : R {nm="PVR"; d=0x815d0000;};
+    // revision:0 version:15d 
+    R : R {nm="RESRV"; d=0x0000000000000000;};
+    // ADDR:0000000000000000 RES:0 
+    R : R {nm="SPEFSCR"; d=0x00000000;};
+    // FDBZ:0 FDBZE:0 FDBZS:0 FG:0 FINV:0 FINVE:0 FINVS:0 FINXE:0 FINXS:0 FOVF:0 FOVFE:0 
+    // FOVFS:0 FRMC:0 FUNF:0 FUNFE:0 FUNFS:0 FX:0 MODE:0 OV:0 SOV:0 
+    R : R {nm="SPRGPR0"; d=0x00000000;};
+    R : R {nm="SPRGPR1"; d=0x00000000;};
+    R : R {nm="SPRGPR2"; d=0x00000000;};
+    R : R {nm="SPRGPR3"; d=0x00000000;};
+    R : R {nm="SRR0"; d=0x00000000;};
+    R : R {nm="SRR1"; d=0x00000000;};
+    R : R {nm="SVR"; d=0x00000000;};
+    R : R {nm="TBL"; d=0x00000000;};
+    R : R {nm="TBU"; d=0x00000000;};
+    R : R {nm="TCR"; d=0x00000000;};
+    // ARE:0 DIE:0 FIE:0 FP:0 FPEXT:0 WIE:0 WP:0 WPEXT:0 WRC:0 
+    R : R {nm="TSR"; d=0x00000000;};
+    // DIS:0 ENW:0 FIS:0 WIS:0 WRS:0 
+    R : R {nm="USPRGPR0"; d=0x00000000;};
+    R : R {nm="XER"; d=0x20000006;};
+    // Bytecnt:6 CA:1 OV:0 SO:0 
+    R : R {nm="dmem_baseaddr_port"; d=0x0001;};
+    R : R {nm="gr0Addren"; d=0xfff;};
+    R : R {nm="gr0Baseaddr"; d=0x000;};
+    R : R {nm="gr1Addren"; d=0xfff;};
+    R : R {nm="gr1Baseaddr"; d=0x000;};
+    R : R {nm="imem_baseaddr_port"; d=0x0000;};
+    R : R {nm="GPR0"; d=0x00000000;};
+    R : R {nm="GPR1"; d=0x00000000;};
+    R : R {nm="GPR2"; d=0x00000000;};
+    R : R {nm="GPR3"; d=0x00000000;};
+    R : R {nm="GPR4"; d=0x00000000;};
+    R : R {nm="GPR5"; d=0xbac45d44;};
+    R : R {nm="GPR6"; d=0x00000000;};
+    R : R {nm="GPR7"; d=0xbbbbb000;};
+    R : R {nm="GPR8"; d=0x00f752bc;};
+    R : R {nm="GPR9"; d=0x00000000;};
+    R : R {nm="GPR10"; d=0x00000000;};
+    R : R {nm="GPR11"; d=0x00000000;};
+    R : R {nm="GPR12"; d=0x00000000;};
+    R : R {nm="GPR13"; d=0x00000000;};
+    R : R {nm="GPR14"; d=0x00000000;};
+    R : R {nm="GPR15"; d=0xbbbbbfff;};
+    R : R {nm="GPR16"; d=0x00000000;};
+    R : R {nm="GPR17"; d=0x00000000;};
+    R : R {nm="GPR18"; d=0x00000000;};
+    R : R {nm="GPR19"; d=0x00000000;};
+    R : R {nm="GPR20"; d=0x00000000;};
+    R : R {nm="GPR21"; d=0x00000000;};
+    R : R {nm="GPR22"; d=0x00000000;};
+    R : R {nm="GPR23"; d=0x00000000;};
+    R : R {nm="GPR24"; d=0x00000000;};
+    R : R {nm="GPR25"; d=0x00000000;};
+    R : R {nm="GPR26"; d=0x00000000;};
+    R : R {nm="GPR27"; d=0x00000000;};
+    R : R {nm="GPR28"; d=0x00000000;};
+    R : R {nm="GPR29"; d=0x00000000;};
+    R : R {nm="GPR30"; d=0x00000000;};
+    R : R {nm="GPR31"; d=0x08961ae5;};
+    R : T {n="MPU0_INST"; t=""; way=0;
+            d={{"DEBUG",0x0},{"G",0x1},{"GOVR",0x0},{"I",0x0},{"INST",0x1},{"IOVR",0x0},
+              {"IPROT",0x0},{"LOWER_BOUND",0x0},{"RO",0x1},{"SR",0x1},{"SW",0x1},
+              {"SX",0x0},{"TID",0x8f},{"TIDMSK",0x0},{"UAMSK",0x4},{"UPPER_BOUND",0xfffffff},
+              {"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},};};
+    R : T {n="MPU0_DATA"; t=""; way=0;
+            d={{"DEBUG",0x0},{"G",0x0},{"GOVR",0x0},{"I",0x0},{"INST",0x0},{"IOVR",0x0},
+              {"IPROT",0x0},{"LOWER_BOUND",0xbbbb000},{"RO",0x0},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TIDMSK",0x0},{"UAMSK",0x4},
+              {"UPPER_BOUND",0xbbbbfff},{"UR",0x0},{"UW",0x0},{"UX",0x0},{"V",0x1},};};
+  } // powerpc
+  R : D {ea=0x00000000bbbbb000; ra=0x00000000bbbbb000; d=0x08961ae5; ta=0x3;};
+} 

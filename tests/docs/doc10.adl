@@ -1,0 +1,228 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+The condition register.
+    """;
+    define (field=CR) {
+      attrs = one;
+      indexed=4;
+    }
+    define (field=LT) {
+      """
+Negative (LT)- This bit is set when the result is negative.
+""";
+      bits = 0;
+    }
+    define (field=GT) {
+      attrs = two;
+      """
+Positive (GT)- This bit is set when the result is positive (and not zero).
+""";
+      bits = 1;
+    }
+    define (field=EQ) {
+      attrs = three;
+      """
+Zero (EQ)- This bit is set when the result is zero.
+""";
+      bits = 2;
+    }
+    define (field=SO) {
+      """
+Summary overflow (SO)- This is a copy of the final state of XER(SO) at the
+completion of the instruction.
+""";
+      bits = 3;
+    }
+    define (field=FX) {
+      """
+Floating point exception (FX).  Copy of the final state of FPSCR(FX) at the
+completion of the instruction.
+""";
+      bits = 4;
+    }
+    define (field=FEX) {
+      """
+Floating-point enabled exception (FEX).  Copy of the final state of FPSCR(FEX)
+at the completion of the instruction.
+""";
+      bits = 5;
+    }
+    define (field=VX) {
+      """
+Floating-point invalid exception (VX).  Copy of the final state of FPSCR(CX) at
+the completion of the instruction.
+""";
+      bits = 6;
+    }
+    define (field=OX) {
+      """
+Floating-point overflow exception (OX).  Copy of the final state of FPSCR(OX) at
+the completion of the instruction.
+""";
+      bits = 7;
+    }
+  }
+
+
+  define (reg=CTR) {
+    """
+The counter register.
+    """;
+    define (read) {
+      action = { return CTR/2; };
+    }
+    define (write) {
+      action = func (bits<32> x) { CTR = x * 2; };
+    }
+  }
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+Field used to specify options for the Branch Conditional (`bc BO, BI, BD`_) instruction.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+Field used to specify a bit in the Condition Register (CR_) to be used
+as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      bits<32> si = SI;
+      if (RA == 0) {
+        GPR(RT) = si << 16;
+      } else {
+        GPR(RT) = GPR(RA) + (si << 16);
+      }
+    };
+  }
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    action = func() {
+      int x = CTR <= 0;
+      int y = CTR >= 0;
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = BO(2) || ( (CTR!=0) ^ BO(3));
+      var cond_ok = BO(0) || ( CR(BI) == BO(1));
+      if ( ctr_ok && cond_ok ) {
+        var ea = signExtend(concat(BD,zero(2)),32);
+        NIA = CIA + ea;
+      }
+    };
+  }
+
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

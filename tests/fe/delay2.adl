@@ -1,0 +1,75 @@
+//
+// Test error handling with delayed_write().
+//
+
+define (arch=minippc) {
+  
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    
+    action= {
+      // Should fail- not enough arguments.
+      delayed_write(X) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    
+    action= {
+      // Should fail- unknown register.
+      delayed_write(Foo(0,1),1) = GPR(RA)+GPR(RB);
+    };
+  }
+
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    
+    action= {
+      // Should fail- unknown register.
+      X = delayed_write(Foo(0,1),1);
+    };
+  }
+
+  define (regfile=GPR) {
+    define (field=x) {
+      bits = (0,1);
+    }
+    size = 32;
+  }
+
+  define (reg=X) {
+    define (field=x) {
+      bits = (0,1);
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

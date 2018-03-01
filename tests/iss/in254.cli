@@ -1,0 +1,17 @@
+
+set mode [lindex $argv 0]
+switch $mode {
+		jit -
+		dc  { }
+		default {
+				puts {Bad mode argument specified.  Expected either "dc" or "jit".}
+				exit 1
+		}
+}
+
+set query "${mode}_escapes"
+
+simmode $mode
+go
+puts "Number of escapes:  [simstat $query]"
+quit

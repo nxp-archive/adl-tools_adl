@@ -1,0 +1,202 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Memories:
+  Name:  MemA (1)
+  Size:   2048
+  Addressing unit: 1
+
+Instruction Fields:
+  AA: [30,30] 
+        Absolute address bit.
+    
+  BD: [16,29] 
+    Signed:  1
+    Addr:  PC-relative
+    Shift:  2
+        Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    
+  BI: [11,15] 
+    Display:  hex
+        Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    
+  BO: [6,10] 
+    Display:  hex
+        Field used to specify options for the Branch Conditional instructions.
+    
+  Bar: [11,20] [mem:  MemA] [not used]
+  CRM: [12,19] 
+  Foo: [19,20] [not used] 
+    Enums:  '' '+' '.l' 'reserved' 'reserved' '.f' 
+  LK: [31,31] 
+        LINK bit.
+    
+  MB: [21,25] 
+  ME: [26,30] 
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR]
+  RB: [16,20] [regfile:  GPR]
+  RS: [6,10] [regfile:  GPR]
+  RT: [6,10] [regfile:  GPR]
+  Rc: [31,31] 
+  SH: [16,20] 
+  SI: [16,31] 
+  UI: [16,31] 
+  XO: [21,30] 
+  Y: [15,15] 
+    Enums:  '-' '+' 
+        Overlay field for setting the Y bit in a conditional branch.
+    
+  aBD: [16,29] [not used] 
+    Inverted:  1
+    Addr:  Absolute
+    Shift:  2
+        Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended. This is used for
+    an absolute branch and the value is inverted before encoding.
+    
+Instructions:
+  Name:  addi (rank: 100)
+  Width:  32
+  Fields:  OPCD(40) RT RA SI
+  Action:  {
+}
+  -------------------------------
+  Name:  bc (rank: 100)
+  Width:  32
+  Syntax:  "bc%f %f,%f,%f":   Y BO BI BD
+  Fields:  OPCD(16) BO Y BI BD AA(0) LK(0)
+  Action:  func (  ) {
+     ;
+}
+  Source Registers:  pc 
+  -------------------------------
+  Name:  bclr (rank: 100)
+  Width:  32
+  Syntax:  "bclr%f %f,%f":   Y BO BI
+  Fields:  OPCD(19) BO Y BI XO(16) LK(0)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  blr (rank: 100) (shorthand)
+  Width:  32
+  Fields: 
+  Alias:  bclr BO(20) BI(0) 
+  -------------------------------
+  Name:  li (rank: 100) (shorthand)
+  Width:  32
+  Fields:  RT SI
+  Alias:  addi RT(RT) RA(0) SI(SI) 
+  -------------------------------
+  Name:  mr (rank: 100) (shorthand)
+  Width:  32
+  Fields:  RS RA
+  Alias:  or RS(RS) RA(RA) RB(RS) 
+  -------------------------------
+  Name:  mtcr (rank: 100) (shorthand)
+  Width:  32
+  Fields:  RS
+  Alias:  mtcrf RS(RS) CRM(255) 
+  -------------------------------
+  Name:  mtcrf (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS CRM XO(144)
+  Action:  {
+}
+  -------------------------------
+  Name:  my_or (rank: 100)
+  Width:  16
+  Fields:  OPCD(3) RT RA
+  Alias:  or RS(RA) RA(RT) RB(RA) 
+  -------------------------------
+  Name:  nop (rank: 100) (shorthand)
+  Width:  32
+  Fields: 
+  Alias:  ori RS(0) RA(0) UI(0) 
+  -------------------------------
+  Name:  or (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO(444) Rc(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  or. (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RS RA RB XO(444) Rc(1)
+  Action:  {
+}
+  -------------------------------
+  Name:  ori (rank: 100)
+  Width:  32
+  Fields:  OPCD(24) RS RA UI
+  Action:  {
+}
+  -------------------------------
+  Name:  rlwinm (rank: 100)
+  Width:  32
+  Syntax:  "rlwinm %f,%f,%f,%f,%f":   RA RS SH MB ME
+  Fields:  OPCD(21) RS RA SH MB ME
+  Action:  {
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( MB , ME ) ;
+    GPR ( RA ) = r & m ;
+}
+  Source Registers:  GPR(RS) 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+  Name:  slwi (rank: 100) (shorthand)
+  Width:  32
+  Syntax:  "slwi %f,%f,%f":   RA RS SH
+  Fields:  RS RA SH
+  Alias:  rlwinm RS(RS) RA(RA) SH(SH) MB(0) ME(0 - SH) 
+  Source Registers:  GPR(RS) 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    3(c000000):  my_or
+    16(40000000):      Mask:  0x3
+      0(0):  bc
+    19(4c000000):      Mask:  0x7ff
+      32(20):  bclr
+        Shorthand:  blr: bclr BO(20) BI(0) 
+    21(54000000):  rlwinm
+      Shorthand:  slwi: rlwinm RS(RS) RA(RA) SH(SH) MB(0) ME(0 - SH) 
+    24(60000000):  ori
+      Shorthand:  nop: ori RS(0) RA(0) UI(0) 
+    31(7c000000):      Mask:  0x7fe
+      144(120):  mtcrf
+        Shorthand:  mtcr: mtcrf RS(RS) CRM(255) 
+      444(378):        Mask:  0x1
+        0(0):  or
+          Shorthand:  mr: or RS(RS) RA(RA) RB(RS) 
+        1(1):  or.
+    40(a0000000):  addi
+      Shorthand:  li: addi RT(RT) RA(0) SI(SI) 
+-------------------------------
+

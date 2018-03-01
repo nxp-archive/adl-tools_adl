@@ -1,0 +1,122 @@
+//
+// Split opcode fields
+// 
+
+define (arch=minippc) {
+
+  
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  // Small fields
+  
+  define (instrfield = OPCD) {
+    bits = ((0,3),(8,11),(16,19),(24,27));  
+  }  
+
+  define (instr = I1) {
+    fields = (OPCD(0xAFFF));
+    width = 32;
+    action = {};
+  }  
+  
+  define (instr = I2) {
+    fields = (OPCD(0xFAFF));
+    width = 32;
+    action = {};
+  }
+  
+   define (instr = I3) {
+    fields = (OPCD(0xFFAF));
+    width = 32;
+    action = {};
+  }  
+    define (instr = I4) {
+    fields = (OPCD(0xFFFA));
+    width = 32;
+    action = {};
+  } 
+  
+  // Mixed
+  
+  define (instrfield = OPCDL) {
+  
+    bits = ((0,3),(16,19));
+  }  
+   
+  define (instrfield = OPCDR) {
+  
+    bits = ((8,11),(24,27));
+  } 
+  
+  define (instr = II1) {
+    //FAFA
+    fields = (OPCDL(0xFF),OPCDR(0xAA));
+    width = 32;
+    action = {};
+  } 
+  
+  define (instr = II2) {
+    //AFAF
+    fields = (OPCDL(0xAA),OPCDR(0xFF));
+    width = 32;
+    action = {};
+  }  
+  
+  // Big  
+  
+  define (instrfield = OPCDB) {
+    bits = ((0,7),(24,43), (60,63));
+  }
+  
+  define (instr = III1) {
+    fields = (OPCDB(0xAABBBBBC));
+    action = {};  
+  }
+
+  define (instr = III2) {
+    fields = (OPCDB(0xACBBBBBC));
+    action = {};  
+  }
+  
+  define (instr = III3) {
+    fields = (OPCDB(0xAABBCBBC));
+    action = {};  
+  }  
+  
+  define (instr = III4) {
+    fields = (OPCDB(0xAABBBBBA));
+    action = {};  
+  } 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+     
+    
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,85 @@
+#
+# Basic out-of-order test with loads and arithmetics.
+#
+= asm
+
+	addi r1,r1,4
+	lwz  r2,0x1000(r1)
+	addi r2,r2,20	
+	addi r1,r1,4
+	addi r4,r4,5
+	addi r5,r5,6
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210004	#	addi r1,r1,4
+MD n=Mem ra=0x00000004 d=0x80411000	#	lwz  r2,0x1000(r1)
+MD n=Mem ra=0x00000008 d=0x38420014	#	addi r2,r2,20	
+MD n=Mem ra=0x0000000c d=0x38210004	#	addi r1,r1,4
+MD n=Mem ra=0x00000010 d=0x38840005	#	addi r4,r4,5
+MD n=Mem ra=0x00000014 d=0x38A50006	#	addi r5,r5,6
+# </GEN>
+
+MD n=Mem ra=0x1004 d=30
+
+TRACE 
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210004
+INSTR op=0x38210004					asm="addi r1,r1,4"
+ITIME t=1
+R n=GPR i=1 d=0x00000004
+CTIME t=4
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x80411000
+INSTR op=0x80411000					asm="lwz r2,4096(r1)"
+ITIME t=1
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x0000001e
+R n=GPR i=2 d=0x0000001e
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+ITIME t=2
+R n=GPR i=2 d=0x00000032
+CTIME t=7
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38210004
+INSTR op=0x38210004					asm="addi r1,r1,4"
+ITIME t=2
+R n=GPR i=1 d=0x00000008
+CTIME t=7
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38840005
+INSTR op=0x38840005					asm="addi r4,r4,5"
+ITIME t=3
+R n=GPR i=4 d=0x00000005
+CTIME t=8
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38a50006
+INSTR op=0x38a50006					asm="addi r5,r5,6"
+ITIME t=3
+R n=GPR i=5 d=0x00000006
+CTIME t=8
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=4
+CTIME t=9
+
+RESULTS
+
+RD n=GPR i=1 d=8
+RD n=GPR i=2 d=50
+RD n=GPR i=4 d=5
+RD n=GPR i=5 d=6

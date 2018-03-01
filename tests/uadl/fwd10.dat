@@ -1,0 +1,80 @@
+#
+# Test the use of the Repeat label.  The second add would stall w/o Repeat
+# because the lwz will stall due to a misaligned load.
+#
+= asm
+
+	lwz r1,0x1002(r0)
+	addi r2,r2,20
+	nop
+	nop
+	addi r3,r2,30
+  
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201002	#	lwz r1,0x1002(r0)
+MD n=Mem ra=0x00000004 d=0x38420014	#	addi r2,r2,20
+MD n=Mem ra=0x00000008 d=0x60000000	#	nop
+MD n=Mem ra=0x0000000c d=0x60000000	#	nop
+MD n=Mem ra=0x00000010 d=0x3862001E	#	addi r3,r2,30
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0x0000dead
+MD n=Mem ra=0x1004 d=0xbeef0000
+
+RD n=NIA d=0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201002
+INSTR op=0x80201002					asm="lwz r1,4098(r0)"
+ITIME t=2
+D n=Mem t=read ea=0x1002 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000dead
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0xbeef0000
+R n=GPR i=1 d=0xdeadbeef
+CTIME t=6
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+ITIME t=2
+R n=GPR i=2 d=0x00000014
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x60000000
+INSTR op=0x60000000					asm="ori r0,r0,0x0000"
+ITIME t=3
+CTIME t=7
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x60000000
+INSTR op=0x60000000					asm="ori r0,r0,0x0000"
+ITIME t=3
+CTIME t=7
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x3862001e
+INSTR op=0x3862001e					asm="addi r3,r2,30"
+ITIME t=5
+R n=GPR i=3 d=0x00000032
+CTIME t=8
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=8
+CTIME t=11
+
+
+RESULTS
+
+RD n=GPR i=0 d=0
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=50

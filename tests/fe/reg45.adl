@@ -1,0 +1,74 @@
+//
+// Check the use of immediate write-hooks.
+//
+
+define (arch = MiniPPC) {
+
+  parallel_execution = 2;
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  immediate_writehooks = true;
+
+  // A wite hook which uses updateReg to perform the actual updates.  The write
+  // hook also maintains a summary bit.
+  define(reg=CReg) {
+    // a bundle register file
+    width = 32;	
+    define(field=A) { bits = (0,3);	};
+    define(field=B) { bits = (4,7);	};
+    define(field=C) { bits = (8,11);	};
+    define(field=S) { bits = (28,31);	};
+
+    define(write) {
+      action = func(ValueBundle v) {
+        updateReg(v);
+      }; 
+    }
+  } 
+
+  // This register has the 'immediate' flag set, so that the write-hook
+  // evaluates immediately, but the actual write is delayed.
+  define (reg=EReg) {
+    define (field=X) { bits = 0; };
+    define (field=Y) { bits = (1,31); };
+    define (write) {
+      immediate = true;
+      action = func(bits<32> v) {
+        ThisReg.Y = v;
+      };
+    }
+  }
+
+  // This register has the 'immediate' flag set, so that the write-hook
+  // evaluates immediately, but the actual write is delayed.
+  define (regfile=ERegfile) {
+    size = 4;
+    define (field=X) { bits = 0; };
+    define (field=Y) { bits = (1,31); };
+    define (write) {
+      action = func(unsigned i,bits<32> v) {
+        ThisReg(i).Y = v;
+      };
+    }
+  }
+
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

@@ -1,0 +1,10 @@
+#
+# This tests to make sure that we won't execute any instructions, even in
+# decode-cache mode, if the td threshold is set to 0.
+#
+simmode dc
+settd threshold 0
+go
+simmode normal
+go
+

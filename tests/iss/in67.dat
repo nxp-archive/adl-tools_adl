@@ -1,0 +1,13 @@
+#
+# Tests max-instruction-count in the presence of interrupts.
+#
+
+MD n=Mem ra=0x0 d=0x8888888
+
+RD n=NIA   d=0x00000000
+
+RESULTS
+
+TRACE
+
+

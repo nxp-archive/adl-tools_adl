@@ -1,0 +1,62 @@
+#
+# More testing of logging of reads and partial register accesses, specifically
+# looking at indexed register field accesses.
+#
+#
+= asm
+
+	crorc 0,1,2
+	crorc 10,12,14
+	crorc 29,30,31
+	cmpi 3,10,0
+	cmpi 4,10,50
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4C011342	#	crorc 0,1,2
+MD n=Mem ra=0x00000004 d=0x4D4C7342	#	crorc 10,12,14
+MD n=Mem ra=0x00000008 d=0x4FBEFB42	#	crorc 29,30,31
+MD n=Mem ra=0x0000000c d=0x2D8A0000	#	cmpi 3,10,0
+MD n=Mem ra=0x00000010 d=0x2E0A0032	#	cmpi 4,10,50
+# </GEN>
+CORE n=:P
+
+TRACE
+
+
+I ea=0x0 id=1
+INSTR op=0x4c011342					asm="crorc 0,1,2"
+R a=read n=CR d=0x00000000 m=0x20000000
+R a=read n=CR d=0x00000000 m=0x40000000
+R n=CR d=0x80000000 m=0x80000000
+
+I ea=0x4 id=2
+INSTR op=0x4d4c7342					asm="crorc 10,12,14"
+R a=read n=CR d=0x80000000 m=0x00020000
+R a=read n=CR d=0x80000000 m=0x00080000
+R n=CR d=0x80200000 m=0x00200000
+
+I ea=0x8 id=3
+INSTR op=0x4fbefb42					asm="crorc 29,30,31"
+R a=read n=CR d=0x80200000 m=0x00000001
+R a=read n=CR d=0x80200000 m=0x00000002
+R n=CR d=0x80200004 m=0x00000004
+
+I ea=0xc id=4
+INSTR op=0x2d8a0000					asm="cmpi 3,r10,0x0000"
+R a=read n=GPR i=10 d=0x0000000000000000
+R n=CR d=0x80220004 m=0x000f0000
+
+I ea=0x10 id=5
+INSTR op=0x2e0a0032					asm="cmpi 4,r10,0x0032"
+R a=read n=GPR i=10 d=0x0000000000000000
+R n=CR d=0x80228004 m=0x0000f000
+
+I ea=0x14 id=6
+INSTR op=0x00					asm="halt "
+
+RESULTS
+
+RD n=CR d=0x80228004

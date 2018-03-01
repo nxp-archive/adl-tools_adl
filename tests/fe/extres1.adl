@@ -1,0 +1,81 @@
+
+//
+// Example of an external resource.  This should parse correctly.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+
+  define (ext_resource=foo) {
+    objtype = Foo;
+    constr_args = (1,2,"stuff");
+    reset = true;
+  }
+
+  define (ext_resource=bar) {
+    objtype = Bar;
+    external = true;
+  }
+
+  define (ext_resource=ext3) {}
+
+  // A reference to an external resource is OK.
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      foo.do_action(1);
+      bar.do_action(2);
+    };
+  }  
+
+}
+
+define(arch=foo2) {
+
+  // Removal of an external resource.
+  defmod(ext_resource=ext3) {
+    remove = 1;
+  }
+
+}
+
+define (core=P) {
+  archs=(foo,foo2);
+}

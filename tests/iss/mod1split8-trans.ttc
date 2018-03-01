@@ -1,0 +1,6 @@
+
+define (core=P) {
+  define (config) {
+    mem_split_size = 8;
+  }
+}

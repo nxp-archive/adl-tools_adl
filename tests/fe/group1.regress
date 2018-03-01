@@ -1,0 +1,104 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  A: [6,20] 
+  B: [21,30] 
+  OPCD: [0,5] 
+Instructions:
+  Name:  i1 (rank: 100)
+  Width:  32
+  Fields:  OPCD(1) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i2 (rank: 100)
+  Width:  32
+  Fields:  OPCD(2) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i3 (rank: 100)
+  Width:  32
+  Fields:  OPCD(3) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i4 (rank: 100)
+  Width:  32
+  Attributes:  red
+  Fields:  OPCD(4) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i5 (rank: 100)
+  Width:  32
+  Fields:  OPCD(5) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i6 (rank: 100)
+  Width:  32
+  Fields:  OPCD(6) A B
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    1(4000000):  i1
+    2(8000000):  i2
+    3(c000000):  i3
+    4(10000000):  i4
+    5(14000000):  i5
+    6(18000000):  i6
+
+Groups:
+  Name:  g1
+  Type:  instr
+  Items: i1 i2 i3 
+  -------------------------------
+  Name:  g2
+  Type:  instr
+  Items: i3 i4 i5 
+  -------------------------------
+  Name:  g3
+  Type:  instr
+  Items: i3 i6 
+  -------------------------------
+  Name:  g4
+  Type:  instr
+  Items: i1 i2 i6 
+  -------------------------------
+  Name:  g5
+  Type:  instr
+  Items: i3 i6 
+  -------------------------------
+  Name:  g6
+  Type:  instr
+  Items: i1 i2 i3 i4 i5 
+  -------------------------------
+  Name:  g7
+  Type:  instr
+  Items: i1 i2 i4 i5 
+  -------------------------------
+  Name:  g8
+  Type:  instr
+  Items: i3 i4 i5 i6 
+  -------------------------------
+-------------------------------
+

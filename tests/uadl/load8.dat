@@ -1,0 +1,125 @@
+
+= asm
+
+	lwzu r2,0x1000(r1)
+	lwzu r3,4(r1)
+	lwzu r4,4(r1)
+	lwzu r5,4(r1)
+	lwzu r6,4(r1)
+	lwzu r7,4(r1)
+	lwzu r8,4(r1)
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA    d=0x0
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x84411000	#	lwzu r2,0x1000(r1)
+MD n=Mem ra=0x00000004 d=0x84610004	#	lwzu r3,4(r1)
+MD n=Mem ra=0x00000008 d=0x84810004	#	lwzu r4,4(r1)
+MD n=Mem ra=0x0000000c d=0x84A10004	#	lwzu r5,4(r1)
+MD n=Mem ra=0x00000010 d=0x84C10004	#	lwzu r6,4(r1)
+MD n=Mem ra=0x00000014 d=0x84E10004	#	lwzu r7,4(r1)
+MD n=Mem ra=0x00000018 d=0x85010004	#	lwzu r8,4(r1)
+# </GEN>
+
+MD n=Mem ra=0x1000 d=1
+MD n=Mem ra=0x1004 d=2
+MD n=Mem ra=0x1008 d=3
+MD n=Mem ra=0x100c d=4
+MD n=Mem ra=0x1010 d=5
+MD n=Mem ra=0x1014 d=6
+MD n=Mem ra=0x1018 d=7
+
+TRACE
+
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x84411000
+INSTR op=0x84411000					asm="lwzu r2,4096(r1)"
+ITIME t=4
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000001
+R n=GPR i=1 d=0x00001000
+R n=GPR i=2 d=0x00000001
+CTIME t=9
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x84610004
+INSTR op=0x84610004					asm="lwzu r3,4(r1)"
+ITIME t=9
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000002
+R n=GPR i=1 d=0x00001004
+R n=GPR i=3 d=0x00000002
+CTIME t=14
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x84810004
+INSTR op=0x84810004					asm="lwzu r4,4(r1)"
+ITIME t=14
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000003
+R n=GPR i=1 d=0x00001008
+R n=GPR i=4 d=0x00000003
+CTIME t=19
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x84a10004
+INSTR op=0x84a10004					asm="lwzu r5,4(r1)"
+ITIME t=19
+D n=Mem t=read ea=0x100c nb=4
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000004
+R n=GPR i=1 d=0x0000100c
+R n=GPR i=5 d=0x00000004
+CTIME t=24
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x84c10004
+INSTR op=0x84c10004					asm="lwzu r6,4(r1)"
+ITIME t=24
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000005
+R n=GPR i=1 d=0x00001010
+R n=GPR i=6 d=0x00000005
+CTIME t=29
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x84e10004
+INSTR op=0x84e10004					asm="lwzu r7,4(r1)"
+ITIME t=29
+D n=Mem t=read ea=0x1014 nb=4
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0x00000006
+R n=GPR i=1 d=0x00001014
+R n=GPR i=7 d=0x00000006
+CTIME t=34
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x85010004
+INSTR op=0x85010004					asm="lwzu r8,4(r1)"
+ITIME t=34
+D n=Mem t=read ea=0x1018 nb=4
+M n=Mem t=read ea=0x1018 ra=0x1018 d=0x00000007
+R n=GPR i=1 d=0x00001018
+R n=GPR i=8 d=0x00000007
+CTIME t=39
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=35
+CTIME t=40
+
+RESULTS
+
+RD n=GPR i=1 d=0x00001018
+RD n=GPR i=2 d=0x00000001
+RD n=GPR i=3 d=0x00000002
+RD n=GPR i=4 d=0x00000003
+RD n=GPR i=5 d=0x00000004
+RD n=GPR i=6 d=0x00000005
+RD n=GPR i=7 d=0x00000006
+RD n=GPR i=8 d=0x00000007

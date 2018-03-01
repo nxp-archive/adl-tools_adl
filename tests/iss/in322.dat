@@ -1,0 +1,31 @@
+#
+# A very simple test of micro-ops.
+#
+# Constructed using as-mod99
+#
+= asm
+
+	addi r1,r1,200	addi r2,r2,300
+	add  r3,r1,r2   sub r4,r2,r1	mul r5,r1,r2
+	halt
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x42108064	#	addi r1,r1,200	addi r2,r2,300
+MD n=Mem ra=0x00000004 d=0x0442012C
+MD n=Mem ra=0x00000008 d=0x82308844	#	add  r3,r1,r2   sub r4,r2,r1	mul r5,r1,r2
+MD n=Mem ra=0x0000000c d=0x10465088
+MD n=Mem ra=0x00000010 d=0x00000000	#	halt
+MD n=Mem ra=0x00000014 d=0x00000000
+# </GEN>
+
+RESULTS
+
+CORE n=packet_ops
+
+RD n=GPR i=1 d=200
+RD n=GPR i=2 d=300
+RD n=GPR i=3 d=500
+RD n=GPR i=4 d=100
+RD n=GPR i=5 d=60000

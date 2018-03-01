@@ -1,0 +1,20 @@
+
+set mode [lindex $argv 0]
+switch $mode {
+		jit -
+		dc  { }
+		default {
+				puts {Bad mode argument specified.  Expected either "dc" or "jit".}
+				exit 1
+		}
+}
+
+simmode $mode
+setbrk 0x40
+go
+traceon in253.out.dat
+setbrk 0x9c
+go
+traceoff
+go
+quit

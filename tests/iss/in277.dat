@@ -1,0 +1,145 @@
+#
+# This tests to make sure that we properly log a critical address in the D card.
+# In this situation, lvx and stvx log their original, unaligend address in the D
+# card, rather than the actual starting address.
+#
+= asm
+
+	lvx r4,r1,r2
+	addi r2,r2,0x14
+	lvx r8,r1,r2
+
+	addi r2,r2,0x14
+	stvx r4,r1,r2
+
+	lwz r12,0x0(r1)
+	stw r12,0x2000(r0)
+
+= /asm
+
+= aopts
+	-mregnames -maltivec
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C8110CE	#	lvx r4,r1,r2
+MD n=Mem ra=0x00000004 d=0x38420014	#	addi r2,r2,0x14
+MD n=Mem ra=0x00000008 d=0x7D0110CE	#	lvx r8,r1,r2
+MD n=Mem ra=0x0000000c d=0x38420014	#	addi r2,r2,0x14
+MD n=Mem ra=0x00000010 d=0x7C8111CE	#	stvx r4,r1,r2
+MD n=Mem ra=0x00000014 d=0x81810000	#	lwz r12,0x0(r1)
+MD n=Mem ra=0x00000018 d=0x91802000	#	stw r12,0x2000(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA    d=0x0
+
+RD n=GPR i=1 d=0x1000
+RD n=GPR i=2 d=0x4
+
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+MD n=Mem ra=0x1008 d=0x87654321
+MD n=Mem ra=0x100c d=0xb0f0babe
+
+MD n=Mem ra=0x1010 d=0xa5ef4234
+MD n=Mem ra=0x1014 d=0x12349877
+MD n=Mem ra=0x1018 d=0xacdbfeaf
+MD n=Mem ra=0x101c d=0x2346854a
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c8110ce
+INSTR op=0x7c8110ce					asm="lvx r4,r1,r2"
+D n=Mem t=read ea=0x1004 nb=16 type=read
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x12345678
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x87654321
+M n=Mem t=read ea=0x100c ra=0x100c d=0xb0f0babe
+R n=GPR i=4 d=0xdeadbeef
+R n=GPR i=5 d=0x12345678
+R n=GPR i=6 d=0x87654321
+R n=GPR i=7 d=0xb0f0babe
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+R n=GPR i=2 d=0x00000018
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7d0110ce
+INSTR op=0x7d0110ce					asm="lvx r8,r1,r2"
+D n=Mem t=read ea=0x1018 nb=16 type=read
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0xa5ef4234
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0x12349877
+M n=Mem t=read ea=0x1018 ra=0x1018 d=0xacdbfeaf
+M n=Mem t=read ea=0x101c ra=0x101c d=0x2346854a
+R n=GPR i=8 d=0xa5ef4234
+R n=GPR i=9 d=0x12349877
+R n=GPR i=10 d=0xacdbfeaf
+R n=GPR i=11 d=0x2346854a
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+R n=GPR i=2 d=0x0000002c
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c8111ce
+INSTR op=0x7c8111ce					asm="stvx r4,r1,r2"
+D n=Mem t=write ea=0x102c nb=16 type=write
+M n=Mem t=write ea=0x1020 ra=0x1020 d=0xdeadbeef
+M n=Mem t=write ea=0x1024 ra=0x1024 d=0x12345678
+M n=Mem t=write ea=0x1028 ra=0x1028 d=0x87654321
+M n=Mem t=write ea=0x102c ra=0x102c d=0xb0f0babe
+
+I ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x81810000
+INSTR op=0x81810000 asm="lwz r12,0(r1)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=12 d=0xdeadbeef
+
+I ea=0x18
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x91802000
+INSTR op=0x91802000 asm="stw r12,8192(r0)"
+D n=Mem t=write ea=0x2000 nb=4
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0xdeadbeef
+
+I ea=0x1c
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x0
+INSTR op=0x00000000 asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0x00001000
+RD n=GPR i=2 d=0x0000002c
+RD n=GPR i=4 d=0xdeadbeef
+RD n=GPR i=5 d=0x12345678
+RD n=GPR i=6 d=0x87654321
+RD n=GPR i=7 d=0xb0f0babe
+RD n=GPR i=8 d=0xa5ef4234
+RD n=GPR i=9 d=0x12349877
+RD n=GPR i=10 d=0xacdbfeaf
+RD n=GPR i=11 d=0x2346854a
+RD n=GPR i=12 d=0xdeadbeef
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+MD n=Mem ra=0x1008 d=0x87654321
+MD n=Mem ra=0x100c d=0xb0f0babe
+
+MD n=Mem ra=0x1010 d=0xa5ef4234
+MD n=Mem ra=0x1014 d=0x12349877
+MD n=Mem ra=0x1018 d=0xacdbfeaf
+MD n=Mem ra=0x101c d=0x2346854a
+
+MD n=Mem ra=0x1020 d=0xdeadbeef
+MD n=Mem ra=0x1024 d=0x12345678
+MD n=Mem ra=0x1028 d=0x87654321
+MD n=Mem ra=0x102c d=0xb0f0babe
+
+MD n=Mem ra=0x2000 d=0xdeadbeef

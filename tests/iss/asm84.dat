@@ -1,0 +1,13 @@
+#
+# This just contains expected results when running asm84.hex on mod1.
+#
+
+RESULTS
+
+CORE n=:P
+
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=200
+
+MD n=Mem ra=0x1000 d=100
+MD n=Mem ra=0x100c d=200

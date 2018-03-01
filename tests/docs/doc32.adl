@@ -1,0 +1,428 @@
+//
+// For this testcase, more instruction fields exist than are used by
+// instructions.  When a database or documentation is generated with
+// --used-only, extra instruction fields and relocations should be removed.
+//
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+    var cr = CR;
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  void setcrfield(bits<3> field,bits<32> x,bits<32> y) {
+    // Same thing as above.  Here just to test case issues.
+    var cr = CR;
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+The condition register.
+    """;
+    define (field=CR) {
+      attrs = one;
+      indexed=4;
+    }
+    define (field=LT) {
+      """
+Negative (LT)- This bit is set when the result is negative.
+""";
+      bits = 0;
+    }
+    define (field=GT) {
+      attrs = two;
+      """
+Positive (GT)- This bit is set when the result is positive (and not zero).
+""";
+      bits = 1;
+    }
+    define (field=EQ) {
+      attrs = three;
+      """
+Zero (EQ)- This bit is set when the result is zero.
+""";
+      bits = 2;
+    }
+    define (field=SO) {
+      """
+Summary overflow (SO)- This is a copy of the final state of XER(SO) at the
+completion of the instruction.
+""";
+      bits = 3;
+    }
+    define (field=FX) {
+      """
+Floating point exception (FX).  Copy of the final state of FPSCR(FX) at the
+completion of the instruction.
+""";
+      bits = 4;
+    }
+    define (field=FEX) {
+      """
+Floating-point enabled exception (FEX).  Copy of the final state of FPSCR(FEX)
+at the completion of the instruction.
+""";
+      bits = 5;
+    }
+    define (field=VX) {
+      """
+Floating-point invalid exception (VX).  Copy of the final state of FPSCR(CX) at
+the completion of the instruction.
+""";
+      bits = 6;
+    }
+    define (field=OX) {
+      """
+Floating-point overflow exception (OX).  Copy of the final state of FPSCR(OX) at
+the completion of the instruction.
+""";
+      bits = 7;
+    }
+  }
+
+
+  define (reg=CTR) {
+    """
+The counter register.
+    """;
+    define (read) {
+      action = { return CTR/2; };
+    }
+    define (write) {
+      action = func (bits<32> x) { CTR = x * 2; };
+    }
+  }
+
+  define (reg=ESR) {
+    """
+Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+Machine state register.
+    """;
+  }
+
+  define (reg=SRR0) {
+    """
+Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (regfile=SPR) {
+    size=1024;
+
+    define (entry=9)  { reg = CTR; }
+    define (entry=62) { reg = ESR; }
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+  }
+
+  define (reloc=D1) {
+    value = 1;
+    width = 16;
+    attrs = two;
+    instrfield = D;
+    """
+An example ADL relocation.
+""";
+  }
+
+  define (reloc=D2) {
+    value = 2;
+    width = 16;
+    instrfield = SH;
+  }
+
+  define (reloc=D3) {
+    value = 3;
+    width = 16;
+    instrfield = MB;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+Field used to specify options for the Branch Conditional (`bc BO, BI, BD`_) instruction.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+Field used to specify a bit in the Condition Register (CR_) to be used
+as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield = F1) {
+    """
+An example enumerated field.
+    """;
+    bits = (28,31);
+    enumerated = ( "", ",1", ",2", ",3", reserved, reserved, ",foo" );
+  };
+
+  define (instrfield=BD) {
+    """
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+Field used to specify one of the Condition Register (CR_) fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+Field used to specify a Special Purpose Register (SPR_) for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register (GPR_) as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+   // For short instructions
+  define (instrfield=RY) {
+    bits = (8,11);
+  }
+  define (instrfield=RX) {
+    bits = (12,15);
+  }
+
+
+  //
+  // Instructions.
+  //
+
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      if (RA == 0) {
+        GPR(RT) = si;
+      } else {
+        GPR(RT) = GPR(RA) + si;
+      }
+    };
+  }
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      GPR(RT) = GPR(RA) + si;
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      bits<32> si = SI;
+      if (RA == 0) {
+        GPR(RT) = si << 16;
+      } else {
+        GPR(RT) = GPR(RA) + (si << 16);
+      }
+    };
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    syntax = ("%i %f,%f",SPRN,RS);
+    action = {
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    """
+The program interrupt occurs for various reasons, such as when an illegal
+instruction is encountered.
+""";
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR.get<16>(0,15),IVOR6.get<16>(16,31));
+    };
+  }
+
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

@@ -1,0 +1,295 @@
+#
+# Just a simple test to make sure that we're properly alternating instructions
+# in a combined smt/fused-core mt model.
+#
+= asm
+
+	addi r1,r1,10
+	addi r2,r2,20
+	addi r1,r1,5
+	addi r2,r2,6
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x38420014	#	addi r2,r2,20
+MD n=Mem ra=0x00000008 d=0x38210005	#	addi r1,r1,5
+MD n=Mem ra=0x0000000c d=0x38420006	#	addi r2,r2,6
+# </GEN>
+
+CORE n=:PMT
+
+RD n=TEN d=0xf0000000
+
+CORE n=:PMT:s0:t0
+
+RD n=NIA     d=0x0
+RD n=GPR i=1 d=0
+RD n=GPR i=2 d=0
+
+CORE n=:PMT:s0:t1
+
+RD n=NIA     d=0x0
+RD n=GPR i=1 d=2
+RD n=GPR i=2 d=3
+
+CORE n=:PMT:s1:t0
+
+RD n=NIA     d=0x0
+RD n=GPR i=1 d=4
+RD n=GPR i=2 d=5
+
+CORE n=:PMT:s1:t1
+
+RD n=NIA     d=0x0
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=7
+
+TRACE
+
+
+
+CORE n=:PMT:s1:t0
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+ITIME t=1
+R n=SmtIndex d=0x00000001
+R n=GPR i=1 d=0x0000000e
+CTIME t=5
+
+CORE n=:PMT:s0:t0
+
+
+I ea=0x0 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+ITIME t=1
+R n=SmtIndex d=0x00000001
+R n=GPR i=1 d=0x0000000a
+CTIME t=5
+
+CORE n=:PMT:s1:t1
+
+
+I ea=0x0 id=3
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+ITIME t=1
+R n=SmtIndex d=0x00000000
+R n=GPR i=1 d=0x00000010
+CTIME t=6
+
+CORE n=:PMT:s1:t0
+
+
+I ea=0x4 id=4
+R n=SmtIndex d=0x00000001
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+ITIME t=2
+R n=SmtIndex d=0x00000001
+R n=GPR i=2 d=0x00000019
+CTIME t=6
+
+CORE n=:PMT:s0:t1
+
+
+I ea=0x0 id=5
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+ITIME t=1
+R n=SmtIndex d=0x00000000
+R n=GPR i=1 d=0x0000000c
+CTIME t=6
+
+CORE n=:PMT:s0:t0
+
+
+I ea=0x4 id=6
+R n=SmtIndex d=0x00000001
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+ITIME t=2
+R n=SmtIndex d=0x00000001
+R n=GPR i=2 d=0x00000014
+CTIME t=6
+
+CORE n=:PMT:s1:t1
+
+
+I ea=0x4 id=7
+R n=SmtIndex d=0x00000000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+ITIME t=3
+R n=SmtIndex d=0x00000000
+R n=GPR i=2 d=0x0000001b
+CTIME t=7
+
+CORE n=:PMT:s1:t0
+
+
+I ea=0x8 id=8
+R n=SmtIndex d=0x00000001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210005
+INSTR op=0x38210005					asm="addi r1,r1,5"
+ITIME t=3
+R n=SmtIndex d=0x00000001
+R n=GPR i=1 d=0x00000013
+CTIME t=7
+
+CORE n=:PMT:s0:t1
+
+
+I ea=0x4 id=9
+R n=SmtIndex d=0x00000000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+ITIME t=3
+R n=SmtIndex d=0x00000000
+R n=GPR i=2 d=0x00000017
+CTIME t=7
+
+CORE n=:PMT:s0:t0
+
+
+I ea=0x8 id=10
+R n=SmtIndex d=0x00000001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210005
+INSTR op=0x38210005					asm="addi r1,r1,5"
+ITIME t=3
+R n=SmtIndex d=0x00000001
+R n=GPR i=1 d=0x0000000f
+CTIME t=7
+
+CORE n=:PMT:s1:t1
+
+
+I ea=0x8 id=11
+R n=SmtIndex d=0x00000000
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210005
+INSTR op=0x38210005					asm="addi r1,r1,5"
+ITIME t=4
+R n=SmtIndex d=0x00000000
+R n=GPR i=1 d=0x00000015
+CTIME t=8
+
+CORE n=:PMT:s1:t0
+
+
+I ea=0xc id=12
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420006
+INSTR op=0x38420006					asm="addi r2,r2,6"
+ITIME t=4
+R n=SmtIndex d=0x00000001
+R n=GPR i=2 d=0x0000001f
+CTIME t=8
+
+CORE n=:PMT:s0:t1
+
+
+I ea=0x8 id=13
+R n=SmtIndex d=0x00000000
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210005
+INSTR op=0x38210005					asm="addi r1,r1,5"
+ITIME t=4
+R n=SmtIndex d=0x00000000
+R n=GPR i=1 d=0x00000011
+CTIME t=8
+
+CORE n=:PMT:s0:t0
+
+
+I ea=0xc id=14
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420006
+INSTR op=0x38420006					asm="addi r2,r2,6"
+ITIME t=4
+R n=SmtIndex d=0x00000001
+R n=GPR i=2 d=0x0000001a
+CTIME t=8
+
+CORE n=:PMT:s1:t1
+
+
+I ea=0xc id=15
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420006
+INSTR op=0x38420006					asm="addi r2,r2,6"
+ITIME t=5
+R n=SmtIndex d=0x00000000
+R n=GPR i=2 d=0x00000021
+CTIME t=9
+
+CORE n=:PMT:s1:t0
+
+
+I ea=0x10 id=16
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=5
+CTIME t=9
+
+CORE n=:PMT:s0:t1
+
+
+I ea=0xc id=17
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420006
+INSTR op=0x38420006					asm="addi r2,r2,6"
+ITIME t=5
+R n=SmtIndex d=0x00000000
+R n=GPR i=2 d=0x0000001d
+CTIME t=9
+
+CORE n=:PMT:s0:t0
+
+
+I ea=0x10 id=18
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=5
+CTIME t=9
+
+CORE n=:PMT:s1:t1
+
+
+I ea=0x10 id=19
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=6
+CTIME t=10
+
+CORE n=:PMT:s0:t1
+
+
+I ea=0x10 id=20
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=6
+CTIME t=10
+
+RESULTS
+
+CORE n=:PMT:s0:t0
+
+RD n=GPR i=1 d=15
+RD n=GPR i=2 d=26
+
+CORE n=:PMT:s0:t1
+
+RD n=GPR i=1 d=17
+RD n=GPR i=2 d=29
+
+CORE n=:PMT:s1:t0
+
+RD n=GPR i=1 d=19
+RD n=GPR i=2 d=31
+
+CORE n=:PMT:s1:t1
+
+RD n=GPR i=1 d=21
+RD n=GPR i=2 d=33
+
+

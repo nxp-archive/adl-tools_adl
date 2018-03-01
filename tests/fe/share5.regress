@@ -1,0 +1,4 @@
+share5.adl:75: Shared register 'HID1' is not identical across items in this system.
+share5.adl:75: Shared register file 'PMR' is not identical across items in this system.
+share5.adl:75: Shared parameter 'Mode' is not identical across items in this system.
+share5.adl:75: Shared parameter 'X' is not identical across items in this system.

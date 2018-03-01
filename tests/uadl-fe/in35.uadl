@@ -1,0 +1,109 @@
+//
+// Error checking of memory aliases.
+//
+define (core powerpc) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = L1i;
+      entries = 1;
+      entry_size = 4;
+      fetch_size = (4);
+    }
+
+    // pipeline stages
+    define (pipestage=(mID, mEX, mMM, mWB)) {}
+
+    // memory system
+    define (cache L1i) {
+      next_level_memory = Mem.I;
+    }
+
+    define (cache L1d) {
+      next_level_memory = Mem.D;
+      foobar = true; // Not OK b/c we don't have a custom cache.
+    }
+
+    define (memory Mem) {
+      data_width = 32;
+      max_requests = 2;
+      define(port I) {
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+      }
+      define(port D) {
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+        read_latency = 1;
+        write_latency = 2;
+      }	
+		
+    }
+  }
+
+  define (mem_alias) {
+    InstrMem = L1i;
+    DataMem  = Mem.D;
+    FooMem   = Foo;
+    BadPort  = Mem.Something;
+    Mem      = L1d;
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_EXp, S_MM, S_MMp, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = (S_EX,S_EXp);
+      mMM = (S_MM,S_MMp);
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class cacheNop) {
+    instructions = (icbi);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+    };
+
+    action = {
+		S_INIT: if (mID.empty() && mEX.empty() && mMM.empty() && mWB.empty()) { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && mEX.has_space()) {
+        Src.read();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.can_request_cmd() && DataMem.is_inactive() && InstrMem.is_inactive()) {
+        // Calc ea.
+        exec();
+        Mem.send_cmd();
+        exec();
+        change_state(S_EXp);
+      }
+    S_EXp: if (exec_done() && mMM.has_space()) {
+        change_state(S_MM);
+      }
+      else if (Mem.can_request_cmd()) {
+        Mem.send_cmd();
+        exec();
+        if (mMM.has_space()) {
+          change_state(S_MM);
+        }
+      }
+    S_MM: {
+      change_state(S_WB);
+    }
+		S_WB: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+}

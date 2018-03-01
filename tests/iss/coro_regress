@@ -1,0 +1,34 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use rdriver;
+use regress_utils;
+use strict;
+
+use vars qw($src);
+
+my @Tests = (
+
+
+			 {
+			  cmd   => "./corotest",
+			  stdio => 1,
+			  diff  => "$src/corotest.regress",
+			 },
+
+			);
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);

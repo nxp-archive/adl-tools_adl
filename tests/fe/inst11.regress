@@ -1,0 +1,76 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  BD8: [8,15] 
+  BI16: [6,7] 
+  BO16: [5,5] 
+  LK15: [15,15] 
+  LK7: [7,7] 
+  OPCD: [0,5] 
+  OPCD15: [0,14] 
+  OPCD5: [0,4] 
+Instructions:
+  Name:  se_b (rank: 100)
+  Width:  16
+  Fields:  OPCD(62) LK7(0) BD8
+  Action:  {
+}
+  -------------------------------
+  Name:  se_bc (rank: 100)
+  Width:  16
+  Fields:  OPCD5(30) BO16 BI16 BD8
+  Action:  {
+}
+  -------------------------------
+  Name:  se_bctr (rank: 100)
+  Width:  16
+  Fields:  OPCD15(3) LK15(0)
+  Action:  {
+}
+  -------------------------------
+  Name:  se_bctrl (rank: 100)
+  Width:  16
+  Fields:  OPCD15(3) LK15(1)
+  Action:  {
+}
+  -------------------------------
+  Name:  se_bl (rank: 100)
+  Width:  16
+  Fields:  OPCD(62) LK7(1) BD8
+  Action:  {
+}
+  -------------------------------
+  Name:  se_bne (rank: 100) (shorthand)
+  Width:  16
+  Syntax:  "se_bne %f":   BD8
+  Fields:  BD8
+  Alias:  se_bc BO16(0) BI16(2) BD8(BD8) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xf8000000
+    0(0):      Mask:  0x7ff0000
+      6(60000):  se_bctr
+      7(70000):  se_bctrl
+    30(f0000000):  se_bc
+      Shorthand:  se_bne: se_bc BO16(0) BI16(2) BD8(BD8) 
+    31(f8000000):      Mask:  0x5000000
+      0(0):  se_b
+      1(1000000):  se_bl
+-------------------------------
+

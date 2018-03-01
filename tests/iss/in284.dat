@@ -1,0 +1,234 @@
+#
+# Test of our Uart model.  Note that results are checked by examining standard
+# out.  The model must be run with the pic-uart.so plugin in order to work.
+#
+= asm
+
+	.equ CoreCount,				3
+	.equ LockAddr,				0xA00
+	.equ StartAddr,				0x1000
+	.equ UartAddr,				0x2000
+	.equ C1Data,					0x3000
+	.equ C2Data,					0x3100
+	.equ C3Data,					0x3200
+
+Start1:
+	li r20,LockAddr
+	li r1,C1Data-1
+	b Prog
+	.long 0x0
+
+Start2:
+	li r20,LockAddr
+	li r1,C2Data-1
+	b Prog
+	.long 0x0
+
+Start3:
+	li r20,LockAddr
+	li r1,C3Data-1
+	b Prog
+	.long 0x0
+
+Prog:
+	# Wait for everybody to start.
+	bl Lock
+	lwz r2,StartAddr(r0)
+	addi r2,r2,1
+	stw r2,StartAddr(r0)
+	bl Unlock
+StartLoop:
+	lwz r2,StartAddr(r0)
+	cmpwi r2,CoreCount
+	bne StartLoop
+
+	# Output each string, grabbing a lock and releasing it each time.  We stop
+	# when we get a 0 for the start of a string.
+OuterLoop:
+	lbzu r2,0x1(r1)				# Get next byte.
+	cmpwi r2,0x0					# If it's 0, then we're done.
+	beq End
+	bl Lock								# Get the lock.
+StrLoop:
+	stw r2,UartAddr(r0)		# Write to the uart.
+	lbzu r2,0x1(r1)
+	cmpwi r2,0x0					# If we get a 0, it's the end of the string.
+	bne StrLoop
+	li r2,'\n'						# So write a newline.
+	stw r2,UartAddr(r0)		
+	bl Unlock
+	b OuterLoop						# And go to the next string.
+
+End:
+	.long 0x0
+
+	# Start of spinlock.  Uses r10, r11.  Lock address should be in r20.
+Lock:
+	li       r11,1
+S2:
+  lwarx    r10,r0,r20 	# If the lock already has a value of 1, then wait.
+	cmpwi    r10,0
+  bne-     S3
+  stwcx.   r11,r0,r20   # If we can store to this location, then we're ok, else wait.
+  bne      S3
+  blr										# And we're done.
+S3:
+  li       r0,158				# sched_yield when we don't get a lock.
+	mr       r10,r3				# Save r3 (sc return code), since we use that value elsewhere.
+	sc
+	mr			 r3,r10
+	li			 r0,0
+  b S2									# Now try again to get the lock.
+
+	# To unlock, we just write a 0 to the lock address stored in r20.
+Unlock:
+	stw r0,0x0(r20)
+	blr
+
+= /asm
+
+# P0 strings.
+= str
+
+ * addr: 0x3000
+P0: hello there
+P0: how are you?
+P0: This is P0!
+
+= /str
+
+# P1 strings.
+= str
+
+ * addr: 0x3100
+P1: This is P1!
+P1: Hi, I am core P1.
+P1: This is P1 again!
+
+= /str
+
+# P2 strings.
+= str
+
+ * addr: 0x3200
+P2: This is P2!
+P2: Hi, I am core P2.
+P2: How's it going, this is P2.
+
+= /str
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000004 d=0x38202FFF	#	li r1,C1Data-1
+MD n=Mem ra=0x00000008 d=0x48000028	#	b Prog
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000014 d=0x382030FF	#	li r1,C2Data-1
+MD n=Mem ra=0x00000018 d=0x48000018	#	b Prog
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000024 d=0x382031FF	#	li r1,C3Data-1
+MD n=Mem ra=0x00000028 d=0x48000008	#	b Prog
+MD n=Mem ra=0x0000002c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000030 d=0x48000055	#	bl Lock
+MD n=Mem ra=0x00000034 d=0x80401000	#	lwz r2,StartAddr(r0)
+MD n=Mem ra=0x00000038 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000003c d=0x90401000	#	stw r2,StartAddr(r0)
+MD n=Mem ra=0x00000040 d=0x48000079	#	bl Unlock
+MD n=Mem ra=0x00000044 d=0x80401000	#	lwz r2,StartAddr(r0)
+MD n=Mem ra=0x00000048 d=0x2C020003	#	cmpwi r2,CoreCount
+MD n=Mem ra=0x0000004c d=0x4082FFF8	#	bne StartLoop
+MD n=Mem ra=0x00000050 d=0x8C410001	#	lbzu r2,0x1(r1)				# Get next byte.
+MD n=Mem ra=0x00000054 d=0x2C020000	#	cmpwi r2,0x0					# If it's 0, then we're done.
+MD n=Mem ra=0x00000058 d=0x41820028	#	beq End
+MD n=Mem ra=0x0000005c d=0x48000029	#	bl Lock								# Get the lock.
+MD n=Mem ra=0x00000060 d=0x90402000	#	stw r2,UartAddr(r0)		# Write to the uart.
+MD n=Mem ra=0x00000064 d=0x8C410001	#	lbzu r2,0x1(r1)
+MD n=Mem ra=0x00000068 d=0x2C020000	#	cmpwi r2,0x0					# If we get a 0, it's the end of the string.
+MD n=Mem ra=0x0000006c d=0x4082FFF4	#	bne StrLoop
+MD n=Mem ra=0x00000070 d=0x3840000A	#	li r2,'\n'						# So write a newline.
+MD n=Mem ra=0x00000074 d=0x90402000	#	stw r2,UartAddr(r0)		
+MD n=Mem ra=0x00000078 d=0x48000041	#	bl Unlock
+MD n=Mem ra=0x0000007c d=0x4BFFFFD4	#	b OuterLoop						# And go to the next string.
+MD n=Mem ra=0x00000080 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000084 d=0x39600001	#	li       r11,1
+MD n=Mem ra=0x00000088 d=0x7D40A028	#	lwarx    r10,r0,r20 	# If the lock already has a value of 1, then wait.
+MD n=Mem ra=0x0000008c d=0x2C0A0000	#	cmpwi    r10,0
+MD n=Mem ra=0x00000090 d=0x40820010	#	bne-     S3
+MD n=Mem ra=0x00000094 d=0x7D60A12D	#	stwcx.   r11,r0,r20   # If we can store to this location, then we're ok, else wait.
+MD n=Mem ra=0x00000098 d=0x40820008	#	bne      S3
+MD n=Mem ra=0x0000009c d=0x4E800020	#	blr										# And we're done.
+MD n=Mem ra=0x000000a0 d=0x3800009E	#	li       r0,158				# sched_yield when we don't get a lock.
+MD n=Mem ra=0x000000a4 d=0x7C6A1B78	#	mr       r10,r3				# Save r3 (sc return code), since we use that value elsewhere.
+MD n=Mem ra=0x000000a8 d=0x44000002	#	sc
+MD n=Mem ra=0x000000ac d=0x7D435378	#	mr			 r3,r10
+MD n=Mem ra=0x000000b0 d=0x38000000	#	li			 r0,0
+MD n=Mem ra=0x000000b4 d=0x4BFFFFD4	#	b S2									# Now try again to get the lock.
+MD n=Mem ra=0x000000b8 d=0x90140000	#	stw r0,0x0(r20)
+MD n=Mem ra=0x000000bc d=0x4E800020	#	blr
+# </GEN>
+
+# <STR>
+
+MD n=Mem ra=0x00003000 d=0x50303a20
+MD n=Mem ra=0x00003004 d=0x68656c6c
+MD n=Mem ra=0x00003008 d=0x6f207468
+MD n=Mem ra=0x0000300c d=0x65726500
+MD n=Mem ra=0x00003010 d=0x50303a20
+MD n=Mem ra=0x00003014 d=0x686f7720
+MD n=Mem ra=0x00003018 d=0x61726520
+MD n=Mem ra=0x0000301c d=0x796f753f
+MD n=Mem ra=0x00003020 d=0x0050303a
+MD n=Mem ra=0x00003024 d=0x20546869
+MD n=Mem ra=0x00003028 d=0x73206973
+MD n=Mem ra=0x0000302c d=0x20503021
+MD n=Mem ra=0x00003030 d=0x00000000
+MD n=Mem ra=0x00003100 d=0x50313a20
+MD n=Mem ra=0x00003104 d=0x54686973
+MD n=Mem ra=0x00003108 d=0x20697320
+MD n=Mem ra=0x0000310c d=0x50312100
+MD n=Mem ra=0x00003110 d=0x50313a20
+MD n=Mem ra=0x00003114 d=0x48692c20
+MD n=Mem ra=0x00003118 d=0x4920616d
+MD n=Mem ra=0x0000311c d=0x20636f72
+MD n=Mem ra=0x00003120 d=0x65205031
+MD n=Mem ra=0x00003124 d=0x2e005031
+MD n=Mem ra=0x00003128 d=0x3a205468
+MD n=Mem ra=0x0000312c d=0x69732069
+MD n=Mem ra=0x00003130 d=0x73205031
+MD n=Mem ra=0x00003134 d=0x20616761
+MD n=Mem ra=0x00003138 d=0x696e2100
+MD n=Mem ra=0x0000313c d=0x00000000
+MD n=Mem ra=0x00003200 d=0x50323a20
+MD n=Mem ra=0x00003204 d=0x54686973
+MD n=Mem ra=0x00003208 d=0x20697320
+MD n=Mem ra=0x0000320c d=0x50322100
+MD n=Mem ra=0x00003210 d=0x50323a20
+MD n=Mem ra=0x00003214 d=0x48692c20
+MD n=Mem ra=0x00003218 d=0x4920616d
+MD n=Mem ra=0x0000321c d=0x20636f72
+MD n=Mem ra=0x00003220 d=0x65205032
+MD n=Mem ra=0x00003224 d=0x2e005032
+MD n=Mem ra=0x00003228 d=0x3a20486f
+MD n=Mem ra=0x0000322c d=0x77277320
+MD n=Mem ra=0x00003230 d=0x69742067
+MD n=Mem ra=0x00003234 d=0x6f696e67
+MD n=Mem ra=0x00003238 d=0x2c207468
+MD n=Mem ra=0x0000323c d=0x69732069
+MD n=Mem ra=0x00003240 d=0x73205032
+MD n=Mem ra=0x00003244 d=0x2e000000
+# </STR>
+
+CORE n=:procs:P0
+
+RD n=NIA   d=0x00
+
+CORE n=:procs:P1
+
+RD n=NIA   d=0x10
+
+CORE n=:procs:P2
+
+RD n=NIA   d=0x20
+

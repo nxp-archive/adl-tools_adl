@@ -1,0 +1,355 @@
+//
+// Tests a tricky disassembly issue- if we have to insert an extra fetch in
+// order to get more decoding bits, we want to make sure that we remember that
+// we've made that extra fetch, and we don't try to refetch those bits.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+  parallel_execution = 4;
+  attrs = (prefix,type1);  
+  blk = dalu;
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 16;  prefix = r; };
+
+  // -------- INSTRFIELDS ----------
+  
+  define (instrfield = RT)  { width = 4; pseudo = true; ref=GPR;}
+  define (instrfield = RA)  { width = 4; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; reserved = true; } // Serial Grouping
+  define (instrfield = IMM)  { width = 38; pseudo = true; }
+  define (instrfield = IMM2)  { width = 32; pseudo = true; }
+  define (instrfield = N)   { width = 2; pseudo = true; enumerated = ("1","2","3","4"); }
+  define (instrfield = BB) { width = 2; pseudo = true; };
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+  define (instrfield = Enc1)   { width = 16;  pseudo = true; }
+  define (instrfield = Enc2)   { width = 48;  pseudo = true; }
+
+  define (instrfield = HighReg)  { 
+    pseudo = true; 
+    prefix = true; 
+    width = 4; 
+    indexed = 2; 
+    index_endianness = big; 
+    value = 0; 
+  }
+
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  = 1; };
+
+  
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = PREFIX) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),HighReg(0)),
+              (bits(7),HighReg(1)),
+              (bits(8),HighReg(2)),
+              (bits(9),HighReg(3)),
+              (bits(10),0),
+              (bits(11),0),
+              (bits(12),VlesSize(0)),
+              (bits(13),VlesSize(1)),
+              (bits(14),VlesSize(2)),
+              (bits(15),reserved));
+    prefix = true;
+    syntax = ("LPREFIX, VlesSize = %f, HighReg = %f",VlesSize,HighReg);  
+    attrs = prefix;
+    width  = 16;
+    next_table = {
+      VlesSizeCtr = VlesSize;
+    };
+  }
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+  define(instr = OneWord) {
+    fields = ((bits(15,0), Enc1),
+              (bits(17,16),HighReg));
+
+    prefix_counters = ((HighRegCtr,HighReg));
+
+    pseudo = true;
+  }
+
+  define (prefixcounter=HighRegCtr) { reset = 0; }
+  define (prefixcounter=VlesSizeCtr) { reset = 1; }
+
+  define(instr = ThreeWord) {
+    fields = ((bits(47,0), Enc2),
+              (bits(49,48),HighReg));
+
+    prefix_counters = ((HighRegCtr,HighReg));
+
+    pseudo = true;
+  }
+
+  define(instr=mv1) {
+    attrs = (type1);
+    type = ThreeWord;
+    blk = dalu;
+    fields = (
+              (bits(0), 0),
+              (bits(1), 0),
+              (bits(2), 1),
+              (bits(3), IMM(0)),
+      	      (bits(4), IMM(1)),
+              (bits(5), IMM(2)),
+              (bits(6), RA(0)),		
+              (bits(7), RA(1)),		
+              (bits(8), RA(2)),		
+              (bits(9), IMM(3)),
+              (bits(10),IMM(4)),
+              (bits(11),IMM(5)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),IMM(6)),
+              (bits(17),IMM(7)),
+              (bits(18),IMM(8)),
+              (bits(19),IMM(9)),
+              (bits(20),IMM(10)),
+              (bits(21),IMM(11)),
+              (bits(22),IMM(12)),
+              (bits(23),IMM(13)),
+              (bits(24),IMM(14)),
+              (bits(25),IMM(15)),
+              (bits(26),IMM(16)),
+              (bits(27),IMM(17)),
+              (bits(28),IMM(18)),
+              (bits(29),IMM(19)),
+              (bits(30),IMM(20)),
+              (bits(31),IMM(21)),
+              (bits(32),IMM(22)),
+              (bits(33),IMM(23)),
+              (bits(34),IMM(24)),
+              (bits(35),IMM(25)),
+              (bits(36),IMM(26)),
+              (bits(37),IMM(27)),
+              (bits(38),IMM(28)),
+              (bits(39),IMM(29)),
+              (bits(40),IMM(30)),
+              (bits(41),IMM(31)),
+              (bits(42),IMM(32)),
+              (bits(43),IMM(33)),
+              (bits(44),IMM(34)),
+              (bits(45),IMM(35)),
+              (bits(46),IMM(36)),
+              (bits(47),IMM(37)),
+              (bits(48),RA(3)),
+              (bits(49),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM;
+    };
+
+    prefix_counter_incr = HighRegCtr;
+
+    syntax = ("%i %f,%f,%f",RA,IMM,RT);
+  }
+
+  define(instr=mv2) {
+    attrs = (type1);
+    type = ThreeWord;
+    blk = dalu;
+    fields = (
+              (bits(0), 0),
+              (bits(1), 1),
+              (bits(2), 0),
+              (bits(3), IMM2(0)),
+      	      (bits(4), IMM2(1)),
+              (bits(5), IMM2(2)),
+              (bits(6), RA(0)),		
+              (bits(7), RA(1)),		
+              (bits(8), RA(2)),		
+              (bits(9), IMM2(3)),
+              (bits(10),IMM2(4)),
+              (bits(11),IMM2(5)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),IMM2(6)),
+              (bits(17),IMM2(7)),
+              (bits(18),IMM2(8)),
+              (bits(19),IMM2(9)),
+              (bits(20),IMM2(10)),
+              (bits(21),IMM2(11)),
+              (bits(22),IMM2(12)),
+              (bits(23),IMM2(13)),
+              (bits(24),IMM2(14)),
+              (bits(25),IMM2(15)),
+              (bits(26),IMM2(16)),
+              (bits(27),IMM2(17)),
+              (bits(28),IMM2(18)),
+              (bits(29),IMM2(19)),
+              (bits(30),IMM2(20)),
+              (bits(31),IMM2(21)),
+              (bits(32),IMM2(22)),
+              (bits(33),IMM2(23)),
+              (bits(34),IMM2(24)),
+              (bits(35),IMM2(25)),
+              (bits(36),IMM2(26)),
+              (bits(37),IMM2(27)),
+              (bits(38),IMM2(28)),
+              (bits(39),IMM2(29)),
+              (bits(40),IMM2(30)),
+              (bits(41),IMM2(31)),
+              (bits(42),0),
+              (bits(43),0),
+              (bits(44),0),
+              (bits(45),0),
+              (bits(46),0),
+              (bits(47),0),
+              (bits(48),RA(3)),
+              (bits(49),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM2;
+    };
+
+    prefix_counter_incr = HighRegCtr;
+
+    syntax = ("%i %f,%f,%f",RA,IMM2,RT);
+  }
+
+  define(instr=mv3) {
+    attrs = (type1);
+    type = ThreeWord;
+    blk = dalu;
+    fields = (
+              (bits(0), 0),
+              (bits(1), 1),
+              (bits(2), 0),
+              (bits(3), IMM2(0)),
+      	      (bits(4), IMM2(1)),
+              (bits(5), IMM2(2)),
+              (bits(6), RA(0)),		
+              (bits(7), RA(1)),		
+              (bits(8), RA(2)),		
+              (bits(9), IMM2(3)),
+              (bits(10),IMM2(4)),
+              (bits(11),IMM2(5)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),IMM2(6)),
+              (bits(17),IMM2(7)),
+              (bits(18),IMM2(8)),
+              (bits(19),IMM2(9)),
+              (bits(20),IMM2(10)),
+              (bits(21),IMM2(11)),
+              (bits(22),IMM2(12)),
+              (bits(23),IMM2(13)),
+              (bits(24),IMM2(14)),
+              (bits(25),IMM2(15)),
+              (bits(26),IMM2(16)),
+              (bits(27),IMM2(17)),
+              (bits(28),IMM2(18)),
+              (bits(29),IMM2(19)),
+              (bits(30),IMM2(20)),
+              (bits(31),IMM2(21)),
+              (bits(32),IMM2(22)),
+              (bits(33),IMM2(23)),
+              (bits(34),IMM2(24)),
+              (bits(35),IMM2(25)),
+              (bits(36),IMM2(26)),
+              (bits(37),IMM2(27)),
+              (bits(38),IMM2(28)),
+              (bits(39),IMM2(29)),
+              (bits(40),IMM2(30)),
+              (bits(41),IMM2(31)),
+              (bits(42),0),
+              (bits(43),0),
+              (bits(44),0),
+              (bits(45),1),
+              (bits(46),0),
+              (bits(47),0),
+              (bits(48),RA(3)),
+              (bits(49),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM2;
+    };
+
+    prefix_counter_incr = HighRegCtr;
+
+    syntax = ("%i %f,%f,%f",RA,IMM2,RT);
+  }
+
+  define (group=all_instrs) {
+    type = instr;
+    items = "*" - PREFIX;
+  }
+
+  defmod (instr=*all_instrs) {
+    prefix_counter_decr = VlesSizeCtr;
+    next_table = {
+      if (VlesSizeCtr == 0) {
+        setPacketPosition(0);
+      }
+    };
+  }
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+    if (0) {
+      Mem(0,4,CacheIFetch) = bits<32>(0xdeadbeef);
+    }
+  };    
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  // We just set the packet size and call the set-prefix method.
+  post_packet_asm = func(InstrBundle b) {
+    VlesSize = b.size();
+    b.set_prefix_fields();
+  } ;
+ 
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type1);
+    disasm_instrtables = (prefix,type1); 
+    explicit_regs = true;	
+
+   
+  };
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

@@ -1,0 +1,4 @@
+in38.uadl:6: warning: Core powerpc is not defined by ADL, using core P instead.
+in38.uadl:81: State may generate exceptions, but no exception state mapping exists for this state.
+in38.uadl:87: State may generate exceptions, but no exception state mapping exists for this state.
+Could not parse in38.uadl

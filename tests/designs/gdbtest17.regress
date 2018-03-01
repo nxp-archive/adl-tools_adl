@@ -1,0 +1,14 @@
+QNonStop+;
+OK
+OK
+OK
+S05
+OK
+QC1
+1
+OK
+vCont;c;C;s;S;t
+S05
+S05
+S05
+S05

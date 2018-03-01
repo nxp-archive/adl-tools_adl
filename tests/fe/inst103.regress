@@ -1,0 +1,239 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Registers:
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  F: [not used] 
+    Pseudo:  1
+    Width:   8
+  OPCD: [not used] 
+    Pseudo:  1
+    Width:   8
+    Primary opcode.
+    
+  VarInstrOpcode_imp_bits__39_32_x_31_24_x_15_8_: [39,24] [15,8] 
+  VarInstrOpcode_imp_bits__47_40_x_39_32_x_15_8_: [47,32] [15,8] 
+  VarInstrOpcode_imp_bits__47_40_x_39_32_x_23_16_: [47,32] [23,16] 
+  VarInstrOpcode_imp_bits__55_48_x_47_40_x_15_8_: [55,40] [15,8] 
+  VarInstrOpcode_imp_bits__55_48_x_47_40_x_23_16_: [55,40] [23,16] 
+  VarInstrOpcode_imp_bits__55_48_x_47_40_x_31_24_: [55,40] [31,24] 
+  VarInstrOpcode_imp_bits__63_56_x_55_48_x_23_16_: [63,48] [23,16] 
+  VarInstrOpcode_imp_bits__63_56_x_55_48_x_31_24_: [63,48] [31,24] 
+  VarInstrOpcode_imp_bits__71_64_x_63_56_x_31_24_: [71,56] [31,24] 
+  VarInstrOpcode_imp_bits__7_0_: [7,0] [not used] 
+  X1: 
+    Pseudo:  1
+    Width:   8
+  X1_imp_bits__23_16_: [23,16] 
+    Implements:  X1
+  X1_imp_bits__31_24_: [31,24] 
+    Implements:  X1
+  X1_imp_bits__39_32_: [39,32] 
+    Implements:  X1
+  X1_imp_bits__7_0_: [7,0] 
+    Implements:  X1
+  X2: 
+    Pseudo:  1
+    Width:   16
+  X2_imp_bits__15_0_: [15,0] 
+    Implements:  X2
+  X2_imp_bits__31_16_: [31,16] 
+    Implements:  X2
+  X2_imp_bits__39_24_: [39,24] 
+    Implements:  X2
+  X2_imp_bits__47_32_: [47,32] 
+    Implements:  X2
+  X3: 
+    Pseudo:  1
+    Width:   24
+  X3_imp_bits__23_0_: [23,0] 
+    Implements:  X3
+  X3_imp_bits__39_16_: [39,16] 
+    Implements:  X3
+  X3_imp_bits__47_24_: [47,24] 
+    Implements:  X3
+  X3_imp_bits__55_32_: [55,32] 
+    Implements:  X3
+Subinstructions:
+Name:  a1
+Fields:  X1 F(0)
+Action:  {
+}
+-------------------------------
+Name:  a2
+Fields:  X2 F(1)
+Action:  {
+}
+-------------------------------
+Name:  a3
+Fields:  X3 F(2)
+Action:  {
+}
+-------------------------------
+Name:  b1
+Fields:  X1 F(0)
+Action:  {
+}
+-------------------------------
+Name:  b2
+Fields:  X2 F(1)
+Action:  {
+}
+-------------------------------
+Name:  b3
+Fields:  X3 F(2)
+Action:  {
+}
+-------------------------------
+Instructions:
+  Name:  bar_a1_b1 (rank: 0)
+  Width:  40
+  Fields:  VarInstrOpcode_imp_bits__39_32_x_31_24_x_15_8_ X1_imp_bits__23_16_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a1_b2 (rank: 0)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_40_x_39_32_x_23_16_ X1_imp_bits__31_24_ X2_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a1_b3 (rank: 0)
+  Width:  56
+  Fields:  VarInstrOpcode_imp_bits__55_48_x_47_40_x_31_24_ X1_imp_bits__39_32_ X3_imp_bits__23_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a2_b1 (rank: 0)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_40_x_39_32_x_15_8_ X2_imp_bits__31_16_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a2_b2 (rank: 0)
+  Width:  56
+  Fields:  VarInstrOpcode_imp_bits__55_48_x_47_40_x_23_16_ X2_imp_bits__39_24_ X2_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a2_b3 (rank: 0)
+  Width:  64
+  Fields:  VarInstrOpcode_imp_bits__63_56_x_55_48_x_31_24_ X2_imp_bits__47_32_ X3_imp_bits__23_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a3_b1 (rank: 0)
+  Width:  56
+  Fields:  VarInstrOpcode_imp_bits__55_48_x_47_40_x_15_8_ X3_imp_bits__39_16_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a3_b2 (rank: 0)
+  Width:  64
+  Fields:  VarInstrOpcode_imp_bits__63_56_x_55_48_x_23_16_ X3_imp_bits__47_24_ X2_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a3_b3 (rank: 0)
+  Width:  72
+  Fields:  VarInstrOpcode_imp_bits__71_64_x_63_56_x_31_24_ X3_imp_bits__55_32_ X3_imp_bits__23_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b1 (rank: 0)
+  Width:  40
+  Fields:  VarInstrOpcode_imp_bits__39_32_x_31_24_x_15_8_ X1_imp_bits__23_16_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b2 (rank: 0)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_40_x_39_32_x_23_16_ X1_imp_bits__31_24_ X2_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b3 (rank: 0)
+  Width:  56
+  Fields:  VarInstrOpcode_imp_bits__55_48_x_47_40_x_31_24_ X1_imp_bits__39_32_ X3_imp_bits__23_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b1 (rank: 0)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_40_x_39_32_x_15_8_ X2_imp_bits__31_16_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b2 (rank: 0)
+  Width:  56
+  Fields:  VarInstrOpcode_imp_bits__55_48_x_47_40_x_23_16_ X2_imp_bits__39_24_ X2_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b3 (rank: 0)
+  Width:  64
+  Fields:  VarInstrOpcode_imp_bits__63_56_x_55_48_x_31_24_ X2_imp_bits__47_32_ X3_imp_bits__23_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b1 (rank: 0)
+  Width:  56
+  Fields:  VarInstrOpcode_imp_bits__55_48_x_47_40_x_15_8_ X3_imp_bits__39_16_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b2 (rank: 0)
+  Width:  64
+  Fields:  VarInstrOpcode_imp_bits__63_56_x_55_48_x_23_16_ X3_imp_bits__47_24_ X2_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b3 (rank: 0)
+  Width:  72
+  Fields:  VarInstrOpcode_imp_bits__71_64_x_63_56_x_31_24_ X3_imp_bits__55_32_ X3_imp_bits__23_0_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xffff00000000000000000000
+    7680(1e0000000000000000000000):      Mask:  0x000000ff0000000000000000
+      0(000000000000000000000000):  foo_a1_b1
+      1(000000010000000000000000):  foo_a1_b2
+      2(000000020000000000000000):  foo_a1_b3
+    7681(1e0100000000000000000000):      Mask:  0x00000000ff00000000000000
+      0(000000000000000000000000):  foo_a2_b1
+      1(000000000100000000000000):  foo_a2_b2
+      2(000000000200000000000000):  foo_a2_b3
+    7682(1e0200000000000000000000):      Mask:  0x0000000000ff000000000000
+      0(000000000000000000000000):  foo_a3_b1
+      1(000000000001000000000000):  foo_a3_b2
+      2(000000000002000000000000):  foo_a3_b3
+    11776(2e0000000000000000000000):      Mask:  0x000000ff0000000000000000
+      0(000000000000000000000000):  bar_a1_b1
+      1(000000010000000000000000):  bar_a1_b2
+      2(000000020000000000000000):  bar_a1_b3
+    11777(2e0100000000000000000000):      Mask:  0x00000000ff00000000000000
+      0(000000000000000000000000):  bar_a2_b1
+      1(000000000100000000000000):  bar_a2_b2
+      2(000000000200000000000000):  bar_a2_b3
+    11778(2e0200000000000000000000):      Mask:  0x0000000000ff000000000000
+      0(000000000000000000000000):  bar_a3_b1
+      1(000000000001000000000000):  bar_a3_b2
+      2(000000000002000000000000):  bar_a3_b3
+-------------------------------
+

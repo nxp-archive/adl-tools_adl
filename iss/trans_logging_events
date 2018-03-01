@@ -1,0 +1,395 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+#
+# Generates the logging code for a transactional ISS.  Here, each event is
+# stored in a temporary object and attached to the currently registered
+# instruction object.  When the object is finally committed, all events are sent
+# to the registered loggers.
+#
+
+use Data::Dumper;
+use FindBin;
+use lib $FindBin::RealBin;
+
+use logging_events;
+use logging_events_utils;
+
+# We modify the register events so that the names are stored as strings.  This
+# is so that, in case any register file elements are logged as registers, we
+# store their names properly, rather than using a static buffer which will
+# become invalid.
+updateEventParm("name",["const char *", "std::string","","","_name.c_str()"],\%Events,
+									"log_reg_write","log_reg_read","log_reg_write_mask","log_reg_read_mask");
+#print "Parms are:  ",Dumper(\%Events),"\n";
+
+if (@ARGV < 1) {
+	print "Usage:  <output-file>\n";
+	exit 1;
+}
+
+$fn = $ARGV[0];
+
+# List any events here which have special handler bodies.  The value shoudl be the method body
+# with braces.
+%Special = (
+			 log_instr_prefetch => <<FOO1,
+  {
+    // This item is added to the back of the queue because it represents the first item in
+    // an instruction grouping and we iterate over the list in reverse when committing log messages.
+    TransLogBase *obj = new logInstrPrefetchObj(_clients,ea);
+    add_to_pending_queue_tail(obj);
+    _last_instr_fetch = ea;
+  }
+FOO1
+			 log_instr => <<FOO3,
+  {
+    TransLogBase *obj = new logInstrObj(_clients, opc, num_half_bytes, name, dis, flags);
+    obj->_next = _pending_log_head;
+    _current_instr->_log = obj;
+    _pending_log_head = _pending_log_tail = 0;
+  }
+FOO3
+			log_mmu_translation => <<FOO4,
+  {
+    if (_direct_logging) {
+      logMmuTranslationObj *obj = new logMmuTranslationObj(_clients, tt, seq, set, way, ea, ra, trans);     
+      issue_log_event(obj);
+    } else {
+      logMmuTranslationObj *obj = new logMmuTranslationObj(_clients, tt, seq, set, way, ea, ra, trans);     
+      add_event(obj);
+    }
+  }
+FOO4
+			 log_instr_args => <<FOO5,
+  {
+    TransLogBase *obj = new logInstrArgsObj(_clients, opc, num_half_bytes, name, dis);
+		obj->_next = _pending_log_head;
+    _current_instr->_log = obj;
+    _pending_log_head = _pending_log_tail = 0;
+  }
+FOO5
+			log_breakpoint => <<FOO6,
+  {
+     // Breakpoints are directly logged b/c they are generated at free-packet time.
+     ForEach(_clients,i) {
+      i->second->logBreakpoint(ea, h, payload);
+    }
+  }
+FOO6
+			);
+
+
+`rm -f $fn`;
+open $out,">$fn" or die "Could not open output file $fn";
+
+printHeader($out);
+printStdCode($out);
+printClassHeader($out,"LoggingObj");
+
+print $out <<FOO2;
+
+  // Base class for all logging.  Note:  W do *not* use the GC because it
+  // can get confused with our use of coroutines.  Since these objects may
+  // be allocated while we're in a coroutine, we just use the standard allocator.
+  struct TransLogBase {
+
+    TransLogBase() : _next(0), _valid(true) {};
+    virtual ~TransLogBase() { assert(_valid); _valid = false; };
+
+    // This should perform the actual logging operation.
+    virtual void commit() = 0;
+
+    TransLogBase *_next;  // Next pointer in chain.
+    bool          _valid; // Double-deletion checker.
+  };
+
+  // The core associated with this object.
+  IssCore              &_core;
+
+  // If true, directly broadcast logging events.
+  bool                  _direct_logging;
+
+  // Stores the current instruction packet.
+  PacketLogBase      *_current_instr;
+
+  // Stores pending events which might occur before an instruction
+  // has been allocated.
+  TransLogBase         *_pending_log_head, *_pending_log_tail;
+
+  // Stores instruction fetch information.  Each decode will then remove
+  // as many items as necessary for the relevant instruction.  This operates as a queue,
+  // where we add to the back and take from the front.
+  struct logInstrReadObj;
+  logInstrReadObj      *_instr_fetch_head, *_instr_fetch_tail;
+  addr_t                _last_instr_fetch;
+
+  // When logging an instruction, we store the instruction translation here.
+  struct logMmuTranslationObj;
+  logMmuTranslationObj *_instr_trans;
+  bool                  _add_to_trans_list;
+
+  LoggingObj(IssCore &core) :
+    _core(core),
+    _direct_logging(false),
+    _current_instr(0),
+    _pending_log_head(0),
+    _pending_log_tail(0),
+    _instr_fetch_head(0),
+    _instr_fetch_tail(0),
+    _last_instr_fetch(0),
+    _instr_trans(0),
+    _add_to_trans_list(false)
+  {
+  }
+
+  PacketLogBase *log_current_instr (PacketLogBase *instr)
+  {
+    PacketLogBase *o = _current_instr;
+    _current_instr = instr;
+    return o;
+  }
+
+  // Internally used helper function for cdr'ing down the log list so that
+  // we can print the elements in the correct order.
+  void issue_log_event (TransLogBase *x)
+  {
+    if (x) {
+      // We recurse to the end, then issue the events.
+      issue_log_event(x->_next);
+      x->commit();
+      // Note:  Explicit memory management here!  See comment in TransLogBase about
+      // why we're not using the GC.
+      delete x;
+    }
+  }
+
+  // This commits all pending log information to the registered clients.
+  // If no instruction packet is supplied, then it commits the pending list.
+  void log_commit (PacketLogBase *instr)
+  {
+    if (instr) {
+      // Iterate over any objects in the list, calling their commit functions.    
+      TransLogBase *x = (TransLogBase *)instr->_log;
+      issue_log_event(x);
+      instr->_log = 0;
+      // If this is the current instruction, then clear the current_instr pointer- we assume
+      // that the act of committing is done when the instruction is finished.
+      if (instr == _current_instr) {
+        _current_instr = 0;
+      }
+    } else if (_pending_log_head) {
+      issue_log_event(_pending_log_head);
+      _pending_log_head = _pending_log_tail = 0;
+    }
+  }
+
+  // Discards all log data.
+  void log_discard (PacketLogBase *instr)
+  {
+    TransLogBase *head = (TransLogBase *)instr->_log;
+    while (head) {
+      TransLogBase *tmp = head;
+      head = head->_next;
+      delete tmp;
+    }    
+    instr->_log = 0;
+  }
+
+  // Switches between direct and queued logging.
+  bool log_direct(bool d)
+  {
+    bool tmp = _direct_logging;
+    _direct_logging = d;
+    return tmp;
+  }
+
+  // Fetches and clears the pending queue.
+  LogType log_get_pending_queue()
+  {
+    LogType p = _pending_log_head;
+    _pending_log_head = _pending_log_tail = 0;
+    return p;
+  }
+
+  // Adds an item to the pending queue.
+  void add_to_pending_queue(TransLogBase *obj)
+  {
+    obj->_next = _pending_log_head;
+    _pending_log_head = obj;
+    if (!_pending_log_tail) {
+      _pending_log_tail = obj;
+    }
+  }
+
+  // Appends to the pending queue.
+  void log_append_pending_queue(LogType p)
+  {
+    TransLogBase *obj = (TransLogBase*)p;
+    add_to_pending_queue_tail(obj);
+    // Chase the tail until we get to the end.
+    if (_pending_log_tail) {
+      while (_pending_log_tail->_next) {
+        _pending_log_tail = _pending_log_tail->_next;
+      }
+    }
+  }
+
+  void add_event (TransLogBase *obj)
+  {
+    if (_direct_logging) {
+      issue_log_event(obj);
+    } else if (_current_instr) {
+      obj->_next = (TransLogBase*)(_current_instr->_log);
+      _current_instr->_log = obj;
+    } else {
+      add_to_pending_queue(obj);
+    }
+  }
+
+FOO2
+
+if ($safe_mode) {
+  print $out <<END;
+  // Adds an item to the back of the pending queue.
+  void add_to_pending_queue_tail(TransLogBase *obj)
+  {
+    if (!_pending_log_tail) {
+      _pending_log_tail = obj;
+    } else {
+      _pending_log_tail = _pending_log_tail->_next = obj;
+    }
+    if (!_pending_log_head) {
+       _pending_log_head = _pending_log_tail;
+    }
+  }
+END
+} else {
+  print $out <<END;
+  // Adds an item to the back of the pending queue.
+  void add_to_pending_queue_tail(TransLogBase *obj)
+  {
+    if (!_pending_log_tail) {
+      _pending_log_tail = obj;
+    } else {
+      _pending_log_tail->_next = obj;
+    }
+    if (!_pending_log_head) {
+       _pending_log_head = _pending_log_tail;
+    }
+  }
+END
+}
+
+
+for (keys (%Events)) {
+  my $event = $_;
+  my $parms = $Events{$event};
+  my $handler = getHandlerName($event);
+  my $obj = $handler."Obj";
+
+  my $parmlist   = "LoggerClients &clients";
+  my $xparmlist  = parmList($parms);
+  if ($xparmlist) {
+	$parmlist .= ", $xparmlist";
+  }
+  my $xarglist   = argList($parms);
+  my $mbrlist    = argList($parms,"_",1);
+  my $arglist    = "_clients";
+  if ($xarglist) {
+	$arglist .= ", $xarglist";
+  }
+  
+  my $initlist   = "_clients(clients)";
+  my $xinitlist  = initList($parms);
+  if ($xinitlist) {
+	$initlist .= ", $xinitlist";
+  }
+
+  my $memberlist = "LoggerClients &_clients;" . memberList($parms);
+  my $constr     = constr($parms);
+  my $destr      = destr($parms);
+  print $out <<END1A;
+
+  struct $obj : public TransLogBase {
+    $obj($parmlist) :
+       $initlist {$constr};
+END1A
+
+ if ($destr) { 
+ 
+   print $out <<END1B;      
+    ~$obj() { $destr ;};
+
+END1B
+ }
+   
+   print $out <<END1C;     
+
+    $obj *next() { return static_cast<$obj *>(_next); };
+
+    void commit() {
+      ForEach(_clients,i) {
+        i->second->$handler($mbrlist);
+      }
+    };
+
+    $memberlist
+  };
+
+END1C
+
+  if ($Special{$event}) {
+	# The function contains a special handler, so use that instead.
+	print $out "void $event($xparmlist)",$Special{$event};
+  } else {
+	# Otherwise, packets are appended to the current instruction packet.
+	# However, it's possible that some activites might occur when there is
+	# no packet, such as register updates during a pre_fetch function, so we
+	# have to guard against that case.
+	print $out <<END4;
+
+  void $event($xparmlist)
+  {
+    TransLogBase *obj = new $obj($arglist);
+    add_event(obj);
+  }
+
+END4
+  }
+}
+
+print $out <<FOOTER;
+
+  // Flush anything in the pending queue.
+  void log_flush_pending()
+  {
+    while (_pending_log_head) {
+      TransLogBase *tmp = _pending_log_head;
+      _pending_log_head = _pending_log_head->_next;
+      delete tmp;
+    }
+    _pending_log_head = _pending_log_tail = 0;
+    log_clear_instr_reads();
+  }
+
+  };
+
+  // MT safety not really supported at this point...
+  LoggingObjBase *createLoggingObj(IssCore &core,bool mtsafe)
+  {
+    return new LoggingObj(core);
+  }
+
+}
+
+
+FOOTER
+
+`chmod -w $fn`;

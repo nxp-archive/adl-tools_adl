@@ -1,0 +1,24 @@
+Files read:  in4.dat    dat
+
+
+CORE n=P
+
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38e00064
+INSTR op=0x38e00064					asm="li r7,100"
+R n=NIA d=0x00000004
+R n=GPR i=7 d=0x00000064
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7ce903a6
+INSTR op=0x7ce903a6					asm="mtctr r7"
+R n=NIA d=0x00000008
+R n=CTR d=0x00000064
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x3d200000
+INSTR op=0x3d200000					asm="lis r9,0"
+R n=NIA d=0x0000000c
+R n=GPR i=9 d=0x00000000
+

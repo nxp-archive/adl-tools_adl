@@ -1,0 +1,501 @@
+//
+// A DLX model that does branch prediction at fetch time
+//
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = Mem;
+      entries = 8;
+      entry_size = 1;
+      fetch_size = (8, 4);
+      branch_predictor = BP;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {}
+
+    // branch predictor
+    define (branch_predictor BP) {
+      // We'll use a custom algorithm.
+      algorithm = dlx_custom_bp;
+      size = 8;
+      counter_width = 2;
+      reg_compares = MSR.IR;
+
+      // Branch predictor is enabled via the BPEN field of HID0.
+      enable = func() {
+        return (HID0.BPEN != 0);
+      };
+    }
+
+    // memory system
+    define (memory Mem) {
+      data_width = 32;
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDe, S_EX, S_EXp, S_EXe, S_MM, S_MMp, S_MMe, S_WB, S_WBp, S_WBe );
+
+    define (mapping) {
+      mID = (S_ID,S_IDe);
+      mEX = (S_EX,S_EXp,S_EXe);
+      mMM = (S_MM,S_MMp,S_MMe);
+      mWB = (S_WB,S_WBp,S_WBe);
+    };
+
+    // Defines the state transition on an exception:
+    //  Lhs:  exception state.
+    //  Rhs:  states which might generate an exception.
+    define (exception_mapping) {
+      S_IDe = S_ID;
+      S_EXe = S_EX;
+      S_MMe = S_MM;
+      S_WBe = S_WB;
+   }
+  }
+
+  // Behavior common to all instruction classes (can be overridden on a
+  // per-class basis): If an exception occurs, perform its actions (commit) and
+  // flush the pipe behind it.
+  commit_on_exception = true;
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     add, or, cmpi, cmp, mullw,
+                     rlwinm, mtspr, mfspr, srw, halt );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+      Flags = CR;
+      Flags = XER;
+    };
+
+    define (instr=(ori, xori, "andi.", "andis.", rlwimi, "rlwimi.", 
+                   rlwinm, "rlwinm.", and, or, "or.", xor, slw, sraw, "sraw.", srawi, "srawi.",
+                   srw )) {
+      define (operands) {
+        Src1 = GPR(RS);
+        Src2 = GPR(RB);
+        Trg  = GPR(RA);
+      };
+    }
+
+    define (instr=(cmpli,cmpi,cmp,cmpl)) {
+      define (operands) {
+        Src1 = GPR(RA);
+        Src2 = GPR(RB);
+        Trg  = CR;
+      }
+    }
+
+    define (instr=(mfspr)) {
+      define (operands) {
+        Src1 = SPR(SPRN);
+        Trg  = GPR(RT);
+      }
+    }
+
+    define (instr=(mtspr)) {
+      define (operands) {
+        Trg = SPR(SPRN);
+        Src1 = GPR(RS);
+      }
+    }
+
+    define (instr=(crxor,creqv)) {
+      define (operands) {
+        Src1 = CR;
+        Trg  = CR;
+      }
+    } 
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read() && Src2.can_read() && Flags.can_read() &&
+							Trg.can_write() && mEX.has_space()) {
+				Src1.read();
+				Src2.read();
+        Flags.read();
+        Flags.allocate();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+		// No space-check, so one will be inserted.
+		S_EX: {
+			exec();
+			change_state(S_MM);
+		}
+		S_MM: { 
+			change_state(S_WB); 
+		}
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+    };
+  }
+
+  define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzu, lwzx );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      Imm = field(D);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space()) {
+        Src.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.can_request_read()) {
+        // Calc ea.
+        exec();
+        Mem.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.can_read()) { 
+        exec_and_read(Mem);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_read()) {
+        Mem.send_read_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+    };
+ }
+
+  define (instr_class lmw) {
+    instructions = ( lmw );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space()) {
+        Src.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.can_request_read()) {
+        // Calc ea.
+        exec();
+        Mem.send_read_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.can_read()) { 
+        exec_and_read(Mem,2);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_read()) {
+        Mem.send_read_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+    };
+ }
+
+ define (instr_class store) {
+    instructions = (stb, sth, sthx, stw, stwu, stwx);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space()) {
+				Src.read();
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.can_request_write()) {
+        // Calc ea.
+        exec();
+        Mem.send_write_request();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.can_write()) { 
+        exec_and_write(Mem);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_write()) {
+        Mem.send_write_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+    };
+  }
+
+ define (instr_class stmw) {
+    instructions = ( stmw );
+
+    machine = normal;
+    
+    // Ugly, but this makes sure that we can list an operand multiple times in
+    // order to include multiple resources.  Could be simplified by having a
+    // single source operand with "sources" as a value.
+    define (operands) {
+      Src1 = GPR(RA);
+      Src1 = FOO;
+      Src1 = dsESR;
+      Src1 = dsFoo;
+      Src2 = GPR(RS);
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read() && Src2.can_read() && mEX.has_space()) {
+				Src1.read();
+				Src2.read();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.can_request_write()) {
+        // Calc ea.
+        exec();
+        Mem.send_write_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.can_write()) { 
+        // Do 64-bit writes, unless our request is odd in size, in which case
+        // we'll have a 4-byte write at the end.
+        exec_and_write(Mem,2,4);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_write()) {
+        Mem.send_write_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+    };
+  }
+
+
+ define (instr_class branch) {
+   instructions = ( bc, b, bl );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+   
+   action = {
+   S_INIT :{
+     change_state(S_ID);
+   };
+   S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space()) {
+       read_ops();
+       allocate_ops();
+       exec();
+       write_ops();
+       BP.update();
+       if ( branch_taken() != BP.last_predict_taken()) {
+         taken_flush();
+       }
+       change_state(S_EX);
+     }
+   S_EX: if (mMM.has_space()) {
+       change_state(S_MM);
+     }
+   S_MM: if (mWB.has_space()) {
+       change_state(S_WB);
+     }
+   S_WB: {
+     change_state(S_INIT);
+   }
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+   };
+ }
+
+ define (instr_class rfi) {
+   instructions = ( rfi );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+   
+   action = {
+   S_INIT :{
+     change_state(S_ID);
+   };
+   S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space()) {
+       read_ops();
+       allocate_ops();
+       change_state(S_EX);
+     }
+   S_EX: if (mMM.has_space()) {
+       exec();
+       write_ops();
+       taken_flush();
+       change_state(S_MM);
+     }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+
+   };
+ }
+
+ define (instr_class fetch_exception) {
+   instructions = ( fetch_exception );
+   
+   machine = normal;
+
+   // We have explicit code to do this, so we don't need the automatic code.
+   commit_on_exception = false;
+
+   action = {
+   S_INIT: {
+     change_state(S_ID);
+   }
+   S_ID: {
+     commit_exceptions();
+     taken_flush();
+     change_state(S_EX);
+   }
+   S_EX: {
+     change_state(S_MM);
+   }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+
+   };
+ }
+
+};

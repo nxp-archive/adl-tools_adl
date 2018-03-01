@@ -1,0 +1,66 @@
+//
+// Test of instruction table optimizations.
+//
+
+define (arch=minippc) {
+ 
+  define (reg=PC) {
+    attrs = (cia,nia);
+  }
+ 
+  define (instrfield=opcd1) {
+    bits = (0,3);
+  }
+  define (instrfield=opcd2) {
+    bits = (4,7);
+  }
+  define (instrfield=opcd3) {
+    bits = (8,11);
+  }
+  define (instrfield=opcd4) {
+    bits = (12,15);
+  }
+  define (instrfield=opcd5) {
+    bits = (16,19);
+  }
+  
+  // should not merge these two opcds because they are not located on the same word.
+  define (instrfield=opcd6) {
+    bits = (30,31);
+  }
+  define (instrfield=opcd7) {
+    bits = (32,33);
+  }
+  
+  define (instr = foo1) {
+    width = 64;
+    fields = (opcd1(0xa),opcd2(0),opcd3(0),opcd4(0),opcd5(0xb));
+    action = {};
+  }
+  define (instr = foo2) {
+    width = 64;
+    fields = (opcd1(0xa),opcd2(0),opcd3(0),opcd4(0),opcd5(0xf));
+    action = {};
+  }
+  define (instr = foo3) {
+    width = 64;
+    fields = (opcd1(0xf),opcd2(0),opcd3(0),opcd4(0),opcd5(0xb));
+    action = {};
+  }
+  define (instr = foo4) {
+    width = 64;
+    fields = (opcd1(0xf),opcd2(0),opcd3(0),opcd4(0),opcd5(0xf));
+    action = {};
+  }
+ 
+  define (instr = foo5) {
+    width = 64;
+    fields = (opcd1(0xf),opcd2(0),opcd3(0),opcd4(0),opcd5(0xa),opcd6(1),opcd7(1));
+    action = {};
+  }
+}
+
+define (core=z6) {
+  archs=minippc;
+  instrtables=other;
+}

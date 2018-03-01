@@ -1,0 +1,429 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Exceptions:
+  Name:  DTlbMiss
+  Action:  func (  ) {
+}
+  -------------------------------
+  Name:  ITlbMiss
+  Action:  func (  ) {
+}
+  -------------------------------
+  Name:  Program
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR . get < 16 > ( 0 , 15 ) , IVOR6 . get < 16 > ( 16 , 31 ) ) ;
+}
+  -------------------------------
+  Name:  ProtectionFault
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR . get < 16 > ( 0 , 15 ) , IVOR7 . get < 16 > ( 16 , 31 ) ) ;
+}
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "DEAR"
+  Width:  32
+  -------------------------------
+  Name:  "HDBCR0"
+  Usage:  read
+  Width:  32
+    MMU_ENABLE[0]   
+  -------------------------------
+  Name:  "HDBCR1"
+  Read alias/hook:
+    {
+    return foo ( 3 ) ;
+}
+    Target Registers:  GPR(3) 
+    Helper Functions:  foo 
+
+  Width:  32
+  -------------------------------
+  Name:  "IVOR6"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 6.
+    
+  -------------------------------
+  Name:  "IVOR7"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 7.
+    
+  -------------------------------
+  Name:  "IVPR"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector prefix register.
+    
+  -------------------------------
+  Name:  "L1CFG1"
+  Read alias/hook:
+    {
+    return ( HDBCR0 == 1 ) ? foo ( 2 ) : stuff (  ) ;
+}
+    Source Registers:  HDBCR0 
+    Target Registers:  GPR(2) 
+    Helper Functions:  foo stuff 
+
+  Width:  32
+  -------------------------------
+  Name:  "MSR"
+  Usage:  read, written
+  Width:  32
+    CM[11]   
+    PR[10]   
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+  Name:  "PID0"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "PID1"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "SRR0"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "SRR1"
+  Usage:  written
+  Width:  32
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+MMU:
+
+  Interleaved fetch :  1
+  Interleaved reads :  1
+  Interleaved writes:  1
+
+  Enable:  {
+    return ( HDBCR0 . REALMODE (  ) == 0 ) ;
+}
+    Source Registers:  HDBCR0 
+
+  Lookup:  Tlb4k (parent: TlbBase)
+    Type:  both
+    Priority:  1
+    Size:  4096 bytes.
+    Page Number Shift:  2
+    Real-page Field:  RPN
+    Min Page Size:  4096 (bytes)
+    Array:  512 entries, 2-way set-associative.
+    Set Fields:
+      NV:  1 bits.
+        Reset value:  0
+
+    Way Fields:
+      EPN:  24 bits.
+        Reset value:  0
+      Documention:
+
+        Example documentation string for an MMU field.
+        
+      RPN:  24 bits.
+        Reset value:  0
+      SIZE:  6 bits.
+        Reset value:  0
+      SR:  1 bits.
+        Reset value:  0
+      SW:  1 bits.
+        Reset value:  0
+      SX:  1 bits.
+        Reset value:  0
+      TID:  6 bits.
+        Reset value:  0
+      TS:  1 bits.
+        Reset value:  0
+      UR:  1 bits.
+        Reset value:  0
+      UW:  1 bits.
+        Reset value:  0
+      UX:  1 bits.
+        Reset value:  0
+      V:  1 bits.
+        Reset value:  0
+      WIMG:  4 bits.
+        Reset value:  0
+        Attributes:  translation_attr
+
+    Tests:
+
+      Compare ( V , 1 )
+      Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) )
+      Compare ( TID , 0 , PID0 , PID1 )
+      AddrComp ( EPN )
+
+    Execute permission:  func ( TlbBase_t t , addr_t ea , unsigned seq ) {
+}
+  -------------------------------
+
+  Lookup:  TlbBase (interface) (parent: TlbOrig)
+    Type:  both
+    Priority:  0
+    Page Number Shift:  2
+    Real-page Field:  RPN
+    Min Page Size:  0 (bytes)
+    Way Fields:
+      EPN:  24 bits.
+        Reset value:  0
+      Documention:
+
+        Example documentation string for an MMU field.
+        
+      RPN:  24 bits.
+        Reset value:  0
+      SIZE:  6 bits.
+        Reset value:  0
+      SR:  1 bits.
+        Reset value:  0
+      SW:  1 bits.
+        Reset value:  0
+      SX:  1 bits.
+        Reset value:  0
+      TID:  6 bits.
+        Reset value:  0
+      TS:  1 bits.
+        Reset value:  0
+      UR:  1 bits.
+        Reset value:  0
+      UW:  1 bits.
+        Reset value:  0
+      UX:  1 bits.
+        Reset value:  0
+      V:  1 bits.
+        Reset value:  0
+      WIMG:  4 bits.
+        Reset value:  0
+        Attributes:  translation_attr
+
+    Tests:
+
+      Compare ( V , 1 )
+      Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) )
+      Compare ( TID , 0 , PID0 , PID1 )
+      AddrComp ( EPN )
+
+    Execute permission:  func ( TlbBase_t t , addr_t ea , unsigned seq ) {
+}
+  -------------------------------
+
+  Lookup:  TlbCam (parent: TlbBase)
+    Type:  both
+    Priority:  0
+    Size:  2^(1 * SIZE + 0) << 10
+    Page Number Shift:  2
+    Real-page Field:  RPN
+    Min Page Size:  1024 (bytes)
+    Array:  16 entries, fully associative.
+    Way Fields:
+      EPN:  24 bits.
+        Reset value:  0
+      Documention:
+
+        Example documentation string for an MMU field.
+        
+      IND:  1 bits.
+        Reset value:  0
+      RPN:  24 bits.
+        Reset value:  0
+      SIZE:  6 bits.
+        Reset value:  0
+      SR:  1 bits.
+        Reset value:  0
+      SW:  1 bits.
+        Reset value:  0
+      SX:  1 bits.
+        Reset value:  0
+      TID:  6 bits.
+        Reset value:  0
+      TS:  1 bits.
+        Reset value:  0
+      UR:  1 bits.
+        Reset value:  0
+      UW:  1 bits.
+        Reset value:  0
+      UX:  1 bits.
+        Reset value:  0
+      V:  1 bits.
+        Reset value:  0
+      WIMG:  4 bits.
+        Reset value:  0
+        Attributes:  translation_attr
+
+    Tests:
+
+      Compare ( V , 1 )
+      Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) )
+      Compare ( TID , 0 , PID0 , PID1 )
+      AddrComp ( EPN )
+      Compare ( IND , 0 )
+
+    Execute permission:  func ( TlbBase_t t , addr_t ea , unsigned seq ) {
+}
+  -------------------------------
+
+  Lookup:  TlbOrig (interface)
+    Type:  both
+    Priority:  0
+    Page Number Shift:  0
+    Min Page Size:  0 (bytes)
+    Way Fields:
+      EPN:  24 bits.
+        Reset value:  0
+      Documention:
+
+        Example documentation string for an MMU field.
+        
+      RPN:  24 bits.
+        Reset value:  0
+      SIZE:  6 bits.
+        Reset value:  0
+      SR:  1 bits.
+        Reset value:  0
+      SW:  1 bits.
+        Reset value:  0
+      SX:  1 bits.
+        Reset value:  0
+      TID:  6 bits.
+        Reset value:  0
+      TS:  1 bits.
+        Reset value:  0
+      UR:  1 bits.
+        Reset value:  0
+      UW:  1 bits.
+        Reset value:  0
+      UX:  1 bits.
+        Reset value:  0
+      V:  1 bits.
+        Reset value:  0
+      WIMG:  4 bits.
+        Reset value:  0
+        Attributes:  translation_attr
+
+  -------------------------------
+-------------------------------
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  XO: [21,30] 
+    Extended opcode.
+    
+Instructions:
+  Name:  add1 (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    foo ( 1 ) ;
+    foo ( 2 ) ;
+}
+  Target Registers:  GPR(1) GPR(2) 
+  Helper Functions:  foo 
+  -------------------------------
+  Name:  add2 (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(267)
+  Action:  {
+    foo ( 2 ) ;
+    foo ( 3 ) ;
+}
+  Target Registers:  GPR(2) GPR(3) 
+  Helper Functions:  foo 
+  -------------------------------
+  Name:  add3 (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(268)
+  Action:  {
+    foo ( 3 ) ;
+    foo ( 4 ) ;
+}
+  Target Registers:  GPR(3) GPR(4) 
+  Helper Functions:  foo 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    1040187658(7c000214):  add1
+    1040187659(7c000216):  add2
+    1040187660(7c000218):  add3
+
+Helper Functions:
+  bar:
+ void bar ( int x ) {
+    foo ( 2 ) ;
+    GPR ( x ) = 20 ;
+}
+    Target Registers:  GPR(2) GPR(x [parm #0]) 
+    Helper Functions:  foo 
+
+  foo:
+ int foo ( int x ) {
+    GPR ( x ) = 20 ;
+    return GPR ( x ) ;
+}
+    Target Registers:  GPR(x [parm #0]) 
+
+  stuff:
+ int stuff (  ) {
+    return 20 ;
+}
+-------------------------------
+

@@ -1,0 +1,46 @@
+//
+// Should fail b/c if a sparse register entry is not associated with
+// a register then it must have a read and a write hook.
+//
+
+define (arch = Base) {
+  define (regfile = sprs) {
+    size = 1024;
+  }
+  define (regfile = gprs) {
+    size = 32;
+  }
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+}
+
+define (arch = minippc) {
+
+  define (reg = a) { }
+
+  define (reg = b) { }
+
+  defmod (regfile=sprs) {
+    define (entry=20) {
+      define (write) {
+        action = func (bits<32>) {
+          ;
+        };
+      }
+    }
+    define (entry=21) {
+      define (read) {
+        action = func () {
+          ;
+        };
+      }
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (Base,minippc);
+}
+

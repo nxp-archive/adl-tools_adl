@@ -1,0 +1,2 @@
+asm78.s: Assembler messages:
+asm78.s:6: Error: Relocation extends past end of instruction.  Too large of a relocation used.

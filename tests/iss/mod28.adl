@@ -1,0 +1,82 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+// This is a basic model that is always in little-endian mode.
+
+#import "mod1.adl"
+
+define (core = P) {
+  archs = (MiniPPC);
+
+  define (instrfield=XO_DS) {
+    bits = (30,31);
+  }
+
+  define (instrfield=DS) {
+    bits = (16,29);
+    shift = 2;
+    is_signed = true;
+  }
+
+  define (reg=MSR) {
+    define (field=ILE) {
+      bits = 12;
+    }
+    define (field=DLE) {
+      bits = 13;
+    }
+  }
+
+  define (mem=Mem) {
+    read = func(unsigned s,bits<s> v) {
+      if (MSR.DLE == 1) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    } ;
+    instr_read = func(unsigned s,bits<s> v) {
+      if (MSR.ILE == 1) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    } ;
+    write = func(unsigned s, bits<s> v) {
+      if (MSR.DLE == 1) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    };
+  }
+
+  // For testing purposes, we define the load-double and store-double
+  // instructions as loading 64-bits and placing the upper-half into GPR(RT) and
+  // the lower-half into GPR(RT+1).
+  define (instr="ld") {
+    fields=(OPCD(58),RT,RA,DS,XO_DS(0));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + DS;
+      var d = Mem(addr,8);
+      GPR(RT)        = d(0,31);
+      GPR((RT+1)%32) = d(32,63);
+    };
+  }
+
+  define (instr="std") {
+    fields=(OPCD(62),RT,RA,DS,XO_DS(0));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + DS;
+      var d = concat( GPR(RT) , GPR((RT+1)%32) );
+      Mem(addr,8) = d;
+    };
+  }
+
+}

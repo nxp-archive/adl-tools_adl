@@ -1,0 +1,27 @@
+
+asm45.o:     file format elf32-powerpc
+asm45.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000004  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000038  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000038  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	08 22       	foo      r2,2:4:6:8:11:13:15:17
+   2:	11 e2       	foo      r4,30:32:34:36:39:41:43:45

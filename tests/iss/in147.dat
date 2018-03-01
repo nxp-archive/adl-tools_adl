@@ -1,0 +1,36 @@
+#
+# Tests that an aliased instruction which lies on a cache-line
+# will be translated correctly.
+#
+= asm
+
+  .long 0x7c0053ae # Fake instruction:  dcbi2 to test aliasing in the jit.
+  bc 0x0c,2,L1     # Shouldn't be taken.
+  addi r3,r3,1
+L1:
+  addi r3,r3,1
+
+= /asm
+
+= mdopts
+
+instr-offset: 0xf80
+
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000f80 d=0x7C0053AE	#	.long 0x7c0053ae # Fake instruction:  dcbi2 to test aliasing in the jit.
+MD n=Mem ra=0x00000f84 d=0x41820008	#	bc 0x0c,2,L1   # Shouldn't be taken.
+MD n=Mem ra=0x00000f88 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000f8c d=0x38630001	#	addi r3,r3,1
+# </GEN>
+
+RD n=NIA   d=0xf80
+RD n=CCR   d=0xc0000000
+RD n=CTR   d=0x00000001
+
+RESULTS
+
+RD n=GPR i=3 d=2

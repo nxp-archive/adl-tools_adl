@@ -1,0 +1,41 @@
+//
+// If a register references a register file, the index
+// must be within the size of the register file.
+//
+
+define (arch = Base) {
+
+  attrs = (foo,stuff);
+
+  define (regfile = sprs) {
+    size = 1024;
+    attrs = foo;
+  }
+}
+
+define (arch = minippc) {
+
+  define (reg = a) {
+    width = 32;
+  }
+
+  defmod (regfile = sprs) {
+    define (entry=2000) {
+      reg = a;
+    }
+    define (entry=2001) { }
+    define (entry=10) {
+      define (write) { ignore=true; };
+      define (read) {
+        action = {
+          return 10;
+        };
+      }
+    }
+  }
+}
+
+define (core = P) {
+  archs = (Base,minippc);
+}
+

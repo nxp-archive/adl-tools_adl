@@ -1,0 +1,39 @@
+#
+# Tests that the targets of aliases are the actual instruction
+# execution function and not the wrapper used to modify instruction fields.
+#
+# To assemble this:
+#
+# 1.  Create an assembler:
+#
+#     adl/scripts/adl2asm --prefix=$adl --bprefix=/data/data/a/adl/external/binutils-adl mod2.adl
+#
+# 2.  Use this assembler with makedat:
+#
+#     ./makedat test.dat --as=./as-mod2
+#
+= asm
+
+	se_inc r1
+	se_inc r1
+	se_foo r2
+	se_foo r2
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0821 s=2	#	se_inc r1
+MD n=Mem ra=0x00000002 d=0x0821 s=2	#	se_inc r1
+MD n=Mem ra=0x00000004 d=0x0C42 s=2	#	se_foo r2
+MD n=Mem ra=0x00000006 d=0x0C42 s=2	#	se_foo r2
+# </GEN>
+CORE n=:P
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=0x1000
+
+RESULTS
+
+RD n=GPR i=1 d=12
+RD n=GPR i=2 d=0x11000

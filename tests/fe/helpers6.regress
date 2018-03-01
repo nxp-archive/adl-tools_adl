@@ -1,0 +1,47 @@
+======
+Cores:
+======
+Name:  "c"
+Registers:
+  Name:  "L2HitReg"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "MSR"
+  Width:  32
+    PR[10]   
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Caches:
+  L1 (level 1, unified)
+    Size    :  131072 bytes
+    Linesize:  256 bytes
+    Sets    :  256 
+    Ways    :  2 
+    Hit handler:  func ( CacheAccess ca , addr_t  ) {
+    L2HitReg = L2HitReg + 1 ;
+    foo (  ) ;
+    bar (  ) ;
+}
+
+
+Helper Functions:
+  bar:
+ void bar (  ) {
+}
+
+  foo:
+ void foo (  ) {
+}
+-------------------------------
+

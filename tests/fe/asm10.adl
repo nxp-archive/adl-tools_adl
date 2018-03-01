@@ -1,0 +1,119 @@
+//
+// Make sure assembler rules can be applied to nested instructions via defmod,
+// including using groups with attribute selection.
+//
+define (arch = PPC_parallel) {
+
+  parallel_execution = 2;
+
+  attrs = (alu);
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+
+  //
+  // regs
+  // 
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+  
+  defmod(reg = (CIA,NIA)) {
+    serial = true;
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  //
+  // instrfields
+  //
+  define (instrfield = (R1,R2,R3)) {
+    pseudo = true;
+    width = 5;
+  }
+
+
+  define(instr=sub_family) {
+    fields = (OPCD,R1,R2,R3);
+    define (instr=sub) {
+      width = 32;
+      attrs = alu;
+      fields = (OPCD(10),R1,R2,R3);
+      alias = sub_family(OPCD(OPCD),R1(R1),R2(R2),R3(R3));
+    }
+
+    action = {
+      GPR(R1) = GPR(R2.uint32()) - GPR(R3);
+    };
+  }
+
+  define(instr=add_family) {
+    fields = (OPCD,R1,R2,R3);
+    define (instr=add) {
+      width = 32;
+      attrs = alu;
+      fields = (OPCD(11),R1,R2,R3);
+      alias = add_family(OPCD(OPCD),R1(R1),R2(R2),R3(R3));
+    }
+
+    action = {
+      GPR(R1) = GPR(R2.uint32()) + GPR(R3);
+    };
+  }
+
+  defmod(instr=sub) {
+    asm_rules = R1;
+  }
+
+  define(group=alu_instrs) {
+    has_attrs = (alu);
+    type = instr;
+  }
+
+  defmod(instr=(*alu_instrs)) {
+    asm_rules = R2;
+  }
+
+  define (assembler) {
+
+    define(rule=R1) {
+      action = func (InstrInfo) {
+      };
+    }
+
+    define(rule=R2) {
+      action = func (InstrInfo) {
+      };
+    }
+
+  }
+
+}
+
+define (core = P) {
+  archs = (PPC_parallel);
+}
+

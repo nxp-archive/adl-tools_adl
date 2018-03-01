@@ -1,0 +1,231 @@
+//
+// Test for parsing little-endian instructions.  The words in the decode tree should be swapped
+// to account of the byte-swapping.  The actual byte-swapping on a word-level is taken care of by
+// the underlying reader (objdump vs a model).
+//
+
+define (arch=BigInst) {
+
+  attrs = (nia,cia);
+
+  instr_endianness = little;
+  data_endianness = little;
+  bit_endianness = little;
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define (instrfield=OpCode) {
+    bits = (63,58);
+  }
+
+  define (instrfield=Src) {
+    bits = 57;
+    enumerated = (".imm",".mem");
+    value = ".imm";
+  }
+
+  define (instrfield=Imm) {
+    bits = (111,64);
+  }
+
+  define (instrfield=SrcAddr) {
+    bits = (31,16);
+  }
+
+  define (instrfield=DestAddr) {
+    bits = (15,0);
+  }
+
+  define (instrfield=MultImm) {
+    bits = (127,80);
+  }
+
+  define (instrfield=CoefAddr) {
+    bits = (127,112);
+  }
+
+  define (instrfield=ModValue) {
+    bits = (95,80);
+  }
+
+  define (instrfield=MultMode) {
+    bits = (79,78);
+    enumerated = (".const",".allN",".modM",reserved);
+  }
+
+  define (instrfield=ConstMultValSrc) {
+    bits = (77,76);
+    enumerated = (".twram",".workreg",".imm",reserved);
+    value = ".twram";
+  }
+  
+  define (instrfield=Shift_En) {
+    bits = 75;
+    enumerated = (".nosrcscale",".srcscale");
+    value = ".nosrcscale";
+  }
+
+  define (instrfield=ShiftVal) {
+    bits = (73,72);
+  }
+
+  define (instrfield=SubSamplingFactor) {
+    bits = (67,64);
+    enumerated = ("1","2","4","8","16","32","64","128","256",reserved,reserved);
+  }
+
+  define (instrfield=FFT16) {
+    bits = 57;
+    enumerated = (".nofft16",".fft16");
+    value = ".nofft16";
+  }
+
+  define (instrfield=Window) {
+    bits = 56;
+    enumerated = (".nowin",".win");
+    value = ".nowin";
+  }
+
+  define (instrfield=FIR) {
+    bits = 55;
+    enumerated = (".nofir",".fir");
+    value = ".nofir";
+  }
+
+  define (instrfield=RoundFFT) {
+    bits = (54,52);
+  }
+
+  define (instrfield=InputDataType) {
+    bits = 51;
+    enumerated = (".real",".cmplx");
+    value = ".real";
+  }
+
+  define (instrfield=LastRound) {
+    bits = 50;
+    enumerated = (".nolastrnd",".lastrnd");
+    value = ".nolastrnd";
+  }
+
+  define (instrfield=SubSampling) {
+    bits = 49;
+    enumerated = (".noss",".ss");
+    value = ".noss";
+  }
+
+  define (instrfield=QuadExt) {
+    bits = 48;
+    enumerated = (".noqext",".qext");
+    value = ".noqext";
+  }
+
+  define (instrfield=IMA) {
+    bits = 45;
+    enumerated = (".imm",".ind");
+    value = ".imm";
+  }
+
+  define (instrfield=VectLen) {
+    bits = (44,32);
+  }
+
+  define (instrfield=SrcAddrIncr) {
+    bits = (111,104);
+  }
+
+  define (instrfield=DestAddrIncr) {
+    bits = (103,96);
+  }
+
+  
+  //
+  // Instructions
+  //
+
+# define ImmSrc 0
+# define RegSrc 1
+
+  define (instr=set) {
+
+    width = 128;
+    fields = (Imm,OpCode(0x1),Src,SrcAddr,DestAddr);
+    syntax = ("%i%p %f,%f,%f",Src,DestAddr,Imm,SrcAddr);
+
+    action = {
+    };
+  }
+  
+  define (instr=set_imm) {
+    alias = set(Imm(Imm),Src(ImmSrc),SrcAddr(0),DestAddr(DestAddr));
+    syntax = ("set %f,%f",DestAddr,Imm);
+  }
+
+  define (instr=get) {
+
+    width = 128;
+    fields = (OpCode(0x2),SrcAddr,DestAddr);
+    syntax = ("%i %f,%f",DestAddr,SrcAddr);
+
+    action = {
+    };
+  }
+
+  define (instr=add) {
+
+    width = 128;
+    fields = (Imm,OpCode(0x3),Src,SrcAddr,DestAddr);
+    syntax = ("%i%p %f,%f,%f",Src,DestAddr,Imm,SrcAddr);
+
+    action = {
+    };
+  }
+
+  define (instr=add_imm) {
+    alias = add(Imm(Imm),Src(ImmSrc),SrcAddr(0),DestAddr(DestAddr));
+    syntax = ("add %f,%f",DestAddr,Imm);
+  }
+
+  define (instr=stop) {
+
+    width = 128;
+    fields = (OpCode(0x4));
+
+    action = {
+      halt();
+    };
+  }
+
+  define (instr=mult_mm0) {
+    
+    width = 128;
+    fields = (MultImm,MultMode(0),SubSamplingFactor,
+              OpCode(0x21),SubSampling,QuadExt,IMA,VectLen,SrcAddr,DestAddr);
+    syntax = ("mult%p%p%p %f,%f,%f,%f,%f",SubSampling,QuadExt,IMA,
+              MultImm,SubSamplingFactor,VectLen,SrcAddr,DestAddr);
+
+    action = {
+    };
+  }
+
+  define (instr=mult_mmn0) {
+    width = 128;
+    fields = (CoefAddr,ModValue,MultMode,ConstMultValSrc,Shift_En,ShiftVal,SubSamplingFactor,
+              OpCode(0x21),SubSampling,QuadExt,IMA,VectLen,SrcAddr,DestAddr);
+
+    syntax = ("mult%p%p%p%p%p%p %f,%f,%f,%f,%f,%f,%f",
+              MultMode,ConstMultValSrc,Shift_En,SubSampling,QuadExt,IMA,
+              CoefAddr,ModValue,ShiftVal,SubSamplingFactor,VectLen,SrcAddr,DestAddr);
+
+    action = {
+    };
+  }
+
+
+}
+
+define (core=biginst) {
+  archs = BigInst;
+}

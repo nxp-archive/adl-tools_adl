@@ -1,0 +1,199 @@
+
+dhry_2.o:     file format elf32-powerpc
+dhry_2.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         0000021c  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000250  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000250  2**0
+                  ALLOC
+  3 .rodata       00000014  00000000  00000000  00000250  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, DATA
+  4 .comment      00000012  00000000  00000000  00000264  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+00000000 l    df *ABS*	00000000 dhry_2.c
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000 l    d  .rodata	00000000 .rodata
+00000000 l    d  .comment	00000000 .comment
+00000000 g     F .text	000000a0 Proc_6
+0000020c g     F .text	00000010 Func_3
+00000000         *UND*	00000000 Int_Glob
+000000a0 g     F .text	00000010 Proc_7
+000000b0 g     F .text	00000078 Proc_8
+00000128 g     F .text	00000028 Func_1
+00000000         *UND*	00000000 Ch_1_Glob
+00000150 g     F .text	000000bc Func_2
+00000000         *UND*	00000000 strcmp
+
+
+
+Disassembly of section .text:
+
+00000000 <Proc_6>:
+   0:	94 21 ff e0 	stwu	r1,-32(r1)
+   4:	7c 08 02 a6 	mflr	r0
+   8:	93 c1 00 18 	stw	r30,24(r1)
+   c:	93 e1 00 1c 	stw	r31,28(r1)
+  10:	90 01 00 24 	stw	r0,36(r1)
+  14:	7c 7f 1b 78 	mr	r31,r3
+  18:	7c 9e 23 78 	mr	r30,r4
+  1c:	90 7e 00 00 	stw	r3,0(r30)
+  20:	48 00 00 01 	bl	20 <Proc_6+0x20>
+			20: RELOC_REL24	Func_3
+  24:	2c 03 00 00 	cmpwi	r3,0
+  28:	40 82 00 0c 	bne-	34 <Proc_6+0x34>
+  2c:	38 00 00 03 	li	r0,3
+  30:	90 1e 00 00 	stw	r0,0(r30)
+  34:	28 1f 00 04 	cmplwi	r31,4
+  38:	41 81 00 50 	bgt-	88 <Proc_6+0x88>
+  3c:	3d 20 00 00 	lis	r9,0
+			3e: RELOC_HI16	.rodata
+  40:	39 29 00 00 	addi	r9,r9,0
+			42: RELOC_LO16	.rodata
+  44:	57 e0 10 3a 	rlwinm	r0,r31,2,0,29
+  48:	7c 09 00 2e 	lwzx	r0,r9,r0
+  4c:	7c 00 4a 14 	add	r0,r0,r9
+  50:	7c 09 03 a6 	mtctr	r0
+  54:	4e 80 04 20 	bctr
+  58:	3d 20 00 00 	lis	r9,0
+			5a: RELOC_HI16	Int_Glob
+  5c:	80 09 00 00 	lwz	r0,0(r9)
+			5e: RELOC_LO16	Int_Glob
+  60:	2c 00 00 64 	cmpwi	r0,100
+  64:	40 81 00 0c 	ble-	70 <Proc_6+0x70>
+  68:	38 00 00 00 	li	r0,0
+  6c:	48 00 00 18 	b	84 <Proc_6+0x84>
+  70:	38 00 00 03 	li	r0,3
+  74:	48 00 00 10 	b	84 <Proc_6+0x84>
+  78:	38 00 00 01 	li	r0,1
+  7c:	48 00 00 08 	b	84 <Proc_6+0x84>
+  80:	38 00 00 02 	li	r0,2
+  84:	90 1e 00 00 	stw	r0,0(r30)
+  88:	80 01 00 24 	lwz	r0,36(r1)
+  8c:	7c 08 03 a6 	mtlr	r0
+  90:	83 c1 00 18 	lwz	r30,24(r1)
+  94:	83 e1 00 1c 	lwz	r31,28(r1)
+  98:	38 21 00 20 	addi	r1,r1,32
+  9c:	4e 80 00 20 	blr
+
+000000a0 <Proc_7>:
+  a0:	38 63 00 02 	addi	r3,r3,2
+  a4:	7c 84 1a 14 	add	r4,r4,r3
+  a8:	90 85 00 00 	stw	r4,0(r5)
+  ac:	4e 80 00 20 	blr
+
+000000b0 <Proc_8>:
+  b0:	39 45 00 05 	addi	r10,r5,5
+  b4:	55 40 10 3a 	rlwinm	r0,r10,2,0,29
+  b8:	7d 20 1a 14 	add	r9,r0,r3
+  bc:	7c c3 01 2e 	stwx	r6,r3,r0
+  c0:	90 c9 00 04 	stw	r6,4(r9)
+  c4:	91 49 00 78 	stw	r10,120(r9)
+  c8:	7d 49 53 78 	mr	r9,r10
+  cc:	38 a5 00 06 	addi	r5,r5,6
+  d0:	7c 0a 28 00 	cmpw	r10,r5
+  d4:	41 81 00 24 	bgt-	f8 <Proc_8+0x48>
+  d8:	1d 0a 00 32 	mulli	r8,r10,50
+  dc:	39 6a 00 01 	addi	r11,r10,1
+  e0:	7c 08 4a 14 	add	r0,r8,r9
+  e4:	54 00 10 3a 	rlwinm	r0,r0,2,0,29
+  e8:	7d 44 01 2e 	stwx	r10,r4,r0
+  ec:	39 29 00 01 	addi	r9,r9,1
+  f0:	7c 09 58 00 	cmpw	r9,r11
+  f4:	40 81 ff ec 	ble+	e0 <Proc_8+0x30>
+  f8:	1d 6a 00 cc 	mulli	r11,r10,204
+  fc:	7d 6b 22 14 	add	r11,r11,r4
+ 100:	81 2b ff fc 	lwz	r9,-4(r11)
+ 104:	39 29 00 01 	addi	r9,r9,1
+ 108:	91 2b ff fc 	stw	r9,-4(r11)
+ 10c:	55 40 10 3a 	rlwinm	r0,r10,2,0,29
+ 110:	7c 03 00 2e 	lwzx	r0,r3,r0
+ 114:	90 0b 0f a0 	stw	r0,4000(r11)
+ 118:	38 00 00 05 	li	r0,5
+ 11c:	3d 20 00 00 	lis	r9,0
+			11e: RELOC_HI16	Int_Glob
+ 120:	90 09 00 00 	stw	r0,0(r9)
+			122: RELOC_LO16	Int_Glob
+ 124:	4e 80 00 20 	blr
+
+00000128 <Func_1>:
+ 128:	54 84 06 3e 	clrlwi	r4,r4,24
+ 12c:	54 63 06 3e 	clrlwi	r3,r3,24
+ 130:	38 00 00 00 	li	r0,0
+ 134:	7c 03 20 00 	cmpw	r3,r4
+ 138:	40 a2 00 10 	bne+	148 <Func_1+0x20>
+ 13c:	3d 20 00 00 	lis	r9,0
+			13e: RELOC_HI16	Ch_1_Glob
+ 140:	98 69 00 00 	stb	r3,0(r9)
+			142: RELOC_LO16	Ch_1_Glob
+ 144:	38 00 00 01 	li	r0,1
+ 148:	7c 03 03 78 	mr	r3,r0
+ 14c:	4e 80 00 20 	blr
+
+00000150 <Func_2>:
+ 150:	94 21 ff e0 	stwu	r1,-32(r1)
+ 154:	7c 08 02 a6 	mflr	r0
+ 158:	93 81 00 10 	stw	r28,16(r1)
+ 15c:	93 a1 00 14 	stw	r29,20(r1)
+ 160:	93 c1 00 18 	stw	r30,24(r1)
+ 164:	93 e1 00 1c 	stw	r31,28(r1)
+ 168:	90 01 00 24 	stw	r0,36(r1)
+ 16c:	7c 7e 1b 78 	mr	r30,r3
+ 170:	7c 9d 23 78 	mr	r29,r4
+ 174:	3b e0 00 02 	li	r31,2
+ 178:	7c 7e f8 ae 	lbzx	r3,r30,r31
+ 17c:	7d 3d fa 14 	add	r9,r29,r31
+ 180:	88 89 00 01 	lbz	r4,1(r9)
+ 184:	48 00 00 01 	bl	184 <Func_2+0x34>
+			184: RELOC_REL24	Func_1
+ 188:	2c 03 00 00 	cmpwi	r3,0
+ 18c:	40 82 00 0c 	bne-	198 <Func_2+0x48>
+ 190:	3b 80 00 41 	li	r28,65
+ 194:	3b ff 00 01 	addi	r31,r31,1
+ 198:	2c 1f 00 02 	cmpwi	r31,2
+ 19c:	40 81 ff dc 	ble+	178 <Func_2+0x28>
+ 1a0:	38 1c ff a9 	addi	r0,r28,-87
+ 1a4:	54 00 06 3e 	clrlwi	r0,r0,24
+ 1a8:	28 00 00 02 	cmplwi	r0,2
+ 1ac:	41 81 00 08 	bgt-	1b4 <Func_2+0x64>
+ 1b0:	3b e0 00 07 	li	r31,7
+ 1b4:	38 00 00 01 	li	r0,1
+ 1b8:	2c 1c 00 52 	cmpwi	r28,82
+ 1bc:	41 82 00 2c 	beq-	1e8 <Func_2+0x98>
+ 1c0:	7f c3 f3 78 	mr	r3,r30
+ 1c4:	7f a4 eb 78 	mr	r4,r29
+ 1c8:	48 00 00 01 	bl	1c8 <Func_2+0x78>
+			1c8: RELOC_REL24	strcmp
+ 1cc:	38 00 00 00 	li	r0,0
+ 1d0:	2c 03 00 00 	cmpwi	r3,0
+ 1d4:	40 81 00 14 	ble-	1e8 <Func_2+0x98>
+ 1d8:	3b ff 00 07 	addi	r31,r31,7
+ 1dc:	3d 20 00 00 	lis	r9,0
+			1de: RELOC_HI16	Int_Glob
+ 1e0:	93 e9 00 00 	stw	r31,0(r9)
+			1e2: RELOC_LO16	Int_Glob
+ 1e4:	38 00 00 01 	li	r0,1
+ 1e8:	7c 03 03 78 	mr	r3,r0
+ 1ec:	80 01 00 24 	lwz	r0,36(r1)
+ 1f0:	7c 08 03 a6 	mtlr	r0
+ 1f4:	83 81 00 10 	lwz	r28,16(r1)
+ 1f8:	83 a1 00 14 	lwz	r29,20(r1)
+ 1fc:	83 c1 00 18 	lwz	r30,24(r1)
+ 200:	83 e1 00 1c 	lwz	r31,28(r1)
+ 204:	38 21 00 20 	addi	r1,r1,32
+ 208:	4e 80 00 20 	blr
+
+0000020c <Func_3>:
+ 20c:	68 63 00 02 	xori	r3,r3,2
+ 210:	20 03 00 00 	subfic	r0,r3,0
+ 214:	7c 60 19 14 	adde	r3,r0,r3
+ 218:	4e 80 00 20 	blr

@@ -1,0 +1,74 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, slice-written
+  Width:  64
+  -------------------------------
+Registers:
+  Name:  "ACC"
+  Usage:  written
+  Width:  64
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO_X: [21,30] 
+        Extended opcode for X Instruction Format.
+    
+Instructions:
+  Name:  b (rank: 100)
+  Width:  32
+  Fields:  OPCD(2) RT RA RB XO_X(10)
+  Action:  {
+    evmgrp1 ( RT , RA , RB , 1 , 0 , 1 , 1 , 3 ) ;
+}
+  Target Registers:  ACC GPR(RT) 
+  Helper Functions:  evmgrp1 fldru64 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    67108874(8000014):  b
+
+Helper Functions:
+  evmgrp1:
+ void evmgrp1 ( uint32_t d , uint32_t a , uint32_t b , uint8_t M , uint8_t O , uint8_t F , uint8_t S , uint8_t A ) {
+     uint64_t temp5 = 0 , temp6 = 0 ;
+    GPR ( d ) ( 0 , 31 ) = fldru64 ( temp5 , 32 , 63 ) ;
+    GPR ( d ) ( 32 , 63 ) = fldru64 ( temp6 , 32 , 63 ) ;
+    ACC = GPR ( d ) ;
+}
+    Target Registers:  ACC GPR(d [parm #0]) 
+    Helper Functions:  fldru64 
+
+  fldru64:
+ uint64_t fldru64 ( uint64_t data , int msb , int lsb ) {
+}
+-------------------------------
+

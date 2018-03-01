@@ -1,0 +1,6 @@
+inst79.adl:115: Unknown register or register-file XER
+inst79.adl:115: Excluded source GPR(Foo) is not a valid source for instruction 'a'.
+inst79.adl:115: Unknown register or register-file XER
+inst79.adl:115: Excluded source GPR(Foo) is not a valid source for instruction 'b'.
+inst79.adl:115: Unknown register or register-file XER
+inst79.adl:115: Excluded source GPR(Foo) is not a valid source for instruction 'c'.

@@ -1,0 +1,314 @@
+#
+# Test of our uart and interrupt controller model.  Note that results are
+# checked by examining standard out.  The model must be run with the pic-uart.so
+# plugin in order to work.
+#
+# The basic idea is this: Cores 0 and 1 generate external exceptions on cores 2
+# and 3.  When these cores get external exceptions, they display message strings
+# to the uart.  Each receving core loops until it gets 10 exceptions.
+#
+= asm
+
+	.equ CoreCount,				4
+	.equ ExceptionCount,	10
+	.equ LockAddr,				0xA00
+	.equ StartAddr,				0x1000
+	.equ DoneAddr,				0x1010
+	.equ UartAddr,				0x2000
+	.equ PicAddr,					0x2010
+	.equ C2Data,					0x3100
+	.equ C3Data,					0x3200
+
+Start0:
+	li r20,LockAddr
+	li r21,DoneAddr
+	li r22,4
+	b Prog1
+	.long 0x0
+
+Start1:
+	li r20,LockAddr
+	li r21,DoneAddr+4
+	li r22,8
+	b Prog1
+	.long 0x0
+
+Start2:
+	li r20,LockAddr
+	li r21,DoneAddr
+	li r1,C2Data
+	b Prog2
+	.long 0x0
+
+Start3:
+	li r20,LockAddr
+	li r21,DoneAddr+4
+	li r1,C3Data
+	b Prog2
+	.long 0x0
+
+ # Exception generating routine.
+Prog1:
+	bl Startup
+
+Prog1Loop:
+	li r1,1000
+	mtctr r1
+L1:										# Simple wait loop.
+	nop
+	bdnz L1
+	stw r22,PicAddr(r0)	# Generate exception on relevant cores.
+	lwz r2,0x0(r21)  		# Load done address, loop until it's non-zero.
+	cmpwi r2,0
+	beq Prog1Loop
+	.long 0x0
+
+ # Exception receiving routine:  Loop until we get n exceptions.  When done,
+ # Set Mem(r21) to 1.  Uses r5,r6 as temporaries.
+Prog2:
+	bl Startup
+Prog2Loop:
+	nop
+	cmpwi r5,ExceptionCount
+	blt Prog2Loop
+	li r6,1
+	stw r6,0x0(r21)		# Signal that we're done.
+	.long 0x0	
+ # Exception handler routine.  Updates r5 and uses r30,r31 as a temporary.
+Excpt:
+	mflr r31
+	mfcr r30
+	addi r5,r5,1				# Exception handler.
+	bl Print
+	mtcr r30
+	mtlr r31
+	rfi
+	.long 0x0
+
+	# Output a string.  r1 should have string address, r2,r3,r4 used as temporary. 
+Print:
+	mflr r3
+	mr r4,r1
+	addi r1,r1,-1					# We point to one byte before the string, so we can use update form.
+	bl Lock								# Get the lock.
+PrintLoop:
+	lbzu r2,0x1(r1)				# Get a byte.
+	cmpwi r2,0x0					# If we get a 0, it's the end of the string.
+	beq PrintEnd
+	stw r2,UartAddr(r0)		# Write to the uart.
+	b PrintLoop
+PrintEnd:
+	li r2,'\n'						# So write a newline.
+	stw r2,UartAddr(r0)		
+	bl Unlock
+	mtlr r3
+	mr r1,r4
+	blr
+
+End:
+	.long 0x0
+
+	# Startup routine:  Wait for all cores to get started.
+	# Uses r7,r8 as a temporary.
+Startup:
+	# Wait for everybody to start.
+	mflr r7
+	bl Lock
+	lwz r8,StartAddr(r0)
+	addi r8,r8,1
+	stw r8,StartAddr(r0)
+	bl Unlock
+StartLoop:
+	lwz r8,StartAddr(r0)
+	cmpwi r8,CoreCount
+	bne StartLoop
+	mtlr r7
+	blr
+
+	# Start of spinlock.  Uses r10, r11.  Lock address should be in r20.
+Lock:
+	li       r11,1
+S2:
+  lwarx    r10,r0,r20 	# If the lock already has a value of 1, then wait.
+	cmpwi    r10,0
+  bne-     S3
+  stwcx.   r11,r0,r20   # If we can store to this location, then we're ok, else wait.
+  bne      S3
+  blr										# And we're done.
+S3:
+  li       r0,158				# sched_yield when we don't get a lock.
+	mr       r10,r3				# Save r3 (sc return code), since we use that value elsewhere.
+	sc
+	mr			 r3,r10
+	li			 r0,0
+  b S2									# Now try again to get the lock.
+
+	# To unlock, we just write a 0 to the lock address stored in r20.
+Unlock:
+	stw r0,0x0(r20)
+	blr
+
+= /asm
+
+# P2 strings.
+= str
+
+ * addr: 0x3100
+P2: Got an exception!
+
+= /str
+
+# P3 strings.
+= str
+
+ * addr: 0x3200
+P3: Got an exception!
+
+= /str
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000004 d=0x3AA01010	#	li r21,DoneAddr
+MD n=Mem ra=0x00000008 d=0x3AC00004	#	li r22,4
+MD n=Mem ra=0x0000000c d=0x48000044	#	b Prog1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000018 d=0x3AA01014	#	li r21,DoneAddr+4
+MD n=Mem ra=0x0000001c d=0x3AC00008	#	li r22,8
+MD n=Mem ra=0x00000020 d=0x48000030	#	b Prog1
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000028 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x0000002c d=0x3AA01010	#	li r21,DoneAddr
+MD n=Mem ra=0x00000030 d=0x38203100	#	li r1,C2Data
+MD n=Mem ra=0x00000034 d=0x48000044	#	b Prog2
+MD n=Mem ra=0x00000038 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000003c d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000040 d=0x3AA01014	#	li r21,DoneAddr+4
+MD n=Mem ra=0x00000044 d=0x38203200	#	li r1,C3Data
+MD n=Mem ra=0x00000048 d=0x48000030	#	b Prog2
+MD n=Mem ra=0x0000004c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000050 d=0x480000A5	#	bl Startup
+MD n=Mem ra=0x00000054 d=0x382003E8	#	li r1,1000
+MD n=Mem ra=0x00000058 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x0000005c d=0x60000000	#	nop
+MD n=Mem ra=0x00000060 d=0x4200FFFC	#	bdnz L1
+MD n=Mem ra=0x00000064 d=0x92C02010	#	stw r22,PicAddr(r0)	# Generate exception on relevant cores.
+MD n=Mem ra=0x00000068 d=0x80550000	#	lwz r2,0x0(r21)  		# Load done address, loop until it's non-zero.
+MD n=Mem ra=0x0000006c d=0x2C020000	#	cmpwi r2,0
+MD n=Mem ra=0x00000070 d=0x4182FFE4	#	beq Prog1Loop
+MD n=Mem ra=0x00000074 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000078 d=0x4800007D	#	bl Startup
+MD n=Mem ra=0x0000007c d=0x60000000	#	nop
+MD n=Mem ra=0x00000080 d=0x2C05000A	#	cmpwi r5,ExceptionCount
+MD n=Mem ra=0x00000084 d=0x4180FFF8	#	blt Prog2Loop
+MD n=Mem ra=0x00000088 d=0x38C00001	#	li r6,1
+MD n=Mem ra=0x0000008c d=0x90D50000	#	stw r6,0x0(r21)		# Signal that we're done.
+MD n=Mem ra=0x00000090 d=0x00000000	#	.long 0x0	
+MD n=Mem ra=0x00000094 d=0x7FE802A6	#	mflr r31
+MD n=Mem ra=0x00000098 d=0x7FC00026	#	mfcr r30
+MD n=Mem ra=0x0000009c d=0x38A50001	#	addi r5,r5,1				# Exception handler.
+MD n=Mem ra=0x000000a0 d=0x48000015	#	bl Print
+MD n=Mem ra=0x000000a4 d=0x7FCFF120	#	mtcr r30
+MD n=Mem ra=0x000000a8 d=0x7FE803A6	#	mtlr r31
+MD n=Mem ra=0x000000ac d=0x4C000064	#	rfi
+MD n=Mem ra=0x000000b0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000000b4 d=0x7C6802A6	#	mflr r3
+MD n=Mem ra=0x000000b8 d=0x7C240B78	#	mr r4,r1
+MD n=Mem ra=0x000000bc d=0x3821FFFF	#	addi r1,r1,-1					# We point to one byte before the string, so we can use update form.
+MD n=Mem ra=0x000000c0 d=0x48000061	#	bl Lock								# Get the lock.
+MD n=Mem ra=0x000000c4 d=0x8C410001	#	lbzu r2,0x1(r1)				# Get a byte.
+MD n=Mem ra=0x000000c8 d=0x2C020000	#	cmpwi r2,0x0					# If we get a 0, it's the end of the string.
+MD n=Mem ra=0x000000cc d=0x4182000C	#	beq PrintEnd
+MD n=Mem ra=0x000000d0 d=0x90402000	#	stw r2,UartAddr(r0)		# Write to the uart.
+MD n=Mem ra=0x000000d4 d=0x4BFFFFF0	#	b PrintLoop
+MD n=Mem ra=0x000000d8 d=0x3840000A	#	li r2,'\n'						# So write a newline.
+MD n=Mem ra=0x000000dc d=0x90402000	#	stw r2,UartAddr(r0)		
+MD n=Mem ra=0x000000e0 d=0x48000075	#	bl Unlock
+MD n=Mem ra=0x000000e4 d=0x7C6803A6	#	mtlr r3
+MD n=Mem ra=0x000000e8 d=0x7C812378	#	mr r1,r4
+MD n=Mem ra=0x000000ec d=0x4E800020	#	blr
+MD n=Mem ra=0x000000f0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x000000f4 d=0x7CE802A6	#	mflr r7
+MD n=Mem ra=0x000000f8 d=0x48000029	#	bl Lock
+MD n=Mem ra=0x000000fc d=0x81001000	#	lwz r8,StartAddr(r0)
+MD n=Mem ra=0x00000100 d=0x39080001	#	addi r8,r8,1
+MD n=Mem ra=0x00000104 d=0x91001000	#	stw r8,StartAddr(r0)
+MD n=Mem ra=0x00000108 d=0x4800004D	#	bl Unlock
+MD n=Mem ra=0x0000010c d=0x81001000	#	lwz r8,StartAddr(r0)
+MD n=Mem ra=0x00000110 d=0x2C080004	#	cmpwi r8,CoreCount
+MD n=Mem ra=0x00000114 d=0x4082FFF8	#	bne StartLoop
+MD n=Mem ra=0x00000118 d=0x7CE803A6	#	mtlr r7
+MD n=Mem ra=0x0000011c d=0x4E800020	#	blr
+MD n=Mem ra=0x00000120 d=0x39600001	#	li       r11,1
+MD n=Mem ra=0x00000124 d=0x7D40A028	#	lwarx    r10,r0,r20 	# If the lock already has a value of 1, then wait.
+MD n=Mem ra=0x00000128 d=0x2C0A0000	#	cmpwi    r10,0
+MD n=Mem ra=0x0000012c d=0x40820010	#	bne-     S3
+MD n=Mem ra=0x00000130 d=0x7D60A12D	#	stwcx.   r11,r0,r20   # If we can store to this location, then we're ok, else wait.
+MD n=Mem ra=0x00000134 d=0x40820008	#	bne      S3
+MD n=Mem ra=0x00000138 d=0x4E800020	#	blr										# And we're done.
+MD n=Mem ra=0x0000013c d=0x3800009E	#	li       r0,158				# sched_yield when we don't get a lock.
+MD n=Mem ra=0x00000140 d=0x7C6A1B78	#	mr       r10,r3				# Save r3 (sc return code), since we use that value elsewhere.
+MD n=Mem ra=0x00000144 d=0x44000002	#	sc
+MD n=Mem ra=0x00000148 d=0x7D435378	#	mr			 r3,r10
+MD n=Mem ra=0x0000014c d=0x38000000	#	li			 r0,0
+MD n=Mem ra=0x00000150 d=0x4BFFFFD4	#	b S2									# Now try again to get the lock.
+MD n=Mem ra=0x00000154 d=0x90140000	#	stw r0,0x0(r20)
+MD n=Mem ra=0x00000158 d=0x4E800020	#	blr
+# </GEN>
+
+# <STR>
+
+MD n=Mem ra=0x00003100 d=0x50323a20
+MD n=Mem ra=0x00003104 d=0x476f7420
+MD n=Mem ra=0x00003108 d=0x616e2065
+MD n=Mem ra=0x0000310c d=0x78636570
+MD n=Mem ra=0x00003110 d=0x74696f6e
+MD n=Mem ra=0x00003114 d=0x21000000
+MD n=Mem ra=0x00003200 d=0x50333a20
+MD n=Mem ra=0x00003204 d=0x476f7420
+MD n=Mem ra=0x00003208 d=0x616e2065
+MD n=Mem ra=0x0000320c d=0x78636570
+MD n=Mem ra=0x00003210 d=0x74696f6e
+MD n=Mem ra=0x00003214 d=0x21000000
+# </STR>
+
+CORE n=:procs:P0
+
+RD n=NIA   d=0x00
+
+CORE n=:procs:P1
+
+RD n=NIA   d=0x14
+
+CORE n=:procs:P2
+
+RD n=NIA   d=0x28
+RD n=IVOR4 d=0x94
+RD n=MSR   d=0x00040000
+
+CORE n=:procs:P3
+
+RD n=NIA   d=0x3c
+RD n=IVOR4 d=0x94
+RD n=MSR   d=0x00040000
+
+# We should be OK with these extra inits in lax mode.
+
+CORE n=:procs:P4
+
+RD n=NIA   d=0xfffffffc
+
+CORE n=:procs:P5
+
+RD n=NIA   d=0xfffffffc
+
+CORE n=:procs:P6
+
+RD n=NIA   d=0xfffffffc
+
+CORE n=:procs:P7
+
+RD n=NIA   d=0xfffffffc
+# This should be ignored, since we're ignoring the core.
+RD n=FOO   d=0xfffffffc

@@ -1,0 +1,70 @@
+     <html>
+     <big>
+     <head>
+     <title>ADL Database Report</title>
+     </head>
+     <body>
+     <table border="10">
+     <tr bgcolor="lightblue">
+
+<tr bgcolor="lightblue">
+<td>
+<big><b>NAME</big></b></td>
+<td>
+<big><b>WIDTH</big></b></td>
+<td>
+<big><b>ACTION</big></b></td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+I4</td>
+<td>
+32</td>
+<td>
+<pre>
+ {
+    IMEM ( 0 , 4 ) = 3 ;
+    GPR ( F2 ) = sincos ( IMEM ( GPR ( F2 ) , 4 ) ) ;
+    GPR ( F2 + 1 ) = sincos ( IMEM ( GPR ( F2 + 1 ) , 4 ) ) ;
+    raiseException ( yo ) ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add</td>
+<td>
+16</td>
+<td>
+<pre>
+ {
+     bits < 32 > addr ;
+    eaRegDirect( RS , addr ) ;
+     bits < 32 > res ;
+    addOp( RA , addr , res ) ;
+    GPR ( RA . uint32 (  ) ) = res ;
+}
+</pre>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addi</td>
+<td>
+16</td>
+<td>
+<pre>
+ {
+     bits < 32 > addr ;
+    eaRegDirect( RS , addr ) ;
+     bits < 32 > res ;
+    subOp( RA , addr , res ) ;
+    GPR ( RA . uint32 (  ) ) = res ;
+}
+</pre>
+</td>
+</tr>
+</table>
+</body>
+</html>

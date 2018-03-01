@@ -1,0 +1,11 @@
+mmu10.adl:143: Lookup conflicts with another lookup of the same name
+mmu10.adl:99: Expected a function of arity 4 but found arity of 3 for execute permission function
+mmu10.adl:99: Argument 1 of execute permission function must be of type(s) 'PTE_t '.
+mmu10.adl:99: Argument 2 of execute permission function must be of type(s) 'Seg1_t '.
+mmu10.adl:99: Argument 4 of execute permission function must be of type unsigned.
+mmu10.adl:104: Expected a function of arity 4 but found arity of 3 for data-load permission function
+mmu10.adl:104: Argument 1 of data-load permission function must be of type(s) 'PTE_t '.
+mmu10.adl:104: Argument 2 of data-load permission function must be of type(s) 'Seg1_t '.
+mmu10.adl:104: Argument 4 of data-load permission function must be of type unsigned.
+mmu10.adl:109: Expected a function of arity 4 but found arity of 3 for data-store permission function
+Too many errors.

@@ -1,0 +1,75 @@
+format=huvp;
+//------------------------------------------------------------------------------
+//
+// Options:
+//   ./mod41 in107.dat -of=uvp -trace 
+//
+//------------------------------------------------------------------------------
+test => in107 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  P => P {
+    I : R {nm="GPR0"; d=0x00000001;};
+    I : R {nm="GPR1"; d=0x00000010;};
+    I : R {nm="GPR2"; d=0x00000100;};
+    I : R {nm="GPR3"; d=0x00001000;};
+    I : R {nm="GPR4"; d=0x00010000;};
+    I : R {nm="GPR5"; d=0x00100000;};
+    I : R {nm="GPR6"; d=0x01000000;};
+    I : R {nm="GPR7"; d=0x10000000;};
+    I : R {nm="GPR8"; d=0x00000002;};
+    I : R {nm="GPR9"; d=0x00000020;};
+    I : R {nm="GPR10"; d=0x00000200;};
+    I : R {nm="GPR11"; d=0x00002000;};
+    I : R {nm="GPR12"; d=0x00020000;};
+    I : R {nm="GPR13"; d=0x00200000;};
+    I : R {nm="GPR14"; d=0x02000000;};
+    I : R {nm="GPR15"; d=0x20000000;};
+    E : I {asm="Prefix 2,0x30"; c=1; gc=1;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0xf230; op=0xf230; op_size=16;};
+    E : I {asm="add 0,0,0"; c=2; gc=3;
+                   ea=0x0000000000000002; ra=0x0000000000000002; d=0xc400; op=0x00c40; op_size=16;
+                   ir={// 1: prefix not found - will try to find usual instruction
+                       };};
+    E : I {asm="add 8,9,10"; c=3; gc=4;
+                   ea=0x0000000000000004; ra=0x0000000000000004; d=0xc41a; op=0x03c41; op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR10", d=>0x00000022],
+                       [ t=>"reg", rn=>"GPR0", d=>0x00000002],
+                       // 1: end of packet - prefix
+                       };};
+    E : I {asm="add 1,1,1"; c=4; gc=6;
+                   ea=0x0000000000000006; ra=0x0000000000000006; d=0x0491; op=0x00049; op_size=16;
+                   ir={// 1: prefix not found - will try to find usual instruction
+                       };};
+    E : I {asm="add 2,2,2"; c=5; gc=7;
+                   ea=0x0000000000000008; ra=0x0000000000000008; d=0x0522; op=0x00052; op_size=16;};
+    E : I {asm="add 3,3,3"; c=6; gc=8;
+                   ea=0x000000000000000a; ra=0x000000000000000a; d=0xc5b3; op=0x00c5b; op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR3", d=>0x00002000],
+                       [ t=>"reg", rn=>"GPR2", d=>0x00000200],
+                       [ t=>"reg", rn=>"GPR1", d=>0x00000020],
+                       // 1: end of packet - serial
+                       };};
+    R : RES {ea=0x000000000000000c; ra=0x000000000000000c;};
+    R : R {nm="GPR0"; d=0x00000002;};
+    R : R {nm="GPR1"; d=0x00000020;};
+    R : R {nm="GPR2"; d=0x00000200;};
+    R : R {nm="GPR3"; d=0x00002000;};
+    R : R {nm="GPR4"; d=0x00010000;};
+    R : R {nm="GPR5"; d=0x00100000;};
+    R : R {nm="GPR6"; d=0x01000000;};
+    R : R {nm="GPR7"; d=0x10000000;};
+    R : R {nm="GPR8"; d=0x00000002;};
+    R : R {nm="GPR9"; d=0x00000020;};
+    R : R {nm="GPR10"; d=0x00000022;};
+    R : R {nm="GPR11"; d=0x00002000;};
+    R : R {nm="GPR12"; d=0x00020000;};
+    R : R {nm="GPR13"; d=0x00200000;};
+    R : R {nm="GPR14"; d=0x02000000;};
+    R : R {nm="GPR15"; d=0x20000000;};
+  } // P
+} 

@@ -1,0 +1,22 @@
+======
+P Core
+======
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+

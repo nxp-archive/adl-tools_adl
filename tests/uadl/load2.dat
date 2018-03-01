@@ -1,0 +1,71 @@
+#
+# Test back-to-back loads when accesses through the data cache
+# are pipelined but the memory is not.
+#
+= asm
+
+	lwz 1,0x1000(r0)
+	lwz 2,0x2000(r0)
+	addi r1,r1,10
+	addi r2,r2,20
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz 1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x80402000	#	lwz 2,0x2000(r0)
+MD n=Mem ra=0x00000008 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x0000000c d=0x38420014	#	addi r2,r2,20
+# </GEN>
+
+RD n=NIA     d=0x0
+
+MD n=Mem ra=0x1000 d=30
+MD n=Mem ra=0x2000 d=40
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201000
+INSTR op=0x80201000                                     asm="lwz r1,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000001e
+R n=GPR i=1 d=0x0000001e
+ITIME t=4
+CTIME t=10
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x80402000
+INSTR op=0x80402000                                     asm="lwz r2,8192(r0)"
+D n=Mem t=read ea=0x2000 nb=4
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0x00000028
+R n=GPR i=2 d=0x00000028
+ITIME t=5
+CTIME t=13
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x3821000a
+INSTR op=0x3821000a                                     asm="addi r1,r1,10"
+R n=GPR i=1 d=0x00000028
+ITIME t=8
+CTIME t=14
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420014
+INSTR op=0x38420014                                     asm="addi r2,r2,20"
+R n=GPR i=2 d=0x0000003c
+ITIME t=10
+CTIME t=16
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=13
+CTIME t=17
+
+RESULTS
+
+RD n=GPR i=1 d=40
+RD n=GPR i=2 d=60

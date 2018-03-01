@@ -1,0 +1,67 @@
+#
+# Test to make sure that we can remove a breakpoint when using a model with a
+# memory protection unit, when using the decode cache.  We must invalidate the
+# basic block containing the address of the breakpoint, or else we'll hit the
+# breakpoint trampoline, return to the simulation kernel, then assert because we
+# don't find the breakpoint address in our hash of breakpoints.
+#
+# In this case, the address doesn't exist as a valid mapping, but since we've
+# turned off ITLB exceptions, we just translate 1-1.  So, the no-side-effect
+# version of the instruction translation function, invoked when clearing the
+# breakpoint, should still return true, so that we can clear the breakpoint.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	mtctr r1
+L1:
+	addi r3,r3,10
+	addi r4,r4,10
+	bdnz L1
+
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+
+= /asm
+
+= aopts
+ -mregnames -mppc64
+= /aopts
+
+= mdopts
+	instr-offset: 0x10000
+= /mdopts
+
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0001000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010018 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x0001001c d=0x3863000A	#	addi r3,r3,10
+MD n=Mem ra=0x00010020 d=0x3884000A	#	addi r4,r4,10
+MD n=Mem ra=0x00010024 d=0x4200FFF8	#	bdnz L1
+MD n=Mem ra=0x00010028 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0001002c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00010030 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00010034 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00010038 d=0x38420002	#	addi r2,r2,2
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x10000
+
+# Disable ITLB exceptions so that we don't need to have a translation.
+RD n=HID0 d=0x00000003

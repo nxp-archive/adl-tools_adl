@@ -1,0 +1,56 @@
+#
+# Test calculated branches (branch and link) and branching in the first slot of
+# an instruction packet (little-endian).
+#
+# Constructed using as-mod101
+#
+= asm
+
+	addi r1,r1,1 ; addi r2,r2,3
+L1:
+	nop2 ; sub r2,r2,1
+	bcl 0,L2,0 ; addi r10,r10,1
+	bc r2,L1,1
+	halt
+	
+L2:
+	addi r3,r3,5
+L3:
+	add  r10,r10,r1 ; sub r3,r3,r1
+	bc r3,L3,0
+	blr
+
+= /asm
+= mdopts
+endian: little
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x00062105	#	nop2 ; sub r2,r2,1
+MD n=Mem ra=0x00000004 d=0x00010842
+MD n=Mem ra=0x00000008 d=0x10800002	#	bcl 0,L2,0 ; addi r10,r10,1
+MD n=Mem ra=0x0000000c d=0x00000022
+MD n=Mem ra=0x00000010 d=0x0002A505	#	bc r2,L1,1
+MD n=Mem ra=0x00000014 d=0x00001808
+MD n=Mem ra=0x00000018 d=0x00000001	#	halt
+MD n=Mem ra=0x0000001c d=0x7FFFF086
+MD n=Mem ra=0x00000020 d=0x00000000	#	addi r3,r3,5
+MD n=Mem ra=0x00000024 d=0x00000000
+MD n=Mem ra=0x00000028 d=0x00000001	#	add  r10,r10,r1 ; sub r3,r3,r1
+MD n=Mem ra=0x0000002c d=0x000518C2
+MD n=Mem ra=0x00000030 d=0x18800002	#	bc r3,L3,0
+MD n=Mem ra=0x00000034 d=0x02A50423
+MD n=Mem ra=0x00000038 d=0x00000001	#	blr
+MD n=Mem ra=0x0000003c d=0x3FFFF8C6
+MD n=Mem ra=0x00000040 d=0x00000002	#	
+MD n=Mem ra=0x00000044 d=0x00001000
+# </GEN>
+
+CORE n=packet_ops
+
+
+RESULTS
+
+RD n=GPR i=1  d=1
+RD n=GPR i=2  d=0
+RD n=GPR i=10 d=18

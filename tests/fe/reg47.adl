@@ -1,0 +1,66 @@
+//
+// We should flag an error b/c we don't allow a writable field in a register
+// with a write hook.
+//
+define (arch = minippc) {
+
+  define (regfile = vprs) {
+    width = 128;
+    size = 32;
+    offset = 32;
+    define (field = w) {
+      indexed = 32;
+    }
+    define (field = h) {
+      indexed = 16;
+    }
+    define (field = b) {
+      indexed = 8;
+    }
+  }
+
+  define (reg = a) {
+    width = 32;
+    offset = 32;
+    define (field = f1) {
+      "A read-only field.";
+      bits = (43,50);
+      readonly = 1;
+      writable = true;
+    }
+    define (field = f2) {
+      bits = (53,63);
+    }
+    define (write) {
+      action = func(bits<32> x) {
+        ThisReg = x;
+      };
+    }
+  }
+
+  define (regfile = b) {
+    width = 32;
+    size = 16;
+    define (field = f1) {
+      "A read-only field.";
+      bits = (43,50);
+      readonly = 1;
+      writable = true;
+    }
+    define (write) {
+      action = func(unsigned index,bits<32> x) {
+        ThisReg(index) = x;
+      };
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

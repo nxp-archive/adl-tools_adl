@@ -1,0 +1,36 @@
+
+asm79.o:     file format elf32-powerpc
+asm79.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00018011  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00018045  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00018045  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00018008 l       .text	00000000 foo
+
+
+
+Disassembly of section .text:
+
+00000000 <foo-0x18008>:
+       0:	3c 20 00 01 	lis    r1,1
+			2: RELOC_HI16	.text+0x18008
+       4:	60 21 80 08 	ori    r1,r1,0x8008
+			6: RELOC_LO16	.text+0x18008
+	...
+
+00018008 <foo>:
+   18008:	61 62 63 64 	ori    r2,r11,0x6364
+   1800c:	00 00 00 00 	.long 0x0
+   18010:	00 00 00 00 

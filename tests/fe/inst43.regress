@@ -1,0 +1,4 @@
+inst43.adl:23: warning: Valid range is greater then field.
+inst43.adl:15: warning: Valid range is greater then field.
+inst43.adl:15: Pseudo instruction field width is undefined.
+inst43.adl:19: Valid ranges are not properly defined.

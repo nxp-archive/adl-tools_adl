@@ -1,0 +1,10 @@
+//
+// Defines a post-simulation hook for testing purposes.
+//
+
+define (core=P) {
+  define (config) {
+    // Test post-simulation function.
+    post_sim = func() { QEXIT = QEXIT + 1; };
+  }
+}

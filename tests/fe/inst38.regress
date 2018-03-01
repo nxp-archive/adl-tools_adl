@@ -1,0 +1,2 @@
+inst38.adl:71: Instruction 'names' count different from the size of the cross-product of all sub-instructions.
+inst38.adl:66: Unknown variable/resource found in action code:  Rm

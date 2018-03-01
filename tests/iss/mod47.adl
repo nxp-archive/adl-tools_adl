@@ -1,0 +1,477 @@
+// Test assembler prefix grouping
+define (arch = MiniStarCore) {
+
+  parallel_execution = 3;
+  packet_pos_incr = 16;
+  attrs = (type1,type2);  
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 256;  prefix = r; };
+  // SR (T,...);
+  define (reg = SR) { define (field = T) { bits = 0;}; width = 32; };
+  define (reg =LC) {width =32;};
+  // -------- INSTRFIELDS ----------
+
+  define (reloc = low) {
+    abbrev = "lo";
+    value = 20;
+    instrfield = IMM;
+  }
+  
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  =  0; };
+  // For conditional execution
+  define (instrfield = IfTruePos)   { width = 4; prefix = true; pseudo = true; value  = 15; };
+  define (instrfield = IfFalsePos)  { width = 4; prefix = true; pseudo = true; value  = 15; }; 
+  define (instrfield = IfAlwaysPos) { width = 4; prefix = true; pseudo = true; value  =  0; };
+  define (instrfield = LpMarkA)      { width = 1; prefix = true; pseudo = true; value  =  0; };
+  define (instrfield = LpMarkB)      { width = 1; prefix = true; pseudo = true; value  =  0; };
+  
+  define (instrfield = OPCD) { bits = ( 0, 7); };
+  define (instrfield = RA)   { bits = ( 8,15); ref = GPR; };
+  define (instrfield = RB)   { bits = (16,23); ref = GPR; };
+  define (instrfield = RA_s) { bits = ( 8,11); ref = GPR; };
+  define (instrfield = RB_s) { bits = (12,15); ref = GPR; };
+  define (instrfield = RC)   { bits = (24,31); ref = GPR; };
+  define (instrfield = IMM)  { bits = (16,31);  };
+  define (instrfield = IMM2)  { bits = (8,23); type=immed; };
+  define (instrfield = LAB)  { bits = (16,31); addr = pc; shift=2; };
+  define (instrfield = PR) { width = 1; pseudo = true; assembler = true; enumerated = ("","pr"); value = ""; };
+
+  // -------- PREFIX INSTRUCTIONS -----------
+  
+  define (instr = PREFIX) {
+    fields = (
+              (bits(20,23), 	IfAlwaysPos),
+              (bits(16,19), 	IfFalsePos),
+              (bits(12,15), 	IfTruePos),
+              (bits(9,11), 	VlesSize),
+              (bits(8,8),       LpMarkB),
+              (bits(7,7),       LpMarkA),
+              (bits(0,6), 	0x11	));
+    prefix = true;
+    syntax = ("PREFIX, VlesSize %f, IFA => %f, IFT => %f, IFF => %f, LPMARKA => %f LPMARKB => %f",
+              VlesSize,IfAlwaysPos,IfTruePos,IfFalsePos,LpMarkA,LpMarkB);  
+    width  = 32;
+  }
+
+  // --------- ASM INSTRUCTIONS ---------
+
+  define (instr = IFT) { 
+    syntax = ("ift");
+    assembler = { IfTruePos[0]  = VlesSize[0]; IfAlwaysPos[0] = 15;};
+  }
+ 
+  define (instr = IFF) {
+    syntax = ("iff");
+    assembler = { IfFalsePos[0] = VlesSize[0]; IfAlwaysPos[0] = 15;}; 
+  }
+  
+  define (instr = IFA) {
+    syntax = ("ifa");
+    assembler = { IfAlwaysPos[0] = VlesSize[0]; }; 
+  }
+
+  define (instr=loopend0) {
+    syntax = ("loopend0");
+    assembler = { 
+      if (PktCnt == (unsigned) 1) {
+        LpMarkB[1] = 1;
+        L1 = 0;
+      } else {
+        if (short_loop) {
+          LpMarkA[2] = 1; 
+        } else {
+          LpMarkB[2] = 1; 
+        }
+      }
+      PktCnt = 0;
+    };
+  }
+
+ 	
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+  define (instr = move) {
+    fields = (OPCD(1),RA,IMM);
+    syntax = ("%i %f,%f",RA,IMM);
+    action = { GPR(RA) = IMM;};
+    attrs = type1;
+    width = 32;
+  }
+
+  define (instr = add) {
+    fields = (OPCD(2),RA,RB,RC); 
+    syntax = ("%i %f,%f,%f",RA,RB,RC);
+    action = { GPR(RC) = GPR(RA) + GPR(RB) ;};
+    attrs = type1;
+    width = 32;
+  }
+
+
+
+  define (instr = cmpeq) {
+    fields = (OPCD(3),RA,RB,RC(0)); 
+    syntax = ("%i %f,%f",RA,RB);
+    action = { SR.T = (GPR(RA) == GPR(RB)) ;};
+    attrs = type1;
+    width = 32;
+  }
+
+
+  define (instr = cmpeq_btr0) {
+    fields = (OPCD(4),RA,RC(0)); 
+    syntax = ("cmpeq %f+btr0",RA);
+    action = { SR.T = (GPR(RA) == 1) ;};
+    attrs = type1;
+    width = 32;
+  }
+ 
+  define (instr = skipls) {
+    fields = (OPCD(7),LAB);
+    syntax = ("skipls %f",LAB);
+    action = { ; };
+    attrs = type1;
+    assembler = {
+      L1 = LAB;
+    };		
+  }
+
+
+  define (instr = move_l_sp) {
+    fields = (OPCD(8),RA,RB);
+    syntax = ("move.l (sp+%f),%f",RA,RB);
+    action = {};
+    attrs = type1;
+  }
+ 
+  define (instr = move_l_sp_short) {
+    fields = (OPCD(9),RA_s,RB_s);
+    syntax = ("move.l (sp+%f),%f",RA_s,RB_s);
+    action = {};
+    attrs = type1;
+  }
+
+  define (instr = move_l) {
+    fields = (OPCD(10),RA,RB);
+    syntax = ("move.l (%f),%f",RA,RB);
+    action = {};
+    attrs = type1;
+  }
+ 
+  define (instr = move_l_short) {
+    fields = (OPCD(11),RA_s,RB_s);
+    syntax = ("move.l (%f),%f",RA_s,RB_s);
+    action = {};
+    attrs = type1;
+  }
+
+
+  define (instr = move_l_r_plus_r) {
+    fields = (OPCD(12),RA,RB,RC);
+    syntax = ("move.l (%f+%f),%f",RA,RB,RC);
+    action = {};
+    attrs = type1;
+  }
+  
+  define (instr = amove_l_r_plus_r) {
+    fields = (OPCD(13),IMM2);
+    syntax = ("move.l (%f),r14",IMM2);
+    action = {};
+    attrs = type1;
+  }
+ 
+
+  define (instr = doen) {
+    fields = (OPCD(14),RA);
+    action = { LC = GPR(RA);};
+    assembler = {short_loop = 0;};
+    attrs = type1;
+  }
+
+  define (instr = doensh) {
+    fields = (OPCD(15),RA);
+    action = { LC = GPR(RA);};
+    assembler = {short_loop = 1;};
+    attrs = type1;
+  }
+
+  define (instr = doensh0) {
+    alias = doensh(RA(0));
+    syntax = ("doensh0");
+    attrs = type1;
+  }
+  define (instr = doeh0) {
+    alias = doen(RA(0));
+    syntax = ("doen0");
+    attrs = type1;
+  }
+
+  define (instr = halt) {
+    fields = (OPCD(0));
+    syntax = ("halt");	
+    attrs = type1;
+    action = { halt(); };
+  }
+
+  // NESTED INSTRUCTIONS
+
+  define (instrfield=VarOpcd) { width = variable;   pseudo = true; }
+  define (instrfield=Src1) { width = 6;  pseudo = true;}
+  define (instrfield=Src2) { width = 2;  pseudo = true;}
+  define (instrfield=Res)  { width = 4;  pseudo = true;}
+
+  define (regfile=D) {
+    size = 256;
+    width = 32;
+    prefix = d;
+  }
+
+  define (instrfield=RA_) {
+    pseudo = true;
+    width = 6;
+    ref = D;
+  }
+
+  define (instrfield=RB1_) {
+    pseudo = true;
+    width = 4;
+    ref = D;
+  }
+
+  define (instrfield=RB_) {
+    pseudo = true;
+    width = 2;
+    ref = D;
+  }
+
+  define (instrfield=RT_) {
+    pseudo = true;
+    width = 4;
+    ref = D;
+  }
+
+
+  define(instr=add_outer) { 
+    fields = (VarOpcd, Src1, Src2, Res); 
+    // This should only be selected if the operand range requires it.  The PR
+    // field is enumerated in ordere to make sure that this doesn't confuse the
+    // sort order.
+    define(instr=add_nested1) { 
+      attrs = type1;
+      fields = (
+                (bits(23), RA_(0)),       
+                (bits(22), RA_(1)),       
+                (bits(21), RA_(2)),       
+                (bits(20), RA_(3)),       
+                (bits(19),RA_(4)),       
+                (bits(18),RA_(5)),
+                (bits(17), RT_(0)),       
+                (bits(16), RT_(1)),       
+                (bits(15), RT_(2)),       
+                (bits(14), RT_(3)),       
+                (bits(13), RB1_(3)),       
+                (bits(12), RB1_(2)),       
+                (bits(11), RB1_(1)),
+                (bits(10), RB1_(0)),
+                (bits(9),b1),
+                (bits(8),b0),
+                (bits(7),PR),
+                (bits(6),b0),
+                (bits(5),b0),
+                (bits(4),b0),
+                (bits(3),b1),
+                (bits(2),b0),
+                (bits(1),b0),
+                (bits(0),b0));
+
+      alias = add_outer(VarOpcd(VarOpcd),Src1(RA_),Src2(RB1_),Res(RT_)); 
+      syntax = ("add_n %f,%f,%f",RA_,RB1_,RT_);
+    } 
+    define(instr=add_nested2) { 
+      attrs = type1;
+      fields = (
+                (bits(15), RA_(0)),       
+                (bits(14), RA_(1)),       
+                (bits(13), RA_(2)),       
+                (bits(12), RA_(3)),       
+                (bits(11),RA_(4)),       
+                (bits(10),RA_(5)),
+                (bits(9), RT_(0)),       
+                (bits(8), RT_(1)),       
+                (bits(7), RT_(2)),       
+                (bits(6), RT_(3)),       
+                (bits(5), RB_(0)),       
+                (bits(4), RB_(1)),       
+                (bits(3),b0),
+                (bits(2),b0),
+                (bits(1),b1),
+                (bits(0),b0));
+
+      alias = add_outer(VarOpcd(VarOpcd),Src1(RA_),Src2(RB_),Res(RT_)); 
+      syntax = ("add_n %f,%f,%f",RA_,RB_,RT_);
+    } 
+
+    action = { D(Res) = D(Src1) + D(Src2); };
+  }
+
+  define (instr = add_n_alias) {
+    attrs = type1;
+    alias = add_nested1(RA_(RA_),RB1_(RB1_),RT_(0));   
+    syntax = ("add_n_al %f,%f",RA_,RB1_);
+  }
+
+  define (instr = nop) {
+    alias = add_nested1(RA_(0),RB1_(0),RT_(0));
+  }
+
+  define (parm = icount) { 
+    options = (i0,i1,i2,i3,i4);
+    value = i0;
+  }
+
+  void update_icount() {
+    switch (icount) {
+    case i0: icount = i1; break;
+    case i1: icount = i2; break;
+    case i2: icount = i3; break;
+    case i3: icount = i4; break;
+    case i4: icount = i0; break;
+    }
+  }
+
+  bool eop(int n) {
+    return (int)icount == n;
+  }
+
+  // -------- POST EXEC ----------------
+  post_exec = func() {
+    if (eop(VlesSize)) {
+      icount = i0;
+      info (1,"eop");
+      setPacketPosition(0);
+    } else {
+      update_icount();
+    }
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+    }
+  };
+
+
+  // --------- POST PACKET --------------  
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+    CondExecStatus = ExecAlways;
+  };    
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+ 
+  // ------------ PRE FETCH -------------------
+  define (parm = CondExecStatus) {
+    options = (ExecAlways,ExecIfTrue,ExecIfFalse); 
+    value = ExecAlways;
+  }  
+
+  pre_fetch =  {
+    if (getCurrentInstrTable() != prefix) {
+      unsigned pos = getPacketPosition()/2; 
+      if (pos == IfAlwaysPos+ 1) {
+        info (1,"switching to ifa at " << pos);
+        CondExecStatus = ExecAlways;
+      } else if (pos == IfTruePos + 1) {
+        info (1,"switching to ift at " << pos);
+        CondExecStatus = ExecIfTrue;
+      } else if (pos == IfFalsePos + 1) {
+        info (1,"switching to iff at " << pos);
+        CondExecStatus = ExecIfFalse;
+      }
+
+      switch (CondExecStatus) {
+      case ExecIfTrue:  
+      if (SR.T != 1) { 
+        info(1,"skipping"); 
+        PC = PC + 4; 
+        setPacketPosition(getPacketPosition() + 1);
+        /*if (getPacketPosition()/2 == VlesSize) {
+          setPacketPosition(0);
+          setCurrentInstrTable(prefix);
+          } */
+     
+        skip_instruction();
+      }; 
+      break; 
+      case ExecIfFalse: 
+      if (SR.T == 1) { 
+        info(1,"skipping"); 
+        PC = PC + 4; 
+        setPacketPosition(getPacketPosition() + 1);
+        /*if (getPacketPosition()/2 == VlesSize) {
+          setPacketPosition(0);
+          setCurrentInstrTable(prefix);
+          } */
+        skip_instruction();
+      }; 
+      break; 
+      default: break;
+      }
+    }
+  };
+
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type1);
+    disasm_instrtables = (prefix,type1); 
+    queue_size = 5;
+
+    define(parm=L1) {
+      type = label;
+    }
+    define(parm=PktCnt) {
+      type = integer;
+      value = 0;
+    }	
+    define(parm=short_loop) {
+      type = integer;
+      value = 0;
+    }
+  } 
+
+  post_packet_asm = func(InstrBundle b) {
+    if(L1 != 0) {
+      if(L1 == '*') {
+        L1 = 0;
+        PktCnt = 1;
+      }
+    } else if (PktCnt > 0) {
+      ++PktCnt;
+    }
+  };
+
+  post_asm = func(unsigned instr_width) {
+    VlesSize[0] += 1;
+  };    
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

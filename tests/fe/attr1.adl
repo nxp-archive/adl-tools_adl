@@ -1,0 +1,66 @@
+//
+// Test on attributes with parameters.
+//
+// Also tests string concatenation and stringification of integers.
+//
+
+#define xstr(s) str(s)
+#define str(s) #s	
+
+define (arch = minippc) {
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = ("simple" "1","simple" xstr(2));
+  attrs = (str1,str2,str3);
+  attrs = (int1,int2,int3);
+  attrs = (strlist);
+  attrs = (intlist);
+
+  define (instrfield=OPCD) { bits = (0,5);}
+  define (instrfield=RA) { bits = (11,15); }
+  define (instrfield=RT) { bits = (6,10); }
+
+  define (regfile = RF1) {
+    attrs = (intlist((1,3,6,45)),simple1);
+    size=32;
+    
+  }
+
+  define (regfile = RF2) {
+    attrs = (intlist((12,13,26,45)),str1,str2,int1,int2);
+    size=32;
+  }
+  
+  define (instr=a) {
+    fields=(OPCD(14),RT,RA);
+    attrs = (simple1,str1("d"),int1(6),strlist(("dd","aa","gg")));
+    action = {};
+  }
+  define (instr=b) {
+    fields=(OPCD(31),RT,RA);
+    attrs = (str1("ad"),simple2,int1(45));
+    action = {};
+  }
+  define (instr=c) {
+    fields=(OPCD(32),RT,RA);
+    attrs = (simple1,str1("d"),int1,strlist);
+
+    action = {};
+  }
+  define (instr=d) {
+    fields=(OPCD(33),RT,RA);
+    attrs = (simple2,str2("d"),str1,int1(6),strlist(("add","aa3","gg3")));
+    action = {};
+  }
+
+
+  
+
+
+}
+
+define (core = P) {
+  archs = (minippc);
+}

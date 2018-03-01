@@ -1,0 +1,62 @@
+=======
+Systems:
+=======
+System:  PMT
+  Shared Resources:
+    Register-files:  NIAs TCR 
+  Locally-defined Cores:
+    Name:  "Thread"
+    Register Files:
+      Name:  "NIAs"
+      Size:  4
+      Usage:  read, written
+      Log name:  NIA
+      Width:  32
+      Attributes:  log_as_reg
+      -------------------------------
+      Name:  "SPR"
+      Size:  1024
+      Contained registers:
+        30:  NIAs(0)
+        31:  NIAs(1)
+        32:  NIAs(2)
+        33:  NIAs(3)
+        60:  TCR(child_id)
+        61:  TCR(0)
+        62:  TCR(1)
+        63:  TCR(2)
+        64:  TCR(3)
+      Width:  32
+      -------------------------------
+      Name:  "TCR"
+      Size:  4
+      Usage:  read, written
+      Width:  32
+      -------------------------------
+    Registers:
+      Name:  "NIA"
+      Read alias/hook:
+        NIAs(child_id)
+
+      Write alias/hook:
+        NIAs(child_id)
+
+      Usage:  read, written
+      Width:  32
+      Pseudo:  1
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  NIA
+    Next-instruction-address register:  NIA
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    -------------------------------
+  Constituent Items:
+    t0:  Thread
+    t1:  Thread
+    t2:  Thread
+    t3:  Thread
+-------------------------------
+

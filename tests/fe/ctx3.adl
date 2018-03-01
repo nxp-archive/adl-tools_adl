@@ -1,0 +1,100 @@
+//
+// Example of a context.  Should fail.
+//
+
+define (arch=mt) {
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=TACTIVE) {}
+
+  define (reg=CR) {}
+
+  define (reg=CTR) {}
+
+  define (reg=LR) {}
+
+  define (reg=XER) {}
+
+  define (reg=FOO) {
+    alias = XER;
+  }
+
+  define (reg=TA0) { 
+    define (write) {
+      action = func (bits<32> x) {
+        // Should fail b/c no argument given to context access.
+        if ( thread().CR == 0) {
+          TA0 = x * 2;
+        } else {
+          TA0 = x;
+        }
+      };
+    }
+  }
+
+  define (reg=TA1) { 
+    define (write) {
+      action = func (bits<32> x) {
+        // Should fail b/c the index is out of range for the number of thread
+        // contexts we have.
+        if ( thread(3).CR == 0) {
+          TA1 = x * 2;
+        } else {
+          TA1 = x;
+        }
+      };
+    }
+  }
+
+  define (reg=TA2) { 
+    define (write) {
+      action = func (bits<32> x) {
+        // Should fail b/c the register is not a member of the context.
+        if ( thread(1).TA0 == 0) {
+          TA2 = x * 2;
+        } else {
+          TA2 = x;
+        }
+      };
+    }
+  }
+
+  define (reg=TA3) { 
+    define (write) {
+      action = func (bits<32> x) {
+        // Should fail b/c we do not allow access to pseudo registers in this manner.
+        thread(1).FOO = x;
+        TA3 = x;
+      };
+    }
+  }
+
+  define (context=thread) {
+    regs=(CIA,NIA,CR,CTR,LR,XER,FOO);
+    num_contexts = 2;
+    mem_layout = (NIA,CR);
+    mem_omit = FOO;
+    active = { return TACTIVE; };
+  }
+
+}
+
+define (core=P) {
+  remove=1;
+}
+
+define (sys=PMT) {
+  type="minippc";
+  define (core = Thread) {
+    archs = (mt);
+  }
+  Thread t0;
+  Thread t1;
+}

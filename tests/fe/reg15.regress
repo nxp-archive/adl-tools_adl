@@ -1,0 +1,12 @@
+reg15.adl:27: A register may only be aliased to an element of a register-file.
+reg15.adl:31: Index of 40 is out of bounds of register-file gprs
+reg15.adl:12: First argument to write-hook action function must be a `bits` of the same width as the registers in a register file.
+reg15.adl:35: A register file may only be aliased to another register file.
+reg15.adl:39: Register files may not be mapped to single elements of another register file.
+reg15.adl:35: warning: Target of alias is larger than the alias.  This will result in truncation.
+reg15.adl:35: warning: Target of alias is larger than the alias.  This will result in truncation.
+reg15.adl:34: Size not set for register file and this is not a pure alias to another register file.
+reg15.adl:39: warning: Target of alias is larger than the alias.  This will result in truncation.
+reg15.adl:39: warning: Target of alias is larger than the alias.  This will result in truncation.
+reg15.adl:38: Size not set for register file and this is not a pure alias to another register file.
+reg15.adl:44: Did not find any registers identified as a current-instruction-address register (of class cia).

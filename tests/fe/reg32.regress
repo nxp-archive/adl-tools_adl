@@ -1,0 +1,9 @@
+reg32.adl:7: Duplicate enumeration value 'x' found.
+reg32.adl:12: An enumerated field must have more than one item.
+reg32.adl:17: The enumerated field has no non-reserved entries.
+reg32.adl:26: Unknown variable/resource found in action code:  aa
+reg32.adl:36: Unknown enum value.
+reg32.adl:40: Unknown enum value.
+reg32.adl:65: Unknown variable/resource found in action code:  k
+reg32.adl:65: Unknown variable/resource found in action code:  k
+reg32.adl:75: Unknown variable/resource found in action code:  g :: n

@@ -1,0 +1,97 @@
+//
+// If a helper calls a helper, and the final helper accesses a register file
+// using a parm, then the first helper called that helper using a parm, then we
+// don't want to lose track of this parameter chain.
+//
+
+#define RegSize 32
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      x(RT);
+    };
+  }
+
+  void x(int field)
+  {
+    y(field);
+  }
+
+  void y(int field)
+  {
+    GPR(field) = 10;
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc);
+}

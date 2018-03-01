@@ -1,0 +1,51 @@
+#
+# Tests page crossing using the JIT.
+#
+
+= asm
+
+loop:
+  addi r1,r1,1
+  addi r2,r2,2
+  addi r3,r3,3
+  addi r4,r4,4
+  addi r5,r5,5
+  subic. r10,r10,1
+  bne loop
+  addi r20,r20,100
+
+= /asm
+
+= mdopts
+
+instr-offset: 0x1ff0
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00001ff0 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00001ff4 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00001ff8 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00001ffc d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00002000 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00002004 d=0x354AFFFF	#	subic. r10,r10,1
+MD n=Mem ra=0x00002008 d=0x4082FFE8	#	bne loop
+MD n=Mem ra=0x0000200c d=0x3A940064	#	addi r20,r20,100
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA      d=0x00001ff0
+RD n=GPR i=10 d=10
+
+RESULTS
+
+RD n=NIA      d=0x00002014
+
+RD n=GPR i=0  d=0x00000000
+RD n=GPR i=1  d=0x0000000a
+RD n=GPR i=2  d=0x00000014
+RD n=GPR i=3  d=0x0000001e
+RD n=GPR i=4  d=0x00000028
+RD n=GPR i=5  d=0x00000032
+RD n=GPR i=20 d=0x00000064

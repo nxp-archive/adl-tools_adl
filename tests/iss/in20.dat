@@ -1,0 +1,101 @@
+#
+# Basic load/increment/store code.
+#
+= aopts
+ -mregnames -mppc64
+= /aopts
+= asm
+    ld  r2,0x1000(r5)
+    add r3,r2,r1
+    std r3,0x0000(r4)
+	ld  r6,0x1004(r5)
+	std r6,0x1004(r4)
+	std r6,0x0000(r9)
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xE8451000	# ld r2,0x1000(r5)
+MD n=Mem ra=0x00000004 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00000008 d=0xF8640000	# std r3,0x0000(r4)
+MD n=Mem ra=0x0000000c d=0xE8C51004	# ld r6,0x1004(r5)
+MD n=Mem ra=0x00000010 d=0xF8C41004	# std r6,0x1004(r4)
+MD n=Mem ra=0x00000014 d=0xF8C90000	# std r6,0x0000(r9)
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=0x0000088800001fff
+RD n=GPR i=4 d=0x00A0000000002000
+RD n=GPR i=5 d=0x0020000000000000
+RD n=GPR i=9 d=0x00A000000000300e
+MD n=Mem ra=0x0020000000001000 d=0xdeadbeef
+MD n=Mem ra=0x0020000000001004 d=0x12345678
+MD n=Mem ra=0x0020000000001008 d=0xb0f0babe
+MD n=Mem ra=0x00A0000000002000 d=0x00000000
+MD n=Mem ra=0x00A0000000002004 d=0x00000000
+MD n=Mem ra=0x00A0000000003004 d=0x00000000
+MD n=Mem ra=0x00A0000000003008 d=0x00000000
+MD n=Mem ra=0x00A000000000300C d=0x00000000
+MD n=Mem ra=0x00A0000000003010 d=0x00000000
+MD n=Mem ra=0x00A0000000003014 d=0x00000000
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xe8451000
+INSTR op=0xe8451000 asm="#1 ld 2,5,1024"
+M n=Mem ea=0x20000000001000 ra=0x20000000001000 t=read d=0xdeadbeef
+M n=Mem ea=0x20000000001004 ra=0x20000000001004 t=read d=0x12345678
+R n=GPR i=2 d=0xdeadbeef12345678
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c620a14
+INSTR op=0x7c620a14 asm="#2 add 3,2,1"
+R n=GPR i=3 d=0xdeadc77712347677
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0xf8640000
+INSTR op=0xf8640000 asm="#3 std 3,4,0"
+M n=Mem ea=0xa0000000002000 ra=0xa0000000002000 t=write d=0xdeadc777
+M n=Mem ea=0xa0000000002004 ra=0xa0000000002004 t=write d=0x12347677
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xe8c51004
+INSTR op=0xe8c51004 asm="#4 ld 6,5,1025"
+M n=Mem ea=0x20000000001004 ra=0x20000000001004 t=read d=0x12345678
+M n=Mem ea=0x20000000001008 ra=0x20000000001008 t=read d=0xb0f0babe
+R n=GPR i=6 d=0x12345678b0f0babe
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0xf8c41004
+INSTR op=0xf8c41004 asm="#5 std 6,4,1025"
+M n=Mem ea=0xa0000000003004 ra=0xa0000000003004 t=write d=0x12345678
+M n=Mem ea=0xa0000000003008 ra=0xa0000000003008 t=write d=0xb0f0babe
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0xf8c90000
+INSTR op=0xf8c90000 asm="#6 std 6,9,0"
+M n=Mem ea=0xa000000000300c ra=0xa000000000300c t=write d=0x00001234
+M n=Mem ea=0xa0000000003010 ra=0xa0000000003010 t=write d=0x5678b0f0
+M n=Mem ea=0xa0000000003014 ra=0xa0000000003014 t=write d=0xbabe0000
+
+I id=7 ea=0x14
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x0
+INSTR op=0x0 asm="#6 halt"
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000088800001fff
+RD n=GPR i=2 d=0xdeadbeef12345678
+RD n=GPR i=3 d=0xdeadc77712347677
+RD n=GPR i=5 d=0x0020000000000000
+
+MD n=Mem ra=0x0020000000001000 d=0xdeadbeef
+MD n=Mem ra=0x0020000000001004 d=0x12345678
+MD n=Mem ra=0x0020000000001008 d=0xb0f0babe
+MD n=Mem ra=0x00A0000000002000 d=0xdeadc777
+MD n=Mem ra=0x00A0000000002004 d=0x12347677
+MD n=Mem ra=0x00A0000000003004 d=0x12345678
+MD n=Mem ra=0x00A0000000003008 d=0xb0f0babe
+MD n=Mem ra=0x00A000000000300c d=0x00001234
+MD n=Mem ra=0x00A0000000003010 d=0x5678b0f0
+MD n=Mem ra=0x00A0000000003014 d=0xbabe0000

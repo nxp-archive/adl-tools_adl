@@ -1,0 +1,145 @@
+
+define (core=P) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define (reg=Foo) {
+    define (field=X) { bits = (0,15); };
+    define (field=Y) { bits = (16,31); };
+  }
+
+  define (reg=Bar) {}
+
+  define (regfile=GPR) {
+    size = 32;
+    define (field=l) { bits = (0,15); };
+    define (field=h) { bits = (16,31); };
+  }
+
+  define (reg=CR) {}
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instr=add) {
+    """
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    """;
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr="stmw") {
+    fields=(OPCD(47),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      int r = RS.uint32();
+      do {
+        Mem(addr,4) = GPR(r);
+        r = r + 1;
+        addr = addr + 4;
+      } while (r <= 31);
+    };
+  }
+
+}

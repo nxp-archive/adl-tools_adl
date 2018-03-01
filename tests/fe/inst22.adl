@@ -1,0 +1,117 @@
+//
+// This makes sure that we sort opcodes, rather than just using them in the order
+// that we get them.  This ensures that when we encode the two instructions
+// in this example, the bcctrl's LK field is encoded last.  Otherwise, there would
+// be a problem because creqv does not have an LK field.
+//
+
+define (arch = minippc) {
+    
+  //
+  // Instruction fields.
+  //
+  
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+  
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+    
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+  
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BH) {
+    """
+    Field used to provide a hint about the target address with respect to whether
+    or not the instruction is a subroutine return.
+    """;
+    bits = (19,20);
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+  
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+  
+  define (instrfield=BT) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  
+  define (instrfield=BA) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BB) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=bcctrl) {
+    fields=(OPCD(19),BO,BI,BH,LK(1),XO(528));
+    action = func() { ; };
+  } 
+  
+  define (instr=creqv) {
+    fields=(OPCD(19),BT,BA,BB,XO(289));
+    action = { ; };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+    
+}
+
+define (core = P) {
+  archs = minippc;
+}

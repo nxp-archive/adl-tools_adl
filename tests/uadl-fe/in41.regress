@@ -1,0 +1,4 @@
+in41.uadl:44: warning: Instruction defined in class 'sfx' but not ADL:  halt
+in41.uadl:62: Unknown helper function used for an interface-function target:  fuz
+in41.uadl:4: warning: Instructions access no data memory
+Could not parse in41.uadl

@@ -1,0 +1,219 @@
+//
+// Tests whether we can encode instructions where opcodes overlap but are not complete
+// supersets or subsets of each other.  For example, isel's secondary opcode spans bits
+// 26-30, srad's secondary opcode spans 21-30, and sradi's spans 21-29.  So, we end up
+// having to first match bits 26-29, because that's the first point of commonality amongst
+// the secondary opcodes.  Then, we must match bit 30 to detect isel, match 21-25 to match
+// srad or sradi, and then match 30 to detect srad.
+//
+
+define (arch = minippc) {
+
+  attrs = (load,store);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=XO_A) {
+    bits = (26,30);
+  }
+
+  define (instrfield=XO_XS) {
+    bits = (21,29);
+  }
+
+  define (instrfield=BO) {
+    """
+Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BC) {
+    bits = (21,25);
+  }
+
+  define (instrfield=BI) {
+    """
+Field used to specify a bit in the Condition Register to be used
+as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+Field used to specify one of the Condition Register fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=isel) {
+    fields=(OPCD(31),RT,RA,RB,BC,XO_A(15));
+    action = {
+      ;
+    };
+  }
+  
+  define (instr=srad) {
+    fields=(OPCD(31),RS,RA,RB,XO(794));
+    action = {
+      ;
+    };
+  }
+
+  define (instr=sradi) {
+    fields=(OPCD(31),RS,RA,RB,XO_XS(413));
+    action = {
+      ;
+    };
+  }
+
+  define (instr=srw) {
+    fields=(OPCD(31),RS,RA,RB,XO(536));
+    action = {
+      ;
+    };
+  }
+
+  define (instr=subfc) {
+    fields = (OPCD(31),RT,RA,RB,XO(8));
+    action = {
+      ;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

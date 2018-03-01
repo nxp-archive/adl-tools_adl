@@ -1,0 +1,84 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CTR"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    The counter register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SI: [16,31] 
+        Signed immediate field for arithmetic operations.
+    
+Instructions:
+  Name:  addis (rank: 100)
+  Width:  32
+  Fields:  OPCD(15) RT RA SI
+  Action:  {
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI ;
+    } else {
+        if ( CTR ) {
+            GPR ( RT ) = GPR ( RA ) ;
+        }
+        GPR ( RT ) = GPR ( RA ) + SI ;
+    }
+}
+  Source Registers:  CTR? GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    15(3c000000):  addis
+-------------------------------
+

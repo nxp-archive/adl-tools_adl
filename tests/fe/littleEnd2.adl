@@ -1,0 +1,95 @@
+//
+// Test new fields syntax with little endian
+//
+
+ define (arch=minippc) {
+  
+ bit_endianness = little;
+ 
+ parallel_execution = 2;
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+
+ define (regfile=D) {
+   size = 32;
+   define(field = A) {
+     bits = (1,4);
+   }
+ }
+
+ define(instrfield=OPCD){
+   pseudo = true;
+   width = variable;
+ }
+ 
+ define(instrfield=A){
+   bits = (32,33);
+ }
+ 
+ define(instrfield=B){
+   bits = ((32,22),(23,4));
+ }  
+ 
+ define(instrfield=GOOD){
+   bits = (31,21); 
+   action =  func(unsigned ddd) { 
+     ThisField = 0;	
+   };
+ } 
+
+
+ define(instr=Foo2) {
+   fields = (OPCD,A, B);
+   width = 32;
+   define(instr=Foo3) {
+    fields = ((bits(31,30),b10),(bits(29),GOOD(13)));
+    alias = Foo2(OPCD(OPCD));
+   }
+   action = {
+	
+   };
+ }
+
+  define(instr=Foo10) {
+   fields = (OPCD,GOOD);
+   width = 32;
+   define(instr=Foo11) {
+    fields = ((bits(31,30),b11),(bits(27,28),GOOD(1,0)),(bits(24),GOOD(10)));
+    alias = Foo10(OPCD(OPCD));
+   }
+   action = {};
+ }
+ 
+ define (instrfield=HighReg) 
+  {
+	prefix = true;    
+	pseudo = true;
+  	indexed = 3; 
+	action =  { 
+	  ThisField = 0;	
+	};
+  }
+
+  define(instr=HighReg) {
+    prefix = true;
+    fields = ((bits(15,10),0x1a),
+	      (bits(9,7),HighReg(2,3)),
+	      (bits(6,4),2),
+	      (bits(3,1),HighReg(2,0)));
+  }  
+
+  define(instr=HighReg2) {
+    prefix = true;
+    fields = ((bits(15,10),0x1a),
+	      (bits(9,7),HighReg(1,3)),
+	      (bits(6,4),2),
+	      (bits(3,1),HighReg(2,0)));
+  }
+}
+ 
+
+define (core=P) {
+  archs=minippc;
+}

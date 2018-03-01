@@ -1,0 +1,209 @@
+======
+Cores:
+======
+Name:  "foo"
+Bit Order:              little endian
+Registers:
+  Name:  "cPC"
+  Usage:  read, written
+  Width:  24
+  Attributes:  cia
+  Reset:  0
+  Documention:
+
+ 24-bit current Program Counter Register 
+  -------------------------------
+  Name:  "nPC"
+  Usage:  read, written
+  Width:  24
+  Attributes:  nia
+  Reset:  0
+  Documention:
+
+ 24-bit next Program Counter Register 
+  -------------------------------
+Current-instruction-address register:  cPC
+Next-instruction-address register:  nPC
+Real-address Mask:
+  Initial mask:  0xffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffff (constant)
+Instruction Fields:
+  B1: [not used] 
+    Pseudo:  1
+    Width:   1
+     1-Bit Field 
+  B2: [not used] 
+    Pseudo:  1
+    Width:   2
+     2-Bit Field 
+  B4: 
+    Pseudo:  1
+    Width:   4
+     4-Bit Field 
+  B4_imp_bits__3_0_: [3,0] 
+    Implements:  B4
+  B8: [not used] 
+    Pseudo:  1
+    Width:   8
+     8-Bit Field 
+  BB_IE: 
+    Pseudo:  1
+    Width:   1
+     BB - IE 
+  BB_IE_imp_bits__23_23_: [23,23] 
+    Implements:  BB_IE
+  BB_SIZE: 
+    Pseudo:  1
+    Width:   2
+     BB - size 
+  BB_SIZE_imp_bits__19_18_: [19,18] 
+    Implements:  BB_SIZE
+  BB_S_D_MEM: 
+    Pseudo:  1
+    Width:   1
+     BB - Source/Destination in Memory 
+  BB_S_D_MEM_imp_bits__20_20_: [20,20] 
+    Implements:  BB_S_D_MEM
+  BB_W: 
+    Pseudo:  1
+    Width:   2
+     BB - w 
+  BB_W_imp_bits__17_16_: [17,16] 
+    Implements:  BB_W
+  Di: 
+    Pseudo:  1
+    Width:   3
+     Data Register Selector 
+  Di_imp_bits__10_8_: [10,8] 
+    Implements:  Di
+  Di_imp_bits__26_24_: [26,24] 
+    Implements:  Di
+  Di_imp_bits__2_0_: [2,0] 
+    Implements:  Di
+  I1: 
+    Pseudo:  1
+    Width:   8
+     Immediate Byte 1 
+  I1_imp_bits__15_8_: [15,8] 
+    Implements:  I1
+  MB_SIGN: 
+    Pseudo:  1
+    Width:   1
+     MB - sign 
+  MB_SIGN_imp_bits__23_23_: [23,23] 
+    Implements:  MB_SIGN
+  MB_SIGN_imp_bits__7_7_: [7,7] 
+    Implements:  MB_SIGN
+  MB_SZ1: 
+    Pseudo:  1
+    Width:   2
+     MB - Size1 
+  MB_SZ1_imp_bits__21_20_: [21,20] 
+    Implements:  MB_SZ1
+  MB_SZ1_imp_bits__5_4_: [5,4] 
+    Implements:  MB_SZ1
+  MB_SZ2: 
+    Pseudo:  1
+    Width:   2
+     MB - Size2 
+  MB_SZ2_imp_bits__19_18_: [19,18] 
+    Implements:  MB_SZ2
+  MB_SZ2_imp_bits__3_2_: [3,2] 
+    Implements:  MB_SZ2
+  R1: 
+    Pseudo:  1
+    Width:   8
+     RB - Extension Byte 1 
+  R1_imp_bits__7_0_: [7,0] 
+    Implements:  R1
+  RB: 
+    Pseudo:  1
+    Width:   7
+     RB - Postbyte 
+  RB_imp_bits__14_8_: [14,8] 
+    Implements:  RB
+  VarInstrOpcode_imp_bits__11_4_: [11,4] [not used] 
+  VarInstrOpcode_imp_bits__15_8_x_7_4_: [15,4] 
+  VarInstrOpcode_imp_bits__15_8_x_7_4_x_3_3_: [15,3] [not used] 
+  VarInstrOpcode_imp_bits__23_16_x_15_12_x_11_11_x_6_6_x_1_0_: [23,11] [6,6] [1,0] [not used] 
+  VarInstrOpcode_imp_bits__23_16_x_15_15_: [23,15] 
+  VarInstrOpcode_imp_bits__39_32_x_31_28_x_27_27_x_22_21_x_7_0_: [39,27] [22,21] [7,0] 
+  VarInstrOpcode_imp_bits__39_32_x_31_28_x_27_27_x_22_22_x_17_16_x_15_8_x_7_0_: [39,27] [22,22] [17,0] 
+  VarInstrOpcode_imp_bits__7_0_: [7,0] [not used] 
+Subinstructions:
+Name:  BB_3
+Fields:  BB_IE BB_S_D_MEM BB_SIZE BB_W I1 B2(3)
+Action:  func ( bits < 1 > & src_in_mem , bits < 1 > & dest_in_mem , bits < 1 > & ie , bits < 3 > & Ds , bits < 3 > & size , bits < 5 > & w , bits < 5 > & o ) {
+}
+Documention:
+
+ Dd in opcode[2:0]; Source in memory; parameter w[4:3] in postbyte, w[2:0],o[4:0] in ext byte i1
+            Destination in memory; Source in opcode[2:0]; parameter w[4:3] in postbyte, w[2:0],o[4:0] in ext byte i1
+        
+-------------------------------
+Name:  RB_R1
+Fields:  RB R1 B1(1)
+Action:  func ( bits < 24 > & addr ) {
+}
+Documention:
+
+ RB - One Extension Byte 
+-------------------------------
+Name:  TR_6
+Fields:  B4(15)
+Action:  {
+}
+Documention:
+
+ TRAP $Fx 
+-------------------------------
+Name:  XB_18
+Fields:  B8(255)
+Action:  func ( uint32_t incdec_size , bits < 1 > & is_imm , bits < 1 > & is_reg , bits < 24 > & addr_or_reg_idx_or_imm ) {
+}
+Documention:
+
+ S+ auto post inc (as in pull) (size of operand/operation - 1, 2, 3, or 4 bytes) 
+-------------------------------
+Instructions:
+  Name:  BFINS_BFEXT_OPR_BB_3_XB_18 (rank: 0)
+  Width:  40
+  Fields:  VarInstrOpcode_imp_bits__39_32_x_31_28_x_27_27_x_22_21_x_7_0_ Di_imp_bits__26_24_ BB_IE_imp_bits__23_23_ BB_S_D_MEM_imp_bits__20_20_ BB_SIZE_imp_bits__19_18_ BB_W_imp_bits__17_16_ I1_imp_bits__15_8_
+  Action:  {
+}
+  -------------------------------
+  Name:  BSR_RB_R1 (rank: 0)
+  Width:  24
+  Fields:  VarInstrOpcode_imp_bits__23_16_x_15_15_ RB_imp_bits__14_8_ R1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  MODx_MB_2_XB_18_XB_18 (rank: 0)
+  Width:  40
+  Fields:  VarInstrOpcode_imp_bits__39_32_x_31_28_x_27_27_x_22_22_x_17_16_x_15_8_x_7_0_ Di_imp_bits__26_24_ MB_SIGN_imp_bits__23_23_ MB_SZ1_imp_bits__21_20_ MB_SZ2_imp_bits__19_18_
+  Action:  {
+}
+  -------------------------------
+  Name:  TRAP_TR_6 (rank: 0)
+  Width:  16
+  Fields:  VarInstrOpcode_imp_bits__15_8_x_7_4_ B4_imp_bits__3_0_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff80000000000000
+    54(1b00000000000000):      Mask:  0x0078400000000000
+      33(0008400000000000):        Mask:  0x0000200000000000
+        1(0000200000000000):          Mask:  0x00000000ff000000
+          255(00000000ff000000):  BFINS_BFEXT_OPR_BB_3_XB_18
+      225(0038400000000000):        Mask:  0x000003ff00000000
+        767(000002ff00000000):          Mask:  0x00000000ff000000
+          255(00000000ff000000):  MODx_MB_2_XB_18_XB_18
+    55(1b80000000000000):      Mask:  0x0070000000000000
+      7(0070000000000000):  TRAP_TR_6
+    67(2180000000000000):  BSR_RB_R1
+-------------------------------
+

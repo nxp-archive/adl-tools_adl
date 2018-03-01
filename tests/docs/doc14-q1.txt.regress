@@ -1,0 +1,67 @@
+
+--------------------------------------------------------------------------------------------------------------------
+| SYNTAX                         | INPUTS               | OUTPUTS              | PARENT_ACTION        | ATTRS      |
+--------------------------------------------------------------------------------------------------------------------
+| add RT, RA, RB                 | GPR(RA), GPR(RB)[mask| CR.CR0/p, GPR(RT),   | {     GPR ( RT ) =   | a1, a2, a3 |
+|                                | 0xffff0000]/p        | XER.CA/p             | GPR ( RA ) + GPR ( RB|            |
+|                                |                      |                      | ) ( 0 , 15 ) ;       |            |
+|                                |                      |                      | setCrField0 ( GPR (  |            |
+|                                |                      |                      | RT ) , 0 ) ;         |            |
+|                                |                      |                      | setXerField ( false ,|            |
+|                                |                      |                      | false , true , 0 ) ; |            |
+|                                |                      |                      | }                    |            |
+| add1 RT, RA, RB                | GPR(RA), GPR(RB)[mask| CR.CR0/p, GPR(RT),   | {     GPR ( RT ) =   | a1, a2, a3 |
+|                                | 0xffff0000]/p        | XER.CA/p             | GPR ( RA ) + GPR ( RB|            |
+|                                |                      |                      | ) ( 0 , 15 ) + 1 ;   |            |
+|                                |                      |                      | setCrField0 ( GPR (  |            |
+|                                |                      |                      | RT ) , 0 ) ;         |            |
+|                                |                      |                      | setXerField ( false ,|            |
+|                                |                      |                      | false , true , 0 ) ; |            |
+|                                |                      |                      | }                    |            |
+| add_family Src1, Src2, Trg,    | GPR(Src1),           | CR.CR0/p, GPR(Trg),  |                      | a1, a2     |
+|                                | GPR(Src2)[mask       | XER.CA/p             |                      |            |
+|                                | 0xffff0000]/p        |                      |                      |            |
+| bit1 RT, RA, RB                | GPR(RA), GPR(RB)     | GPR(RT)              | {     GPR ( RT ) = ( |            |
+|                                |                      |                      | GPR ( RA ) & GPR ( RB|            |
+|                                |                      |                      | ) ) ; }              |            |
+| bit2 RT, RA, RB                | GPR(RA), GPR(RB)     | GPR(RT)              | {     GPR ( RT ) = ( |            |
+|                                |                      |                      | GPR ( RA ) | GPR ( RB|            |
+|                                |                      |                      | ) ) ; }              |            |
+| bit_family Src1, Src2, Trg,    | GPR(Src1), GPR(Src2) | GPR(Trg)             |                      |            |
+| mv1 RT, RA, RB                 | GPR(RA), GPR(RB)[mask| CR.CR0/p, GPR(RT),   | {     GPR ( RT ) =   | a1, a2, a3 |
+|                                | 0xffff0000]/p        | XER.CA/p             | GPR ( RA ) + GPR ( RB|            |
+|                                |                      |                      | ) ( 0 , 15 ) ;       |            |
+|                                |                      |                      | setCrField0 ( GPR (  |            |
+|                                |                      |                      | RT ) , 0 ) ;         |            |
+|                                |                      |                      | setXerField ( false ,|            |
+|                                |                      |                      | false , true , 0 ) ; |            |
+|                                |                      |                      | }                    |            |
+| mv2 RT, RA, RB                 | GPR(RA), GPR(RB)[mask| CR.CR0/p, GPR(RT),   | {     GPR ( RT ) =   | a1, a2     |
+|                                | 0xffff0000]/p        | XER.CA/p             | GPR ( RA ) - GPR ( RB|            |
+|                                |                      |                      | ) ( 0 , 15 ) ;       |            |
+|                                |                      |                      | setCrField0 ( GPR (  |            |
+|                                |                      |                      | RT ) , 0 ) ;         |            |
+|                                |                      |                      | setXerField ( false ,|            |
+|                                |                      |                      | false , true , 0 ) ; |            |
+|                                |                      |                      | }                    |            |
+| mv3 RT, RA, RB                 | GPR(RA), GPR(RB)[mask| CR.CR0/p, GPR(RA),   | {     GPR ( RT ) =   | a1, a2     |
+|                                | 0xffff0000]/p        | GPR(RT), XER.CA/p    | GPR ( RA ) * GPR ( RB|            |
+|                                |                      |                      | ) ( 0 , 15 ) ; GPR ( |            |
+|                                |                      |                      | RA ) = GPR ( RA ) + 1|            |
+|                                |                      |                      | ;     setCrField0 (  |            |
+|                                |                      |                      | GPR ( RT ) , 0 ) ;   |            |
+|                                |                      |                      | setXerField ( false ,|            |
+|                                |                      |                      | false , true , 0 ) ; |            |
+|                                |                      |                      | }                    |            |
+| mv_family Src1, Src2, Trg, Type| GPR(Src1)?,          | CR.CR0/p, GPR(Src1)?,|                      | a1, a2     |
+|                                | GPR(Src2)[mask       | GPR(Trg)?, XER.CA/p  |                      |            |
+|                                | 0xffff0000]/p?       |                      |                      |            |
+| sub RT, RA, RB                 | GPR(RA), GPR(RB)[mask| CR.CR0/p, GPR(RT),   | {     GPR ( RT ) =   | a1, a2     |
+|                                | 0xffff0000]/p        | XER.CA/p             | GPR ( RA ) - GPR ( RB|            |
+|                                |                      |                      | ) ( 0 , 15 ) ;       |            |
+|                                |                      |                      | setCrField0 ( GPR (  |            |
+|                                |                      |                      | RT ) , 0 ) ;         |            |
+|                                |                      |                      | setXerField ( false ,|            |
+|                                |                      |                      | false , true , 0 ) ; |            |
+|                                |                      |                      | }                    |            |
+--------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,90 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ enum RoundMode {
+    ROUND_NEAR = 0
+    ,
+    ROUND_ZERO
+    ,
+    ROUND_PINF
+    ,
+    ROUND_NINF
+    ,
+    RoundModeEos
+} ;
+
+//-------------------------
+
+ enum OpMode {
+    IEEE = 0
+    ,
+    ZEEE
+    ,
+    OpModeEos
+} ;
+
+//-------------------------
+
+typedef unsigned long UL ;
+
+//-------------------------
+
+ OpMode sfpu_setOpMode ( OpMode m ) ;
+
+//-------------------------
+
+ RoundMode sfpu_setRndMode ( RoundMode r ) ;
+
+//-------------------------
+
+ UL sfpu_status (  ) ;
+
+//-------------------------
+
+ UL sfpu_abs ( UL a ) ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR]
+  RT: [6,10] [regfile:  GPR]
+  SI: [16,31] 
+Instructions:
+  Name:  addi (rank: 100)
+  Width:  32
+  Fields:  OPCD(40) RT RA SI
+  Action:  {
+     OpMode x = sfpu_setOpMode ( IEEE ) ;
+     UL y = sfpu_status (  ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    40(a0000000):  addi
+-------------------------------
+

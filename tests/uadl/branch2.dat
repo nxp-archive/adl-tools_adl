@@ -1,0 +1,78 @@
+#
+# Make sure that, for an untaken branch, a breakpoint stops execution before the
+# second instruction in a dual-issue machine is completed.
+#
+CORE n=:P
+
+= asm
+
+L1:
+				addi r1,r1,1
+				addi r2,r2,2
+				addi r3,r3,3
+				addi r4,r4,4
+				beq L1
+				addi r5,r5,5
+				addi r6,r6,6
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000000c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000010 d=0x4182FFF0	#	beq L1
+MD n=Mem ra=0x00000014 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000018 d=0x38C60006	#	addi r6,r6,6
+# </GEN>
+
+RD n=NIA d=0x0
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=1
+R n=GPR i=1 d=0x00000001
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+ITIME t=1
+R n=GPR i=2 d=0x00000002
+CTIME t=5
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38630003
+INSTR op=0x38630003					asm="addi r3,r3,3"
+ITIME t=2
+R n=GPR i=3 d=0x00000003
+CTIME t=6
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38840004
+INSTR op=0x38840004					asm="addi r4,r4,4"
+ITIME t=2
+R n=GPR i=4 d=0x00000004
+CTIME t=6
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x4182fff0
+INSTR op=0x4182fff0					asm="beq+ 0x0000000000000000"
+ITIME t=3
+CTIME t=7
+BP ea=0x10
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000003
+RD n=GPR i=4 d=0x00000004
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0x00000000

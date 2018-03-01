@@ -1,0 +1,40 @@
+//
+// Tests the use of groups: We select everything that has one or more of the
+// listed attributes, then remove them.  We use the no-check version of
+// remove-attribute in order to make things simpler.
+//
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+      
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,30);}
+  define (instrfield = C   ) { bits = (21,30);}
+
+  define (instr = i1) { attrs = (up,down);    fields = (OPCD(1),A,B); action  = {};}
+  define (instr = i2) { attrs = (left,right); fields = (OPCD(2),A,B); action  = {};}
+  define (instr = i3) { attrs = (red,blue);   fields = (OPCD(3),A,B); action  = {};}  
+  define (instr = i4) { attrs = (up);         fields = (OPCD(4),A,B); action  = {}; attrs = red;}  
+  define (instr = i5) { attrs = (right);      fields = (OPCD(5),A,C); action  = {};}  
+  define (instr = i6) { attrs = (blue);       fields = (OPCD(6),A,C); action  = {};}  
+
+  define (group = g1) {
+    has_attrs = (up,down,left,red);
+    type = instr;
+  }
+
+  defmod (instr=*g1) {
+    remove_attrs_nc = (up,down,left,red);
+  }
+
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

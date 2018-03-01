@@ -1,0 +1,55 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Registers:
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [not used] 
+    Pseudo:  1
+    Width:   8
+    Primary opcode.
+    
+  VarInstrOpcode_imp_bits__31_24_: [31,24] 
+  X: 
+    Pseudo:  1
+    Width:   8
+  X_imp_bits__23_16_: [23,16] 
+    Implements:  X
+  Y: 
+    Pseudo:  1
+    Width:   16
+  Y_imp_bits__15_0_: [15,0] 
+    Implements:  Y
+Instructions:
+  Name:  A (rank: 100)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__31_24_ X_imp_bits__23_16_ Y_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  B (rank: 100)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__31_24_ X_imp_bits__23_16_ Y_imp_bits__15_0_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff000000
+    28(1c000000):  B
+    30(1e000000):  A
+-------------------------------
+

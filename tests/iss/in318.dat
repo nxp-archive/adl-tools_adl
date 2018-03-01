@@ -1,0 +1,69 @@
+#
+# Test to make sure that we'll touch the cache, with the decode cache, when we
+# cross a cache line with a misaligned instruction.  In this situation, we don't
+# have an icache in the model, but we explicitly requested this feature via
+# icache_touch=true in the .ttc file, so it's implemented as a call to
+# instr_read32.
+#
+= asm
+
+	addi r1,r1,1
+	se_b L1
+	
+
+	.org 0x7e
+L1:
+	addi r1,r1,1  # Misaligned- should cause an icache miss on 0x80.
+	addi r1,r1,1
+	.long 0x0
+	
+= /asm
+
+= aopts
+
+ -mregnames -mvle
+
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0xE83D s=2	#	se_b L1
+MD n=Mem ra=0x00000006 d=0x00000000	#	.org 0x7e
+MD n=Mem ra=0x0000000a d=0x00000000
+MD n=Mem ra=0x0000000e d=0x00000000
+MD n=Mem ra=0x00000012 d=0x00000000
+MD n=Mem ra=0x00000016 d=0x00000000
+MD n=Mem ra=0x0000007e d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000082 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000086 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+TRACE
+
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+
+I ea=0x0 id=1 tic=1
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x4 id=2 tic=2
+INSTR op=0xe83d					asm="se_b 0x000000000000007a"
+B taken=1 ea=0x7e
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x00003821
+M n=Mem t=ifetch ea=0x80 ra=0x80 d=0x00013821
+
+I ea=0x7e id=3 tic=3
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0x82 id=4 tic=4
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000003
+
+I ea=0x86 id=5 tic=5
+INSTR op=0x00000000					asm="halt "
+RESULTS
+
+RD n=GPR i=1 d=3

@@ -1,0 +1,322 @@
+//
+// Tests that we can encode instructions even if a strict left -> right operand encoding
+// scheme won't work.  The addi instruction defines a value for INVA but ori does not.
+// Instead, the two instructions should be encoded using OPCD_ALU.
+//
+
+define (arch = qe_risc_3_11)
+{
+
+	define (reg=CIA)
+	{
+		"""
+		Current instruction address for fetch.
+		""";
+	    attrs = cia;
+    }
+
+	define (reg=NIA) 
+	{
+		"""
+		Next instruction address for fetch.
+	    """;
+		attrs = nia;
+	}
+	
+	//
+	// Instruction fields.
+	//
+
+	define (instrfield=OPCD) 
+	{
+		"""
+		Primary opcode.
+		""";
+		bits = (0,4);
+	}
+
+	define (instrfield=OPCD_SHRT) 
+	{
+		"""
+		Primary short opcode.
+		""";
+		bits = (0,3);
+	}
+
+	define (instrfield=SW) 
+	{
+		"""
+		Swap option for LD instruction
+		""";
+		bits = (4,4);
+	}
+
+	define (instrfield=SM) 
+	{
+		"""
+		Semaphor option for DMA instruction
+		""";
+		bits = (4,4);
+	}
+
+	define (instrfield=HWS) 
+	{
+		"""
+		High Word Select for ALU immideate instructions
+		""";
+		bits = (4,4);
+	}
+
+	define (instrfield=NOT_J) 
+	{
+		"""
+		Condition NOT for JMP instructions
+		""";
+		bits = (4,4);
+	}
+
+	define (instrfield=OPCD_B5) 
+	{
+		"""
+		Secondary opcode.
+		""";
+		bits = (5,5);
+	}
+
+	define (instrfield=NOP_J) 
+	{
+		"""
+		NOP option in JMP instruction.
+		""";
+		bits = (5,5);
+	}
+
+	define (instrfield=INVA) 
+	{
+		"""
+		INV operand B in ALU instruction.
+		""";
+		bits = (5,5);
+	}
+
+	define (instrfield=OPCD_ALU) 
+	{
+		"""
+		Secondary opcode for ALU instructions.
+		""";
+		bits = (6,8);
+	}
+
+	define (instrfield=UPDATE) 
+	{
+		"""
+		Update option of ALU instruction.
+		""";
+		bits = (9,9);
+	}
+
+	define (instrfield=FLAGS) 
+	{
+		"""
+		CR update for ALU instruction.
+		""";
+		bits = (10,10);
+	}
+
+	define (instrfield=IMM16) 
+	{
+		"""
+		immideate 16.
+		""";
+		bits = (16,31);
+	}
+
+	define (instrfield=IMM8) 
+	{
+		"""
+		immideate 8.
+		""";
+		bits = (24,31);
+	}
+
+    define (instrfield=RSV_B21) 
+	{
+		"""
+		Reserved bit.
+		""";
+		bits = (21,21);
+	}
+
+    define (instrfield=BS) 
+	{
+		"""
+		Bite select bit for ALUIS instructions.
+		""";
+		bits = (22,23);
+	}
+
+    define (instrfield=OPCD_B31) 
+	{
+		"""
+		Secondary opcode.
+		""";
+		bits = (31,31);
+	}
+
+
+	define (instrfield=ML)
+	{
+		"""
+		Mask Left.
+		""";
+		bits = (6,10);
+	}
+	
+	define (instrfield=BIT)
+	{
+		"""
+		Conditional BIT select for JMP instruction.
+		""";
+		bits = (6,10);
+	}
+	
+	define (instrfield=MR)
+	{
+		"""
+		Mask Rigth.
+		""";
+		bits = (26,30);
+	}
+	
+	define (instrfield=RA)
+	{
+		"""
+		RA.
+		""";
+		bits = (11,15);
+	}
+	
+	define (instrfield=RB)
+	{
+		"""
+		RB.
+		""";
+		bits = (16,20);
+	}
+	
+	define (instrfield=RC)
+	{
+		"""
+		RC.
+		""";
+		bits = (21,25);
+	}
+	
+	define (instrfield=INSTR_OFFSET)
+	{
+		"""
+		instruction offset for imm. jmp instructions
+		""";
+		bits = (16,31);
+	}
+	
+    define(instr=merge)
+	{
+		fields=(OPCD(0x19), OPCD_B5(0), ML, RA, RB, RC, MR, OPCD_B31(0) );
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=andi)
+	{
+		fields=(OPCD_SHRT(0xe), HWS, INVA, OPCD_ALU(2), UPDATE, FLAGS, RA, IMM16);
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=ori)
+	{
+		fields=(OPCD_SHRT(0xe), HWS, INVA, OPCD_ALU(3), UPDATE, FLAGS, RA, IMM16);
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=xori)
+	{
+		fields=(OPCD_SHRT(0xe), HWS, INVA, OPCD_ALU(4), UPDATE, FLAGS, RA, IMM16);
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=addi)
+	{
+      fields=(OPCD_SHRT(0xe), HWS, INVA(0), OPCD_ALU(0), UPDATE, FLAGS, RA, IMM16);
+      action =
+		{
+          ;
+		};
+	}
+
+    define(instr=subi)
+	{
+      fields=(OPCD_SHRT(0xe), HWS, INVA(1), OPCD_ALU(0), UPDATE, FLAGS, RA, IMM16);
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=andis)
+	{
+		fields=(OPCD(0x1e), INVA, OPCD_ALU(2), UPDATE, FLAGS, RA, RB, RSV_B21(0), BS, IMM8);
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=oris)
+	{
+		fields=(OPCD(0x1e), INVA, OPCD_ALU(3), UPDATE, FLAGS, RA, RB, RSV_B21(0), BS, IMM8);
+		action =
+		{
+          ;
+		};
+	}
+
+    define(instr=xoris)
+	{
+		fields=(OPCD(0x1e), INVA, OPCD_ALU(4), UPDATE, FLAGS, RA, RB, RSV_B21(0), BS, IMM8);
+		action =
+		{
+          ;
+		};
+	}
+
+	define(instr=jmp)
+	{
+		fields=(OPCD_SHRT(0xb), NOT_J, NOP_J, RA, INSTR_OFFSET);
+		action =
+		{
+          ;
+		};
+	}
+
+}
+
+
+
+define (core = qe_risc) {
+archs = qe_risc_3_11;
+}
+
+
+

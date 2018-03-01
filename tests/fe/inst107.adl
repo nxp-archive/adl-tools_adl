@@ -1,0 +1,254 @@
+//
+// This tests to make sure that we don't mess up the ordering, when instructions
+// include sub-instructions, followed by additional fields.  In this case, TRAP
+// has a trailing B4 field which should occur *after* the B4 used by TR_6 to add
+// an opcode value.
+//
+define (arch = foo) {
+
+    // Least Significant Bit is number 0
+    bit_endianness = little;
+
+    // Current Instruction PC Program Counter Register 
+    define (reg = cPC) {
+        """ 24-bit current Program Counter Register """;
+
+        width = 24;
+
+        attrs = cia;
+
+        // Reset Value
+        reset = 0;
+    }
+
+    // Next Instruction PC Program Counter Register
+    define (reg = nPC) {
+        """ 24-bit next Program Counter Register """;
+
+        width = 24;
+
+        attrs = nia;
+
+        // Reset Value 
+        reset = 0;
+    }
+
+    define (instrfield = Di) {
+        """ Data Register Selector """;
+
+        pseudo = 1;
+        width  = 3;
+    }
+
+    define (instrfield = I1) {
+        """ Immediate Byte 1 """;
+
+        pseudo = 1;
+        width  = 8;
+    }
+
+    define (instrfield = MB_SZ1) {
+        """ MB - Size1 """;
+    
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (instrfield = MB_SZ2) {
+        """ MB - Size2 """;
+
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (instrfield = MB_SIGN) {
+        """ MB - sign """;
+
+        pseudo = 1;
+        width  = 1;
+    }
+
+    //# RB Postbyte Instruction Fields ###############################################
+    define (instrfield = RB) {
+        """ RB - Postbyte """;
+    
+        pseudo = 1;
+        width  = 7;
+    }
+
+    define (instrfield = R1) {
+        """ RB - Extension Byte 1 """;
+
+        pseudo = 1;
+        width  = 8;
+    }
+
+    define (instrfield = BB_IE) {
+        """ BB - IE """;
+
+        pseudo = 1;
+        width  = 1;
+    }
+
+    define (instrfield = BB_W) {
+        """ BB - w """;
+
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (instrfield = BB_SIZE) {
+        """ BB - size """;
+
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (instrfield = BB_S_D_MEM) {
+        """ BB - Source/Destination in Memory """;
+
+        pseudo = 1;
+        width  = 1;
+    }
+
+    define (instrfield = B1) {
+        """ 1-Bit Field """;
+
+        pseudo = 1;
+        width  = 1;
+    }
+
+    define (instrfield = B2) {
+        """ 2-Bit Field """;
+
+        pseudo = 1;
+        width  = 2;
+    }
+
+    define (instrfield = B4) {
+        """ 4-Bit Field """;
+
+        pseudo = 1;
+        width  = 4;
+    }
+
+    define (instrfield = B8) {
+        """ 8-Bit Field """;
+
+        pseudo = 1;
+        width  = 8;
+    }
+
+    define (subinstr = RB_R1) {
+        """ RB - One Extension Byte """;
+
+        fields = (B1(0x1), RB, R1);
+
+        action = func (bits<24> &addr) {
+        };
+    }
+
+    define (instr = BSR) {
+        """ Branch Subroutine """;
+
+        // RB - Postbyte
+        define (subinstrs = RB_Rx) {
+            subs = (RB_R1);
+        }
+
+        fields = (B8(0x21), RB_Rx);
+
+        action = {
+
+        };
+    }
+
+    define (subinstr = TR_6) {
+        """ TRAP $Fx """;
+
+        fields = (B4(0xF));
+
+        action = {};
+    }
+
+    define (instr = TRAP) {
+        """ P2 - TRAP $9x - $Fx """;
+
+        //# TRAP sub-instructions
+        define (subinstrs = TRx) {
+            subs = (TR_6);
+        }
+
+        fields = (B8(0x1B), TRx, B4);
+
+        action = {
+
+        };
+    }
+
+    define (subinstr = XB_18) {
+        """ S+ auto post inc (as in pull) (size of operand/operation - 1, 2, 3, or 4 bytes) """;
+
+        fields = (B8(0xFF));
+
+        action = func (uint32_t incdec_size, bits<1> &is_imm, bits<1> &is_reg, bits<24> &addr_or_reg_idx_or_imm) {
+
+        };
+    }
+
+    define (instr = MODx_MB_2) {
+        """ 
+            Modulo
+            Memory, Memory 
+        """;
+
+        define (subinstrs = SRC1) {
+            subs = (XB_18);
+        }
+
+        define (subinstrs = SRC2) {
+            subs = (XB_18);
+        }
+
+        fields = (B8(0x1B), B4(0x3), B1(0x1), Di, MB_SIGN, B1(1), MB_SZ1, MB_SZ2, B2(0x2), SRC1, SRC2);
+
+        action = {
+
+        };
+    }
+
+    define (subinstr = BB_3) {
+        """ Dd in opcode[2:0]; Source in memory; parameter w[4:3] in postbyte, w[2:0],o[4:0] in ext byte i1
+            Destination in memory; Source in opcode[2:0]; parameter w[4:3] in postbyte, w[2:0],o[4:0] in ext byte i1
+        """;
+
+        fields = (BB_IE, B2(0x3), BB_S_D_MEM, BB_SIZE, BB_W, I1);
+
+        action = func(bits<1> &src_in_mem, bits<1> &dest_in_mem, bits<1> &ie,
+                      bits<3> &Ds, bits<3> &size, bits<5> &w, bits<5> &o) {
+        };
+    }
+
+    define (instr = BFINS_BFEXT_OPR) {
+        """ Insert/Extract Bit Field """;
+
+        // BB - Postbyte
+        define (subinstrs = BB_x) {
+            subs = (BB_3);
+        }
+
+        // XB - Postbyte
+        define (subinstrs = SRC_DEST) {
+            subs = (XB_18);
+        }
+
+        fields = (B8(0x1B), B4(0x0), B1(0x1), Di, BB_x, SRC_DEST);
+
+        action = {
+        };
+    }
+}
+
+define (core = foo) {
+    archs = foo;
+}

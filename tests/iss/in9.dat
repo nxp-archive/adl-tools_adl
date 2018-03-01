@@ -1,0 +1,232 @@
+#
+# Tests 16-bit instructions and aliased register
+# files (VLE and alternate-VRE GPRs).
+#
+# <ASM>
+#
+#       .section .text_vle,"arx"
+#       .switch  -mvle
+#  loop:
+#       se_add  r2,r1
+#       subf.   r3,r4,r3
+#       se_bne  loop
+#         se_mtar r12,r2
+#         e_ori   r12,r16,0
+#         se_mfar r31,r16
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0412 s=2	# se_add r2,r1
+MD n=Mem ra=0x00000002 d=0x7C641851	# subf. r3,r4,r3
+MD n=Mem ra=0x00000006 d=0xE2FD s=2	# se_bne loop
+MD n=Mem ra=0x00000008 d=0x0224 s=2	# se_mtar r12,r2
+MD n=Mem ra=0x0000000a d=0x1A0CD000	# e_ori r12,r16,0
+MD n=Mem ra=0x0000000e d=0x038F s=2	# se_mfar r31,r16
+MD n=Mem ra=0x00000012 d=0x00000000	# halt
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=GPR i=4 d=1
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#1 se_add 1,2"
+R n=GPR i=2 d=0x00000082
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#2 subf. 3,4,3"
+R n=GPR i=3 d=0x00000009
+R n=CR d=0x40000000
+
+I id=3 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#3 se_bc 0,2,253"
+
+I id=4 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#4 se_add 1,2"
+R n=GPR i=2 d=0x000000a0
+
+I id=5 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#5 subf. 3,4,3"
+R n=GPR i=3 d=0x00000008
+R n=CR d=0x40000000
+
+I id=6 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#6 se_bc 0,2,253"
+
+I id=7 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#7 se_add 1,2"
+R n=GPR i=2 d=0x000000be
+
+I id=8 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#8 subf. 3,4,3"
+R n=GPR i=3 d=0x00000007
+R n=CR d=0x40000000
+
+I id=9 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#9 se_bc 0,2,253"
+
+I id=10 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#10 se_add 1,2"
+R n=GPR i=2 d=0x000000dc
+
+I id=11 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#11 subf. 3,4,3"
+R n=GPR i=3 d=0x00000006
+R n=CR d=0x40000000
+
+I id=12 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#12 se_bc 0,2,253"
+
+I id=13 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#13 se_add 1,2"
+R n=GPR i=2 d=0x000000fa
+
+I id=14 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#14 subf. 3,4,3"
+R n=GPR i=3 d=0x00000005
+R n=CR d=0x40000000
+
+I id=15 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#15 se_bc 0,2,253"
+
+I id=16 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#16 se_add 1,2"
+R n=GPR i=2 d=0x00000118
+
+I id=17 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#17 subf. 3,4,3"
+R n=GPR i=3 d=0x00000004
+R n=CR d=0x40000000
+
+I id=18 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#18 se_bc 0,2,253"
+
+I id=19 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#19 se_add 1,2"
+R n=GPR i=2 d=0x00000136
+
+I id=20 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#20 subf. 3,4,3"
+R n=GPR i=3 d=0x00000003
+R n=CR d=0x40000000
+
+I id=21 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#21 se_bc 0,2,253"
+
+I id=22 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#22 se_add 1,2"
+R n=GPR i=2 d=0x00000154
+
+I id=23 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#23 subf. 3,4,3"
+R n=GPR i=3 d=0x00000002
+R n=CR d=0x40000000
+
+I id=24 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#24 se_bc 0,2,253"
+
+I id=25 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#25 se_add 1,2"
+R n=GPR i=2 d=0x00000172
+
+I id=26 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#26 subf. 3,4,3"
+R n=GPR i=3 d=0x00000001
+R n=CR d=0x40000000
+
+I id=27 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#27 se_bc 0,2,253"
+
+I id=28 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4127c64
+INSTR op=0x0412 asm="#28 se_add 1,2"
+R n=GPR i=2 d=0x00000190
+
+I id=29 ea=0x2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851 asm="#29 subf. 3,4,3"
+R n=GPR i=3 d=0x00000000
+R n=CR d=0x20000000
+
+I id=30 ea=0x6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+INSTR op=0xe2fd asm="#30 se_bc 0,2,253"
+
+I id=31 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x2241a0c
+INSTR op=0x0224 asm="#31 se_mtar 2,4"
+R n=GPR i=12 d=0x00000190
+
+I id=32 ea=0xa
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x02241a0c
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xd000038f
+INSTR op=0x1a0cd000 asm="#32 e_ori 16,12,0"
+R n=GPR i=16 d=0x00000190
+
+I id=33 ea=0xe
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xd000038f
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x038f asm="#33 se_mfar 8,15"
+R n=GPR i=31 d=0x00000190
+
+I id=34 ea=0x10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x0
+INSTR op=0x0 asm="#34 halt"
+
+RESULTS
+
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+RD n=GPR i=12 d=400
+RD n=GPR i=16 d=400
+RD n=GPR i=31 d=400

@@ -1,0 +1,43 @@
+
+asm2.o:     file format elf64-powerpc
+asm2.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x0000000000000000
+
+Sections:
+Idx Name          Size      VMA               LMA               File off  Algn
+  0 .text         00000024  0000000000000000  0000000000000000  00000040  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  0000000000000000  0000000000000000  00000064  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  0000000000000000  0000000000000000  00000064  2**0
+                  ALLOC
+  3 .comment      00000029  0000000000000000  0000000000000000  00000064  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+0000000000000000 l    df *ABS*	0000000000000000 t1.c
+0000000000000000 l    d  .text	0000000000000000 .text
+0000000000000000 l    d  .data	0000000000000000 .data
+0000000000000000 l    d  .bss	0000000000000000 .bss
+0000000000000000 l       .text	0000000000000000 gcc2_compiled.
+0000000000000000 l    d  .comment	0000000000000000 .comment
+0000000000000000 g     F .text	0000000000000024 main
+0000000000000000         *UND*	0000000000000000 i
+
+
+
+Disassembly of section .text:
+
+0000000000000000 <main>:
+   0:	94 21 ff f0 	stwu   r1,-16(r1)
+   4:	93 e1 00 0c 	stw    r31,12(r1)
+   8:	7c 3f 0b 78 	mr     r31,r1
+   c:	3d 20 00 00 	lis    r9,0
+			e: RELOC_HI16	i
+  10:	38 00 00 0a 	li     r0,10
+  14:	90 09 00 00 	stw    r0,0(r9)
+			16: RELOC_LO16	i
+  18:	81 61 00 00 	lwz    r11,0(r1)
+  1c:	83 eb ff fc 	lwz    r31,-4(r11)
+  20:	7d 61 5b 78 	mr     r1,r11

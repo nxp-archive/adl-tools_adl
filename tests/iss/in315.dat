@@ -1,0 +1,77 @@
+#
+# Tests the behavior of pending exceptions when other exceptions occur.  In this
+# case, in315.cli injects an external exception when those are disabled, then we
+# generate a system call, then we re-enable external exceptions.  The external
+# exception should then occur at that point.
+#
+= asm
+
+	# External exception is injected during this sequence.
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	sc
+	.long 0x0
+	# System call handler.
+	addi r2,r2,2
+	addi r2,r2,2
+	# Enable external exceptions- the pending exception should occur.
+	wrteei 1
+	addi r2,r2,2
+	addi r2,r2,2
+	.long 0x0
+	# External exception handler.
+	addi r3,r3,3
+	mfspr r31,srr0
+	addi  r31,r31,4
+	mtspr srr0,r31
+	rfi
+	.long 0x0
+	
+= /asm
+
+= aopts
+
+ -mregnames -mbooke
+
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000018 d=0x44000002	#	sc
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000024 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000028 d=0x7C008146	#	wrteei 1
+MD n=Mem ra=0x0000002c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000030 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000034 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000038 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000003c d=0x7FFA02A6	#	mfspr r31,srr0
+MD n=Mem ra=0x00000040 d=0x3BFF0004	#	addi  r31,r31,4
+MD n=Mem ra=0x00000044 d=0x7FFA03A6	#	mtspr srr0,r31
+MD n=Mem ra=0x00000048 d=0x4C000064	#	rfi
+MD n=Mem ra=0x0000004c d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+RD n=IVOR4  d=0x38
+RD n=IVOR8  d=0x20
+
+RD n=MSR    d=0x0
+RD n=NIA    d=0x0
+
+RESULTS
+
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=8
+RD n=GPR i=3 d=3

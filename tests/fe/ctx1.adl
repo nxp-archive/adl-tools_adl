@@ -1,0 +1,91 @@
+//
+// Example of a context.  Should parse correctly.
+//
+
+define (arch=mt) {
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define(regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg=CR) {}
+
+  define (reg=CTR) {}
+
+  define (reg=LR) {}
+
+  define (reg=XER) {}
+
+  define (reg=X) {}
+
+  define (reg=Y) {}
+
+  define (reg=VPIR) {
+    // Test the reseting of context registers- the reset function should take a
+    // context index.
+    reset = func(unsigned index) {
+      VPIR = index;
+    };
+  }
+
+  define (reg=NIA0) { 
+    alias = thread(0).NIA;
+  }
+  define (reg=NIA1) { 
+    alias = thread(1).NIA;
+  }
+
+  define (reg=TACTIVE) { }
+
+  define (reg=FACTIVE) { }
+
+  define (context=thread) {
+    regs=(CIA,NIA,CR,CTR,LR,XER,VPIR,TA0);
+    regfiles = GPR;
+    num_contexts = 2;
+    active = { return TACTIVE; };
+  }
+
+  define (context=foo) {
+    regs=(X,Y);
+    num_contexts = 3;
+    mem_layout = X;
+    mem_omit = Y;
+    active = { return FACTIVE; };
+  }
+
+  define (reg=TA0) { 
+    define (write) {
+      action = func (bits<32> x) {
+        if ( thread(1).TA0 == 0) {
+          CR = x * 2;
+        } else {
+          CR = x;
+        }
+      };
+    }
+  }
+
+
+}
+
+define (core=P) {
+  remove=1;
+}
+
+define (sys=PMT) {
+  type="minippc";
+  define (core = Thread) {
+    archs = (mt);
+  }
+  Thread t0;
+  Thread t1;
+}

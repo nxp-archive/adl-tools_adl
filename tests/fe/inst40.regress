@@ -1,0 +1,41 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  F1: [9,9] 
+    Enums:  '.up' '.down' ( '.up1' '.up2' ) '.down1' ( 'a1' 'a2' 'a3' 'a4' ) 
+    Default value :'.up'
+  F2: [10,10] 
+    Enums:  '.left0' '.right0' ( '.left1' '.left2' '.left3' ) '.right1' 
+    Default value :'.left1'
+  OPCD: [1,5] 
+  R1: [11,16] 
+  R2: [17,22] 
+Instructions:
+  Name:  foo (rank: 100)
+  Width:  24
+  Syntax:  "foo%p%p %f %f":   F1 F2 R1 R2
+  Fields:  OPCD(11) F1 F2 R1 R2
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x7c000000
+    11(2c000000):  foo
+-------------------------------
+

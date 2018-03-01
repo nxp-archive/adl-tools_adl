@@ -1,0 +1,85 @@
+//
+// Make sure that a partial write found after a full write updates the
+// partial-write flag for that target.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      if (RA == 0) {
+        GPR(RT) = 0;
+      } else {
+        GPR(RT)(24,31) = RB;
+      }
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      if (RA == 0) {
+        GPR(RT)(24,31) = RB;
+      } else {
+        GPR(RT) = 0;
+      }
+    };
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

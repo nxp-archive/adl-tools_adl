@@ -1,0 +1,5 @@
+asm48.s: Assembler messages:
+asm48.s:5: Error: RX larger than 2-bit window.
+asm48.s:7: Error: RX larger than 2-bit window.
+asm48.s:7: Error: RT larger than 2-bit window.
+asm48.s:7: Error: 3 assembler rule violations were found.

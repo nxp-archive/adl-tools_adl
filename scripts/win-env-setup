@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Setup an environment for doing a Windows build.  We expect that a clone of the
+# ADL repository is in a subdirectory called 'adl', but this can be modified by
+# specifing the directory on the command-line.
+#
+
+
+base="$1"
+if [ -z $base ]; then
+	 base="adl"
+fi
+
+if [ ! -d ${base} ]; then
+	echo "Are you sure you're in the 'adl work' directory?"
+	echo "I don't see the ${base} directory."
+	exit 1
+fi
+
+if [ ! -d model ]; then
+		mkdir model
+fi
+
+if [ ! -d uadl-model ]; then
+		mkdir uadl-model
+fi
+
+if [ ! -d mt-uadl-model ]; then
+		mkdir mt-uadl-model
+fi
+
+if [ ! -d sysc-model ]; then
+		mkdir sysc-model
+fi
+
+if [ ! -d asm-disasm ]; then
+		mkdir asm-disasm
+fi
+
+if [ ! -d include ]; then
+		mkdir include
+fi
+
+ln -nfs $base/scripts/run-test run-test3
+ln -nfs $base/scripts/update-win-test update-win-test3
+
+cp $base/win_adl_config.h $base/adl_config.h
+cp $base/extras/FlexLexer.h include/FlexLexer.h
+
+for i in asm2.s asm5.s in4.dat; do
+		cp $base/tests/iss/$i .
+		unix2dos $i
+done
+
+for i in mt3.dat; do
+		cp $base/tests/uadl/$i .
+		unix2dos $i
+done

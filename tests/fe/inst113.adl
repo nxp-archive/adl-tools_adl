@@ -1,0 +1,97 @@
+//
+// Example of using parm instrfield
+//
+//
+
+define (arch = MiniPPC) {
+
+  //
+  // Registers.
+  //
+
+  blk = agu;
+
+  attrs = (a1,a2);
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (reloc=R1) {
+    """
+      A relocation defined in ADL.
+    """;
+    value = 3;
+    attrs = a1;
+  } 
+
+  define (reloc=R2) {
+    value = 4;
+    attrs = a2;
+  } 
+
+  define (reloc=R3) {
+    value = 5;
+    offset = 1;
+  } 
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    pseudo = true;
+    width = variable;
+  }
+
+  define (instrfield=XO) {
+    pseudo = true;
+    width = 10;
+  }
+
+  define (instrfield=XP) {
+    width = 3;	
+    parm = true;	
+  }
+
+
+
+  //
+  // Instructions.
+  //
+
+  define (instr=sub) {
+    fields = (OPCD,XO,XP);	
+    define(instr=sub1) {
+      fields = ((bits(0,10),0xF7),(bits(11,20),XO));
+      alias = sub(OPCD(OPCD),XO(XO),XP(7));
+      syntax = ("sub %f",XO);
+    }	
+    action = {};
+  }
+
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

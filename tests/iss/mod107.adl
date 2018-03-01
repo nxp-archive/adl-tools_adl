@@ -1,0 +1,111 @@
+//
+// This takes the packet-op concept and applies it to a harvard architecture.
+// Only the dmem is separate- we use the default global memory for imem.
+//
+
+#include "mod101.adl"
+
+defmod (arch = packet_ops) {
+
+  defmod (instr = lw) {
+    action = {
+
+      var ea = GPR(ra) + simm;
+
+      GPR(rt) = signExtend(DMEM(ea,4),64);
+
+    };
+  }
+
+  defmod (instr = ld) {
+    action = {
+
+      var ea = GPR(ra) + simm;
+
+      GPR(rt) = signExtend(DMEM(ea,8),64);
+
+    };
+  }
+
+  defmod (instr = sw) {
+    action = {
+
+      var ea = GPR(ra) + simm;
+
+      DMEM(ea,4) = GPR(rt);
+
+    };
+  }
+
+  defmod (instr = sd) {
+    action = {
+
+      var ea = GPR(ra) + simm;
+
+      DMEM(ea,8) = GPR(rt);
+
+    };
+  }
+
+  define (instr = lwo) {
+    """
+    Load word form omem.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(12), rt, ra, simm);
+    syntax = ("%i %f,%f(%f)",rt,simm,ra);
+    
+    action = {
+
+      var ea = GPR(ra) + simm;
+
+      GPR(rt) = signExtend(OMEM(ea,4),64);
+
+    };
+  }
+
+  define (instr = swo) {
+    """
+    Store word.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(13), rt, ra, simm);
+    syntax = ("%i %f,%f(%f)",rt,simm,ra);
+    
+    action = {
+
+      var ea = GPR(ra) + simm;
+
+      OMEM(ea,4) = GPR(rt);
+
+    };
+  }
+  
+  
+}
+
+define (arch = harvard) {
+
+    define(mem=DMEM)
+    {
+      size = 0x8000;
+      addr_unit = 1;
+    }
+
+    // Test to make sure that we can have an additional memory.
+    define(mem=OMEM)
+    {
+      size = 0x8000;
+      addr_unit = 1;
+    }    
+  
+}
+
+defmod (core = packet_ops) {
+  archs = (packet_ops, harvard); 
+  instrtables = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+}

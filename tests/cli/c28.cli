@@ -1,0 +1,21 @@
+#
+# Test of using writereg and readreg.  This should trigger write-hook and
+# read-hook side effects.
+#
+
+writereg FOO5 10
+writereg FOO5 20
+setreg   FOO5 30
+
+# Should return 20
+puts "foo5:  [reg FOO5]"
+
+# Should return 2 b/c of two writes to FOO5
+puts "foo5_wr:  [reg FOO5_WR]"
+
+puts "foo5_rd:  [reg FOO5_RD]"
+
+# This should now bump FOO5_RD
+puts "foo5:  [readreg FOO5]"
+
+puts "foo5_rd:  [reg FOO5_RD]"

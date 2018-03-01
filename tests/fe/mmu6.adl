@@ -1,0 +1,94 @@
+//
+// Example shared MMU.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=HDBCR0) {
+    define (field=MMU_ENABLE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+      define (wayfield=x) {
+        bits = 2;
+        reset = 2;
+      }
+      define (wayfield=y) {
+        bits = 3;
+        reset = 1;
+      }
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      test = Compare(TID,PID0,PID1);
+      test = AddrComp(EPN);
+      size = SIZE;
+      realpage = RPN;
+      
+    }
+
+  }
+
+}
+
+define (sys=P) {
+  define (core=Thread) {
+    archs=foo;
+  }
+
+  Thread t0;
+  Thread t1;
+  
+  define (shared) {
+    regs = (PID0,PID1);
+    mmulookups = (TlbCam);
+  }
+}

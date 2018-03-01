@@ -1,0 +1,118 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ unsigned swap32 ( unsigned int d ) ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Memories:
+  Name:  data (1)
+  Size:   512
+  Addressing unit: 1
+  Parent name:  instr
+  Offset:  256
+  Read Hook:
+  func ( unsigned size , bits < size  > d ) {
+    return d . swap_bytes (  ) ;
+}
+  Instruction Read Hook:
+  func ( unsigned size , bits < size  > d ) {
+    return d . swap_bytes (  ) ;
+}
+  Write Hook:
+  func ( unsigned size , bits < size  > d ) {
+    return d . swap_bytes (  ) ;
+}
+
+  Name:  instr (2)
+  Instruction memory
+  Size:   1024
+  Addressing unit: 4
+  Instruction Read Hook:
+  func ( unsigned size , bits < size  > d ) {
+    return d . swap_bytes (  ) ;
+}
+
+Instruction Fields:
+  D: [16,31] 
+        Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [not used] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO: [21,30] [not used] 
+        Extended opcode.
+    
+Instructions:
+  Name:  ilwz (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA D
+  Action:  {
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + d ;
+    GPR ( RT ) = instr ( addr , 4 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  Source Memories:  instr 
+  -------------------------------
+  Name:  lwz (rank: 100)
+  Width:  32
+  Fields:  OPCD(32) RT RA D
+  Action:  {
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + d ;
+    GPR ( RT ) = data ( addr , 4 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  Source Memories:  data 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    31(7c000000):  ilwz
+    32(80000000):  lwz
+-------------------------------
+

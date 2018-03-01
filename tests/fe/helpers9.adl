@@ -1,0 +1,77 @@
+//
+// Tests that we can see helper functions across architectures
+// when using just defines.
+//
+// This adds an extra layer of architecture.
+//
+
+define (arch = minippc) {
+
+  attrs = (unarchitected,indeterminate);
+ 
+ 
+ define (reg=CIA) {
+   """
+    Current instruction address.
+    """;
+    attrs = cia;
+    width = 32;
+ }
+ 
+ define (reg=NIA) {
+   """
+    Next instruction address.
+    """;
+   attrs = nia;
+   width = 32;
+ }
+ 
+}
+
+define (arch = foo) {
+ 
+  void bar() {
+    int i = 10;
+  };
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 64;
+    set_assoc = 8;
+  }
+    
+}
+  
+define (arch = foo_mt) {
+
+  void foo() {
+    int j = 20;
+  };
+
+  // This should be able to see helpers across all architectures.
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 64;
+    set_assoc = 8;
+    miss = func (CacheAccess ca,addr_t a) { 
+      foo();
+      bar();
+    };
+  }
+
+}
+
+define (sys=minippc) {
+  
+  define (core = Thread0) {
+    archs = (minippc,foo,foo_mt);
+    type = "thread";  
+  }
+
+  Thread0 t0;
+
+}

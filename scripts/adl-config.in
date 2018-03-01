@@ -1,0 +1,483 @@
+#!/bin/sh
+
+# this is shamelessly stolen from gnome-config
+
+prefix='@prefix@'
+bprefix='@prefix@/share/binutils'
+cxxpath='@CXXPROG@'
+so_support='@so_support@'
+jit_ok='@JIT_OK@'
+have_lz4='@LZ4_EXISTS@'
+
+usage()
+{
+    cat <<EOF
+Usage: adl-config [OPTION]...
+
+Generic options
+  --version	    output library version information
+  --help	      display this help and exit
+  --prefix      display installation root directory
+  --bprefix     display binutils installation root directory
+  --cxxpath     display the path of the C++ compiler that is used
+
+Compilation support options
+  --basic        Modify flags so that only basic library information is printed, rather than
+                 the full set of libraries required for a standalone ISS.
+  --readers      Add in support for the various file readers that ADL supports.  This is only
+                 relevant with the --basic option, as these are included by default otherwise.
+  --support      Add support libraries, such as option processing.
+  --trans        Modify flags for a transactional ISS.
+  --no-trans     Explicitly disable transactional ISS related logging.
+  --uadl         Modify flags for a uADL model.
+  --uadl-support Add on the uADL support library.
+  --logging      Add on logging libraries (only necessary if using with basic, which does not
+                 normally include these.
+  --framework    Modify flags for just building with ADL framework libraries.
+  --sparse-mem   Modify compile flags to compile a sparse-memory model (the default).
+  --block-mem    Modify comile flags to compile a block-memory model.
+  --rnumber      Include RNumber support.  The option may be negated, e.g. --no-rnumber, so remove
+                 the need for RNumber support.  The default is 'true'.
+  --jit          Modify flags as necessary to support JIT compilation.  This option may be negated.
+		             The default is 'false'.
+  --jit-enabled  Print "true" if JIT support is enabled for this ADL installation, or "false" if not.
+  --dc-enabled   Print "true" if decode-cache support is enabled for this ADL installation, or "false" if not.
+  --so-target    Modify flags as necessary to support the creation of a shared object.
+  --setpfx=path  Specify an alternative install prefix.
+  --setbpfx=path Specify an alternative prefix for binutils files.
+  --depend       print archive dependencies
+  --cflags       print compiler flags for generating an ISS.
+  --as-cflags    print compiler flags for compiling an assembler support library.
+  --libs	       print library linking information
+  --ltlibs	     print libtool library information
+  --lib-paths    print only linking path information
+  --static-libs	 print archive names and any required system libraries
+EOF
+
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+depend=false
+cflags=false
+as_cflags=false
+libs=false
+ltlibs=false
+libpaths=false
+static_libs=false
+print_prefix=false
+print_bprefix=false
+print_cxxpath=false
+basic=false
+readers=false
+support=false
+rnumber=true
+sys_libs=false
+jit=false
+graphite=false
+so_target=false
+trans=false
+uadl=false
+uadlsupport=false
+framework=false
+logging=false
+sparsemem=true
+
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) 
+		optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) 
+		optarg= ;;
+    esac
+
+    case $1 in
+    --setpfx*)
+        prefix=$optarg
+        ;;
+		--setbpfx*)
+				bprefix=$optarg
+				;;
+    --version)
+        echo @PACKAGE_VERSION@
+        exit 0
+        ;;
+    --help)
+        usage 0
+        ;;
+    --basic)
+		basic=true
+		;;
+    --readers)
+		readers=true
+		;;
+    --support)
+		support=true
+		;;
+    --trans)
+		trans=true
+		;;
+    --no-trans)
+		# Allow users to explicitly turn off transactional logging.  Allows them to
+		# get the uADL library (to avoid linking errors in some cases) without
+		# transactional logging.
+		trans=false
+		;;
+    --uadl)
+    # uadl implies transactional ISS
+		trans=true
+		uadl=true
+		;;
+		--uadl-support)
+		uadlsupport=true
+		;;
+	--framework)	
+		framework=true
+		;;
+	--sparse-mem)
+		sparsemem=true
+		;;
+	--block-mem)
+		sparsemem=false
+		;;
+	--logging)	
+		logging=true
+		;;
+    --rnumber)
+		rnumber=true
+		;;
+    --no-rnumber)
+		rnumber=false
+		;;
+		--decode-cache-enabled)
+				# Decode cache is always true in this mode.
+				echo "true"
+		    exit 0
+		;;
+		--jit-enabled)
+		if [ $jit_ok = 1 ]; then
+				echo "true"
+		else
+				echo "false"
+		fi
+		exit 0
+		;;
+    --jit)
+		jit=true
+		;;
+    --no-jit)
+        jit=false
+				;;
+		--graphite)
+				graphite=true
+				;;
+		--no-graphite)
+				graphite=false
+				;;
+    --prefix)
+				print_prefix=true
+				;;
+		--bprefix)
+				print_bprefix=true
+				;;
+    --cxxpath)
+				print_cxxpath=true
+				;;
+    --depend)
+        static_libs=true
+				;;
+    --cflags)
+        cflags=true
+        ;;
+		--as-cflags)
+				as_cflags=true
+				;;
+    --so-target)
+        so_target=true
+        ;;
+    --libs)
+        libpaths=true
+        libs=true
+        sys_libs=true
+        ;;
+    --ltlibs)
+        ltlibs=true
+        sys_libs=true
+        ;;
+    --static-libs)
+        sys_libs=true
+        static_libs=true
+        ;;
+    --lib-paths)
+        libpaths=true
+        ;;
+    *)
+		usage 1
+		;;
+    esac
+    shift
+done
+
+# Convert prefix into an absolute path so that any shared objects can be found later.
+prefix=$(cd $prefix && pwd)
+
+libdir="$prefix/lib@archsuffix@"
+includedir="$prefix/include"
+datadir="$prefix/share"
+
+pldir=@PLASMA_PATH@/lib 
+
+if $rnumber; then
+	RN_CFLAGS="@RNUMBER_CFLAGS@"
+	RN_LIBPATHS="@RNUMBER_LIB_PATHS@"
+	RN_STATIC_LIBS="${libdir}/libIntbvRnum.a @RNUMBER_STATIC_LIBS@"
+	RN_LIBS_ONLY="-lIntbvRnum @RNUMBER_LIBS_ONLY@"
+	RN_LTLIBS="${libdir}/libIntbvRnum.la @RNUMBER_LTLIBS@"
+else
+	RN_CFLAGS=
+	RN_LIBPATHS=
+	RN_STATIC_LIBS=
+	RN_LIBS_ONLY=
+	RN_LTLIBS=
+fi
+
+# We turn off the warning for unused labels because we use labels for various
+# purposes, such as aspects.
+CFLAGS="--std=c++0x -Wno-unused-but-set-variable -Wno-unused-label -I${includedir} ${RN_CFLAGS}"
+SO_CFLAGS="@ADL_SO_CFLAGS@"
+
+# Pthread isn't needed on mingw.
+if [ @MINGW@ = false ]; then
+	SYS_LIBS="-lpthread"
+fi
+
+if [ $framework = false ]; then
+	CFLAGS="${CFLAGS} @EXTRA_CFLAGS@"
+fi
+
+# Tcl related configuration for cli
+if [ @MINGW@ = false ]; then
+	TCL_LIB_PATHS="@TCL_LIB_PATHS@"
+	TCL_LIBS="@TCL_LIBS@"
+	TCL_STATIC_LIBS="@TCL_STATIC_LIBS@"
+	LDL="-ldl"
+fi
+
+if [ $jit = true -a $jit_ok = 0 ]; then
+		echo "JIT support not enabled for this ADL installation."
+		exit 1
+fi
+
+if [ $jit = true ]; then
+		JitWhole="-Wl,--whole-archive"
+		JitEndWhole="-Wl,--no-whole-archive"
+fi
+
+BASE_STATIC_LIBS="${libdir}/libAdlIssSupport.a ${libdir}/libAdlLogUsage.a ${JitWhole} ${libdir}/libIntbv.a ${RN_STATIC_LIBS} ${JitEndWhole} "
+BASE_LIBS="-lAdlIssSupport -lAdlLogUsage -lIntbv ${RN_LIBS_ONLY} ${LDL} "
+BASE_LTLIBS="${libdir}/libAdlIssSupport.la ${libdir}/libAdlLogUsage.la ${libdir}/libIntbv.la ${RN_LTLIBS} "
+BASE_LIBPATHS="-L${libdir} -Wl,-R${libdir} ${RN_LIBPATHS}"
+
+# If the user has explicitly requested logging, or implicitly requested it by not wanting just a basic
+# model, then we add on the appropriate logging libraries.
+need_boost=false
+if [ $logging = true -o $basic = false ]; then
+	need_boost=true
+  if $trans; then
+    # Transactional libraries.
+    LOG_STATIC_LIBS="${libdir}/libAdlIssTransLogging.a"
+    LOG_LIBS="-lAdlIssTransLogging"
+    LOG_LTLIBS="${libdir}/libAdlIssTransLogging.la"
+  else
+    # Non-transactional libraries.
+    LOG_STATIC_LIBS="${libdir}/libAdlIssLogging.a"
+    LOG_LIBS="-lAdlIssLogging"
+    LOG_LTLIBS="${libdir}/libAdlIssLogging.la"
+  fi
+fi
+
+# If we're not just doing the basic libraries, then add on the support libraries.
+if [ $basic = false ]; then
+	support=true
+  need_boost=true
+fi
+
+# IF we're in basic mode, and readers are requested, then add on those libraries.
+if [ $basic = true -a $readers = true ]; then
+  support=true
+  need_boost=true
+fi
+
+if [ $uadl = true ]; then
+	need_boost=true
+  # add uadl libraries
+  BASE_STATIC_LIBS="${libdir}/libuadl.a ${BASE_STATIC_LIBS} -l:libboost_context.a"
+  BASE_LIBS="-luadl ${BASE_LIBS} -lboost_context"
+  BASE_LTLIBS="${libdir}/libuadl.la ${BASE_LTLIBS} -lboost_context"
+fi
+
+if [ $uadlsupport = true ]; then
+  # add uadl libraries
+  BASE_STATIC_LIBS="${libdir}/libuadl.a ${libdir}/libuadlSupport.a ${BASE_STATIC_LIBS}"
+  BASE_LIBS="-luadl -luadlSupport ${BASE_LIBS}"
+  BASE_LTLIBS="${libdir}/libuadl.la ${libdir}/libuadlSupport.la ${BASE_LTLIBS}"
+fi
+
+if $support; then
+  # add support libraries
+  BASE_STATIC_LIBS="${libdir}/libAdlSupport.a ${BASE_STATIC_LIBS}"
+  BASE_LIBS="-lAdlSupport ${BASE_LIBS}"
+  BASE_LTLIBS="${libdir}/libAdlSupport.la ${BASE_LTLIBS}"
+fi
+
+if [ $have_lz4 = true ]; then
+		LZ4_STATIC_LIBS="${libdir}/liblz4stream.a @LZ4_STATIC_LDFLAGS@"
+		LZ4_LIBS="-llz4stream @LZ4_LDFLAGS@"
+		LZ4_LTLIBS="${libdir}/liblz4stream.la"
+fi
+
+if [ $basic = true -a $readers = true ]; then
+  BASE_STATIC_LIBS="${libdir}/libAdlReaders.a ${libdir}/libAdlParsing.a ${LZ4_STATIC_LIBS} ${BASE_STATIC_LIBS}"
+  BASE_LIBS="-lAdlReaders -lAdlParsing ${LZ4_LIBS} ${BASE_LIBS}"
+  BASE_LTLIBS="${libdir}/libAdlReaders.la ${libdir}/libAdlParsing.la ${LZ4_LTLIBS} ${BASE_LTLIBS}"
+fi
+
+# I'm just always adding on the Boost path now, since we use this more and more.
+CFLAGS="${CFLAGS} @PLASMA_CFLAGS@ @LZ4_CFLAGS@ @BOOST_CPPFLAGS@"
+if [ $need_boost = true ]; then
+  BASE_STATIC_LIBS="${BASE_STATIC_LIBS} ${LDL}  @BOOST_LDFLAGS@ -l:libboost_thread.a -l:libboost_system.a -l:libboost_regex.a -l:libboost_atomic.a -l:libboost_iostreams.a -lrt"
+  BASE_LIBS="${BASE_LIBS} @BOOST_LDFLAGS@ -lboost_thread -lboost_system -lboost_regex -lboost_atomic -lboost_iostreams -lrt"
+  BASE_LTLIBS="${BASE_LTLIBS} ${LDL}  @BOOST_LDFLAGS@ -lboost_thread -lboost_system -lboost_regex -lboost_atomic -lboost_iostreams -lrt"
+fi
+
+if $jit; then
+	CFLAGS="${CFLAGS}"
+  BASE_STATIC_LIBS="${libdir}/libAdlIssJitSupport.a ${BASE_STATIC_LIBS} @LLVM_LDFLAGS@ @LLVM_LIBS@ @BOOST_LDFLAGS@ -l:libboost_system.a"
+  BASE_LIBS="-lAdlIssJitSupport ${BASE_LIBS} @LLVM_LDFLAGS@ @LLVM_LIBS@ @BOOST_LDFLAGS@ -lboost_system"
+  BASE_LTLIBS="${libdir}/libAdlIssJitSupport.la ${BASE_LTLIBS} @LLVM_LDFLAGS@ @LLVM_LIBS@ @BOOST_LDFLAGS@ -lboost_system"
+fi
+
+if [ @MINGW@ = false ]; then
+	AR_SCRIPT="${libdir}/libAdlScript.a"
+	LIB_SCRIPT="-lAdlScript"
+	LA_SCRIPT="${libdir}/libAdlScript.la"
+fi
+
+if $graphite; then
+	GraphiteStaticLib="${libdir}/libAdlGraphite.a"
+	GraphiteLib="-lAdlGraphite"
+	GraphiteLtLib="${libdir}/libAdlGraphite.la"
+fi
+
+EXE_STATIC_LIBS="-Wl,--whole-archive ${libdir}/libAdlIssExec.a ${GraphiteStaticLib} ${pldir}/libltdl.a ${LOG_STATIC_LIBS} ${AR_SCRIPT} ${TCL_LIB_PATHS} ${TCL_STATIC_LIBS} -lz -Wl,--no-whole-archive ${libdir}/libAdlReaders.a ${libdir}/libAdlParsing.a ${LZ4_STATIC_LIBS} ${BASE_STATIC_LIBS}"
+EXE_LIBS="-Wl,--whole-archive -lAdlIssExec ${GraphiteLib}  -L${pldir} -Wl,-R${pldir} -lltdl ${LOG_LIBS} ${LIB_SCRIPT} ${TCL_LIBS} -Wl,--no-whole-archive -lAdlReaders -lAdlParsing ${LZ4_LIBS} ${BASE_LIBS}"
+EXE_LTLIBS="${libdir}/libAdlIssExec.la ${GraphiteLtLib} ${pldir}/libltdl.la ${LOG_LTLIBS} ${LA_SCRIPT} ${libdir}/libAdlReaders.la ${libdir}/libAdlParsing.la ${LZ4_LTLIBS} ${BASE_LTLIBS}"
+EXE_LIBPATHS="${TCL_LIB_PATHS} ${BASE_LIBPATHS}"
+
+
+if [ $uadl != true -a $so_target != true ]; then
+  # Add the adl library which contains main if we want ADL libraries but we're not creating a shared object.
+  EXE_STATIC_LIBS="${libdir}/libAdlIssMain.a ${EXE_STATIC_LIBS}"
+  EXE_LIBS="-lAdlIssMain ${EXE_LIBS}"
+  EXE_LTLIBS="${libdir}/libAdlIssMain.la ${EXE_LTLIBS}"
+elif [ $uadl = true -a $so_target != true ]; then
+  # Add the uadl library which contains main if we want uADL libraries but we're not creating a shared object.
+  EXE_STATIC_LIBS="${libdir}/libuadlMain.a ${libdir}/libuadlSupport.a ${EXE_STATIC_LIBS}"
+  EXE_LIBS="-luadlMain -luadlSupport ${EXE_LIBS}"
+  EXE_LTLIBS="${libdir}/libuadlMain.la ${libdir}/libuadlSupport.la ${EXE_LTLIBS}"
+fi
+
+if $print_prefix; then
+    echo $prefix
+    exit 0
+fi
+
+if $print_bprefix; then
+    echo $bprefix
+    exit 0
+fi
+
+if $print_cxxpath; then
+		echo $cxxpath
+		exit 0
+fi
+
+all_flags=
+
+if $cflags; then
+    all_flags="$all_flags $CFLAGS"
+	if $so_target; then
+		all_flags="$all_flags $SO_CFLAGS"
+	fi
+	if [ $sparsemem = false ]; then
+		all_flags="$all_flags -DUseBlockMemory"
+	fi
+fi
+
+if $as_cflags; then
+		all_flags="$all_flags -I${bprefix} -I${bprefix}/include -I${bprefix}/bfd -I${bprefix}/gas -I${bprefix}/gas/config"
+fi
+
+if $libpaths; then
+	if [ $basic = false ]; then
+		all_flags="$all_flags $EXE_LIBPATHS"
+	else
+		all_flags="$all_flags $BASE_LIBPATHS"		
+	fi
+	if [ $jit = true -o $so_support = false ]; then
+		all_flags="$all_flags -export-dynamic"
+	fi
+fi
+
+if $libs; then
+	if $basic; then
+		all_flags="$all_flags $BASE_LIBS"
+		if [ $logging ]; then
+			all_flags="$LOG_LIBS $all_flags"
+		fi
+	else
+		all_flags="$all_flags $EXE_LIBS"
+	fi
+fi
+
+if $ltlibs; then
+	if $basic; then
+		all_flags="$all_flags $BASE_LTLIBS"
+		if [ $logging ]; then
+			all_flags=" $LOG_LTLIBS $all_flags"
+		fi
+	else
+		all_flags="$all_flags $EXE_LTLIBS"
+	fi
+fi
+
+if $static_libs; then
+	if $basic; then
+		all_flags="$all_flags $BASE_STATIC_LIBS"
+		if [ $logging ]; then
+			all_flags="$LOG_STATIC_LIBS $all_flags"
+		fi
+	else
+		all_flags="$all_flags $EXE_STATIC_LIBS"
+	fi
+	if [ $jit = true -o $so_support = false ]; then
+		all_flags="$all_flags -export-dynamic"
+	fi
+fi
+
+if $sys_libs; then
+	if [ $basic = false ]; then
+		all_flags="$all_flags $SYS_LIBS"
+	fi
+fi
+
+if test -z "$all_flags" || test "x$all_flags" = "x "; then
+    usage 1
+fi
+
+echo $all_flags
+
+exit 0

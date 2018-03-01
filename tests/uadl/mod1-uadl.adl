@@ -1,0 +1,89 @@
+//
+// This just adds a bit more stuff to the basic mod1.adl model in order to
+// test pre and post-cycle hooks.
+//
+
+#define UADL
+
+#import "mod1.adl"
+
+define (arch=cycle_count) {
+
+  define (reg=PRE_CYCLE_COUNT) {}
+  define (reg=POST_CYCLE_COUNT) {}
+
+  pre_cycle = {
+    PRE_CYCLE_COUNT = PRE_CYCLE_COUNT + 1;
+  };
+
+  post_cycle = {
+    POST_CYCLE_COUNT = POST_CYCLE_COUNT + 1;
+  };
+
+  int foobar() { return 0; };
+
+  defmod (instr=stw) {
+    action = {
+      int dummy = foobar();
+      if (dummy) {
+        // Just here so that the parser thinks this instruction could halt.  We
+        // want to make sure that instructions which access memory *and* halt
+        // don't cause any problems.
+        halt();
+      }
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  define (instr=divw) {
+    fields=(OPCD(31),RT,RA,RB,XO(491),RC(0));
+    action = {
+      var dividend = GPR(RA);
+      var divisor = GPR(RB);
+      bool u = ((GPR(RA) == 0x80000000) && (GPR(RB) == 0xffffffff)) || (GPR(RB) == 0);
+      var quotient = (u) ? 0 : signedDivide (dividend,divisor);
+      GPR(RT) = quotient;
+    };
+  }   
+
+  define (instr="divw.") {
+    fields=(OPCD(31),RT,RA,RB,XO(491),RC(1));
+    action = {
+      var dividend = GPR(RA);
+      var divisor = GPR(RB);
+      bool u = ((GPR(RA) == 0x80000000) && (GPR(RB) == 0xffffffff)) || (GPR(RB) == 0);
+      var quotient = (u) ? 0 : signedDivide (dividend,divisor);
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  //e_lmvsprw (maps to crnor in a PPC assembler/
+  define (instr=e_lmvsprw) {
+    fields=(OPCD(19),RT,RA,RB,XO(33));
+
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + RB;
+      
+      CR =  Mem(ea,4);
+      ea += 4;
+
+      LR = Mem(ea,4);
+      ea += 4;
+
+      CTR = Mem(ea,4);
+      ea += 4;
+
+      XER = Mem(ea,4);
+    };
+  }
+
+}
+
+
+define (core = P) {
+
+  archs = (MiniPPC,cycle_count);
+}

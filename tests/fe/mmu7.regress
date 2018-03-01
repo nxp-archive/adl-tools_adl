@@ -1,0 +1,6 @@
+mmu7.adl:107: warning: Item 'y' was redefined.
+mmu7.adl:66: warning:     Previous definition was here.
+mmu7.adl:54: Unknown lookup name in argument to MMU function:  TlbFoo
+mmu7.adl:54: Unknown lookup name in argument to MMU function:  TlbFoo
+mmu7.adl:125: Shared mmu lookup 'TlbCam' is not identical across items in this system.
+mmu7.adl:125: Unknown shared mmu lookup TlbFoo

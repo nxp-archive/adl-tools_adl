@@ -1,0 +1,8 @@
+Unable to install callback on register FOO (ignored).
+Unable to install read callback on register FOO (ignored).
+HID0:  New value is 0x3
+HID1:  New value is 0x4
+HID0:  Reading value of 0x3
+HID1:  Reading value of 0x4
+Instructions executed:  9
+

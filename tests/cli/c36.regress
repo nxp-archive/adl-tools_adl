@@ -1,0 +1,8 @@
+Executing lwz sources:  GPR0  targets:  GPR2
+Executing addi sources:  GPR10  targets:  GPR10
+Executing add sources:  GPR2 GPR1  targets:  GPR3
+Executing addic. sources:  GPR5 XER  targets:  CR GPR5 XER
+Executing stw sources:  GPR4 GPR3  targets: 
+Executing stw sources:  GPR6 GPR3  targets: 
+Executing halt sources:   targets: 
+Simulation halted at address: 0x000000000000011c

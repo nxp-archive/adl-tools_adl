@@ -1,0 +1,434 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+
+
+.. _adl-internal-target-1:
+Overview
+--------
+
+Example documentation string- place overview information here.
+
+
+
+.. _adl-internal-target-2:
+Registers
+---------
+
+
+.. _adl-internal-target-3:
+*CIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Current instruction address.
+  
+  
+
+
+.. _adl-internal-target-4:
+*CR*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The condition register.
+  
+  
+
+
+.. _adl-internal-target-5:
+*CTR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CTR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The counter register.
+  
+  
+
+
+.. _adl-internal-target-6:
+*HID0*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td width="3.125%" class="field">MIXD</td>
+   <td colspan="2" width="96.875%" class="reserved" title="Reserved"></td>
+   </tr>
+   <tr>
+   <td class="singleodd">0</td>
+   <td class="lefteven">1</td><td class="righteven">31</td>
+   </tr>
+   </table>
+   
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - MIXD
+       -  [0] 
+       - 
+
+
+.. _adl-internal-target-7:
+*HID1*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">HID1</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-8:
+*LR*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">LR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The link register.
+  
+  
+
+
+.. _adl-internal-target-9:
+*NIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">NIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Next instruction address.
+  
+  
+
+
+.. _adl-internal-target-10:
+*PRGINTR*
+`````````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">PRGINTR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-11:
+*XER*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td width="3.125%" class="field">SO</td>
+   <td width="3.125%" class="field">OV</td>
+   <td width="3.125%" class="field">CA</td>
+   <td colspan="2" width="90.625%" class="reserved" title="Reserved"></td>
+   </tr>
+   <tr>
+   <td class="singleodd">0</td>
+   <td class="singleeven">1</td>
+   <td class="singleodd">2</td>
+   <td class="lefteven">3</td><td class="righteven">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  The overflow and carry register.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - SO
+       -  [0] 
+       - 
+     * - OV
+       -  [1] 
+       - 
+     * - CA
+       -  [2] 
+       - 
+
+
+.. _adl-internal-target-12:
+Register Files
+--------------
+
+
+.. _adl-internal-target-13:
+*GPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">GPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  32
+
+Description:
+
+  General purpose registers.
+  
+  
+
+
+.. _adl-internal-target-14:
+*SPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">SPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  1024
+
+Description:
+
+  Special purpose registers.
+  
+  
+
+.. list-table:: Constituent Registers
+   :class: sparsecontents
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Index
+     - Register Usage
+   * - 1
+     - `XER <#adl-internal-target-11>`__
+   * - 8
+     - `LR <#adl-internal-target-8>`__
+   * - 9
+     - `CTR <#adl-internal-target-5>`__
+   * - 50
+     - `HID0 <#adl-internal-target-6>`__
+   * - 51
+     - `HID1 <#adl-internal-target-7>`__
+   
+
+.. _adl-internal-target-15:
+*rGPR*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">rGPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  16
+
+Description:
+
+  Upper and lower halves of GPR for use by Mixed instructions.
+  
+  
+
+
+This is a pseudo register.  It does not represent an actual storage element.
+
+On a read: Action is aliased to register file **GPR_**.
+
+.. raw:: html
+
+   <table class="indexmapping">
+   <tr>
+     <th>Source Index</th>
+     <th>Target Index</th>
+   </tr>
+   <tr><td>0</td><td>0</td></tr>
+   <tr><td>1</td><td>1</td></tr>
+   <tr><td>2</td><td>2</td></tr>
+   <tr><td>3</td><td>3</td></tr>
+   <tr><td>4</td><td>4</td></tr>
+   <tr><td>5</td><td>5</td></tr>
+   <tr><td>6</td><td>6</td></tr>
+   <tr><td>7</td><td>7</td></tr>
+   <tr><td>8</td><td>24</td></tr>
+   <tr><td>9</td><td>25</td></tr>
+   <tr><td>10</td><td>26</td></tr>
+   <tr><td>11</td><td>27</td></tr>
+   <tr><td>12</td><td>28</td></tr>
+   <tr><td>13</td><td>29</td></tr>
+   <tr><td>14</td><td>30</td></tr>
+   <tr><td>15</td><td>31</td></tr>
+   </table>
+   
+On a write: Action is aliased to register file **GPR_**.
+
+.. raw:: html
+
+   <table class="indexmapping">
+   <tr>
+     <th>Source Index</th>
+     <th>Target Index</th>
+   </tr>
+   <tr><td>0</td><td>0</td></tr>
+   <tr><td>1</td><td>1</td></tr>
+   <tr><td>2</td><td>2</td></tr>
+   <tr><td>3</td><td>3</td></tr>
+   <tr><td>4</td><td>4</td></tr>
+   <tr><td>5</td><td>5</td></tr>
+   <tr><td>6</td><td>6</td></tr>
+   <tr><td>7</td><td>7</td></tr>
+   <tr><td>8</td><td>24</td></tr>
+   <tr><td>9</td><td>25</td></tr>
+   <tr><td>10</td><td>26</td></tr>
+   <tr><td>11</td><td>27</td></tr>
+   <tr><td>12</td><td>28</td></tr>
+   <tr><td>13</td><td>29</td></tr>
+   <tr><td>14</td><td>30</td></tr>
+   <tr><td>15</td><td>31</td></tr>
+   </table>
+   
+
+.. _adl-internal-target-16:
+Core-level Hook Functions
+-------------------------
+
+Action taken on a decode miss:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t ea , unsigned  ) {
+        raiseException ( Program ) ;
+    }
+    
+Predicate for determing the currently-active instruction table:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+        if ( HID0 . MIXD == 0 ) {
+            return other ;
+        } else {
+            return mixed ;
+        }
+    }
+    

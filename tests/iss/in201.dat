@@ -1,0 +1,42 @@
+
+= asm
+
+	crorc 4,24,6
+	crorc 9,11,13
+	crorc 31,9,0
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4C983342	#	crorc 4,24,6
+MD n=Mem ra=0x00000004 d=0x4D2B6B42	#	crorc 9,11,13
+MD n=Mem ra=0x00000008 d=0x4FE90342	#	crorc 31,9,0
+# </GEN>
+
+RD n=NIA     d=0x0
+
+RD n=CR d=0x1e28101e
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x4c983342                                     asm="crorc 4,24,6"
+R n=CR d=0x1628101e
+
+I ea=0x4 id=2
+INSTR op=0x4d2b6b42                                     asm="crorc 9,11,13"
+R n=CR d=0x1668101e
+
+I ea=0x8 id=3
+INSTR op=0x4fe90342                                     asm="crorc 31,9,0"
+R n=CR d=0x1668101f
+
+I ea=0xc id=4
+INSTR op=0x00                                   asm="halt "
+
+
+RESULTS
+
+RD n=CR d=0x1668101f

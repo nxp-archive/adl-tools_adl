@@ -1,0 +1,201 @@
+// Incorrect instrfield syntax 
+
+
+define (arch = sc3400){
+
+
+define (mem=DMEM)    
+{
+	size= 0x2000;	// size of memory in bytes
+	addr_unit=1;	
+}
+	
+define (mem=IMEM)
+{
+	size=0x1000;
+	addr_unit=1;
+	instr_mem = true;
+} 
+
+
+define (reg=PC)
+{  
+  attrs = cia;
+}
+
+define (reg=NIA) {
+attrs = nia;
+}
+
+
+define (regfile=D) 
+{
+	size = 16;
+	width = 40;
+	prefix = d;
+}
+
+define (instrfield=TT)  
+{
+	width = 4;	// the MSB for High Register
+	pseudo = true;
+}
+
+
+define (instrfield=FFF)  
+{
+	width = 4;	// the MSB for High Register
+	type = regfile;	
+	ref = D;
+	pseudo = true;
+	syntax = ("a %f",FFF);
+}
+
+define (instrfield=DaDa) { 
+	width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    	ref = D; 
+	pseudo = true;
+	
+    	define(instrfield=jj) { 
+		bits = (0,1); 
+		table = ((1,1),(3,3),(5,5),(7,7)); 
+    	} 
+    
+    fields = (3,jj(1),2,jj(0));		// ThisField will hold 8 bits, 2 pairs of the same field
+    
+    define(instrfield=Da) {
+    	width = 4;
+        fields = (0,3);		// ! (3,0)  
+    }	
+    define(instrfield=Db) { 
+    	width = 4;
+        fields = (4,7);  	// ! (7,4)
+    }	
+    syntax = ("%i %f",Da);
+
+}
+
+define (instrfield=DaDc) { 
+	width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    	ref = D; 
+	pseudo = true;
+	
+    	define(instrfield=jj) { 
+		bits = (0,1); 
+		table = ((1,1),(3,3),(5,5),(7,7)); 
+    	} 
+    
+    fields = (3,jj(1),2,jj(0));		// ThisField will hold 8 bits, 2 pairs of the same field
+    
+    syntax = ("%f,%f",jj);
+
+}
+define (instrfield=DaDk) { 
+	width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    	ref = D; 
+	pseudo = true;
+	
+    	define(instrfield=jj) { 
+		bits = (0,1); 
+		table = ((1,1),(3,3),(5,5),(7,7)); 
+    	} 
+    
+    fields = (3,jj(1),2,jj(0));		// ThisField will hold 8 bits, 2 pairs of the same field
+    
+    define(instrfield=Da) {
+    	width = 4;
+        fields = (0,3);		// ! (3,0)  
+    }	
+    define(instrfield=Db) { 
+    	width = 4;
+        fields = (4,7);  	// ! (7,4)
+    }	
+    syntax = ("%f,%f",Da,Dd);
+
+}
+define (instrfield=DaDh) { 
+	width = 4; // number of  input  bits 
+   	size = 8; // number of  output bits
+    	ref = D; 
+	pseudo = true;
+	
+    	define(instrfield=jj) { 
+		bits = (0,1); 
+		table = ((1,1),(3,3),(5,5),(7,7)); 
+    	} 
+    
+    fields = (3,jj(1),2,jj(0));		// ThisField will hold 8 bits, 2 pairs of the same field
+    
+    define(instrfield=Da) {
+    	width = 4;
+        fields = (0,3);		// ! (3,0)  
+    }	
+    define(instrfield=Db) { 
+    	width = 4;
+        fields = (4,7);  	// ! (7,4)
+    }	
+    syntax = ("%f,%f",TT,Da,Db(TT));
+
+}
+
+define (instrfield = DaDb) 
+{ 
+	width = 7; // number of  input  bits 
+   	size = 8; // number of  output bits
+    	ref = D; 
+	pseudo = true;
+	
+    	define (instrfield=JJJJJ) 
+	{ 
+		bits = (0,4); 
+		table = ((0,4),(0,5),(0,6),(0,7), 
+		 	(1,4),(1,5),(1,6),(1,7), 
+		 	(2,4),(2,5),(2,6),(2,7),
+		 	(3,4),(3,5),(3,6),(3,7), 
+		 	(0,0),(0,1),(0,2),(0,3),
+		 	(4,4),(4,5),(4,6),(4,7),
+		 	(1,2),(1,3),(5,6),(5,7),
+		 	(2,2),(2,3),(6,6),(6,7)); 
+ 	}
+	
+	fields = (6,JJJJJ(1),5,JJJJJ(0));
+    	
+   	define(instrfield=Da) { // This nested field refers to the computed value of DaDb
+        	width = 4;
+		fields = (0,3);  // ! changed from bits (0,3) of ThisField.
+   	}	
+   	define(instrfield=Db) {
+		width=4;
+		fields = (4,7);	  // ! changed from (7,4)
+   	}	
+	syntax = ("%p, %f", Da,Db);	
+}
+
+
+define(instr=add) 
+{ 
+	width = 24; 
+	fields =((bits(0,4), DaDb(0,4)),  
+               	(bits(5,6), b10),  
+               	(bits(7,9), FFF(0,2)),
+               	(bits(10,13), b1011),
+               	(bits(14), reserved),  		// for serial grouping 
+		(bits(15), b0),
+		(bits(16), FFF(3)),		// High Register to op3
+		(bits(17,18), DaDb(5,6)),  	// bit 18 --> DaDb(6) - op2, bit 17 --> DaDb(5) - op1   
+		(bits(19,23), 0)); 
+     		action = { ;} ;
+} 
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (other);
+}

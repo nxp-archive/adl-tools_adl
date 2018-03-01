@@ -1,0 +1,36 @@
+//
+// Tests using a list as a name within a define.
+//
+define (arch = minippc) {
+
+  define (reg = a) {
+    width = 64;
+  }
+  define (reg = b) {
+    width = 64;
+  }
+  define (reg = c) {
+    width = 64;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (arch = Foo) {
+
+  defmod (reg=(a,b,c)) {
+    define (write) {
+      action = func (bits<64> x) {
+        ThisReg = concat(ThisReg.get<32>(0,31),x.get<32>(32,63));
+      };
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc,Foo);
+}

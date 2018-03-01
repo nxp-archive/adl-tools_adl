@@ -1,0 +1,110 @@
+TEST id=0
+INIT
+
+CORE n=:P
+
+RD n=NIA d=0x00000000
+RD n=TIA d=0x00000000
+RD n=GPR i=0 d=0x0000000000000003
+RD n=GPR i=1 d=0x0000000000000000
+RD n=GPR i=2 d=0x0000000000000000
+RD n=GPR i=3 d=0x0000000000000000
+MD n=Mem ra=0x0000000000000000 d=0x42029000	#	(1107464192)
+MD n=Mem ra=0x0000000000000004 d=0xa0800001	#	(2692743169)
+MD n=Mem ra=0x0000000000000008 d=0x7fffffff	#	(2147483647)
+MD n=Mem ra=0x000000000000000c d=0xffffffff	#	(4294967295)
+
+CORE n=:P
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+INSTR op=0x4202					asm="addi16 1,0x1"
+R n=GPR i=1 d=0x0000000000000001
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+INSTR op=0x9000					asm="loop16 0,0x0"
+R n=TIA d=0x00000000
+R n=GPR i=0 d=0x0000000000000002
+
+I ea=0x4 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7fffffff
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xffffffff
+INSTR op=0xa08000017fffffffffffffff					asm="addi96 1,0x3fffffffffffffff"
+R n=GPR i=1 d=0x3fffffffffffffff
+
+I ea=0x0 id=4
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+INSTR op=0x4202					asm="addi16 1,0x1"
+R n=GPR i=1 d=0x4000000000000000
+
+I ea=0x2 id=5
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+INSTR op=0x9000					asm="loop16 0,0x0"
+R n=TIA d=0x00000000
+R n=GPR i=0 d=0x0000000000000001
+
+I ea=0x4 id=6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7fffffff
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xffffffff
+INSTR op=0xa08000017fffffffffffffff					asm="addi96 1,0x3fffffffffffffff"
+R n=GPR i=1 d=0x3fffffffffffffff
+
+I ea=0x0 id=7
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+INSTR op=0x4202					asm="addi16 1,0x1"
+R n=GPR i=1 d=0x4000000000000000
+
+I ea=0x2 id=8
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+INSTR op=0x9000					asm="loop16 0,0x0"
+R n=TIA d=0x00000000
+R n=GPR i=0 d=0x0000000000000000
+
+I ea=0x4 id=9
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7fffffff
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xffffffff
+INSTR op=0xa08000017fffffffffffffff					asm="addi96 1,0x3fffffffffffffff"
+R n=GPR i=1 d=0x3fffffffffffffff
+
+I ea=0x0 id=10
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+INSTR op=0x4202					asm="addi16 1,0x1"
+R n=GPR i=1 d=0x4000000000000000
+
+I ea=0x2 id=11
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x42029000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+INSTR op=0x9000					asm="loop16 0,0x0"
+
+I ea=0x4 id=12
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0800001
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7fffffff
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xffffffff
+INSTR op=0xa08000017fffffffffffffff					asm="addi96 1,0x3fffffffffffffff"
+R n=GPR i=1 d=0x3fffffffffffffff
+
+I ea=0x10 id=13
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x0000					asm="halt "
+
+RESULTS
+RD n=NIA d=0x00000012
+RD n=TIA d=0x00000000
+RD n=GPR i=0 d=0x0000000000000000
+RD n=GPR i=1 d=0x3fffffffffffffff
+RD n=GPR i=2 d=0x0000000000000000
+RD n=GPR i=3 d=0x0000000000000000
+MD n=Mem ra=0x0000000000000000 d=0x42029000	#	(1107464192)
+MD n=Mem ra=0x0000000000000004 d=0xa0800001	#	(2692743169)
+MD n=Mem ra=0x0000000000000008 d=0x7fffffff	#	(2147483647)
+MD n=Mem ra=0x000000000000000c d=0xffffffff	#	(4294967295)

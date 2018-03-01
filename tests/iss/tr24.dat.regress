@@ -1,0 +1,3 @@
+powerpc:  Instr 1:  Register GPR29 mismatch:  Found 0xceb1c4c28174ac9a (dt=R43,R44), expected 0xceb1c4c28174ac9a (dt=R48,R44)
+powerpc:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

@@ -1,0 +1,58 @@
+#
+# Tests the use of the resetCore() function to reset a core
+# by generating a watchdog interrupt.  This resets the part
+# and then executes a bit more code based upon this default
+# reset state.  Note that registers without explicit reset values
+# are not modified by this operation.  This is tested by checking
+# GPRs, which do not have a reset value and checking an SPR which
+# does.
+#
+
+= asm
+
+start:
+  addi r1,r1,0x1000
+  addi r2,r2,0x2000
+  mfspr r3,400
+  .long 0
+  .long 0
+  mtspr 400,r4
+  addi r1,r1,0x2000
+  mtspr 302,r2
+  b start
+
+= /asm
+
+= mdopts
+  instr-offset: 0xfdc
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000fdc d=0x38211000	#	addi r1,r1,0x1000
+MD n=Mem ra=0x00000fe0 d=0x38422000	#	addi r2,r2,0x2000
+MD n=Mem ra=0x00000fe4 d=0x7C7062A6	#	mfspr r3,400
+MD n=Mem ra=0x00000fe8 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000fec d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000ff0 d=0x7C9063A6	#	mtspr 400,r4
+MD n=Mem ra=0x00000ff4 d=0x38212000	#	addi r1,r1,0x2000
+MD n=Mem ra=0x00000ff8 d=0x7C4E4BA6	#	mtspr 302,r2
+MD n=Mem ra=0x00000ffc d=0x4BFFFFE0	#	b start
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0xfffffff0
+
+RD n=GPR i=4 d=0x12345678
+
+RESULTS
+
+# GPR values will not be reset, so r1 will be the cumulative
+# total of pre and post reset operations.
+RD n=GPR i=1 d=0x3000
+RD n=GPR i=2 d=0x2000
+
+# This reflects SPR 400 (FOO), which does have a reset value.
+RD n=GPR i=3 d=0xdeadbeef
+
+

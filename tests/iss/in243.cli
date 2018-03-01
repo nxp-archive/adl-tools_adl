@@ -1,0 +1,21 @@
+#
+# Test instruction jamming via the 'ijam' function and external-write logging
+# via writereg.
+#
+go
+writereg GPR2 10
+# Test using setreg/logreg to do the same thing.
+setreg GPR4 20
+setreg GPR5 30
+setreg CTR  40
+logreg GPR4
+logreg GPR 5
+logreg CTR
+#	addi r2,r2,2
+ijam 0x38420002
+writereg GPR3 20
+#	addi r3,r3,3
+ijam P 0x38630003
+#	lwz r4,0x0(r0)
+ijam P 0x80801000
+quit

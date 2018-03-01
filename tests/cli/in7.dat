@@ -1,0 +1,95 @@
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	.long 0x0
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	.long 0x0
+	addi r30,r30,1
+	rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000018 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000001c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000020 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000024 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000028 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000002c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000030 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000034 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000038 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000003c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000040 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000044 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000048 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000004c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000050 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000054 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000058 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000005c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000060 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000064 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000068 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000006c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000070 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000074 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000078 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000007c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000080 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000084 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000088 d=0x3BDE0001	#	addi r30,r30,1
+MD n=Mem ra=0x0000008c d=0x4C000064	#	rfi
+# </GEN>
+
+
+CORE n=PMT
+
+RD n=TEN   d=0xc0000000
+
+CORE n=PMT:t0
+
+RD n=NIA0  d=0
+RD n=IVOR4 d=0x88
+
+CORE n=PMT:t1
+
+RD n=NIA1 d=0x44
+RD n=IVOR4 d=0x88

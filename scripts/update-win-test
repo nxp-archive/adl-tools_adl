@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ ! -d model -a ! -d uadl-model ]; then
+		echo "Are you sure you're in the 'adl work' directory?"
+		echo "I don't see the model or uadl-model directory."
+		exit 1
+fi
+
+if [ -z "$adl" ]; then
+		echo "adl environment variable not set"
+		exit 1
+fi
+
+base=${adl}/win-test-files
+adlsrc=${base}/model
+asmsrc=${base}/asm-disasm
+uadlsrc=${base}/uadl-model
+mtsrc=${base}/mt-uadl-model
+syscsrc=${base}/sysc-model
+
+uadlmodel=dlx-cache-split-safe
+mtmodel=dlx-mt1-safe
+
+#uadlmodel=dlx2-fwd-safe
+cp ${adlsrc}/model.cc ${adlsrc}/model-0.cc ${adlsrc}/model-1.cc ${adlsrc}/model-2.cc model
+cp ${asmsrc}/*.cc asm-disasm
+cp ${uadlsrc}/${uadlmodel}{-iss.cc,.h,.cc} ${uadlsrc}/uadl-model.cc uadl-model
+cp ${syscsrc}/dlx-sysc-base{-iss.cc,.h,.cc} sysc-model
+cp ${mtsrc}/${mtmodel}{-iss.cc,.h,.cc} ${mtsrc}/MyCache.h mt-uadl-model

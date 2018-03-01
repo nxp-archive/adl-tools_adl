@@ -1,0 +1,436 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests the use of an architectural parameter to switch betwen
+// 32-bit and 64-bit behavior, where the mode behavior is set
+// using watch expressions defined by the parameter.
+// 
+
+define (arch = MiniPPC) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+
+    define (write) {
+      action = func (bits<32> value) {
+        ThisReg = value;
+      };
+    }
+  }
+
+  define (reg=CTR) {};
+  define (reg=CR) {};
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    width=64;
+    size = 32;
+  }
+
+  define (regfile=SPR) {
+    """
+    Special purpose registers.
+    """;
+    size=1024;
+    width=64;
+    
+    define (entry=100) { reg = AReg; }
+    define (entry=101) { reg = BReg; }
+    define (entry=102) { reg = CReg; }
+    define (entry=103) { reg = DReg; }
+    define (entry=104) { reg = EReg; }
+  }
+
+  define (reg=AReg) {
+    width = 64;
+  }
+
+  define (reg=BReg) {
+    width = 64;
+  }
+
+  define (reg=CReg) {
+    width = 64;
+  }
+
+  define (reg=DReg) {
+    width = 64;
+    define (field=P) {
+      bits = 0;
+      readonly = true;
+    }
+    define (field=RESERVED) {
+      bits = (1,2);
+      reserved = true;
+    }
+    // Bits 1 and 2 are reserved.
+    define (field=X) {
+      bits = (3,31);
+    }
+    define (field=Y) {
+      bits = (32,63);
+    }
+    define (write) {
+      action = func(bits<64> value,unsigned start,unsigned stop) {
+        ThisReg(start,stop) = value;
+        ThisReg.P = ThisReg(1,63).count_ones() % 2;
+      };
+    }
+  }
+
+  define (reg=EReg) {
+    define (field=A) {
+      bits = (0,7);
+    }
+    define (field=B) {
+      bits = (8,15);
+      readonly = true;
+    }
+    define (field=C) {
+      bits = (16,23);
+      reserved = true;
+    }
+    define (field=D) {
+      bits = (24,31);
+    }
+  }
+
+  define (reg=ARegRo) {
+    width = 64;
+    define(write) {
+      action = func (bits<64> value) {
+      };
+    }
+    define(read) {
+      alias = AReg;
+    }
+  }
+
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+    display = hex;
+  }
+
+  define (instrfield=BI) {
+    """
+Field used to specify a bit in the Condition Register to be used
+as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+    display = hex;
+  }
+
+  define (instrfield=CRn) {
+    """
+Assembler field used to specify a CR field for a conditional branch.
+    """;
+    pseudo = true;
+    width = 3;
+  }
+
+  define (instrfield=BD) {
+    """
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+    addr = pc;
+    shift = 2;
+    is_signed = true;
+  }
+
+  define (instrfield=BF) {
+    """
+Field used to specify one of the Condition Register fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LI) {
+    """
+    Immediate address field for branch instructions.
+    """;
+    bits = (6,29);
+    
+    is_signed = true;
+    shift = 2;
+    addr = pc;
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      var r = GPR(RA) + GPR(RB);
+      r.setUndefined(0,31);
+      GPR(RT) = r;
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,64);
+      var r = (RA == 0) ? si : (GPR(RA) + si);
+      r.setUndefined(0,31);
+      GPR(RT) = r;
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(18),LI,AA(0),LK(0));
+    action =  {
+      NIA = LI;
+    };
+  }
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    syntax = ("%i %f,%f,%f",BO,BI,BD);
+    action = func() {
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = (BO(2)!=0)  || (( (CTR!=0) ^ BO(3))!=0);
+      var cond_ok = (BO(0)!=0) || ( CR(BI) == BO(1));
+      if ( ctr_ok && cond_ok ) {
+        NIA = BD;
+      }
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  // Just for experimenting with register fields.
+  define (instr=crand) {
+    fields=(OPCD(19),RT,RA,RB,XO(257));
+    action = {
+      if (RA == 0) {
+        DReg.Y = GPR(RT);
+      } else {
+        DReg.X = GPR(RT);
+      }
+      // This should be ignored.
+      DReg.P = 1;
+      DReg.RESERVED = 3;
+
+      var x = GPR(RT)(32,63);
+      EReg.A = x(0,7);
+      // This should also be ignored.
+      EReg.B = x(8,15);
+      EReg.C = x(16,23);
+      // This should also be ignored.
+      EReg.D = x(24,31);
+    };
+  }
+
+  // Just for experimentation.
+  define (instr=crandc) {
+    fields=(OPCD(19),RS,RA,RB,XO(129));
+    action = {
+      DReg(RA,RB) = GPR(RS);
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+  }
+
+}
+
+define (arch=Foo) {
+
+  define (reg=HID0) {
+    """
+    A hardware control register.
+    """;
+    define (field=M) {
+      bits = 0;
+    }
+  }
+
+  define (reg=HID1) {
+    """
+    A hardware control register.
+    """;
+    define (field=LP) {
+      bits = 0;
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=50) { reg = HID0; }
+    define (entry=51) { reg = HID1; }
+  }
+
+  defmod (parm=Mode) {
+    // Add the hybrid option.
+    options = LowPower;
+    value = Mode32;
+    watch = {
+      if (HID0.M == 0) {
+        if (HID1.LP == 1) {
+          Mode = LowPower;
+        } else {
+          Mode = Mode32;
+        }
+      } else {
+        Mode = Mode64;
+      }
+    };
+  }
+
+  defmod (reg=(AReg,BReg,CReg)) {
+    define (write) {
+      action = func(bits<64> value) {
+        if (Mode == LowPower) {
+          ThisReg = concat( ThisReg(0,31) , value(32,63) );
+        } else {
+          ThisReg = value;
+        }
+      };
+    }
+  }
+  
+  defmod (regfile=GPR) {
+    define (write) {
+      action = func(unsigned index,bits<64> value) {
+        if (Mode == Mode32) {
+          // Otherwise, use the prior upperhalf's value.
+          // Note that we're testing the ability to assign to a slice
+          // of a register-file element here, within a writehook.
+          GPR(index)(32,63) = value;
+        } else if (Mode == LowPower) {
+          // In LP mode, blank the upper half of the register.
+          GPR(index) = value(32,63);
+        } else {
+          // Default case- full 64-bit update.
+          GPR(index) = value;
+        }
+      };
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,Foo);
+}
+

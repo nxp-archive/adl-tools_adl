@@ -1,0 +1,60 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// This model is only meant to demonstrate the use of the ADL language and does
+// not represent any actual Freescale product.
+//
+// THIS MODEL IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------
+//
+//  An example 32-bit Power ISA microprocessor.  This does not contain a cache
+//  or an MMU.
+//
+//---------------------------------------------------------------------------
+
+#define regSize 32
+#define defaultOffset 32
+
+#import "generic32.adl"
+
+// Remove this core b/c the name is not what we want.
+define (core=powerpc) {
+  remove = true;
+}
+
+//---------------------------------------------------------------------------
+// An example 32-bit Power ISA processor core.
+//
+// The only difference between this and 'powerpc' is the name, so that we're
+// compatible with the regression tests that expect a core named "P".
+// ---------------------------------------------------------------------------
+define (core = P) {
+  //---------------------------------------------------------------------------
+  // Helper functions
+  //---------------------------------------------------------------------------
+
+  // These BookE helper functions are stubbed out becuase z0 does not implement caches.
+  void AllocateDataCacheBlock(bits<regSize> x ) {}
+  void FlushDataCacheBlock(bits<regSize> x) {}
+  void InvalidateDataCacheBlock(bits<regSize> x) {}
+  void InvalidateInstructionCacheBlock(bits<regSize> x) {}
+  void StoreDataCacheBlock(bits<regSize> x) {}
+  void PrefetchDataCacheBlock(bits<regSize> x,bits<5> y) {}
+  void PrefetchInstructionCacheBlock(bits<regSize> x,bits<5> y) {}
+  void ZeroDataCacheBlock(bits<regSize> x) {}
+  
+
+  archs = (power,generic32);
+  type = "generic32_0";
+}

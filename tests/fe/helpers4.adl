@@ -1,0 +1,31 @@
+//
+// Another test of helper functions:  Should fail b/c we don't
+// allow outer-level stuff.
+//
+// NOTE:  This test has been removed because we now *do* allow
+//        outer-level stuff.  This test may be added back if
+//        we ever disallow it again.
+
+template <size_t Size>
+bitset<Size> signExtend(bitset<Size> a,int signbit)
+{
+  assert (signbit < a.size());
+  if (a.test(signbit)) {
+    for (int i = a.size()-1; i >= signbit; --i) {
+      a.set(i);
+    }
+  }
+  return a;
+}
+
+define (arch=minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

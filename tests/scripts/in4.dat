@@ -1,0 +1,41 @@
+#
+# 
+#
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  mtspr 50,r1
+  addi r1,r1,1
+  mtspr 51,r1
+	mfspr r2,50
+	mfspr r3,51
+  .long 0
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x7C320BA6	#	mtspr 50,r1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x7C330BA6	#	mtspr 51,r1
+MD n=Mem ra=0x00000018 d=0x7C520AA6	#	mfspr r2,50
+MD n=Mem ra=0x0000001c d=0x7C730AA6	#	mfspr r3,51
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0
+# </GEN>
+
+RESULTS
+
+RD n=HID0 d=3
+RD n=HID1 d=4
+
+RD n=GPR i=1 d=4
+RD n=GPR i=2 d=3
+RD n=GPR i=3 d=4
+
+

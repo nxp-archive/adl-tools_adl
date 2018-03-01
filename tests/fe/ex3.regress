@@ -1,0 +1,51 @@
+======
+Cores:
+======
+Name:  "P"
+Exceptions:
+  Name:  Foo
+  Attributes:  user super
+  Action:  {
+    FOO = 12 ;
+    IAR = 0x0000700 ;
+}
+  Documention:
+
+Foo interrupt.
+  -------------------------------
+  Name:  Program
+  Attributes:  user super
+  Fields:
+    ESR:  32 bits.
+      Reset value:  0x80000000
+  Action:  func ( Program_t p ) {
+    FOO = 12 ;
+    IAR = 0x0000700 ;
+    ESR = p . ESR ;
+}
+  Documention:
+
+Program interrupt.
+  -------------------------------
+Registers:
+  Name:  "ESR"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "FOO"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

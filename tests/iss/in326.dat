@@ -1,0 +1,34 @@
+#
+# A very simple test of micro-ops in little-endian.
+#
+# Constructed using as-mod101
+#
+= asm
+
+	addi r1,r1,200	addi r2,r2,300
+	add  r3,r1,r2   sub r4,r2,r1	mul r5,r1,r2
+	halt
+
+= /asm
+= mdopts
+endian: little
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x02582105	#	add  r3,r1,r2   sub r4,r2,r1	mul r5,r1,r2
+MD n=Mem ra=0x00000004 d=0x00C80842
+MD n=Mem ra=0x00000008 d=0x2084128E	#	halt
+MD n=Mem ra=0x0000000c d=0x04118422
+MD n=Mem ra=0x00000010 d=0x00000000	#	
+MD n=Mem ra=0x00000014 d=0x00000000
+# </GEN>
+
+RESULTS
+
+CORE n=packet_ops
+
+RD n=GPR i=1 d=200
+RD n=GPR i=2 d=300
+RD n=GPR i=3 d=500
+RD n=GPR i=4 d=100
+RD n=GPR i=5 d=60000

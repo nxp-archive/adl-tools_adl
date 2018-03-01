@@ -1,0 +1,46 @@
+#
+# Make sure that watchpoint functionality can be used as a debugger would use
+# it: When a watchpoint hits, we want to be able to finish instruction
+# execution, then stop and do something, so that the instruction actually
+# completes fully.
+#
+
+proc w1 {id type ea pre nb val} {
+		if { $type == "write" } {
+				puts [format "Watchpoint at 0x%x of %d bytes (0x%x)" $ea $nb $val ]
+		} else {
+				puts [format "Watchpoint at 0x%x of %d bytes" $ea $nb ]
+		}
+		clrwatchcmd w1
+		return simstop
+}
+
+simmode $argv
+
+# We set a watch command and when it triggers, stop execution.  Then we clear
+# the watch, modify the pc to point to the instruction we just executed, and
+# cycle the model to execute the actual instruction.  This emulates what a real
+# debugger would want: For the instruction to be fully executed before stopping
+# execution.
+setwatchcmd 0x2000 read w1
+go
+setpc [cia]
+step
+puts "r1 is [reg GPR1]"
+puts "r2 is [reg GPR2]"
+
+set n 5
+set a 0x2010
+
+for { set i 1 } { $i < $n } { incr i } {
+		setwatchcmd $a write w1
+		go
+		setpc [cia]
+		step
+		puts "r1 is [reg GPR1]"
+		puts "r2 is [reg GPR2]"
+		puts [format "Mem\[0x%x\] is 0x%x" $a [memlist $a 4 4]]
+		set a [expr $a + 4]
+}
+
+quit

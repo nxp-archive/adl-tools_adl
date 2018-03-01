@@ -1,0 +1,32 @@
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	mfspr r2,230
+	# Won't be executed b/c the mfspr will end the quantum, thus ending the
+	# simulation.
+	addi r3,r3,10
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x7C463AA6	#	mfspr r2,230
+MD n=Mem ra=0x00000014 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000018 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000001c d=0x38420001	#	addi r2,r2,1
+# </GEN>
+
+RESULTS
+
+CORE n=:P
+
+RD n=GPR i=1 d=4
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=0

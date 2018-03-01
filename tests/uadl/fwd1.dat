@@ -1,0 +1,96 @@
+#
+# Tests selective forwarding:  Update loads forward the EA immediately, then
+# forwards the memory result when available.
+#
+
+= asm
+
+  lwzu r1,0x1000(r2)  # r2 will get new EA
+  addi r3,r2,0x1000   # addi is dependent upon new EA.
+  addi r10,r10,1      # no dependencies.
+  addi r10,r10,1      # no dependencies.
+  lwzu r3,0x1000(r2)
+  addi r4,r3,0x1000   # dependent upon memory result, so no early forwarding.
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA     d=0
+
+MD n=Mem ra=0x1000 d=0x10
+MD n=Mem ra=0x2000 d=0x20
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x84221000	#	lwzu r1,0x1000(r2)  # r2 will get new EA
+MD n=Mem ra=0x00000004 d=0x38621000	#	addi r3,r2,0x1000   # addi is dependent upon new EA.
+MD n=Mem ra=0x00000008 d=0x394A0001	#	addi r10,r10,1      # no dependencies.
+MD n=Mem ra=0x0000000c d=0x394A0001	#	addi r10,r10,1      # no dependencies.
+MD n=Mem ra=0x00000010 d=0x84621000	#	lwzu r3,0x1000(r2)
+MD n=Mem ra=0x00000014 d=0x38831000	#	addi r4,r3,0x1000   # dependent upon memory result, so no early forwarding.
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x84221000
+INSTR op=0x84221000					asm="lwzu r1,4096(r2)"
+ITIME t=1
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000010
+R n=GPR i=2 d=0x00001000
+R n=GPR i=1 d=0x00000010
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38621000
+INSTR op=0x38621000					asm="addi r3,r2,4096"
+ITIME t=2
+R n=GPR i=3 d=0x00002000
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x394a0001
+INSTR op=0x394a0001					asm="addi r10,r10,1"
+ITIME t=3
+R n=GPR i=10 d=0x00000001
+CTIME t=7
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x394a0001
+INSTR op=0x394a0001					asm="addi r10,r10,1"
+ITIME t=5
+R n=GPR i=10 d=0x00000002
+CTIME t=9
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x84621000
+INSTR op=0x84621000					asm="lwzu r3,4096(r2)"
+ITIME t=6
+D n=Mem t=read ea=0x2000 nb=4
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0x00000020
+R n=GPR i=2 d=0x00002000
+R n=GPR i=3 d=0x00000020
+CTIME t=10
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38831000
+INSTR op=0x38831000					asm="addi r4,r3,4096"
+ITIME t=7
+R n=GPR i=4 d=0x00001020
+CTIME t=12
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=9
+CTIME t=13
+
+RESULTS
+
+RD n=GPR i=1  d=0x10
+RD n=GPR i=2  d=0x2000
+RD n=GPR i=3  d=0x20
+RD n=GPR i=4  d=0x1020
+RD n=GPR i=10 d=0x02
+

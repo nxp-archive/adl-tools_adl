@@ -1,0 +1,35 @@
+#
+# Tests that we can initialize sparse registers by index and name,
+# with index concatenated.
+#
+
+CORE n=:P
+
+# No instructions are needed- we just check to see if the inits propagate.
+
+RD n=SPR   i=9   d=0xdeadbeef
+RD n=SPR   i=100 d=0x12345678
+RD n=SPR22       d=0x87654321
+RD n=SPR230      d=0x10
+RD n=SPR   i=231 d=0x20
+RD n=SPR   i=232 d=0x30
+
+RESULTS
+
+RD n=CTR      d=0xdeadbeef
+RD n=GPR i=20 d=0x12345678
+RD n=DEC      d=0x87654320
+
+CTX n=foobar cn=0
+
+RD n=AR d=0x00000010
+
+CTX n=foobar cn=1
+
+RD n=AR d=0x00000020
+
+CTX n=foobar cn=2
+
+RD n=AR d=0x00000030
+
+NOCTX

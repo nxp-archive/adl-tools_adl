@@ -1,0 +1,203 @@
+#
+# Tests cache locking instructions.
+#
+
+CORE n=:P
+
+= asm
+
+	dcbtls 0,r10,r0          # Locks 0x2000
+	addi   r10,r10,0x2000
+	dcbtls 0,r10,r0          # Locks 0x4000
+	addi   r10,r10,0x2000
+	dcbtls 0,r10,r0          # Locks 0x6000
+	addi   r10,r10,0x2000
+	stw    r1,0(r10)         # Store should go into way=3 b/c rest are locked.
+	addi   r10,r10,0x2000
+	stw    r1,0(r10)         # Store should go into way=3 b/c rest are locked.
+	dcblc  0,r9,r0           # Unlock 0x2000
+	dcblc  0,r11,r0          # Should do nothing.
+	addi   r10,r10,0x2000
+	stw    r1,0(r10)         # Should go into way=0 b/c just unlocked, thus older than way=3.
+
+= /asm
+
+= aopts
+
+ -mregnames -me500
+
+= /aopts
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x7C0A014C	#	dcbtls 0,r10,r0          # Locks 0x2000
+MD n=Mem ra=0x00000104 d=0x394A2000	#	addi   r10,r10,0x2000
+MD n=Mem ra=0x00000108 d=0x7C0A014C	#	dcbtls 0,r10,r0          # Locks 0x4000
+MD n=Mem ra=0x0000010c d=0x394A2000	#	addi   r10,r10,0x2000
+MD n=Mem ra=0x00000110 d=0x7C0A014C	#	dcbtls 0,r10,r0          # Locks 0x6000
+MD n=Mem ra=0x00000114 d=0x394A2000	#	addi   r10,r10,0x2000
+MD n=Mem ra=0x00000118 d=0x902A0000	#	stw    r1,0(r10)         # Store should go into way=3 b/c rest are locked.
+MD n=Mem ra=0x0000011c d=0x394A2000	#	addi   r10,r10,0x2000
+MD n=Mem ra=0x00000120 d=0x902A0000	#	stw    r1,0(r10)         # Store should go into way=3 b/c rest are locked.
+MD n=Mem ra=0x00000124 d=0x7C09030C	#	dcblc  0,r9,r0           # Unlock 0x2000
+MD n=Mem ra=0x00000128 d=0x7C0B030C	#	dcblc  0,r11,r0          # Should do nothing.
+MD n=Mem ra=0x0000012c d=0x394A2000	#	addi   r10,r10,0x2000
+MD n=Mem ra=0x00000130 d=0x902A0000	#	stw    r1,0(r10)         # Should go into way=0 b/c just unlocked, thus older than way=3.
+# </GEN>
+
+RD n=NIA d=0x0100
+RD n=CCR d=0x80000000
+
+RD n=GPR i=1  d=0xdeadbeef
+RD n=GPR i=9  d=0x2000
+RD n=GPR i=10 d=0x2000
+RD n=GPR i=11 d=0xaa000
+
+MD n=Mem ra=0x2004 d=0x1
+MD n=Mem ra=0x4004 d=0x2
+MD n=Mem ra=0x6004 d=0x3
+MD n=Mem ra=0x8004 d=0x4
+MD n=Mem ra=0xa004 d=0x5
+MD n=Mem ra=0xc004 d=0x6
+
+MD n=Mem ra=0x8000 d=0x0  
+
+TRACE
+
+I ea=0x100 id=1
+C n=L1i a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L1i a=load t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x7c0a014c
+INSTR op=0x7c0a014c asm="dcbtls 10,0"
+C n=L1d a=miss t=lock-addr set=0 way=0 lm=0x7f ra=0x2000
+R n=CCR d=0x80100000
+A l=1 m="L1d miss:  0x2000"
+C n=L1d a=load t=lock-addr set=0 way=0 lm=0x7f ra=0x2000
+C n=L1d t=lock set=0 way=0 lm=0x7f ra=0x2000
+
+I ea=0x104 id=2
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x394a2000
+INSTR op=0x394a2000 asm="addi 10,10,8192"
+R n=GPR i=10 d=0x00004000
+
+I ea=0x108 id=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x7c0a014c
+INSTR op=0x7c0a014c asm="dcbtls 10,0"
+C n=L1d a=miss t=lock-addr set=0 way=1 lm=0x7f ra=0x4000
+R n=CCR d=0x80200000
+A l=1 m="L1d miss:  0x4000"
+C n=L1d a=load t=lock-addr set=0 way=1 lm=0x7f ra=0x4000
+C n=L1d t=lock set=0 way=1 lm=0x7f ra=0x4000
+
+I ea=0x10c id=4
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x394a2000
+INSTR op=0x394a2000 asm="addi 10,10,8192"
+R n=GPR i=10 d=0x00006000
+
+I ea=0x110 id=5
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x7c0a014c
+INSTR op=0x7c0a014c asm="dcbtls 10,0"
+C n=L1d a=miss t=lock-addr set=0 way=2 lm=0x7f ra=0x6000
+R n=CCR d=0x80300000
+A l=1 m="L1d miss:  0x6000"
+C n=L1d a=load t=lock-addr set=0 way=2 lm=0x7f ra=0x6000
+C n=L1d t=lock set=0 way=2 lm=0x7f ra=0x6000
+
+I ea=0x114 id=6
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x394a2000
+INSTR op=0x394a2000 asm="addi 10,10,8192"
+R n=GPR i=10 d=0x00008000
+
+I ea=0x118 id=7
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x902a0000
+INSTR op=0x902a0000 asm="stw 1,10,0"
+C n=L1d a=miss t=write set=0 way=3 lm=0x7f ra=0x8000
+R n=CCR d=0x80400000
+A l=1 m="L1d miss:  0x8000"
+C n=L1d a=load t=write set=0 way=3 lm=0x7f ra=0x8000
+M n=Mem t=write ea=0x8000 ra=0x8000 d=0xdeadbeef
+
+I ea=0x11c id=8
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0x394a2000
+INSTR op=0x394a2000 asm="addi 10,10,8192"
+R n=GPR i=10 d=0x0000a000
+
+I ea=0x120 id=9
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x902a0000
+INSTR op=0x902a0000 asm="stw 1,10,0"
+C n=L1d a=miss t=write set=0 way=3 lm=0x7f ra=0xa000
+R n=CCR d=0x80500000
+A l=1 m="L1d miss:  0xa000"
+C n=L1d a=evict t=write set=0 way=3 lm=0x7f ra=0x8000
+C n=L1d a=load t=write set=0 way=3 lm=0x7f ra=0xa000
+M n=Mem t=write ea=0xa000 ra=0xa000 d=0xdeadbeef
+
+I ea=0x124 id=10
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x7c09030c
+INSTR op=0x7c09030c asm="dcblc 9,0"
+C n=L1d t=unlock set=0 way=0 lm=0x7f ra=0x2000
+
+I ea=0x128 id=11
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0x7c0b030c
+INSTR op=0x7c0b030c asm="dcblc 11,0"
+
+I ea=0x12c id=12
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x12c ra=0x12c d=0x394a2000
+INSTR op=0x394a2000 asm="addi 10,10,8192"
+R n=GPR i=10 d=0x0000c000
+
+I ea=0x130 id=13
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x130 ra=0x130 d=0x902a0000
+INSTR op=0x902a0000 asm="stw 1,10,0"
+C n=L1d a=miss t=write set=0 way=0 lm=0x7f ra=0xc000
+R n=CCR d=0x80600000
+A l=1 m="L1d miss:  0xc000"
+C n=L1d a=load t=write set=0 way=0 lm=0x7f ra=0xc000
+M n=Mem t=write ea=0xc000 ra=0xc000 d=0xdeadbeef
+
+I ea=0x134 id=14
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x134 ra=0x134 d=0x0
+INSTR op=0x0 asm="halt"
+
+RESULTS
+
+CD n=L1d set=0 way=0 ra=0x000000000000c000 valid=1 dirty=1 locked=0 d=0xdeadbeef,0x00000006,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=1 ra=0x0000000000004000 valid=1 dirty=0 locked=1 d=0x00000000,0x00000002,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=2 ra=0x0000000000006000 valid=1 dirty=0 locked=1 d=0x00000000,0x00000003,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=3 ra=0x000000000000a000 valid=1 dirty=1 locked=0 d=0xdeadbeef,0x00000005,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1i set=2 way=0 ra=0x0000000000000100 valid=1 dirty=0 locked=0 d=0x7c0a014c,0x394a2000,0x7c0a014c,0x394a2000,0x7c0a014c,0x394a2000,0x902a0000,0x394a2000,0x902a0000,0x7c09030c,0x7c0b030c,0x394a2000,0x902a0000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+
+MD n=Mem ra=0x0000000000002004 d=0x00000001	#	(1)
+MD n=Mem ra=0x0000000000004004 d=0x00000002	#	(2)
+MD n=Mem ra=0x0000000000006004 d=0x00000003	#	(3)
+MD n=Mem ra=0x0000000000008004 d=0x00000004	#	(4)
+MD n=Mem ra=0x000000000000a004 d=0x00000005	#	(5)
+MD n=Mem ra=0x000000000000c004 d=0x00000006	#	(6)
+MD n=Mem ra=0x0000000000008000 d=0xdeadbeef	#	(3735928559)
+
+
+
+
+
+
+
+
+

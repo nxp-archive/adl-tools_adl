@@ -1,0 +1,96 @@
+//
+// Simple test of resource tracking, when default parameters are used.
+//
+define (arch=minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=E) {
+    """
+    Immediate field used to specify a 1-bit value used by *wrteei* to place in the
+    EE (External Input Enable) bit of the Machine State Register.
+    """;
+    bits = 16;
+  }
+
+  // Since this function has a default parameter, rb will be 0 if not specified.
+  // This means that GPR(0) will be used as a source.
+  void foo(unsigned rt,unsigned ra,unsigned rb = 0)
+  {
+    GPR(rt) = GPR(ra) + GPR(rb);
+  }
+
+  define (instr=add1) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      // Call the function with a default parameter.
+      foo(RT,RA);
+    };
+  }
+
+  define (instr=add2) {
+    fields=(OPCD(32),RT,RA,RB,XO(266));
+    action = {
+      // Call the function with a default parameter.
+      foo(RT,RA,RB);
+    };
+  }
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,270 @@
+//
+// A very simple model for testing moded architectures with the JIT.  The idea
+// is that the JIT model is compiled with Mode as a translation-time constant
+// parm, so that the JIT can consider it a constant when compiling basic blocks.
+// This way, it can eliminate any conditionals (and dead code) guarded by the
+// parm.
+//
+
+#ifndef regSize
+#define regSize 64
+#endif
+
+#ifndef defaultOffset
+#define defaultOffset 0 
+#endif
+
+define (arch = MiniPPC) {
+
+  // Various helper routines.
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) |
+      XER.SO;
+
+    CR(4*field,4*field+3) = r;
+  }
+
+  void setXerField(bool ov, bool so, bool ca,const bits<32>& carry)
+  {
+    if (ov) { XER.OV = carry(0) ^ carry(1);}
+    if (so) { XER.SO = XER.SO | XER.OV ;}
+    if (ca) { XER.CA = carry(0);}
+  }
+
+
+  attrs = (load,store,privileged);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+    width = regSize;
+    offset = defaultOffset;
+  }
+ 
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+    width = regSize;
+    offset = defaultOffset;
+    reset = 0xfffffffc;
+  }
+
+  define (reg=LR) {
+    """
+    The link register.
+    """;
+    width = regSize;
+  }
+
+  define (reg=XER) {
+    """
+    The overflow and carry register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=SO) { bits = 32; }
+    define (field=OV) { bits = 33; }
+    define (field=CA) { bits = 34; }
+  }
+
+  define (reg=CR) {
+    // TODO - define all SPR register fields
+    """
+    The condition register.
+    """;
+    width = 32;
+    offset = 32;
+  }
+
+  define (reg=MSR) {
+    """
+    The machine state register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=CM)  { bits = 32; }
+    define (field=PR)  { bits = 49; }
+
+  }
+
+  define (regfile=GPR) {
+    """
+    The general purpose register file.
+    """;
+    size = 32;
+    width = regSize;
+    offset = defaultOffset;
+    prefix = r;
+  }
+
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+    value=Mode32;
+    watch = {
+      if (MSR.CM == 0) {
+        Mode = Mode32;
+      } else {
+        Mode = Mode64;
+      }
+    };
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RC) {
+    """
+    Extended RC opcode.
+    """;
+    bits = (31,31);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=LI) {
+    """
+    Immediate address field for pc-relative branch instructions.
+    """;
+    bits = (6,29);
+    is_signed = true;
+    shift = 2;
+    addr = pc;
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  int mode (bool reg, bool addr ) {
+    var m = (Mode == Mode64) ? 0 : 32;
+    return m;
+  }
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO_X(266),RC(0));
+    action = {
+      var m = mode(true/*reg*/,false/*addr*/);
+      GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var m = mode(true/*reg*/,false/*addr*/);
+      if (RA == 0) {
+        GPR(RT)(m,regSize-1) = SI;
+      } else {
+        GPR(RT)(m,regSize-1) = GPR(RA) + SI;
+      }
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(18),LI,AA(0),LK(0));
+    action =  {
+      var m = mode(false/*reg*/,true/*addr*/);
+      NIA = LI(m,63);
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO_X(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+  
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    width = 32;
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

@@ -1,0 +1,6 @@
+
+traceon adds.out.dat
+setreg NIA0 0x0
+simload $env(srcdir)/adds.elf
+go
+quit

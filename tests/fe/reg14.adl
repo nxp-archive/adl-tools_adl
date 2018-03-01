@@ -1,0 +1,101 @@
+//
+// Register aliasing test.
+//
+// This also includes a test of the optional arguments for register write hooks.
+// Note that, in terms of resource usage, if slices of ThisReg are performed,
+// and they match the arguments of the write-hook function, then usage of the
+// register is not logged, as it would be redundant.
+define (arch = minippc) {
+  
+  define (regfile = gprs) {
+    size = 32;
+    width = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg = SPRG0) {
+    width = 64;
+  }
+
+  define (reg = SPRG1) {
+    width = 64;
+  }
+
+  define (reg = TBR2) {
+    width = 32;
+  }
+
+  define (reg = TBR1) {
+    width = 32;
+    pseudo = 1;
+    define (read) {
+      action = { return TBR2; };
+    }
+    define (write) {
+      action = func(bits<32> v,unsigned start,unsigned stop) { 
+        ThisReg(start,stop) = v(start,stop) | ThisReg(start,stop);
+        TBR2 = v; 
+      };
+    }
+  }
+
+}
+
+define (arch = spe) {
+
+  define (regfile = spe_gprs) {
+    size = 32;
+    width = 64;
+  }
+
+  define (regfile = gprs) {
+    size=32;
+    width=32;
+    define (read) {
+      alias = spe_gprs;
+      slice = (32,63);
+    }
+    define (write) {
+      alias = spe_gprs;
+      slice = (32,63);
+    }
+  }
+
+  define (reg = USPRG0) {
+    width=32;
+    pseudo = 1;
+    define (read) {
+      alias = SPRG0;
+      slice = (32,63);
+    }
+    define (write) {
+      action = func(bits<32>) { };
+    }
+  }
+
+  define (reg = USPRG1) {
+    width = 32;
+    alias = SPRG1;
+    alias_slice = ((8,15),12);
+  }
+
+  define (reg = USPRG2) {
+    width = 32;
+    define (read) {
+      alias = SPRG1;
+      slice = ((24,31),16);
+    }
+    define (write) {
+      alias = SPRG1;
+      slice = ((24,31),22);
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc,spe);
+}

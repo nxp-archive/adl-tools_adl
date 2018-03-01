@@ -1,0 +1,27 @@
+//
+// This changes the model so that it has a unified L1 cache.
+//
+
+#define UADL
+
+#import "mod23.adl"
+
+defmod (core P) {
+
+  defmod (cache=L1i) {
+    remove = true;
+  }
+
+  defmod (cache=L1d) {
+    remove = true;
+  }
+
+  define (cache=L1) {
+    type      = unified;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;    
+  }
+
+}

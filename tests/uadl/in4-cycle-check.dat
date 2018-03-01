@@ -1,0 +1,11 @@
+#
+# This file contains the expected cycle-count values for running DLX
+# on tests/iss/in4.dat.
+#
+
+CORE n=:P
+
+RESULTS
+
+RD n=POST_CYCLE_COUNT d=0x1037
+RD n=PRE_CYCLE_COUNT d=0x1037

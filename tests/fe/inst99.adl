@@ -1,0 +1,92 @@
+//
+// If subinstructions are used, and no names field is specified, then generate
+// the names list.
+//
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  
+  define (instrfield=F1) {
+    bits = (6,7);
+  }
+
+  define (instrfield=F2) {
+    bits = (8,9);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (subinstr=a1) {
+    fields = (F1(0),RA);
+    action = {};
+  }
+
+  define (subinstr=a2) {
+    fields = (F1(1),RA);
+    action = {};
+  }
+
+  define (subinstr=a3) {
+    fields = (F1(2),RA);
+    action = {};
+  }
+
+  define (subinstr=b1) {
+    fields = (F2(0),RB);
+    action = {};
+  }
+
+  define (subinstr=b2) {
+    fields = (F2(1),RB);
+    action = {};
+  }
+
+  define (subinstr=b3) {
+    fields = (F2(3),RB);
+    action = {};
+  }
+
+  define (instr=foo) {
+    fields = (OPCD(1),A,B);
+    
+    define (subinstrs=A) { subs = (a1,a2,a3); }
+    define (subinstrs=B) { subs = (b1,b2,b3); }
+
+    action = {};
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

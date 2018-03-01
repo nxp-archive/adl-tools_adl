@@ -1,0 +1,37 @@
+
+asm117.o:     file format elf32-powerpcle
+asm117.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000018  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  0000004c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  0000004c  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000010 l       .text	00000000 foo
+00000010 l       .text	00000000 bar
+00000010 l       .text	00000000 stuff
+00000000 g       .text	00000000 _start
+
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+   0:	00042105 	addi     r2,1 ; addi     r2,2
+   4:	00011082 
+   8:	00000001 	addi     r2,3 ; nop1     
+   c:	00031082 
+
+00000010 <bar>:
+  10:	000a2105 	addi     r2,4 ; addi     r2,5
+  14:	00041082 

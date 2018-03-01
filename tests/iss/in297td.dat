@@ -1,0 +1,75 @@
+#
+# Results for running in297.dat on mod90.adl, with times slightly adjusted,
+# since for this model, we don't have two-cycle latencies for loads and stores.
+#
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201000
+INSTR op=0x80201000					asm="lwz r1,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=0 lm=0x7f ra=0x1000
+C n=L1d a=load t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000000a
+R n=GPR i=1 d=0x0000000a
+CTIME t=21
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x80401004
+INSTR op=0x80401004					asm="lwz r2,4100(r0)"
+D n=Mem t=read ea=0x1004 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000014
+R n=GPR i=2 d=0x00000014
+CTIME t=22
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x80601008
+INSTR op=0x80601008					asm="lwz r3,4104(r0)"
+D n=Mem t=read ea=0x1008 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x0000001e
+R n=GPR i=3 d=0x0000001e
+CTIME t=23
+
+I ea=0xc id=4 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x90202000
+INSTR op=0x90202000					asm="stw r1,8192(r0)"
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=64 way=0 lm=0x7f ra=0x2000
+C n=L1d a=load t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x0000000a
+CTIME t=34
+
+I ea=0x10 id=5 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90402004
+INSTR op=0x90402004					asm="stw r2,8196(r0)"
+D n=Mem t=write ea=0x2004 nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2004 ra=0x2004 d=0x00000014
+CTIME t=35
+
+I ea=0x14 id=6 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x90602008
+INSTR op=0x90602008					asm="stw r3,8200(r0)"
+D n=Mem t=write ea=0x2008 nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2008 ra=0x2008 d=0x0000001e
+CTIME t=36
+
+I ea=0x18 id=7 tic=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+CTIME t=37
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=10
+MD n=Mem ra=0x1004 d=20
+MD n=Mem ra=0x1008 d=30
+MD n=Mem ra=0x2000 d=10
+MD n=Mem ra=0x2004 d=20
+MD n=Mem ra=0x2008 d=30

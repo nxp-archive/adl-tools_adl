@@ -1,0 +1,30 @@
+#
+# This runs an instruction which references a string (in the action code),
+# this testing to make sure that the JIT can handle symbols which point
+# into read-only memory.
+#
+
+= asm
+
+crxor 11,9,0
+crxor 12,10,0
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4D690182	#	crxor 11,9,0
+MD n=Mem ra=0x00000004 d=0x4D8A0182	#	crxor 12,10,0
+# </GEN>
+
+RD n=NIA      d=0x0
+RD n=GPR i=9  d=0xdeadbeef
+RD n=GPR i=10 d=0x87654321
+RD n=GPR i=11 d=0x12345678
+RD n=GPR i=12 d=0x12345678
+
+RESULTS
+
+RD n=GPR i=11 d=0x00adbede
+RD n=GPR i=12 d=0x00654387

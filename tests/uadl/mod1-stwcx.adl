@@ -1,0 +1,44 @@
+//
+// This just adds a bit more stuff to the basic mod1.adl model in order to
+// test pre and post-cycle hooks.
+//
+
+#define UADL
+
+#import "mod1.adl"
+
+define (core = P) {
+
+  define (instrfield=Rc) {
+    bits = 31;
+  }
+
+  define (reg=SCTRL) {
+    define (field=SQLCH) {
+      bits = 0;
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=72) {
+      reg = SCTRL;
+    }
+  }
+
+  // This is just for testing- it doesn't have any of the conditional logic you
+  // would normally have in a stwcx.
+  define (instr="stwcx.") {
+    fields=(OPCD(31),RS,RA,RB,XO(150),Rc(1));
+    action = {
+      // Test conditional memory access- code should work if no memory is
+      // accessed at all.
+      if (SCTRL.SQLCH != 1) {
+        var b = (RA == 0) ? 0 : GPR(RA);
+        var addr = b + GPR(RB);
+        Mem(addr,4) = GPR(RS);
+      }
+    };
+  }
+
+  archs = (MiniPPC);
+}

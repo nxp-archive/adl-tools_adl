@@ -1,0 +1,41 @@
+// 
+// Tests basic error checking with register-file hasAttr().
+//
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down);
+  
+  define (regfile=A) {
+    size = 32;
+    attrs = (up,down);
+  }
+  
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = RA  ) { bits = (6 ,20);}
+  define (instrfield = RB  ) { bits = (21,30);}
+  
+  
+  define (instr = A) { 
+    fields = (OPCD(1),RA,RB); 
+    action  = {
+      // Bad- hasAttr takes two arguments.
+      if (A.hasAttr(up)) { int j = 10; };
+    };
+  }
+
+  define (instr = B) { 
+    fields = (OPCD(2),RA,RB); 
+    action  = {
+      // Bad- unknown attribute.
+      if (A.hasAttr(RA,foobar)) { int j = 10; };
+    };
+  }
+}
+
+define (core=P) {
+  archs=minippc;
+}

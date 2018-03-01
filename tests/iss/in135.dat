@@ -1,0 +1,59 @@
+#
+# Tests that an exception caused by a read-hook will be handled properly,
+# especially within a transactional ISS.
+#
+= asm
+
+  addi r2,r2,1
+  mfspr r3,250 # This will cause a program exception.
+  addi r6,r6,1 # Shouldn't be reached b/c of program exception.
+  .long 0
+  addi r5,r5,1 # This should execute due to program exeception.
+  .long 0
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA   d=0x00
+RD n=IVOR6 d=0x10
+
+RD n=GPR i=3 d=0xdeadbeef
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000004 d=0x7C7A3AA6	#	mfspr r3,250 # This will cause a program exception.
+MD n=Mem ra=0x00000008 d=0x38C60001	#	addi r6,r6,1 # Shouldn't be reached b/c of program exception.
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000010 d=0x38A50001	#	addi r5,r5,1 # This should execute due to program exeception.
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x38420001                                     asm="addi 2,2,0x1"
+R n=GPR i=2 d=0x00000001
+
+I ea=0x4 id=2
+INSTR op=0x7c7a3aa6                                     asm="mfspr 3,0xfa"
+E n=Program
+R n=SRR0 d=0x00000004
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+# We're leaving ESR out b/c DLX_bp_safe, uses mod11.adl, which defines
+# the program exception slightly differently.
+
+I ea=0x10 id=3
+INSTR op=0x38a50001                                     asm="addi 5,5,0x1"
+R n=GPR i=5 d=0x00000001
+
+I ea=0x14 id=4
+INSTR op=0x00000000                                     asm="halt "
+
+RESULTS
+
+RD n=GPR i=2 d=1
+RD n=GPR i=3 d=0xdeadbeef
+RD n=GPR i=5 d=1
+RD n=GPR i=6 d=0

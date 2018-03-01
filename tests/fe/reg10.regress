@@ -1,0 +1,2 @@
+reg10.adl:18: Indexed-field width must be non-zero.
+reg10.adl:11: Indexed-field width is not an integer-divisor of the register width.

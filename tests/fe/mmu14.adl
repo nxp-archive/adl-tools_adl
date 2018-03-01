@@ -1,0 +1,171 @@
+//
+// Example MMU- this should not parse.
+//
+// Tests error checking related to test sets.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=HDBCR0) {
+    define (field=MMU_ENABLE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (reg=EPID) { }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  attrs = (translation_attr,minippc_mmu,foo);
+
+  define (mmu) {
+
+    attrs = foo;
+
+    both_enable = { return HDBCR0.MMU_ENABLE(); };
+
+    define(lookup=TlbCam) {
+      attrs = minippc_mmu;
+      define (wayfield=x) {
+        bits = 2;
+        reset = 2;
+      }
+      define (wayfield=y) {
+        bits = 3;
+        reset = 1;
+      }
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=Foo) { }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      define (tests=Normal) {
+        enable = func (int x) { return instrHasAttr(stuff); };
+        test = Compare(TID,PID0,PID1);
+        test = AddrComp(EPN);
+      }
+
+      define (tests=Extra) {
+        test = Compare(TID,PID0,PID1);
+        test = AddrComp(EPN);
+      }
+
+      define (tests=Extended) {
+        enable = func (addr_t y) { return 0; };
+        test = Compare(TID,PID2);
+        test = AddrComp(EPN);
+      }
+
+      test_order = (Normal,Extra,Foo,Extended);
+
+      size = SIZE;
+      realpage = RPN;
+      valid = { return (V != 0); };
+      
+      hit  = func (TransType tt,TlbCam_t x,addr_t,unsigned seq) { };
+      miss = func (TransType tt,addr_t,unsigned seq) { };
+      reset = func() {};
+
+      exec_perm = func(TlbCam_t t,addr_t,unsigned seq) {
+        if (!((MSR.PR()) ? t.SX : t.UX)) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      load_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if (!((MSR.PR()) ? t.SR : t.UR)) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      store_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if (! ((MSR.PR()) ? t.SW : t.UW)) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+    }
+
+    aligned_write = func(addr_t ea,addr_t ra) {
+      int i = 20;
+    };
+    
+    misaligned_write = func(addr_t ea,addr_t ra) {
+      int j = 30;
+    };
+
+    instr_miss = func (addr_t a,unsigned seq) { raiseException(ITlbMiss); };
+    data_miss = func (addr_t a,unsigned seq) { DEAR = a; raiseException(DTlbMiss); };
+
+  }
+
+}
+
+define(arch=foo2) {
+  defmod(mmu) {
+    defmod(lookup=TlbCam) {
+      define (wayfield=a) {
+        bits = 5;
+      }
+      define (wayfield=y) {
+        bits = 5;
+      }
+      define (wayfield=Foo) {
+        remove = true;
+      }
+    }
+  }
+}
+
+
+define (core=P) {
+  archs=(foo,foo2);
+}

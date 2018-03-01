@@ -1,0 +1,64 @@
+#
+# Make sure that latencies from an external memory in iss-mem-mode propagate to
+# the model.
+#
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,1
+  lwz r2,0x1000(r0)
+  lwz r3,0x1008(r0)
+  stw r2,0x2000(r0)  
+  
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x80401000	#	lwz r2,0x1000(r0)
+MD n=Mem ra=0x0000000c d=0x80601008	#	lwz r3,0x1008(r0)
+MD n=Mem ra=0x00000010 d=0x90402000	#	stw r2,0x2000(r0)  
+# </GEN>
+
+RD n=NIA d=0x0
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1008 d=0x12345678
+MD n=Mem ra=0x2000 d=0x00000000
+
+TRACE
+
+I ea=0x0 id=1
+ITIME t=5
+CTIME t=9
+
+I ea=0x4 id=2
+ITIME t=11
+CTIME t=15
+
+I ea=0x8 id=3
+CTIME t=25
+
+I ea=0xc id=4
+ITIME t=23
+CTIME t=31
+
+I ea=0x10 id=5
+ITIME t=29
+CTIME t=33
+
+I ea=0x14 id=6
+ITIME t=35
+CTIME t=39
+
+RESULTS
+
+RD n=GPR i=1 d=2
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0x12345678
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1008 d=0x12345678
+MD n=Mem ra=0x2000 d=0xdeadbeef

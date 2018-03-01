@@ -1,0 +1,79 @@
+#
+# Test deadlock detection/recovery for multi-threaded designs.  The crxor
+# instruction is hardcoded to cause a deadlock.
+#
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	crxor 0,1,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	addi r2,r2,2
+	.long 0x0
+	addi r3,r3,3
+	addi r3,r3,3
+	addi r3,r3,3
+	addi r3,r3,3
+	addi r3,r3,3
+	crxor 0,1,2
+	addi r4,r4,4
+	addi r4,r4,4
+	addi r4,r4,4
+	addi r4,r4,4
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x4C011182	#	crxor 0,1,2
+MD n=Mem ra=0x00000010 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000014 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000018 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000001c d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000028 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000002c d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000030 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000034 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000038 d=0x4C011182	#	crxor 0,1,2
+MD n=Mem ra=0x0000003c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000040 d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000044 d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000048 d=0x38840004	#	addi r4,r4,4
+# </GEN>
+
+CORE n=:PMT
+
+RD n=CCR d=0x80000000
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA d=0x0
+RD n=CR  d=0x40000000
+
+CORE n=:PMT:t1
+
+RD n=NIA d=0x24
+RD n=CR  d=0x20000000
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=3
+RD n=GPR i=2 d=8
+RD n=CR      d=0xc0000000
+
+CORE n=:PMT:t1
+
+RD n=GPR i=3 d=15
+RD n=GPR i=4 d=16
+RD n=CR      d=0xa0000000

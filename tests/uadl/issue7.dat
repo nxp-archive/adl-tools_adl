@@ -1,0 +1,63 @@
+#
+# Two tests of a rigid, lock-step pipeline.  The load and add should always stay
+# in the same pipe, regardless of stalls, even if the second instruction stalls
+# but the first doesn't.
+#
+= asm
+
+	lwz  r2,0x1006(r3)
+	addi r1,r1,4
+	addi r1,r1,4
+	lwz  r4,0x1002(r3)
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80431006	#	lwz  r2,0x1006(r3)
+MD n=Mem ra=0x00000004 d=0x38210004	#	addi r1,r1,4
+MD n=Mem ra=0x00000008 d=0x38210004	#	addi r1,r1,4
+MD n=Mem ra=0x0000000c d=0x80831002	#	lwz  r4,0x1002(r3)
+# </GEN>
+
+RD n=NIA     d=0x0
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+MD n=Mem ra=0x1008 d=0x87654321
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x80431006					asm="lwz r2,4102(r3)"
+ITIME t=1
+CTIME t=6
+
+I ea=0x4 id=2
+INSTR op=0x38210004					asm="addi r1,r1,4"
+ITIME t=1
+CTIME t=6
+
+I ea=0x8 id=3
+INSTR op=0x38210004					asm="addi r1,r1,4"
+ITIME t=2
+CTIME t=10
+
+I ea=0xc id=4
+INSTR op=0x80831002					asm="lwz r4,4098(r3)"
+ITIME t=2
+CTIME t=10
+
+I ea=0x10 id=5
+INSTR op=0x00000000					asm="halt "
+ITIME t=6
+CTIME t=11
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000008
+RD n=GPR i=2 d=0x56788765
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0xbeef1234

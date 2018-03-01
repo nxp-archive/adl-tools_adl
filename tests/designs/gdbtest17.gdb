@@ -1,0 +1,15 @@
+qSupported:multiprocess+;qRelocInsn+
+!
+Hg0
+QNonStop:0
+?
+Hc-1
+qC
+qAttached
+qSymbol::
+vCont?
+vCont;s:1;c
+vCont;s:1;c
+vCont;s:1;c
+vCont;s:1;c
+@

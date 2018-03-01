@@ -1,0 +1,33 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+template < size_t Size >  bitset < Size  > signExtend ( bitset < Size  > a , int signbit ) {
+    assert ( signbit < a . size (  ) ) ;
+    if ( a . test ( signbit ) ) {
+        for (  int i = a . size (  ) - 1 ; i >= signbit ; -- i ) {
+            a . set ( i ) ;
+        }
+    }
+    return a ;
+}
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Width:  32
+  Attributes:  cia nia 
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

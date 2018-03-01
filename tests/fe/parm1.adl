@@ -1,0 +1,53 @@
+//
+// Simple test of parameters:  Parameters must have options and the
+// default value must be a registered option.
+//
+
+define (arch=a1) {
+  define(parm=p1) {
+    value=stuff;
+  }
+  define (parm=p2) {
+    options=(hello,goodbye);
+    value=what;
+  }
+  define (parm=p3) {
+    options=(mode1,mode2,mode3,mode4);
+  }
+  define (parm=p4) {
+    options=(a,b,c,d);
+  }
+}
+
+define (arch=a2) {
+  // This will replace the existing definition- it
+  // should be a defmod to work.
+  define(parm=p4) {
+    value=d;
+    constant=true;
+  }
+  // Should fail b/c watch expressions can't modify registers.
+  define (reg=X) {}
+  define(parm=p5) {
+    options=(a,b,c);
+    value = a;
+    watch = {
+      X = 20;
+    };
+  }
+  // Should fail b/c we use a boolean value w/o the parameter
+  // being exclusively a boolean.
+  define (parm=p6) {
+    options=(true,foo);
+  }
+  define (parm=p7) {
+    options=(false,bar);
+  }
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+}
+
+define (core=bar) {
+  archs=(a1,a2);
+}

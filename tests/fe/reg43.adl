@@ -1,0 +1,47 @@
+// 
+// Tests the use of regfile hasAttr().
+//
+define (arch=minippc) {
+      
+  define (reg = pc) { attrs = (cia,nia); }
+  define (reg=X) { attrs = up; }
+  define (reg=Y) { attrs = right; }
+  
+  attrs = (up,down,left,right);
+  
+  define (regfile=A) {
+    size = 32;
+    attrs = (up,down,left);
+  }
+
+  define (regfile=B) {
+    size = 32;
+    
+    define (entry=1) { reg=X; };
+    define (entry=2) { reg=Y; };
+  }
+  
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = RA  ) { bits = (6 ,20);}
+  define (instrfield = RB  ) { bits = (21,30);}
+  
+  
+  define (instr = A) { 
+    fields = (OPCD(1),RA,RB); 
+    action  = {
+      if (A.hasAttr(RA,up)) { int j = 10; };
+    };
+  }
+
+  define (instr = B) { 
+    fields = (OPCD(2),RA,RB); 
+    action  = {
+      // Bad- unknown attribute.
+      if (B.hasAttr(RA,down)) { int j = 10; };
+    };
+  }
+}
+
+define (core=P) {
+  archs=minippc;
+}

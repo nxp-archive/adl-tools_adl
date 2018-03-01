@@ -1,0 +1,250 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  16
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  F: [not used] 
+    Pseudo:  1
+    Width:   4
+  OPCD: [not used] 
+    Pseudo:  1
+    Width:   8
+    Primary opcode.
+    
+  RA: 
+    Pseudo:  1
+    Width:   4
+  RA_imp_bits__12_15_: [12,15] 
+    Implements:  RA
+  RA_imp_bits__8_11_: [8,11] 
+    Implements:  RA
+  RT: 
+    Pseudo:  1
+    Width:   4
+  RT_imp_bits__8_11_: [8,11] 
+    Implements:  RT
+  VarInstrOpcode_imp_bits__0_7_: [0,7] 
+  VarInstrOpcode_imp_bits__0_7_x_12_15_: [0,7] [12,15] 
+  VarInstrOpcode_imp_bits__0_7_x_16_19_: [0,7] [16,19] 
+  VarInstrOpcode_imp_bits__0_7_x_8_11_x_28_31_: [0,11] [28,31] 
+  VarInstrOpcode_imp_bits__0_7_x_8_11_x_36_39_: [0,11] [36,39] 
+  X1: 
+    Pseudo:  1
+    Width:   16
+  X1_imp_bits__12_27_: [12,27] 
+    Implements:  X1
+  X1_imp_bits__16_31_: [16,31] 
+    Implements:  X1
+  X1_imp_bits__32_47_: [32,47] 
+    Implements:  X1
+  X1_imp_bits__40_55_: [40,55] 
+    Implements:  X1
+  X2: 
+    Pseudo:  1
+    Width:   24
+  X2_imp_bits__12_35_: [12,35] 
+    Implements:  X2
+  X2_imp_bits__16_39_: [16,39] 
+    Implements:  X2
+  X2_imp_bits__32_55_: [32,55] 
+    Implements:  X2
+  X2_imp_bits__40_63_: [40,63] 
+    Implements:  X2
+Subinstructions:
+Name:  Decr
+Fields:  F(1)
+Action:  func ( bits < 32 > & result , bits < 32 > src ) {
+    result = src - 1 ;
+}
+-------------------------------
+Name:  Incr
+Fields:  F(0)
+Action:  func ( bits < 32 > & result , bits < 32 > src ) {
+    result = src + 1 ;
+}
+-------------------------------
+Name:  a1
+Fields:  X1 F(0)
+Action:  func ( bits < 32 > & addr ) {
+    addr = X1 ;
+}
+-------------------------------
+Name:  a2
+Fields:  X2 F(1)
+Action:  func ( bits < 32 > & addr ) {
+    addr = X2 ;
+}
+-------------------------------
+Instructions:
+  Name:  addi (rank: 100)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__0_7_ RT_imp_bits__8_11_ RA_imp_bits__12_15_ X1_imp_bits__16_31_
+  Action:  {
+    GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + X1[write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + X1] ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  halt (rank: 100)
+  Width:  8
+  Fields:  VarInstrOpcode_imp_bits__0_7_
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+  Name:  inc_Decr (rank: 0)
+  Width:  24
+  Fields:  RT_imp_bits__8_11_ RA_imp_bits__12_15_ VarInstrOpcode_imp_bits__0_7_x_16_19_
+  Action:  {
+     bits < 32 > result ;
+    Decr( result , GPR ( RA )[read: GPR(RA)] )[Op: Decr] ;
+    GPR ( RT ) = result[write: GPR(RT) := result] ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  inc_Incr (rank: 0)
+  Width:  24
+  Fields:  RT_imp_bits__8_11_ RA_imp_bits__12_15_ VarInstrOpcode_imp_bits__0_7_x_16_19_
+  Action:  {
+     bits < 32 > result ;
+    Incr( result , GPR ( RA )[read: GPR(RA)] )[Op: Incr] ;
+    GPR ( RT ) = result[write: GPR(RT) := result] ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  ld_a1 (rank: 0)
+  Width:  32
+  Fields:  RA_imp_bits__8_11_ VarInstrOpcode_imp_bits__0_7_x_12_15_ X1_imp_bits__16_31_
+  Action:  {
+     bits < 32 > addr ;
+    a1( addr )[A: a1] ;
+    GPR ( RA ) = Mem ( addr , 4 )[read: Mem @ addr of 4 bytes][write: GPR(RA) := Mem ( addr , 4 )[read: Mem @ addr of 4 bytes]] ;
+}
+  Target Registers:  GPR(RA) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  ld_a2 (rank: 0)
+  Width:  40
+  Fields:  RA_imp_bits__8_11_ VarInstrOpcode_imp_bits__0_7_x_12_15_ X2_imp_bits__16_39_
+  Action:  {
+     bits < 32 > addr ;
+    a2( addr )[A: a2] ;
+    GPR ( RA ) = Mem ( addr , 4 )[read: Mem @ addr of 4 bytes][write: GPR(RA) := Mem ( addr , 4 )[read: Mem @ addr of 4 bytes]] ;
+}
+  Target Registers:  GPR(RA) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  mov_a1_a1 (rank: 0)
+  Width:  48
+  Fields:  X1_imp_bits__12_27_ VarInstrOpcode_imp_bits__0_7_x_8_11_x_28_31_ X1_imp_bits__32_47_
+  Action:  {
+     bits < 32 > addr1 , addr2 ;
+    a1( addr1 )[A: a1] ;
+    a1( addr2 )[B: a1] ;
+    Mem ( addr1 , 4 ) = Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes][write: Mem @ addr1 of 4 bytes := Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes]] ;
+}
+  Source Memories:  Mem 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  mov_a1_a2 (rank: 0)
+  Width:  56
+  Fields:  X1_imp_bits__12_27_ VarInstrOpcode_imp_bits__0_7_x_8_11_x_28_31_ X2_imp_bits__32_55_
+  Action:  {
+     bits < 32 > addr1 , addr2 ;
+    a1( addr1 )[A: a1] ;
+    a2( addr2 )[B: a2] ;
+    Mem ( addr1 , 4 ) = Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes][write: Mem @ addr1 of 4 bytes := Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes]] ;
+}
+  Source Memories:  Mem 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  mov_a2_a1 (rank: 0)
+  Width:  56
+  Fields:  X2_imp_bits__12_35_ VarInstrOpcode_imp_bits__0_7_x_8_11_x_36_39_ X1_imp_bits__40_55_
+  Action:  {
+     bits < 32 > addr1 , addr2 ;
+    a2( addr1 )[A: a2] ;
+    a1( addr2 )[B: a1] ;
+    Mem ( addr1 , 4 ) = Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes][write: Mem @ addr1 of 4 bytes := Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes]] ;
+}
+  Source Memories:  Mem 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  mov_a2_a2 (rank: 0)
+  Width:  64
+  Fields:  X2_imp_bits__12_35_ VarInstrOpcode_imp_bits__0_7_x_8_11_x_36_39_ X2_imp_bits__40_63_
+  Action:  {
+     bits < 32 > addr1 , addr2 ;
+    a2( addr1 )[A: a2] ;
+    a2( addr2 )[B: a2] ;
+    Mem ( addr1 , 4 ) = Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes][write: Mem @ addr1 of 4 bytes := Mem ( addr2 , 4 )[read: Mem @ addr2 of 4 bytes]] ;
+}
+  Source Memories:  Mem 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  st_a1 (rank: 0)
+  Width:  32
+  Fields:  RA_imp_bits__8_11_ VarInstrOpcode_imp_bits__0_7_x_12_15_ X1_imp_bits__16_31_
+  Action:  {
+     bits < 32 > addr ;
+    a1( addr )[A: a1] ;
+    Mem ( addr , 4 ) = GPR ( RA )[read: GPR(RA)][write: Mem @ addr of 4 bytes := GPR ( RA )[read: GPR(RA)]] ;
+}
+  Source Registers:  GPR(RA) 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  st_a2 (rank: 0)
+  Width:  40
+  Fields:  RA_imp_bits__8_11_ VarInstrOpcode_imp_bits__0_7_x_12_15_ X2_imp_bits__16_39_
+  Action:  {
+     bits < 32 > addr ;
+    a2( addr )[A: a2] ;
+    Mem ( addr , 4 ) = GPR ( RA )[read: GPR(RA)][write: Mem @ addr of 4 bytes := GPR ( RA )[read: GPR(RA)]] ;
+}
+  Source Registers:  GPR(RA) 
+  Target Memories:  Mem 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff00000000000000
+    30(1e00000000000000):      Mask:  0x00f0000000000000
+      0(0000000000000000):        Mask:  0x0000000f00000000
+        0(0000000000000000):  mov_a1_a1
+        1(0000000100000000):  mov_a1_a2
+      1(0010000000000000):        Mask:  0x000000000f000000
+        0(0000000000000000):  mov_a2_a1
+        1(0000000001000000):  mov_a2_a2
+    32(2000000000000000):  halt
+    46(2e00000000000000):      Mask:  0x000f000000000000
+      0(0000000000000000):  ld_a1
+      1(0001000000000000):  ld_a2
+    62(3e00000000000000):      Mask:  0x000f000000000000
+      0(0000000000000000):  st_a1
+      1(0001000000000000):  st_a2
+    78(4e00000000000000):  addi
+    94(5e00000000000000):      Mask:  0x0000f00000000000
+      0(0000000000000000):  inc_Incr
+      1(0000100000000000):  inc_Decr
+-------------------------------
+

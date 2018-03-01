@@ -1,0 +1,4044 @@
+#
+# Tests the use of a tags-only cache between cores.
+#
+# The first core writes data, then broadcasts a message event.
+# The second core, on a message event, reads the data and
+# stores the final sum.
+#
+
+= asm
+
+	b S1
+	b S2
+	
+S1:
+	# Producer:  Generate data and notify other core via msg.
+	#
+	# Set up number of loop iterations. 
+	li r1,5
+	mtctr r1
+	# We'll be sending 5 items each time.
+	li r1,5
+	mtspr 301,r1
+	# We'll be storing data at this address.
+	li r1,0x1000
+	# Initial data starts at 10.
+	li r2,10
+ProducerLoop:
+	# Write the data.
+	stw r2,0x0(r1)
+	addi r2,r2,1
+	stw r2,0x4(r1)
+	addi r2,r2,1
+	stw r2,0x8(r1)
+	addi r2,r2,1
+	stw r2,0xc(r1)
+	addi r2,r2,1
+	stw r2,0x10(r1)
+	addi r2,r2,1
+	# Send the message.
+	mtspr 302,r1
+	# Wait until we can proceed.
+ProducerWait:
+	mfspr r4,300
+	cmpwi r4,0
+	beq ProducerWait
+	# Rinse and repeat.
+	bdnz ProducerLoop
+	# When all finished, signal by sending '1'.
+	li r1,1
+	mtspr 302,r1
+	.long 0x0
+
+S2:
+	# Consumer: Loop until a non-zero value is in the receive register.  Then read
+	# in the data, sum it up, and store the sum.  Then notify producer to
+	# continue.
+	# 
+	# We store each sum starting at this address +4.
+	li r1,0x1ffc
+ConsumerLoop:
+ConsumerWait:
+	mfspr r2,300
+	cmpwi r2,0
+	# Zero means we don't have anythingl.
+	beq ConsumerWait
+	# One means we're done.
+	cmpwi r2,1
+	beq ConsumerDone
+	# Got something, so sum up the data and store it off.
+	# Get the number of items.
+	mfspr r3,301
+	mtctr r3
+	# Store the sum.
+	li r4,0
+	addi r2,r2,-4
+ConsumerSum:
+	lwzu r3,0x4(r2)
+	add r4,r4,r3
+	bdnz ConsumerSum
+	# Then store the sum.
+	stwu r4,0x4(r1)
+	# Notify the producer that it can proceed.
+	li r2,1
+	mtspr 302,r2
+	# Repeat until we get a done message.
+	b ConsumerLoop
+ConsumerDone:
+	.long 0x0	
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x48000008	#	b S1
+MD n=Mem ra=0x00000004 d=0x48000064	#	b S2
+MD n=Mem ra=0x00000008 d=0x38200005	#	li r1,5
+MD n=Mem ra=0x0000000c d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x00000010 d=0x38200005	#	li r1,5
+MD n=Mem ra=0x00000014 d=0x7C2D4BA6	#	mtspr 301,r1
+MD n=Mem ra=0x00000018 d=0x38201000	#	li r1,0x1000
+MD n=Mem ra=0x0000001c d=0x3840000A	#	li r2,10
+MD n=Mem ra=0x00000020 d=0x90410000	#	stw r2,0x0(r1)
+MD n=Mem ra=0x00000024 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000028 d=0x90410004	#	stw r2,0x4(r1)
+MD n=Mem ra=0x0000002c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000030 d=0x90410008	#	stw r2,0x8(r1)
+MD n=Mem ra=0x00000034 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000038 d=0x9041000C	#	stw r2,0xc(r1)
+MD n=Mem ra=0x0000003c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000040 d=0x90410010	#	stw r2,0x10(r1)
+MD n=Mem ra=0x00000044 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000048 d=0x7C2E4BA6	#	mtspr 302,r1
+MD n=Mem ra=0x0000004c d=0x7C8C4AA6	#	mfspr r4,300
+MD n=Mem ra=0x00000050 d=0x2C040000	#	cmpwi r4,0
+MD n=Mem ra=0x00000054 d=0x4182FFF8	#	beq ProducerWait
+MD n=Mem ra=0x00000058 d=0x4200FFC8	#	bdnz ProducerLoop
+MD n=Mem ra=0x0000005c d=0x38200001	#	li r1,1
+MD n=Mem ra=0x00000060 d=0x7C2E4BA6	#	mtspr 302,r1
+MD n=Mem ra=0x00000064 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000068 d=0x38201FFC	#	li r1,0x1ffc
+MD n=Mem ra=0x0000006c d=0x7C4C4AA6	#	mfspr r2,300
+MD n=Mem ra=0x00000070 d=0x2C020000	#	cmpwi r2,0
+MD n=Mem ra=0x00000074 d=0x4182FFF8	#	beq ConsumerWait
+MD n=Mem ra=0x00000078 d=0x2C020001	#	cmpwi r2,1
+MD n=Mem ra=0x0000007c d=0x41820030	#	beq ConsumerDone
+MD n=Mem ra=0x00000080 d=0x7C6D4AA6	#	mfspr r3,301
+MD n=Mem ra=0x00000084 d=0x7C6903A6	#	mtctr r3
+MD n=Mem ra=0x00000088 d=0x38800000	#	li r4,0
+MD n=Mem ra=0x0000008c d=0x3842FFFC	#	addi r2,r2,-4
+MD n=Mem ra=0x00000090 d=0x84620004	#	lwzu r3,0x4(r2)
+MD n=Mem ra=0x00000094 d=0x7C841A14	#	add r4,r4,r3
+MD n=Mem ra=0x00000098 d=0x4200FFF8	#	bdnz ConsumerSum
+MD n=Mem ra=0x0000009c d=0x94810004	#	stwu r4,0x4(r1)
+MD n=Mem ra=0x000000a0 d=0x38400001	#	li r2,1
+MD n=Mem ra=0x000000a4 d=0x7C4E4BA6	#	mtspr 302,r2
+MD n=Mem ra=0x000000a8 d=0x4BFFFFC4	#	b ConsumerLoop
+MD n=Mem ra=0x000000ac d=0x00000000	#	.long 0x0	
+# </GEN>
+
+CORE n=:procs:P0
+
+RD n=NIA d=0x0
+
+CORE n=:procs:P1
+
+RD n=NIA d=0x4
+
+
+TRACE
+
+
+CORE n=procs:P0
+
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x48000008
+INSTR op=0x48000008					asm="b 0x0000000000000008"
+B taken=1 ea=0x8
+
+CORE n=procs:P1
+
+
+I ea=0x4 id=2 tic=1
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x48000064
+INSTR op=0x48000064					asm="b 0x0000000000000068"
+B taken=1 ea=0x68
+
+CORE n=procs:P0
+
+
+I ea=0x8 id=3 tic=2
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38200005
+INSTR op=0x38200005					asm="li r1,5"
+R n=GPR i=1 d=0x00000005
+
+CORE n=procs:P1
+
+
+I ea=0x68 id=4 tic=2
+M n=Mem t=ifetch ea=0x68 ra=0x68 d=0x38201ffc
+INSTR op=0x38201ffc					asm="li r1,8188"
+R n=GPR i=1 d=0x00001ffc
+
+CORE n=procs:P0
+
+
+I ea=0xc id=5 tic=3
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c2903a6
+INSTR op=0x7c2903a6					asm="mtctr r1"
+R n=CTR d=0x00000005
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=6 tic=3
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x10 id=7 tic=4
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38200005
+INSTR op=0x38200005					asm="li r1,5"
+R n=GPR i=1 d=0x00000005
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=8 tic=4
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x14 id=9 tic=5
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c2d4ba6
+INSTR op=0x7c2d4ba6					asm="mtspr ACNT,r1"
+R n=ACNT d=0x00000005
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=10 tic=5
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x18 id=11 tic=6
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x38201000
+INSTR op=0x38201000					asm="li r1,4096"
+R n=GPR i=1 d=0x00001000
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=12 tic=6
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x1c id=13 tic=7
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x3840000a
+INSTR op=0x3840000a					asm="li r2,10"
+R n=GPR i=2 d=0x0000000a
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=14 tic=7
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x20 id=15 tic=8
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+D n=Mem t=write ea=0x1000 nb=4
+C n=L1d a=miss t=write set=32 way=0 lm=0x7f ra=0x1000
+C n=L1d a=load t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x0000000a
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=16 tic=8
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x24 id=17 tic=9
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000000b
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=18 tic=9
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x28 id=19 tic=10
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90410004
+INSTR op=0x90410004					asm="stw r2,4(r1)"
+D n=Mem t=write ea=0x1004 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x0000000b
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=20 tic=10
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x2c id=21 tic=11
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000000c
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=22 tic=11
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x30 id=23 tic=12
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x90410008
+INSTR op=0x90410008					asm="stw r2,8(r1)"
+D n=Mem t=write ea=0x1008 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x0000000c
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=24 tic=12
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x34 id=25 tic=13
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000000d
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=26 tic=13
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x38 id=27 tic=14
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x9041000c
+INSTR op=0x9041000c					asm="stw r2,12(r1)"
+D n=Mem t=write ea=0x100c nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x100c ra=0x100c d=0x0000000d
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=28 tic=14
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x3c id=29 tic=15
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000000e
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=30 tic=15
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x40 id=31 tic=16
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x90410010
+INSTR op=0x90410010					asm="stw r2,16(r1)"
+D n=Mem t=write ea=0x1010 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x0000000e
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=32 tic=16
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x44 id=33 tic=17
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000000f
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=34 tic=17
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x48 id=35 tic=18
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6					asm="mtspr ASEND,r1"
+R n=ARECV d=0x00001000 cn=procs:P1
+R n=ACNT d=0x00000005 cn=procs:P1
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=36 tic=18
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=37 tic=19
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=38 tic=19
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=39 tic=20
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=40 tic=20
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=41 tic=21
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x78 id=42 tic=21
+M n=Mem t=ifetch ea=0x78 ra=0x78 d=0x2c020001
+INSTR op=0x2c020001					asm="cmpwi r2,1"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=43 tic=22
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x7c id=44 tic=22
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x41820030
+INSTR op=0x41820030					asm="beq- 0x00000000000000ac"
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=45 tic=23
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x80 id=46 tic=23
+M n=Mem t=ifetch ea=0x80 ra=0x80 d=0x7c6d4aa6
+INSTR op=0x7c6d4aa6					asm="mfspr r3,ACNT"
+R n=GPR i=3 d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=47 tic=24
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x84 id=48 tic=24
+M n=Mem t=ifetch ea=0x84 ra=0x84 d=0x7c6903a6
+INSTR op=0x7c6903a6					asm="mtctr r3"
+R n=CTR d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=49 tic=25
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x88 id=50 tic=25
+M n=Mem t=ifetch ea=0x88 ra=0x88 d=0x38800000
+INSTR op=0x38800000					asm="li r4,0"
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=51 tic=26
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x8c id=52 tic=26
+M n=Mem t=ifetch ea=0x8c ra=0x8c d=0x3842fffc
+INSTR op=0x3842fffc					asm="addi r2,r2,-4"
+R n=GPR i=2 d=0x00000ffc
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=53 tic=27
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=54 tic=27
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=0 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P0
+C n=L1d a=load t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000000a
+R n=GPR i=3 d=0x0000000a
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=55 tic=28
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=56 tic=28
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000000a
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=57 tic=29
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=58 tic=29
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000004
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=59 tic=30
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=60 tic=30
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1004 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x0000000b
+R n=GPR i=3 d=0x0000000b
+R n=GPR i=2 d=0x00001004
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=61 tic=31
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=62 tic=31
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000015
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=63 tic=32
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=64 tic=32
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000003
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=65 tic=33
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=66 tic=33
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1008 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x0000000c
+R n=GPR i=3 d=0x0000000c
+R n=GPR i=2 d=0x00001008
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=67 tic=34
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=68 tic=34
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000021
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=69 tic=35
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=70 tic=35
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000002
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=71 tic=36
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=72 tic=36
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x100c nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x100c ra=0x100c d=0x0000000d
+R n=GPR i=3 d=0x0000000d
+R n=GPR i=2 d=0x0000100c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=73 tic=37
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=74 tic=37
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000002e
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=75 tic=38
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=76 tic=38
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000001
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=77 tic=39
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=78 tic=39
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1010 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x0000000e
+R n=GPR i=3 d=0x0000000e
+R n=GPR i=2 d=0x00001010
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=79 tic=40
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=80 tic=40
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000003c
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=81 tic=41
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=82 tic=41
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=83 tic=42
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x9c id=84 tic=42
+M n=Mem t=ifetch ea=0x9c ra=0x9c d=0x94810004
+INSTR op=0x94810004					asm="stwu r4,4(r1)"
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=64 way=0 lm=0x7f ra=0x2000
+C n=L1d a=load t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x0000003c
+R n=GPR i=1 d=0x00002000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=85 tic=43
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0xa0 id=86 tic=43
+M n=Mem t=ifetch ea=0xa0 ra=0xa0 d=0x38400001
+INSTR op=0x38400001					asm="li r2,1"
+R n=GPR i=2 d=0x00000001
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=87 tic=44
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0xa4 id=88 tic=44
+M n=Mem t=ifetch ea=0xa4 ra=0xa4 d=0x7c4e4ba6
+INSTR op=0x7c4e4ba6					asm="mtspr ASEND,r2"
+R n=ARECV d=0x00000001 cn=procs:P0
+R n=ACNT d=0x00000005 cn=procs:P0
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=89 tic=45
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0xa8 id=90 tic=45
+M n=Mem t=ifetch ea=0xa8 ra=0xa8 d=0x4bffffc4
+INSTR op=0x4bffffc4					asm="b 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=91 tic=46
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000001
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=92 tic=46
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=93 tic=47
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=94 tic=47
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=95 tic=48
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=96 tic=48
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x58 id=97 tic=49
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x4200ffc8
+INSTR op=0x4200ffc8					asm="bdnz+ 0x0000000000000020"
+R n=CTR d=0x00000004
+B taken=1 ea=0x20
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=98 tic=49
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x20 id=99 tic=50
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+D n=Mem t=write ea=0x1000 nb=4
+C n=L1d a=miss t=write set=32 way=1 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P1
+C n=L1d a=load t=write set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x0000000f
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=100 tic=50
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x24 id=101 tic=51
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000010
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=102 tic=51
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x28 id=103 tic=52
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90410004
+INSTR op=0x90410004					asm="stw r2,4(r1)"
+D n=Mem t=write ea=0x1004 nb=4
+C n=L1d a=hit t=write set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000010
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=104 tic=52
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x2c id=105 tic=53
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000011
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=106 tic=53
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x30 id=107 tic=54
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x90410008
+INSTR op=0x90410008					asm="stw r2,8(r1)"
+D n=Mem t=write ea=0x1008 nb=4
+C n=L1d a=hit t=write set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x00000011
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=108 tic=54
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x34 id=109 tic=55
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000012
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=110 tic=55
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x38 id=111 tic=56
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x9041000c
+INSTR op=0x9041000c					asm="stw r2,12(r1)"
+D n=Mem t=write ea=0x100c nb=4
+C n=L1d a=hit t=write set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x100c ra=0x100c d=0x00000012
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=112 tic=56
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x3c id=113 tic=57
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000013
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=114 tic=57
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x40 id=115 tic=58
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x90410010
+INSTR op=0x90410010					asm="stw r2,16(r1)"
+D n=Mem t=write ea=0x1010 nb=4
+C n=L1d a=hit t=write set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x00000013
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=116 tic=58
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x44 id=117 tic=59
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000014
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=118 tic=59
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x48 id=119 tic=60
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6					asm="mtspr ASEND,r1"
+R n=ARECV d=0x00001000 cn=procs:P1
+R n=ACNT d=0x00000005 cn=procs:P1
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=120 tic=60
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=121 tic=61
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=122 tic=61
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=123 tic=62
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=124 tic=62
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=125 tic=63
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=126 tic=63
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=127 tic=64
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x78 id=128 tic=64
+M n=Mem t=ifetch ea=0x78 ra=0x78 d=0x2c020001
+INSTR op=0x2c020001					asm="cmpwi r2,1"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=129 tic=65
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x7c id=130 tic=65
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x41820030
+INSTR op=0x41820030					asm="beq- 0x00000000000000ac"
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=131 tic=66
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x80 id=132 tic=66
+M n=Mem t=ifetch ea=0x80 ra=0x80 d=0x7c6d4aa6
+INSTR op=0x7c6d4aa6					asm="mfspr r3,ACNT"
+R n=GPR i=3 d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=133 tic=67
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x84 id=134 tic=67
+M n=Mem t=ifetch ea=0x84 ra=0x84 d=0x7c6903a6
+INSTR op=0x7c6903a6					asm="mtctr r3"
+R n=CTR d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=135 tic=68
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x88 id=136 tic=68
+M n=Mem t=ifetch ea=0x88 ra=0x88 d=0x38800000
+INSTR op=0x38800000					asm="li r4,0"
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=137 tic=69
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x8c id=138 tic=69
+M n=Mem t=ifetch ea=0x8c ra=0x8c d=0x3842fffc
+INSTR op=0x3842fffc					asm="addi r2,r2,-4"
+R n=GPR i=2 d=0x00000ffc
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=139 tic=70
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=140 tic=70
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=1 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P0
+C n=L1d a=load t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000000f
+R n=GPR i=3 d=0x0000000f
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=141 tic=71
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=142 tic=71
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000000f
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=143 tic=72
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=144 tic=72
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000004
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=145 tic=73
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=146 tic=73
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1004 nb=4
+C n=L1d a=hit t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000010
+R n=GPR i=3 d=0x00000010
+R n=GPR i=2 d=0x00001004
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=147 tic=74
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=148 tic=74
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000001f
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=149 tic=75
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=150 tic=75
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000003
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=151 tic=76
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=152 tic=76
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1008 nb=4
+C n=L1d a=hit t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000011
+R n=GPR i=3 d=0x00000011
+R n=GPR i=2 d=0x00001008
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=153 tic=77
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=154 tic=77
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000030
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=155 tic=78
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=156 tic=78
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000002
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=157 tic=79
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=158 tic=79
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x100c nb=4
+C n=L1d a=hit t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000012
+R n=GPR i=3 d=0x00000012
+R n=GPR i=2 d=0x0000100c
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=159 tic=80
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=160 tic=80
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000042
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=161 tic=81
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=162 tic=81
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000001
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=163 tic=82
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=164 tic=82
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1010 nb=4
+C n=L1d a=hit t=read set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000013
+R n=GPR i=3 d=0x00000013
+R n=GPR i=2 d=0x00001010
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=165 tic=83
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=166 tic=83
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000055
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=167 tic=84
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=168 tic=84
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=169 tic=85
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x9c id=170 tic=85
+M n=Mem t=ifetch ea=0x9c ra=0x9c d=0x94810004
+INSTR op=0x94810004					asm="stwu r4,4(r1)"
+D n=Mem t=write ea=0x2004 nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2004 ra=0x2004 d=0x00000055
+R n=GPR i=1 d=0x00002004
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=171 tic=86
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0xa0 id=172 tic=86
+M n=Mem t=ifetch ea=0xa0 ra=0xa0 d=0x38400001
+INSTR op=0x38400001					asm="li r2,1"
+R n=GPR i=2 d=0x00000001
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=173 tic=87
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0xa4 id=174 tic=87
+M n=Mem t=ifetch ea=0xa4 ra=0xa4 d=0x7c4e4ba6
+INSTR op=0x7c4e4ba6					asm="mtspr ASEND,r2"
+R n=ARECV d=0x00000001 cn=procs:P0
+R n=ACNT d=0x00000005 cn=procs:P0
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=175 tic=88
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000001
+
+CORE n=procs:P1
+
+
+I ea=0xa8 id=176 tic=88
+M n=Mem t=ifetch ea=0xa8 ra=0xa8 d=0x4bffffc4
+INSTR op=0x4bffffc4					asm="b 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=177 tic=89
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=178 tic=89
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=179 tic=90
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=180 tic=90
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x58 id=181 tic=91
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x4200ffc8
+INSTR op=0x4200ffc8					asm="bdnz+ 0x0000000000000020"
+R n=CTR d=0x00000003
+B taken=1 ea=0x20
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=182 tic=91
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x20 id=183 tic=92
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+D n=Mem t=write ea=0x1000 nb=4
+C n=L1d a=miss t=write set=32 way=2 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P1
+C n=L1d a=load t=write set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x00000014
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=184 tic=92
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x24 id=185 tic=93
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000015
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=186 tic=93
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x28 id=187 tic=94
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90410004
+INSTR op=0x90410004					asm="stw r2,4(r1)"
+D n=Mem t=write ea=0x1004 nb=4
+C n=L1d a=hit t=write set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000015
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=188 tic=94
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x2c id=189 tic=95
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000016
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=190 tic=95
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x30 id=191 tic=96
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x90410008
+INSTR op=0x90410008					asm="stw r2,8(r1)"
+D n=Mem t=write ea=0x1008 nb=4
+C n=L1d a=hit t=write set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x00000016
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=192 tic=96
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x34 id=193 tic=97
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000017
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=194 tic=97
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x38 id=195 tic=98
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x9041000c
+INSTR op=0x9041000c					asm="stw r2,12(r1)"
+D n=Mem t=write ea=0x100c nb=4
+C n=L1d a=hit t=write set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x100c ra=0x100c d=0x00000017
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=196 tic=98
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x3c id=197 tic=99
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000018
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=198 tic=99
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x40 id=199 tic=100
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x90410010
+INSTR op=0x90410010					asm="stw r2,16(r1)"
+D n=Mem t=write ea=0x1010 nb=4
+C n=L1d a=hit t=write set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x00000018
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=200 tic=100
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x44 id=201 tic=101
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000019
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=202 tic=101
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x48 id=203 tic=102
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6					asm="mtspr ASEND,r1"
+R n=ARECV d=0x00001000 cn=procs:P1
+R n=ACNT d=0x00000005 cn=procs:P1
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=204 tic=102
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=205 tic=103
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=206 tic=103
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=207 tic=104
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=208 tic=104
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=209 tic=105
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=210 tic=105
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=211 tic=106
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=212 tic=106
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=213 tic=107
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x78 id=214 tic=107
+M n=Mem t=ifetch ea=0x78 ra=0x78 d=0x2c020001
+INSTR op=0x2c020001					asm="cmpwi r2,1"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=215 tic=108
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x7c id=216 tic=108
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x41820030
+INSTR op=0x41820030					asm="beq- 0x00000000000000ac"
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=217 tic=109
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x80 id=218 tic=109
+M n=Mem t=ifetch ea=0x80 ra=0x80 d=0x7c6d4aa6
+INSTR op=0x7c6d4aa6					asm="mfspr r3,ACNT"
+R n=GPR i=3 d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=219 tic=110
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x84 id=220 tic=110
+M n=Mem t=ifetch ea=0x84 ra=0x84 d=0x7c6903a6
+INSTR op=0x7c6903a6					asm="mtctr r3"
+R n=CTR d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=221 tic=111
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x88 id=222 tic=111
+M n=Mem t=ifetch ea=0x88 ra=0x88 d=0x38800000
+INSTR op=0x38800000					asm="li r4,0"
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=223 tic=112
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x8c id=224 tic=112
+M n=Mem t=ifetch ea=0x8c ra=0x8c d=0x3842fffc
+INSTR op=0x3842fffc					asm="addi r2,r2,-4"
+R n=GPR i=2 d=0x00000ffc
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=225 tic=113
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=226 tic=113
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=2 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P0
+C n=L1d a=load t=read set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000014
+R n=GPR i=3 d=0x00000014
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=227 tic=114
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=228 tic=114
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000014
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=229 tic=115
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=230 tic=115
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000004
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=231 tic=116
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=232 tic=116
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1004 nb=4
+C n=L1d a=hit t=read set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000015
+R n=GPR i=3 d=0x00000015
+R n=GPR i=2 d=0x00001004
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=233 tic=117
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=234 tic=117
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000029
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=235 tic=118
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=236 tic=118
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000003
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=237 tic=119
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=238 tic=119
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1008 nb=4
+C n=L1d a=hit t=read set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000016
+R n=GPR i=3 d=0x00000016
+R n=GPR i=2 d=0x00001008
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=239 tic=120
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=240 tic=120
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000003f
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=241 tic=121
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=242 tic=121
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000002
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=243 tic=122
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=244 tic=122
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x100c nb=4
+C n=L1d a=hit t=read set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000017
+R n=GPR i=3 d=0x00000017
+R n=GPR i=2 d=0x0000100c
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=245 tic=123
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=246 tic=123
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000056
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=247 tic=124
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=248 tic=124
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000001
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=249 tic=125
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=250 tic=125
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1010 nb=4
+C n=L1d a=hit t=read set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000018
+R n=GPR i=3 d=0x00000018
+R n=GPR i=2 d=0x00001010
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=251 tic=126
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=252 tic=126
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000006e
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=253 tic=127
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=254 tic=127
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=255 tic=128
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x9c id=256 tic=128
+M n=Mem t=ifetch ea=0x9c ra=0x9c d=0x94810004
+INSTR op=0x94810004					asm="stwu r4,4(r1)"
+D n=Mem t=write ea=0x2008 nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2008 ra=0x2008 d=0x0000006e
+R n=GPR i=1 d=0x00002008
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=257 tic=129
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0xa0 id=258 tic=129
+M n=Mem t=ifetch ea=0xa0 ra=0xa0 d=0x38400001
+INSTR op=0x38400001					asm="li r2,1"
+R n=GPR i=2 d=0x00000001
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=259 tic=130
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0xa4 id=260 tic=130
+M n=Mem t=ifetch ea=0xa4 ra=0xa4 d=0x7c4e4ba6
+INSTR op=0x7c4e4ba6					asm="mtspr ASEND,r2"
+R n=ARECV d=0x00000001 cn=procs:P0
+R n=ACNT d=0x00000005 cn=procs:P0
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=261 tic=131
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0xa8 id=262 tic=131
+M n=Mem t=ifetch ea=0xa8 ra=0xa8 d=0x4bffffc4
+INSTR op=0x4bffffc4					asm="b 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=263 tic=132
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=264 tic=132
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=265 tic=133
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000001
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=266 tic=133
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=267 tic=134
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=268 tic=134
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=269 tic=135
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=270 tic=135
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x58 id=271 tic=136
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x4200ffc8
+INSTR op=0x4200ffc8					asm="bdnz+ 0x0000000000000020"
+R n=CTR d=0x00000002
+B taken=1 ea=0x20
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=272 tic=136
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x20 id=273 tic=137
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+D n=Mem t=write ea=0x1000 nb=4
+C n=L1d a=miss t=write set=32 way=3 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P1
+C n=L1d a=load t=write set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x00000019
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=274 tic=137
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x24 id=275 tic=138
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000001a
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=276 tic=138
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x28 id=277 tic=139
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90410004
+INSTR op=0x90410004					asm="stw r2,4(r1)"
+D n=Mem t=write ea=0x1004 nb=4
+C n=L1d a=hit t=write set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x0000001a
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=278 tic=139
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x2c id=279 tic=140
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000001b
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=280 tic=140
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x30 id=281 tic=141
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x90410008
+INSTR op=0x90410008					asm="stw r2,8(r1)"
+D n=Mem t=write ea=0x1008 nb=4
+C n=L1d a=hit t=write set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x0000001b
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=282 tic=141
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x34 id=283 tic=142
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000001c
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=284 tic=142
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x38 id=285 tic=143
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x9041000c
+INSTR op=0x9041000c					asm="stw r2,12(r1)"
+D n=Mem t=write ea=0x100c nb=4
+C n=L1d a=hit t=write set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x100c ra=0x100c d=0x0000001c
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=286 tic=143
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x3c id=287 tic=144
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000001d
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=288 tic=144
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x40 id=289 tic=145
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x90410010
+INSTR op=0x90410010					asm="stw r2,16(r1)"
+D n=Mem t=write ea=0x1010 nb=4
+C n=L1d a=hit t=write set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x0000001d
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=290 tic=145
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x44 id=291 tic=146
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000001e
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=292 tic=146
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x48 id=293 tic=147
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6					asm="mtspr ASEND,r1"
+R n=ARECV d=0x00001000 cn=procs:P1
+R n=ACNT d=0x00000005 cn=procs:P1
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=294 tic=147
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=295 tic=148
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=296 tic=148
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=297 tic=149
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=298 tic=149
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=299 tic=150
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x78 id=300 tic=150
+M n=Mem t=ifetch ea=0x78 ra=0x78 d=0x2c020001
+INSTR op=0x2c020001					asm="cmpwi r2,1"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=301 tic=151
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x7c id=302 tic=151
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x41820030
+INSTR op=0x41820030					asm="beq- 0x00000000000000ac"
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=303 tic=152
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x80 id=304 tic=152
+M n=Mem t=ifetch ea=0x80 ra=0x80 d=0x7c6d4aa6
+INSTR op=0x7c6d4aa6					asm="mfspr r3,ACNT"
+R n=GPR i=3 d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=305 tic=153
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x84 id=306 tic=153
+M n=Mem t=ifetch ea=0x84 ra=0x84 d=0x7c6903a6
+INSTR op=0x7c6903a6					asm="mtctr r3"
+R n=CTR d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=307 tic=154
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x88 id=308 tic=154
+M n=Mem t=ifetch ea=0x88 ra=0x88 d=0x38800000
+INSTR op=0x38800000					asm="li r4,0"
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=309 tic=155
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x8c id=310 tic=155
+M n=Mem t=ifetch ea=0x8c ra=0x8c d=0x3842fffc
+INSTR op=0x3842fffc					asm="addi r2,r2,-4"
+R n=GPR i=2 d=0x00000ffc
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=311 tic=156
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=312 tic=156
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=3 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P0
+C n=L1d a=load t=read set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000019
+R n=GPR i=3 d=0x00000019
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=313 tic=157
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=314 tic=157
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000019
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=315 tic=158
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=316 tic=158
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000004
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=317 tic=159
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=318 tic=159
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1004 nb=4
+C n=L1d a=hit t=read set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x0000001a
+R n=GPR i=3 d=0x0000001a
+R n=GPR i=2 d=0x00001004
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=319 tic=160
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=320 tic=160
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000033
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=321 tic=161
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=322 tic=161
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000003
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=323 tic=162
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=324 tic=162
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1008 nb=4
+C n=L1d a=hit t=read set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x0000001b
+R n=GPR i=3 d=0x0000001b
+R n=GPR i=2 d=0x00001008
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=325 tic=163
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=326 tic=163
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000004e
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=327 tic=164
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=328 tic=164
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000002
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=329 tic=165
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=330 tic=165
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x100c nb=4
+C n=L1d a=hit t=read set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x100c ra=0x100c d=0x0000001c
+R n=GPR i=3 d=0x0000001c
+R n=GPR i=2 d=0x0000100c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=331 tic=166
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=332 tic=166
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000006a
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=333 tic=167
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=334 tic=167
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000001
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=335 tic=168
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=336 tic=168
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1010 nb=4
+C n=L1d a=hit t=read set=32 way=3 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x0000001d
+R n=GPR i=3 d=0x0000001d
+R n=GPR i=2 d=0x00001010
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=337 tic=169
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=338 tic=169
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x00000087
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=339 tic=170
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=340 tic=170
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=341 tic=171
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x9c id=342 tic=171
+M n=Mem t=ifetch ea=0x9c ra=0x9c d=0x94810004
+INSTR op=0x94810004					asm="stwu r4,4(r1)"
+D n=Mem t=write ea=0x200c nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x200c ra=0x200c d=0x00000087
+R n=GPR i=1 d=0x0000200c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=343 tic=172
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0xa0 id=344 tic=172
+M n=Mem t=ifetch ea=0xa0 ra=0xa0 d=0x38400001
+INSTR op=0x38400001					asm="li r2,1"
+R n=GPR i=2 d=0x00000001
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=345 tic=173
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0xa4 id=346 tic=173
+M n=Mem t=ifetch ea=0xa4 ra=0xa4 d=0x7c4e4ba6
+INSTR op=0x7c4e4ba6					asm="mtspr ASEND,r2"
+R n=ARECV d=0x00000001 cn=procs:P0
+R n=ACNT d=0x00000005 cn=procs:P0
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=347 tic=174
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0xa8 id=348 tic=174
+M n=Mem t=ifetch ea=0xa8 ra=0xa8 d=0x4bffffc4
+INSTR op=0x4bffffc4					asm="b 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=349 tic=175
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000001
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=350 tic=175
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=351 tic=176
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=352 tic=176
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=353 tic=177
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=354 tic=177
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x58 id=355 tic=178
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x4200ffc8
+INSTR op=0x4200ffc8					asm="bdnz+ 0x0000000000000020"
+R n=CTR d=0x00000001
+B taken=1 ea=0x20
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=356 tic=178
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x20 id=357 tic=179
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+D n=Mem t=write ea=0x1000 nb=4
+C n=L1d a=miss t=write set=32 way=0 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P1
+C n=L1d a=load t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x0000001e
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=358 tic=179
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x24 id=359 tic=180
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x0000001f
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=360 tic=180
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x28 id=361 tic=181
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90410004
+INSTR op=0x90410004					asm="stw r2,4(r1)"
+D n=Mem t=write ea=0x1004 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x0000001f
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=362 tic=181
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x2c id=363 tic=182
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000020
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=364 tic=182
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x30 id=365 tic=183
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x90410008
+INSTR op=0x90410008					asm="stw r2,8(r1)"
+D n=Mem t=write ea=0x1008 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x00000020
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=366 tic=183
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x34 id=367 tic=184
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000021
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=368 tic=184
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x38 id=369 tic=185
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x9041000c
+INSTR op=0x9041000c					asm="stw r2,12(r1)"
+D n=Mem t=write ea=0x100c nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x100c ra=0x100c d=0x00000021
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=370 tic=185
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x3c id=371 tic=186
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000022
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=372 tic=186
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x40 id=373 tic=187
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x90410010
+INSTR op=0x90410010					asm="stw r2,16(r1)"
+D n=Mem t=write ea=0x1010 nb=4
+C n=L1d a=hit t=write set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x00000022
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=374 tic=187
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x44 id=375 tic=188
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000023
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=376 tic=188
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x48 id=377 tic=189
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6					asm="mtspr ASEND,r1"
+R n=ARECV d=0x00001000 cn=procs:P1
+R n=ACNT d=0x00000005 cn=procs:P1
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=378 tic=189
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=379 tic=190
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=380 tic=190
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=381 tic=191
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=382 tic=191
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=383 tic=192
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=384 tic=192
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=385 tic=193
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x78 id=386 tic=193
+M n=Mem t=ifetch ea=0x78 ra=0x78 d=0x2c020001
+INSTR op=0x2c020001					asm="cmpwi r2,1"
+R n=CR d=0x40000000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=387 tic=194
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x7c id=388 tic=194
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x41820030
+INSTR op=0x41820030					asm="beq- 0x00000000000000ac"
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=389 tic=195
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x80 id=390 tic=195
+M n=Mem t=ifetch ea=0x80 ra=0x80 d=0x7c6d4aa6
+INSTR op=0x7c6d4aa6					asm="mfspr r3,ACNT"
+R n=GPR i=3 d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=391 tic=196
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x84 id=392 tic=196
+M n=Mem t=ifetch ea=0x84 ra=0x84 d=0x7c6903a6
+INSTR op=0x7c6903a6					asm="mtctr r3"
+R n=CTR d=0x00000005
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=393 tic=197
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x88 id=394 tic=197
+M n=Mem t=ifetch ea=0x88 ra=0x88 d=0x38800000
+INSTR op=0x38800000					asm="li r4,0"
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=395 tic=198
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x8c id=396 tic=198
+M n=Mem t=ifetch ea=0x8c ra=0x8c d=0x3842fffc
+INSTR op=0x3842fffc					asm="addi r2,r2,-4"
+R n=GPR i=2 d=0x00000ffc
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=397 tic=199
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=398 tic=199
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=32 way=0 lm=0x7f ra=0x1000
+A l=1 m="invalidate message for address 0x00001000" cn=procs:P0
+C n=L1d a=load t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000001e
+R n=GPR i=3 d=0x0000001e
+R n=GPR i=2 d=0x00001000
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=399 tic=200
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=400 tic=200
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000001e
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=401 tic=201
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=402 tic=201
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000004
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=403 tic=202
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=404 tic=202
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1004 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x0000001f
+R n=GPR i=3 d=0x0000001f
+R n=GPR i=2 d=0x00001004
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=405 tic=203
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=406 tic=203
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000003d
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=407 tic=204
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=408 tic=204
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000003
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=409 tic=205
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=410 tic=205
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1008 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000020
+R n=GPR i=3 d=0x00000020
+R n=GPR i=2 d=0x00001008
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=411 tic=206
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=412 tic=206
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000005d
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=413 tic=207
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=414 tic=207
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000002
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=415 tic=208
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=416 tic=208
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x100c nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000021
+R n=GPR i=3 d=0x00000021
+R n=GPR i=2 d=0x0000100c
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=417 tic=209
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=418 tic=209
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x0000007e
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=419 tic=210
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=420 tic=210
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000001
+B taken=1 ea=0x90
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=421 tic=211
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x90 id=422 tic=211
+M n=Mem t=ifetch ea=0x90 ra=0x90 d=0x84620004
+INSTR op=0x84620004					asm="lwzu r3,4(r2)"
+D n=Mem t=read ea=0x1010 nb=4
+C n=L1d a=hit t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000022
+R n=GPR i=3 d=0x00000022
+R n=GPR i=2 d=0x00001010
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=423 tic=212
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0x94 id=424 tic=212
+M n=Mem t=ifetch ea=0x94 ra=0x94 d=0x7c841a14
+INSTR op=0x7c841a14					asm="add r4,r4,r3"
+R n=GPR i=4 d=0x000000a0
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=425 tic=213
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0x98 id=426 tic=213
+M n=Mem t=ifetch ea=0x98 ra=0x98 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x0000000000000090"
+R n=CTR d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=427 tic=214
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x9c id=428 tic=214
+M n=Mem t=ifetch ea=0x9c ra=0x9c d=0x94810004
+INSTR op=0x94810004					asm="stwu r4,4(r1)"
+D n=Mem t=write ea=0x2010 nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2010 ra=0x2010 d=0x000000a0
+R n=GPR i=1 d=0x00002010
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=429 tic=215
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P1
+
+
+I ea=0xa0 id=430 tic=215
+M n=Mem t=ifetch ea=0xa0 ra=0xa0 d=0x38400001
+INSTR op=0x38400001					asm="li r2,1"
+R n=GPR i=2 d=0x00000001
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=431 tic=216
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+B taken=1 ea=0x4c
+
+CORE n=procs:P1
+
+
+I ea=0xa4 id=432 tic=216
+M n=Mem t=ifetch ea=0xa4 ra=0xa4 d=0x7c4e4ba6
+INSTR op=0x7c4e4ba6					asm="mtspr ASEND,r2"
+R n=ARECV d=0x00000001 cn=procs:P0
+R n=ACNT d=0x00000005 cn=procs:P0
+
+CORE n=procs:P0
+
+
+I ea=0x4c id=433 tic=217
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x7c8c4aa6
+INSTR op=0x7c8c4aa6					asm="mfspr r4,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=4 d=0x00000001
+
+CORE n=procs:P1
+
+
+I ea=0xa8 id=434 tic=217
+M n=Mem t=ifetch ea=0xa8 ra=0xa8 d=0x4bffffc4
+INSTR op=0x4bffffc4					asm="b 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x50 id=435 tic=218
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x2c040000
+INSTR op=0x2c040000					asm="cmpwi r4,0"
+R n=CR d=0x40000000
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=436 tic=218
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x54 id=437 tic=219
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000004c"
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=438 tic=219
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x58 id=439 tic=220
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x4200ffc8
+INSTR op=0x4200ffc8					asm="bdnz+ 0x0000000000000020"
+R n=CTR d=0x00000000
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=440 tic=220
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+CORE n=procs:P0
+
+
+I ea=0x5c id=441 tic=221
+M n=Mem t=ifetch ea=0x5c ra=0x5c d=0x38200001
+INSTR op=0x38200001					asm="li r1,1"
+R n=GPR i=1 d=0x00000001
+
+CORE n=procs:P1
+
+
+I ea=0x6c id=442 tic=221
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000000
+
+CORE n=procs:P0
+
+
+I ea=0x60 id=443 tic=222
+M n=Mem t=ifetch ea=0x60 ra=0x60 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6					asm="mtspr ASEND,r1"
+R n=ARECV d=0x00000001 cn=procs:P1
+R n=ACNT d=0x00000005 cn=procs:P1
+
+CORE n=procs:P1
+
+
+I ea=0x70 id=444 tic=222
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x20000000
+
+CORE n=procs:P0
+
+
+I ea=0x64 id=445 tic=223
+M n=Mem t=ifetch ea=0x64 ra=0x64 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+CORE n=procs:P1
+
+
+I ea=0x74 id=446 tic=223
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+B taken=1 ea=0x6c
+
+I ea=0x6c id=447 tic=224
+M n=Mem t=ifetch ea=0x6c ra=0x6c d=0x7c4c4aa6
+INSTR op=0x7c4c4aa6					asm="mfspr r2,ARECV"
+R n=ARECV d=0x00000000
+R n=GPR i=2 d=0x00000001
+
+I ea=0x70 id=448 tic=225
+M n=Mem t=ifetch ea=0x70 ra=0x70 d=0x2c020000
+INSTR op=0x2c020000					asm="cmpwi r2,0"
+R n=CR d=0x40000000
+
+I ea=0x74 id=449 tic=226
+M n=Mem t=ifetch ea=0x74 ra=0x74 d=0x4182fff8
+INSTR op=0x4182fff8					asm="beq+ 0x000000000000006c"
+
+I ea=0x78 id=450 tic=227
+M n=Mem t=ifetch ea=0x78 ra=0x78 d=0x2c020001
+INSTR op=0x2c020001					asm="cmpwi r2,1"
+R n=CR d=0x20000000
+
+I ea=0x7c id=451 tic=228
+M n=Mem t=ifetch ea=0x7c ra=0x7c d=0x41820030
+INSTR op=0x41820030					asm="beq- 0x00000000000000ac"
+B taken=1 ea=0xac
+
+I ea=0xac id=452 tic=229
+M n=Mem t=ifetch ea=0xac ra=0xac d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+
+
+RESULTS
+
+# Sums created by the consumer.
+MD n=Mem ra=0x0000000000002000 d=60
+MD n=Mem ra=0x0000000000002004 d=85
+MD n=Mem ra=0x0000000000002008 d=110
+MD n=Mem ra=0x000000000000200c d=135
+MD n=Mem ra=0x0000000000002010 d=160

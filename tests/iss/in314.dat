@@ -1,0 +1,74 @@
+#
+# Make sure that we cache the smallest subset of a bounded region of memory when
+# using an MPU style of model.  Otherwise, we might incorrectly cache a larger
+# region that is not valid, when we have overlapping segments with different
+# protections.
+#
+= asm
+
+	stw r5,0x3000(r0) # Valid
+	stw r6,0x4000(r0) # Not valid.
+	stw r7,0x1ffc(r0) # Not valid.
+	stw r5,0x5000(r0) # Valid
+	stw r6,0x6000(r0) # Not valid.
+	stw r7,0x4ffc(r0) # Not valid.
+	lwz r8,0x1000(r0) # Valid.
+	.long 0x0
+	# prot fault handler.
+	addi r10,r10,1
+	mfspr r31,SRR0
+	addi  r31,r31,4
+	mtspr SRR0,r31
+	rfi
+	.long 0x0	
+	
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90A03000	#	stw r5,0x3000(r0) # Valid
+MD n=Mem ra=0x00000004 d=0x90C04000	#	stw r6,0x4000(r0) # Not valid.
+MD n=Mem ra=0x00000008 d=0x90E01FFC	#	stw r7,0x1ffc(r0) # Not valid.
+MD n=Mem ra=0x0000000c d=0x90A05000	#	stw r5,0x5000(r0) # Valid
+MD n=Mem ra=0x00000010 d=0x90C06000	#	stw r6,0x6000(r0) # Not valid.
+MD n=Mem ra=0x00000014 d=0x90E04FFC	#	stw r7,0x4ffc(r0) # Not valid.
+MD n=Mem ra=0x00000018 d=0x81001000	#	lwz r8,0x1000(r0) # Valid.
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x00000024 d=0x7FFA02A6	#	mfspr r31,SRR0
+MD n=Mem ra=0x00000028 d=0x3BFF0004	#	addi  r31,r31,4
+MD n=Mem ra=0x0000002c d=0x7FFA03A6	#	mtspr SRR0,r31
+MD n=Mem ra=0x00000030 d=0x4C000064	#	rfi
+MD n=Mem ra=0x00000034 d=0x00000000	#	.long 0x0	
+# </GEN>
+
+CORE n=:P
+
+RD n=IVOR7  d=0x20
+
+TD n=MpuCam set=0 way=1  LB=0x3000 UB=0x3fff   SR=1 SW=1 UR=0 UW=0 V=1
+TD n=MpuCam set=0 way=2  LB=0x100 UB=0xff00000 SR=1 SW=0 UR=0 UW=0 V=1
+TD n=MpuCam set=0 way=3  LB=0x5000 UB=0x5fff   SR=1 SW=1 UR=0 UW=0 V=1
+
+RD n=GPR i=5  d=20
+RD n=GPR i=6  d=30
+RD n=GPR i=7  d=40
+
+MD n=Mem ra=0x1000 d=100
+MD n=Mem ra=0x1ffc d=0
+MD n=Mem ra=0x3000 d=0
+MD n=Mem ra=0x4000 d=0
+MD n=Mem ra=0x4ffc d=0
+MD n=Mem ra=0x5000 d=0
+MD n=Mem ra=0x6000 d=0
+
+RESULTS
+
+RD n=GPR i=8  d=100
+RD n=GPR i=10 d=4
+
+MD n=Mem ra=0x1ffc d=0
+MD n=Mem ra=0x3000 d=20
+MD n=Mem ra=0x4000 d=0
+MD n=Mem ra=0x4ffc d=0
+MD n=Mem ra=0x5000 d=20
+MD n=Mem ra=0x6000 d=0

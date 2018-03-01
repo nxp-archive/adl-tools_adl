@@ -1,0 +1,116 @@
+#
+# Tests the ability to fix-up branches which lie at the start of a cache-line
+# boundary and thus have icache touch logic.  Also makes sure that we can walk
+# off the end of such a page, to make sure that we haven't altered the
+# end-of-page trampoline with our icache-touch logic. 
+#
+= asm
+
+  addi r1,r1,10
+  addi r1,r1,20
+  bc 0x0c,2,L1   # Shouldn't be taken.
+  bc 0x12,0,L1   # Decrement counter, branch if CTR == 0 (should be taken).
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+L2:
+  addi r3,r3,1
+  addi r3,r3,2
+  addi r3,r3,3
+  addi r3,r3,4
+  .long 0x0
+  .long 0x0
+L1:
+  addi r2,r2,50
+  addi r2,r2,60
+  b L2
+
+= /asm
+
+= mdopts
+
+instr-offset: 0xf78
+
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000f78 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000f7c d=0x38210014	#	addi r1,r1,20
+MD n=Mem ra=0x00000f80 d=0x41820090	#	bc 0x0c,2,L1   # Shouldn't be taken.
+MD n=Mem ra=0x00000f84 d=0x4240008C	#	bc 0x12,0,L1   # Decrement counter, branch if CTR == 0 (should be taken).
+MD n=Mem ra=0x00000f88 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f8c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f90 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f94 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f98 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f9c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fa0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fa4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fa8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fac d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fb0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fb4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fb8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fbc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fc0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fc4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fc8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fcc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fd0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fd4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fd8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fdc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fe0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fe4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fe8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fec d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff8 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000ffc d=0x38630002	#	addi r3,r3,2
+MD n=Mem ra=0x00001000 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00001004 d=0x38630004	#	addi r3,r3,4
+MD n=Mem ra=0x00001008 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000100c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001010 d=0x38420032	#	addi r2,r2,50
+MD n=Mem ra=0x00001014 d=0x3842003C	#	addi r2,r2,60
+MD n=Mem ra=0x00001018 d=0x4BFFFFE0	#	b L2
+# </GEN>
+
+RD n=NIA   d=0xf78
+RD n=CCR   d=0xc0000000
+RD n=CTR   d=0x00000001
+
+RESULTS
+
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=110
+RD n=GPR i=3 d=10
+RD n=CTR     d=0x00000000

@@ -1,0 +1,79 @@
+//
+// Simple test of instruction fields.
+//
+define (arch=minippc) {
+
+
+  define(reloc=R1) {
+    value = 1;
+    instrfield = XO;
+  }		
+  define(reloc=R2) {
+    value = 8;
+    instrfield = RA;
+  }
+
+  define(reloc=R8) {
+    value = 12;
+    action = func (addr_t relocation,int) {
+      return relocation + ( (relocation & 0x8000) << 1 );
+    };
+    instrfield = OPCD;
+  }
+
+  define(reloc=D1) {
+    value = 7;
+    width = 32;
+    field_width = 3;
+    instrfield = RB;
+  };
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    pseudo = true;
+    width = 3;
+    addr = pc;
+  }
+  define(instr=Foo) {
+     fields = (SPRN(3),RB);
+     width = 32;
+     action = {};
+  } 	
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

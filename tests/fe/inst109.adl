@@ -1,0 +1,93 @@
+//
+// This tests to make sure that an alias which uses a resource, e.g. through an
+// instruction field, will have its usage information included.
+//
+// In this case, b_b should have a source of CIA and a target of NIA, while b
+// only has a target of NIA.
+define (arch = MiniPPC) {
+
+  attrs = (load,store,privileged);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LI) {
+    """
+    Immediate address field for branch instructions.
+    """;
+    bits = (6,29);
+    
+    is_signed = true;
+    shift = 2;
+    addr = pc;
+  }
+
+  define (instrfield=F_LI) {
+    """
+    Immediate address field for branch instructions.
+    """;
+    bits = (6,29);
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=b) {
+    fields=(OPCD(18),F_LI,AA(0),LK(0));
+    action =  {
+      NIA = F_LI;
+    };
+  }
+
+  define (instr=b_b) {
+    fields=(OPCD(19),LI,AA(0),LK(0));
+    alias = b(F_LI(LI));
+  }
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

@@ -1,0 +1,127 @@
+//
+// A very simple example demonstrating another way to use nested fields.  In
+// this case, the outer field is enumerated and the inner fields extract their
+// values via table accesses.
+//
+define (arch = miniSC){
+
+  bit_endianness = little;
+
+  attrs = (one_word);
+
+  define (regfile=D) {
+    size   = 16;
+    width  = 40;
+    prefix = d;
+  }
+  
+  define (reg=PC) {
+    attrs = (nia,cia);	
+  }
+  
+  define (instrfield = DaDb) { 
+    width = 5; 	// number of  input  bits 
+    pseudo = true;
+
+    // Various allowed combinations of registers.  Note that shortcuts exist,
+    // demonstrating multiple enumeration strings for the same value.
+    enumerated = (("d0::d2","d0:d1:d2"),
+                  ("d1::d3","d1:d2:d3"),
+                  ("d2::d4","d2:d3:d4"),
+                  ("d3::d5","d3:d4:d5"),
+                  ("d4::d6","d4:d5:d6"),
+                  ("d5::d7","d5:d6:d7"),
+                  ("d6::d8","d6:d7:d8"),
+                  ("d7::d9","d7:d8:d9"),
+                  ("d8::d10","d8:d9:d10"),
+                  ("d9::d11","d9:d10:d11"),
+                  ("d10::d12","d10:d11:d12"),
+                  ("d11::d13","d11:d12:d13"),
+                  ("d12::d14","d12:d13:d14"),
+                  ("d12::d15","d12:d14:d15"),
+                  "d0:d2:d4",
+                  "d2:d4:d6",
+                  "d4:d6:d8",
+                  "d6:d8:d10",
+                  "d8:d10:d12",
+                  "d10:d12:d14",
+                  "d1:d3:d5",
+                  "d3:d5:d7",
+                  "d5:d7:d9",
+                  "d7:d9:d11",
+                  "d9:d11:d13",
+                  "d11:d13:d15",
+                  "d0:d3:d6",
+                  "d3:d6:d9",
+                  "d6:d9:d12",
+                  "d9:d12:d15",
+                  "d0:d7:d15"
+                  ); 
+	
+    define(instrfield=Da) {
+      size = 5;
+      fields = (4,0);
+      table = (0,1,2,3,4,5,6,7,8,9,10,11,12,12,0,2,4,6,8,10,1,3,5,7,9,11,0,3,6,9,0);
+    }	
+    define(instrfield=Db) {
+      size = 5;
+      fields = (4,0);
+      table = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,2,4,6,8,10,12,3,5,7,9,11,13,3,6,9,12,7);
+    }	
+    define(instrfield=Dc) {
+      size = 5;
+      fields = (4,0);
+      table = (2,3,4,5,6,7,8,9,10,11,12,13,14,15,4,6,8,10,12,14,5,7,9,11,13,15,6,9,12,15,15);
+    }
+  }
+
+  define (instrfield=FFF) {
+    width = 4;	
+    ref = D;
+    pseudo = true;
+  }
+
+  define (instrfield=OPCD) {
+    width  = variable; 
+    pseudo = true;
+  }
+  
+  define(instr=add) { 
+    fields =((bits(4,0),DaDb(4,0)),  
+             (bits(6,5),0x2),  
+             (bits(9,7),FFF(2,0)),
+             (bits(13,10),0xB),
+             (bits(14),reserved),
+             (bits(15),b0),
+             (bits(16),FFF(3)),
+             (bits(18,17),reserved),
+             (bits(31,19),0x0));
+	  
+    attrs = one_word;
+    syntax = ("add %f,%f",DaDb,FFF);
+    width = variable;
+    action = {
+      D(DaDb.Da) = DaDb.Da;
+      D(DaDb.Db) = DaDb.Db;	
+      D(DaDb.Dc) = DaDb.Dc;	
+      D(FFF) = DaDb.Da + DaDb.Db + DaDb.Dc;
+    };
+  }
+
+  define (instr = stop) {
+    attrs = one_word;
+    fields = ((bits(31,0),0x12f));
+    syntax = ("stop");
+    action = {
+      halt();
+    };
+  }
+
+}; 
+
+define (core = SC)
+{
+  instrtables = (one_word);
+  archs = miniSC;
+}
+

@@ -1,0 +1,44 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Blocks:
+agu dalu 
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [31,26] 
+    Nested instruction fields:
+      A: [1,0] [not used]  
+    Fields:  ( OPCD(0,0) A OPCD(3,1) )
+  OPCD1: [22,16] 
+    Nested instruction fields:
+      C: [3,2] 
+      Table:  (( 0 0 ), ( 1 1 ), ( 2 2 ), ( 3 3 ))
+    Fields:  ( OPCD1(0,0) C(0) OPCD1(1,1) C(1) )
+Instructions:
+  Name:  Foo (rank: 100)
+  Width:  32
+  Syntax:  "Foo %f":   OPCD1.C(0)
+  Fields:  OPCD(0) OPCD1
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    0(0):  Foo
+-------------------------------
+

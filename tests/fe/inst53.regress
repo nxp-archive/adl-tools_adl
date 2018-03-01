@@ -1,0 +1,56 @@
+======
+Cores:
+======
+Name:  "P"
+Blocks:
+agu dalu 
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  F1: [6,6] 
+    Block:  agu 
+  F2: [8,8] 
+    Block:  agu 
+  F3: [not used] 
+    Pseudo:  1
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+  F4: [7,7] [not used] 
+    Prefix:  1
+  F5: [not used] 
+    Pseudo:  1
+    Complementary:  1
+  OPCD: [0,5] [not used] 
+Instructions:
+  Name:  Foo (rank: 100)
+  Width:  16
+  Fields:  F1(1) F2
+  Pseudo:  1
+  -------------------------------
+  Name:  Foo1 (rank: 100)
+  Width:  8
+  Block:  agu
+  Fields:  F1(1)
+  Action:  {
+}
+  Type:  Foo
+  -------------------------------
+
+Instruction Tables:
+prefix:
+  other:
+    Mask:  0x2000000
+    1(2000000):  Foo1
+-------------------------------
+

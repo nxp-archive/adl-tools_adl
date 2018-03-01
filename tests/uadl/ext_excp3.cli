@@ -1,0 +1,9 @@
+#
+# Make sure that we can raise an edge sensitive exception and that it will be
+# taken by the core.
+#
+setreg MSR 0x40000
+step 100
+triggerexcpt External
+go
+quit

@@ -1,0 +1,64 @@
+#
+# Tests the behavior of a dual-issue machine.
+#
+# <ASM>
+# mullw r1,r2,r3
+# add   r4,r2,r3
+# add   r5,r1,r4
+# add   r6,r2,r3
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C2219D6	# mullw r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x7C821A14	# add r4,r2,r3
+MD n=Mem ra=0x00000008 d=0x7CA12214	# add r5,r1,r4
+MD n=Mem ra=0x0000000c d=0x7CC21A14	# add r6,r2,r3
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=1
+RD n=GPR i=6 d=1
+
+TRACE
+
+I id=1
+M n=Mem t=ifetch
+INSTR
+ITIME t=1
+CTIME t=12
+
+I id=2
+M n=Mem t=ifetch
+INSTR
+ITIME t=1
+CTIME t=12
+
+I id=3
+M n=Mem t=ifetch
+INSTR
+ITIME t=8
+CTIME t=13
+
+I id=4
+M n=Mem t=ifetch
+INSTR
+ITIME t=8
+CTIME t=13
+
+I id=5
+M n=Mem t=ifetch
+INSTR
+ITIME t=9
+CTIME t=14
+
+RESULTS
+
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=5
+RD n=GPR i=5 d=11
+RD n=GPR i=6 d=5

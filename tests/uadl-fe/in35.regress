@@ -1,0 +1,10 @@
+in35.uadl:4: warning: Core powerpc is not defined by ADL, using core P instead.
+in35.uadl:23: Found a non-builtin cache parameter, but this cache is not a custom model.
+in35.uadl:49: Unknown port 'Something' for memory alias BadPort -> Mem . Something
+in35.uadl:48: Unknown target for memory alias:  FooMem -> Foo
+in35.uadl:66: warning: Instruction defined in class 'cacheNop' but not ADL:  icbi
+in35.uadl:47: Multiple first-level data memories/caches:  L1d (current 1st) vs. Mem . D
+in35.uadl:47: Multiple first-level instruction memories/caches:  L1i (current 1st) vs. Mem . D
+in35.uadl:47: Multiple first-level data memories/caches:  L1d (current 1st) vs. Mem . D
+in35.uadl:47: Multiple first-level instruction memories/caches:  L1i (current 1st) vs. Mem . D
+Could not parse in35.uadl

@@ -1,0 +1,56 @@
+#
+# This tests a pretty specific bug: When using the decode cache, if an external
+# exception is raised which is placed onto the pending flag, then when the
+# exception is re-enabled, and thus sets the exception flag, we want to make
+# sure that we handle the exception when we're exiting the decode-cache
+# simulation loop due to exceeding the td threshold.
+#
+= asm
+
+		li r3,1
+L1:
+		addi r1,r1,1
+		addi r2,r2,2
+		cmpwi r3,0
+		beq L2
+		b L1
+L2:
+		addi r4,r4,4
+		.long 0x0
+		.long 0x0
+		mfspr r3,srr0
+		addi r3,r3,4
+		mtspr srr0,r3
+		li r3,0
+		li r5,1
+		rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38600001	#	li r3,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0000000c d=0x2C030000	#	cmpwi r3,0
+MD n=Mem ra=0x00000010 d=0x41820008	#	beq L2
+MD n=Mem ra=0x00000014 d=0x4BFFFFF0	#	b L1
+MD n=Mem ra=0x00000018 d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x7C7A02A6	#	mfspr r3,srr0
+MD n=Mem ra=0x00000028 d=0x38630004	#	addi r3,r3,4
+MD n=Mem ra=0x0000002c d=0x7C7A03A6	#	mtspr srr0,r3
+MD n=Mem ra=0x00000030 d=0x38600000	#	li r3,0
+MD n=Mem ra=0x00000034 d=0x38A00001	#	li r5,1
+MD n=Mem ra=0x00000038 d=0x4C000064	#	rfi
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA   d=0x0
+RD n=IVOR4 d=0x24
+
+RESULTS
+
+RD n=GPR i=4 d=4
+RD n=GPR i=5 d=1

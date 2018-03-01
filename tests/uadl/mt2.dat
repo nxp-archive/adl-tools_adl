@@ -1,0 +1,69 @@
+#
+# An mt testcase with branching.  The two threads' behavior will be slightly
+# different due to initial GPR values, to make sure that each will branch
+# independently.
+#
+CORE n=:PMT
+
+= asm
+
+	addi r1,r1,5
+L1:
+	cmpwi r3,1
+	beq L2
+	addi r4,r4,2
+L2:
+	addi r5,r5,3
+	subic. r1,r1,1
+	bne L1
+	addi r6,r6,1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210005	#	addi r1,r1,5
+MD n=Mem ra=0x00000004 d=0x2C030001	#	cmpwi r3,1
+MD n=Mem ra=0x00000008 d=0x41820008	#	beq L2
+MD n=Mem ra=0x0000000c d=0x38840002	#	addi r4,r4,2
+MD n=Mem ra=0x00000010 d=0x38A50003	#	addi r5,r5,3
+MD n=Mem ra=0x00000014 d=0x3421FFFF	#	subic. r1,r1,1
+MD n=Mem ra=0x00000018 d=0x4082FFEC	#	bne L1
+MD n=Mem ra=0x0000001c d=0x38C60001	#	addi r6,r6,1
+# </GEN>
+
+CORE n=:PMT
+
+RD n=CCR d=0x80000000
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA     d=0x0
+RD n=GPR i=3 d=1
+
+CORE n=:PMT:t1
+
+RD n=NIA     d=0x0
+RD n=GPR i=1 d=3
+
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0
+RD n=GPR i=2 d=0
+RD n=GPR i=3 d=1
+RD n=GPR i=4 d=0
+RD n=GPR i=5 d=15
+RD n=GPR i=6 d=1
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=0
+RD n=GPR i=2 d=0
+RD n=GPR i=3 d=0
+RD n=GPR i=4 d=16
+RD n=GPR i=5 d=24
+RD n=GPR i=6 d=1

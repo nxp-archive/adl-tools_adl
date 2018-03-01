@@ -1,0 +1,35 @@
+#
+# Test of a simple model which tests nested instructions
+# which are aliases, and where the aliases make use of
+# expressions.
+#
+= asm
+
+  add  r1,r2,r3
+  add. r1,r2,r3    # Should target G17
+  add  r20,r18,r19 # Should target G4
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C221A14	#	add  r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x7C221A15	#	add. r1,r2,r3    # Should target G17
+MD n=Mem ra=0x00000008 d=0x7E929A14	#	add  r20,r18,r19 # Should target G4
+# </GEN>
+
+RD n=GPR i=2  d=10
+RD n=GPR i=3  d=20
+RD n=GPR i=18 d=50
+RD n=GPR i=19 d=60
+
+RESULTS
+
+RD n=GPR i=1  d=30
+RD n=GPR i=2  d=10
+RD n=GPR i=3  d=20
+RD n=GPR i=4  d=30
+RD n=GPR i=18 d=50
+RD n=GPR i=19 d=60
+RD n=GPR i=17 d=110

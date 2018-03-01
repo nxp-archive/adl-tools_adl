@@ -1,0 +1,9 @@
+Entering interactive interpreter.
+Starting initialization
+Starting program execution
+NIA:  0x4
+GPR3: 0x1e
+Reading address 0x1000:  0xdeadbeef
+reg NIA:  0x8
+Reading address 0x1004:  0x12345678
+reg NIA:  0xc

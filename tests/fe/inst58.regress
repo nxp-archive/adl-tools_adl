@@ -1,0 +1,132 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "D"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Parallel execution packet size: 2
+Packet position increment:  16
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D1: 
+    Pseudo:  1
+    Width:   5
+  D1_imp_bits__17_18_x_23_25_: [17,18] [23,25] 
+    Implements:  D1
+  D2: 
+    Pseudo:  1
+    Width:   3
+  D2_imp_bits__13_15_: [13,15] 
+    Implements:  D2
+  ESG: [not used] 
+    Pseudo:  1
+    Width:   1
+  Enc1: [not used] 
+    Pseudo:  1
+    Width:   16
+  F1: [6,6] 
+  F1_imp_bits__2_2_: [2,2] 
+    Implements:  F1
+  F2: [8,8] 
+  F3: [9,11] 
+  F3_imp_bits__4_4_x_2_3_: [4,4] [2,3] 
+    Implements:  F3
+  HighReg: 
+    Pseudo:  1
+    Width:   6
+    Size: 3
+    Prefix:  1
+    Indexed:  3 (little-endian)
+  HighReg_imp_bits__6_8_x_12_14_: [6,8] [12,14] 
+    Implements:  HighReg
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  VarInstrOpcode_imp_bits__0_12_x_16_16_x_19_22_x_26_31_: [0,12] [16,16] [19,22] [26,31] 
+  VarInstrOpcode_imp_bits__0_1_: [0,1] 
+  VarPrefixOpcode_imp_bits__0_5_x_9_11_: [0,5] [9,11] 
+    Prefix:  1
+Instructions:
+  Name:  Bar1 (rank: 100)
+  Width:  32
+  Fields:  D2_imp_bits__13_15_ D1_imp_bits__17_18_x_23_25_ VarInstrOpcode_imp_bits__0_12_x_16_16_x_19_22_x_26_31_
+  Action:  {
+    D ( D1 ) = D ( D2 ) * 3 ;
+}
+  Source Registers:  D(D2) 
+  Target Registers:  D(D1) 
+  Nested insructions:  
+    Name:  Bar2 (rank: 100) (shorthand)
+    Width:  32
+    Fields:  D2
+    Alias:  Bar1 D2_imp_bits__13_15_(- D2) D1_imp_bits__17_18_x_23_25_(7) 
+    Source Registers:  D(D2) 
+    Target Registers:  D(D1) 
+    -------------------------------
+  -------------------------------
+  Name:  Foo10 (rank: 100)
+  Fields:  OPCD F2 F3
+  Action:  {
+}
+  Nested insructions:  
+    Name:  Foo11 (rank: 100)
+    Width:  32
+    Fields:  VarInstrOpcode_imp_bits__0_1_ F3_imp_bits__4_4_x_2_3_
+    Alias:  Foo10 OPCD(3) F2(4) F3(F3) 
+    -------------------------------
+  -------------------------------
+  Name:  Foo2 (rank: 100)
+  Fields:  OPCD F1 F2
+  Action:  {
+}
+  Nested insructions:  
+    Name:  Foo3 (rank: 100)
+    Width:  32
+    Fields:  VarInstrOpcode_imp_bits__0_1_ F1_imp_bits__2_2_
+    Alias:  Foo2 OPCD(2) F1(F1) F2(1) 
+    -------------------------------
+  -------------------------------
+  Name:  HighReg (rank: 100)
+  Width:  16
+  Attributes:  prefix
+  Fields:  VarPrefixOpcode_imp_bits__0_5_x_9_11_ HighReg_imp_bits__6_8_x_12_14_
+  Prefix:  1
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0xfc700000
+    1666(68200000):  HighReg
+other:
+    Mask:  0xc0000000
+    0(0):      Mask:  0x3ff89e3f
+      133731903(7f8963f):  Bar1
+        Shorthand:  Bar2: Bar1 D2_imp_bits__13_15_(- D2) D1_imp_bits__17_18_x_23_25_(7) 
+    2(80000000):  Foo3
+    3(c0000000):  Foo11
+
+Post-Packet Handler:  func (  ) {
+    if ( getCurrentInstrTable (  ) == other ) {
+    }
+}
+
+Post-Packet-Commit Handler:  func (  ) {
+     int i = 10 ;
+}
+-------------------------------
+

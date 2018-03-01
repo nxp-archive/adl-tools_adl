@@ -1,0 +1,219 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Blocks:
+dalu ipu lsu 
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia nia
+  -------------------------------
+  Name:  "SR"
+  Usage:  field-read
+  Width:  32
+    T1[0]   
+      Usage:  field-read
+       SR.T1 field
+    T6[1]   
+      Usage:  field-read
+  -------------------------------
+Parallel execution packet size: 3
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CE: 
+    Pseudo:  1
+    Width:   4
+    Assembler:  1
+    Default value :'0'
+  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_: [17,16] [5,4] 
+    Implements:  CE
+  CondExec: 
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  CondExec_imp_bits__17_16_: [17,16] 
+    Implements:  CondExec
+  Enc1: 
+    Pseudo:  1
+    Width:   16
+  Enc1_imp_bits__15_0_: [15,0] 
+    Implements:  Enc1
+  Enc2: [not used] 
+    Pseudo:  1
+    Width:   32
+  IFT: [instrfield: CondExec]
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_: [11,6] 
+    Implements:  IFT
+  NonScale: 
+    Pseudo:  1
+    Width:   1
+    Parm:  1
+  PfxOpcode: 
+    Pseudo:  1
+    Width:   6
+  PfxOpcode_imp_bits__5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [5,0] 
+    Implements:  PfxOpcode
+  RA: [regfile:  GPR]
+    Pseudo:  1
+    Width:   3
+  RA_imp_bits__6_6_x_7_7_x_8_8_: [6,6] [7,7] [8,8] 
+    Implements:  RA
+  RA_imp_bits__8_8_x_7_7_x_6_6_: [8,6] 
+    Implements:  RA
+  RB: [regfile:  GPR]
+    Pseudo:  1
+    Width:   3
+  RB_imp_bits__11_11_x_10_10_x_9_9_: [11,9] 
+    Implements:  RB
+  RT: [regfile:  GPR]
+    Pseudo:  1
+    Width:   2
+  RT_imp_bits__13_13_x_12_12_: [13,12] 
+    Implements:  RT
+  Res1: 
+    Pseudo:  1
+    Width:   5
+  SG: 
+    Pseudo:  1
+    Width:   1
+    Reserved:  1
+    Assembler:  1
+    Default value :'0'
+  SG_imp_bits__15_15_: [15,15] 
+    Implements:  SG
+  Src1: 
+    Pseudo:  1
+    Width:   3
+  Src2: 
+    Pseudo:  1
+    Width:   3
+  VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_: [14,14] [3,0] 
+  VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_: [15,12] 
+    Prefix:  1
+  VlesSize: [not used] 
+    Pseudo:  1
+    Width:   3
+    Prefix:  1
+    Default value :'0'
+Instructions:
+  Name:  LPREFIX (rank: 100)
+  Width:  16
+  Syntax:  "LPREFIX,  IFT => %f":   IFT
+  Attributes:  prefix
+  Fields:  VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_ IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_ PfxOpcode_imp_bits__5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_
+  Prefix:  1
+  -------------------------------
+  Name:  OneWord (rank: 100)
+  Width:  18
+  Fetch width:  16
+  Fields:  CondExec_imp_bits__17_16_ Enc1_imp_bits__15_0_
+  Pseudo:  1
+  -------------------------------
+  Name:  add_family (rank: 100)
+  Width:  18
+  Fetch width:  16
+  Block:  dalu
+  Fields:  Src1 Src2 Res1 CE NonScale
+  Action:  {
+    GPR ( Res1 ) = GPR ( Src2 ) + add_func ( Src1 , NonScale ) ;
+}
+  Source Registers:  GPR(0)? GPR(1)? GPR(2)? GPR(3)? GPR(Src1)? GPR(Src2) SR[mask 0x00000003]/p 
+  Target Registers:  GPR(Res1) 
+  Helper Functions:  add_func find_option 
+  Documentation Name:  add Ra,Rb,Rt
+  Nested insructions:  
+    Name:  add (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Block:  dalu
+    Attributes:  type1 first
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_ RT_imp_bits__13_13_x_12_12_ RB_imp_bits__11_11_x_10_10_x_9_9_ RA_imp_bits__8_8_x_7_7_x_6_6_
+    Alias:  add_family Src1(RA) Src2(RB) Res1(RT) CE(CE) NonScale(1) 
+    Source Registers:  GPR(1) GPR(Src1) GPR(Src2) SR[mask 0x00000001]/p 
+    Target Registers:  GPR(Res1) 
+    Helper Functions:  add_func find_option 
+    Type:  OneWord
+    -------------------------------
+    Name:  add2 (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Block:  dalu
+    Attributes:  type1 first('add') 
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_ RT_imp_bits__13_13_x_12_12_ RB_imp_bits__11_11_x_10_10_x_9_9_ RA_imp_bits__6_6_x_7_7_x_8_8_
+    Alias:  add_family Src1(RA) Src2(RB) Res1(RT) CE(CE) NonScale(0) 
+    Source Registers:  GPR(0) GPR(Src1) GPR(Src2) SR[mask 0x00000002]/p 
+    Target Registers:  GPR(Res1) 
+    Helper Functions:  add_func find_option 
+    Type:  OneWord
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0xf03f0000
+    3(30000):  LPREFIX
+type1:
+    Mask:  0x1003c000
+    9(24000):  add
+    11(2c000):  add2
+type2:
+  
+Helper Functions:
+  add_func:
+ bits < 32 > add_func ( bits < 3 > src , bits < 1 > option ) {
+     bits < 1 > op = find_option ( option ) ;
+     bits < 32 > tmp = 0 ;
+    switch ( option . uint32 (  ) ) {
+        case 0 : tmp = ( GPR ( src ) + GPR ( 0 ) ) ;
+        break ;
+        case 1 : tmp = ( GPR ( src ) + GPR ( 1 ) ) ;
+        break ;
+        case 2 : tmp = ( GPR ( src ) + GPR ( 2 ) ) ;
+        break ;
+        case 3 : tmp = ( GPR ( src ) + GPR ( 3 ) ) ;
+        break ;
+        default : break ;
+    }
+    return ( tmp ) ;
+}
+    Source Registers:  GPR(0)? GPR(1)? GPR(2)? GPR(3)? GPR(src [parm #0])? SR[mask 0x00000003]/p 
+    Helper Functions:  find_option 
+
+  find_option:
+ bits < 1 > find_option ( bits < 1 > opt ) {
+    if ( opt == 1 ) {
+        return SR . T1 ;
+    } else {
+        return SR . T6 ;
+    }
+}
+    Source Registers:  SR[mask 0x00000003]/p 
+-------------------------------
+

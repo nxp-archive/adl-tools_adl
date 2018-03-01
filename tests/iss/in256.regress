@@ -1,0 +1,14 @@
+Breakpoint hit on node: P  at address: 0x0000000000000004 count: 0  InstrCount: 2
+GPR2:  0x0; GPR3:  0x0
+Breakpoint hit on node: P  at address: 0x0000000000000004 count: 0  InstrCount: 5
+GPR2:  0x2; GPR3:  0x3
+Breakpoint hit on node: P  at address: 0x0000000000000004 count: 0  InstrCount: 8
+GPR2:  0x4; GPR3:  0x6
+Breakpoint hit on node: P  at address: 0x0000000000000004 count: 0  InstrCount: 11
+GPR2:  0x6; GPR3:  0x9
+Breakpoint hit on node: P  at address: 0x0000000000000004 count: 0  InstrCount: 14
+GPR2:  0x8; GPR3:  0xc
+Simulation halted at address: 0x0000000000000018
+Number of escapes:  1
+
+Instructions executed: 63

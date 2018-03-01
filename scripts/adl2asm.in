@@ -1,0 +1,722 @@
+#!@PERL@ 
+# -- -*-perl-*-a
+#
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+adl2asm [options] <.adl file | [ asm-src objdump-src ] >
+
+=head1 SYNOPSIS
+
+adl2asm [options] <.adl file | [ asm-src objdump-src ]>
+
+Produces an assembler, disassembler, and address-to-line program suitable for
+use with binutils.  The default option is to produce these files for an ELF
+target using an ADL file as input.  Alternatively, the generated C files for the
+assembler and disassembler may be specified, in order to just compile and build
+the final executables.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--man, -m>
+
+Display the complete help as a man page.
+
+=item B<--version, -v>
+
+Display the ADL version number.
+
+=item B<--model-base=str, -mb=str>
+
+Specify the base name to be used for naming the assembler and disassembler.  If not specified,
+the basename of the input ADL file is used.
+
+=item B<--output-dir=path>
+
+Optional output directory for intermediate and result files.
+
+=item B<--print-data, -pd>
+
+Display ADL data to standard-out, do not generate an ISS.
+
+=item B<--dis, --no-dis>
+
+Create (or do not create) the disassembler.
+
+=item B<--asm, --no-asm>
+
+Create (or do not create) the assembler.
+
+=item B<--a2l, --no-a2l>
+
+Create (or do not create) the addr2line program.
+
+=item B<--ld, --no-ld>
+
+Create (or do not create) the linker (ld).
+
+=item B<--dbg, --no-dbg>
+
+Create (or do not create) additional functions in the disassembler to assist
+with debugger creation.  This creates a function for disassembling instructions
+into a common structure, plus other data structures useful for a gdb port.
+
+=item B<--reloc-extra=s>
+
+Specify that the given relocation needs additional processing.  The relocation
+will generate a call to a user-supplied hook function which must be supplied via
+an external library.
+
+=item B<--core=s>
+
+Specify the core for which to create the assembler and/or disassembler.
+
+=item B<--arch-pfx=s, --ap=s>
+
+Specify the architecture prefix to use.  The default is 'ppc', but another
+prefix may be used, in order to link with custom functions which specify
+alternate assembler/disassembler behavior.
+
+=item B<--arch-name=s>
+
+Specify the name of the architecture.  If not specified, the architecture prefix
+is used instead.
+
+=item B<--arch-print-name=s>
+
+Specify an alternate, printable architecture name.  If not specified, the
+standard architecture name is used instead.
+
+=item B<--elf-machine-code=i, -emc=i>
+
+Specify an ELF machine code value to use for any input or output ELF file.
+
+=item B<--bprefix=s>
+
+Specify the prefix to a binutils I<build> tree.  Defaults to the binutils
+package installed with the ADL release being used.
+
+=item B<--bsprefix=s>
+
+Specify the prefix to a binutils I<source> tree.  If not specified, then the
+value of B<--bprefix> is used.  This option is required if the source and build
+trees for the binutils installation are different.
+
+=item B<--define=str, -D=str>
+
+Specify a preprocessor define.
+
+=item B<--include=path, -I=path>
+
+Specify a preprocessor include directory.
+
+=item B<--static>
+
+Link everything statically.
+
+=item B<--optimize=[level]>
+
+Compile the model with optimization.  The default optimization level is 2,
+corresponding to compiling with -O2.  Another level may be specified.  A value
+of 0 turns off optimization (equivalent to using the B<--no-optimize> option).
+
+=item B<--no-optimize>
+
+Turn off compiler optimization.
+
+=item B<--cc=path>
+
+Specify an alternative compiler to use for preprocessing, compiling, and linking.
+
+=item B<--cflags=str>
+
+Specify additional C flags when the build-locally option is used.
+
+=item B<--as-libs=str>
+
+Specify additional libraries to link with the assembler.
+
+=item B<--verbose>
+
+Show the output of all internally executed commands.
+
+=item B<--strict>
+
+Use strict mode for parser.
+
+=item B<--warn-redefine>
+
+Warn if a define block overwrites another define block.  This option may be
+negated.  The default is true.
+
+=item B<--build-locally|--build>
+
+Builds assembler or disassembler locally, without copying files to binutils directory.
+Will use B<--bprefix> path to binutils that should be already built, if B<--bprefix> is not
+specified when will use CADDEV default: I<@prefix@/share/binutils@archsuffix@>.  If the source and build trees
+are different for binutils, then the I<--bsprefix> option must be used.
+
+This is the default behavior.
+
+=item B<--gen-only, -go>
+
+Same as B<--no-build>.  Here for compatibility with I<adl2iss>.
+
+=item B<--cleanup=all|obj|none>
+
+Remove temporary, intermediate files.  By default, this is set to I<obj>, which
+means that object file sare cleaned up.  if I<none> is selected, then no cleanup
+is performed.  If I<all> is selected, then all intermediate files, including
+source files, are removed.
+
+=item B<--shared[=<so-name>]>
+
+Builds a shared line-assembler and disassembler object(s).  Optionally, the user may specify
+the name of the output shared object.  The default name is adl_asm.so.
+
+=item B<--big-mem>
+
+For unresolved symbols - uses the instruction with largest immediate.  Default
+is false.  Option may be negated.
+
+=item B<--prefix-shift>
+
+For architectures with prefix bits, shift an instruction by its prefix bits
+during disassembly.  Default is FALSE.
+
+=item B<--keep-ws>
+
+Keep all whitespace in syntax strings.  By default, we try to remove extra
+whitespace, since the GNU assembler preprocesses input strings to remove
+whitespace around operands.  However, in some cases, whitespace is required
+because it is used as a separator, but is still removed by the assembler
+generator.  To override this behavior, use this flag in order to ensure that all
+whitespace is preserved.
+
+=item B<--asm-ver=str>
+
+Specify a version string to use for the assembler.  This overrides the version
+specified via B<--log-usage> if specified, but does not itself imply usage
+logging.  It is simply supplied to the assembler kernel and may be accessed by
+external users of assembler shared objects.
+
+=item B<--log-usage[=prog:ver]>
+
+Turn usage logging on or off.  The user may supply an optional program-name
+and version string to be logged.  If omitted, then the input-file root will
+be used as the program-name and the version will default to
+<year>.<month>.<day>.
+
+To disable the option, use --log-usage=false or --log-usage=no.  You may also
+use the negated form of --no-log-usage.
+
+=item B<--depfile=file, -df=file>
+
+Instruct the preprocessor to generate a dependency file suitable for inclusion
+by a Makefile.  This is done as a side-effect and does not affect the
+compilation process.
+
+=back
+
+=cut
+
+use FindBin;
+use Getopt::Long 2.33 qw(:config permute);
+use Pod::Usage;
+use strict;
+use File::Copy;
+use Cwd;
+use Cwd 'abs_path';
+use File::Basename;
+use File::Temp;
+
+use lib "@prefix@/share";
+use lib "@adl_top_srcdir@/scripts";
+use adl_wrapper_support;
+
+# The default prefix is the installation prefix set by Autoconf.
+# This may be overridden using the "prefix" command-line option.
+my $optimize = 2;
+my $bdir=$FindBin::RealBin;
+my $prefix = "@prefix@";
+# Default binutils prefix is in share, but this can be overridden by the user.
+my $bprefix = "${prefix}/share/binutils";
+my $ver = "@PACKAGE_VERSION@";
+my $so_flags = "--std=c++0x @ADL_SO_CFLAGS@";
+my $cc       = '@CXXPROG@';
+
+my ($genasm,$gendis,$gena2l,$genld,$gendbg,$build,$big_mem) = (1,1,1,1,0,1,0);
+
+my ($model,@srcs,$help,$man,$version,$strict,$warn_redefine,$printdata,$core,
+		$model_base,$bsprefix,$makelinks,@user_defines,@user_includes,@user_cflags,
+		$shared,$dbg_shared,$big_mem,$pfx_shift,$keep_ws,$log_usage,$asm_ver,$output_dir,$static_link,
+		$archname,$archpname,@as_libs,@reloc_extras,$elf_machine_code,$depfile);
+
+my $archpfx = "ppc";
+my $cleanup = "obj";
+
+# Default name for shared object output.
+my $asm_so = "adl_asm.so";
+
+if (!&GetOptions
+	(
+	 "h|help"          => \$help,
+	 "m|man"           => \$man,
+	 "v|version"       => \$version,
+	 "verbose"         => \$verbose,
+	 "strict"          => \$strict,
+	 "warn-redefine!"  => \$warn_redefine,
+	 "build|build-locally!"  => \$build,
+	 "go|gen-only"     => sub { $build = 0 },
+	 "pd|print-data"   => \$printdata,
+	 "asm!"            => \$genasm,
+	 "dis!"            => \$gendis,
+	 "a2l!"            => \$gena2l,
+	 "ld!"             => \$genld,
+	 "dbg!"            => \$gendbg,
+	 "arch-pfx|ap=s"   => \$archpfx,
+	 "arch-name=s"     => \$archname,
+	 "arch-print-name=s"=>\$archpname,
+	 "model-base|mb=s" => \$model_base,
+	 "core=s"          => \$core,
+	 "setpfx|prefix=s" => \$prefix,
+	 "setbpfx|bprefix=s"=>\$bprefix,
+	 "bsprefix=s"      => \$bsprefix,
+	 "make-links|ml"   => \$makelinks,
+	 "output-dir=s"    => \$output_dir,
+	 "D|define=s"      => \@user_defines,
+	 "I|include=s"     => \@user_includes,
+	 "cflags=s"        => \@user_cflags,
+	 "cleanup=s"       => \$cleanup,
+	 "shared:s"  	     => sub { my (undef,$val) = @_; $shared = 1; $asm_so = $val if ($val); },
+	 "dbg-shared!"     => \$dbg_shared,
+	 "prefix-shift!"   => \$pfx_shift,
+	 "keep-ws!"        => \$keep_ws,
+	 "big-mem!"    	   => \$big_mem,
+	 "static"          => \$static_link,
+	 "no-optimize"     => sub { $optimize = 0; },
+	 "optimize:i"      => \$optimize,
+	 "log-usage:s"     => \$log_usage,
+	 "asm-ver=s"       => \$asm_ver,
+	 "no-log-usage"    => sub { $log_usage="false"; },
+	 "cc=s"            => \$cc,
+	 "reloc-extra=s"   => \@reloc_extras,
+	 "as-libs=s"       => \@as_libs,
+	 "emc|elf-machine-code=i" => \$elf_machine_code,
+	 "df|depfile=s"    => \$depfile,
+	 "<>"              => \&plusargs,
+	)) {
+  printhelp(1,\&printversion,1);
+}
+
+sub printversion {
+  print "ADL Version $ver\n";
+}
+
+sub plusargs {
+  push @srcs,shift;
+}
+
+# Massage any defines into the appropriate form.
+@user_defines  = map { "--define=$_"; } @user_defines;
+@user_includes = map { "--include=$_"; } @user_includes;
+
+# Make prefix absolute for finding shared objects.
+$prefix = abs_path($prefix);
+
+if ($bprefix) {
+	$bprefix = abs_path($bprefix);
+}
+
+my $gen      = "$prefix/bin@archsuffix@/make-asm";
+
+# Print help if requested to do so.
+printhelp(0,\&printversion,1) if $help;
+
+printhelp(0,\&printversion,2) if $man;
+
+if ($version) {
+  printversion();
+  exit 0;
+}
+
+# We should have a default of "adl", but it's an error if the user specified an
+# empty prefix.
+if (!$archpfx) {
+  die "An architecture prefix must be specified.\n";
+}
+
+my $do_gen = 0;
+
+my ($asm_exec,$asm_cfile,$asm_obj,$dis_exec,$a2l_exec,$ld_exec,$dis_cfile,$dis_obj,$dbg_hfile);
+
+# Make sure that if an output directory is specified, we can just prepend it.
+my $output_pfx;
+if ($output_dir && $output_dir !~ m{[^/]*/$} ) {
+	$output_dir .= "/"
+}
+
+if ( @srcs == 0 ) {
+	#
+  # No model or sources specified:  error.
+	# 
+	print "Error:  No model or source files were specified.\n\n";
+	printhelp(1,\&printversion,1);
+} elsif (@srcs == 1) {
+	#
+	# User specified just an ADL file, so we must generate and compile.
+	#
+	$do_gen = 1;
+
+	($model) = @srcs;
+
+	if (!$model) {
+		print "Error:  No model was specified.\n\n";
+		printhelp(1,\&printversion,1);
+	}
+	
+	if ($printdata) {
+		exec "$gen $model --print-data @user_defines @user_includes";
+	}
+
+  # We calculate the model base here, and always pass it in, so that we can
+  # guarantee consistency between the files we expect to have and how make-asm
+  # works.
+	if (!$model_base) {
+		my ($x,$y);
+		($model_base,$x,$y) = fileparse($model,qr/\.(adl)/);
+	}
+
+	$asm_exec  = $output_dir . "as-$model_base";
+	$asm_cfile = "$asm_exec.cc";
+	$asm_obj   = $output_dir . (fileparse($asm_cfile,qr/\.(cc)/))[0] . ".o";
+	
+	$dis_exec  = $output_dir . "objdump-$model_base";
+	$a2l_exec  = $output_dir . "addr2line-$model_base";
+	$ld_exec   = $output_dir . "ld-$model_base";
+	$dis_cfile = "$dis_exec.cc";
+	$dis_obj   = $output_dir . (fileparse($dis_cfile,qr/\.(cc)/))[0] . ".o";
+
+	$dbg_hfile = $output_dir . "instr-info-${model_base}.h";
+} elsif (@srcs >= 2) {
+	#
+	# Explicitly specified source files, so no need to generate.
+	#
+	$do_gen = 0;
+
+	$asm_cfile = $srcs[0];
+	$asm_exec  = $output_dir . fileparse($asm_cfile,qr/\.(cc|C|cpp)/);
+	$asm_obj   = $asm_exec . ".o";
+
+	$dis_cfile = $srcs[1];
+	$dis_exec  = $output_dir . fileparse($dis_cfile,qr/\.(cc|C|cpp)/);
+
+	if ( ($gena2l || $genld) && !$model_base) {
+		print "Error:  No model-base specified; cannot generate linker or addr2line without this.\n";
+		exit 1;
+	}
+
+	$a2l_exec  = $output_dir . "addr2line-$model_base";
+	$ld_exec   = $output_dir . "ld-$model_base";
+	$dis_obj   = $dis_exec . ".o";
+}
+	
+my $builddis = $gendis;
+
+# The assembler, addr2line, and the linker require the disassembler, but we
+# don't have to build it.
+if ($genasm || $gena2l || $genld) {
+	if (!$gendis) {
+		$builddis = 0;
+	}
+  $gendis = 1;
+}
+
+if ($genasm) {
+  print "Assembler file   :  $asm_cfile\n";
+}
+
+if ($gendis) {
+  print "Disassembler file:  $dis_cfile\n";
+}
+
+if ($gendbg) {
+	print "Header file      :  $dbg_hfile\n";
+}
+
+
+if ($do_gen) {
+
+	# This gets a little complicated- add on the appropriate targets based upon
+	# what we're generating/building.
+	my $deptarget;
+	if ($depfile) {
+		if ($build) {
+			$deptarget .= "$asm_exec " if ($genasm);
+			$deptarget .= "$dis_exec " if ($gendis || $gena2l || $genld || $gendbg);			
+		} else {
+			$deptarget .= "$asm_cfile " if ($genasm);
+			$deptarget .= "$dis_cfile " if ($gendis || $gena2l || $genld || $gendbg);
+		}
+	}
+		
+	# Generate the command-line options.
+	print "\nOptions:\n" if ($verbose);
+	my $gencmd = "$gen --cpp=$cc $model @user_defines @user_includes "
+			.addFlag("asm",$genasm)
+			.addFlag("dis",$gendis)
+			.addFlag("dbg",$gendbg)			
+			.addOption("core",$core)
+			.addOption("arch-pfx",$archpfx)
+			.addOption("arch-name",$archname)
+			.addOption("arch-print-name",$archpname)
+			.addOption("asm-output",$asm_cfile)
+			.addOption("dis-output",$dis_cfile)
+			.addOption("hdr-output",$dbg_hfile)
+			.addOption("log-usage",$log_usage)
+			.addOption("asm-ver",$asm_ver)
+			.addOption("reloc-extra",@reloc_extras)
+			.addOption("elf-machine-code",$elf_machine_code)
+			.addFlag("verbose")
+			.addFlag("strict",$strict)
+			.addFlag("warn-redefine",$warn_redefine)
+			.addFlag("big-mem",$big_mem)
+			.addFlag("prefix-shift",$pfx_shift)
+			.addFlag("keep-ws",$keep_ws);
+
+	$gencmd .= " --depfile=$depfile --deptarget=$deptarget" if ($depfile);
+
+# Execute the generation command.
+	print "\nRunning generation command.\n";
+	print"\nCommand output:\n" if($verbose);
+
+	{
+		$show_output = 1;
+		runcmd $gencmd;
+		$show_output = 0;
+	}
+}
+
+sub copyfile {
+  my ($src,$dst,$msg) = (shift,shift,shift);
+  print "  Copying $src -> $dst\n" if ($verbose);
+  if ($makelinks) {
+	my $cwd = cwd();
+	system ("cd $dst && ln -fs $cwd/$src") and die "Could not link $msg '$src' to '$dst'";
+  } else {
+	if ( ! -d $dst ) {
+	  print "    Creating destination directory $dst\n" if ($verbose);
+	  system ("install -d $dst")
+	}
+	copy ($src,$dst) or die "Could not copy $msg '$src' to '$dst'";
+  }
+}
+
+# If a binutils source prefix was not specified, then use the bprefix value.  In
+# other words, this implies that the source and build trees are the same for
+# binutils.
+if ($bprefix && !$bsprefix) {
+  $bsprefix = $bprefix;
+}
+
+my ($ul_path,$ul_lib,$intl);
+
+if ($build) {
+	$cc = get_compiler_invocation($cc);
+
+  # Default for CAD/use-version environment
+  if (!$bprefix) {
+    die ("\nError: Cannot find binutils source directory: $bprefix.\n") unless (-e $bprefix); 
+  }
+	if ($log_usage ne "false") {
+		$ul_path = "-L$prefix/lib -Wl,-R$prefix/lib";
+		$ul_lib = ($static_link) ? "-l:libAdlLogUsage.a" : "-lAdlLogUsage";
+	}
+
+	# If the intl library may or may not exist, depending upon whether gettext is
+	# built-in.
+	$intl = "-lintl" if ( -e "$bprefix/intl/libintl.a" );
+
+	my (@ofiles,$asm_link_cmd,$disasm_link_cmd,$a2l_link_cmd,$ld_link_cmd);
+
+	# Setup for doing builds, then we do it in parallel if applicable.
+  if ($gendis) {  
+    ($disasm_link_cmd,$a2l_link_cmd,$ld_link_cmd) = build_disasm(\@ofiles,$builddis);
+  }
+  if ($genasm) {
+    $asm_link_cmd = build_asm(\@ofiles);
+  }
+
+	# This does the actual builds.
+	runbuild \@ofiles;
+
+	# Do the links, if applicable.
+	if ($disasm_link_cmd && $builddis) {
+		runcmd($disasm_link_cmd);
+	}
+	if ($a2l_link_cmd && $gena2l) {
+		runcmd($a2l_link_cmd);
+	}
+	if ($ld_link_cmd && $genld) {
+		runcmd($ld_link_cmd);
+	}
+	if ($asm_link_cmd) {
+		runcmd($asm_link_cmd);
+	}
+
+	# Now do cleanup.
+  if ($cleanup ne "none") {
+		if ($cleanup =~ /obj|all/) {
+			unlink $dis_obj;
+			unlink $asm_obj;
+		}
+		if ($cleanup eq "all") {
+			unlink $dis_cfile;
+			unlink $asm_cfile;
+		}
+  }
+}
+
+# used with --shared flag to filter from tc-pp.c some non architectural
+# register file from the list used by DT assembler
+sub filter_reg {
+  my $reg = shift;
+  open(F,$asm_cfile) || die;
+  my @lines = <F>;
+  close(F);
+  open(F,">$asm_cfile") || die;
+  my $r_size = 0;
+  foreach (@lines) {
+    if (/{"l\d+",\d+}/) {
+			$r_size = $r_size + 1;
+    } else {
+      if (/static const int num_(.+)_regnames = (\d+);/) {
+				print F "static const int num_$1_regnames = $2 - $r_size;\n";
+      } else {
+				print F;
+      }
+    }
+  }
+  close(F);
+}
+
+sub build_asm {
+	my ($ofiles) = @_;
+  my $cwd = cwd();
+
+	print "\Compiling assembler.\n";
+
+  my $asm_includes = "-I$prefix/include -I$bsprefix/gas -I$bsprefix/gas/config -I$bsprefix -I$bsprefix/opcodes -I$bsprefix/bfd -I$bsprefix/include -I$bsprefix/intl ";
+
+  # If there are separate source and build directories, then we must supply both
+  # as include paths because some headers are generated by configure.
+  if ($bsprefix ne $bprefix) {
+		$asm_includes .= "-I$bprefix/gas -I$bprefix -I$bprefix/opcodes -I$bprefix/bfd -I$bprefix/include -I$bprefix/intl ";
+  }
+
+  my $asm_libs     = "$ul_path -L$bprefix/gas -L$bprefix/opcodes -L$bprefix/bfd -L$bprefix/intl -L$bprefix/libiberty";
+
+  my $asm_defs = "-DHAVE_CONFIG_H -D_GNU_SOURCE";
+  my $asm_opts =  "-W -Wall -g -O$optimize $so_flags @user_cflags";
+
+	my $extra_libs = join " ",@as_libs;
+
+	# Any extra libraries containing hooks has to be placed after the hook is
+	# mentioned (in libgas) but before the weak implementation (in -lgas-gas).
+  $asm_libs .= " $dis_obj $ul_lib -lgas $extra_libs -lopcodes -lbfd -liberty $intl -lz";
+
+  if ($shared) {
+    filter_reg("l");
+    $asm_defs .= " -DADL_DT";
+    my $drv_opts = "-W -Wall -Werror -g -O$optimize -fpic";
+    $asm_opts .= " -fpic";
+
+    if ($dbg_shared) {
+      $asm_defs .= " -D_DEVTECH_DEBUG_ ";
+    }
+		$asm_libs .= " -lgas-dt";
+  }  else {
+		$asm_libs .= " -lgas-gas";
+  }
+
+	if ($static_link) {
+		$asm_libs .= " -static-libstdc++ -static-libgcc";
+	}
+	
+	push @$ofiles,{ cmd => $cc, src => $asm_cfile, obj => $asm_obj, flags => "$asm_defs $asm_includes $asm_opts -c" };
+
+  if ($shared) {
+		return "$cc -o $asm_so -shared $asm_opts $asm_obj $asm_libs";
+  } else {
+    return "$cc -o $asm_exec $asm_opts $asm_obj $asm_libs";
+  }
+}
+
+# This returns two link commands:  For the disassembler and for the addr2line program.
+sub build_disasm {
+	my ($ofiles,$build) = @_;
+
+  my $cwd = cwd();
+
+	print "\Compiling disassembler.\n";
+
+  my $dis_includes = "-I$prefix/include -I$bsprefix/opcodes -I$bsprefix/bfd -I$bsprefix/include -I$bsprefix/intl ";
+
+  # If there are separate source and build directories, then we must supply both
+  # as include paths because some headers are generated by configure.
+  if ($bsprefix ne $bprefix) {
+		$dis_includes .= "-I$bprefix/opcodes -I$bprefix/bfd -I$bprefix/include -I$bprefix/intl ";
+  }
+
+  my ($shared_opt,$shared_sfx) = ($shared) ? ("-shared",".so") : ();
+
+  my $dis_libs = "$ul_path -L$bprefix/binutils -L$bprefix/bfd -L$bprefix/opcodes -L$bprefix/libiberty $ul_lib -lobjdump -lbfd -lbfd -liberty $intl -lz";
+
+  my $a2l_libs = "$ul_path -L$bprefix/binutils -L$bprefix/bfd -L$bprefix/opcodes -L$bprefix/libiberty $ul_lib -laddr2line -lbfd -lbfd -liberty $intl -lz";
+
+  my $ld_libs  = "$ul_path -L$bprefix/ld -L$bprefix/bfd -L$bprefix/opcodes -L$bprefix/libiberty $ul_lib -lld -lbfd -lbfd -liberty $intl -lz";
+
+  if ($shared) {
+		$dis_libs .= " -Wl,-whole-archive -lopcodes -Wl,-no-whole-archive";
+  } else {
+		$dis_libs .= " -lopcodes";
+  }
+
+	if ($static_link) {
+		$dis_libs .= " -static-libstdc++ -static-libgcc";
+	}
+
+  my $dis_defs = "-DHAVE_CONFIG_H -D_GNU_SOURCE";
+  my $dis_opts =  "-W -Wall -g -O$optimize $so_flags @user_cflags";
+  
+	push @$ofiles,{ cmd => $cc, src => $dis_cfile, obj => $dis_obj, flags => "$dis_defs $dis_includes $dis_opts -c" };
+
+	# Only build the final disassembler if so requested.
+	if ($build) {
+		return (
+			"$cc $dis_opts $shared_opt -o $dis_exec$shared_sfx $dis_obj $dis_libs",
+			"$cc $dis_opts $shared_opt -o $a2l_exec$shared_sfx $dis_obj $a2l_libs",
+			"$cc $dis_opts $shared_opt -o $ld_exec$shared_sfx $dis_obj $ld_libs",
+				);
+	} else {
+		return ("","");
+	}
+}
+
+
+# We're done at this point.
+exit 0;

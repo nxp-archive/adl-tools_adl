@@ -1,0 +1,14 @@
+
+define (config) {
+  icache_touch = true;
+}
+
+define (core=P) {
+
+  define (config) {
+
+    cache_line_size = 128;
+
+  }
+
+}

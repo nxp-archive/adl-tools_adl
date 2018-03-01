@@ -1,0 +1,52 @@
+#
+# Tests to make sure that a slice update, if the slice bit indices use
+# a register offset, will work.  For example, mcrxr is written to use
+# offsets, so writing to element 5 of the CR involves writing to bits
+# 52-55, which is reall bits 20-23.
+#
+
+= asm
+
+  mcrxr 5
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7E800400	#	mcrxr 5
+# </GEN>
+
+CORE n=:P
+
+RD n=CR  d=0x57b1bb73
+RD n=XER d=0xa000001d
+
+RESULTS
+
+TRACE
+
+
+I ea=0x0 id=1
+R n=FCNT d=0x00000001
+R n=NIA d=0x00000004
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7e800400
+INSTR op=0x7e800400					asm="mcrxr 5"
+ITIME t=0
+R n=ICNT d=0x00000001
+R n=CR d=0x57b1ba73
+R n=XER d=0x0000001d
+CTIME t=0
+
+I ea=0x4 id=2
+R n=FCNT d=0x00000002
+R n=NIA d=0x00000008
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=0
+R n=ICNT d=0x00000002
+CTIME t=0
+
+RESULTS
+
+RD n=CR d=0x57b1ba73
+RD n=XER d=0x0000001d

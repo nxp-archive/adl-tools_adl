@@ -1,0 +1,74 @@
+//
+// Make sure that we can parse global-level helper functions and declarations.
+// We'll probably want to tighten up these restrictions at some point, but
+// we allow pretty much everything for now.
+//
+
+/* These enums are taken from P-fpu.h, rather than #including that file, to
+   keep us from starting a quasi-endless chain of inclusions.*/
+enum RoundMode {
+  ROUND_NEAR=0, // round to nearest
+  ROUND_ZERO,   // round to zero
+  ROUND_PINF,   // round toward positive infinity
+  ROUND_NINF,   // round toward negative infinity
+  RoundModeEos
+};
+enum OpMode {
+  IEEE=0,     // use ieee mode for overflow/underflow
+  ZEEE,       // P ieee mode, saturation arithmetic
+  OpModeEos   // end of enumeration marker
+}; 
+
+typedef unsigned long UL;
+
+// Single-Precision:
+OpMode sfpu_setOpMode( OpMode m );
+RoundMode sfpu_setRndMode(RoundMode r);
+UL sfpu_status();
+UL sfpu_abs( UL a );
+
+
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(40),RT,RA,SI);
+    action = {
+      OpMode x = sfpu_setOpMode(IEEE);
+      UL y = sfpu_status();
+    };
+  }
+  
+
+}
+
+define (core = P) {
+  archs = foo;
+}

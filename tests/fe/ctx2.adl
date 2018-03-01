@@ -1,0 +1,67 @@
+//
+// Example of a context.  Should fail.
+//
+
+define (arch=mt) {
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=CR) {}
+
+  define (reg=CTR) {}
+
+  define (reg=LR) {}
+
+  define (reg=XER) {}
+
+  define (reg=VPIR) {
+    // This should fail b/c we don't specify an index for 
+    // a conext register.
+    reset = func() {
+      VPIR = 1;
+    };
+  }
+
+  define (reg=FOO) {
+    // This should cause an error b/c the reset function has arity-1 but is not
+    // part of a context.
+    reset = func(unsigned i) { };
+  }
+
+  define (reg=NIA0) { 
+    alias = thread(3).NIA;
+  }
+  define (reg=NIA1) { 
+    alias = foo(1).NIA;
+  }
+
+  define (reg=TACTIVE) { }
+
+  define (context=thread) {
+    regs=(CIA,NIA,CR,CTR,LR,XER,VPIR);
+    regfiles = GPR;
+    mmulookups = TlbFoo;
+    num_contexts = 2;
+    active = { return TACTIVE; };
+  }
+
+}
+
+define (core=P) {
+  remove=1;
+}
+
+define (sys=PMT) {
+  type="minippc";
+  define (core = Thread) {
+    archs = (mt);
+  }
+  Thread t0;
+  Thread t1;
+}

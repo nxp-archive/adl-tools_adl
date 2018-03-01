@@ -1,0 +1,54 @@
+//
+// This makes sure that we can't boost a resource
+// to be shared if a constituent item is not locally
+// defined.
+//
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=HID0) {
+  }
+
+  define (reg=HID1) {
+  }
+
+  define (regfile=SPR) {
+    size = 1024;
+
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+
+define (sys=PSystem) {
+  PChip chip0;
+  PChip chip1;
+  define (shared) {
+    regs = HID0;
+  }
+  define (sys=PChip) {
+    define (shared) {
+      regs = (HID0,HID1,SPR);
+    }
+    P context0;
+    P context1;
+    P context2;
+  }
+}
+
+

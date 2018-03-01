@@ -1,0 +1,3 @@
+P:  Instr 5:  Register GPR2 mismatch:  Found 0xb, expected 0xa
+P:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

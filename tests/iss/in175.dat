@@ -1,0 +1,40 @@
+#
+# Tests that misaligned accesses update the cache correctly.
+#
+= asm
+
+  lwz r1,0x8fe(r0)  # Miss- update the cache.
+  lwz r2,0x8d0(r0)  # Will miss b/c first part of misaligned won't be in cache.
+  lwz r3,0x900(r0)  # Hit in cache.
+  
+  stw r1,0x7fe(r0)
+  stw r2,0x800(r0)
+= /asm
+
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x802008FE	#	lwz r1,0x8fe(r0)  # Miss- update the cache.
+MD n=Mem ra=0x00000004 d=0x804008D0	#	lwz r2,0x8d0(r0)  # Will miss b/c first part of misaligned won't be in cache.
+MD n=Mem ra=0x00000008 d=0x80600900	#	lwz r3,0x900(r0)  # Hit in cache.
+MD n=Mem ra=0x0000000c d=0x902007FE	#	stw r1,0x7fe(r0)
+MD n=Mem ra=0x00000010 d=0x90400800	#	stw r2,0x800(r0)
+# </GEN>
+
+MD n=Mem ra=0x7fc d=0
+MD n=Mem ra=0x800 d=0
+
+MD n=Mem ra=0x8fc d=0xdeadbeef
+MD n=Mem ra=0x900 d=0x12345678
+MD n=Mem ra=0x8d0 d=0xa5456633
+
+RD n=NIA d=0x0
+
+RESULTS
+
+RD n=GPR i=1 d=0xbeef1234
+RD n=GPR i=2 d=0xa5456633
+
+MD n=Mem ra=0x7fc d=0x0000beef
+MD n=Mem ra=0x800 d=0xa5456633

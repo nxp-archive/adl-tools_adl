@@ -1,0 +1,37 @@
+
+asm39.o:     file format elf32-powerpc
+asm39.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000018  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  0000004c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  0000004c  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	2d 07       	nop      
+   2:	42 43       	LPREFIX, Foo = 0, VlesSize = 4, HighPr = 9
+   4:	c6 bb       	pr1 mv       r2,15,r4
+   6:	77 3b       	 mv       r4,15,r7
+   8:	34 49       	  add      r1,r2,r3
+   a:	6b 09       	  add      r4,r5,r6
+   c:	41 83       	LPREFIX, Foo = 0, VlesSize = 4, HighPr = 6
+   e:	46 bb       	 mv       r2,15,r4
+  10:	f7 3b       	pr1 mv       r4,15,r7
+  12:	34 49       	  add      r1,r2,r3
+  14:	6b 09       	  add      r4,r5,r6
+  16:	b3 69       	pr1 pl1 add      r5,r1,r3

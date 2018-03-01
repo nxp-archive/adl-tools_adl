@@ -1,0 +1,119 @@
+//
+// This makes sure that we can handle a complex encoding, where there is no
+// different in the primary opcode and no single instruction contains a superset
+// of opcode bits.  This only works if we set allow_conflict = true in the instruction.
+//
+
+define (core = foo) {
+  archs = foo; 
+}
+
+define (arch = foo) {
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+	define (instrfield = opc)
+    {
+      bits = (63, 61);
+    }
+
+	define (reg=cIA) {
+	  """
+	  Current instruction address
+	  """;
+	  attrs = cia;
+	  serial = true;
+	}
+
+	define (reg=nIA) {
+	  """
+	  Next instruction address
+	  """;
+	  attrs = nia;
+	  serial = true;
+	}
+
+  define (regfile=GPR) {
+    width = 32;
+    size = 32;
+    prefix = r;
+  }
+  
+	define (instr = A) { 
+	  width = 64;
+	  fields = (
+              opc(3),
+        
+              (bits(60,56),R1),
+              (bits(55,51),R2),
+              (bits(50,46),R3)
+        
+              );
+
+    allow_conflict = true;
+    
+	  action =  { 
+    };    
+	}
+
+	define (instr = B) { 
+	  width = 64;
+	  fields = (
+              opc(3),
+
+              (bits(60,56),R1),
+              (bits(55,51),R2),
+              (bits(50,46),R3),
+
+              (bits(5,2),b1111)
+
+              );
+    
+	  action =  { 
+    };    
+	}
+
+	define (instr = C) {
+	  width = 64;
+	  fields = (
+              opc(3),
+       
+              (bits(59,54),b01011),
+              (bits(50,43),b000000),
+
+              (bits(42,38),R1),
+              (bits(37,33),R2),
+              (bits(32,28),R3)
+       
+              );
+
+	  action =  { 
+    };    
+	}
+  
+	define(instrfield=R1) {
+	  pseudo = true;
+	  width = 5;
+	  type = regfile;
+	  ref = GPR;
+	}
+
+	define(instrfield=R2) {
+	  pseudo = true;
+	  width = 5;
+	  type = regfile;
+	  ref = GPR;
+	}
+
+	define(instrfield=R3) {
+	  pseudo = true;
+	  width = 5;
+	  type = regfile;
+	  ref = GPR;
+	}
+  
+}
+
+

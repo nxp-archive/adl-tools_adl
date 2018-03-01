@@ -1,0 +1,24 @@
+#
+# Expects for assembling and then running asm31 on mod61.adl
+#
+
+CORE n=:P
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000006
+RD n=GPR i=2 d=0x00000007
+RD n=GPR i=3 d=0x0000000d
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0x00000000
+RD n=GPR i=7 d=0x0000000f
+RD n=GPR i=8 d=0x00000000
+RD n=GPR i=9 d=0x00000000
+RD n=GPR i=10 d=0x00000000
+RD n=GPR i=11 d=0x00000000
+RD n=GPR i=12 d=0x0000000a
+RD n=GPR i=13 d=0x00000000
+RD n=GPR i=14 d=0x00000019
+RD n=GPR i=15 d=0x00000000

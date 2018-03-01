@@ -1,0 +1,79 @@
+//
+// This makes sure that duplicates are detected when adding operands multiple
+// times, if only the source mask differs.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {};
+
+    // memory system
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_MM, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( add, addi, "addic.", halt );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Src = (GPR(RA),0xff000000);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID:  {
+				change_state(S_EX);
+			}
+		S_EX: {
+      exec();
+			change_state(S_MM);
+		}
+		S_MM: { 
+			change_state(S_WB); 
+		}
+		S_WB: {
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+}

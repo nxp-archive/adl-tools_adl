@@ -1,0 +1,762 @@
+$data = {
+"cores" => {
+"P" => {
+"doc" => <<DATA
+Example documentation string- place overview information here.
+
+DATA
+,
+"bit_endianness" => "little",
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+Current instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+Next instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+"SR" => {
+"width" => 32,
+"fields" => {
+"C" => {
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"LF" => {
+"bits" => [
+[
+30,
+27,
+],
+],
+},
+"OVF" => {
+"bits" => [
+[
+10,
+10,
+],
+],
+},
+"P0" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"P1" => {
+"bits" => [
+[
+31,
+31,
+],
+],
+},
+"P2" => {
+"bits" => [
+[
+30,
+30,
+],
+],
+},
+"P3" => {
+"bits" => [
+[
+29,
+29,
+],
+],
+},
+"P4" => {
+"bits" => [
+[
+28,
+28,
+],
+],
+},
+"P5" => {
+"bits" => [
+[
+27,
+27,
+],
+],
+},
+"RF" => {
+"bits" => [
+[
+13,
+13,
+],
+],
+},
+"RM" => {
+"bits" => [
+[
+3,
+3,
+],
+],
+},
+"S" => {
+"bits" => [
+[
+6,
+6,
+],
+],
+},
+"SAT" => {
+"bits" => [
+[
+11,
+11,
+],
+],
+},
+"SCM" => {
+"bits" => [
+[
+8,
+8,
+],
+[
+5,
+4,
+],
+],
+},
+"SM" => {
+"bits" => [
+[
+2,
+2,
+],
+],
+},
+"SM2" => {
+"bits" => [
+[
+7,
+7,
+],
+],
+},
+"T" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"W20" => {
+"bits" => [
+[
+12,
+12,
+],
+],
+},
+},
+"reserved_mask" => "0b00000111111111111100001000000000",
+"shared" => 0,
+},
+},
+"regfiles" => {
+"D" => {
+"doc" => <<DATA
+General purpose registers.
+    
+DATA
+,
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+},
+"instrfields" => {
+"DoSub" => {
+"pseudo" => 1,
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+5,
+0,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3f",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+15,
+11,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+20,
+16,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) as a target.
+    
+DATA
+,
+"bits" => [
+[
+10,
+6,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (D_) to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+10,
+6,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"Src1" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Src2" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Trg" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+30,
+21,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe00000",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add_family" => {
+"syntax" => "add_family Src1, Src2, Trg",
+"dsyntax" => "add_family ${Src1}, ${Src2}, ${Trg}",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+},
+"action" => <<DATA
+{
+     sbits < 41 > mult ;
+     sbits < 41 > MB_H = ( signedMultiply ( signExtend ( D ( Src1 ) . H , 41 ) , signExtend ( D ( Src2 ) . H , 41 ) ) ) ;
+    mult = ( signedMultiply ( signExtend ( D ( Src1 ) . L , 41 ) , signExtend ( D ( Src2 ) . L , 41 ) ) ) ;
+    MB_H = ( MB_H - mult ) << 1 ;
+    MB_H = ( MB_H + 0x8000 ) >> 16 ;
+    D ( Trg ) . WH = D ( Src1 ) . WH + MB_H ( 19 , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"extracted-doc-op" => <<DATA
+
+D ( Trg ) . WH = D ( Src1 ) . WH + ( ( ( ( signedMultiply ( signExtend ( D ( Src1 ) . H , 41 ) , signExtend ( D ( Src2 ) . H , 41 ) ) - signedMultiply ( signExtend ( D ( Src1 ) . L , 41 ) , signExtend ( D ( Src2 ) . L , 41 ) ) ) << 1 ) + 0x8000 ) >> 16 ) ( 19 , 0 ) ;
+DATA
+,
+"inputs" => [
+"D(Src1)",
+"D(Src2)",
+],
+"outputs" => [
+"D(Trg)",
+],
+},
+"add1" => {
+"width" => 32,
+"syntax" => "add1 RB, RA, RT",
+"dsyntax" => "add1 ${RB}, ${RA}, ${RT}",
+"fields" => {
+"XO" => 266,
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 31,
+},
+"aliases" => {
+"add_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"parent_action" => <<DATA
+{
+     sbits < 41 > mult ;
+     sbits < 41 > MB_H = ( signedMultiply ( signExtend ( D ( RA ) . H , 41 ) , signExtend ( D ( RB ) . H , 41 ) ) ) ;
+    mult = ( signedMultiply ( signExtend ( D ( RA ) . L , 41 ) , signExtend ( D ( RB ) . L , 41 ) ) ) ;
+    MB_H = ( MB_H - mult ) << 1 ;
+    MB_H = ( MB_H + 0x8000 ) >> 16 ;
+    D ( RT ) . WH = D ( RA ) . WH + MB_H ( 19 , 0 ) ;
+}
+DATA
+,
+"extracted-doc-op" => <<DATA
+
+D ( RT ) . WH = D ( RA ) . WH + ( ( ( ( signedMultiply ( signExtend ( D ( RA ) . H , 41 ) , signExtend ( D ( RB ) . H , 41 ) ) - signedMultiply ( signExtend ( D ( RA ) . L , 41 ) , signExtend ( D ( RB ) . L , 41 ) ) ) << 1 ) + 0x8000 ) >> 16 ) ( 19 , 0 ) ;
+DATA
+,
+},
+},
+"parent" => "add_family",
+"disassemble" => 1,
+"inputs" => [
+"D(RA)",
+"D(RB)",
+],
+"outputs" => [
+"D(RT)",
+],
+},
+"add2" => {
+"width" => 32,
+"syntax" => "add2 RB, RA, RT",
+"dsyntax" => "add2 ${RB}, ${RA}, ${RT}",
+"attributes" => {
+"doc_no_expand_exprs" => "",
+},
+"fields" => {
+"XO" => 266,
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 32,
+},
+"aliases" => {
+"add_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"parent_action" => <<DATA
+{
+     sbits < 41 > mult ;
+     sbits < 41 > MB_H = ( signedMultiply ( signExtend ( D ( RA ) . H , 41 ) , signExtend ( D ( RB ) . H , 41 ) ) ) ;
+    mult = ( signedMultiply ( signExtend ( D ( RA ) . L , 41 ) , signExtend ( D ( RB ) . L , 41 ) ) ) ;
+    MB_H = ( MB_H - mult ) << 1 ;
+    MB_H = ( MB_H + 0x8000 ) >> 16 ;
+    D ( RT ) . WH = D ( RA ) . WH + MB_H ( 19 , 0 ) ;
+}
+DATA
+,
+},
+},
+"parent" => "add_family",
+"disassemble" => 1,
+"inputs" => [
+"D(RA)",
+"D(RB)",
+],
+"outputs" => [
+"D(RT)",
+],
+},
+"foo_family" => {
+"syntax" => "foo_family Src1, Src2, Trg",
+"dsyntax" => "foo_family ${Src1}, ${Src2}, ${Trg}",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+},
+"action" => <<DATA
+{
+     sbits < 65 > mult32_32_1 = signedMultiply ( signExtend ( D ( Src1 ) . M , 65 ) , signExtend ( D ( Src2 ) . M , 65 ) ) ;
+     sbits < 65 > mult32_32_2 = signedMultiply ( signExtend ( D ( Src1 ) . M , 65 ) , signExtend ( D ( Src2 ) . M , 65 ) ) ;
+    mult32_32_2 = 0 - mult32_32_2 ;
+    D ( Trg ) = ( ( sbits < 65 >  ) ( ( ( mult32_32_1 << 1 ) + 0x80000000ull ) ) >> 32 ) ( 39 , 0 ) ;
+    D ( Trg ) = ( ( sbits < 65 >  ) ( ( ( mult32_32_2 << 1 ) + 0x80000000ull ) ) >> 32 ) ( 39 , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"extracted-doc-op" => <<DATA
+
+D ( Trg ) = ( ( sbits < 65 >  ) ( ( signedMultiply ( signExtend ( D ( Src1 ) . M , 65 ) , signExtend ( D ( Src2 ) . M , 65 ) ) << 1 ) + 0x80000000ull ) >> 32 ) ( 39 , 0 ) ;
+D ( Trg ) = ( ( sbits < 65 >  ) ( ( ( 0 - signedMultiply ( signExtend ( D ( Src1 ) . M , 65 ) , signExtend ( D ( Src2 ) . M , 65 ) ) ) << 1 ) + 0x80000000ull ) >> 32 ) ( 39 , 0 ) ;
+DATA
+,
+"inputs" => [
+"D(Src1)",
+"D(Src2)",
+],
+"outputs" => [
+"D(Trg)",
+],
+},
+"foo1" => {
+"width" => 32,
+"syntax" => "foo1 RB, RA, RT",
+"dsyntax" => "foo1 ${RB}, ${RA}, ${RT}",
+"fields" => {
+"XO" => 266,
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 34,
+},
+"aliases" => {
+"foo_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"parent_action" => <<DATA
+{
+     sbits < 65 > mult32_32_1 = signedMultiply ( signExtend ( D ( RA ) . M , 65 ) , signExtend ( D ( RB ) . M , 65 ) ) ;
+     sbits < 65 > mult32_32_2 = signedMultiply ( signExtend ( D ( RA ) . M , 65 ) , signExtend ( D ( RB ) . M , 65 ) ) ;
+    mult32_32_2 = 0 - mult32_32_2 ;
+    D ( RT ) = ( ( sbits < 65 >  ) ( ( ( mult32_32_1 << 1 ) + 0x80000000ull ) ) >> 32 ) ( 39 , 0 ) ;
+    D ( RT ) = ( ( sbits < 65 >  ) ( ( ( mult32_32_2 << 1 ) + 0x80000000ull ) ) >> 32 ) ( 39 , 0 ) ;
+}
+DATA
+,
+"extracted-doc-op" => <<DATA
+
+D ( RT ) = ( ( sbits < 65 >  ) ( ( signedMultiply ( signExtend ( D ( RA ) . M , 65 ) , signExtend ( D ( RB ) . M , 65 ) ) << 1 ) + 0x80000000ull ) >> 32 ) ( 39 , 0 ) ;
+D ( RT ) = ( ( sbits < 65 >  ) ( ( ( 0 - signedMultiply ( signExtend ( D ( RA ) . M , 65 ) , signExtend ( D ( RB ) . M , 65 ) ) ) << 1 ) + 0x80000000ull ) >> 32 ) ( 39 , 0 ) ;
+DATA
+,
+},
+},
+"parent" => "foo_family",
+"disassemble" => 1,
+"inputs" => [
+"D(RA)",
+"D(RB)",
+],
+"outputs" => [
+"D(RT)",
+],
+},
+"sub_family" => {
+"syntax" => "sub_family Src1, Src2, Trg, DoSub",
+"dsyntax" => "sub_family ${Src1}, ${Src2}, ${Trg}, ${DoSub}",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+"DoSub" => "",
+},
+"action" => <<DATA
+{
+     sbits < 41 > x ;
+    if ( DoSub == 1 ) {
+        x = signExtend ( D ( Src1 ) . H , 41 ) - signExtend ( D ( Src2 ) . L , 41 ) ;
+    } else {
+        x = signExtend ( D ( Src1 ) . H , 41 ) + signExtend ( D ( Src2 ) . L , 41 ) ;
+    }
+    D ( Trg ) . WH = x ;
+}
+DATA
+,
+"disassemble" => 1,
+"extracted-doc-op" => <<DATA
+
+ sbits < 41 > x ;
+if ( DoSub == 1 ) {
+        x = signExtend ( D ( Src1 ) . H , 41 ) - signExtend ( D ( Src2 ) . L , 41 ) ;
+    } else {
+        x = signExtend ( D ( Src1 ) . H , 41 ) + signExtend ( D ( Src2 ) . L , 41 ) ;
+    }
+D ( Trg ) . WH = x ;
+DATA
+,
+"inputs" => [
+"D(Src1)",
+"D(Src2)",
+],
+"outputs" => [
+"D(Trg)",
+],
+},
+"sub1" => {
+"width" => 32,
+"syntax" => "sub1 RB, RA, RT",
+"dsyntax" => "sub1 ${RB}, ${RA}, ${RT}",
+"fields" => {
+"XO" => 266,
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 33,
+},
+"aliases" => {
+"sub_family" => {
+"sources" => [
+"source" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"source" => {
+"field" => "Src2",
+"value" => "RB",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "DoSub",
+"value" => 1,
+},
+],
+"parent_action" => <<DATA
+{
+     sbits < 41 > x ;
+    {
+        x = signExtend ( D ( RA ) . H , 41 ) - signExtend ( D ( RB ) . L , 41 ) ;
+    }
+    D ( RT ) . WH = x ;
+}
+DATA
+,
+"extracted-doc-op" => <<DATA
+
+D ( RT ) . WH = ( signExtend ( D ( RA ) . H , 41 ) - signExtend ( D ( RB ) . L , 41 ) ) ;
+DATA
+,
+},
+},
+"parent" => "sub_family",
+"disassemble" => 1,
+"inputs" => [
+"D(RA)",
+"D(RB)",
+],
+"outputs" => [
+"D(RT)",
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+},
+},
+"systems" => {
+},
+};
+

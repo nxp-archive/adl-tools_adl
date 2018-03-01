@@ -1,0 +1,3 @@
+P:thread0:  More instructions were found in expected trace than found trace.
+P:thread0:  Intermediate results mismatch.
+Error:  Test 1:  Intermediate result mismatches were found.

@@ -1,0 +1,134 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "c"
+  Size:  16
+  Width:  32
+    X[0,3]   
+  Attributes:  up red
+  -------------------------------
+  Name:  "d"
+  Size:  16
+  Width:  32
+    V[0,3]   Attributes:  red
+  Attributes:  blue
+  -------------------------------
+Registers:
+  Name:  "a"
+  Width:  32
+    X[0,3]   
+  Attributes:  up
+  -------------------------------
+  Name:  "b"
+  Width:  32
+    V[0,3]   Attributes:  red
+  Attributes:  down
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  A: [6,20] 
+  B: [21,30] 
+  C: [21,30] 
+  OPCD: [0,5] 
+Instructions:
+  Name:  i1 (rank: 100)
+  Width:  32
+  Attributes:  up down
+  Fields:  OPCD(1) A B
+  Action:  {
+     int i = 10 ;
+}
+  -------------------------------
+  Name:  i2 (rank: 100)
+  Width:  32
+  Attributes:  left right
+  Fields:  OPCD(2) A B
+  Action:  {
+     int i = 10 ;
+}
+  -------------------------------
+  Name:  i3 (rank: 100)
+  Width:  32
+  Attributes:  red blue
+  Fields:  OPCD(3) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i4 (rank: 100)
+  Width:  32
+  Attributes:  up red
+  Fields:  OPCD(4) A B
+  Action:  {
+     int i = 10 ;
+}
+  -------------------------------
+  Name:  i5 (rank: 100)
+  Width:  32
+  Attributes:  right
+  Fields:  OPCD(5) A C
+  Action:  {
+     int j = 20 ;
+}
+  -------------------------------
+  Name:  i6 (rank: 100)
+  Width:  32
+  Attributes:  blue
+  Fields:  OPCD(6) A C
+  Action:  {
+     int j = 20 ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    1(4000000):  i1
+    2(8000000):  i2
+    3(c000000):  i3
+    4(10000000):  i4
+    5(14000000):  i5
+    6(18000000):  i6
+
+Groups:
+  Name:  g1
+  Type:  instr
+  Items: i1 i2 i3 i4 
+  -------------------------------
+  Name:  g2
+  Type:  instr
+  Items: i1 i2 i4 
+  -------------------------------
+  Name:  g3
+  Type:  instr
+  Items: i5 i6 
+  -------------------------------
+  Name:  g4
+  Type:  reg
+  Items: a 
+  -------------------------------
+  Name:  g5
+  Type:  regfile
+  Items: c 
+  -------------------------------
+  Name:  g6
+  Type:  reg
+  Items: b 
+  -------------------------------
+  Name:  g7
+  Type:  regfile
+  Items: d 
+  -------------------------------
+-------------------------------
+

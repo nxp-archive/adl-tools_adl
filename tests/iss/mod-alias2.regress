@@ -1,0 +1,50 @@
+
+mod-alias2.o:     file format elf32-powerpcle
+mod-alias2.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000068  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  0000009c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  0000009c  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	00000003 	stm  [sp+0],g1, (0x3)
+   4:	0f000000 
+   8:	00000001 	stm  [sp+0],g0, (0x1)
+   c:	0f000000 
+  10:	00000005 	stm  [sp+0],g2, (0x5)
+  14:	0f000000 
+  18:	00000009 	stm  [sp+0],g3, (0x9)
+  1c:	0f000000 
+  20:	00000003 	stm  [sp+3],g1, (0x3)
+  24:	0f0000c0 
+  28:	00000001 	stm  [sp+1],g0, (0x1)
+  2c:	0f000040 
+  30:	00000005 	stm  [sp+5],g2, (0x5)
+  34:	0f000140 
+  38:	00000009 	stm  [sp+9],g3, (0x9)
+  3c:	0f000240 
+  40:	0000000f 	stm  [sp+15],g3, (0xf)
+  44:	0f0003c0 
+  48:	0000000e 	stm  [sp+0],g3, (0xe)
+  4c:	0f000000 
+  50:	0000000e 	stm  [sp-14],g3, (0xe)
+  54:	0f3ffc80 
+  58:	0000000e 	stm  [sp-14],g3, (0xe)
+  5c:	0f3ffc80 
+	...

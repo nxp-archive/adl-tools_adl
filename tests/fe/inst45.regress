@@ -1,0 +1,4 @@
+inst45.adl:72: Field 'R5' not handled in syntax field.
+inst45.adl:83: Fewer format codes were found than fields listed in the syntax field.
+inst45.adl:92: Invalid dsyntax string.
+inst45.adl:105: Invalid dsyntax string.

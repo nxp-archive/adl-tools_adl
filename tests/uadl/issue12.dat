@@ -1,0 +1,53 @@
+#
+# Branch/exception example where we check that a branch is not incorrectly taken
+# b/c _speculative is set by another instruction taking an exception.  Only
+# happens if branch is evaluated earlier than exec call for the other
+# instruction.
+#
+= asm
+
+L1:
+	addi r3,r3,3   # Shouldn't be taken.
+	addi r3,r3,3
+	.long 0x0
+	addi r1,r1,1
+	mtspr 100,r1   # Will cause program exception.
+	beq L1
+	.long 0x0      # Shouldn't execute.
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	addi r4,r4,4
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38630003	#	addi r3,r3,3   # Shouldn't be taken.
+MD n=Mem ra=0x00000004 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000008 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x7C241BA6	#	mtspr 100,r1   # Will cause program exception.
+MD n=Mem ra=0x00000014 d=0x4182FFEC	#	beq L1
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0      # Shouldn't execute.
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000002c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000030 d=0x38840004	#	addi r4,r4,4
+# </GEN>
+
+RD n=MSR   d=0x00400000
+RD n=NIA   d=0xc
+RD n=IVOR6 d=0x30
+
+RESULTS
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=0
+RD n=GPR i=3 d=0
+RD n=GPR i=4 d=4

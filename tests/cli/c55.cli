@@ -1,0 +1,21 @@
+#
+# Refer to in9.dat for an explanation of this test.  We want to make sure that
+# we can remove a breakpoint when using the decode cache, and not run into any
+# problems.
+#
+simmode dc
+step
+step
+setbrk 0x10020
+setbrk 0x10038
+go
+puts "GPR3: [reg GPR3]"
+go
+puts "GPR3: [reg GPR3]"
+go
+puts "GPR3: [reg GPR3]"
+clrbrk 0x10020
+go
+puts "GPR2: [reg GPR2]"
+puts "GPR3: [reg GPR3]"
+quit

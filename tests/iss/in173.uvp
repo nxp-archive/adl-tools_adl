@@ -1,0 +1,54 @@
+format=huvp;
+//------------------------------------------------------------------------------
+//
+// Tests to make sure that we can end a test with an alternate UVP RES value.
+// If it's not recognized, then the RES card location will be taken as at
+// 0x1000, which doesn't translate, and will thus cause an error.
+//
+//------------------------------------------------------------------------------
+test => test {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  P => P {
+    I : R {nm="NIA"; d=0x00000fe4;};
+    I : T {n="TlbCam"; t="ID"; way=0; ep=0x0000000000000000; rp=0x0000000000000000; 
+            d={{"E",0x0},{"EPN",0x0},{"RPN",0x0},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TS",0x0},{"UR",0x1},{"UW",0x1},
+              {"UX",0x1},{"V",0x1},{"WIMG",0x1},};};
+    E : I {asm="addi r1,r1,1"; c=1; gc=1;
+                   ea=0x0000000000000fe4; ra=0x0000000000000fe4; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000001],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000fe8],
+                       [ t=>"reg", rn=>"HitReg", d=>0x00000001],};};
+    E : I {asm="addi r1,r1,1"; c=2; gc=2;
+                   ea=0x0000000000000fe8; ra=0x0000000000000fe8; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000002],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000fec],};};
+    E : I {asm="addi r1,r1,1"; c=3; gc=3;
+                   ea=0x0000000000000fec; ra=0x0000000000000fec; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000003],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000ff0],};};
+    E : I {asm="addi r1,r1,1"; c=4; gc=4;
+                   ea=0x0000000000000ff0; ra=0x0000000000000ff0; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000004],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000ff4],};};
+    E : I {asm="addi r1,r1,1"; c=5; gc=5;
+                   ea=0x0000000000000ff4; ra=0x0000000000000ff4; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000005],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000ff8],};};
+    E : I {asm="addi r1,r1,1"; c=6; gc=6;
+                   ea=0x0000000000000ff8; ra=0x0000000000000ff8; d=0x38210001; op=0x38210001; ta=0x1; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000006],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000ffc],};};
+    R : RES {ea=0x0000000000000ffc; ra=0x0000000000000ffc;ta=0x1;};
+    R : R {nm="GPR1"; d=0x00000006;};
+    R : T {n="TlbCam"; t="ID"; way=0; ep=0x0000000000000000; rp=0x0000000000000000; 
+            d={{"E",0x0},{"EPN",0x0},{"RPN",0x0},{"SIZE",0x1},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TS",0x0},{"UR",0x1},{"UW",0x1},
+              {"UX",0x1},{"V",0x1},{"WIMG",0x1},};};
+  } // P
+} 

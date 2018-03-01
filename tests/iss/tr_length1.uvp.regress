@@ -1,0 +1,3 @@
+powerpc:t2:  More instructions were found in expected trace than found trace.
+powerpc:t2:  Intermediate results mismatch.
+Error:  Test 1:  Intermediate result mismatches were found.

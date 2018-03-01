@@ -1,0 +1,661 @@
+##grammar {
+  start =
+    element data { 
+      element date {str}?,
+      cores,
+      element systems {
+        element sys { systemContent}*
+      }
+    }
+
+  cores = element cores { core*}
+  regs = element regs { register* }
+  register = element register {registerContent}
+  systems = element systems { element sys { systemContent}*}
+  RaMask = element RaMask 	{ 
+		element initial {str}, 
+		element constant {bool}?,
+    element watch {str}?
+  }
+  EaMask = element EaMask { 
+		element initial {str}, 
+		element constant {bool}?,
+    element watch {str}?
+  }
+  blocks = element blocks {str*}
+  block = element block {str}
+  type = element type {str}
+  asm_config = element asm_config {  
+    element comments {str+}?,   
+    element line_comments {str+}?,
+    element line_seps {str+}?,
+    element instr_seps {str+}?,
+    element group_seps {
+       element group_sep {
+         ((str,str)|str)
+       }+
+    }?,
+    element asm_instrtables {str+}?,
+    element disasm_instrtables {str+}?,
+    element parms {
+      element parm {
+        attribute name {text},
+	      element value {int}?,
+	      element type {str}?
+      }+
+    }?
+  }
+
+  coreContent =
+    attribute name {text}?,
+    doc?,
+    type?,
+    element bit_endianness {str}?,
+    blocks?,
+    element type_declarations {str+}?,
+    element parallel_execution {int}?,
+    RaMask?,
+    EaMask?,
+    regs?,
+    regfiles_definition?,
+	  relocations?,
+    instrfields?,
+    instrs?,
+    subinstrs?,
+    exceptions?,
+    contexts?,
+    caches?,
+    eventbuses?,
+		ext_resources?,
+    memories_definition?,
+    mmu?,
+    core-level-hooks?,
+    groups?,
+    parms?,
+    aspects?,
+    asm_config?,
+    core_helpers?
+  
+  core_helpers = element helpers {
+    element helper {
+      attribute name {text},
+      element action {str},
+      usage_info?
+    }*
+  }
+  
+  aspects = element aspects {
+    element aspect {
+      element type {str},
+      element location {str+},
+      element targets {str+},
+      action
+    }+
+  }
+      
+  parms = element parms {
+    element parm { 
+      attribute name {text},
+      doc?,
+      element value {str},
+      element options {str+},
+      element watch {str}?,
+      element constant {bool}?
+	
+    }+
+  }
+
+  contexts = element contexts { context+}
+  context = element context {
+    attribute name {text},
+    doc?,
+    element thread {bool}?,
+    element active {str}?,
+    element num_contexts {int}?,
+    element regs {str+}?,
+    element regfiles {str+}?   
+  }
+      
+  mmu = element mmu {
+		element interleaved-fetch {bool},
+		element interleaved-reads {bool},
+		element interleaved-writes {bool},
+	  mmulookups,
+	  element instr-enable {str},
+    element data-enable {str},
+    element instr-miss {str},
+    element data-miss {str},
+    element load-miss {str},
+    element store-miss {str},
+    element multi-hit {str},
+    element aligned-write {str},
+    element misaligned-write {str},
+    element misaligned-read {str},
+    element post-write {str},
+    element post-read {str}
+  }
+
+  core-level-hooks = element core-level-hooks {
+	decode-miss?,
+	pre-cycle?,
+	post-cycle?,
+	pre-fetch?,
+	post-fetch?,
+	post-exec?,
+	post-asm?,
+	post-packet-asm?,
+	post-packet?,
+	active-watch?,
+	instr-table-watch?
+  }
+
+  decode-miss = element decode-miss {element str {text}}
+
+  pre-fetch = element pre-fetch {element str {text}}
+
+  post-fetch = element post-fetch {element str {text}}
+
+  pre-cycle = element pre-cycle {element str {text}}
+
+  post-cycle = element post-cycle {element str {text}}
+
+  post-exec = element post-exec {element str {text}}
+  
+  post-asm = element post-asm {element str {text}}
+  
+  post-packet-asm = element post-packet-asm {element str {text}}
+
+  post-packet = element post-packet {element str {text}}
+  
+  active-watch = element active-watch {element str {text}}
+
+  instr-table-watch = element instr-table-watch {element str {text}}
+
+  groups = element groups { group+}
+  group = element group {
+    attribute name {text},
+    element type {str},
+    element items {str+}}
+
+  exceptions = element exceptions { exception+}
+  exception = element exception {
+    attribute name {text},
+    doc?,
+    fields?,
+    priority,
+    action}
+  
+  priority = element priority {int}
+  memories_definition = element memories {memory_definition*}
+  memory_definition = element memory { 
+    attribute name {text},
+    element instr_mem {bool},
+    element prefetch_mem {bool}?,
+    element size {int},
+    element addr_unit {int},
+    element parent {str,int}?,
+    element read {str}?,
+    element write {str}?,
+    element instr_read {str}?
+  }
+
+  caches = element caches {
+    element cache {cacheContent}*  }
+
+  instrfields = element instrfields {
+    instrfield+  }
+ 
+  instrfield = element instrfield {
+    attribute name {text},
+    doc?,
+    syntax?,
+		attributes?,
+    (alias_d |
+      ((instr_bits|pseudo),
+      element prefix {bool}?,
+      width?,
+      size?,
+      shift?,
+			offset?,
+      element indexed {int}?,
+      element mask {str},
+      blocks?,
+      table?,
+      enumerated?,
+      element addr {str}?,
+      element display {str}?,
+      type?,
+      element overlay {bool}?,
+      element signed {bool}?,
+      element inverted {bool}?,
+      element assembler {bool}?,
+      element unsigned_upper_bound {bool}?,    
+      action?,
+      element value {int}?,
+      element implements {str}?,
+      element reloc {str}?,
+      element valid_ranges {valid_range+}?,
+      element valid_masks {valid_mask+}?,
+      element ref {str}?,
+      element instrtable {str}?,    
+      nested_fields?,
+      nested_instrfields?))
+  }
+  
+	alias_d = element alias {str}
+
+  valid_range = element range { int,int}
+  valid_mask = element mask { int,int}
+  
+  nested_fields = element fields { 
+    nested_field*
+  }
+  
+  nested_field = element field { attribute name {text},int } |(int,int) 
+ 
+  nested_instrfields = element instrfields { 
+    nested_instrfield*
+  }
+  
+  nested_instrfield = element instrfield { 
+    attribute name {text},
+    size?,
+    (instr_bits|nested_fields),
+    table?  
+  }
+
+  table = element table {
+    table_entry+
+  }
+
+  table_entry = element entry {
+    attribute name {text},
+    (int+ | element str {"reserved"})
+  }
+
+  instrs = element instrs { instruction+}
+	instruction_aliases = element aliases { instr_alias* }
+	instr_alias = element alias { 
+    attribute name {text},
+    sources?,
+    destinations?,
+    miscs?,
+		parent_action?,
+		extracted-doc-op?
+  }
+  sources       =  element sources { source* }
+  source        =  element source  {
+    element  conditional {bool}?,
+    element  field {str},
+    (element value {str} | element value {int})
+  }
+  destinations  =  element destinations { destination* }
+  destination   =  element destination  { 
+    element  conditional {bool}?,
+    element  field {str},
+    (element value {str} | element value {int})
+  }
+  miscs         =  element miscs   {  misc* }
+  misc          =  element misc    {  
+    element  conditional {bool}?,
+    element  field {str},
+    (element value {str} | element value {int})
+  }
+  
+
+  instruction = element instruction { 
+    attribute name {text},
+    width?,
+    element fetch_width{int}?,
+    doc?,
+    syntax,
+		dsyntax?,
+    block?,
+    attributes?,
+    ((instruction_fields?,instruction_aliases) |
+    (instruction_fields,(pseudo|(action?,assembler?))) |
+	  alias_action),
+		element parent {str}?,
+    element prefix {bool}?,
+    element disassemble {bool}?,
+		doc-op?,
+    type?,
+    usage_info 
+  }
+  
+  subinstrs = element subinstrs {subinstruction+}
+  
+  subinstruction = element subinstruction {
+    attribute name {text},
+    doc?,
+    block?,
+    attributes?,
+    syntax?,
+    attributes?,
+    instruction_fields,
+    usage_info
+  }
+
+  usage_info =     
+    inputs?,
+    outputs?,
+    input_mems?,
+    output_mems?,
+    input_caches?,
+    output_caches?,
+    helpers?,
+    element raises_exception {bool}? 
+
+
+
+
+  
+  
+  attributes = element attributes { attr+}
+  
+  attr = element attribute {
+     attribute name {text},
+     (str|int|strlist|intlist)       
+  }
+
+  strlist = element strlist {str+}
+
+  intlist = element intlist {int+}
+  
+  syntax = element syntax { str}
+  dsyntax = element dsyntax { str}	
+  inputs = element inputs { str*}
+  outputs = element outputs {str*}
+  input_mems = element input_mems { str*}
+  output_mems = element output_mems {str*}
+  input_caches = element input_caches { str*}
+  output_caches = element output_caches {str*}
+  helpers = element helpers { str*}
+
+  size = element size {int}
+  shift = element shift {int}
+  instruction_fields = element fields { instruction_field*}
+  instruction_field = element field {
+    attribute name {text},
+    (int | str)  }
+  mmulookups = element mmulookups {
+    attribute name {text}?,
+    mmulookup*
+  }
+ 
+  memories_declaration = element memories {
+    element memory { memory_declaration_content }*
+  }
+
+  eventbuses = element eventbuses {
+    element eventbus { eventbusContent }*
+  }
+
+	ext_resources = element ext_resources {
+		element ext_resource { extResourceContent }*
+	}
+
+  core = element core { coreContent}*
+
+  systemContent = 
+    attribute name {text}?,
+      regs,
+      regfiles_declaration,
+      caches,
+      mmulookups,
+      memories_declaration,
+      eventbuses,
+			ext_resources,
+      core*
+
+  cacheContent = 
+    attribute name {text},
+    doc?,
+    element level {int},
+    element type {str},
+    element size {int},
+    element line_size {int},
+    (element fully_assoc {bool} | element set_assoc {int}),
+    element setfields {field+}?,
+    element wayfields {field+}?,
+    element enable-predicate {str},
+    element hit {str},  
+    element miss {str},  
+    element invalidate-line {str},  
+    element read-line {str},  
+    element replace {str},  
+    element line-access {str},  
+    element writethrough-predicate {str},  
+    element number-of-sets {str},  
+    element number-of-ways {str}  
+
+  str = element str {text}
+
+  docContent = (text|str)
+
+  docOpContent = (text|str)
+
+  regfiles_definition = 
+    element regfiles {regfile_definition*}
+
+  regfile_definition = 
+    element regfile { attribute name {text},
+                      doc?,
+                      width,
+		      offset?,
+		      pseudo?,
+		      serial?,
+                      regfields?,
+                      reserved_mask?,
+		      readonly_mask?,
+		      attributes?,
+		      enumerated?,
+		      reset?,
+                      size,
+		      element prefix {str}?,
+                      shared?,
+                      entries?,
+                      read_regfile?,
+                      write_regfile?    }
+
+  relocations = element relocations { relocation* }
+
+  relocation = element reloc { 
+	  attribute name {text},
+		  attributes?,
+      doc?,
+			element abbrev {str},
+			element field_width {int},
+			element pcrel {bool},
+      element value {int} ?,
+      element right_shift {int} ?,
+      element width {int} ?
+  }
+
+  entries = element entries { regnames+}
+
+  regnames = element entry { 
+    attribute name {text},
+    syntax?,
+    element reg {str | text} ?,
+    read_register?,
+    write_register?
+  }
+
+    
+  pseudo = element pseudo { bool}
+
+  eventbusContent = 
+    attribute name {text},
+    doc?,	       
+    fields?,
+    action?    
+
+  extResourceContent = 
+	  attribute name {text},
+		doc?,
+		element objtype {str}?,
+		element	external {bool}?,
+		constr_args?
+
+	constr_args = element constr_args {
+    constr_arg*  }
+
+	constr_arg = element constr_arg { str }
+
+  memory_declaration_content = 
+    attribute name {text}
+
+  mmulookup = 
+    element mmulookup {
+    attribute name {text},
+		doc?,
+    priority,
+    page-size,
+    element entries {int},
+    (element fully_assoc {bool} | element set_assoc {int}),
+    setfields_mmu?,
+    wayfields_mmu?,
+    (testsets | element tests { str*}?),
+    element exec-perm { str}?,
+    element load-perm { str}?,
+    element store-perm {str}?,
+    element valid {str}?,
+    element hit {str}?,
+    element miss {str}?,
+    element reset {str}?,
+    element mem_read {str}?,
+    element mem_write {str}?,
+		element mem_size {int}?
+  }
+
+  testsets = element testsets {
+    testset*
+  }
+
+  testset = element testset {
+    attribute name {text},
+	element enable {str}?,
+	element tests { str*}?
+  }
+
+  page-size = element page-size {
+       ((element const {bool}, 
+	 element size {int}) 
+       |
+        (element bitsize {bool},
+         element scale {int},
+	 element field {str},
+	 element offset {int},
+ 	 element shift {int}))
+  }
+
+  regfields = element fields {
+     element field {
+      attribute name {text},
+      doc?,
+      (indexed |
+     (instr_bits,
+      readonly?,reserved?)),
+			attributes?
+     }+
+  }
+  
+  fieldContents = 
+    attribute name {text},
+    doc?,
+    (indexed |
+     (bits,
+      readonly?,reserved?)),
+	 attributes?
+  
+  indexed = element indexed {
+    width,
+    element count {int}}
+
+  regfiles_declaration = element regfiles {
+    element str {text}*
+  }
+
+  instr_bits = element bits { range+ }
+  bits = element bits { element int {xsd:int}+ }
+
+  range = element range { (int, int) | int }
+
+  bool = (element true {empty}) | (element false { empty})
+  readonly = element readonly {bool}
+  reserved = element reserved {bool}
+  int = element int {xsd:long}
+  width = element width {int}
+  offset = element offset {int}
+  serial = element serial {bool}
+  doc = element doc {docContent}
+	extracted-doc-op = element extracted-doc-op {docOpContent}
+  doc-op = element doc-op {docOpContent}
+  field = element field { fieldContents}
+  fields = element fields { ## just plain fields are register definition fields
+    field*
+  }
+  
+  setfields_mmu = element setfields { 
+    field_mmu*
+  }
+  
+  wayfields_mmu = element wayfields { 
+    field_mmu*
+  }
+  
+  field_mmu = element field { 
+    attribute name {text},
+    doc?,
+    (indexed |
+     (bits,
+      readonly?))
+  }
+
+  action = element action {str}
+	alias_action = element alias_action {str}	
+  parent_action = element parent_action {str}
+  assembler = element assembler {element str {text}}
+  read_register = element read { alias_register | str}
+  read_regfile = element read { alias_regfile | str}
+  alias_regfile = element alias { 
+    element reg {str},
+    map_regfile_alias?}
+
+  map_regfile_alias = element map {
+    alias_index+}
+
+  alias_index = element alias_index {
+    attribute name {text},
+    int}
+
+  alias_register = (element alias {str} , element alias_index {int}?)
+  ignored = element ignored {bool}
+  write_register = element write { alias_register | (str| ignored)}
+  write_regfile = element write { alias_regfile | (str | ignored)}
+  reset = element reset {str}
+  shared = element shared {int}
+  reserved_mask = element reserved_mask {str}
+  readonly_mask = element readonly_mask {str}
+  
+  enumerated = element enumerated {option+}
+  option = element option { attribute name {text}?, str }
+  
+  registerContent =
+    attribute name {text},
+    doc?,
+    width,
+    offset?,
+    serial?,
+    pseudo?,
+    enumerated?,
+    regfields?,
+    reserved_mask?,
+    readonly_mask?,
+    attributes?,
+    reset?,
+    shared?,
+    read_register?,
+    write_register?
+##}

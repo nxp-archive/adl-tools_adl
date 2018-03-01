@@ -1,0 +1,66 @@
+#
+# This tests to make sure that if a context switch occurs, triggered by an
+# eventbus write from another core, then the next instruction for that core
+# will reflect that context update.
+#
+
+= asm
+
+  addi r1,r1,1
+  addi r2,r2,1
+  mtspr 302,r2
+  mtspr 300,r1
+  mfspr r3,303
+  .long 0
+  nop
+  nop
+  nop
+  mfspr r3,303
+  .long 0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000008 d=0x7C4E4BA6	#	mtspr 302,r2
+MD n=Mem ra=0x0000000c d=0x7C2C4BA6	#	mtspr 300,r1
+MD n=Mem ra=0x00000010 d=0x7C6F4AA6	#	mfspr r3,303
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000018 d=0x60000000	#	nop
+MD n=Mem ra=0x0000001c d=0x60000000	#	nop
+MD n=Mem ra=0x00000020 d=0x60000000	#	nop
+MD n=Mem ra=0x00000024 d=0x7C6F4AA6	#	mfspr r3,303
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0
+# </GEN>
+
+CORE n=:MP:core0
+
+CTX n=foo cn=1
+
+RD n=X d=0xdeadbeef
+
+RD n=NIA d=0x0
+
+NOCTX
+
+CORE n=:MP:core1
+
+RD n=NIA d=0x18
+
+CTX n=foo cn=1
+
+RD n=X d=0x12345678
+
+NOCTX
+
+RESULTS
+
+CORE n=:MP:core0
+
+RD n=GPR i=3 d=0xdeadbeef
+
+CORE n=:MP:core1
+
+RD n=GPR i=3 d=0x12345678
+

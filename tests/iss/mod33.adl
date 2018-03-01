@@ -1,0 +1,207 @@
+// Test assembler for instructions larger than 64 bit
+define (arch=big_arch) {
+      
+  define (reg = PC) {
+    attrs = (cia,nia);
+  }
+
+  define (regfile = GPR) {
+    size = 32;
+    width = 32;
+    prefix = r;
+  }
+  
+  define (regfile = SPRS) {
+    size = 32;
+ 
+    define (entry = 0) { reg = GPR(0) ;};
+    //-------
+    define (entry = 1) { reg = GPR(1) ;};
+    //------- 
+    define (entry = 2) { reg = PC;};
+    //-------
+    define (entry = 3) {
+      define(read) {
+        action = func() { return PC;};
+      }
+      define (write) {
+        action = func (bits<32> x) { PC = ~x;};
+      }
+      syntax = "PCPC";
+    }
+    //-------
+    prefix = s; 
+  }
+//--------------
+  define (regfile = SPRS2) {
+    size = 32;
+    define (entry = 0) { reg = PC;};
+  }
+    
+  define (instrfield = stam) {
+    bits = (16,31);
+    ref = SPRS2;
+  }
+  define (instr = instr_new) {
+    fields = (opcd(0x44),stam);
+    action = {};
+
+  }
+//----------
+  
+  define (instrfield = opcd) {
+    bits = (0,15);
+  }
+
+  define (instrfield = reg1) {
+    bits = (16,23);
+    ref = GPR;
+  }
+
+  define (instrfield = reg2) {
+    bits = (24,31);
+    ref = GPR;
+  }
+ 
+  define (instrfield = imm8) {
+    bits = (24,31);
+    addr = pc;
+    is_signed = true;
+  }
+  
+  define (instrfield = imm24) {
+    bits = (24,47);
+    addr = pc;
+    is_signed = true;
+  }
+
+  define (instrfield = ra) {
+    bits = (16,31);
+    enumerated = ("a","b");
+  }
+ 
+  define (instrfield = rb) {
+    bits = (32,47);
+    ref  = SPRS;
+  }
+   
+  define (instrfield = label) {
+    bits = (16,31);
+    addr = abs;
+  }
+
+  define (instrfield = imm16) {
+    bits = (48,63);
+  }
+  
+  define (instrfield = label2) {
+    bits = (48,63);
+    addr = abs;
+  }
+  
+  define (instr=halt) {
+    fields = (opcd(0));
+    action = {halt();};
+  }
+
+  define (instr=foo1) {
+    fields = (opcd(0xf001),label);
+    syntax = ("%i %f",label);
+    action = {};
+  }
+  
+  define (instr=foo2) {
+    fields = (opcd(0xf002),ra,rb,imm16);
+    syntax = ("%i %f,%f,%f",ra,rb,imm16);
+    action =  {};
+  }
+  
+  define (instr=foo3) {
+    fields = (opcd(0xf003),ra,rb);
+    syntax = ("%i %f,%f",ra,rb);
+    action =  {};
+  }
+
+  define (instr=foo4) {
+    fields = (opcd(0xf004),label,rb,imm16);
+    syntax = ("%i %f,%f,%f",label,rb,imm16);
+    action =  {};
+  }
+  
+  define (instr=foo5) {
+    fields = (opcd(0xf005),ra,rb,label2);
+    syntax = ("%i %f,%f,%f",ra,rb,label2);
+    action =  {};
+  }
+
+  define (instrfield = ext) {
+    bits = (64,79);
+  }
+  define (instr=foo6) {
+    fields = (opcd(0xf006),ra,rb,label2,ext);
+    syntax = ("%i %f,%f,%f,%f",ra,rb,label2,ext);
+    action =  {};
+  }
+
+  define (instr=foo7) {
+    fields = (opcd(0xf008),reg1,reg2);
+    syntax = ("foo6 (%f+%f)",reg1,reg2);
+    action = {};
+  }
+
+  define (instr=foo8) {
+    fields = (opcd(0xf007),reg1,imm8);
+    syntax = ("foo6 (%f+%f)",reg1,imm8,imm8(imm8>>2));
+    action = {};
+  }
+  define (instrfield=pseudo_field) {
+    pseudo = true;
+    width = 16;
+  }
+ 
+  define (instr = foo9) {
+    fields = (opcd(0xf009),(bits(16,31),pseudo_field));
+    syntax = ("%i %f",pseudo_field);
+    action = {};
+  }
+  
+  define (instr = fo10) {
+    alias = foo9(pseudo_field(~pseudo_field)); 
+    syntax = ("%i %f",pseudo_field);
+  }
+
+  
+  define (instr=fo11) {
+    fields = (opcd(0xf011),reg1,imm8);
+    syntax = ("move %f,(>%f)",reg1,imm8);
+    action = {};
+  }
+  
+  define (instr=fo12) {
+    fields = (opcd(0xf012),reg1,imm24);
+    syntax = ("move %f,(<%f)",reg1,imm24);
+    action = {};
+  }
+  define (instr=fo11_alias) {
+    alias = fo11(reg1(reg1),imm8(imm8));
+    syntax = ("move %f,(%f)",reg1,imm8);
+  }
+ 
+
+  parallel_execution = 3;
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ("//");
+    line_comments = ("#rem","|","//");
+    symbol_chars = ("+","(",")");
+    explicit_regs = true;
+    queue_size = 2;
+  }
+
+}
+
+
+define (core=big_core) {
+  archs=big_arch;
+  
+}

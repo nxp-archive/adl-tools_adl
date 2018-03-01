@@ -1,0 +1,52 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Simple example of implementing an architecture with a delayed branch 
+// (single delay slot).  The branch is just the normal BC instruction.  However,
+// if BO(4) is set, then the delay slot is annulled.
+//
+
+#import "mod1.adl"
+
+define (arch = delay_slot) {
+
+  // Tests enumerated registers.
+  define (reg=Fetch) {
+    enumerated = (Normal,DelaySlot);
+    reset = Normal;
+  }
+
+  pre_fetch = func() {
+    Fetch = Fetch::Normal;
+  };
+
+  defmod (instr=bc) {
+    action = func() {
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = (BO(2)!=0) || (( (CTR!=0) ^ BO(3))!=0);
+      var cond_ok = (BO(0)!=0) || ( CR(BI) == BO(1));
+      var nop_ds = (BO(4) == 1);
+      if ( ctr_ok && cond_ok ) {
+        if (nop_ds) {
+          NIA = BD;
+        } else {
+          // Delay the NIA update by one cycle.
+          delayed_write(NIA,1) = BD;
+          Fetch = Fetch::DelaySlot;
+        }
+      }
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,delay_slot);
+}

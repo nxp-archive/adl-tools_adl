@@ -1,0 +1,274 @@
+#
+# A basic counter loop using some VLE
+# instructions to demonstrate the functioning
+# of instructions of different lengths.
+#
+#
+= asm
+
+ loop:
+      se_add  r2,r1
+      subf.   r3,r4,r3
+      se_bne  loop
+      .long 0x0
+
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0412 s=2	#	se_add  r2,r1
+MD n=Mem ra=0x00000002 d=0x7C641851	#	subf.   r3,r4,r3
+MD n=Mem ra=0x00000006 d=0xE2FD s=2	#	se_bne  loop
+MD n=Mem ra=0x00000008 d=0x00000000	#	.long 0x0
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=GPR i=4 d=1
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x00000082
+ITIME t=1
+CTIME t=5
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000009
+ITIME t=3
+CTIME t=7
+
+I ea=0x6 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=4
+CTIME t=10
+
+I ea=0x0 id=4
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x000000a0
+ITIME t=8
+CTIME t=12
+
+I ea=0x2 id=5
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000008
+ITIME t=10
+CTIME t=14
+
+I ea=0x6 id=6
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=11
+CTIME t=17
+
+I ea=0x0 id=7
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x000000be
+ITIME t=15
+CTIME t=19
+
+I ea=0x2 id=8
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000007
+ITIME t=17
+CTIME t=21
+
+I ea=0x6 id=9
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=18
+CTIME t=24
+
+I ea=0x0 id=10
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x000000dc
+ITIME t=22
+CTIME t=26
+
+I ea=0x2 id=11
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000006
+ITIME t=24
+CTIME t=28
+
+I ea=0x6 id=12
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=25
+CTIME t=31
+
+I ea=0x0 id=13
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x000000fa
+ITIME t=29
+CTIME t=33
+
+I ea=0x2 id=14
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000005
+ITIME t=31
+CTIME t=35
+
+I ea=0x6 id=15
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=32
+CTIME t=38
+
+I ea=0x0 id=16
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x00000118
+ITIME t=36
+CTIME t=40
+
+I ea=0x2 id=17
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000004
+ITIME t=38
+CTIME t=42
+
+I ea=0x6 id=18
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=39
+CTIME t=45
+
+I ea=0x0 id=19
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x00000136
+ITIME t=43
+CTIME t=47
+
+I ea=0x2 id=20
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000003
+ITIME t=45
+CTIME t=49
+
+I ea=0x6 id=21
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=46
+CTIME t=52
+
+I ea=0x0 id=22
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x00000154
+ITIME t=50
+CTIME t=54
+
+I ea=0x2 id=23
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000002
+ITIME t=52
+CTIME t=56
+
+I ea=0x6 id=24
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=53
+CTIME t=59
+
+I ea=0x0 id=25
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x00000172
+ITIME t=57
+CTIME t=61
+
+I ea=0x2 id=26
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000001
+ITIME t=59
+CTIME t=63
+
+I ea=0x6 id=27
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+B taken=1 ea=0x0
+ITIME t=60
+CTIME t=66
+
+I ea=0x0 id=28
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+INSTR op=0x0412					asm="se_add r1,r2"
+R n=GPR i=2 d=0x00000190
+ITIME t=64
+CTIME t=68
+
+I ea=0x2 id=29
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04127c64
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0x7c641851					asm="subf. r3,r4,r3"
+R n=CR d=0x20000000
+R n=GPR i=3 d=0x00000000
+ITIME t=66
+CTIME t=70
+
+I ea=0x6 id=30
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x1851e2fd
+INSTR op=0xe2fd					asm="se_bc 0,2,0xfd"
+ITIME t=67
+CTIME t=73
+
+I ea=0x8 id=31
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=70
+CTIME t=74
+
+RESULTS
+
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+

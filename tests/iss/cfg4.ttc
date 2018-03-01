@@ -1,0 +1,14 @@
+//
+// Should produce an error b/c the hierarchy does not match
+// the model's.
+//
+define (sys=PSystem) {
+  define (sys=Foo) {
+    define (core=P) {
+      define (group=foo) {
+        itemss = mullw;
+        latency = 8;
+      }
+    }
+  }
+}

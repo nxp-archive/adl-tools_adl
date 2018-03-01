@@ -1,0 +1,116 @@
+#
+# Tests the ability to use is_misaligned(mask) as a predicate.
+# In this case, the e_lmvsprw instruction adds an extra cycle of latency
+# if the load is double-word misaligned/
+#
+= asm
+
+  lwzu r0,0x1000(r20)
+  lwzu r1,0x4(r20)
+  lwzu r2,0x4(r20)
+  lwzu r3,0x4(r20)
+  lwzu r4,0x4(r20)
+  lwzu r5,0x4(r20)
+  lwzu r6,0x4(r20)
+  lwzu r7,0x4(r20)
+  crnor 0,r20,0  # e_lmvsprw r20
+  lwzu r8,0x4(r20) # In order to align.
+  crnor 0,r20,0  # e_lmvsprw r20
+
+= /asm
+
+MD n=Mem ra=0x1000 d=1
+MD n=Mem ra=0x1004 d=2
+MD n=Mem ra=0x1008 d=3
+MD n=Mem ra=0x100c d=4
+MD n=Mem ra=0x1010 d=5
+MD n=Mem ra=0x1014 d=6
+MD n=Mem ra=0x1018 d=7
+MD n=Mem ra=0x101c d=8
+MD n=Mem ra=0x1020 d=9
+MD n=Mem ra=0x1024 d=10
+MD n=Mem ra=0x1028 d=11
+MD n=Mem ra=0x102c d=0xc0000000
+
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x84141000	#	lwzu r0,0x1000(r20)
+MD n=Mem ra=0x00000004 d=0x84340004	#	lwzu r1,0x4(r20)
+MD n=Mem ra=0x00000008 d=0x84540004	#	lwzu r2,0x4(r20)
+MD n=Mem ra=0x0000000c d=0x84740004	#	lwzu r3,0x4(r20)
+MD n=Mem ra=0x00000010 d=0x84940004	#	lwzu r4,0x4(r20)
+MD n=Mem ra=0x00000014 d=0x84B40004	#	lwzu r5,0x4(r20)
+MD n=Mem ra=0x00000018 d=0x84D40004	#	lwzu r6,0x4(r20)
+MD n=Mem ra=0x0000001c d=0x84F40004	#	lwzu r7,0x4(r20)
+MD n=Mem ra=0x00000020 d=0x4C140042	#	crnor 0,r20,0  # e_lmvsprw r20
+MD n=Mem ra=0x00000024 d=0x85140004	#	lwzu r8,0x4(r20) # In order to align.
+MD n=Mem ra=0x00000028 d=0x4C140042	#	crnor 0,r20,0  # e_lmvsprw r20
+# </GEN>
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+ITIME t=2
+CTIME t=5
+
+I ea=0x4 id=2
+ITIME t=5
+CTIME t=8
+
+I ea=0x8 id=3
+ITIME t=9
+CTIME t=12
+
+I ea=0xc id=4
+ITIME t=12
+CTIME t=15
+
+I ea=0x10 id=5
+ITIME t=16
+CTIME t=19
+
+I ea=0x14 id=6
+ITIME t=19
+CTIME t=22
+
+I ea=0x18 id=7
+ITIME t=23
+CTIME t=26
+
+I ea=0x1c id=8
+ITIME t=26
+CTIME t=29
+
+I ea=0x20 id=9
+ITIME t=30
+CTIME t=37
+
+I ea=0x24 id=10
+ITIME t=31
+CTIME t=38
+
+I ea=0x28 id=11
+ITIME t=38
+CTIME t=44
+
+I ea=0x2c id=12
+ITIME t=45
+CTIME t=48
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000001
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000003
+RD n=GPR i=3 d=0x00000004
+RD n=GPR i=4 d=0x00000005
+RD n=GPR i=5 d=0x00000006
+RD n=GPR i=6 d=0x00000007
+RD n=GPR i=7 d=0x00000008
+RD n=GPR i=8 d=0x00000009
+RD n=CR      d=0x00000009
+RD n=LR      d=0x0000000a
+RD n=CTR     d=0x0000000b
+RD n=XER     d=0xc0000000

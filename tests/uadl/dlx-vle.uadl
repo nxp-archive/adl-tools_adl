@@ -1,0 +1,101 @@
+//
+// A simple model for testing variable-length instruction fetches and
+// register-file aliasing.
+//
+
+#import "dlx-fwd.uadl"
+
+defmod (core P) {
+
+  defmod (resources) {
+    define (fetchunit Fetcher) {
+      fetch_memory = mMEM;
+      entries = 12;
+      entry_size = 1;
+      fetch_size = (2);
+    }
+    
+    define (pipestage mID) {
+      scheduler = lock_step;
+    }
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDe, S_EX, S_EXp, S_EXe, S_MM, S_MMp, S_MMe, S_WB, S_WBp, S_WBe );
+
+    define (mapping) {
+      mID = (S_ID,S_IDe);
+      mEX = (S_EX,S_EXp,S_EXe);
+      mMM = (S_MM,S_MMp,S_MMe);
+      mWB = (S_WB,S_WBp,S_WBe);
+    };
+
+    // Defines the state transition on an exception:
+    //  Lhs:  exception state.
+    //  Rhs:  states which might generate an exception.
+    define (exception_mapping) {
+      S_IDe = S_ID;
+      S_EXe = S_EX;
+      S_MMe = S_MM;
+      S_WBe = S_WB;
+   }
+  }
+
+  defmod (instr_class sfx) {
+    instructions = (se_add, se_slw, se_or, "subf.", crand );
+
+    define (instr=(se_add, se_slw, se_or )) {
+      define (operands) {
+        Src1 = sources;
+        Trg  = targets;
+      };
+    }
+
+    define (instr=(crand)) {
+      define (operands) {
+        Src1 = CR;
+        Trg  = CR;
+      }
+    } 
+    
+  }
+
+  defmod (instr_class branch) {
+    instructions = ( se_bc );
+  }
+
+ define (instr_class fetch_exception) {
+   instructions = ( fetch_exception );
+   
+   machine = normal;
+
+   // We have explicit code to do this, so we don't need the automatic code.
+   commit_on_exception = false;
+
+   action = {
+   S_INIT: {
+     change_state(S_ID);
+   }
+   S_ID: {
+     commit_exceptions();
+     taken_flush();
+     change_state(S_EX);
+   }
+   S_EX: {
+     change_state(S_MM);
+   }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+
+   };
+ }
+
+    
+}
+

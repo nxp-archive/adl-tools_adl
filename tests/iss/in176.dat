@@ -1,0 +1,41 @@
+#
+# Tests the DMI cache w/an MMU and no cache.  This makes sure that
+# the target address cached is correct when an ea and ra yield
+# different offsets for the sparse memory.
+#
+= asm
+
+  lwz r1,0x19c0(r0)
+  lwz r2,0x19c4(r0)
+
+= /asm
+
+= mdopts
+
+instr-offset: 0x10000
+
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x802019C0	#	lwz r1,0x19c0(r0)
+MD n=Mem ra=0x00010004 d=0x804019C4	#	lwz r2,0x19c4(r0)
+# </GEN>
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x1000 ra=0xAA000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x2a8 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x4
+
+
+MD n=Mem ra=0xAA9c0 d=0x12345678
+MD n=Mem ra=0xAA9c4 d=0xdeadbeef
+
+RD n=NIA d=0x0
+
+RESULTS
+
+RD n=GPR i=1 d=0x12345678
+RD n=GPR i=2 d=0xdeadbeef

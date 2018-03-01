@@ -1,0 +1,338 @@
+format=huvp;
+//------------------------------------------------------------------------------
+//
+// Known good for testing against in26.dat.  The XX1 field should not be displayed,
+// since it's marked as unarchitected.
+//
+// Options:
+//   ./mod14 in26.dat -trace -o=in26.out.uvp 
+//
+//------------------------------------------------------------------------------
+test => in26 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  PowerPC => PMT {
+    I : R {nm="HID0"; d=0x00000000;};
+    I : R {nm="NIA0"; d=0x00000000;};
+    I : R {nm="NIA1"; d=0x00000000;};
+    I : T {n="TlbCam"; t="ID"; way=0; ep=0x0000000000000000; rp=0x0000000000010000; 
+            d={{"EPN",0x0},{"RPN",0x40},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    I : T {n="TlbCam"; t="ID"; way=1; ep=0x0000000000001000; rp=0x00000000000a1000; 
+            d={{"EPN",0x4},{"RPN",0x284},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    I : T {n="TlbCam"; t="ID"; way=2; ep=0x0000000000002000; rp=0x00000000000b2000; 
+            d={{"EPN",0x8},{"RPN",0x2c8},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    I : T {n="TlbCam"; t="ID"; way=3; ep=0x0000000000003000; rp=0x00000000000b7000; 
+            d={{"EPN",0xc},{"RPN",0x2dc},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    I : T {n="TlbCam"; t="ID"; way=4; ep=0x0000000000005000; rp=0x00000000000e1000; 
+            d={{"EPN",0x14},{"RPN",0x384},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    I : T {n="TlbCam"; t="ID"; way=5; ep=0x0000000000006000; rp=0x00000000000c2000; 
+            d={{"EPN",0x18},{"RPN",0x308},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    I : T {n="TlbCam"; t="ID"; way=6; ep=0x0000000000007000; rp=0x00000000000f7000; 
+            d={{"EPN",0x1c},{"RPN",0x3dc},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    Thread => t0 {
+      I : R {nm="CR"; d=0x00000000;};
+      I : R {nm="CTR"; d=0x00000000;};
+      I : R {nm="HID1"; d=0x00000000;};
+      I : R {nm="LR"; d=0x00000000;};
+      I : R {nm="MSR"; d=0x00000000;};
+      // DR:0 IR:0 
+      I : R {nm="PID0"; d=0x00000000;};
+      I : R {nm="PID1"; d=0x00000000;};
+      I : R {nm="XER"; d=0x00000000;};
+      // CA:0 OV:0 SO:0 
+      I : R {nm="GPR0"; d=0x00000000;};
+      I : R {nm="GPR1"; d=0x00001fff;};
+      I : R {nm="GPR2"; d=0x00000000;};
+      I : R {nm="GPR3"; d=0x00000000;};
+      I : R {nm="GPR4"; d=0x00002000;};
+      I : R {nm="GPR5"; d=0x00000000;};
+      I : R {nm="GPR6"; d=0x00000000;};
+      I : R {nm="GPR7"; d=0x00000000;};
+      I : R {nm="GPR8"; d=0x00000000;};
+      I : R {nm="GPR9"; d=0x00000000;};
+      I : R {nm="GPR10"; d=0x00000000;};
+      I : R {nm="GPR11"; d=0x00000000;};
+      I : R {nm="GPR12"; d=0x00000000;};
+      I : R {nm="GPR13"; d=0x00000000;};
+      I : R {nm="GPR14"; d=0x00000000;};
+      I : R {nm="GPR15"; d=0x00000000;};
+      I : R {nm="GPR16"; d=0x00000000;};
+      I : R {nm="GPR17"; d=0x00000000;};
+      I : R {nm="GPR18"; d=0x00000000;};
+      I : R {nm="GPR19"; d=0x00000000;};
+      I : R {nm="GPR20"; d=0x00000000;};
+      I : R {nm="GPR21"; d=0x00000000;};
+      I : R {nm="GPR22"; d=0x00000000;};
+      I : R {nm="GPR23"; d=0x00000000;};
+      I : R {nm="GPR24"; d=0x00000000;};
+      I : R {nm="GPR25"; d=0x00000000;};
+      I : R {nm="GPR26"; d=0x00000000;};
+      I : R {nm="GPR27"; d=0x00000000;};
+      I : R {nm="GPR28"; d=0x00000000;};
+      I : R {nm="GPR29"; d=0x00000000;};
+      I : R {nm="GPR30"; d=0x00000000;};
+      I : R {nm="GPR31"; d=0x00000000;};
+      I : D {ea=0x0000000000001000; ra=0x00000000000a1000; d=0xdeadbeef; ta=0x0;};
+      I : D {ea=0x0000000000002000; ra=0x00000000000b2000; d=0x00000000; ta=0x0;};
+      I : D {ea=0x0000000000002ffc; ra=0x00000000000b2ffc; d=0x00000000; ta=0x0;};
+      I : D {ea=0x0000000000003000; ra=0x00000000000b7000; d=0x00000000; ta=0x0;};
+      E : I {asm="lwz r2,4096(r9) (EA=0x0000000000001000,RA=0x00000000000a1000)"; c=1; gc=1;
+                     ea=0x0000000000000000; ra=0x0000000000010000; d=0x80491000; op=0x80491000; ta=0x0; op_size=32;
+                     tea=0x0000000000001000; tra=0x00000000000a1000; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"GPR2", d=>0xdeadbeef],
+                         [ t=>"reg", rn=>"NIA0", d=>0x00000004],
+                         // trans. hit:  TlbCam, set=0, way=1
+                         [ t=>"load",  ra=>0x00000000000a1000, d=>0xdeadbeef, ta=>0x0 ],};};
+      E : I {asm="add r3,r2,r1"; c=2; gc=3;
+                     ea=0x0000000000000004; ra=0x0000000000010004; d=0x7c620a14; op=0x7c620a14; ta=0x0; op_size=32;
+                     ir={[ t=>"reg", rn=>"GPR3", d=>0xdeaddeee],
+                         [ t=>"reg", rn=>"NIA0", d=>0x00000008],};};
+      E : I {asm="addic. r5,r5,-2"; c=3; gc=5;
+                     ea=0x0000000000000008; ra=0x0000000000010008; d=0x34a5fffe; op=0x34a5fffe; ta=0x0; op_size=32;
+                     ir={[ t=>"reg", rn=>"XER", d=>0x00000000],
+                         [ t=>"reg", rn=>"CR", d=>0x80000000],
+                         [ t=>"reg", rn=>"GPR5", d=>0xfffffffe],
+                         [ t=>"reg", rn=>"NIA0", d=>0x0000000c],};};
+      E : I {asm="stw r3,0(r4) (EA=0x0000000000002000,RA=0x00000000000b2000)"; c=4; gc=7;
+                     ea=0x000000000000000c; ra=0x000000000001000c; d=0x90640000; op=0x90640000; ta=0x0; op_size=32;
+                     tea=0x0000000000002000; tra=0x00000000000b2000; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"NIA0", d=>0x00000010],
+                         // trans. hit:  TlbCam, set=0, way=2
+                         [ t=>"store", ra=>0x00000000000b2000, d=>0xdeaddeee, ta=>0x0 ],};};
+      E : I {asm="stw r3,4095(r4) (EA=0x0000000000002fff,RA=0x00000000000b2fff)"; c=5; gc=9;
+                     ea=0x0000000000000010; ra=0x0000000000010010; d=0x90640fff; op=0x90640fff; ta=0x0; op_size=32;
+                     tea=0x0000000000002fff; tra=0x00000000000b2fff; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"NIA0", d=>0x00000014],
+                         // trans. hit:  TlbCam, set=0, way=2
+                         [ t=>"store", ra=>0x00000000000b2ffc, d=>0x000000de, ta=>0x0 ],
+                         // trans. hit:  TlbCam, set=0, way=3
+                         [ t=>"store", ra=>0x00000000000b7000, d=>0xaddeee00, ta=>0x0 ],};};
+      E : I {asm="lhz r6,4095(r4) (EA=0x0000000000002fff,RA=0x00000000000b2fff)"; c=6; gc=11;
+                     ea=0x0000000000000014; ra=0x0000000000010014; d=0xa0c40fff; op=0xa0c40fff; ta=0x0; op_size=32;
+                     tea=0x0000000000002fff; tra=0x00000000000b2fff; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"GPR6", d=>0x0000dead],
+                         [ t=>"reg", rn=>"NIA0", d=>0x00000018],
+                         // trans. hit:  TlbCam, set=0, way=2
+                         [ t=>"load",  ra=>0x00000000000b2ffc, d=>0x000000de, ta=>0x0 ],
+                         // trans. hit:  TlbCam, set=0, way=3
+                         [ t=>"load",  ra=>0x00000000000b7000, d=>0xaddeee00, ta=>0x0 ],};};
+      R : RES {ea=0x0000000000000018; ra=0x0000000000010018;ta=0x0;};
+      R : R {nm="CR"; d=0x80000000;};
+      R : R {nm="CTR"; d=0x00000000;};
+      R : R {nm="HID1"; d=0x00000000;};
+      R : R {nm="LR"; d=0x00000000;};
+      R : R {nm="MSR"; d=0x00000000;};
+      // DR:0 IR:0 
+      R : R {nm="PID0"; d=0x00000000;};
+      R : R {nm="PID1"; d=0x00000000;};
+      R : R {nm="XER"; d=0x00000000;};
+      // CA:0 OV:0 SO:0 
+      R : R {nm="GPR0"; d=0x00000000;};
+      R : R {nm="GPR1"; d=0x00001fff;};
+      R : R {nm="GPR2"; d=0xdeadbeef;};
+      R : R {nm="GPR3"; d=0xdeaddeee;};
+      R : R {nm="GPR4"; d=0x00002000;};
+      R : R {nm="GPR5"; d=0xfffffffe;};
+      R : R {nm="GPR6"; d=0x0000dead;};
+      R : R {nm="GPR7"; d=0x00000000;};
+      R : R {nm="GPR8"; d=0x00000000;};
+      R : R {nm="GPR9"; d=0x00000000;};
+      R : R {nm="GPR10"; d=0x00000000;};
+      R : R {nm="GPR11"; d=0x00000000;};
+      R : R {nm="GPR12"; d=0x00000000;};
+      R : R {nm="GPR13"; d=0x00000000;};
+      R : R {nm="GPR14"; d=0x00000000;};
+      R : R {nm="GPR15"; d=0x00000000;};
+      R : R {nm="GPR16"; d=0x00000000;};
+      R : R {nm="GPR17"; d=0x00000000;};
+      R : R {nm="GPR18"; d=0x00000000;};
+      R : R {nm="GPR19"; d=0x00000000;};
+      R : R {nm="GPR20"; d=0x00000000;};
+      R : R {nm="GPR21"; d=0x00000000;};
+      R : R {nm="GPR22"; d=0x00000000;};
+      R : R {nm="GPR23"; d=0x00000000;};
+      R : R {nm="GPR24"; d=0x00000000;};
+      R : R {nm="GPR25"; d=0x00000000;};
+      R : R {nm="GPR26"; d=0x00000000;};
+      R : R {nm="GPR27"; d=0x00000000;};
+      R : R {nm="GPR28"; d=0x00000000;};
+      R : R {nm="GPR29"; d=0x00000000;};
+      R : R {nm="GPR30"; d=0x00000000;};
+      R : R {nm="GPR31"; d=0x00000000;};
+      R : D {ea=0x0000000000001000; ra=0x00000000000a1000; d=0xdeadbeef; ta=0x0;};
+      R : D {ea=0x0000000000002000; ra=0x00000000000b2000; d=0xdeaddeee; ta=0x0;};
+      R : D {ea=0x0000000000002ffc; ra=0x00000000000b2ffc; d=0x000000de; ta=0x0;};
+      R : D {ea=0x0000000000003000; ra=0x00000000000b7000; d=0xaddeee00; ta=0x0;};
+    } // PMT::t0
+    Thread => t1 {
+      I : R {nm="CR"; d=0x00000000;};
+      I : R {nm="CTR"; d=0x00000000;};
+      I : R {nm="HID1"; d=0x00000000;};
+      I : R {nm="LR"; d=0x00000000;};
+      I : R {nm="MSR"; d=0x00000000;};
+      // DR:0 IR:0 
+      I : R {nm="PID0"; d=0x00000000;};
+      I : R {nm="PID1"; d=0x00000000;};
+      I : R {nm="XER"; d=0x00000000;};
+      // CA:0 OV:0 SO:0 
+      I : R {nm="GPR0"; d=0x00000000;};
+      I : R {nm="GPR1"; d=0x00001fff;};
+      I : R {nm="GPR2"; d=0x00000000;};
+      I : R {nm="GPR3"; d=0x00001000;};
+      I : R {nm="GPR4"; d=0x00006000;};
+      I : R {nm="GPR5"; d=0x00000000;};
+      I : R {nm="GPR6"; d=0x00000000;};
+      I : R {nm="GPR7"; d=0x00000000;};
+      I : R {nm="GPR8"; d=0x00000000;};
+      I : R {nm="GPR9"; d=0x00004000;};
+      I : R {nm="GPR10"; d=0x00000000;};
+      I : R {nm="GPR11"; d=0x00000000;};
+      I : R {nm="GPR12"; d=0x00000000;};
+      I : R {nm="GPR13"; d=0x00000000;};
+      I : R {nm="GPR14"; d=0x00000000;};
+      I : R {nm="GPR15"; d=0x00000000;};
+      I : R {nm="GPR16"; d=0x00000000;};
+      I : R {nm="GPR17"; d=0x00000000;};
+      I : R {nm="GPR18"; d=0x00000000;};
+      I : R {nm="GPR19"; d=0x00000000;};
+      I : R {nm="GPR20"; d=0x00000000;};
+      I : R {nm="GPR21"; d=0x00000000;};
+      I : R {nm="GPR22"; d=0x00000000;};
+      I : R {nm="GPR23"; d=0x00000000;};
+      I : R {nm="GPR24"; d=0x00000000;};
+      I : R {nm="GPR25"; d=0x00000000;};
+      I : R {nm="GPR26"; d=0x00000000;};
+      I : R {nm="GPR27"; d=0x00000000;};
+      I : R {nm="GPR28"; d=0x00000000;};
+      I : R {nm="GPR29"; d=0x00000000;};
+      I : R {nm="GPR30"; d=0x00000000;};
+      I : R {nm="GPR31"; d=0x00000000;};
+      I : D {ea=0x0000000000006000; ra=0x00000000000c2000; d=0x00000000; ta=0x0;};
+      I : D {ea=0x0000000000006ffc; ra=0x00000000000c2ffc; d=0x00000000; ta=0x0;};
+      I : D {ea=0x0000000000005000; ra=0x00000000000e1000; d=0xdeadbeef; ta=0x0;};
+      I : D {ea=0x0000000000007000; ra=0x00000000000f7000; d=0x00000000; ta=0x0;};
+      E : I {asm="lwz r2,4096(r9) (EA=0x0000000000005000,RA=0x00000000000e1000)"; c=1; gc=2;
+                     ea=0x0000000000000000; ra=0x0000000000010000; d=0x80491000; op=0x80491000; ta=0x0; op_size=32;
+                     tea=0x0000000000005000; tra=0x00000000000e1000; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"GPR2", d=>0xdeadbeef],
+                         [ t=>"reg", rn=>"NIA1", d=>0x00000004],
+                         // trans. hit:  TlbCam, set=0, way=4
+                         [ t=>"load",  ra=>0x00000000000e1000, d=>0xdeadbeef, ta=>0x0 ],};};
+      E : I {asm="add r3,r2,r1"; c=2; gc=4;
+                     ea=0x0000000000000004; ra=0x0000000000010004; d=0x7c620a14; op=0x7c620a14; ta=0x0; op_size=32;
+                     ir={[ t=>"reg", rn=>"GPR3", d=>0xdeaddeee],
+                         [ t=>"reg", rn=>"NIA1", d=>0x00000008],};};
+      E : I {asm="addic. r5,r5,-2"; c=3; gc=6;
+                     ea=0x0000000000000008; ra=0x0000000000010008; d=0x34a5fffe; op=0x34a5fffe; ta=0x0; op_size=32;
+                     ir={[ t=>"reg", rn=>"XER", d=>0x00000000],
+                         [ t=>"reg", rn=>"CR", d=>0x80000000],
+                         [ t=>"reg", rn=>"GPR5", d=>0xfffffffe],
+                         [ t=>"reg", rn=>"NIA1", d=>0x0000000c],};};
+      E : I {asm="stw r3,0(r4) (EA=0x0000000000006000,RA=0x00000000000c2000)"; c=4; gc=8;
+                     ea=0x000000000000000c; ra=0x000000000001000c; d=0x90640000; op=0x90640000; ta=0x0; op_size=32;
+                     tea=0x0000000000006000; tra=0x00000000000c2000; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"NIA1", d=>0x00000010],
+                         // trans. hit:  TlbCam, set=0, way=5
+                         [ t=>"store", ra=>0x00000000000c2000, d=>0xdeaddeee, ta=>0x0 ],};};
+      E : I {asm="stw r3,4095(r4) (EA=0x0000000000006fff,RA=0x00000000000c2fff)"; c=5; gc=10;
+                     ea=0x0000000000000010; ra=0x0000000000010010; d=0x90640fff; op=0x90640fff; ta=0x0; op_size=32;
+                     tea=0x0000000000006fff; tra=0x00000000000c2fff; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"NIA1", d=>0x00000014],
+                         // trans. hit:  TlbCam, set=0, way=5
+                         [ t=>"store", ra=>0x00000000000c2ffc, d=>0x000000de, ta=>0x0 ],
+                         // trans. hit:  TlbCam, set=0, way=6
+                         [ t=>"store", ra=>0x00000000000f7000, d=>0xaddeee00, ta=>0x0 ],};};
+      E : I {asm="lhz r6,4095(r4) (EA=0x0000000000006fff,RA=0x00000000000c2fff)"; c=6; gc=12;
+                     ea=0x0000000000000014; ra=0x0000000000010014; d=0xa0c40fff; op=0xa0c40fff; ta=0x0; op_size=32;
+                     tea=0x0000000000006fff; tra=0x00000000000c2fff; tta=0x0; 
+                     ir={[ t=>"reg", rn=>"GPR6", d=>0x0000dead],
+                         [ t=>"reg", rn=>"NIA1", d=>0x00000018],
+                         // trans. hit:  TlbCam, set=0, way=5
+                         [ t=>"load",  ra=>0x00000000000c2ffc, d=>0x000000de, ta=>0x0 ],
+                         // trans. hit:  TlbCam, set=0, way=6
+                         [ t=>"load",  ra=>0x00000000000f7000, d=>0xaddeee00, ta=>0x0 ],};};
+      R : RES {ea=0x0000000000000018; ra=0x0000000000010018;ta=0x0;};
+      R : R {nm="CR"; d=0x80000000;};
+      R : R {nm="CTR"; d=0x00000000;};
+      R : R {nm="HID1"; d=0x00000000;};
+      R : R {nm="LR"; d=0x00000000;};
+      R : R {nm="MSR"; d=0x00000000;};
+      // DR:0 IR:0 
+      R : R {nm="PID0"; d=0x00000000;};
+      R : R {nm="PID1"; d=0x00000000;};
+      R : R {nm="XER"; d=0x00000000;};
+      // CA:0 OV:0 SO:0 
+      R : R {nm="GPR0"; d=0x00000000;};
+      R : R {nm="GPR1"; d=0x00001fff;};
+      R : R {nm="GPR2"; d=0xdeadbeef;};
+      R : R {nm="GPR3"; d=0xdeaddeee;};
+      R : R {nm="GPR4"; d=0x00006000;};
+      R : R {nm="GPR5"; d=0xfffffffe;};
+      R : R {nm="GPR6"; d=0x0000dead;};
+      R : R {nm="GPR7"; d=0x00000000;};
+      R : R {nm="GPR8"; d=0x00000000;};
+      R : R {nm="GPR9"; d=0x00004000;};
+      R : R {nm="GPR10"; d=0x00000000;};
+      R : R {nm="GPR11"; d=0x00000000;};
+      R : R {nm="GPR12"; d=0x00000000;};
+      R : R {nm="GPR13"; d=0x00000000;};
+      R : R {nm="GPR14"; d=0x00000000;};
+      R : R {nm="GPR15"; d=0x00000000;};
+      R : R {nm="GPR16"; d=0x00000000;};
+      R : R {nm="GPR17"; d=0x00000000;};
+      R : R {nm="GPR18"; d=0x00000000;};
+      R : R {nm="GPR19"; d=0x00000000;};
+      R : R {nm="GPR20"; d=0x00000000;};
+      R : R {nm="GPR21"; d=0x00000000;};
+      R : R {nm="GPR22"; d=0x00000000;};
+      R : R {nm="GPR23"; d=0x00000000;};
+      R : R {nm="GPR24"; d=0x00000000;};
+      R : R {nm="GPR25"; d=0x00000000;};
+      R : R {nm="GPR26"; d=0x00000000;};
+      R : R {nm="GPR27"; d=0x00000000;};
+      R : R {nm="GPR28"; d=0x00000000;};
+      R : R {nm="GPR29"; d=0x00000000;};
+      R : R {nm="GPR30"; d=0x00000000;};
+      R : R {nm="GPR31"; d=0x00000000;};
+      R : D {ea=0x0000000000006000; ra=0x00000000000c2000; d=0xdeaddeee; ta=0x0;};
+      R : D {ea=0x0000000000006ffc; ra=0x00000000000c2ffc; d=0x000000de; ta=0x0;};
+      R : D {ea=0x0000000000005000; ra=0x00000000000e1000; d=0xdeadbeef; ta=0x0;};
+      R : D {ea=0x0000000000007000; ra=0x00000000000f7000; d=0xaddeee00; ta=0x0;};
+    } // PMT::t1
+    R : R {nm="HID0"; d=0x00000000;};
+    R : R {nm="NIA0"; d=0x00000018;};
+    R : R {nm="NIA1"; d=0x00000018;};
+    R : T {n="TlbCam"; t="ID"; way=0; ep=0x0000000000000000; rp=0x0000000000010000; 
+            d={{"EPN",0x0},{"RPN",0x40},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    R : T {n="TlbCam"; t="ID"; way=1; ep=0x0000000000001000; rp=0x00000000000a1000; 
+            d={{"EPN",0x4},{"RPN",0x284},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    R : T {n="TlbCam"; t="ID"; way=2; ep=0x0000000000002000; rp=0x00000000000b2000; 
+            d={{"EPN",0x8},{"RPN",0x2c8},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    R : T {n="TlbCam"; t="ID"; way=3; ep=0x0000000000003000; rp=0x00000000000b7000; 
+            d={{"EPN",0xc},{"RPN",0x2dc},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    R : T {n="TlbCam"; t="ID"; way=4; ep=0x0000000000005000; rp=0x00000000000e1000; 
+            d={{"EPN",0x14},{"RPN",0x384},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    R : T {n="TlbCam"; t="ID"; way=5; ep=0x0000000000006000; rp=0x00000000000c2000; 
+            d={{"EPN",0x18},{"RPN",0x308},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+    R : T {n="TlbCam"; t="ID"; way=6; ep=0x0000000000007000; rp=0x00000000000f7000; 
+            d={{"EPN",0x1c},{"RPN",0x3dc},{"SIZE",0x1},{"TID",0x0},{"TS",0x0},
+              {"V",0x1},{"WIMG",0x0},{"XX2",0x0},};};
+  } // PMT
+} 

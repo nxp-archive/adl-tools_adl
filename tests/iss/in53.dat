@@ -1,0 +1,72 @@
+#
+# Test of aliasing of elements of a register file
+# to registers or sparse-register entries.
+#
+
+CORE n=:P
+
+= asm
+
+	mtspr 100,r4
+	mtspr 101,r5
+	li r2,0x7999
+	mfspr r10,200
+= /asm
+
+= aopts
+
+ -mregnames
+
+= /aopts
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x7C841BA6	#	mtspr 100,r4
+MD n=Mem ra=0x00000104 d=0x7CA51BA6	#	mtspr 101,r5
+MD n=Mem ra=0x00000108 d=0x38407999	#	li r2,0x7999
+MD n=Mem ra=0x0000010c d=0x7D4832A6	#	mfspr r10,200
+# </GEN>
+
+RD n=NIA d=0x0100
+
+RD n=GPR i=4 d=0xdeadbeef
+RD n=GPR i=5 d=0x12345678
+
+TRACE
+
+I ea=0x100 id=1
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x7c841ba6
+INSTR op=0x7c841ba6 asm="mtspr 4,100"
+R n=GPR i=20 d=0xdeadbeef
+
+I ea=0x104 id=2
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x7ca51ba6
+INSTR op=0x7ca51ba6 asm="mtspr 5,101"
+R n=GPR i=21 d=0x12345678
+
+I ea=0x108 id=3
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x38407999
+INSTR op=0x38407999 asm="addi 2,0,31129"
+R n=GPR i=2 d=0x00007999
+
+I ea=0x10c id=4
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x7d4832a6
+INSTR op=0x7d4832a6 asm="mfspr 10,200"
+R n=GPR i=10 d=0x00007999
+
+I ea=0x110 id=5
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x0
+INSTR op=0x0 asm="halt"
+
+RESULTS
+
+RD n=GPR i=2  d=0x7999
+RD n=GPR i=10 d=0x7999
+RD n=GPR i=20 d=0xdeadbeef
+RD n=GPR i=21 d=0x12345678
+

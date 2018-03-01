@@ -1,0 +1,39 @@
+//
+// Makes sure that various hooks are recognized.
+//
+
+define (arch = minippc) {
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+  
+  decode_miss = func (addr_t ea,unsigned) { 0; };
+
+  pre_cycle = { 1; };
+
+  post_cycle = { 2; };
+
+  post_fetch = func(unsigned) { 3; };
+
+  pre_fetch = { 4; };
+
+  post_exec = { 5; };
+
+  branch_taken = { 6; };
+
+  pre_exception = func (Exception x) { 7; };
+
+  post_exception = func (Exception x) { 8; };
+
+  addr_check = func(addr_t ea,addr_t ra,TransType tt,int id,int set,int way) { if (tt = InstrTrans) { LoadTrans; StoreTrans; } };
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

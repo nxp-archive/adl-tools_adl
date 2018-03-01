@@ -1,0 +1,110 @@
+#
+# Test the use of external write hooks.
+#
+= asm
+
+	lis r1,0xdead
+	ori r1,r1,0xbeef
+	mtspr 400,r1
+	addi r2,r2,1
+	addi r2,r2,1
+	mfspr r3,400
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3C20DEAD	#	lis r1,0xdead
+MD n=Mem ra=0x00000004 d=0x6021BEEF	#	ori r1,r1,0xbeef
+MD n=Mem ra=0x00000008 d=0x7C3063A6	#	mtspr 400,r1
+MD n=Mem ra=0x0000000c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000010 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000014 d=0x7C7062A6	#	mfspr r3,400
+# </GEN>
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+R n=BCCNT d=0x00000001
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3c20dead
+INSTR op=0x3c20dead					asm="addis 1,0,0xdead"
+R n=NIA d=0x00000004
+R n=GPR i=1 d=0xdead0000
+R n=ICNT d=0x00000001
+R n=PCCNT d=0x00000001
+
+I ea=0x4 id=2
+R n=BCCNT d=0x00000002
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x6021beef
+INSTR op=0x6021beef					asm="ori 1,1,0xbeef"
+R n=NIA d=0x00000008
+R n=GPR i=1 d=0xdeadbeef
+R n=ICNT d=0x00000002
+R n=PCCNT d=0x00000002
+
+I ea=0x8 id=3
+R n=BCCNT d=0x00000003
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c3063a6
+INSTR op=0x7c3063a6					asm="mtspr 1,0x190"
+R n=NIA d=0x0000000c
+R n=EWTEST d=0xdeadbeef
+R n=ICNT d=0x00000003
+R n=PCCNT d=0x00000003
+
+I ea=0xc id=4
+R n=BCCNT d=0x00000004
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420001
+INSTR op=0x38420001					asm="addi 2,2,0x0001"
+R n=NIA d=0x00000010
+R n=GPR i=2 d=0x00000001
+R n=ICNT d=0x00000004
+R n=PCCNT d=0x00000004
+R n=EWTEST d=0xd0a00e0f
+
+CTX n=foobar cn=0
+
+I ea=0x10 id=5
+R n=BCCNT d=0x00000005
+R n=FCNT d=0x00000005
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38420001
+INSTR op=0x38420001					asm="addi 2,2,0x0001"
+R n=NIA d=0x00000014
+R n=GPR i=2 d=0x00000002
+R n=ICNT d=0x00000005
+R n=PCCNT d=0x00000005
+
+I ea=0x14 id=6
+R n=BCCNT d=0x00000006
+R n=BCCNT d=0x00000007
+R n=FCNT d=0x00000006
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c7062a6
+INSTR op=0x7c7062a6					asm="mfspr 3,0x190"
+R n=NIA d=0x00000018
+R n=GPR i=3 d=0xd0a00e0f
+R n=ICNT d=0x00000006
+R n=PCCNT d=0x00000006
+R n=PCCNT d=0x00000007
+
+I ea=0x18 id=7
+R n=BCCNT d=0x00000008
+R n=FCNT d=0x00000007
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x0000001c
+R n=ICNT d=0x00000007
+R n=PCCNT d=0x00000008
+
+RESULTS
+
+NOCTX 
+
+RD n=EWTEST d=0xd0a00e0f
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0xd0a00e0f

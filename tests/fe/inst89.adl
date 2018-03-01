@@ -1,0 +1,68 @@
+//
+// Use of a translation function should be recorded as implying that this is a memory function, since
+// it means that we're accessing the memory hierarchy.
+//
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+    };
+  }
+
+  define (instr=dcbx) {
+    fields=(OPCD(31),RA,RB,XO(87));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataWriteTranslate(ea);
+    };
+  }
+
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

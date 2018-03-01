@@ -1,0 +1,84 @@
+//
+// This makes sure that unequal resources cannot be shared.
+//
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=HID0) {
+  }
+
+  define (reg=HID1) {
+  }
+
+  define (regfile=PMR) {
+    size = 32;
+  }
+
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+    value = Mode32;
+  }
+
+}
+
+define (arch=bar) {
+
+  define (parm=X) {
+    options = (A,B);
+    value = A;
+    constant = true;
+  }
+
+}
+
+define (arch=foo) {
+
+  defmod (parm=Mode) {
+    options = (Foo,Bar);
+    value = Foo;
+  }
+
+  defmod (reg=HID1) {
+    width = 64;
+  }
+
+  defmod (regfile=PMR) {
+    size = 64;
+  }
+
+  define (parm=X) {
+    options = (A,B);
+    value = A;
+  }
+
+}
+
+define (sys=P) {
+  define (core = Thread0) {
+    archs = (minippc,bar);
+  }
+  define (core = Thread1) {
+    archs = (minippc,foo);
+  }
+  define (shared) {
+    regs = (HID0,HID1);
+    regfiles = PMR;
+    parms = (Mode,X);
+  }
+  Thread0 t0;
+  Thread1 t1;
+}
+
+

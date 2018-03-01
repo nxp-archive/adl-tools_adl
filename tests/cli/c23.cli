@@ -1,0 +1,6 @@
+#
+# Test to make sure that we'll get an error message if
+# we do something which causes an error.
+#
+
+puts [regs foo]

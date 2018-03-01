@@ -1,0 +1,1128 @@
+//
+// This is a much larger regression than I would like, but I can't find another
+// way to reproduce the original bug.  The problem is that
+// GenAsm::SortBySpecificity must be a strict weak ordering, but originally
+// wasn't, leading to a segfault when sorting the copy_mask aliases.  This
+// example demonstrates the problem by having lots of complex aliases.
+//
+// This also demonstrates use of the --keep-ws option for assembler generation,
+// where we preserve all whitespace.
+//
+
+#define WRAM 0
+#define TRAM 1
+#define ORAM 2
+#define SPRAM 3
+
+#define BUG 1
+
+define (arch=spt3_base) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define (instrfield=in_dattyp2) {
+    // COPY, MAXS, SORT
+    bits = (121,120);
+    enumerated = (".real",".cmplx",".log2");
+    value = ".real";
+  }
+  
+  define (instrfield=pre_proc) {
+    // COPY, HIST, MAXS
+    bits = (119,118);
+    enumerated = (".no_pre", ".abs_proc", ".mag_proc");
+  }
+
+  define (instrfield=ima_fld) {
+    bits = 109;
+    enumerated = (".imm",".ind");
+    value = ".imm";
+  }
+
+  define (instrfield=vec_sz) {
+    // WIN, RDX4, FIR
+    bits = (108,96);
+    display = dec;
+  }
+
+  define (instrfield=src_add) {
+    bits = (95, 80);
+  }
+
+  define (instrfield=dest_add) {
+    bits = (79, 64);
+  }
+
+  define (instrfield=src_add_inc) {
+    // WIN, RDX4, RDX2, FIR, COPY
+    bits = (47,40);
+  }
+
+  define (instrfield=dest_add_inc) {
+    // WIN, RDX4, RDX2, FIR, COPY
+    bits = (39,32);
+  }
+
+  define (instrfield=opcode) {
+    bits = (127,122);
+  }
+
+  define (instrfield=src_add_reg) {
+    pseudo=true;
+    size = 16;
+    enumerated = (
+wr_0, /*0x0*/
+wr_1, /*0x1*/
+wr_2, /*0x2*/
+wr_3, /*0x3*/
+wr_4, /*0x4*/
+wr_5, /*0x5*/
+wr_6, /*0x6*/
+wr_7, /*0x7*/
+wr_8, /*0x8*/
+wr_9, /*0x9*/
+wr_10, /*0xa*/
+wr_11, /*0xb*/
+wr_12, /*0xc*/
+wr_13, /*0xd*/
+wr_14, /*0xe*/
+wr_15, /*0xf*/
+wr_16, /*0x10*/
+wr_17, /*0x11*/
+wr_18, /*0x12*/
+wr_19, /*0x13*/
+wr_20, /*0x14*/
+wr_21, /*0x15*/
+wr_22, /*0x16*/
+wr_23, /*0x17*/
+wr_24, /*0x18*/
+wr_25, /*0x19*/
+wr_26, /*0x1a*/
+wr_27, /*0x1b*/
+wr_28, /*0x1c*/
+wr_29, /*0x1d*/
+wr_30, /*0x1e*/
+wr_31, /*0x1f*/
+wr_32, /*0x20*/
+wr_33, /*0x21*/
+wr_34, /*0x22*/
+wr_35, /*0x23*/
+wr_36, /*0x24*/
+wr_37, /*0x25*/
+wr_38, /*0x26*/
+wr_39, /*0x27*/
+wr_40, /*0x28*/
+wr_41, /*0x29*/
+wr_42, /*0x2a*/
+wr_43, /*0x2b*/
+wr_44, /*0x2c*/
+wr_45, /*0x2d*/
+wr_46, /*0x2e*/
+wr_47, /*0x2f*/
+spr_0, /*0x1000*/
+spr_1, /*0x1001*/
+spr_2, /*0x1002*/
+spr_3, /*0x1003*/
+spr_4, /*0x1004*/
+spr_5, /*0x1005*/
+spr_6, /*0x1006*/
+spr_7, /*0x1007*/
+spr_8, /*0x1008*/
+spr_9, /*0x1009*/
+hw_spr_0, /*0x1010*/
+hw_spr_1, /*0x1011*/
+hw_spr_2, /*0x1012*/
+hw_spr_3, /*0x1013*/
+hw_spr_4, /*0x1014*/
+hw_spr_5, /*0x1015*/
+evt_spr_0, /*0x1016*/
+evt_spr_1, /*0x1017*/
+evt_spr_2, /*0x1018*/
+evt_spr_3, /*0x1019*/
+evt_spr_4, /*0x101a*/
+evt_spr_5, /*0x101b*/
+evt_spr_6, /*0x101c*/
+evt_spr_7, /*0x101d*/
+evt_spr_8, /*0x101e*/
+evt_spr_9, /*0x101f*/
+chrp_spr_0, /*0x1020*/
+chrp_spr_1, /*0x1021*/
+chrp_spr_2, /*0x1022*/
+chrp_spr_3, /*0x1023*/
+chrp_spr_4, /*0x1024*/
+chrp_spr_5, /*0x1025*/
+chrp_spr_6, /*0x1026*/
+chrp_spr_7 /*0x1027*/                  
+                  );
+  }
+
+  define (instrfield=mem) {
+  	pseudo=true;
+  	width=2;
+  	enumerated = ("wr","tr","or","spr");
+  }
+
+  define (instrfield=column) {
+  	pseudo=true;
+  	width=9;
+  	display=dec;
+  	valid_ranges = (0,511);
+  }
+  
+  define (instrfield=bank) {
+  	pseudo=true;
+  	width=2;
+  	valid_ranges = (0,3);
+  }
+
+  define (instrfield=slice) {
+  	pseudo=true;
+  	width=4;
+  	valid_ranges = (0,15);
+  }
+
+  define (instrfield=mem1) {
+  	pseudo=true;
+  	width=2;
+  	enumerated = ("wr","tr","or","spr");
+  }
+
+  define (instrfield=bank1) {
+  	pseudo=true;
+  	width=2;
+  	valid_ranges = (0,3);
+  }
+  
+  define (instrfield=column1) {
+  	pseudo=true;
+  	width=9;
+  	display=dec;
+  	valid_ranges = (0,511);
+  }
+  
+  define (instrfield=slice1) {
+  	pseudo=true;
+  	width=4;
+  	valid_ranges = (0,15);
+  }
+  
+  unsigned chk_size(unsigned sz) {
+    if (sz > 8192)
+      error(0, "illegal vector size ", sz);
+    return sz;
+  }
+
+  unsigned is_addr_oram_tram(unsigned x) {
+    unsigned md = get_mode(x);
+    if (md == 0)
+      error(0, "illegal Operand RAM 0x", hex, x);
+    return x;
+  }
+
+  unsigned get_mode ( unsigned x ) {
+    return x >> 14 ;
+  }
+
+  unsigned translateM (unsigned m, unsigned b, unsigned c, unsigned s) {
+    if (b >= 4) error(0, "illegal bank 0x", hex, b);
+    if (s >= 16) error(0, "illegal slice 0x", hex, s);
+  	if (m == TRAM) {
+  		if (c >= 256)
+        error(0, "illegal TR column 0x", hex, c);
+      return 0x4000 | (b << 12) | (c << 4) | s;
+    } else if (m == ORAM) {
+  		if (c >= 512)
+        error(0, "illegal OR column 0x", hex, c);
+      return 0x8000 | (b << 13) | (c << 4) | s;
+    } else if (m == SPRAM)
+      return 0x1000 | s;
+    else return s;
+  }
+
+  unsigned decode_mem(unsigned addr) {
+  	if (addr & 0xc000) return (addr & 0x8000) ? 2 : 1;
+    else if (addr & 0x1000) return 3;
+    else return 0;
+  }
+
+  unsigned decode_bank(unsigned addr) {
+    if (addr & 0xc000)
+      return (addr & 0x8000) ? ((addr >> 13) & 0x3) : ((addr >> 12) & 0x3);
+    return 0;
+  }
+
+  unsigned decode_column(unsigned addr) {
+    if (addr & 0xc000)
+      return (addr & 0x8000) ? ((addr >> 4) & 0x1ff) : ((addr >> 4) & 0xff);
+    return 0;
+  }
+
+  unsigned decode_slice(unsigned addr) {
+    return (addr & 0xc000) ? (addr & 0xf) : (addr & 0x3f);
+  }
+  
+}
+
+define (arch=spt3_copy) {
+
+  define (instrfield=cp_type) {
+		// COPY
+    bits = (116,112);
+    enumerated = (".simple_copy",".threshold_ge",".threshold_lt",".transpose_copy",
+                  ".copy_real_pack",".copy_imag_pack",".copy_unpack",".partial_copy_real",
+                  ".partial_copy_imag",".partial_copy_r2i",".partial_copy_i2r",
+                  ".copy_clear",".copy_shift", ".transpose_fwd_x8", ".transpose_bck_x8",
+                  ".transpose_fwd_x4", ".transpose_bck_x4", ".threshold_gt", ".threshold_ge_step",
+                  ".threshold_gt_step", ".threshold_lt_step", ".scat_gath");
+    value = ".simple_copy";
+  }
+
+  define (instrfield=rst_acc) {
+		// COPY
+    bits = 117;
+    enumerated = (".no_rst",".rst_wr");
+  }
+
+  define (instrfield=rst_n_keep) {
+		// COPY
+    bits = 111;
+    enumerated = (".keep_orig",".reset_values");
+    value = ".keep_orig";
+  }
+
+  define (instrfield=blk_src_inc) {
+		// COPY
+    bits = (63,56);
+    display = dec;
+  }
+
+  define (instrfield=blk_dest_inc) {
+		// COPY
+    bits = (54,48);
+    display = dec;
+  }
+
+  /*
+	  copy	            in_dattyp cp_type rst_n_keep                  vec_sz src_add, dest_add, src_add_inc, dest_add_inc
+	  copy	            in_dattyp cp_type rst_n_keep                  vec_sz src_add,           src_add_inc, dest_add_inc
+	  copy_n_mask       in_dattyp cp_type rst_n_keep                  vec_sz src_add, dest_add, src_add_inc, dest_add_inc, mask
+	  copy_n_mask       in_dattyp cp_type rst_n_keep                  vec_sz src_add,           src_add_inc, dest_add_inc, mask
+	  copy.trans	    in_dattyp cp_type rst_n_keep                  vec_sz src_add, dest_add, src_add_inc, dest_add_inc, blk_src_inc, blk_dest_inc
+	  copy.trans	    in_dattyp cp_type rst_n_keep                  vec_sz src_add,           src_add_inc, dest_add_inc, blk_src_inc, blk_dest_inc
+	  copy.trans_n_mask in_dattyp cp_type rst_n_keep                  vec_sz src_add, dest_add, src_add_inc, dest_add_inc, blk_src_inc, blk_dest_inc, mask
+	  copy.trans_n_mask in_dattyp cp_type rst_n_keep                  vec_sz src_add,           src_add_inc, dest_add_inc, blk_src_inc, blk_dest_inc, mask
+	  copy.thld        	in_dattyp cp_type rst_n_keep pre_proc rst_acc vec_sz src_add, dest_add, src_add_inc, dest_add_inc, thld_add
+	  copy.thld        	in_dattyp cp_type rst_n_keep pre_proc rst_acc vec_sz src_add,           src_add_inc, dest_add_inc, thld_add
+	  copy.thld_n_step	in_dattyp cp_type rst_n_keep pre_proc rst_acc vec_sz src_add, dest_add, src_add_inc, dest_add_inc, thld_add, thld_const
+	  copy.thld_n_step	in_dattyp cp_type rst_n_keep pre_proc rst_acc vec_sz src_add,           src_add_inc, dest_add_inc, thld_add, thld_const
+	  copy.scat	        in_dattyp         rst_n_keep                  vec_sz src_add, dest_add,                            tw_add
+	  copy.scat        	in_dattyp         rst_n_keep                  vec_sz src_add,                                      tw_add
+	  copy_n_mask.scat	in_dattyp         rst_n_keep                  vec_sz src_add, dest_add,                            tw_add, mask
+	  copy_n_mask.scat	in_dattyp         rst_n_keep                  vec_sz src_add,                                      tw_add, mask
+	  copy.clear        	                                          vec_sz          dest_add,                            mask
+
+  */
+
+  define (instrfield=tw_add) {
+    bits = (63,48);
+  }
+
+  define (instrfield=cp_mask) {
+    bits = (31,0);
+  }
+
+  define (instrfield=thld_const) {
+    //bits = (31,16);
+    width = 16;
+    pseudo = true;
+  }
+
+  define (instrfield=thld_add_cp) {
+    //bits = (15,0);
+    pseudo = true;
+    width = 16;
+  }
+
+  define (instrfield=mask_mode) {
+    bits = 110;
+  }
+
+  define (instr=copy_mask) {
+    width = 128;    
+    fields = (opcode(0x25),in_dattyp2,cp_type,
+              pre_proc,rst_acc,
+              rst_n_keep,ima_fld,vec_sz,mask_mode,
+              src_add,
+              dest_add,
+              tw_add,
+              src_add_inc,dest_add_inc,
+              cp_mask);
+    action = { };
+  }
+
+  define (instr=copy_trans_) {
+    width = 128;    
+    fields = (opcode(0x25),in_dattyp2,pre_proc(0),rst_acc(0),cp_type,
+              rst_n_keep,ima_fld,vec_sz,mask_mode,
+              src_add,
+              dest_add,
+              blk_src_inc,blk_dest_inc,
+              src_add_inc,dest_add_inc,
+              cp_mask);
+    action = { };
+  }
+
+  unsigned merge_to_mask(unsigned up, unsigned lo) {
+    return ((up << 16) | (lo & 0xFFFF));
+  }
+
+  int check_copy_type ( int type, int copy_class ) {
+	  enum copy_cl { simple, threshold, threshold_step, transpose };
+
+    switch ((enum copy_cl)copy_class) {
+    case simple:
+      if (type==0 || 4 <= type && type <= 10 || type == 12)
+        return type;
+      break;
+    case threshold:
+      if (1 <= type && type <= 2 || type == 17)
+        return type;
+      break;
+    case threshold_step:
+      if (18 <= type && type <= 20)
+        return type;
+      break;
+    case transpose:
+      if (type == 3 || 13 <= type && type <= 16)
+        return type;
+      break;
+    }
+    error(0, "illegal copy type ", type);
+    return 0;
+  }
+
+  define (instr=copy) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),
+                      mask_mode(0),tw_add(0),
+                      rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      src_add(is_addr_oram_tram(src_add)),
+                      dest_add(is_addr_oram_tram(dest_add)),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(0));
+
+    syntax = ("copy %p %p %p %f %f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add,dest_add,src_add_inc,dest_add_inc
+              );
+  }
+
+  define (instr=copy_MM) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),
+                      mask_mode(0),tw_add(0),
+                      rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(0));
+
+    disassemble = false;
+    syntax = ("copy %p %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,src_add_inc,dest_add_inc
+              );
+  }
+  
+#if BUG
+  define (instr=copy_ind) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),
+                      rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      mask_mode(0),tw_add(0),
+                      src_add((src_add)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(0));
+
+    syntax = ("copy %p %p %p %f %f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add,src_add_inc,dest_add_inc
+              );
+  }
+#endif
+  
+  define (instr=copy_ind_R) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),
+                      rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      mask_mode(0),tw_add(0),
+                      src_add((src_add_reg)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(0));
+
+    syntax = ("copy %p %p %p %f %f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add_reg,src_add_inc,dest_add_inc
+              );
+  }
+  // #if BUG
+
+  //   define (instr=copy_n_mask) {
+
+  //     width = 128;    
+  //     alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),
+  //                       mask_mode(1),tw_add(0),
+  //                       rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+  //                       src_add(is_addr_oram_tram(src_add)),
+  //                       dest_add(is_addr_oram_tram(dest_add)),
+  //                       src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+  //                       cp_mask(cp_mask));
+
+  //     syntax = ("copy_n_mask %p %p %p %f %f,%f,%f,%f,%f",
+  //               in_dattyp2,cp_type,rst_n_keep,
+  //               vec_sz,src_add,dest_add,src_add_inc,dest_add_inc,cp_mask
+  //               );
+  //   }
+  // #endif
+
+  define (instr=copy_n_mask_MM) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),
+                      mask_mode(1),tw_add(0),
+                      rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(cp_mask));
+
+    syntax = ("copy_n_mask %p %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,src_add_inc,dest_add_inc,cp_mask
+              );
+  }
+
+  // #if BUG
+  //   define (instr=copy_n_mask_ind) {
+
+  //     width = 128;    
+  //     alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+  //                       mask_mode(1),tw_add(0),
+  //                       src_add((src_add)),
+  //                       dest_add(0),
+  //                       src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+  //                       cp_mask(cp_mask));
+
+  //     syntax = ("copy_n_mask %p %p %p %f %f,%f,%f,%f",
+  //               in_dattyp2,cp_type,rst_n_keep,
+  //               vec_sz,src_add,src_add_inc,dest_add_inc,cp_mask
+  //               );
+  //   }
+  // #endif
+
+  define (instr=copy_n_mask_ind_R) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type, 0)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      mask_mode(1),tw_add(0),
+                      src_add((src_add_reg)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(cp_mask));
+
+    syntax = ("copy_n_mask %p %p %p %f %f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add_reg,src_add_inc,dest_add_inc,cp_mask
+              );
+  }
+
+  // #if BUG
+  //   define (instr=copy_trans) {
+
+  //     width = 128;    
+  //     alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),
+  //                         mask_mode(0),
+  //                         rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+  //                         src_add(is_addr_oram_tram(src_add)),
+  //                         dest_add(is_addr_oram_tram(dest_add)),
+  //                         blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+  //                         src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+  //                         cp_mask(0));
+
+  //     syntax = ("copy.trans %p %p %p %f %f,%f,%f,%f,%f,%f",
+  //               in_dattyp2,cp_type,rst_n_keep,
+  //               vec_sz,src_add,dest_add,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc
+  //               );
+  //   }
+  // #endif
+
+  define (instr=copy_trans_MM) {
+
+    width = 128;    
+    alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),
+                        mask_mode(0),
+                        rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                        src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                        dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                        blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                        cp_mask(0));
+
+    syntax = ("copy.trans %p %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc
+              );
+  }
+
+  // #if BUG
+  //   define (instr=copy_trans_ind) {
+
+  //     width = 128;    
+  //     alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+  //                         mask_mode(0),
+  //                         src_add((src_add)),
+  //                         dest_add(0),
+  //                         mask_mode(0),
+  //                         blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+  //                         src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+  //                         cp_mask(0));
+
+  //     syntax = ("copy.trans %p %p %p %f %f,%f,%f,%f,%f",
+  //               in_dattyp2,cp_type,rst_n_keep,
+  //               vec_sz,src_add,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc
+  //               );
+  //   }
+  // #endif
+
+  define (instr=copy_trans_ind_R) {
+
+    width = 128;    
+    alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                        mask_mode(0),
+                        src_add((src_add_reg)),
+                        dest_add(0),
+                        mask_mode(0),
+                        blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                        cp_mask(0));
+
+    syntax = ("copy.trans %p %p %p %f %f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add_reg,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc
+              );
+  }
+
+  define (instr=copy_trans_n_mask) {
+
+    width = 128;    
+    alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),
+                        rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                        mask_mode(1),
+                        src_add(is_addr_oram_tram(src_add)),
+                        dest_add(is_addr_oram_tram(dest_add)),
+                        blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                        cp_mask(cp_mask));
+
+    syntax = ("copy.trans_n_mask %p %p %p %f %f,%f,%f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add,dest_add,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc,cp_mask
+              );
+  }
+
+  define (instr=copy_trans_n_mask_MM) {
+
+    width = 128;    
+    alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),
+                        rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                        mask_mode(1),
+                        src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                        dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                        blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                        cp_mask(cp_mask));
+
+    syntax = ("copy.trans_n_mask %p %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc,cp_mask
+              );
+  }
+
+  define (instr=copy_trans_n_mask_ind) {
+
+    width = 128;    
+    alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                        src_add((src_add)),
+                        mask_mode(1),
+                        dest_add(0),
+                        blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                        cp_mask(cp_mask));
+
+    syntax = ("copy.trans_n_mask %p %p %p %f %f,%f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc,cp_mask
+              );
+  }
+
+  define (instr=copy_trans_n_mask_ind_R) {
+
+    width = 128;    
+    alias = copy_trans_(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,3)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                        src_add((src_add_reg)),
+                        mask_mode(1),
+                        dest_add(0),
+                        blk_src_inc(blk_src_inc),blk_dest_inc(blk_dest_inc),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                        cp_mask(cp_mask));
+
+    syntax = ("copy.trans_n_mask %p %p %p %f %f,%f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,rst_n_keep,
+              vec_sz,src_add_reg,src_add_inc,dest_add_inc,blk_src_inc, blk_dest_inc,cp_mask
+              );
+  }
+
+  int get_thld_add(unsigned int x) {
+    if (get_mode(x) == 0 && (x & 0x1000) != 0)
+      error(0, "illegal address 0x", hex, x);
+    return x;
+  }
+
+  define (instr=copy_thld) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,1)),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add(is_addr_oram_tram(src_add)),
+                      dest_add(is_addr_oram_tram(dest_add)),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(0,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld %p %p %p %p %p %f %f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,src_add,dest_add,src_add_inc,dest_add_inc,thld_add_cp
+              );
+  }
+
+  define (instr=copy_thld_MM) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,1)),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(0,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld %p %p %p %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,src_add_inc,dest_add_inc,thld_add_cp
+              );
+  }
+
+  define (instr=copy_thld_ind) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,1)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add((src_add)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(0,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld %p %p %p %p %p %f %f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,src_add,src_add_inc,dest_add_inc,thld_add_cp
+              );
+  }
+
+  define (instr=copy_thld_ind_R) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,1)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add((src_add_reg)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(0,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld %p %p %p %p %p %f %f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,src_add_reg,src_add_inc,dest_add_inc,thld_add_cp
+              );
+  }
+
+  define (instr=copy_thld_n_step) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,2)),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add(is_addr_oram_tram(src_add)),
+                      dest_add(is_addr_oram_tram(dest_add)),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(thld_const,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld_n_step %p %p %p %p %p %f %f,%f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,src_add,dest_add,src_add_inc,dest_add_inc,thld_add_cp,thld_const
+              );
+  }
+
+  define (instr=copy_thld_n_step_MM) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,2)),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(thld_const,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld_n_step %p %p %p %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,src_add_inc,dest_add_inc,thld_add_cp,thld_const
+              );
+  }
+
+  define (instr=copy_thld_n_step_ind) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,2)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add((src_add)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(thld_const,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld_n_step %p %p %p %p %p %f %f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,src_add,src_add_inc,dest_add_inc,thld_add_cp,thld_const
+              );
+  }
+
+  define (instr=copy_thld_n_step_ind_R) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),cp_type(check_copy_type(cp_type,2)),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      pre_proc(pre_proc),rst_acc(rst_acc),
+                      src_add((src_add_reg)),
+                      dest_add(0),
+                      src_add_inc(src_add_inc),dest_add_inc(dest_add_inc),
+                      cp_mask(merge_to_mask(thld_const,get_thld_add(thld_add_cp))));
+
+    syntax = ("copy.thld_n_step %p %p %p %p %p %f %f,%f,%f,%f,%f",
+              in_dattyp2,cp_type,pre_proc,rst_acc,rst_n_keep,
+              vec_sz,src_add_reg,src_add_inc,dest_add_inc,thld_add_cp,thld_const
+              );
+  }
+
+  define (instr=copy_scat) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      src_add(is_addr_oram_tram(src_add)),cp_type(21),
+                      dest_add(is_addr_oram_tram(dest_add)),
+                      mask_mode(0),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(0),tw_add(tw_add));
+
+    syntax = ("copy.scat %p %p %f %f,%f,%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,src_add,dest_add,tw_add
+              );
+  }
+
+  define (instr=copy_scat_MM) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      cp_type(21),
+                      src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                      mask_mode(0),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(0),tw_add(tw_add));
+
+    syntax = ("copy.scat %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,mem,bank,column,slice,mem1,bank1,column1,slice1,tw_add
+              );
+  }
+
+  define (instr=copy_scat_ind) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      src_add((src_add)),cp_type(21),
+                      dest_add(0),
+                      mask_mode(0),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(0),tw_add(tw_add));
+
+    syntax = ("copy.scat %p %p %f %f,%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,src_add,tw_add
+              );
+  }
+
+  define (instr=copy_scat_ind_R) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      src_add((src_add_reg)),cp_type(21),
+                      dest_add(0),
+                      mask_mode(0),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(0),tw_add(tw_add));
+
+    syntax = ("copy.scat %p %p %f %f,%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,src_add_reg,tw_add
+              );
+  }
+
+  define (instr=copy_n_mask_scat) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      mask_mode(1),cp_type(21),
+                      src_add(is_addr_oram_tram(src_add)),
+                      dest_add(is_addr_oram_tram(dest_add)),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(cp_mask),tw_add(tw_add));
+
+    syntax = ("copy_n_mask.scat %p %p %f %f,%f,%f,%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,src_add,dest_add,tw_add,cp_mask
+              );
+  }
+
+  define (instr=copy_n_mask_scat_MM) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(0),vec_sz(chk_size(vec_sz)),
+                      mask_mode(1),cp_type(21),
+                      src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(cp_mask),tw_add(tw_add));
+
+    syntax = ("copy_n_mask.scat %p %p %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f",
+              in_dattyp2,rst_n_keep,vec_sz,
+              mem,bank,column,slice,
+              mem1,bank1,column1,slice1,
+              tw_add,cp_mask
+              );
+  }
+
+  define (instr=copy_n_mask_scat_ind) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      src_add((src_add)),cp_type(21),
+                      mask_mode(1),
+                      dest_add(0),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(cp_mask),tw_add(tw_add));
+
+    syntax = ("copy_n_mask.scat %p %p %f %f,%f,%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,src_add,tw_add,cp_mask
+              );
+  }
+
+  define (instr=copy_n_mask_scat_ind_R) {
+
+    width = 128;    
+    alias = copy_mask(in_dattyp2(in_dattyp2),rst_n_keep(rst_n_keep),ima_fld(1),vec_sz(chk_size(vec_sz)),
+                      src_add((src_add_reg)),cp_type(21),
+                      mask_mode(1),
+                      dest_add(0),
+                      src_add_inc(0),dest_add_inc(0),
+                      cp_mask(cp_mask),tw_add(tw_add));
+
+    syntax = ("copy_n_mask.scat %p %p %f %f,%f,%f",
+              in_dattyp2,rst_n_keep,
+              vec_sz,src_add_reg,tw_add,cp_mask
+              );
+  }
+
+  define (instr=copy_clear) {
+
+    width = 128;    
+    alias = copy_mask(vec_sz(chk_size(vec_sz)),
+                      dest_add(dest_add),
+                      cp_mask(cp_mask)
+                      );
+
+    syntax = ("copy.clear %f %f,%f",vec_sz,dest_add,cp_mask);
+  }
+
+  define (instr=copy_clear_MM) {
+
+    width = 128;    
+    alias = copy_mask(vec_sz(chk_size(vec_sz)),
+                      dest_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                      cp_mask(cp_mask)
+                      );
+
+    syntax = ("copy.clear %f %f(%f,%f,%f),%f",vec_sz,mem,bank,column,slice,cp_mask);
+  }
+          
+}
+
+define (arch=spt3_vmt) {
+
+  define (instrfield=extra_val) {
+    // VMT
+    width = 16;
+    pseudo = true;
+    disassemble = false;
+  }
+
+  define (instrfield=extra_val2) {
+    // VMT
+    width = 16;
+    pseudo = true;
+    disassemble = false;
+  }
+
+  define (instrfield=rst_acc_vmt) {
+    // VMT
+    bits = 121;
+    enumerated = (".no_rst", ".rst_sum");
+  }
+
+  define (instrfield=in_dattyp_vmt) {
+    // VMT
+    bits = 120;
+    enumerated = (".real",".cmplx");
+    value = ".real";
+  }
+
+  define (instrfield=opsq1) {
+    // VMT
+    bits = 119;
+    enumerated = (".no_sq1", ".sq1");
+  }
+
+  define (instrfield=opsq2s1) {
+    // VMT
+    bits = (118,117);
+    enumerated = (".no_sq2s1", ".abs_sq2s1", ".mag_sq2s1", ".conj_sq2s1");
+  }
+
+  define (instrfield=opsq2s2) {
+    // VMT
+    bits = (116,114);
+    enumerated = (".no_sq2s2", ".shft_sq2s2", ".wr_off_sq2s2", "imm_off_sqs2", ".vec_sq2s2");
+  }
+
+  define (instrfield=opsq2s3) {
+    // VMT
+    bits = 113;
+    enumerated = (".no_sq2s3", ".sum_sq2s3");
+  }
+
+  define (instrfield=op_pack) {
+    // VMT
+    bits = 112;
+    enumerated = (".op_off", ".op_on");
+  }
+
+  define (instrfield=ip_pack) {
+    // VMT
+    bits = (111,110);
+    enumerated = (".in_24real", ".in_24im", ".in_48");
+  }
+
+  define (instrfield=imdt_offset_val_im) {
+    // VMT
+    bits = (31,16);
+  }
+
+  define (instrfield=extra_offset_val_im) {
+    // VMT
+    bits = (15,0);
+  }
+
+  define (instrfield=mult_s_exp_n_val_addr) {
+    // VMT
+    bits = (63,48);
+  }
+  
+  // vmt instruction 
+  define (instr=vmt_nosq2s2) {
+
+    width = 128;
+    fields = (opcode(0x26),rst_acc_vmt,in_dattyp_vmt,opsq1,opsq2s1,opsq2s2(0),opsq2s3, 
+              op_pack,ip_pack,ima_fld(0),vec_sz,
+              src_add,
+              dest_add,
+              mult_s_exp_n_val_addr,
+              src_add_inc,dest_add_inc,
+              imdt_offset_val_im(0),
+              extra_offset_val_im(0)
+              );
+
+    dsyntax = ("vmt %f %f %f %f %f %f .no_sq2s2 %f %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f",
+               in_dattyp_vmt,rst_acc_vmt,ip_pack,op_pack,opsq1,opsq2s1,
+               opsq2s3,
+               vec_sz,
+               mem(decode_mem(src_add)),bank(decode_bank(src_add)),column(decode_column(src_add)),slice(decode_slice(src_add)),
+               mem1(decode_mem(dest_add)),bank1(decode_bank(dest_add)),column1(decode_column(dest_add)),slice1(decode_slice(dest_add)),
+               src_addr_reg(mult_s_exp_n_val_addr),
+               src_add_inc,dest_add_inc);
+
+    syntax = ("vmt %p %p %p %p %p %p %p %f %f,%f,%f,%f,%f",
+              in_dattyp_vmt, rst_acc_vmt, ip_pack, op_pack,
+              opsq1, opsq2s1, opsq2s3,
+              vec_sz, src_add, dest_add,
+              mult_s_exp_n_val_addr,
+              src_add_inc, dest_add_inc);
+
+    action = { };
+  }
+
+ 
+  // vmt instruction - we have to preserve all whitespace because of the synax
+  // in thie middle of the field list.
+  define (instr=vmt_nosq2s2_exp_MM) {
+    
+    width = 128;
+    alias = vmt_nosq2s2(rst_acc_vmt(rst_acc_vmt),in_dattyp_vmt(in_dattyp_vmt),opsq1(opsq1),opsq2s1(opsq2s1),opsq2s3(opsq2s3),
+                        op_pack(op_pack),ip_pack(ip_pack),vec_sz(chk_size(vec_sz)),
+                        src_add(is_addr_oram_tram(translateM(mem,bank,column,slice))),
+                        dest_add(is_addr_oram_tram(translateM(mem1,bank1,column1,slice1))),
+                        mult_s_exp_n_val_addr(src_add_reg),
+                        src_add_inc(src_add_inc),dest_add_inc(dest_add_inc)
+                        );
+
+    syntax = ("vmt %f %f %f %f %f %f .no_sq2s2 %f %f %f(%f,%f,%f),%f(%f,%f,%f),%f,%f,%f",
+              in_dattyp_vmt, rst_acc_vmt, ip_pack, op_pack,
+              opsq1, opsq2s1, opsq2s3,
+              vec_sz, 
+              mem,bank,column,slice,
+              mem1,bank1,column1,slice1,
+              src_add_reg,
+              src_add_inc, dest_add_inc);
+  }
+  
+}
+
+define (core=spt3) {
+
+  archs = (spt3_base,spt3_copy,spt3_vmt);
+  instr_endianness = little;
+  data_endianness = little;
+  bit_endianness = little;
+
+}

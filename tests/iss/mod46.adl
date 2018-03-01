@@ -1,0 +1,157 @@
+// Test assember for instruction field syntax 
+// ADL generated encodind
+// Note: This example encodes the DaDb field (without DaDa)
+
+
+define (arch = miniSC){
+
+  bit_endianness = little;
+
+  attrs = (one_word);
+
+  define (regfile=D) 
+    {
+      size   = 16;
+      width  = 40;
+      prefix = d;
+    }
+
+  define (reg=PC) 
+    {
+      attrs = cia;	
+      serial = true;
+    }
+
+  define (reg=NPC)		
+    {  
+      attrs = nia;
+      serial = true;
+    }
+
+
+  define (instrfield = DaDb) 	
+    { 
+      width = 7; 	// number of  input  bits 
+      size = 8; 	// number of  output bits
+      ref = D; 
+      pseudo = true;
+      define (instrfield=JJJJJ) 
+        { 
+          bits = (4,0); 
+          table = ((0,4),(0,5),(0,6),(0,7),(1,4),(1,5),(1,6),(1,7), 
+                   (2,4),(2,5),(2,6),(2,7),(3,4),(3,5),(3,6),(3,7), 
+                   (0,0),(0,1),(0,2),(0,3),(4,4),(4,5),(4,6),(4,7),
+                   (1,2),(1,3),(5,6),(5,7),(2,2),(2,3),(6,6),(6,7)); 
+        }
+	
+      fields = ( 6,JJJJJ(1),5,JJJJJ(0) );
+      syntax = ("%f,%f",Da,Db);
+	
+      define(instrfield=Da) {
+		size = 4;
+        fields = (3,0);
+      }	
+      define(instrfield=Db) {
+		size = 4;
+		fields = (7,4);
+      }	
+
+    }
+
+  define (instrfield=FFF) 		
+    {
+      width = 4;	
+      ref = D;
+      pseudo = true;
+    }
+
+
+  define (instrfield=kk) 
+    {
+      width = 2;
+      size = 16;	
+      ref = D;
+      pseudo = true;
+      define(instrfield = JJ) {
+        bits = (0);
+        table = ((0,2,4,6),(1,3,5,7));
+      }
+      fields = (1,JJ(3),1,JJ(2),1,JJ(1),1,JJ(0));
+      syntax = ("%f:%f:%f:%f",Da,Db,Dc,Dd);
+
+      define(instrfield = Da) {
+        size = 4;
+        fields = (3,0);
+      }
+      define(instrfield = Db) {
+        size = 4;
+        fields = (7,4);
+      }
+      define(instrfield = Dc) {
+        size = 4;
+        fields = (11,8);
+      }
+      define(instrfield = Dd) {
+        size = 4;
+        fields = (15,12);
+      }
+    
+    }
+
+  define (instrfield=OPCD) 	
+    {
+      width  = variable; 
+      pseudo = true;
+    }
+
+
+  define(instr=add) 
+    { 
+      fields =((bits(4,0),DaDb(4,0)),  
+               (bits(6,5),0x2),  
+               (bits(9,7),FFF(2,0)),
+               (bits(13,10),0xB),
+               (bits(14),reserved),
+               (bits(15),b0),
+               (bits(16),FFF(3)),
+               (bits(18,17),DaDb(6,5)),
+               (bits(31,19),0x0));
+	  
+      attrs = one_word;
+      syntax = ("add %f,%f",symmetric(DaDb),FFF);
+      width = variable;
+      action = {
+        D(DaDb.Da) = DaDb.Db;
+        D(DaDb.Db) = DaDb.Da;	
+        D(FFF) = DaDb.Da + DaDb.Db;
+      };
+    }
+
+  define (instr = stop) {
+    attrs = one_word;
+    fields = ((bits(31,0),0x12f));
+    syntax = ("stop");
+    action = {
+      halt();
+    };
+  }
+
+  define(instr = mv) {
+    attrs = one_word;
+    width = variable;
+    fields = ((bits(1,0),kk),
+              (bits(5,2),FFF),
+              (bits(31,6),0x3F));
+    syntax = ("%i %f,%f",kk,FFF);
+    action = {
+      D(FFF) = kk.Da + kk.Db + kk.Dc*kk.Dd; 
+    };
+  }
+}; 
+
+define (core = SC)
+{
+  instrtables = (one_word);
+  archs = miniSC;
+}
+

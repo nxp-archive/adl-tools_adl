@@ -1,0 +1,7 @@
+Breaking proc at 0x8 for 1 time. id is 0, cycle is 9
+Breaking proc at 0x8 for 2 time. id is 0, cycle is 16
+Stopping execution.
+Simulation halted at address: 0x0000000000000004
+Done at cycle 17.  6 instructions committed.  10 instructions issued.
+
+Instructions executed: 6

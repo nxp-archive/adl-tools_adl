@@ -1,0 +1,18 @@
+
+---------------------------------------------------------------------------
+| NAME                 | WIDTH | ACTION                                   |
+---------------------------------------------------------------------------
+| I4                   | 32    | {     IMEM ( 0 , 4 ) = 3 ;     GPR ( F2 )|
+|                      |       | = sincos ( IMEM ( GPR ( F2 ) , 4 ) ) ;   |
+|                      |       | GPR ( F2 + 1 ) = sincos ( IMEM ( GPR ( F2|
+|                      |       | + 1 ) , 4 ) ) ;     raiseException ( yo )|
+|                      |       | ; }                                      |
+| add                  | 16    | {      bits < 32 > addr ;                |
+|                      |       | eaRegDirect( RS , addr ) ;      bits < 32|
+|                      |       | > res ;     addOp( RA , addr , res ) ;   |
+|                      |       | GPR ( RA . uint32 (  ) ) = res ; }       |
+| addi                 | 16    | {      bits < 32 > addr ;                |
+|                      |       | eaRegDirect( RS , addr ) ;      bits < 32|
+|                      |       | > res ;     subOp( RA , addr , res ) ;   |
+|                      |       | GPR ( RA . uint32 (  ) ) = res ; }       |
+---------------------------------------------------------------------------

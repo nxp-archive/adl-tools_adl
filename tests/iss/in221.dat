@@ -1,0 +1,87 @@
+#
+# For testing original-access logging in safe-mode ISSs.
+#
+
+= asm
+
+	lmw r1, 0x1000(r0)
+	lmw r16,0x1040(r0)
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xB8201000	#	lmw r1, 0x1000(r0)
+MD n=Mem ra=0x00000004 d=0xBA001040	#	lmw r16,0x1040(r0)
+# </GEN>
+
+CORE n=:P
+
+MD n=Mem ra=0x1000 d=0xdeadbee0
+MD n=Mem ra=0x1004 d=0xdeadbee1
+MD n=Mem ra=0x1008 d=0xdeadbee2
+MD n=Mem ra=0x100c d=0xdeadbee3
+MD n=Mem ra=0x1010 d=0xdeadbee4
+MD n=Mem ra=0x1014 d=0xdeadbee5
+MD n=Mem ra=0x1018 d=0xdeadbee6
+MD n=Mem ra=0x101c d=0xdeadbee7
+MD n=Mem ra=0x1020 d=0xdeadbee8
+MD n=Mem ra=0x1024 d=0xdeadbee9
+MD n=Mem ra=0x1028 d=0xdeadbeea
+MD n=Mem ra=0x102c d=0xdeadbeeb
+MD n=Mem ra=0x1030 d=0xdeadbeec
+MD n=Mem ra=0x1034 d=0xdeadbeed
+MD n=Mem ra=0x1038 d=0xdeadbeee
+MD n=Mem ra=0x103c d=0xdeadbeef
+
+MD n=Mem ra=0x1040 d=0x12345670
+MD n=Mem ra=0x1044 d=0x12345671
+MD n=Mem ra=0x1048 d=0x12345672
+MD n=Mem ra=0x104c d=0x12345673
+MD n=Mem ra=0x1050 d=0x12345674
+MD n=Mem ra=0x1054 d=0x12345675
+MD n=Mem ra=0x1058 d=0x12345676
+MD n=Mem ra=0x105c d=0x12345677
+MD n=Mem ra=0x1060 d=0x12345678
+MD n=Mem ra=0x1064 d=0x12345679
+MD n=Mem ra=0x1068 d=0x1234567a
+MD n=Mem ra=0x106c d=0x1234567b
+MD n=Mem ra=0x1070 d=0x1234567c
+MD n=Mem ra=0x1074 d=0x1234567d
+MD n=Mem ra=0x1078 d=0x1234567e
+MD n=Mem ra=0x107c d=0x1234567f
+
+RESULTS
+
+RD n=GPR i=0 d=0xdeadbee0
+RD n=GPR i=1 d=0xdeadbee1
+RD n=GPR i=2 d=0xdeadbee2
+RD n=GPR i=3 d=0xdeadbee3
+RD n=GPR i=4 d=0xdeadbee4
+RD n=GPR i=5 d=0xdeadbee5
+RD n=GPR i=6 d=0xdeadbee6
+RD n=GPR i=7 d=0xdeadbee7
+RD n=GPR i=8 d=0xdeadbee8
+RD n=GPR i=9 d=0xdeadbee9
+RD n=GPR i=10 d=0xdeadbeea
+RD n=GPR i=11 d=0xdeadbeeb
+RD n=GPR i=12 d=0xdeadbeec
+RD n=GPR i=13 d=0xdeadbeed
+RD n=GPR i=14 d=0xdeadbeee
+RD n=GPR i=15 d=0xdeadbeef
+RD n=GPR i=16 d=0x12345670
+RD n=GPR i=17 d=0x12345671
+RD n=GPR i=18 d=0x12345672
+RD n=GPR i=19 d=0x12345673
+RD n=GPR i=20 d=0x12345674
+RD n=GPR i=21 d=0x12345675
+RD n=GPR i=22 d=0x12345676
+RD n=GPR i=23 d=0x12345677
+RD n=GPR i=24 d=0x12345678
+RD n=GPR i=25 d=0x12345679
+RD n=GPR i=26 d=0x1234567a
+RD n=GPR i=27 d=0x1234567b
+RD n=GPR i=28 d=0x1234567c
+RD n=GPR i=29 d=0x1234567d
+RD n=GPR i=30 d=0x1234567e
+RD n=GPR i=31 d=0x1234567f

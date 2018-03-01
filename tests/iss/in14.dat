@@ -1,0 +1,51 @@
+#
+= asm
+
+ loop:
+     add     r2,r2,r1
+     subic.  r3,r3,1
+     bne     loop
+     mtspr   50,r4
+
+  .section .text,"ax"
+  .switch  -mvle
+ loop2:
+    se_add  rr9,rr8
+    subf.   r26,r27,r26
+    se_bne  loop2
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C420A14	#	add     r2,r2,r1
+MD n=Mem ra=0x00000004 d=0x3463FFFF	#	subic.  r3,r3,1
+MD n=Mem ra=0x00000008 d=0x4082FFF8	#	bne     loop
+MD n=Mem ra=0x0000000c d=0x7C920BA6	#	mtspr   50,r4
+MD n=Mem ra=0x00000010 d=0x0489 s=2	#	se_add  rr9,rr8
+MD n=Mem ra=0x00000012 d=0x7F5BD051	#	subf.   r26,r27,r26
+MD n=Mem ra=0x00000016 d=0xE2FD s=2	#	se_bne  loop2
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=GPR i=4 d=0x80000000
+
+RD n=GPR i=24 d=30
+RD n=GPR i=25 d=100
+RD n=GPR i=26 d=10
+RD n=GPR i=27 d=1
+
+RESULTS
+
+RD n=GPR i=2 d=0x190
+RD n=GPR i=3 d=0
+
+RD n=GPR i=25 d=0x190
+RD n=GPR i=26 d=0
+
+RD n=HID0 d=0x80000000
+
+
+
+
+

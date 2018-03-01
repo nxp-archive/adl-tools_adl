@@ -1,0 +1,7 @@
+Stopping procs:P1 at 0x18001dc
+Stopping procs:P0 at 0x180010c
+Simulation halted at address: 0x000000000180010c
+
+          0x1004: 0000001e 000000f3 00000000 00000000
+
+Instructions executed: 330

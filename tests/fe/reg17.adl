@@ -1,0 +1,22 @@
+//
+// Register aliasing test- should fail because "write"
+// expects an action of arity 1.
+//
+define (arch = spe) {
+
+  define (reg = USPRG0) {
+    width=32;
+    define (write) {
+      action = func() { };
+    }
+  }
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+}
+
+define (core = P) {
+  archs = spe;
+}

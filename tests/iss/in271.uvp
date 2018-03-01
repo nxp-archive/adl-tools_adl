@@ -1,0 +1,112 @@
+format=huvp;
+//------------------------------------------------------------------------------
+//
+// Options:
+//   ./mod1 test.dat -o test.out.uvp -trace 
+//
+//------------------------------------------------------------------------------
+test => test {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  P => P {
+    I : R {nm="CR"; d=0x00000000;};
+    I : R {nm="CTR"; d=0x00000000;};
+    I : R {nm="HID0"; d=0x00000000;};
+    I : R {nm="HID1"; d=0x00000000;};
+    I : R {nm="LR"; d=0x00000000;};
+    I : R {nm="NIA"; d=0x00000000;};
+    I : R {nm="XER"; d=0x00000000;};
+    // CA:0 OV:0 SO:0 
+    I : R {nm="GPR0"; d=0x00000000;};
+    I : R {nm="GPR1"; d=0x00000000;};
+    I : R {nm="GPR2"; d=0x00000000;};
+    I : R {nm="GPR3"; d=0x00000000;};
+    I : R {nm="GPR4"; d=0x00000000;};
+    I : R {nm="GPR5"; d=0x00000000;};
+    I : R {nm="GPR6"; d=0x00000000;};
+    I : R {nm="GPR7"; d=0x00000000;};
+    I : R {nm="GPR8"; d=0x00000000;};
+    I : R {nm="GPR9"; d=0x00000000;};
+    I : R {nm="GPR10"; d=0x00000000;};
+    I : R {nm="GPR11"; d=0x00000000;};
+    I : R {nm="GPR12"; d=0x00000000;};
+    I : R {nm="GPR13"; d=0x00000000;};
+    I : R {nm="GPR14"; d=0x00000000;};
+    I : R {nm="GPR15"; d=0x00000000;};
+    I : R {nm="GPR16"; d=0x00000000;};
+    I : R {nm="GPR17"; d=0x00000000;};
+    I : R {nm="GPR18"; d=0x00000000;};
+    I : R {nm="GPR19"; d=0x00000000;};
+    I : R {nm="GPR20"; d=0x00000000;};
+    I : R {nm="GPR21"; d=0x00000000;};
+    I : R {nm="GPR22"; d=0x00000000;};
+    I : R {nm="GPR23"; d=0x00000000;};
+    I : R {nm="GPR24"; d=0x00000000;};
+    I : R {nm="GPR25"; d=0x00000000;};
+    I : R {nm="GPR26"; d=0x00000000;};
+    I : R {nm="GPR27"; d=0x00000000;};
+    I : R {nm="GPR28"; d=0x00000000;};
+    I : R {nm="GPR29"; d=0x00000000;};
+    I : R {nm="GPR30"; d=0x00000000;};
+    I : R {nm="GPR31"; d=0x00000000;};
+    // We should see both normal instructions and affix instructions in the final testcase.
+    E : I {asm="addi r1,r1,1"; c=0; t="A";ea=0x8;  ra=0x8;  d=0x38210001; op=0x38210001; op_size=32; };
+    E : I {asm="addi r1,r1,1"; c=0; t="A";ea=0xc;  ra=0xc;  d=0x38210001; op=0x38210001; op_size=32; };
+    E : I {asm="addi r1,r1,1"; c=0; t="A";ea=0x10; ra=0x10; d=0x38210001; op=0x38210001; op_size=32; };
+    E : I {asm="addi r1,r1,1"; c=0; t="A";ea=0x14; ra=0x14; d=0x38210001; op=0x38210001; op_size=32; };
+    
+    E : I {asm="addi r1,r1,1"; c=1; gc=1;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0x38210001; op=0x38210001; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x00000001],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000004],};};
+    E : I {asm="addi r2,r2,2"; c=2; gc=2;
+                   ea=0x0000000000000004; ra=0x0000000000000004; d=0x38420002; op=0x38420002; op_size=32;
+                   ir={[ t=>"reg", rn=>"GPR2", d=>0x00000002],
+                       [ t=>"reg", rn=>"NIA", d=>0x00000008],};};
+    R : RES {ea=0x0000000000000008; ra=0x0000000000000008;};
+    R : R {nm="CR"; d=0x00000000;};
+    R : R {nm="CTR"; d=0x00000000;};
+    R : R {nm="HID0"; d=0x00000000;};
+    R : R {nm="HID1"; d=0x00000000;};
+    R : R {nm="LR"; d=0x00000000;};
+    R : R {nm="NIA"; d=0x00000001c;};
+    R : R {nm="XER"; d=0x00000000;};
+    // CA:0 OV:0 SO:0 
+    R : R {nm="GPR0"; d=0x00000000;};
+    R : R {nm="GPR1"; d=0x00000005;};
+    R : R {nm="GPR2"; d=0x00000002;};
+    R : R {nm="GPR3"; d=0x00000000;};
+    R : R {nm="GPR4"; d=0x00000000;};
+    R : R {nm="GPR5"; d=0x00000000;};
+    R : R {nm="GPR6"; d=0x00000000;};
+    R : R {nm="GPR7"; d=0x00000000;};
+    R : R {nm="GPR8"; d=0x00000000;};
+    R : R {nm="GPR9"; d=0x00000000;};
+    R : R {nm="GPR10"; d=0x00000000;};
+    R : R {nm="GPR11"; d=0x00000000;};
+    R : R {nm="GPR12"; d=0x00000000;};
+    R : R {nm="GPR13"; d=0x00000000;};
+    R : R {nm="GPR14"; d=0x00000000;};
+    R : R {nm="GPR15"; d=0x00000000;};
+    R : R {nm="GPR16"; d=0x00000000;};
+    R : R {nm="GPR17"; d=0x00000000;};
+    R : R {nm="GPR18"; d=0x00000000;};
+    R : R {nm="GPR19"; d=0x00000000;};
+    R : R {nm="GPR20"; d=0x00000000;};
+    R : R {nm="GPR21"; d=0x00000000;};
+    R : R {nm="GPR22"; d=0x00000000;};
+    R : R {nm="GPR23"; d=0x00000000;};
+    R : R {nm="GPR24"; d=0x00000000;};
+    R : R {nm="GPR25"; d=0x00000000;};
+    R : R {nm="GPR26"; d=0x00000000;};
+    R : R {nm="GPR27"; d=0x00000000;};
+    R : R {nm="GPR28"; d=0x00000000;};
+    R : R {nm="GPR29"; d=0x00000000;};
+    R : R {nm="GPR30"; d=0x00000000;};
+    R : R {nm="GPR31"; d=0x00000000;};
+  } // P
+} 

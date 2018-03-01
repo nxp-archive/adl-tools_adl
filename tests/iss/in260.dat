@@ -1,0 +1,83 @@
+#
+# This tests to make sure that the temporal-decoupling threshold is obeyed
+# by the JIT and decode-cache models when we're executing cold blocks.
+# The td counter will be set to 1 so that there's perfect interleaving of
+# small cold blocks.
+#
+= asm
+
+	# Start of first processor's code.
+	addi r1,r1,10
+	stw r1,0x1000(r0)
+	b L1
+	.long 0x0
+L1:
+	lwz r2,0x1004(r0)
+	addi r2,r2,20
+  stw r2,0x1008(r0)
+	b L2
+	.long 0x0
+L2:
+	lwz r3,0x100c(r0)
+	.long 0x0
+	.long 0x0
+	# Start of second processor's code.
+	lwz r1,0x1000(r0)
+	addi r1,r1,30
+	stw r1,0x1004(r0)
+	b L3
+	.long 0x0
+L3:
+	lwz r2,0x1008(r0)
+	addi r2,r2,50
+	stw r2,0x100c(r0)
+	.long 0x0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x90201000	#	stw r1,0x1000(r0)
+MD n=Mem ra=0x00000008 d=0x48000008	#	b L1
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x80401004	#	lwz r2,0x1004(r0)
+MD n=Mem ra=0x00000014 d=0x38420014	#	addi r2,r2,20
+MD n=Mem ra=0x00000018 d=0x90401008	#	stw r2,0x1008(r0)
+MD n=Mem ra=0x0000001c d=0x48000008	#	b L2
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x8060100C	#	lwz r3,0x100c(r0)
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000002c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000030 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000034 d=0x3821001E	#	addi r1,r1,30
+MD n=Mem ra=0x00000038 d=0x90201004	#	stw r1,0x1004(r0)
+MD n=Mem ra=0x0000003c d=0x48000008	#	b L3
+MD n=Mem ra=0x00000040 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000044 d=0x80401008	#	lwz r2,0x1008(r0)
+MD n=Mem ra=0x00000048 d=0x38420032	#	addi r2,r2,50
+MD n=Mem ra=0x0000004c d=0x9040100C	#	stw r2,0x100c(r0)
+MD n=Mem ra=0x00000050 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:procs:P0
+
+RD n=NIA d=0x0
+
+CORE n=:procs:P1
+
+RD n=NIA d=0x30
+
+RESULTS
+
+CORE n=:procs:P0
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=60
+RD n=GPR i=3 d=110
+
+CORE n=:procs:P1
+
+RD n=GPR i=1 d=40
+RD n=GPR i=2 d=110
+
+

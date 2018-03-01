@@ -1,0 +1,3 @@
+reg30.adl:14: Overlapping bit ranges for register field.
+reg30.adl:22: Index greater than width of register.
+reg30.adl:30: Indexed-field width is not an integer-divisor of the register width.

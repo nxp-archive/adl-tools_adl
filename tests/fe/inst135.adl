@@ -1,0 +1,62 @@
+//
+// Simple test of reserved_bits_value.
+//
+
+define (arch=minippc) {
+
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  reserved_bits_value = 1;
+
+  define (instr=add1) {
+    attrs=(fxu,base);
+    fields=(OPCD(40),RT,RA,SI);
+    action={
+    };
+  }
+
+  define (instr=add2) {
+    attrs=(fxu,base);
+    fields=(OPCD(41),RT,RA,SI);
+    reserved_bits_value = 0;
+    action={
+    };
+  }
+
+  define (instr=add3) {
+    attrs=(fxu,base);
+    fields=(OPCD(42),RT,RA,SI);
+    reserved_bits_value = 1;
+    action={
+    };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

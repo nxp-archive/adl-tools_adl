@@ -1,0 +1,80 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written, slice-read, slice-written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  SE_OPCD8: [0,7] 
+        Primary opcode, 8-bit width, for 16-bit instructions.
+    
+  SE_RX: [12,15] 
+        Field used to specify a General Purpose Register in the ranges R0:R7 or
+    R24:31 to be used as a source or as a destination.
+    
+  SE_RY: [8,11] 
+        Field used to specify a General Purpose Register in the ranges R0:R7 or
+    R24:31 to be used as a source.
+    
+Instructions:
+  Name:  foo (rank: 100)
+  Width:  16
+  Fields:  SE_OPCD8(67) SE_RY SE_RX
+  Action:  {
+     uint32_t sh = GPR ( SE_RY ) . uint32 (  ) ;
+    if ( sh > 31 ) {
+        GPR ( SE_RX ) = 0 ;
+    } else {
+        GPR ( SE_RX ) = sh ;
+    }
+    if ( SE_RY > 0 ) {
+        foobar ( GPR ( SE_RX ) ) ;
+    }
+}
+  Source Registers:  GPR(SE_RY) 
+  Target Registers:  GPR(SE_RX) 
+  Helper Functions:  foobar 
+  -------------------------------
+  Name:  se_slw (rank: 100)
+  Width:  16
+  Fields:  SE_OPCD8(66) SE_RY SE_RX
+  Action:  {
+     uint32_t sh = GPR ( SE_RY ) ( 58 , 63 ) . uint32 (  ) ;
+    if ( sh > 31 ) {
+        GPR ( SE_RX ) ( 32 , 63 ) = 0 ;
+    } else {
+        GPR ( SE_RX ) ( 32 , 63 ) = GPR ( SE_RX ) << sh ;
+    }
+}
+  Source Registers:  GPR(SE_RX)? GPR(SE_RY)[mask 0x0000003f]/p 
+  Target Registers:  GPR(SE_RX) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff000000
+    66(42000000):  se_slw
+    67(43000000):  foo
+
+Helper Functions:
+  foobar:
+ void foobar (  ) {
+}
+-------------------------------
+

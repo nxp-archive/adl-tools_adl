@@ -1,0 +1,8 @@
+hello, world!
+Read 12 bytes:  Hello there!
+Read 10 bytes:  Some inpute!
+Read 18 bytes:  Last input line...
+All done!
+Simulation halted at address: 0x0000000010000300
+
+Instructions executed: 9471

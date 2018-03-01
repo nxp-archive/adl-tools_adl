@@ -1,0 +1,286 @@
+//
+// Test expression handling involving logicals.  This makes sure that an alias
+// which uses a pc-relative field has correct inputs and outputs.
+//
+define (arch = Foo) {
+
+  bit_endianness = little;
+  parallel_execution = 3;
+  blk = (ipu, dalu, lsu);
+  attrs = (type1,type2,prefix,first,second);  
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 32;  prefix = r; };
+  // SR (T,...);
+  define (reg = SR) { 
+    define (field = T1) { bits = 0; """ SR.T1 field"""; }; define (field = T6) { bits = 1;}; width = 32; 
+  };
+  define (reg =LC) {width =32;};
+
+  define (reg=SP)
+    {
+      """
+	Stack Pointer
+	""";
+      attrs = (doc_hidden);
+      define (read) {
+        action =
+          {
+            if (SR.T1==0) { return GPR(0); }
+            else if (SR.T1==1) { return GPR(1); }
+          };
+      }
+    }
+
+
+  // -------- INSTRFIELDS ----------
+ 
+  define (instrfield = RelAdd) {
+    width = 4;
+    pseudo = true;
+    is_signed = true;
+    addr=pc;
+    shift=1;    
+  }
+
+  define (instrfield=n)  
+    {
+      width  = 2;
+      pseudo = true;
+      enumerated = ("0", "1", "2", "3");
+    }
+
+  define (instrfield=flag)  
+    {
+      width  = 1;
+      pseudo = true;
+      enumerated = (("","-aab"), "-aad");
+    }
+  define (instrfield=flag2)  
+    {
+      width  = 1;
+      pseudo = true;
+      enumerated = (("","-b"), "-d");
+    }
+  define (instrfield=Src1)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Src2)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Res1)
+    {
+      width = 5;
+      pseudo = true;
+    }
+
+  define (instrfield=NonScale)
+    {
+      width = 2;
+      parm = true;
+    }
+
+  define (instrfield=OP1)
+    {
+      width = 2;
+      pseudo = true;
+      // ref = GPR;
+    }
+
+  define (instrfield=OP2)
+    {
+      width = 2;
+      pseudo = true;
+      // ref = GPR;
+    }
+
+  define (instrfield=Rk)
+    {
+      width = 4;
+      ref = GPR;
+      pseudo = true;
+      enumerated = ("r0::r7","r1::r8","r2::r10","r3::r11","r4::r12","r5::r13","r6::r14","r7::r15");
+    }
+
+
+
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RA_tmp)  { width = 5; pseudo = true; ref=GPR;}	
+  define (instrfield = RA2_tmp)  { width = 5; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RT)  { width = 2; pseudo = true; ref=GPR;}
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; reserved = true; } // Serial Grouping
+  define (instrfield = CE)  { width = 4; pseudo = true; assembler = true; value = 0; } // conditional execution
+  define (instrfield = CE1) { width = 2; pseudo = true; assembler = true; value = 0;} // conditional execution
+  define (instrfield = IMM) { width = 3; pseudo = true; is_signed=true;}
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+  define (instrfield = Enc1)   { width = 16;  pseudo = true; }
+  define (instrfield = Enc2)   { width = 32;  pseudo = true; }
+
+  //define (instrfield = Conditional) { pseudo = true; assembler = true; width = variable; }
+  define (instrfield = CondExec) { pseudo = true; prefix = true; indexed = 2; value = 0; }
+  define (instrfield = CondEx)   { pseudo = true; prefix = true; indexed = 2; value = 0; type=CondExec;}
+
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  = 0; };
+  define (instrfield = IFT)       { indexed = 2; prefix = true; pseudo = true; value  = 0; type=CondExec; };
+
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = LPREFIX) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),IFT(0)),
+              (bits(7),IFT(1)),
+              (bits(8),IFT(2)),
+              (bits(9),IFT(3)),
+              (bits(10),IFT(4)),
+              (bits(11),IFT(5)),
+              (bits(12),0),
+              (bits(13),0),
+              (bits(14),0),
+              (bits(15),0));
+    prefix = true;
+    syntax = ("LPREFIX,  IFT => %f",IFT);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr = OneWord) 
+    {
+      fields = ((bits(15,0), Enc1),
+                (bits(17,16),CondExec));
+      pseudo = true;
+    }
+  define(instr = TwoWord) 
+    {
+      fields = ((bits(31,0), Enc2),
+                (bits(33,32),CondExec));
+      pseudo = true;
+    }
+
+  define (instr=foo_family)
+    {
+      fields = (OPCD,flag,Src1,Res1,CE);
+      blk = dalu;
+
+      define(instr=foo1) {
+        attrs = (type1,first);
+        type = OneWord;
+        fields = (
+                  (bits(0),RelAdd(0)),
+                  (bits(1),RelAdd(1)),
+                  (bits(2),RelAdd(2)),
+                  (bits(3),RelAdd(3)),
+                  (bits(4),CE(0)),
+                  (bits(5),CE(1)),
+                  (bits(6),Rk(0)),		
+                  (bits(7),Rk(1)),		
+                  (bits(8),Rk(2)),		
+                  (bits(9),0),
+                  (bits(10),0),
+                  (bits(11),1),
+                  (bits(12),Rk(3)),
+                  (bits(13),1),
+                  (bits(14),1),
+                  (bits(15),SG),
+                  (bits(16),CE(2)),
+                  (bits(17),CE(3))
+                  );
+        syntax = ("%i %f %f",Rk,RelAdd);
+        alias = foo_family(OPCD(OPCD),flag(2),Src1(RelAdd),Res1(Rk),CE(CE));
+      }
+
+      define(instr=foo2) {
+        attrs = (type1,first);
+        type = OneWord;
+        fields = (
+                  (bits(0),RelAdd(0)),
+                  (bits(1),RelAdd(1)),
+                  (bits(2),RelAdd(2)),
+                  (bits(3),RelAdd(3)),
+                  (bits(4),CE(0)),
+                  (bits(5),CE(1)),
+                  (bits(6),Rk(0)),		
+                  (bits(7),Rk(1)),		
+                  (bits(8),Rk(2)),		
+                  (bits(9),0),
+                  (bits(10),0),
+                  (bits(11),1),
+                  (bits(12),Rk(3)),
+                  (bits(13),1),
+                  (bits(14),0),
+                  (bits(15),SG),
+                  (bits(16),CE(2)),
+                  (bits(17),CE(3))
+                  );
+        syntax = ("%i %f %f",Rk,RelAdd);
+        alias = foo_family(OPCD(OPCD),flag(0),Src1(RelAdd),Res1(Rk),CE(CE));
+      }
+
+
+      action = {
+        if (flag == 0) {
+          GPR(Res1) = Mem(Src1,4);
+        } else{
+          GPR(Res1) = 0;
+        }
+      };
+    
+    }
+
+  unsigned calc_instr_size(uint32_t pc) {
+
+    bits<16> a = Mem(pc,2);
+    bits<16> b = Mem(pc+2,2);
+    if (a(15)==1) {
+      return 1;
+    } else if (b(15)==1) {
+      return 2;
+    } 
+  }
+
+  bits<32> add_func(bits<3> src, bits<2> option)
+  {
+    bits<1> op = find_option(option);
+    bits<32> tmp = 0;
+    if (option==0 || option==1) {
+      tmp = (GPR(src)+GPR(0));
+    } else if (option==2 || option==3) {
+      tmp = (GPR(src)+GPR(2));
+    }
+    return (tmp);
+  }
+
+
+  bits<1> find_option(bits<1> opt) {
+    switch (opt.uint32()) {
+    case 0: return SR.T1; break;
+    case 2: return SR.T6; break;
+    default : break;
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = Foo;
+  instrtables = (prefix,type1,type2);
+}

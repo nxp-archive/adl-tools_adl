@@ -1,0 +1,16 @@
+#
+# This is just used to test basic DAT and ELF loading when used with
+# a bare-bones ISS.
+#
+
+CORE n=:P
+RD n=GPR i=30 d=1000
+RD n=GPR i=31 d=2000
+
+RESULTS
+
+MD n=Mem ra=0x1004 d=0x00000015
+MD n=Mem ra=0x2000 d=0xdeadbeef
+
+RD n=GPR i=30 d=1000
+RD n=GPR i=31 d=2000

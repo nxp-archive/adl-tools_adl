@@ -1,0 +1,4 @@
+attr2.adl:21: Expected an unsigned integer value for parameter.
+attr2.adl:33: Expected an identifier or string for parameter.
+attr2.adl:38: Bad type for attribute str1:  Found 'integer attribute type' and expected 'string attribute type'.
+attr2.adl:43: Bad type for attribute intlist:  Found 'string-list attribute type' and expected 'integer-list attribute type'.

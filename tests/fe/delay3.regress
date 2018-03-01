@@ -1,0 +1,63 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "FOO"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Delayed Write Targets:  FOO 
+Instruction Fields:
+  OPCD: [not used]  
+    Pseudo:  1
+    Width:   8
+    Primary opcode.
+    
+  VarInstrOpcode_imp_bits__0_7_: [0,7] 
+  X: 
+    Pseudo:  1
+    Width:   8
+  X_imp_bits__8_15_: [8,15] 
+    Implements:  X
+  Y: 
+    Pseudo:  1
+    Width:   16
+  Y_imp_bits__16_31_: [16,31] 
+    Implements:  Y
+Instructions:
+  Name:  A (rank: 100)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__0_7_ X_imp_bits__8_15_ Y_imp_bits__16_31_
+  Action:  {
+    delayed_write ( FOO , 4 ) = X ;
+}
+  Target Registers:  FOO/d[4] 
+  -------------------------------
+  Name:  B (rank: 100)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__0_7_ X_imp_bits__8_15_ Y_imp_bits__16_31_
+  Action:  {
+    delayed_write ( FOO , 5 ) = X ;
+}
+  Target Registers:  FOO/d[5] 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff000000
+    28(1c000000):  B
+    30(1e000000):  A
+-------------------------------
+

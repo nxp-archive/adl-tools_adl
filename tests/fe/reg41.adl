@@ -1,0 +1,306 @@
+
+// Various helper routines.
+
+define (arch = minippc) {
+
+  void setCrField(bits<32> field,bits<32> x,bits<32> y)
+    {
+      bits<4> r = 
+        ( (x.signedLT(y)) ? 0x8 : 0) |
+        ( (x.signedGT(y)) ? 0x4 : 0) |
+        ( (x == y)        ? 0x2 : 0) ;
+      
+      CR.set(4*field,4*field+3,r);
+    }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=EE) {
+      bits = 9;
+    }
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR5) {
+    """
+    Interrupt-vector offset register 5.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=SPRG0) { }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (reg=A) {}
+  define (reg=B) {}
+  define (reg=C) {}
+
+  define (regfile=SPR) {
+    size=1024;
+    define (entry=9) { reg=CTR; }
+    define (entry=62) { reg=ESR; }
+    define (entry=26) { reg=SRR0; }
+    define (entry=27) { reg=SRR1; }
+    define (entry=20) { reg=A; }
+    define (entry=21) { reg=B; }
+    define (entry=22) { reg=C; }
+    define (entry=23) { reg=GPR(0); }
+  }
+
+  defmod (regfile=SPR) {
+    defmod (entry=(20,21,22,23)) {
+      define (write) {
+        action = func(bits<32> v) {
+          if (MSR.PR == 1) {
+            raiseException(Program);
+          }
+          ThisReg = v;
+        };
+      }
+    };
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=D) {
+    """
+    Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=UI) {
+    """
+    Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    priority = 1;
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR.get<16>(0,15),IVOR6.get<16>(16,31));
+    };
+  }
+
+  //
+  // External interrupt.
+  //
+  define (exception=External) {
+    sensitivity = level;
+    enable = { return MSR.EE == 1; };
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR.get<16>(0,15),IVOR5.get<16>(16,31));      
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

@@ -1,0 +1,31 @@
+#
+# Creates a loop due to a protection fault.  Run with --mic=10 to get this to
+# pass.
+#
+= asm
+
+	addi r1,r1,1
+	lwz r1,0x1000(r0)
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x80201000	#	lwz r1,0x1000(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x0
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x0 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 SX=1 SR=0 SW=1 EPN=0x4
+
+RESULTS
+
+RD n=GPR i=1 d=4
+

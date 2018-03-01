@@ -1,0 +1,70 @@
+// Pass test
+// Instruction-type fields: opHw1, opHw2
+
+define (core = rubber) {
+  archs = rubber;
+  instrtables = (other, instr_micro);
+}
+
+define (arch = rubber) {
+ 
+  attrs = (instr_ctrl, instr_micro);
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+  
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  
+  define(instrfield=opHw1) {
+    display = hex;
+	pseudo = true;
+	width = 25;
+	type = instr;
+	ref = instr_micro;
+  }
+
+  define(instrfield=opHw2) {
+    display = hex;
+	pseudo = true;
+	width = 25;
+	type = instr;
+	ref = instr_micro;
+  }
+
+  
+  define (instr = done){ 
+    width = 64;
+    fields = ((bits(55,46),0), (bits(45,0),reserved));  
+    syntax = ("done");
+    attrs = (instr_ctrl);
+    action={ halt(); };
+  }  
+
+  define (instr = null){ 
+    width = 25;
+    fields = ((bits(24,17),b00111111), (bits(16,0),reserved));
+    syntax = ("null");
+    attrs = (instr_micro);
+    action={ };
+  }  
+
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = (".", "//", "#");
+    line_separators = (";");
+    asm_instrtables = (other);
+    disasm_instrtables = (other);
+  }
+ 
+ }
+
+
+

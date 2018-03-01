@@ -1,0 +1,105 @@
+#
+# Options:
+#   ./mod41 in107.dat -trace -max-instr-count=10 
+#
+
+TEST id=0
+INIT
+
+CORE n=:P
+
+RD n=GPR i=0 d=0x00000001
+RD n=GPR i=1 d=0x00000010
+RD n=GPR i=2 d=0x00000100
+RD n=GPR i=3 d=0x00001000
+RD n=GPR i=4 d=0x00010000
+RD n=GPR i=5 d=0x00100000
+RD n=GPR i=6 d=0x01000000
+RD n=GPR i=7 d=0x10000000
+RD n=GPR i=8 d=0x00000002
+RD n=GPR i=9 d=0x00000020
+RD n=GPR i=10 d=0x00000200
+RD n=GPR i=11 d=0x00002000
+RD n=GPR i=12 d=0x00020000
+RD n=GPR i=13 d=0x00200000
+RD n=GPR i=14 d=0x02000000
+RD n=GPR i=15 d=0x20000000
+MD n=Mem ra=0x0000000000000000 d=0xf230c400	#	(4063282176)
+MD n=Mem ra=0x0000000000000004 d=0xc41a0491	#	(3290039441)
+MD n=Mem ra=0x0000000000000008 d=0x0522c5b3	#	(86164915)
+
+CORE n=:P
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xf230c400
+INSTR op=0xf230					asm="Prefix 2,0x30"
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xf230c400
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xc41a0491
+INSTR op=0xc400c41a					asm=".long 0xc400c41a"
+A l=1 m="prefix not found - will try to find usual instruction"
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xf230c400
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xc41a0491
+INSTR op=0x0c400					asm="add 0,0,0"
+
+I ea=0x4 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xc41a0491
+INSTR op=0x3c41a					asm="add 8,9,10"
+A l=1 m="end of packet - prefix"
+R n=GPR i=0 d=0x00000002
+R n=GPR i=10 d=0x00000022
+
+I ea=0x6 id=4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xc41a0491
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x0522c5b3
+INSTR op=0x04910522					asm=".long 0x04910522"
+A l=1 m="prefix not found - will try to find usual instruction"
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xc41a0491
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x0522c5b3
+INSTR op=0x00491					asm="add 1,1,1"
+
+I ea=0x8 id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x0522c5b3
+INSTR op=0x00522					asm="add 2,2,2"
+
+I ea=0xa id=6
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x0522c5b3
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x0c5b3					asm="add 3,3,3"
+A l=1 m="end of packet - serial"
+R n=GPR i=1 d=0x00000020
+R n=GPR i=2 d=0x00000200
+R n=GPR i=3 d=0x00002000
+
+I ea=0xc id=7
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm=".long 0x00000000"
+A l=1 m="prefix not found - will try to find usual instruction"
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm=".long 0x00000000"
+A l=1 m="decode miss"
+
+RESULTS
+RD n=GPR i=0 d=0x00000002
+RD n=GPR i=1 d=0x00000020
+RD n=GPR i=2 d=0x00000200
+RD n=GPR i=3 d=0x00002000
+RD n=GPR i=4 d=0x00010000
+RD n=GPR i=5 d=0x00100000
+RD n=GPR i=6 d=0x01000000
+RD n=GPR i=7 d=0x10000000
+RD n=GPR i=8 d=0x00000002
+RD n=GPR i=9 d=0x00000020
+RD n=GPR i=10 d=0x00000022
+RD n=GPR i=11 d=0x00002000
+RD n=GPR i=12 d=0x00020000
+RD n=GPR i=13 d=0x00200000
+RD n=GPR i=14 d=0x02000000
+RD n=GPR i=15 d=0x20000000
+MD n=Mem ra=0x0000000000000000 d=0xf230c400	#	(4063282176)
+MD n=Mem ra=0x0000000000000004 d=0xc41a0491	#	(3290039441)
+MD n=Mem ra=0x0000000000000008 d=0x0522c5b3	#	(86164915)

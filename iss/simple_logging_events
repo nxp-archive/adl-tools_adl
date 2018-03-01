@@ -1,0 +1,234 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+#
+# Simple template expander for basic logging: All events are immediately
+# broadcast to the handler of all registered clients.
+#
+
+use FindBin;
+use lib $FindBin::RealBin;
+
+use logging_events;
+use logging_events_utils;
+
+$fn = $ARGV[0];
+
+`rm -f $fn`;
+open $out,">$fn" or die "Could not open output file $fn";
+
+sub printClass {
+	my ($cname,$mt) = @_;
+
+	printClassHeader($out,$cname);
+
+	my $lock;
+	if ($mt) {
+		print $out "    boost::mutex _log_mutex;\n";
+		$lock = "boost::lock_guard<boost::mutex> lock(_log_mutex);\n";
+	}
+
+
+	print $out <<FOO2;
+
+    // Dummy function for compatibility with the transactional-ISS logging features.
+    // Direct logging is always on.
+    bool log_direct(bool d)
+    {
+      return true;
+    }
+
+    LogType log_get_pending_queue()
+    {
+      return 0;
+    }
+
+    void log_append_pending_queue(LogType p)
+    {
+    }
+
+    void log_clear_instr_reads()
+    {
+    }
+
+    // Dummy function for flushing.
+    void log_flush_pending()
+    {
+    }
+
+    void log_discard(InstrPacketBase *)
+    {
+    }
+
+    // Dummuy function for committing.
+    void log_commit(InstrPacketBase *)
+    {
+    }
+
+FOO2
+
+for (keys (%Events)) {
+  my $event = $_;
+  my $parms = $Events{$event};
+  my $handler = getHandlerName($event);
+
+  my $parmlist = parmList($parms);
+  my $arglist  = argList($parms);
+
+  print $out <<END;
+
+    void $event($parmlist)
+    {
+  		$lock
+      ForEach(_clients,i) {
+        i->second->$handler($arglist);
+      }
+    }
+END
+
+}
+
+	print $out "  };\n\n";
+
+}
+
+
+sub printMtClass {
+	my ($cname) = @_;
+
+	# Now print the class which creates the objects and enqueues them.
+  print $out <<FOO3;
+
+# ifndef _MSC_VER
+
+  struct LoggingMtObj : public ThreadedLogger {
+
+FOO3
+
+
+	# First, print out the helper classes which store the logging parameters.
+	for (keys (%Events)) {
+		my $event = $_;
+		my $parms = $Events{$event};
+		my $handler = getHandlerName($event);
+		my $obj = $handler."MtObj";
+
+		my $parmlist  = parmList($parms);
+
+		my $arglist   = argList($parms);
+		my $mbrlist    = argList($parms,"_",1);
+  
+		my $initlist  = initList($parms);
+		if ($initlist) {
+			$initlist = " :\n$initlist";
+		}
+
+		my $memberlist = memberList($parms);
+		my $constr     = constr($parms);
+		my $destr      = destr($parms);
+		print $out <<END1A;
+
+  struct $obj : public MtLogBase {
+    $obj($parmlist)
+       $initlist {$constr};
+END1A
+
+ if ($destr) { 
+ 
+   print $out <<END1B;      
+    ~$obj() { $destr ;};
+
+END1B
+ }
+   
+		print $out <<END1C;     
+
+    void doLog(LoggingIface *iface) {
+			iface->$handler($mbrlist);
+    };
+
+    $memberlist
+  };
+
+  void $event($parmlist)
+  {
+    MtLogBase *obj = new $obj($arglist);
+		while (!_tqueue.push(obj));
+  }
+
+END1C
+  }
+
+  print $out <<END1D;
+
+  struct logCommitMtObj : public MtLogBase {
+    logCommitMtObj() : _ts(get_nstime()) {};
+
+		uint64_t get_time_stamp() { return _ts; };
+
+		// Uncomment for debug (uncomment DatWriterLogger::logCommit and ThreadedLogger as well).
+		//void doLog(LoggingIface *iface) {
+		//  iface->logCommit(_ts);
+		//}
+
+    uint64_t _ts;
+  };
+
+  // Record timestamp for ordering purposes.
+  void log_commit (PacketLogBase *)
+  {
+		MtLogBase *obj = new logCommitMtObj;
+		while (!_tqueue.push(obj));
+	}
+
+END1D
+
+	print $out <<END1E
+
+  };
+
+# endif // _MSC_VER
+
+END1E
+}
+
+sub printFooter {
+
+	print $out <<FOOTER;
+
+  LoggingObjBase *createLoggingObj(IssCore &core,bool use_mt)
+  {
+#   ifdef _MSC_VER
+    return static_cast<LoggingObjBase*>(new LoggingObj);
+#   else
+    return (use_mt) ? static_cast<LoggingObjBase*>(new LoggingMtObj) : static_cast<LoggingObjBase*>(new LoggingObj);
+#   endif
+  }
+
+}
+
+
+FOOTER
+
+}
+
+printHeader($out);
+printStdCode($out);
+
+# We're just going to print out the non-locking version for now, as each thread
+# should be the only writer to the logger, at this time.
+printClass("LoggingObj");
+
+# This is the multi-threaded version.  Objects are queued up and processed by a
+# background thread.
+printMtClass();
+
+printFooter($out);
+
+`chmod -w $fn`;

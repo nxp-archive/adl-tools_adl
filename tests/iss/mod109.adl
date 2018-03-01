@@ -1,0 +1,80 @@
+//
+// Example of using a complex alias, with pseudo fields, to create an
+// instruction, where the pseudo fields are used to modify the addend of a
+// relocation, if it exists, in the final instruction.
+//
+define (arch=TASM) {
+
+  attrs = (nia,cia);
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define(instrfield=trace)  
+    {
+      size = 1;
+      pseudo = true;
+      enumerated = (("",".notrace"), ".trace");
+    }
+
+  define(instrfield=coherent) 
+    {
+      size = 1;
+      pseudo = true;       
+      enumerated = (("",".nocoherent"), ".coherent");
+    }
+
+  define(instrfield=addr) 
+    {
+      bits = (0,23);       
+    }
+
+  define(instrfield=addr_p) 
+    {
+      pseudo = true;
+      width = 24;
+    }
+
+  define (reloc=R_ADDR24) {
+    // PDMA relocation
+    abbrev = "a";
+    value=1;
+    pcrel=false;
+    instrfield = addr;
+  }
+
+  define(instrfield=opcd) 
+    {
+      bits = (24,31);       
+    }
+
+  define(instr=pdma)
+    {                                  
+      // pdma [.trace] [.coherent] address
+      fields = (opcd(0x6),addr);   // Its assembler syntax is 
+      syntax = ("%i %f",addr);
+      assemble = false;
+      action = {};
+    }
+ 
+  define(instr=pdma_)
+    {                                  
+      // pdma [.trace] [.coherent] address
+      syntax = ("pdma%p%p %f",trace,coherent,addr_p);
+      alias_action = func(const InstrArgs &args) {
+        InstrBundle b;
+        var a = args[2];
+        if (a.has_reloc()) {
+          a.set_value(args[0].value() + args[1].value()*2);
+        }
+        b.push_back(createInstr("pdma",a));
+        return b;    
+      };
+    }
+
+}
+
+define (core=TASM) {
+  archs = TASM;
+}

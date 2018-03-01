@@ -1,0 +1,3 @@
+share2.adl:25: Pseudo/aliased registers may not be marked as shared.
+share2.adl:43: Unknown shared register HID1
+share2.adl:43: Unknown shared parameter Mode

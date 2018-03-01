@@ -1,0 +1,84 @@
+reg7.adl:72: warning: Item '20' was redefined.
+reg7.adl:25: warning:     Previous definition was here.
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "gprs"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "sprs"
+  Size:  1024
+  Contained registers:
+    20:  b
+    21:  gprs(2)
+    22:  gprs(3)
+    23:  
+      Read hook:  func (  ) {
+    a = a - 1 ;
+    return a ;
+}
+        Source Registers:  a 
+        Target Registers:  a 
+
+      Write hook:  func ( bits < 32 >  ) {
+    b = b + 1 ;
+}
+        Source Registers:  b 
+        Target Registers:  b 
+
+  Invalid-Entry-Read Handler:  func ( unsigned index ) {
+     int i = 20 ;
+    raiseException ( Program ) ;
+}
+    Does raise exceptions.
+  Invalid-Entry-Write Handler:  func ( unsigned index , bits < 32 > value ) {
+     int i = 10 ;
+    raiseException ( Program ) ;
+}
+    Does raise exceptions.
+  Width:  32
+  -------------------------------
+Exceptions:
+  Name:  Program
+  Action:  {
+    pc = 0x1000 ;
+}
+  -------------------------------
+Registers:
+  Name:  "a"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "b"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+
+Global sparse register-file invalid-entry-read:  func ( unsigned id , unsigned index ) {
+     int i = 20 ;
+    raiseException ( Program ) ;
+}
+  Does raise exceptions.
+
+Global sparse register-file invalid-entry-write:  func ( unsigned id , unsigned index , bits < 32 > value ) {
+     int i = 10 ;
+    raiseException ( Program ) ;
+}
+  Does raise exceptions.
+-------------------------------
+

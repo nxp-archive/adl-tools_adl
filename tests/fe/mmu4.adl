@@ -1,0 +1,90 @@
+//
+// Makes sure that if we don't have priorities on our MMU lookup
+// objects then we have a multi-hit handler.
+//
+define (arch=foo) {
+
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      test = AddrComp(EPN);
+      size = 4096;
+      realpage = RPN;
+    }
+
+    define(lookup=Tlb4k) {
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      test = AddrComp(EPN);
+      size = 4096;
+      realpage = RPN;
+
+      define (lookup=A) {
+        priority = 0;
+        define (wayfield=RPN) {
+          bits = 24;
+        }
+        define (wayfield=EPN) {
+          bits = 24;
+        }
+
+        define (array) {
+          entries = 16;
+        }
+      
+        test = AddrComp(EPN);
+        size = 4096;
+        realpage = RPN;
+      }
+
+      define (lookup=B) {
+        priority = 1;
+
+        define (wayfield=RPN) {
+          bits = 24;
+        }
+        define (wayfield=EPN) {
+          bits = 24;
+        }
+
+        define (array) {
+          entries = 16;
+        }
+      
+        test = AddrComp(EPN);
+        size = 4096;
+        realpage = RPN;
+      }
+    }
+
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=foo;
+}

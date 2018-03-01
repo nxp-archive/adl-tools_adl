@@ -1,0 +1,233 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests some corner cases for usage-info display in the database.  This tests
+// to make sure that partial-writes are not obscured by write-hooks.
+//
+
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  bit_endianness = little;  
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (reg=SR) {
+
+    define (write) {
+      action = func (bits<32> x) {
+        // This shouldn't interfere with the database generation for partial
+        // writes.
+        ThisReg = (x & 0xff000000);
+      };
+    }      
+
+    define (field = C)
+      {
+        bits=0;
+      }
+    define (field = (T,P0))
+      {
+        bits=1;
+      }
+    define (field = SM)
+      {
+        bits=2;
+      }
+    define (field = RM)
+      {
+        bits=3;
+      }
+    define (field = SCM)
+      {
+        bits=(8,5,4);
+      }
+    define (field = S)
+      {
+        bits=6;
+      }
+    define (field = SM2)
+      {
+        bits=7;
+      }
+    define (field = OVF)
+      {
+        bits=10;
+      }
+    define (field = SAT)
+      {
+        bits=11;
+      }
+
+    define (field = W20)
+      {
+        bits=12;
+      }
+    define (field = RF)
+      {
+        bits=13;
+      }
+    define (field = P5)
+      {
+        bits=27;
+      }
+    define (field = P4)
+      {
+        bits=28;
+      }
+    define (field = P3)
+      {
+        bits=29;
+      }
+    define (field = P2)
+      {
+        bits=30;
+      }
+    define (field = P1)
+      {
+        bits=31;
+      }
+    define (field =LF)
+      {
+        bits = (30,27);
+      }
+  }
+
+  define (reg=XR) {
+
+    define (write) {
+      // Since we're using the slice notation, the slices of ThisReg should not
+      // show up in the usage data, since it would be redundant and obscure
+      // what's really happening.
+      action = func (bits<32> x,unsigned start,unsigned stop) {        
+        ThisReg(start,stop) = x(start,stop) | ThisReg(start,stop);
+      };
+    }      
+
+    define (field = A) {
+      bits=0;
+    }
+    define (field = B) {
+      bits=(10,1);
+    }
+    define (field = C) {
+      bits=(23,11);
+    }
+
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=Src1) { pseudo = true; width = 5; };
+  define (instrfield=Src2) { pseudo = true; width = 5; };
+  define (instrfield=Trg)  { pseudo = true; width = 5; };
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (5,0);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (30,21);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (15,11);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (20,16);
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    """;
+    bits = (10,6);
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register (GPR_) as a target.
+    """;
+    bits = (10,6);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add_family) {
+    fields=(Src1,Src2,Trg);
+    action={
+      SR.OVF = 1;
+      SR.SAT = 1;
+    };
+
+    define (instr=add1) {
+      fields=(OPCD(31),RT,RA,RB,XO(266));
+      width = 32;
+      alias = add_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+  }
+
+  define (instr=sub_family) {
+    fields=(Src1,Src2,Trg);
+    action={
+      XR.A = 1;
+      XR.B = XR.C + 2;
+    };
+
+    define (instr=sub1) {
+      fields=(OPCD(32),RT,RA,RB,XO(266));
+      width = 32;
+      alias = sub_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+  }
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

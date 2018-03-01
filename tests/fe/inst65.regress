@@ -1,0 +1,109 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,3] [8,11] [16,19] [24,27] 
+  OPCDB: [0,7] [24,43] [60,63] 
+  OPCDL: [0,3] [16,19] 
+  OPCDR: [8,11] [24,27] 
+Instructions:
+  Name:  I1 (rank: 100)
+  Width:  32
+  Fields:  OPCD(45055)
+  Action:  {
+}
+  -------------------------------
+  Name:  I2 (rank: 100)
+  Width:  32
+  Fields:  OPCD(64255)
+  Action:  {
+}
+  -------------------------------
+  Name:  I3 (rank: 100)
+  Width:  32
+  Fields:  OPCD(65455)
+  Action:  {
+}
+  -------------------------------
+  Name:  I4 (rank: 100)
+  Width:  32
+  Fields:  OPCD(65530)
+  Action:  {
+}
+  -------------------------------
+  Name:  II1 (rank: 100)
+  Width:  32
+  Fields:  OPCDL(255) OPCDR(170)
+  Action:  {
+}
+  -------------------------------
+  Name:  II2 (rank: 100)
+  Width:  32
+  Fields:  OPCDL(170) OPCDR(255)
+  Action:  {
+}
+  -------------------------------
+  Name:  III1 (rank: 100)
+  Width:  64
+  Fields:  OPCDB(2864430012)
+  Action:  {
+}
+  -------------------------------
+  Name:  III2 (rank: 100)
+  Width:  64
+  Fields:  OPCDB(2897984444)
+  Action:  {
+}
+  -------------------------------
+  Name:  III3 (rank: 100)
+  Width:  64
+  Fields:  OPCDB(2864434108)
+  Action:  {
+}
+  -------------------------------
+  Name:  III4 (rank: 100)
+  Width:  64
+  Fields:  OPCDB(2864430010)
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xf00000f000000000
+    167772171(a00000b000000000):      Mask:  0x0f00000f00000000
+      167772171(0a00000b00000000):        Mask:  0x00000000fff0000f
+        3148873738(00000000bbb0000a):  III4
+        3148873740(00000000bbb0000c):  III1
+        3417309196(00000000cbb0000c):  III3
+      201326603(0c00000b00000000):        Mask:  0x00000000fff0000f
+        3148873740(00000000bbb0000c):  III2
+    167772175(a00000f000000000):      Mask:  0x00f0f00000000000
+      3850(00f0a00000000000):  II2
+      3855(00f0f00000000000):  I1
+    251658250(f00000a000000000):      Mask:  0x00f0f00000000000
+      2575(00a0f00000000000):  II1
+      3855(00f0f00000000000):  I4
+    251658255(f00000f000000000):      Mask:  0x00f0f00000000000
+      2575(00a0f00000000000):  I2
+      3850(00f0a00000000000):  I3
+-------------------------------
+

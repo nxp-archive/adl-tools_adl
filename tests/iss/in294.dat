@@ -1,0 +1,11 @@
+#
+# This tests that our ELF reader can read a 1-byte section without a problem.
+#
+# The actual input is in294.elf (created from in294.s).
+#
+
+CORE n=:P
+
+RESULTS
+
+RD n=GPR i=3 d=0x20

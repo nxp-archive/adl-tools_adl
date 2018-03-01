@@ -1,0 +1,113 @@
+#
+# Test an external memory model which treats a certain portion of memory as
+# accumulators.
+#
+
+= asm
+
+	ori r1,r1,0xa000
+	li r2,10
+	stw r2,0x10(r1)
+	li r3,20
+	stw r3,0x10(r1)
+	lwz r3,0x10(r1)
+	stw r3,0x20(r1)
+	stw r3,0x20(r1)
+	stw r3,0x20(r1)
+	lwz r4,0x20(r1)
+	stw r4,0x3000(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x6021A000	#	ori r1,r1,0xa000
+MD n=Mem ra=0x00000004 d=0x3840000A	#	li r2,10
+MD n=Mem ra=0x00000008 d=0x90410010	#	stw r2,0x10(r1)
+MD n=Mem ra=0x0000000c d=0x38600014	#	li r3,20
+MD n=Mem ra=0x00000010 d=0x90610010	#	stw r3,0x10(r1)
+MD n=Mem ra=0x00000014 d=0x80610010	#	lwz r3,0x10(r1)
+MD n=Mem ra=0x00000018 d=0x90610020	#	stw r3,0x20(r1)
+MD n=Mem ra=0x0000001c d=0x90610020	#	stw r3,0x20(r1)
+MD n=Mem ra=0x00000020 d=0x90610020	#	stw r3,0x20(r1)
+MD n=Mem ra=0x00000024 d=0x80810020	#	lwz r4,0x20(r1)
+MD n=Mem ra=0x00000028 d=0x90803000	#	stw r4,0x3000(r0)
+# </GEN>
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x6021a000
+INSTR op=0x6021a000					asm="ori r1,r1,0xa000"
+R n=GPR i=1 d=0x0000a000
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3840000a
+INSTR op=0x3840000a					asm="li r2,10"
+R n=GPR i=2 d=0x0000000a
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x90410010
+INSTR op=0x90410010					asm="stw r2,16(r1)"
+D n=Mem t=write ea=0xa010 nb=4
+M n=Mem t=write ea=0xa010 ra=0xa010 d=0x0000000a
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38600014
+INSTR op=0x38600014					asm="li r3,20"
+R n=GPR i=3 d=0x00000014
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90610010
+INSTR op=0x90610010					asm="stw r3,16(r1)"
+D n=Mem t=write ea=0xa010 nb=4
+M n=Mem t=write ea=0xa010 ra=0xa010 d=0x0000001e
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x80610010
+INSTR op=0x80610010					asm="lwz r3,16(r1)"
+D n=Mem t=read ea=0xa010 nb=4
+M n=Mem t=read ea=0xa010 ra=0xa010 d=0x0000001e
+R n=GPR i=3 d=0x0000001e
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x90610020
+INSTR op=0x90610020					asm="stw r3,32(r1)"
+D n=Mem t=write ea=0xa020 nb=4
+M n=Mem t=write ea=0xa020 ra=0xa020 d=0x0000001e
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x90610020
+INSTR op=0x90610020					asm="stw r3,32(r1)"
+D n=Mem t=write ea=0xa020 nb=4
+M n=Mem t=write ea=0xa020 ra=0xa020 d=0x0000003c
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x90610020
+INSTR op=0x90610020					asm="stw r3,32(r1)"
+D n=Mem t=write ea=0xa020 nb=4
+M n=Mem t=write ea=0xa020 ra=0xa020 d=0x0000005a
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x80810020
+INSTR op=0x80810020					asm="lwz r4,32(r1)"
+D n=Mem t=read ea=0xa020 nb=4
+M n=Mem t=read ea=0xa020 ra=0xa020 d=0x0000005a
+R n=GPR i=4 d=0x0000005a
+
+I ea=0x28 id=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90803000
+INSTR op=0x90803000					asm="stw r4,12288(r0)"
+D n=Mem t=write ea=0x3000 nb=4
+M n=Mem t=write ea=0x3000 ra=0x3000 d=0x0000005a
+
+I ea=0x2c id=12
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+MD n=Mem ra=0x0000000000003000 d=0x0000005a     #       (90)
+MD n=Mem ra=0x000000000000a010 d=0x0000001e     #       (30)
+MD n=Mem ra=0x000000000000a020 d=0x0000005a     #       (90)

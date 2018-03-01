@@ -1,0 +1,22 @@
+#
+# <ASM>
+#
+#       addis 3,2,1
+#       addis 4,0,100
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3C620001	# addis 3,2,1
+MD n=Mem ra=0x00000004 d=0x3C800064	# addis 4,0,100
+MD n=Mem ra=0x00000008 d=0x00000000	# halt
+# </GEN>
+CORE n=:P
+RD n=GPR i=2 d=1000
+
+RESULTS
+
+RD n=CTR d=42
+RD n=GPR i=2 d=0x3e8
+RD n=GPR i=3 d=0x103e8
+RD n=GPR i=4 d=0x640000
+RD n=GPR i=20 d=40
+RD n=GPR i=21 d=21

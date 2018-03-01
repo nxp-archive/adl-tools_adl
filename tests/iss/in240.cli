@@ -1,0 +1,11 @@
+#
+# Tests the use of step with a path to control stepping of individual cores
+# (threads).
+# 
+step PMT:t0 2
+step PMT:t1 2
+step PMT:t0 1
+step PMT:t1 2
+step PMT:t0 1
+step 2
+quit

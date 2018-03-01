@@ -1,0 +1,204 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Contrived example to test aspects.
+//
+
+define (arch = MiniPPC) {
+
+  define (parm=Mode) {
+    options=(Mode32,Mode64);
+  }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      L1:
+      B1:
+      var si = signExtend(SI,32) << 16;
+      if (RA == 0) {
+        GPR(RT) = si;
+      } else {
+        B2:
+        GPR(RT) = GPR(RA) + si;
+      }
+      L2:;
+    };
+  }
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    width = 32;
+    // We're disabling the post-fetch logic to test this feature; we shouldn't
+    // see an NIA increment when halt is executed.
+    enable_post_fetch = func() { return (GPR(31) != 0); };
+    action = {
+      halt();
+    };
+  }
+
+}
+
+define (arch=P) {
+
+  define (aspect=I1) {
+    instr_pre_exec = true;
+    action = {
+      info (1,"Instruction pre-exec.");
+    };
+  }
+
+  define (aspect=I2) {
+    instr_post_exec = true;
+    action = {
+      info (1,"Instruction post-exec.");
+    };
+  }
+
+  define (aspect=A1) {
+    labels = B1;
+    action = {
+      // First B1 aspect.
+      CTR = CTR + 1;
+    };
+  }
+
+  defmod (parm=Mode) {
+    value = Mode32;
+  }
+
+  define (aspect=A2) {
+    labels = B1;
+    action = {
+      // Second B1 aspect.
+      if (Mode == Mode32) {
+        GPR(20) = GPR(20) + 20;
+      }
+    };
+  }
+
+  define (aspect=A3) {
+    labels = B2;
+    action = {
+      // B2 aspect.
+      GPR(21) = GPR(21) + 21;
+    };
+  }
+
+  defmod (instr=addis) {
+    define (aspect=A4) {
+      labels = (L1,L2);
+      exclusive = true;
+      action = {
+        // Instruction aspect.
+        CTR = CTR + 10;
+      };
+    }
+  }
+
+  // This shouldn't be expanded b/c the aspect in addis is exclusive.
+  define (aspect=A5) {
+    labels = (L1,L2);
+    action = {
+      STUFF = 20;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,P);
+}

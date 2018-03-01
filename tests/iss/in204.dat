@@ -1,0 +1,98 @@
+#
+# Test that post-packet-commit sees the proper updated value and that it only
+# sees it after the packet has been committed.  This test was assembled using as-mod61.
+#
+= asm
+
+	[ mv r1,1,r1 mv r2,0xf,r0 ]
+	[ mv r1,10,r1 mv r0,1,r0 ]
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x2003105B	#	[ mv r1,1,r1 mv r2,0xf,r0 ]
+MD n=Mem ra=0x00000004 d=0x06BB s=2
+MD n=Mem ra=0x00000006 d=0x2003146B	#	[ mv r1,10,r1 mv r0,1,r0 ]
+MD n=Mem ra=0x0000000a d=0x001B s=2
+# </GEN>
+
+RD n=GPR i=2 d=0xdeadbee0
+
+TRACE
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x2003105b
+INSTR op=0x2003					asm="LPREFIX, VlesSize = 2, HighReg = 0"
+R n=VSIZE d=0x00000003
+R n=VSIZE d=0x00000002
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x2003105b
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x06bb2003
+INSTR op=0x105b06bb00000000					asm=".long 0x105b06bb"
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x2003105b
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x06bb2003
+INSTR op=0x0416					asm="mv r1,1,r1"
+R n=DCNT d=0x00000000
+R n=VSIZE d=0x00000001
+
+I ea=0x4 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x06bb2003
+INSTR op=0x01ae					asm="mv r2,15,r0"
+R n=DCNT d=0xffffffff
+R n=VSIZE d=0x00000000
+R n=VSIZE d=0x00000001
+A l=1 m="------------------------- eop ----------------------"
+R n=DCNT d=0x00000001
+R n=GPR i=1 d=0x00000001
+R n=GPR i=0 d=0xdeadbeef
+A l=1 m="Got 0xdeadbeef for GPR0!!"
+
+I ea=0x6 id=4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x06bb2003
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x146b001b
+INSTR op=0x2003					asm="LPREFIX, VlesSize = 2, HighReg = 0"
+R n=VSIZE d=0x00000003
+R n=VSIZE d=0x00000002
+
+I ea=0x8 id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x146b001b
+INSTR op=0x146b001bc0000000					asm=".long 0x146b001b"
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x146b001b
+INSTR op=0x051a					asm="mv r1,10,r1"
+R n=DCNT d=0x00000000
+R n=VSIZE d=0x00000001
+
+I ea=0xa id=6
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x146b001b
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x0006					asm="mv r0,1,r0"
+R n=DCNT d=0xffffffff
+R n=VSIZE d=0x00000000
+R n=VSIZE d=0x00000001
+A l=1 m="------------------------- eop ----------------------"
+R n=DCNT d=0x00000001
+R n=GPR i=1 d=0x0000000b
+R n=GPR i=0 d=0xdeadbef0
+
+I ea=0xc id=7
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x0000000000000000					asm=".long 0x00000000"
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x0000					asm="halt"
+R n=VSIZE d=0x00000000
+R n=VSIZE d=0x00000001
+A l=1 m="------------------------- eop ----------------------"
+R n=DCNT d=0x00000001
+
+RESULTS
+
+RD n=GPR i=0 d=0xdeadbef0
+RD n=GPR i=1 d=0x0000000b
+RD n=GPR i=2 d=0xdeadbee0
+RD n=GPR i=3 d=0x00000000

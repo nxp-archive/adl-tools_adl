@@ -1,0 +1,17 @@
+//
+// Simple test of multiple instruction tables.
+//
+
+#import "p2.adl"
+
+defmod (core=P) {
+
+  attrs = mixed;
+
+  defmod (instr=(add,addic)) {
+    attrs = mixed;
+  }
+
+  instrtables=(mixed);
+  
+}

@@ -1,0 +1,27 @@
+#
+# Tests to make sure that we can set various temporal-decoupling parameters in the scripting
+# interface, as well as run a JIT MP simulation.
+#
+
+set mode [lindex $argv 0]
+switch $mode {
+		jit -
+		dc  { }
+		default {
+				puts {Bad mode argument specified.  Expected either "dc" or "jit".}
+				exit 1
+		}
+}
+
+simmode $mode
+# We don't want to trace anything.
+clrfilter 
+settd threshold 20
+settd count 10
+settd incr 2
+puts "Temporal-decoupling threshold:  [gettd threshold], counter:  [gettd count], increment:  [gettd incr]"
+settd count 0
+settd incr 1
+
+go
+quit

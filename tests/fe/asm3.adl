@@ -1,0 +1,25 @@
+// Assembler configuration test - bad line separator
+
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  
+
+  define (assembler) {
+    comments = ("//","#",";");
+    line_comments =  ("#rem","#");
+    line_separators = (";","\t\t");
+    instr_separators = (";","|");
+  }
+
+
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

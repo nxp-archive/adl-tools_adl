@@ -1,0 +1,51 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "a"
+  Write alias/hook:
+    func ( bits < 64 > x ) {
+    ThisReg = concat ( ThisReg . get < 32 > ( 0 , 31 ) , x . get < 32 > ( 32 , 63 ) ) ;
+}
+    Source Registers:  a 
+    Target Registers:  a 
+
+  Usage:  read, written
+  Width:  64
+  -------------------------------
+  Name:  "b"
+  Write alias/hook:
+    func ( bits < 64 > x ) {
+    ThisReg = concat ( ThisReg . get < 32 > ( 0 , 31 ) , x . get < 32 > ( 32 , 63 ) ) ;
+}
+    Source Registers:  b 
+    Target Registers:  b 
+
+  Usage:  read, written
+  Width:  64
+  -------------------------------
+  Name:  "c"
+  Write alias/hook:
+    func ( bits < 64 > x ) {
+    ThisReg = concat ( ThisReg . get < 32 > ( 0 , 31 ) , x . get < 32 > ( 32 , 63 ) ) ;
+}
+    Source Registers:  c 
+    Target Registers:  c 
+
+  Usage:  read, written
+  Width:  64
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

@@ -1,0 +1,6 @@
+
+simload $env(srcdir)/../designs/startup_mmu.dat
+simload $env(srcdir)/../designs/sieve64.elf elf setpc no-elf-pa no-elf-use-fd
+traceon sieve64.out.dat
+go
+quit

@@ -1,0 +1,140 @@
+
+//
+// Example cache- this should parse correctly.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (reg=L2HitReg) { }
+
+  define (reg=L2MissReg) { }
+
+  define (reg=L2CR) {
+    define (field=EN) {
+      bits=0;
+    }
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+
+    enable = func(CacheAccess ca,addr_t addr) { return L2CR.EN == 1 && addr > 0x2000; };
+
+    hit = func (CacheAccess ca,addr_t) {
+      L2HitReg = L2HitReg + 1;
+    };
+
+    hit_pred = func(CacheAccess ca,unsigned set,unsigned way) {};
+
+    miss = func (CacheAccess ca,addr_t) {
+      L2MissReg = L2MissReg + 1;
+    };
+
+    invalidate_line = func (CacheAccess ca,unsigned set,unsigned way) { };
+
+    read_line = func(CacheAccess ca,unsigned set,unsigned way,addr_t addr) {};
+
+    write_through = func(CacheAccess ca,addr_t addr) {};
+
+    miss_enable = func(CacheAccess ca,addr_t addr,unsigned set) {};
+
+  }
+
+  define (cache=L3) {
+    level     = 3;
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  // A reference to a cache in action code is okay.
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      L1d.flush(0);
+      L2.flush(0);
+    };
+  }  
+
+}
+
+define(arch=foo2) {
+
+  // This should remove the L3 cache.
+  defmod(cache=L3) {
+    level  = 3;
+    remove = 1;
+  }
+
+  // This should do nothing, but shouldn't cause an error.
+  defmod(cache=L4) {
+    level  = 4;
+    remove = 1;
+  }
+}
+
+define (core=P) {
+  archs=(foo,foo2);
+}

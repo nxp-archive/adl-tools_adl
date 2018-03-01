@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8F69EC84-6F2A-48CA-9869-7999E74C80B3}</ProjectGuid>
+    <RootNamespace>libbfd</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">libbfd\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">libbfd\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\binutils-adl\include;$(SolutionDir)\external\binutils-adl\win-build\bfd;$(SolutionDir)\external\binutils-adl\win-headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__USE_MINGW_FSEEK;HAVE_powerpc_elf64_vec;HAVE_powerpc_elf64_le_vec;HAVE_powerpc_elf32_vec;HAVE_powerpc_elf32_le_vec;HAVE_rs6000_xcoff_vec;HAVE_rs6000_xcoff64_vec;HAVE_rs6000_xcoff64_aix_vec;HAVE_elf64_le_vec;HAVE_elf64_be_vec;HAVE_elf32_le_vec;HAVE_elf32_be_vec;HAVE_CONFIG_H;DEBUGDIR="C:\\Debug";DEFAULT_VECTOR=powerpc_elf64_vec;SELECT_VECS=&amp;powerpc_elf64_vec,&amp;powerpc_elf64_le_vec,&amp;powerpc_elf32_vec,&amp;powerpc_elf32_le_vec,&amp;rs6000_xcoff_vec,&amp;rs6000_xcoff64_vec,&amp;rs6000_xcoff64_aix_vec,&amp;elf64_le_vec,&amp;elf64_be_vec,&amp;elf32_le_vec,&amp;elf32_be_vec;SELECT_ARCHITECTURES=&amp;bfd_adl_arch;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4267;4244;4800;4101;4102;4715;4312;4355;4311;4312;4996;4099;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <PreprocessToFile>false</PreprocessToFile>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\binutils-adl\include;$(SolutionDir)\external\binutils-adl\win-build\bfd;$(SolutionDir)\external\binutils-adl\win-headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>__USE_MINGW_FSEEK;HAVE_powerpc_elf64_vec;HAVE_powerpc_elf64_le_vec;HAVE_powerpc_elf32_vec;HAVE_powerpc_elf32_le_vec;HAVE_rs6000_xcoff_vec;HAVE_rs6000_xcoff64_vec;HAVE_rs6000_xcoff64_aix_vec;HAVE_elf64_le_vec;HAVE_elf64_be_vec;HAVE_elf32_le_vec;HAVE_elf32_be_vec;HAVE_CONFIG_H;DEBUGDIR="C:\\Debug";DEFAULT_VECTOR=powerpc_elf64_vec;SELECT_VECS=&amp;powerpc_elf64_vec,&amp;powerpc_elf64_le_vec,&amp;powerpc_elf32_vec,&amp;powerpc_elf32_le_vec,&amp;rs6000_xcoff_vec,&amp;rs6000_xcoff64_vec,&amp;rs6000_xcoff64_aix_vec,&amp;elf64_le_vec,&amp;elf64_be_vec,&amp;elf32_le_vec,&amp;elf32_be_vec;SELECT_ARCHITECTURES=&amp;bfd_adl_arch;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4267;4244;4800;4101;4102;4715;4312;4355;4311;4312;4996;4099;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="external\binutils-adl\bfd\aix5ppc-core.c" />
+    <ClCompile Include="external\binutils-adl\bfd\archive.c" />
+    <ClCompile Include="external\binutils-adl\bfd\archive64.c" />
+    <ClCompile Include="external\binutils-adl\bfd\archures.c" />
+    <ClCompile Include="external\binutils-adl\bfd\bfd.c" />
+    <ClCompile Include="external\binutils-adl\bfd\bfdio.c" />
+    <ClCompile Include="external\binutils-adl\bfd\bfdwin.c" />
+    <ClCompile Include="external\binutils-adl\bfd\binary.c" />
+    <ClCompile Include="external\binutils-adl\bfd\cache.c" />
+    <ClCompile Include="external\binutils-adl\bfd\coff-rs6000.c" />
+    <ClCompile Include="external\binutils-adl\bfd\coff64-rs6000.c" />
+    <ClCompile Include="external\binutils-adl\bfd\coffgen.c" />
+    <ClCompile Include="external\binutils-adl\bfd\compress.c" />
+    <ClCompile Include="external\binutils-adl\bfd\corefile.c" />
+    <ClCompile Include="external\binutils-adl\bfd\dwarf1.c" />
+    <ClCompile Include="external\binutils-adl\bfd\dwarf2.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf-attrs.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf-eh-frame.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf-strtab.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf-vxworks.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf32-gen.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf32-ppc.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf32.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf64-gen.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf64-ppc.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elf64.c" />
+    <ClCompile Include="external\binutils-adl\bfd\elflink.c" />
+    <ClCompile Include="external\binutils-adl\bfd\format.c" />
+    <ClCompile Include="external\binutils-adl\bfd\hash.c" />
+    <ClCompile Include="external\binutils-adl\bfd\ihex.c" />
+    <ClCompile Include="external\binutils-adl\bfd\init.c" />
+    <ClCompile Include="external\binutils-adl\bfd\libbfd.c" />
+    <ClCompile Include="external\binutils-adl\bfd\linker.c" />
+    <ClCompile Include="external\binutils-adl\bfd\merge.c" />
+    <ClCompile Include="external\binutils-adl\bfd\opncls.c" />
+    <ClCompile Include="external\binutils-adl\bfd\reloc.c" />
+    <ClCompile Include="external\binutils-adl\bfd\section.c" />
+    <ClCompile Include="external\binutils-adl\bfd\simple.c" />
+    <ClCompile Include="external\binutils-adl\bfd\srec.c" />
+    <ClCompile Include="external\binutils-adl\bfd\stab-syms.c" />
+    <ClCompile Include="external\binutils-adl\bfd\stabs.c" />
+    <ClCompile Include="external\binutils-adl\bfd\syms.c" />
+    <ClCompile Include="external\binutils-adl\bfd\targets.c" />
+    <ClCompile Include="external\binutils-adl\bfd\tekhex.c" />
+    <ClCompile Include="external\binutils-adl\bfd\verilog.c" />
+    <ClCompile Include="external\binutils-adl\bfd\xcofflink.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="external\binutils-adl\bfd\elf-bfd.h" />
+    <ClInclude Include="external\binutils-adl\win-build\bfd\config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

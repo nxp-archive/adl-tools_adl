@@ -1,0 +1,693 @@
+//
+// This tests aspect expansion.  The CofIndSbr aspect is expanded b/c it's
+// associated with nested instructions; the parent thus gets the expansion (kind
+// of a hack, but it works for StarCore).
+//
+// The ArithmeticInstr aspect gets expanded due to attribute matching.  For sub,
+// the aspect should expand within sub_family's action.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+  parallel_execution = 3;
+  blk = (ipu, dalu, lsu);
+  attrs = (type1,type2,prefix,first,second,arithmetic);  
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 32;  prefix = r; };
+  // SR (T,...);
+  define (reg = SR) { 
+    define (field = T1) { bits = 0; """ SR.T1 field"""; }; define (field = T6) { bits = 1;}; width = 32; 
+  };
+  define (reg =LC) {width =32;};
+
+  define (reg = SubInstr) {
+    width = 2;
+    enumerated = (not_sub,regular,regular_2nd_cycle,delayed);
+    serial = true;
+    reset = not_sub;
+  }
+
+  define (reg = ArithInstr) {
+    width = 2;
+    enumerated = (False,True);
+    serial = true;
+    reset = False;
+  }
+
+  define (reg=SP)
+    {
+      """
+	Stack Pointer
+	""";
+      attrs = (doc_hidden);
+      define (read) {
+        action =
+          {
+            if (SR.T1==0) { return GPR(0); }
+            else if (SR.T1==1) { return GPR(1); }
+          };
+      }
+
+      define (write) 
+      {
+        action = func (bits<32> x) {
+          if (SR.T1==0) { LC = x; }
+          else if (SR.T1==1) { PC = x; }
+        };
+      }
+
+    }
+
+
+  // -------- INSTRFIELDS ----------
+ 
+  define (instrfield = FIDD11) {
+    width = 4;
+    pseudo = true;
+    assembler = true;
+    value = 11;
+  }
+
+  define (instrfield=n)  
+    {
+      width  = 2;
+      pseudo = true;
+      enumerated = ("0", "1", "2", "3");
+    }
+
+  define (instrfield=flag)  
+    {
+      width  = 1;
+      pseudo = true;
+      enumerated = (("","-aab"), "-aad");
+    }
+  define (instrfield=flag2)  
+    {
+      width  = 1;
+      pseudo = true;
+      enumerated = (("","-b"), "-d");
+    }
+  define (instrfield=Src1)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Src2)
+    {
+      width = 3;
+      pseudo = true;
+    }
+
+  define (instrfield=Res1)
+    {
+      width = 5;
+      pseudo = true;
+    }
+
+  define (instrfield=NonScale)
+    {
+      width = 2;
+      parm = true;
+    }
+
+  define (instrfield=OP1)
+    {
+      width = 2;
+      pseudo = true;
+      // ref = GPR;
+    }
+
+  define (instrfield=OP2)
+    {
+      width = 2;
+      pseudo = true;
+      // ref = GPR;
+    }
+
+  define (instrfield=Rk)
+    {
+      width = 4;
+      ref = GPR;
+      pseudo = true;
+      enumerated = ("r0::r7","r1::r8","r2::r10","r3::r11","r4::r12","r5::r13","r6::r14","r7::r15");
+    }
+
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RA_tmp)  { width = 5; pseudo = true; ref=GPR;}	
+  define (instrfield = RA2_tmp)  { width = 5; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RT)  { width = 2; pseudo = true; ref=GPR;}
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; reserved = true; } // Serial Grouping
+  define (instrfield = CE)  { width = 4; pseudo = true; assembler = true; value = 0; } // conditional execution
+  define (instrfield = CE1) { width = 2; pseudo = true; assembler = true; value = 0;} // conditional execution
+  define (instrfield = IMM) { width = 3; pseudo = true; is_signed=true;}
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+  define (instrfield = Enc1)   { width = 16;  pseudo = true; }
+  define (instrfield = Enc2)   { width = 32;  pseudo = true; }
+
+  //define (instrfield = Conditional) { pseudo = true; assembler = true; width = variable; }
+  define (instrfield = CondExec) { pseudo = true; prefix = true; indexed = 2; value = 0; }
+  define (instrfield = CondEx)   { pseudo = true; prefix = true; indexed = 2; value = 0; type=CondExec;}
+
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  = 0; };
+  define (instrfield = IFT)       { indexed = 2; prefix = true; pseudo = true; value  = 0; type=CondExec; };
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = LPREFIX) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),IFT(0)),
+              (bits(7),IFT(1)),
+              (bits(8),IFT(2)),
+              (bits(9),IFT(3)),
+              (bits(10),IFT(4)),
+              (bits(11),IFT(5)),
+              (bits(12),0),
+              (bits(13),0),
+              (bits(14),0),
+              (bits(15),0));
+    prefix = true;
+    syntax = ("LPREFIX,  IFT => %f",IFT);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+  define (instr = nop) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),
+              (bits(7),0),
+              (bits(8),1),
+              (bits(9),0),
+              (bits(10),1),
+              (bits(11),1),
+              (bits(12),CE(0)),
+              (bits(13),CE(1)),
+              (bits(14),0),
+              (bits(15),SG),
+              (bits(16),CE(2)),
+              (bits(17),CE(3))
+              );
+    syntax = ("nop"); 
+    attrs = (type1,first("nop"));
+    type = OneWord;
+    action = {
+    };
+  }
+
+
+  // --------- ASM INSTRUCTIONS ---------
+
+  define (instr = IFT1) { 
+    syntax = ("ift1");
+    assembler = { CndExec = 1;};
+  }
+  define (instr = IFT6) {
+    syntax = ("ift6");
+    assembler = { CndExec = 6; }; 
+  }
+
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr = OneWord) 
+    {
+      fields = ((bits(15,0), Enc1),
+                (bits(17,16),CondExec));
+      pseudo = true;
+    }
+  define(instr = TwoWord) 
+    {
+      fields = ((bits(31,0), Enc2),
+                (bits(33,32),CondExec));
+      pseudo = true;
+    }
+
+  define (instr=add_family)
+    {
+      fields = (OPCD,Src1,Src2,Res1,CE,NonScale);
+      blk = (dalu,ipu);
+      doc_title = "add Ra,Rb,Rt";
+      attrs = (arithmetic);
+
+      define (instr=add2)
+        {
+          asm_rank = 90;
+          attrs = (type1,first("add"));
+          type = OneWord;
+          fields = (
+                    (bits(0),1),
+                    (bits(1),1),
+                    (bits(2),0),
+                    (bits(3),1),
+                    (bits(4),CE(0)),
+                    (bits(5),CE(1)),
+                    (bits(6),RA(2)),		
+                    (bits(7),RA(1)),		
+                    (bits(8),RA(0)),		
+                    (bits(9),RB(0)),
+                    (bits(10),RB(1)),
+                    (bits(11),RB(2)),
+                    (bits(12),RT(0)),
+                    (bits(13),RT(1)),
+                    (bits(14),0),
+                    (bits(15),SG),
+                    (bits(16),CE(2)),
+                    (bits(17),CE(3))
+                    );
+          syntax = ("add %f,%f,%f",RA,RB,RT);
+          alias = add_family(OPCD(OPCD),Src1(RA),Src2(RB),Res1(RT),CE(CE),NonScale(0));
+        }
+
+      define (instr=add)
+        {
+          attrs = (type1,first);
+          type = OneWord;
+          fields = (
+                    (bits(0),1),
+                    (bits(1),0),
+                    (bits(2),0),
+                    (bits(3),1),
+                    (bits(4),CE(0)),
+                    (bits(5),CE(1)),
+                    (bits(6),RA(0)),		
+                    (bits(7),RA(1)),		
+                    (bits(8),RA(2)),		
+                    (bits(9),RB(0)),
+                    (bits(10),RB(1)),
+                    (bits(11),RB(2)),
+                    (bits(12),RT(0)),
+                    (bits(13),RT(1)),
+                    (bits(14),0),
+                    (bits(15),SG),
+                    (bits(16),CE(2)),
+                    (bits(17),CE(3))
+                    );
+          syntax = ("add %f,%f,%f",RA,RB,RT);
+          alias = add_family(OPCD(OPCD),Src1(RA),Src2(RB),Res1(RT),CE(CE),NonScale(2));
+          doc_title_add = "(premium)";
+        }
+
+     
+
+      action = {
+        info (1,"CE= " << CE, ", Src1= "<<Src1, ", Src2= "<<Src2, ", Res1= "<<Res1 );
+        GPR(Res1) = GPR(Src2) + add_func(Src1,NonScale);
+      };
+    
+    }
+
+  define (instr=sub_family)
+    {
+      fields = (OPCD,Src1,Src2,Res1,CE);
+      blk = dalu;
+      define (instr=sub)
+        {
+          attrs = (type2,second,arithmetic);
+          type = TwoWord;
+          fields = (
+                    (bits(0),1),
+                    (bits(1),0),
+                    (bits(2),0),
+                    (bits(3),1),
+                    (bits(4),CE(0)),
+                    (bits(5),CE(1)),
+                    (bits(6),RA(0)),		
+                    (bits(7),RA(1)),		
+                    (bits(8),RA(2)),		
+                    (bits(9),RB(0)),
+                    (bits(10),RB(1)),
+                    (bits(11),RB(2)),
+                    (bits(12),RT(0)),
+                    (bits(13),RT(1)),
+                    (bits(14),reserved),
+                    (bits(15),SG),
+                    (bits(31,16),0x1234),
+                    (bits(32),CE(2)),
+                    (bits(33),CE(3))
+                    );
+          syntax = ("sub %f,%f,%f",RA,RB,RT);
+          //	doc_op = "Rb - Ra -> Rt";
+          alias = sub_family(OPCD(OPCD),Src1(RA),Src2(RB),Res1(RT),CE(CE));
+        }
+
+      action = {
+        info (1,"CE= " << CE, ", Src1= "<<Src1, ", Src2= "<<Src2, ", Res1= "<<Res1 );
+        bits<32> tmp =12;
+      doc_op : { tmp = GPR(Src2) - GPR(Src1);
+          GPR(Res1) = tmp; }
+        tmp += 11;
+      };
+    
+    }
+
+  define (instr=mv_family)
+    {
+      fields = (OPCD,flag,Src1,Res1,CE);
+      blk = dalu;
+
+      define(instr=mv) {
+        attrs = (type1,first);
+        type = OneWord;
+        fields = (
+                  (bits(0),FIDD11(0)),
+                  (bits(1),FIDD11(1)),
+                  (bits(2),FIDD11(2)),
+                  (bits(3),FIDD11(3)),
+                  (bits(4),CE(0)),
+                  (bits(5),CE(1)),
+                  (bits(6),Rk(0)),		
+                  (bits(7),Rk(1)),		
+                  (bits(8),Rk(2)),		
+                  (bits(9),flag(0)),
+                  (bits(10),0),
+                  (bits(11),1),
+                  (bits(12),Rk(3)),
+                  (bits(13),1),
+                  (bits(14),1),
+                  (bits(15),SG),
+                  (bits(16),CE(2)),
+                  (bits(17),CE(3))
+                  );
+        syntax = ("mv %f %f",flag,Rk);
+        doc_op = """PC = {AbsAdd31,0} 
+Mem(SP,8) = {return PC,SR} SP = SP + 8""";
+        """ Move
+	 Instr """;
+        //   doc_op = "#IMM -> Rt";
+        //     alias = mv_family(OPCD(OPCD),IMM(IMM),Res1(Rk(0)),CE(CE));
+        alias = mv_family(OPCD(OPCD),flag(flag),Src1(Rk),Res1(Rk+7),CE(CE));
+      }
+
+
+      action = {
+        info (1,"CE= " << CE, ", Res1= "<<Res1, ", Src1= "<<Src1, "flag = " <<flag );
+        GPR(Res1) = Mem(SP,1);
+        GPR(Res1+1) = Mem(SP+1,1);
+        GPR(Res1+2) = Mem(SP+2,1);
+        GPR(Res1+3) = Mem(SP+3,1);
+      };
+    
+    }
+
+
+  define (instr=st_family)
+    {
+      fields = (OPCD,flag,Src1,Res1,CE);
+      blk = dalu;
+
+      define(instr=st) {
+        attrs = (type1,first);
+        type = OneWord;
+        fields = (
+                  (bits(0),1),
+                  (bits(1),1),
+                  (bits(2),0),
+                  (bits(3),0),
+                  (bits(4),CE(0)),
+                  (bits(5),CE(1)),
+                  (bits(6),Rk(0)),		
+                  (bits(7),Rk(1)),		
+                  (bits(8),Rk(2)),		
+                  (bits(9),flag(0)),
+                  (bits(10),0),
+                  (bits(11),1),
+                  (bits(12),Rk(3)),
+                  (bits(13),0),
+                  (bits(14),0),
+                  (bits(15),SG),
+                  (bits(16),CE(2)),
+                  (bits(17),CE(3))
+                  );
+        syntax = ("st %f %f",flag,Rk);
+        alias = st_family(OPCD(OPCD),flag(flag),Src1(Rk),Res1(Rk+7),CE(CE));
+      }
+
+
+      action = {
+        info (1,"CE= " << CE, ", Res1= "<<Res1, ", Src1= "<<Src1, "flag = " <<flag );
+        bits<32> tmp= 0x12345678;
+        Mem(200,4) = tmp;
+      };
+    
+    }
+
+
+  define (instr=move_family)
+    {
+      fields = (OPCD,RA,OP1,OP2,CE);
+      blk = dalu;
+
+      define(instr=move) {
+        attrs = (type1,first);
+        type = OneWord;
+        fields = (
+                  (bits(0),1),
+                  (bits(1),1),
+                  (bits(2),1),
+                  (bits(3),1),
+                  (bits(4),CE(0)),
+                  (bits(5),CE(1)),
+                  (bits(6),OP1(0),1),		
+                  (bits(7),OP1(1),0),		
+                  (bits(8),OP2(0),1),		
+                  (bits(9),RA(0)),
+                  (bits(10),RA(1)),
+                  (bits(11),RA(2)),
+                  (bits(12),1),
+                  (bits(13),OP2(1),1),
+                  (bits(14),0),
+                  (bits(15),SG),
+                  (bits(16),CE(2)),
+                  (bits(17),CE(3))
+                  );
+        syntax = ("move %f",RA);
+        //   doc_op = "#IMM -> Rt";
+        //     alias = mv_family(OPCD(OPCD),IMM(IMM),Res1(Rk(0)),CE(CE));
+        alias = move_family(OPCD(OPCD),RA(RA),OP1(OP1),OP2(OP2),CE(CE));
+      }
+
+
+      action = {
+        info (1,"CE= " << CE, ", RA= "<<RA, ", OP1= "<<OP1, ", OP2= "<<OP2 );
+        GPR(RA+OP1) = 1;
+        GPR(RA+OP2) = 2;
+      };
+    
+    }
+
+  define(instr=halt)  {
+    attrs = (type1,first);
+    type = OneWord;
+    fields = (
+              (bits(14,0),0),
+              (bits(15),SG),
+              (bits(17,16),CE1)
+              );
+    action = { halt(); };
+
+  }
+
+  define (instr=dec) {
+    alias = sub(RA(RA),RB(1),RT(RT),CE(CE));
+    syntax = ("dec %f,%f",RA,RT);
+    asm_rules = R1;
+  }
+
+
+  defmod (instr=(sub,add,add2)) {
+    define (aspect=CofIndSbr) {
+      instr_post_exec = true;
+      priority = 1;
+      action = {
+        SubInstr = SubInstr::regular;
+        info(4,"CofIndSbr aspect; SubInstr = " << SubInstr);
+      };
+    }
+  }
+
+  define (group = gArithmeticInstr) {
+    has_attrs = arithmetic;
+    check_parent = true;
+    type = instr;
+  }
+
+  defmod (instr=*gArithmeticInstr) {
+    define (aspect=ArithmeticInstr) {
+      instr_post_exec = true;
+      priority = 2;
+      action = {
+        ArithInstr = ArithInstr::True;
+        info(4,"ArithmeticInstr aspect; ArithInstr = " << ArithInstr);
+      };
+    }
+  }
+
+  define (parm = icount) { 
+    options = (i0,i1,i2,i3,i4);
+    value = i0;
+  }
+
+  void update_icount() {
+    switch (icount) {
+    case i0: icount = i1; break;
+    case i1: icount = i2; break;
+    case i2: icount = i3; break;
+    case i3: icount = i4; break;
+    case i4: icount = i0; break;
+    }
+  }
+
+  bool eop(int n) {
+    return (int)icount == n;
+  }
+
+  pre_fetch = func() {
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(prefix);
+    }
+    unsigned instr_size = calc_instr_size(PC.uint32());
+    switch(instr_size) {
+    case 1:
+      setCurrentInstrTable(type1);
+      break;
+    case 2:
+      setCurrentInstrTable(type2);
+      break;
+    default:
+      error(1,"Illegal instr_size");
+    }
+
+
+  };
+
+  unsigned calc_instr_size(uint32_t pc) {
+
+    bits<16> a = Mem(pc,2,CacheIFetch);
+    bits<16> b = Mem(pc+2,2,CacheIFetch);
+    if (a(15)==1) {
+      return 1;
+    } else if (b(15)==1) {
+      return 2;
+    } 
+  }
+
+  bits<32> add_func(bits<3> src, bits<2> option)
+  {
+    bits<1> op = find_option(option);
+    bits<32> tmp = 0;
+    if (option==0 || option==1) {
+      tmp = (GPR(src)+GPR(0));
+    } else if (option==2 || option==3) {
+      tmp = (GPR(src)+GPR(2));
+    }
+    return (tmp);
+  }
+
+
+  bits<1> find_option(bits<1> opt) {
+    switch (opt.uint32()) {
+    case 0: return SR.T1; break;
+    case 2: return SR.T6; break;
+    default : break;
+    }
+    /*   if (opt==1 || opt!=0) {
+         return SR.T1;
+         } else {
+         return SR.T6;
+         }*/
+  }
+
+  // -------- POST EXEC ----------------
+  post_exec = func() {
+    if (getCurrentInstrTable() != prefix) {	   	
+      int num_bytes;
+      uint32_t *x = getCurrentInstr(num_bytes);
+      info (1,"encode is: " << hex << x[0]);
+      if ((x[0]&0x20000000)!=0) {
+        setPacketPosition(0);
+      } else {
+        update_icount();
+      }
+    } 
+  };
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+  };    
+
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+ 
+
+  pre_asm = func() {
+    if (CndExec) {
+      CE = CndExec;
+      CndExec = 0;
+    } 
+  };
+
+  post_asm = func(unsigned instr_width) {
+  };
+
+  post_packet_asm = func(InstrBundle b) {
+    SG = 1;
+  } ;
+ 
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type2,type1);
+    disasm_instrtables = (prefix,type2,type1); 
+    explicit_regs = true;
+
+    define(parm=CndExec) {
+      type = integer;
+      value = 0;
+    }
+
+    define(rule=R1) {
+      action = func (InstrInfo) {
+        if (RA <= RT) {
+          error(1,"RA violates rule...");
+        }
+      };
+    }
+  };
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1,type2);
+}

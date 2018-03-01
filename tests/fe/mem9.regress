@@ -1,0 +1,4 @@
+mem9.adl:110: Pre-fetch memory can not have adressing unit.
+mem9.adl:59: Pre-fetch memory can not have parent memory.
+mem9.adl:71: Pre-fetch memory size must be divisible by four.
+mem9.adl:75: Pre-fetch memory can not have read/write hook.

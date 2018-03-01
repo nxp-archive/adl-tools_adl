@@ -1,0 +1,51 @@
+//
+// Basic test of machine definitions.
+// Checks basic error handling.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+   
+    define (pipestage mID) {
+      issue = true;
+    }
+    
+    define (pipestage=(mEX, mMM, mWB)) {};
+    
+  }
+
+  define (machine a) {
+    init_state = S_INIT;
+    states = (S_ID, S_EX, S_MM, S_WB);
+
+    define (mapping) {
+      mID = foo;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (machine b) {
+    init_state = S_INIT;
+    states = (S_ID, S_EX, S_MM, S_WB, S_WBp);
+
+    define (mapping) {
+      mID = foo;
+      foo = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+}

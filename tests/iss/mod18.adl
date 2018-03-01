@@ -1,0 +1,384 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A model with a simple cache configuration:  A split L1 and a unified L2.
+//
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+    define (field=L2E) {
+      bits = 1;
+    }
+    define (field=WAY8) {
+      bits = 2;
+    }
+#ifndef NoCacheCounters
+    define (field=L1dHitCnt) {
+      bits = (4,7);
+    }
+    define (field=L1dMissCnt) {
+      bits = (8,11);
+    }
+    define (field=L2iMissCnt) {
+      bits = (12,15);
+    }
+    define (field=L2dMissCnt) {
+      bits = (16,19);
+    }
+#endif
+    define (field=WT) {
+      bits = 20;
+    }
+    define (field=WT1) {
+      bits = 21;
+    }
+  }
+
+  // Various cache control stuff.
+  define (reg=LCR) {
+    // Flash invalidate.
+    define (field=FLI) {
+      bits = 0;
+    }
+    // Flash flush.
+    define (field=FLF) {
+      bits = 1;
+    }
+    // Indicates that there is a lock in the data cache..
+    define (field=DLPR) {
+      """ Lock present. """;
+      bits = 2;
+    }
+    // Indicates that there is a lock in the instruction cache..
+    define (field=ILPR) {
+      """ Lock present. """;
+      bits = 3;
+    }
+    define (write) {
+      action = func (bits<32> x) {
+        LCR = x;
+        if (LCR.FLI != 0) {
+          // Invalidate both data caches.
+          for (unsigned set = 0; set != L1d.num_sets(); ++set) {
+            for (unsigned way = 0; way != L1d.num_ways(); ++way) {
+              L1d.invalidate(set,way);
+            }
+          }
+          for (unsigned set = 0; set != L2.num_sets(); ++set) {
+            for (unsigned way = 0; way != L2.num_ways(); ++way) {
+              L2.invalidate(set,way);
+            }
+          }
+          // We never actually keep these control bits as 0.
+          LCR.FLI = 0;
+        }
+        if (LCR.FLF != 0) {
+          // Flush both data caches.
+          for (unsigned set = 0; set != L1d.num_sets(); ++set) {
+            for (unsigned way = 0; way != L1d.num_ways(); ++way) {
+              L1d.flush(set,way);
+            }
+          }
+          for (unsigned set = 0; set != L2.num_sets(); ++set) {
+            for (unsigned way = 0; way != L2.num_ways(); ++way) {
+              L2.flush(set,way);
+            }
+          }
+          LCR.FLF = 0;
+        }
+      };
+    }
+  }
+
+  // Local memory control: If the address is non-zero, then the region specified
+  // by LOCAL_MEM_ADDR..(LOCAL_MEM_ADDR+LOCAL_MEM_SIZE) is uncached.
+  define (reg=LOCAL_MEM_ADDR) {}
+  define (reg=LOCAL_MEM_SIZE) {}
+
+  defmod(regfile=SPR) {
+    define (entry=52) { reg=CCR; }
+    define (entry=53) { reg=LCR; }
+  }
+
+  define (instrfield=CT) {
+    bits = (6,10);
+  }
+
+  // Notify instruction.  Test that we can do a 0-byte write.  We also throw in
+  // a 0-byte read just to make sure it works.
+  define (instr=dsn) {
+    fields=(OPCD(31),XO(483),RA,RB);
+    action = {
+      var addr = GPR(RB);
+      Mem(addr,0) = 0;
+      Mem(addr,0);
+    };
+  }
+
+
+  define (instr=dcba) {
+    fields=(OPCD(31),RA,RB,XO(758));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        L1d.allocate(ra);
+        L2.allocate(ra);
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        L1d.flush(ra);
+        L1d.invalidate(ra);
+        L2.flush(ra);
+        L2.invalidate(ra);
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  define (instr=dcbi) {
+    fields=(OPCD(31),RA,RB,XO(470));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        L1d.invalidate(ra);
+        L2.invalidate(ra);
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  // Hack to test aliased instructions.
+  define (instr=dcbi2) {
+    fields=(OPCD(31),RA,RB,XO(471));
+    alias = dcbf(RA(RA),RB(RB));
+  }
+
+  define (instr=dcbst) {
+    fields=(OPCD(31),RA,RB,XO(54));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        L1d.store(ra);
+        L2.store(ra);
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  define (instr=dcbt) {
+    fields=(OPCD(31),RA,RB,XO(278));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        L1d.touch(ra);
+        L2.touch(ra);
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  define (instr=dcbtls) {
+    fields=(OPCD(31),RA,RB,XO(166));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        L1d.lock(ra);
+        LCR.DLPR = 1; // A lock is present.
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  define (instr=dcblc) {
+    fields=(OPCD(31),RA,RB,XO(390));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(ea);
+        int set,way;
+        if (L1d.find(set,way,ra)) {
+          L1d.unlock(set,way);
+        }
+        if (L1d.fully_unlocked()) {
+          LCR.DLPR = 0; // Clear if all locks are gone.
+        }
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  // This makes sure that we can catch exceptions in a helper function.
+  bool dataCacheBlockZero(addr_t ea)
+  {
+    try {
+      var ra = dataReadTranslate(ea);
+      L1d.fill(ra,0);
+      L2.fill(ra,0);
+      return true;
+    }
+    catch (Exception e) {
+      // Do nothing if translation does not exist.
+      return false;
+    }
+  }
+
+  define (instr=dcbz) {
+    fields=(OPCD(31),RA,RB,XO(1014));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      dataCacheBlockZero(ea.uint64());
+    };
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess,addr_t ra) { return (CCR.L1E == 1); };
+    // enable    = func (CacheAccess,addr_t ra) { return (CCR.L1E == 1) && 
+    //                                            !(LOCAL_MEM_ADDR != 0 && 
+    //                                              (ra >= LOCAL_MEM_ADDR.uint64()) && 
+    //                                              (ra < (LOCAL_MEM_ADDR+LOCAL_MEM_SIZE).uint64())); };
+#ifndef NoCacheCounters
+    hit       = func (CacheAccess ca,addr_t a) { CCR.L1dHitCnt = CCR.L1dHitCnt + 1; };
+    miss      = func (CacheAccess ca,addr_t a) { CCR.L1dMissCnt = CCR.L1dMissCnt + 1; info(1,"L1d miss:  0x",hex,a); };
+#endif
+    miss_enable = func(CacheAccess ca,addr_t,unsigned set) {
+      // If we miss in the cache, then we only allow changes if we're not in a fully-locked mode.
+      if (ThisCache.fully_locked(set)) {
+        return false;
+      }
+      return true;
+    };
+    write_through = func(CacheAccess,addr_t addr) { return (CCR.WT == 1 || CCR.WT1 == 1); };
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 65536;
+    linesize  = 128;
+    set_assoc = (4,8);
+    sets      = (64,128);
+    enable    = func (CacheAccess,addr_t ra) { return (CCR.L1E == 1) && 
+                                               !(LOCAL_MEM_ADDR != 0 && 
+                                                 (ra >= LOCAL_MEM_ADDR.uint64()) && 
+                                                 (ra < (LOCAL_MEM_ADDR+LOCAL_MEM_SIZE).uint64())); };
+    enable    = func (CacheAccess) { return (CCR.L2E == 1); };
+#ifndef NoCacheCounters
+    miss       = func (CacheAccess ca,addr_t a) { 
+      if (ca == CacheIFetch) { 
+        CCR.L2iMissCnt = CCR.L2iMissCnt + 1; 
+      } else {
+        CCR.L2dMissCnt = CCR.L2dMissCnt + 1; 
+      }
+    };
+#endif
+    write_through = func(CacheAccess,addr_t addr) { return (CCR.WT == 1); };
+
+    sets_func = {
+      return (CCR.WAY8 == 0) ? 128 : 64;
+    };
+
+    assoc_func = {
+      return (CCR.WAY8 == 0) ? 4 : 8;
+    };
+
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (reg=IVPR) {}
+
+  define (reg=IVOR2) {}
+
+  define (reg=MSR) {}
+
+  define (reg=SRR0) {}
+
+  define (reg=SRR1) {}
+
+  defmod(regfile=SPR) {
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+  }
+
+  define (exception=DataStorage) {
+    priority = 1;
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      NIA =  concat(IVPR(0,15),IVOR2(16,31));
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}

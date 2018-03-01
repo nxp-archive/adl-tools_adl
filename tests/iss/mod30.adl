@@ -1,0 +1,148 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A test of shared event buses.
+//
+
+#import "mod1.adl"
+
+define (arch = messaging) {
+
+  define (eventbus=msg) {
+    define (field=d) { bits=32; }
+    define (field=cid) { }
+
+    action = func (msg_t data) {
+      info(1,"Received message:  ",hex,data.d," from core ",dec,data.cid);
+    };
+  }
+
+  define (reg=CID) {}
+
+  define (reg=M) {
+    define (write) {
+      action = func(bits<32> x) {
+        msg_t data;
+        data.d = x;
+        data.cid = CID.uint32();
+        msg.send(data);
+        M = x;
+      };
+    }
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=200) { reg=M; }   
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=PID1) {
+  }
+
+  // For completeness in testing model generation, a shared MMU and cache are
+  // also added.
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+    }
+
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+}
+
+define (core = P) {
+  remove = 1;
+}
+
+define (sys=MP) {
+
+  define (sys=MT) {
+    define (core=P) {
+      archs = (MiniPPC,messaging);
+    }
+    P core0;
+    P core1;
+
+    define (shared) {
+      eventbuses=msg;
+      caches = L1d;
+      mmulookups = TlbCam;
+      regs = (MSR,PID0,PID1);
+    }
+  }
+
+  MT sys0;
+  MT sys1;
+
+}
+

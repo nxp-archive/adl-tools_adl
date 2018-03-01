@@ -1,0 +1,147 @@
+//
+// This makes sure that we handle the special case where a field's syntax string
+// results in enumerations being created.  If the syntax string specifies table
+// references, then we convert it to a list of enumerations.
+//
+define (arch = miniSC){
+
+  bit_endianness = little;
+
+  attrs = (one_word);
+
+  define (regfile=D) {
+    size   = 16;
+    width  = 40;
+    prefix = d;
+  }
+  
+  define (reg=PC) {
+    attrs = (nia,cia);	
+    serial = true;
+  }
+
+  define (instrfield = DaDb) { 
+    width = 5; 	// Number of  input  bits 
+    size = 5;   // Necessary so that the default width isn't taken from the
+                // nested fields.
+    ref = D; 
+    pseudo = true;
+
+    table = ((0,1,2),
+             (1,2,3),
+             (2,3,4),
+             (3,4,5),
+             (4,5,6),
+             (5,6,7),
+             (6,7,8),
+             (7,8,9),
+             (8,9,10),
+             (9,10,11),
+             (10,11,12),
+             (11,12,13),
+             (12,13,14),
+             (12,14,15),
+             (0,2,4),
+             (2,4,6),
+             (4,6,8),
+             (6,8,10),
+             (8,10,12),
+             (10,12,14),
+             (1,3,5),
+             (3,5,7),
+             (5,7,9),
+             (7,9,11),
+             (9,11,13),
+             (11,13,15),
+             (0,3,6),
+             (3,6,9),
+             (6,9,12),
+             (9,12,15),
+             (0,7,15)
+             ); 
+
+    // Extra enumerations which act as shortcuts.
+    enumerated = ("d0::d2",
+                  "d1::d3",
+                  "d2::d4",
+                  "d3::d5",
+                  "d4::d6",
+                  "d5::d7",
+                  "d6::d8",
+                  "d7::d9",
+                  "d8::d10",
+                  "d9::d11",
+                  "d10::d12",
+                  "d11::d13",
+                  "d12::d14",
+                  "d12::d15"
+                  ); 
+
+    // This has the effect of enumerating the table using the specified formatting.
+    syntax = ("%f:%f:%f",DaDb(0),DaDb(1),DaDb(2));
+	
+    define(instrfield=Da) {
+      width = 4;
+      fields = (DaDb(0));
+    }	
+    define(instrfield=Db) {
+      width = 4;
+      fields = (DaDb(1));
+    }	
+    define(instrfield=Dc) {
+      width = 4;
+      fields = (DaDb(2));
+    }	
+  }
+  
+  define (instrfield=FFF) {
+    width = 4;	
+    ref = D;
+    pseudo = true;
+  }
+
+  define (instrfield=OPCD) {
+    width  = variable; 
+    pseudo = true;
+  }
+
+
+  define(instr=add) { 
+    fields =((bits(4,0),DaDb(4,0)),  
+             (bits(6,5),0x2),  
+             (bits(9,7),FFF(2,0)),
+             (bits(13,10),0xB),
+             (bits(14),reserved),
+             (bits(15),b0),
+             (bits(16),FFF(3)),
+             (bits(18,17),reserved),
+             (bits(31,19),0x0));
+	  
+    attrs = one_word;
+    syntax = ("add %f,%f",DaDb,FFF);
+    width = variable;
+    action = {
+      D(DaDb.Da) = DaDb.Da;
+      D(DaDb.Db) = DaDb.Db;	
+      D(DaDb.Dc) = DaDb.Dc;	
+      D(FFF) = DaDb.Da + DaDb.Db + DaDb.Dc;
+    };
+  }
+
+  define (instr = stop) {
+    attrs = one_word;
+    fields = ((bits(31,0),0x12f));
+    syntax = ("stop");
+    action = {
+      halt();
+    };
+  }
+
+}; 
+
+define (core = SC)
+{
+  instrtables = (one_word);
+  archs = miniSC;
+}
+

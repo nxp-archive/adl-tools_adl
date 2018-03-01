@@ -1,0 +1,139 @@
+======
+Cores:
+======
+Name:  "biginst"
+Bit Order:              little endian
+Instruction Byte Order: little endian
+Data Byte Order:        little endian
+Registers:
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CoefAddr: [127,112] 
+  ConstMultValSrc: [77,76] 
+    Enums:  '.twram' '.workreg' '.imm' 'reserved' 
+    Default value :'.twram'
+  DestAddr: [15,0] 
+  DestAddrIncr: [103,96] [not used] 
+  FFT16: [57,57] [not used] 
+    Enums:  '.nofft16' '.fft16' 
+    Default value :'.nofft16'
+  FIR: [55,55] [not used] 
+    Enums:  '.nofir' '.fir' 
+    Default value :'.nofir'
+  IMA: [45,45] 
+    Enums:  '.imm' '.ind' 
+    Default value :'.imm'
+  Imm: [111,64] 
+  InputDataType: [51,51] [not used] 
+    Enums:  '.real' '.cmplx' 
+    Default value :'.real'
+  LastRound: [50,50] [not used] 
+    Enums:  '.nolastrnd' '.lastrnd' 
+    Default value :'.nolastrnd'
+  ModValue: [95,80] 
+  MultImm: [127,80] 
+  MultMode: [79,78] 
+    Enums:  '.const' '.allN' '.modM' 'reserved' 
+  OpCode: [63,58] 
+  QuadExt: [48,48] 
+    Enums:  '.noqext' '.qext' 
+    Default value :'.noqext'
+  RoundFFT: [54,52] [not used] 
+  ShiftVal: [73,72] 
+  Shift_En: [75,75] 
+    Enums:  '.nosrcscale' '.srcscale' 
+    Default value :'.nosrcscale'
+  Src: [57,57] 
+    Enums:  '.imm' '.mem' 
+    Default value :'.imm'
+  SrcAddr: [31,16] 
+  SrcAddrIncr: [111,104] [not used] 
+  SubSampling: [49,49] 
+    Enums:  '.noss' '.ss' 
+    Default value :'.noss'
+  SubSamplingFactor: [67,64] 
+    Enums:  '1' '2' '4' '8' '16' '32' '64' '128' '256' 'reserved' 'reserved' 
+  VectLen: [44,32] 
+  Window: [56,56] [not used] 
+    Enums:  '.nowin' '.win' 
+    Default value :'.nowin'
+Instructions:
+  Name:  add (rank: 100)
+  Width:  128
+  Syntax:  "add%p %f,%f,%f":   Src DestAddr Imm SrcAddr
+  Fields:  Imm OpCode(3) Src SrcAddr DestAddr
+  Action:  {
+}
+  -------------------------------
+  Name:  add_imm (rank: 100) (shorthand)
+  Width:  128
+  Syntax:  "add %f,%f":   DestAddr Imm
+  Fields:  Imm DestAddr
+  Alias:  add Imm(Imm) Src(0) SrcAddr(0) DestAddr(DestAddr) 
+  -------------------------------
+  Name:  get (rank: 100)
+  Width:  128
+  Syntax:  "get %f,%f":   DestAddr SrcAddr
+  Fields:  OpCode(2) SrcAddr DestAddr
+  Action:  {
+}
+  -------------------------------
+  Name:  mult_mm0 (rank: 100)
+  Width:  128
+  Syntax:  "mult%p%p%p %f,%f,%f,%f,%f":   SubSampling QuadExt IMA MultImm SubSamplingFactor VectLen SrcAddr DestAddr
+  Fields:  MultImm MultMode(0) SubSamplingFactor OpCode(33) SubSampling QuadExt IMA VectLen SrcAddr DestAddr
+  Action:  {
+}
+  -------------------------------
+  Name:  mult_mmn0 (rank: 100)
+  Width:  128
+  Syntax:  "mult%p%p%p%p%p%p %f,%f,%f,%f,%f,%f,%f":   MultMode ConstMultValSrc Shift_En SubSampling QuadExt IMA CoefAddr ModValue ShiftVal SubSamplingFactor VectLen SrcAddr DestAddr
+  Fields:  CoefAddr ModValue MultMode ConstMultValSrc Shift_En ShiftVal SubSamplingFactor OpCode(33) SubSampling QuadExt IMA VectLen SrcAddr DestAddr
+  Action:  {
+}
+  -------------------------------
+  Name:  set (rank: 100)
+  Width:  128
+  Syntax:  "set%p %f,%f,%f":   Src DestAddr Imm SrcAddr
+  Fields:  Imm OpCode(1) Src SrcAddr DestAddr
+  Action:  {
+}
+  -------------------------------
+  Name:  set_imm (rank: 100) (shorthand)
+  Width:  128
+  Syntax:  "set %f,%f":   DestAddr Imm
+  Fields:  Imm DestAddr
+  Alias:  set Imm(Imm) Src(0) SrcAddr(0) DestAddr(DestAddr) 
+  -------------------------------
+  Name:  stop (rank: 100)
+  Width:  128
+  Fields:  OpCode(4)
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x00000000fc0000000000000000000000
+    1(00000000040000000000000000000000):  set
+      Shorthand:  set_imm: set Imm(Imm) Src(0) SrcAddr(0) DestAddr(DestAddr) 
+    2(00000000080000000000000000000000):  get
+    3(000000000c0000000000000000000000):  add
+      Shorthand:  add_imm: add Imm(Imm) Src(0) SrcAddr(0) DestAddr(DestAddr) 
+    4(00000000100000000000000000000000):  stop
+    33(00000000840000000000000000000000):  mult_mmn0
+    Mask:  0x00000000000000000000c00000000000
+      0(00000000000000000000000000000000):  mult_mm0
+-------------------------------
+

@@ -1,0 +1,238 @@
+TEST id=0
+INIT
+
+CORE n=:P
+
+RD n=NIA d=0x00000100
+RD n=TIA d=0x00000000
+RD n=GPR i=0 d=0x0000000000000000
+RD n=GPR i=1 d=0x0000000000000000
+RD n=GPR i=2 d=0x0000000000000000
+RD n=GPR i=3 d=0x0000000000000000
+RD n=GPR i=4 d=0x0000000000000000
+RD n=GPR i=5 d=0x0000000000000000
+RD n=GPR i=6 d=0x0000000000000000
+RD n=GPR i=7 d=0x0000000000000000
+MD n=Mem ra=0x0000000000000100 d=0xd0080200	#	(3490185728)
+MD n=Mem ra=0x0000000000000104 d=0xe0100208	#	(3759145480)
+MD n=Mem ra=0x0000000000000108 d=0xf0184001	#	(4028121089)
+MD n=Mem ra=0x000000000000010c d=0xd0190300	#	(3491300096)
+MD n=Mem ra=0x0000000000000110 d=0xe0190308	#	(3759735560)
+MD n=Mem ra=0x0000000000000114 d=0xf0194001	#	(4028186625)
+MD n=Mem ra=0x0000000000000118 d=0xd0190310	#	(3491300112)
+MD n=Mem ra=0x000000000000011c d=0xe0190318	#	(3759735576)
+MD n=Mem ra=0x0000000000000120 d=0x7810881c	#	(2014349340)
+MD n=Mem ra=0x0000000000000124 d=0x7a288a34	#	(2049477172)
+MD n=Mem ra=0x0000000000000128 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x000000000000012c d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000130 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000134 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000138 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x000000000000013c d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000140 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000144 d=0x00000000	#	(0)
+MD n=Mem ra=0x0000000000000200 d=0x00010002	#	(65538)
+MD n=Mem ra=0x0000000000000204 d=0x00030004	#	(196612)
+MD n=Mem ra=0x0000000000000208 d=0x00010003	#	(65539)
+MD n=Mem ra=0x000000000000020c d=0x00020004	#	(131076)
+
+CORE n=:P
+
+TRACE
+
+
+I ea=0x100 id=1
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0xd0080200
+INSTR op=0xd0080200					asm="ld2wc 0x1,0x200"
+D n=Mem t=read ea=0x200 nb=4
+M n=Mem t=read ea=0x200 ra=0x200 d=0x00010002
+R n=GPR i=1 d=0x0001000200000000
+D n=Mem t=read ea=0x204 nb=4
+M n=Mem t=read ea=0x204 ra=0x204 d=0x00030004
+R n=GPR i=1 d=0x0001000200030004
+
+I ea=0x104 id=2
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xe0100208
+INSTR op=0xe0100208					asm="ld2ws 0x2,0x208"
+D n=Mem t=read ea=0x208 nb=4
+M n=Mem t=read ea=0x208 ra=0x208 d=0x00010003
+R n=GPR i=2 d=0x0001000000030000
+D n=Mem t=read ea=0x20c nb=4
+M n=Mem t=read ea=0x20c ra=0x20c d=0x00020004
+R n=GPR i=2 d=0x0001000200030004
+
+I ea=0x108 id=3
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0xf0184001
+INSTR op=0xf0184001					asm="add2wc 0x3,2,0x1"
+R n=GPR i=3 d=0x0002000400000000
+R n=GPR i=3 d=0x0002000400060008
+
+I ea=0x10c id=4
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0xd0190300
+INSTR op=0xd0190300					asm="st2wc 0x3,0x300"
+D n=Mem t=write ea=0x300 nb=4
+M n=Mem t=write ea=0x300 ra=0x300 d=0x00020004
+D n=Mem t=write ea=0x304 nb=4
+M n=Mem t=write ea=0x304 ra=0x304 d=0x00060008
+
+I ea=0x110 id=5
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0xe0190308
+INSTR op=0xe0190308					asm="st2ws 0x3,0x308"
+D n=Mem t=write ea=0x308 nb=4
+M n=Mem t=write ea=0x308 ra=0x308 d=0x00020006
+D n=Mem t=write ea=0x30c nb=4
+M n=Mem t=write ea=0x30c ra=0x30c d=0x00040008
+
+I ea=0x114 id=6
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0xf0194001
+INSTR op=0xf0194001					asm="add2ws 0x3,2,0x1"
+R n=GPR i=3 d=0x0002000400060008
+R n=GPR i=3 d=0x0002000400060008
+
+I ea=0x118 id=7
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0xd0190310
+INSTR op=0xd0190310					asm="st2wc 0x3,0x310"
+D n=Mem t=write ea=0x310 nb=4
+M n=Mem t=write ea=0x310 ra=0x310 d=0x00020004
+D n=Mem t=write ea=0x314 nb=4
+M n=Mem t=write ea=0x314 ra=0x314 d=0x00060008
+
+I ea=0x11c id=8
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0xe0190318
+INSTR op=0xe0190318					asm="st2ws 0x3,0x318"
+D n=Mem t=write ea=0x318 nb=4
+M n=Mem t=write ea=0x318 ra=0x318 d=0x00020006
+D n=Mem t=write ea=0x31c nb=4
+M n=Mem t=write ea=0x31c ra=0x31c d=0x00040008
+
+I ea=0x120 id=9
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x7810881c
+INSTR op=0x7810					asm="ld16 4,0x8"
+D n=Mem t=read ea=0x128 nb=4
+M n=Mem t=read ea=0x128 ra=0x128 d=0xffffffff
+R n=GPR i=4 d=0xaaaaaaaacccccccc
+D n=Mem t=read ea=0x12c nb=4
+M n=Mem t=read ea=0x12c ra=0x12c d=0xffffffff
+R n=GPR i=4 d=0xffffffffffffffff
+
+I ea=0x122 id=10
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x7810881c
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x7a288a34
+INSTR op=0x881c					asm="st16 4,0xe"
+D n=Mem t=write ea=0x130 nb=4
+M n=Mem t=write ea=0x130 ra=0x130 d=0xffffffff
+D n=Mem t=write ea=0x134 nb=4
+M n=Mem t=write ea=0x134 ra=0x134 d=0xffffffff
+
+I ea=0x124 id=11
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x7a288a34
+INSTR op=0x7a28					asm="ld16 5,0x14"
+D n=Mem t=read ea=0x138 nb=4
+M n=Mem t=read ea=0x138 ra=0x138 d=0xffffffff
+R n=GPR i=5 d=0xaaaaaaaacccccccc
+D n=Mem t=read ea=0x13c nb=4
+M n=Mem t=read ea=0x13c ra=0x13c d=0xffffffff
+R n=GPR i=5 d=0xffffffffffffffff
+
+I ea=0x126 id=12
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x7a288a34
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0xffffffff
+INSTR op=0x8a34					asm="st16 5,0x1a"
+D n=Mem t=write ea=0x140 nb=4
+M n=Mem t=write ea=0x140 ra=0x140 d=0xffffffff
+D n=Mem t=write ea=0x144 nb=4
+M n=Mem t=write ea=0x144 ra=0x144 d=0xffffffff
+
+I ea=0x128 id=13
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x12c id=14
+M n=Mem t=ifetch ea=0x12c ra=0x12c d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x130 id=15
+M n=Mem t=ifetch ea=0x130 ra=0x130 d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x134 id=16
+M n=Mem t=ifetch ea=0x134 ra=0x134 d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x138 id=17
+M n=Mem t=ifetch ea=0x138 ra=0x138 d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x13c id=18
+M n=Mem t=ifetch ea=0x13c ra=0x13c d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x140 id=19
+M n=Mem t=ifetch ea=0x140 ra=0x140 d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x144 id=20
+M n=Mem t=ifetch ea=0x144 ra=0x144 d=0xffffffff
+INSTR op=0xffffffff					asm="add2ws 0x1ff,31,0x1fff"
+R n=GPR i=511 d=0x0000000000000000
+R n=GPR i=511 d=0x0000000000000000
+
+I ea=0x148 id=21
+M n=Mem t=ifetch ea=0x148 ra=0x148 d=0x00000000
+INSTR op=0x0000					asm="halt "
+
+RESULTS
+RD n=NIA d=0x0000014a
+RD n=TIA d=0x00000000
+RD n=GPR i=0 d=0x0000000000000000
+RD n=GPR i=1 d=0x0001000200030004
+RD n=GPR i=2 d=0x0001000200030004
+RD n=GPR i=3 d=0x0002000400060008
+RD n=GPR i=4 d=0xffffffffffffffff
+RD n=GPR i=5 d=0xffffffffffffffff
+RD n=GPR i=6 d=0x0000000000000000
+RD n=GPR i=7 d=0x0000000000000000
+MD n=Mem ra=0x0000000000000100 d=0xd0080200	#	(3490185728)
+MD n=Mem ra=0x0000000000000104 d=0xe0100208	#	(3759145480)
+MD n=Mem ra=0x0000000000000108 d=0xf0184001	#	(4028121089)
+MD n=Mem ra=0x000000000000010c d=0xd0190300	#	(3491300096)
+MD n=Mem ra=0x0000000000000110 d=0xe0190308	#	(3759735560)
+MD n=Mem ra=0x0000000000000114 d=0xf0194001	#	(4028186625)
+MD n=Mem ra=0x0000000000000118 d=0xd0190310	#	(3491300112)
+MD n=Mem ra=0x000000000000011c d=0xe0190318	#	(3759735576)
+MD n=Mem ra=0x0000000000000120 d=0x7810881c	#	(2014349340)
+MD n=Mem ra=0x0000000000000124 d=0x7a288a34	#	(2049477172)
+MD n=Mem ra=0x0000000000000128 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x000000000000012c d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000130 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000134 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000138 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x000000000000013c d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000140 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000144 d=0xffffffff	#	(4294967295)
+MD n=Mem ra=0x0000000000000200 d=0x00010002	#	(65538)
+MD n=Mem ra=0x0000000000000204 d=0x00030004	#	(196612)
+MD n=Mem ra=0x0000000000000208 d=0x00010003	#	(65539)
+MD n=Mem ra=0x000000000000020c d=0x00020004	#	(131076)
+MD n=Mem ra=0x0000000000000300 d=0x00020004	#	(131076)
+MD n=Mem ra=0x0000000000000304 d=0x00060008	#	(393224)
+MD n=Mem ra=0x0000000000000308 d=0x00020006	#	(131078)
+MD n=Mem ra=0x000000000000030c d=0x00040008	#	(262152)
+MD n=Mem ra=0x0000000000000310 d=0x00020004	#	(131076)
+MD n=Mem ra=0x0000000000000314 d=0x00060008	#	(393224)
+MD n=Mem ra=0x0000000000000318 d=0x00020006	#	(131078)
+MD n=Mem ra=0x000000000000031c d=0x00040008	#	(262152)

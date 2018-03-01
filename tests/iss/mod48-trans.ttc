@@ -1,0 +1,8 @@
+//
+// Transactional-ISS configuration file for mod48sm-h.cc.h
+//
+
+define (config) {
+  trans_pool_size = 3;
+  rollback_mode = true;
+}

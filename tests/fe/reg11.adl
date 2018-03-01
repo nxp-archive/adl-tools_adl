@@ -1,0 +1,26 @@
+//
+// A register field's bit indices must be within
+// bounds of the register width.
+//
+
+define (arch = minippc) {
+
+  define (reg = a) {
+    width = 32;
+    define (field = f0) {
+      "A reserved field.";
+      bits = (0,100);
+      reserved = 1;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

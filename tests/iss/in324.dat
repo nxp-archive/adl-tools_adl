@@ -1,0 +1,53 @@
+#
+# Test calculated branches (branch and link) and branching in the first slot of
+# an instruction packet.
+#
+# Constructed using as-mod99
+#
+= asm
+
+	addi r1,r1,1 ; addi r2,r2,3
+L1:
+	nop2 ; sub r2,r2,1
+	bcl 0,L2,0 ; addi r10,r10,1
+	bc r2,L1,1
+	halt
+	
+L2:
+	addi r3,r3,5
+L3:
+	add  r10,r10,r1 ; sub r3,r3,r1
+	bc r3,L3,0
+	blr
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x42108000	#	addi r1,r1,1 ; addi r2,r2,3
+MD n=Mem ra=0x00000004 d=0x84420003
+MD n=Mem ra=0x00000008 d=0x80000042	#	nop2 ; sub r2,r2,1
+MD n=Mem ra=0x0000000c d=0x10400000
+MD n=Mem ra=0x00000010 d=0x48000006	#	bcl 0,L2,0 ; addi r10,r10,1
+MD n=Mem ra=0x00000014 d=0x054A0001
+MD n=Mem ra=0x00000018 d=0x462FFFFC	#	bc r2,L1,1
+MD n=Mem ra=0x0000001c d=0x80000000
+MD n=Mem ra=0x00000020 d=0x00000000	#	halt
+MD n=Mem ra=0x00000024 d=0x00000000
+MD n=Mem ra=0x00000028 d=0x42318002	#	addi r3,r3,5
+MD n=Mem ra=0x0000002c d=0x80000000
+MD n=Mem ra=0x00000030 d=0x82A50443	#	add  r10,r10,r1 ; sub r3,r3,r1
+MD n=Mem ra=0x00000034 d=0x18400000
+MD n=Mem ra=0x00000038 d=0x463FFFFE	#	bc r3,L3,0
+MD n=Mem ra=0x0000003c d=0x00000000
+MD n=Mem ra=0x00000040 d=0x88000000	#	blr
+MD n=Mem ra=0x00000044 d=0x00000000
+# </GEN>
+
+CORE n=packet_ops
+
+
+RESULTS
+
+RD n=GPR i=1  d=1
+RD n=GPR i=2  d=0
+RD n=GPR i=10 d=18

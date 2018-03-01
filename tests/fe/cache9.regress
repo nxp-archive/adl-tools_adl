@@ -1,0 +1,2 @@
+cache9.adl:18: The cache-enable function takes either 1 or 2 arguments.
+cache9.adl:29: Argument 2 of the cache-enable function must be of type addr_t.

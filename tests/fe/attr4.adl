@@ -1,0 +1,131 @@
+//
+// Test remove attributes
+//
+define (arch = minippc) {
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+ 
+  attrs = (simple1,simple2);
+  attrs = (str1,str2,str3);
+  attrs = (int1,int2,int3);
+  attrs = (strlist);
+  attrs = (intlist);
+
+  define (instrfield=OPCD) { bits = (0,5);}
+  define (instrfield=XO)   { bits = (30,31);}
+  define (instrfield=RA) { bits = (11,15); }
+  define (instrfield=RT) {
+    bits = (6,10);
+    attrs = (str1,str2,int1,int2);
+  }
+
+  define (regfile = RF1) {
+    attrs = (intlist((1,3,6,45)),simple1);
+    size=32;
+    
+  }
+
+  define (regfile = RF2) {
+    attrs = (intlist((12,13,26,45)),str1,str2,int1,int2);
+    size=32;
+  }
+  
+  defmod (regfile = RF2) {
+    remove_attrs = (str1,intlist);
+  }
+  
+  
+  define (cache=L1i) {
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+    attrs = (intlist((12,13,26,45)),str1,str2("d"),int1,int2(33),strlist(("d","dd")));
+  }
+  
+ define (mmu) {
+
+    attrs = intlist((12,13,26,45));
+
+    both_enable = { return true; };
+
+    define(lookup=TlbCam) {
+      attrs = (str2("d"),int1,int2(33),strlist(("d","a")));
+      define (wayfield=x) {
+        bits = 2;
+        reset = 2;
+      }
+      test = AddrComp(x);
+      realpage = x;
+      size = 1;
+      define (array) {
+        entries = 16;
+      }
+  }
+}
+  
+  
+  
+  
+  
+  
+  define (instr=a) {
+    fields=(OPCD(14),RT,RA);
+    attrs = (simple1,str1("d"),int1(6),strlist(("dd","aa","gg")));
+    action = {};
+  }
+  define (instr=b) {
+    fields=(OPCD(31),RT,RA);
+    attrs = (str1("ad"),simple2,int1(45));
+    action = {};
+  }
+  define (instr=c) {
+    fields=(OPCD(32),RT,RA);
+    attrs = (simple1,str1("d"),int1,strlist);
+
+    action = {};
+  }
+  define (instr=d) {
+    fields=(OPCD(33),RT,RA);
+    attrs = (simple2,str2("d"),str1,int1(6),strlist(("add","aa3","gg3")));
+    action = {};
+  }
+
+  define (subinstr = addOp) { fields=(OPCD(10)); syntax = ("add");action = {int x = 1 + 2;};}
+  define (subinstr = subOp) { fields=(OPCD(11)); syntax = ("sub");action = {int x = 1 + 2;};}
+
+  define (subinstr = eaRegDirect  ) {fields=(XO(0),RT);syntax = ("%f",  RT);action = {int indir = 0;};}
+  define (subinstr = eaRegIndirect) {fields=(XO(1),RT);syntax = ("i %f",RT);action = {int   dif = 0;};}  
+  
+  
+
+  define (instr=aritOp) {
+    fields=(theOp,theEa);
+    syntax = ("%f %f",theOp,theEa);
+    define (subinstrs=theOp) { subs = (addOp,subOp);}	
+    define (subinstrs=theEa) { subs = (eaRegDirect,eaRegIndirect); }
+    names=(add,sub,addi,subi);
+    action = {theOp;theEa;};
+  }
+  
+  defmod (instr = (a,d)) {
+    remove_attrs = strlist;
+  }
+  defmod (instr = addOp ){
+    attrs = (str1,str2);
+  }
+  
+  defmod (instr = add) {
+    remove_attrs = str1;
+  }
+  defmod (instrfield=RT){
+    remove_attrs = (str1,int1);
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc);
+}

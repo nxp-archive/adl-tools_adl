@@ -1,0 +1,98 @@
+=======
+Systems:
+=======
+System:  P
+  Shared Resources:
+    Registers:  PID0 PID1 
+    MMU lookups:  TlbCam 
+  Locally-defined Cores:
+    Name:  "Thread"
+    Exceptions:
+      Name:  DTlbMiss
+      Action:  func (  ) {
+}
+      -------------------------------
+      Name:  ITlbMiss
+      Action:  func (  ) {
+}
+      -------------------------------
+      Name:  ProtectionFault
+      Action:  func (  ) {
+}
+      -------------------------------
+    Registers:
+      Name:  "DEAR"
+      Width:  32
+      -------------------------------
+      Name:  "HDBCR0"
+      Width:  32
+        MMU_ENABLE[0]   
+      -------------------------------
+      Name:  "MSR"
+      Width:  32
+        PR[10]   
+      -------------------------------
+      Name:  "PID0"
+      Usage:  read
+      Width:  32
+      -------------------------------
+      Name:  "PID1"
+      Usage:  read
+      Width:  32
+      -------------------------------
+      Name:  "pc"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  pc
+    Next-instruction-address register:  pc
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    MMU:
+
+      Interleaved fetch :  1
+      Interleaved reads :  1
+      Interleaved writes:  1
+
+      Enable:  <always>
+      Lookup:  TlbCam
+        Type:  both
+        Priority:  0
+        Size:  2^(1 * SIZE + 0) << 0
+        Page Number Shift:  0
+        Real-page Field:  RPN
+        Min Page Size:  1 (bytes)
+        Array:  16 entries, fully associative.
+        Way Fields:
+          EPN:  24 bits.
+            Reset value:  0
+          Documention:
+
+        Example documentation string for an MMU field.
+        
+          RPN:  24 bits.
+            Reset value:  0
+          SIZE:  6 bits.
+            Reset value:  0
+          TID:  6 bits.
+            Reset value:  0
+          x:  2 bits.
+            Reset value:  2
+          y:  3 bits.
+            Reset value:  1
+
+        Tests:
+
+          Compare ( TID , PID0 , PID1 )
+          AddrComp ( EPN )
+      -------------------------------
+    -------------------------------
+    -------------------------------
+  Constituent Items:
+    t0:  Thread
+    t1:  Thread
+-------------------------------
+

@@ -1,0 +1,227 @@
+ define (core = CortexM0) {
+    archs = CortexM0;
+ }
+ 
+ define (arch = CortexM0) {
+ 
+  bit_endianness = little;
+	instr_endianness = little;
+  
+	attrs = (
+          log_as_reg
+        );
+
+        
+	define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+	}
+
+	// define (reg=NIA) {
+    	// """
+		// Next instruction address.
+		// """;
+		// attrs = nia;
+	// }
+  
+// Processor Core registers
+        
+	define (regfile = r){
+    width = 32;
+		size = 16;
+	}  
+  
+	define (reg = MSP) {
+    alias = r(13);
+	}   
+	define (reg = PSP) {
+    alias = r(13);
+	}
+	define (reg = LR) {
+    alias = r(14);
+	}
+	define (reg = pc) {
+    alias = r(15);
+    attrs = nia;
+	}
+	define (reg = PSR) {
+    width = 32;
+	} 
+	define (reg = PRIMASK) {
+    width = 32;
+	}
+	define (reg = CONTROL) {
+    width = 32;
+	}
+	define (reg = cpsr) {
+    width = 32;
+	}
+  
+  // System control registers
+  
+	define (reg = SYST_CSR) {
+    width = 32;
+	}
+	define (reg = SYST_RVR) {
+    width = 32;
+	}
+	define (reg = SYST_CVR) {
+    width = 32;
+	}
+	define (reg = SYST_CALIB) {
+    width = 32;
+	}
+	define (reg = CPUID) {
+    width = 32;
+	}
+	define (reg = ICSR) {
+    width = 32;
+	}
+	define (reg = AIRCR) {
+    width = 32;
+	}
+	define (reg = CCR) {
+    width = 32;
+	}
+	define (reg = SHPR2) {
+    width = 32;
+	}
+	define (reg = SHPR3) {
+    width = 32;
+	}
+	define (reg = SHCSR) {
+    width = 32;
+	}
+  
+  // NVIC registers
+  
+	define (reg = ISER) {
+    width = 32;
+	}
+	define (reg = ICER) {
+    width = 32;
+	}
+	define (reg = ISPR) {
+    width = 32;
+	}
+	define (reg = ICPR) {
+    width = 32;
+	}
+	define (regfile = IPR) {
+    width = 32;
+    size = 8;
+	}
+  
+  // Debug registers
+  
+	define (reg = DFSR) {
+    width = 32;
+	}
+	define (reg = DHCSR) {
+    width = 32;
+	}
+	define (reg = DCRSR) {
+    width = 32;
+	}
+	define (reg = DCRDR) {
+    width = 32;
+	}
+	define (reg = DEMCR) {
+    width = 32;
+	}
+  
+  // BPU registers
+  
+	define (reg = BP_CTRL) {
+    width = 32;
+	}
+	define (reg = BP_COMP0) {
+    width = 32;
+	}
+	define (reg = BP_COMP1) {
+    width = 32;
+	}
+	define (reg = BP_COMP2) {
+    width = 32;
+	}
+	define (reg = BP_COMP3) {
+    width = 32;
+	}
+  
+  // DWT registers
+  
+	define (reg = DWT_CTRL) {
+    width = 32;
+	}
+	define (reg = DWT_PCSR) {
+    width = 32;
+	}
+	define (reg = DWT_COMP0) {
+    width = 32;
+	}
+	define (reg = DWT_MASK0) {
+    width = 32;
+	}
+	define (reg = DWT_FUNCTION0) {
+    width = 32;
+	}
+	define (reg = DWT_COMP1) {
+    width = 32;
+	}
+	define (reg = DWT_MASK1) {
+    width = 32;
+	}
+	define (reg = DWT_FUNCTION1) {
+    width = 32;
+	}
+  
+  
+  // Instructions
+	
+	
+	define (instr = NOP){
+	    width = 32;
+		fields = ((bits(31, 0), b00000000000000000000000000000000));
+        syntax = ("nop");
+		action = {
+		             disp("nop                       ");
+		         };
+	}
+	
+	define (instr = END){
+	    width = 32;
+		fields = ((bits(31, 0), b00000000000000000000000000000001));
+		syntax = ("end");
+		action = {
+		             halt();
+		         };
+	}
+ }
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

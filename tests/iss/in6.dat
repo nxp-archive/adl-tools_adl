@@ -1,0 +1,71 @@
+#
+# Tests to make sure that an exception can be taken.
+#
+= asm
+
+     lwz  r2,0x1000(0)
+     add r3,r2,r1
+     mtspr 20,r3
+     stw  r3,0(r4)
+
+     mfspr r10,SRR0
+     addi r10,r10,4
+     mtspr SRR0,r10
+     li r11,0x3000
+     lis r12,0x1234
+     la  r12,0x5678(r12)
+     stw r12,0x100(r11)
+     rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80401000	# lwz r2,0x1000(0)
+MD n=Mem ra=0x00000004 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00000008 d=0x7C7403A6	# mtspr 20,r3
+MD n=Mem ra=0x0000000c d=0x90640000	# stw r3,0(r4)
+
+MD n=Mem ra=0x00020010 d=0x7D5A02A6	# mfspr r10,SRR0
+MD n=Mem ra=0x00020014 d=0x394A0004	# addi r10,r10,4
+MD n=Mem ra=0x00020018 d=0x7D5A03A6	# mtspr SRR0,r10
+MD n=Mem ra=0x0002001c d=0x39603000	# li r11,0x3000
+MD n=Mem ra=0x00020020 d=0x3D801234	# lis r12,0x1234
+MD n=Mem ra=0x00020024 d=0x398C5678	# la r12,0x5678(r12)
+MD n=Mem ra=0x00020028 d=0x918B0100	# stw r12,0x100(r11)
+MD n=Mem ra=0x0002002c d=0x4C000064	# rfi
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0x00000000
+MD n=Mem ra=0x2000 d=0x00000000
+MD n=Mem ra=0x3100 d=0x00000000
+
+CORE n=:P
+RD n=NIA  d=0x0
+RD n=IVPR d=0x00020000
+RD n=IVOR6 d=0x00000010
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=4 d=0x2000
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=4 d=0x2000
+RD n=GPR i=11 d=0x3000
+RD n=GPR i=12 d=0x12345678
+RD n=ESR d=0x08000000
+RD n=POSTEXCPT d=0x00000001
+RD n=PREEXCPT d=0x00000001
+
+#RD n=BCCNT d=0x10
+#RD n=PCCNT d=0x0f
+RD n=FCNT  d=0x0d
+RD n=ICNT  d=0x0c
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0xdeaddeee
+MD n=Mem ra=0x3100 d=0x12345678
+

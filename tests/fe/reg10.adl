@@ -1,0 +1,32 @@
+//
+// An indexed field'd width must be an integral divisor of
+// the register width and cannot be 0.
+//
+
+define (arch = minippc) {
+
+  define (regfile = vprs) {
+    width = 128;
+    size = 32;
+    define (field = w) {
+      indexed = 31;
+    }
+  }
+
+  define (reg = cr) {
+    width = 32;
+    define (field = cr) {
+      indexed = 0;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

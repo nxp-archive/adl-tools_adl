@@ -1,0 +1,160 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CR"
+  Usage:  slice-written
+  Width:  32
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D: [16,31] 
+    Display:  dec
+    Signed:  1
+        Signed immediate field for addressing.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] 
+    Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SI: [16,31] 
+        Signed immediate field for arithmetic operations.
+    
+Instructions:
+  Name:  addic. (rank: 100)
+  Width:  32
+  Fields:  OPCD(13) RT RA SI
+  Action:  {
+     var si = signExtend ( SI , 32 ) ;
+    GPR ( RT ) = GPR ( RA ) + si ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  CIA CR[mask 0xf0000000]/p GPR(RT) 
+  Helper Functions:  foo setCrField 
+  -------------------------------
+  Name:  foo (rank: 100)
+  Width:  32
+  Fields:  OPCD(47) RT RA D
+  Action:  {
+    GPR ( 0 ) = GPR ( 31 ) ;
+}
+  Source Registers:  GPR(31) 
+  Target Registers:  GPR(0) 
+  -------------------------------
+  Name:  lmw (rank: 100)
+  Width:  32
+  Fields:  OPCD(46) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var EA = b + D ;
+     int r = RT . uint32 (  ) ;
+    do {
+        GPR ( r ) = Mem ( EA , 4 ) ;
+        r = r + 1 ;
+        EA = EA + 4 ;
+    } while ( r <= 31 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT . uint32 (  ),31) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  stmw (rank: 100)
+  Width:  32
+  Fields:  OPCD(48) RS RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+     int r = RS . uint32 (  ) ;
+    do {
+        Mem ( addr , 4 ) = GPR ( r ) ;
+        r = r + 1 ;
+        addr = addr + 4 ;
+    } while ( r <= 31 ) ;
+}
+  Source Registers:  GPR(RA) GPR(RS . uint32 (  ),31) 
+  Target Memories:  Mem 
+  -------------------------------
+  Name:  subic. (rank: 100) (shorthand)
+  Width:  32
+  Fields:  RT RA SI
+  Alias:  addic. RT(RT) RA(RA) SI(- SI) 
+  Source Registers:  GPR(RA) 
+  Target Registers:  CIA CR[mask 0xf0000000]/p GPR(RT) 
+  Helper Functions:  foo setCrField 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    13(34000000):  addic.
+      Shorthand:  subic.: addic. RT(RT) RA(RA) SI(- SI) 
+    46(b8000000):  lmw
+    47(bc000000):  foo
+    48(c0000000):  stmw
+
+Helper Functions:
+  foo:
+ void foo (  ) {
+    CIA = 0x4 ;
+    foo (  ) ;
+}
+    Target Registers:  CIA 
+    Helper Functions:  foo 
+
+  setCrField:
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    CR ( 4 * field , 4 * field + 3 ) = r ;
+    foo (  ) ;
+}
+    Target Registers:  CIA CR/p 
+    Helper Functions:  foo 
+-------------------------------
+

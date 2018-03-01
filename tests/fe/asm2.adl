@@ -1,0 +1,24 @@
+// Fail becaust grouping is defined only for parallel archs.
+
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  
+  //parallel_execution = 3;
+
+  define (assembler) {
+    comments = ("//","#",";");
+    line_comments =  ("#rem","#");
+    line_separators = ("d","\t");
+    packet_grouping = (("[","]"),"\t");
+  }
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

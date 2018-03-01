@@ -1,0 +1,96 @@
+#
+# Tests the situation where we set cancel to false for fetch when we do a
+# branch, meaning that we only cancel pending transactions and not the current
+# fetch.  This means that we'll remove one transaction, but not the other.  That
+# means that we could end up with a stale pointer in the remaining
+# next-level-action object.  Without proper cleanup, this results in deadlock.
+# We test for that here, with dlx-cache-split-pc3-safe.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	b L1
+	.long 0x0
+	.long 0x0
+L1:
+	b L2
+	.long 0x0
+	.long 0x0
+L2:
+	addi r2,r2,1
+	addi r2,r2,1				
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x4800000C	#	b L1
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x4800000C	#	b L2
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000024 d=0x38420001	#	addi r2,r2,1				
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=4
+R n=GPR i=1 d=0x00000001
+CTIME t=8
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=5
+R n=GPR i=1 d=0x00000002
+CTIME t=11
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4800000c
+INSTR op=0x4800000c					asm="b 0x0000000000000014"
+ITIME t=8
+B taken=1 ea=0x14
+CTIME t=12
+
+I ea=0x14 id=4 tic=4
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4800000c
+INSTR op=0x4800000c					asm="b 0x0000000000000020"
+ITIME t=13
+B taken=1 ea=0x20
+CTIME t=17
+
+I ea=0x20 id=5 tic=5
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=18
+R n=GPR i=2 d=0x00000001
+CTIME t=22
+
+I ea=0x24 id=6 tic=6
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=19
+R n=GPR i=2 d=0x00000002
+CTIME t=25
+
+I ea=0x28 id=7 tic=7
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=22
+CTIME t=26
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000002

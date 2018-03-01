@@ -1,0 +1,159 @@
+// Test prefix instruction and parallel execution:
+// post_exec, post_packet and logging
+// TBD: blocks
+define (arch = MiniStarCore) {
+
+  parallel_execution = 4;
+  bit_endianness = little;  
+  
+  define (reg = pc) {
+    attrs = (cia,nia);  
+    serial = true;
+  }
+  
+  define (regfile = GPR) {
+    width = 32;
+    size  = 16;
+  }
+  
+  define (parm = prefix_grouping) {
+    options = (true,false);
+    value = false;
+  }
+  //////////////////////////
+  //
+  //   Helpers
+  //
+  bool check_highreg(int i) {
+    return HighReg(i+1)&0x4;
+  }
+  
+  bool check_vlessize() {
+    return VlesSize;
+  }
+  
+  //////////////////////
+  //
+  //  Template decription
+  //  
+  
+  define (instrfield = Enc) { 
+    width  = 16; 
+    pseudo = true;
+  }
+  
+  define (instrfield=HighRegister) {
+    indexed = 2;
+    pseudo = true;
+    prefix = true;
+  }
+
+  define (instr = OneWord) {
+    fields = ((bits(15,0), 	Enc		),
+	      (bits(19,16), HighRegister	));
+    pseudo = true;  
+  }
+  
+  ///////////////////
+  //
+  //  Prefix 
+  //
+  
+  define (instrfield = HighReg) {
+    prefix  = true;   
+    pseudo  = true;
+    indexed = 2;   
+    value   = 0;    
+    type = HighRegister; 
+    action = func(unsigned int I){
+      check_highreg(0);
+      check_vlessize();
+    };
+  }
+  
+  define (instrfield=VlesSize) {
+	width  = 2;  
+	prefix = true;
+	pseudo = true;
+  }
+  
+  define (instr = Prefix) {
+    fields = ((bits(7,0), 	HighReg	),
+	      (bits(9,8), 	VlesSize	),
+              (bits(15,10), 	0x3C		));
+
+    prefix = true;  // This is a prefix description.
+    width  = 16;
+    action = { 
+      prefix_grouping = true;
+    };	
+  }
+  
+  ////////////////////////
+  //
+  //  Usual instructions
+  //
+  
+  define (instrfield = RS) { pseudo = true; width = 4;}
+  define (instrfield = RA) { pseudo = true; width = 4;}
+  define (instrfield = RB) { pseudo = true; width = 4;}
+  
+  
+  define (instr = add) {
+    fields = ((bits(3,0),RS),
+              (bits(6,4),RB(2,0)),
+              (bits(9,7),RA(2,0)),
+              (bits(13,10),0x1),
+              (bits(15,14),reserved),//for serial grouping
+              (bits(16), RB(3)),
+              (bits(17), RA(3)),
+	      (bits(19,18), reserved));
+  
+    type = OneWord;
+    action = {
+      GPR(RS) = GPR(RA) + GPR(RB);
+    };
+  }
+  
+  post_packet = func() {
+    prefix_grouping = false;
+    setCurrentInstrTable(prefix);
+  };  
+  
+  post_exec = func() {
+    if (prefix_grouping) {    // prefix grouping
+      if (getPacketPosition() == VlesSize + 1) {
+	info(1,"end of packet - prefix");
+        setPacketPosition(0);
+      }
+    } 
+    else {                   // serial grouping
+      int num_bytes = 0;
+      uint32_t *instr = getCurrentInstr(num_bytes);
+      if (instr[0] & 0x0C000000) {
+      	info(1,"end of packet - serial");
+        setPacketPosition(0);
+      }
+    }   
+  };
+ 
+  decode_miss = func(addr_t, unsigned) {
+   info(1,"decode miss"); 
+   halt();
+  };
+
+  decode_retry = func(addr_t, unsigned) {
+    if (getCurrentInstrTable() == prefix) {
+     info(1,"prefix not found - will try to find usual instruction");
+     setCurrentInstrTable(other);
+     return  true;
+    } else {
+        return false;
+    }
+  };
+}
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,other);
+}

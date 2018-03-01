@@ -1,0 +1,7 @@
+in8.uadl:44: Operand Src2 not used by instruction addi
+in8.uadl:60: Instruction andi. operand GPR(RS) does not correspond to a listed operand.
+in8.uadl:60: Operand Trg not used by instruction andi.
+adl: Initial state has no exiting states.
+
+in8.uadl:6: warning: Instructions access no data memory
+Could not parse in8.uadl

@@ -1,0 +1,4 @@
+P:thread1:  Instr 7:  IR element 2 of type M:  Bad tags:  (ea => 0x2000 )
+  Found data:  (d => 0x87654321 ea => 0x22000 n => Mem ra => 0x2000 t => read )
+P:thread1:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

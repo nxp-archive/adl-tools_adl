@@ -1,0 +1,143 @@
+#
+# Test of a model with CGMT implemented using contexts.
+# For this test, thread-swapping is done manually by writing
+# to the thread-swap register (an SPR).
+#
+
+= asm
+
+  lwz r2,0x1000(r0)
+  add r3,r2,r1
+  mtspr 51,r0
+  add r3,r3,r1
+  .long 0
+  lwz r3,0x2000(r0)
+  add r4,r3,r1
+  mtspr 51,r0
+  .long 0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80401000	#	lwz r2,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x7C620A14	#	add r3,r2,r1
+MD n=Mem ra=0x00000008 d=0x7C130BA6	#	mtspr 51,r0
+MD n=Mem ra=0x0000000c d=0x7C630A14	#	add r3,r3,r1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000014 d=0x80602000	#	lwz r3,0x2000(r0)
+MD n=Mem ra=0x00000018 d=0x7C830A14	#	add r4,r3,r1
+MD n=Mem ra=0x0000001c d=0x7C130BA6	#	mtspr 51,r0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0x3000
+MD n=Mem ra=0x2000 d=0x4000
+
+CORE n=:P
+
+RD n=NIA0 d=0x00
+RD n=NIA1 d=0x14
+
+CTX n=thread cn=0
+
+RD n=GPR i=1 d=10
+
+CTX n=thread cn=1
+
+RD n=GPR i=1 d=50
+
+CTX n=thread cn=0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80401000
+INSTR op=0x80401000					asm="lwz    r2,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00003000
+R n=GPR i=2 d=0x00003000
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add    r3,r2,r1"
+R n=GPR i=3 d=0x0000300a
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c130ba6
+INSTR op=0x7c130ba6					asm="mtspr  r0,51"
+R n=TEN0 d=0
+R n=TEN1 d=1
+R n=TACTIVE d=0x00000001
+
+CTX n=thread cn=1
+
+I ea=0x14 id=4
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x80602000
+INSTR op=0x80602000					asm="lwz    r3,8192(r0)"
+D n=Mem t=read ea=0x2000 nb=4
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0x00004000
+R n=GPR i=3 d=0x00004000
+
+I ea=0x18 id=5
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7c830a14
+INSTR op=0x7c830a14					asm="add    r4,r3,r1"
+R n=GPR i=4 d=0x00004032
+
+I ea=0x1c id=6
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7c130ba6
+INSTR op=0x7c130ba6					asm="mtspr  r0,51"
+R n=TEN0 d=1
+R n=TEN1 d=0
+R n=TACTIVE d=0x00000000
+
+CTX n=thread cn=0
+
+I ea=0xc id=7
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c630a14
+INSTR op=0x7c630a14					asm="add    r3,r3,r1"
+R n=GPR i=3 d=0x00003014
+
+I ea=0x10 id=8
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x0					asm="halt   "
+
+RESULTS
+
+CTX n=thread cn=0
+
+RD n=GPR i=1 d=0x0000000a
+RD n=GPR i=2 d=0x00003000
+RD n=GPR i=3 d=0x00003014
+
+RD n=TEN d=1
+RD n=NIA d=0x14
+
+RD n=VPIR d=0
+
+RD n=XPR i=0 d=0x00000000
+RD n=XPR i=1 d=0x00000001
+RD n=XPR i=2 d=0x00000002
+RD n=XPR i=3 d=0x00000003
+RD n=XPR i=4 d=0x00000004
+RD n=XPR i=5 d=0x00000005
+RD n=XPR i=6 d=0x00000006
+RD n=XPR i=7 d=0x00000007
+
+CTX n=thread cn=1
+
+RD n=GPR i=1 d=0x00000032
+RD n=GPR i=3 d=0x00004000
+RD n=GPR i=4 d=0x00004032
+
+RD n=NIA d=0x20
+
+RD n=VPIR d=1
+
+RD n=XPR i=0 d=0x00000100
+RD n=XPR i=1 d=0x00000101
+RD n=XPR i=2 d=0x00000102
+RD n=XPR i=3 d=0x00000103
+RD n=XPR i=4 d=0x00000104
+RD n=XPR i=5 d=0x00000105
+RD n=XPR i=6 d=0x00000106
+RD n=XPR i=7 d=0x00000107

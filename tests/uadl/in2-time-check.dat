@@ -1,0 +1,45 @@
+#
+# Options:
+#   
+#
+
+TEST id=0
+INIT
+
+CORE n=:P
+
+
+CORE n=:P
+
+TRACE
+
+
+I ea=0x100 id=1
+ITIME t=2
+CTIME t=5
+
+I ea=0x104 id=2
+ITIME t=3
+CTIME t=6
+
+I ea=0x108 id=3
+ITIME t=6
+CTIME t=9
+
+I ea=0x10c id=4
+ITIME t=7
+CTIME t=10
+
+I ea=0x110 id=5
+ITIME t=10
+CTIME t=13
+
+I ea=0x114 id=6
+ITIME t=11
+CTIME t=15
+
+I ea=0x118 id=7
+ITIME t=16
+CTIME t=19
+
+RESULTS

@@ -1,0 +1,97 @@
+//
+// This tests to make sure that we prefer shorter loads over longer loads when
+// assembling.
+//
+
+define (arch = MiniPPC) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+    prefix = r;
+  }
+
+  define (instrfield = fmt) {
+    bits = (0, 3);
+  }
+
+  define (instrfield = op4) {
+    """ 
+      The 2-address opcode. 
+    """;
+    bits = (8,11);
+  }
+
+  define (instrfield = Rd) {
+    """ 
+      First Destination and source register. Normal register access. 
+    """;
+    bits = (4, 7);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield = Rb) {
+    """ 
+      Second source register. Normal register access. 
+    """;
+    bits = (12, 15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield = SO8) {
+    """
+      8-bit signed offset for general 24 bit load and store encodings.
+    """;
+    bits = (16,23);
+    is_signed = true;
+  }
+
+  define (instrfield = SO16) {
+    """
+      Signed offset for general 32 bit load and store encodings.
+    """;
+    bits = (16,31);
+    is_signed = true;
+  }
+
+  define (instr = ld32iz) {
+    """ 
+      Load GPR(Rd) with word at memory location (GPR(Rb) + signed 8-bit offset). 
+      
+      No update GPR(Rb). No sign-extend. 
+    """;
+    fields = (fmt(10), op4(8), Rd, Rb, SO8); 
+    syntax = ("ld32iz %f,%f(%f)", Rd, SO8, Rb);
+    action = {
+    };
+  }
+
+  define (instr = ld32iz32) {
+    """ 
+      Load GPR(Rd) with word at memory location (GPR(Rb) + signed 16-bit offset). 
+      
+      No update GPR(Rb). No sign-extend. 
+    """;
+    fields = (fmt(12), op4(8), Rd, Rb, SO16); 
+    syntax = ("ld32iz32 %f, %f(%f)", Rd, SO16, Rb);
+    action = {
+    };
+  }
+
+  define (instr = ld32iz32_) {
+    alias = ld32iz32(Rd(Rd),Rb(Rb),SO16(SO16));
+    syntax = ("ld32iz %f, %f(%f)", Rd, SO16, Rb);    
+  }
+
+}
+
+
+define (core = P) {
+  archs = MiniPPC;
+}

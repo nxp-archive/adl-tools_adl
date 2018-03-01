@@ -1,0 +1,33 @@
+//
+// Unknown registers should not show up in the final data model.
+//
+// This includes items mislabeled as register when they're register files, or
+// vice versa.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit Fetcher) {
+      fetch_memory = L1i;
+      entries = 1;
+      entry_size = 4;
+      fetch_size = 4;
+    }
+    
+    define (reg Nia) {
+      latency = 1;
+    }
+
+    define (reg GPR) {
+      latency = 1;
+    }
+
+    define (regfile PC) {
+      latency = 1;
+    }
+
+  }
+
+}

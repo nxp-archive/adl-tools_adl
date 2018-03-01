@@ -1,0 +1,77 @@
+//
+// We allow %p fields before the instruction name.  These should
+// be included in the disassembly if we have to create an inverted
+// disassembler object.  Therefore, all fields except A and B should
+// be listed in the DSyntax.
+//
+
+define (arch=minippc) {
+  attrs = (up,down,ff,one); 
+  
+  //REGISTERS
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+  define(instrfield=R1){
+    bits = (11,16);
+  }
+  define(instrfield=R2){
+    bits = (17,22);
+  }
+  define(instrfield=OPCD){
+    bits =(1,5);
+  }
+  
+  define(instrfield=F1){
+    bits = 9;
+    enumerated = (".up",".down",(".up1",".up2"),".down1",("a1","a2","a3","a4"));
+    value = ".up";
+  }
+
+  define(instrfield=F2){
+    bits = 10;
+    enumerated = (".left0",".right0",(".left1",".left2",".left3"),".right1");
+    value = ".left1";
+  }
+
+  define (instrfield=A) {
+    bits = 23;
+  }
+
+  define (instrfield=B) {
+    bits = 24;
+  }
+
+  define (instrfield=NG) {
+    bits = 6;
+    enumerated = ("", "ng");
+  }
+
+  // OK- %p can be before %i.
+  define (instr = family){
+    fields = (OPCD,NG,F1,F2,R1,R2,A,B);
+    action={};
+
+    define (instr = a){
+      attrs = one;
+      fields = (OPCD(2),NG,F1,F2,R1,R2,A,B);
+      syntax = ("%p a%p%p %f %f",NG,F1,F2,R1,R2,A((R1>1)?1:0),B((R2>1)?1:0));
+      alias = family(NG(NG),F1(F1),F2(F2),R1(R1),R2(R2),A(A),B(B));
+    }
+    
+    define (instr = b){
+      attrs = one;
+      fields = (OPCD(3),NG,F1,F2,R1,R2,A,B);
+      syntax = ("%p b%p%p %f %f",NG,F1,F2,R1,R2,A((R1>1)?1:0),B((R2>1)?1:0));
+      alias = family(NG(NG),F1(F1),F2(F2),R1(R1),R2(R2),A(A),B(B));
+    }
+
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+  instrtables = one;
+}

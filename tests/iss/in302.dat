@@ -1,0 +1,74 @@
+#
+# Test to make sure that a sparse-register-file entries linked to specific
+# context-instances of registers and register-files work.
+#
+= asm
+
+	li r1,100
+	mtspr 230,r1
+	addi r1,r1,1
+	mtspr 231,r1
+	addi r1,r1,1
+	mtspr 232,r1
+	addi r1,r1,1
+	mtspr 233,r1
+	addi r1,r1,1
+	mtspr 234,r1
+	addi r1,r1,1
+	mtspr 235,r1
+
+	mfspr r2,230
+	mfspr r3,231
+	mfspr r4,232
+	mfspr r5,233
+	mfspr r6,234
+	mfspr r7,235
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38200064	#	li r1,100
+MD n=Mem ra=0x00000004 d=0x7C263BA6	#	mtspr 230,r1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x7C273BA6	#	mtspr 231,r1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x7C283BA6	#	mtspr 232,r1
+MD n=Mem ra=0x00000018 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000001c d=0x7C293BA6	#	mtspr 233,r1
+MD n=Mem ra=0x00000020 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000024 d=0x7C2A3BA6	#	mtspr 234,r1
+MD n=Mem ra=0x00000028 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000002c d=0x7C2B3BA6	#	mtspr 235,r1
+MD n=Mem ra=0x00000030 d=0x7C463AA6	#	mfspr r2,230
+MD n=Mem ra=0x00000034 d=0x7C673AA6	#	mfspr r3,231
+MD n=Mem ra=0x00000038 d=0x7C883AA6	#	mfspr r4,232
+MD n=Mem ra=0x0000003c d=0x7CA93AA6	#	mfspr r5,233
+MD n=Mem ra=0x00000040 d=0x7CCA3AA6	#	mfspr r6,234
+MD n=Mem ra=0x00000044 d=0x7CEB3AA6	#	mfspr r7,235
+# </GEN>
+
+CORE n=:P
+
+RESULTS
+
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=101
+RD n=GPR i=4 d=102
+RD n=GPR i=5 d=103
+RD n=GPR i=6 d=104
+RD n=GPR i=7 d=105
+
+CTX n=foobar cn=0
+
+RD n=AR     d=100
+RD n=A  i=0 d=103
+
+CTX n=foobar cn=1
+
+RD n=AR     d=101
+RD n=A  i=1 d=104
+
+CTX n=foobar cn=2
+
+RD n=AR     d=102
+RD n=A  i=2 d=105

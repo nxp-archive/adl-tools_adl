@@ -1,0 +1,82 @@
+//
+// Simple test of instruction encoding.
+//
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=OPCD5) {
+    bits = (0,4);
+  }
+
+  define (instrfield=OPCD15) {
+    bits = (0,14);
+  }
+
+  define (instrfield=LK7) {
+    bits = (7,7);
+  }
+
+  define (instrfield=LK15) {
+    bits = (15,15);
+  }
+
+  define (instrfield=BD8) {
+    bits = (8,15);
+  }
+
+  define (instrfield=BI16) {
+    bits = (6,7);
+  }
+
+  define (instrfield=BO16) {
+    bits = (5,5);
+  }
+
+  define (instr=se_b) {
+    width = 16;
+    fields=(OPCD(62),LK7(0),BD8);
+    action = {};
+  }
+
+  define (instr=se_bl) {
+    width = 16;
+    fields=(OPCD(62),LK7(1),BD8);
+    action = {};
+  }
+
+  define (instr=se_bc) {
+    width = 16;
+    fields=(OPCD5(30),BO16,BI16,BD8);
+    action = {};
+  }
+
+  // This should inherit the size from its target.
+  define (instr=se_bne) {
+    alias = se_bc(BO16(0),BI16(2),BD8(BD8));
+    syntax = ("%i %f",BD8);    
+  }
+
+  define (instr=se_bctr) {
+    width = 16;
+    fields=(OPCD15(3),LK15(0));
+    action = {};
+  }
+
+  define (instr=se_bctrl) {
+    width = 16;
+    fields=(OPCD15(3),LK15(1));
+    action = {};
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

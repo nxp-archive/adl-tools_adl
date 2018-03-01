@@ -1,0 +1,105 @@
+#
+# Testing that the addr_check hook will be called, even
+# when we hit in the MMU cache.
+#
+# The program sets up a data-address compare debug exception.
+# after the first two loads by writing to DAC.  The exception
+# handler checks to see if a load occurred or a store, then updates
+# r30 or r31 respectively.  It then increments DAC by 4 so that
+# subsequent loads or stores will be targeted.
+#
+= asm
+
+  lwz r1,0x1000(r0)  
+  add r2,r2,r1
+  lwz r1,0x1004(r0)  
+  add r2,r2,r1
+  mtspr 63,r10
+  lwz r1,0x1008(r0)  
+  add r2,r2,r1  
+  lwz r1,0x100c(r0)  
+  add r2,r2,r1  
+  stw r2,0x1010(r0)
+  stw r2,0x1014(r0)
+  stw r2,0x1018(r0)
+  .long 0x0
+  mfspr r29,64
+  cmpi 0,r29,1
+  beq L1
+  addi r30,r30,1
+  b L2
+L1:
+  addi r31,r31,1
+L2:
+  mfspr r29,63
+  addi r29,r29,4
+  mtspr 63,r29
+  mfspr r29,58
+  addi r29,r29,4
+  mtspr 58,r29
+  rfci
+
+= /asm
+
+= aopts
+ -mregnames -mbooke
+= /aopts
+
+= mdopts
+instr-offset: 0x1000
+= /mdopts
+
+TEST id=0
+
+#
+# <GEN>
+MD n=Mem ra=0x00001000 d=0x80201000	#	lwz r1,0x1000(r0)  
+MD n=Mem ra=0x00001004 d=0x7C420A14	#	add r2,r2,r1
+MD n=Mem ra=0x00001008 d=0x80201004	#	lwz r1,0x1004(r0)  
+MD n=Mem ra=0x0000100c d=0x7C420A14	#	add r2,r2,r1
+MD n=Mem ra=0x00001010 d=0x7D5F0BA6	#	mtspr 63,r10
+MD n=Mem ra=0x00001014 d=0x80201008	#	lwz r1,0x1008(r0)  
+MD n=Mem ra=0x00001018 d=0x7C420A14	#	add r2,r2,r1  
+MD n=Mem ra=0x0000101c d=0x8020100C	#	lwz r1,0x100c(r0)  
+MD n=Mem ra=0x00001020 d=0x7C420A14	#	add r2,r2,r1  
+MD n=Mem ra=0x00001024 d=0x90401010	#	stw r2,0x1010(r0)
+MD n=Mem ra=0x00001028 d=0x90401014	#	stw r2,0x1014(r0)
+MD n=Mem ra=0x0000102c d=0x90401018	#	stw r2,0x1018(r0)
+MD n=Mem ra=0x00001030 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001034 d=0x7FA012A6	#	mfspr r29,64
+MD n=Mem ra=0x00001038 d=0x2C1D0001	#	cmpi 0,r29,1
+MD n=Mem ra=0x0000103c d=0x4182000C	#	beq L1
+MD n=Mem ra=0x00001040 d=0x3BDE0001	#	addi r30,r30,1
+MD n=Mem ra=0x00001044 d=0x48000008	#	b L2
+MD n=Mem ra=0x00001048 d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x0000104c d=0x7FBF0AA6	#	mfspr r29,63
+MD n=Mem ra=0x00001050 d=0x3BBD0004	#	addi r29,r29,4
+MD n=Mem ra=0x00001054 d=0x7FBF0BA6	#	mtspr 63,r29
+MD n=Mem ra=0x00001058 d=0x7FBA0AA6	#	mfspr r29,58
+MD n=Mem ra=0x0000105c d=0x3BBD0004	#	addi r29,r29,4
+MD n=Mem ra=0x00001060 d=0x7FBA0BA6	#	mtspr 58,r29
+MD n=Mem ra=0x00001064 d=0x4C000066	#	rfci
+# </GEN>
+
+CORE n=:P
+RD n=DCTRL    d=0x80000000
+RD n=GPR i=10 d=0x1008
+RD n=IVOR15   d=0x34
+
+MD n=Mem ra=0xa1000 d=0x10
+MD n=Mem ra=0xa1004 d=0x20
+
+# ea=0x0000 ra=0x1000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x4 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x4
+
+RD n=NIA d=0x00000000
+
+
+RESULTS
+
+RD n=GPR i=2  d=0x70 # Only the first 2 loads complete.
+RD n=GPR i=30 d=3    # Should record that 3 stores occurred.
+RD n=GPR i=31 d=2    # Should record that 2 loads occurred.

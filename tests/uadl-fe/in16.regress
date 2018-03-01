@@ -1,0 +1,567 @@
+in16.uadl:5: warning: Core powerpc is not defined by ADL, using core P instead.
+powerpc (for architecture P):
+  First-level instruction memory:  Mem
+
+  First-level data memory:  Mem
+
+  Fetch Unit:  Fetcher
+    Fetch Memory:  Mem
+    Entries     :  8
+    Entry Size  :  1
+    Fetch Sizes :  8 4 
+
+  Pipeline Stage:  mEX
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+  Pipeline Stage:  mID
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  1
+		Shared           :  0
+  Pipeline Stage:  mMM
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+  Pipeline Stage:  mWB
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+
+  Register:  CIA
+    ID        :  0
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CR
+    ID        :  1
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CSRR0
+    ID        :  2
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CSRR1
+    ID        :  3
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CTR
+    ID        :  4
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  DAC
+    ID        :  5
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  DCTRL
+    ID        :  6
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  DSR
+    ID        :  7
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  Decoration
+    ID        :  8
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  ELPC
+    ID        :  9
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  ESR
+    ID        :  10
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  FOO
+    ID        :  11
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  GPR
+    ID        :  40
+    Size      :  32
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  HDBCR0
+    ID        :  12
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  HID0
+    ID        :  13
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  HID1
+    ID        :  14
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  HitReg
+    ID        :  15
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVOR15
+    ID        :  16
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVOR4
+    ID        :  17
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVOR5
+    ID        :  18
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVOR6
+    ID        :  19
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVOR7
+    ID        :  20
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVOR8
+    ID        :  21
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  IVPR
+    ID        :  22
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  LR
+    ID        :  23
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  MAS0
+    ID        :  24
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  MAS1
+    ID        :  25
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  MAS2
+    ID        :  26
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  MSR
+    ID        :  27
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  NIA
+    ID        :  28
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  PFAULT
+    ID        :  29
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  PID0
+    ID        :  30
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  PID1
+    ID        :  31
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  ProgFault
+    ID        :  32
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  RESRV
+    ID        :  33
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  SPR
+    ID        :  41
+    Size      :  1024
+    Width     :  32
+    Latency   :  0
+    Is aliased:  1
+  Register:  SRR0
+    ID        :  34
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  SRR1
+    ID        :  35
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  WatchDogTrigger
+    ID        :  36
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  XER
+    ID        :  37
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  dsESR
+    ID        :  38
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  dsFoo
+    ID        :  39
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+
+  Memory:  Mem
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Pipeline Scheduling Order:   mWB mMM mEX mID 
+
+  Machine:  normal
+    Initial state:  S_INIT
+    States       :  S_EX S_EXe S_EXp S_ID S_IDe S_MM S_MMe S_MMp S_WB S_WBe S_WBp
+    Default State Bindings:
+      S_ID = mID
+      S_IDe = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_EXe = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_MMe = mMM
+      S_WB = mWB
+      S_WBp = mWB
+      S_WBe = mWB
+    Exception Mapping:
+      S_EX -> S_EXe
+      S_ID -> S_IDe
+      S_MM -> S_MMe
+      S_WB -> S_WBe
+
+
+  Instruction Class:  decode_miss
+    Instructions:
+      decode_miss
+        __other__ = (src: ESR), 
+
+    Commit On Exception:  1
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_IDe = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_EXe = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_MMe = mMM
+      S_WB = mWB
+      S_WBp = mWB
+      S_WBe = mWB
+    State actions:
+      S_EXe:
+        To-States:  S_MMe 
+        From-States:  S_ID S_INIT 
+        Action:
+if ( mMM . has_space (  ) ) {
+    change_state ( S_MMe ) ;
+}
+
+      S_ID:
+        To-States:  S_EXe 
+        From-States:  S_INIT 
+        Action:
+if ( can_read_ops (  ) && can_write_ops (  ) && mEX . has_space (  ) ) {
+    exec (  ) ;
+    change_state ( S_EXe ) ;
+}
+
+      S_IDe:
+        To-States:  S_EXe 
+        Action:
+if ( mEX . has_space (  ) ) {
+    change_state ( S_EXe ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID . has_space (  ) ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MMe:
+        To-States:  S_WBe 
+        From-States:  S_EXe S_ID S_INIT 
+        Action:
+if ( mWB . has_space (  ) ) {
+    change_state ( S_WBe ) ;
+}
+
+      S_WBe:
+        To-States:  S_INIT 
+        From-States:  S_EXe S_ID S_INIT S_MMe 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+  Instruction Class:  fetch_exception
+    Instructions:
+      fetch_exception
+
+		Commit On Exception:  0
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_IDe = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_EXe = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_MMe = mMM
+      S_WB = mWB
+      S_WBp = mWB
+      S_WBe = mWB
+    State actions:
+      S_EX:
+        To-States:  S_MM 
+        From-States:  S_ID S_INIT 
+        Action:
+if ( mMM . has_space (  ) ) {
+    change_state ( S_MM ) ;
+}
+
+      S_ID:
+        To-States:  S_EX 
+        From-States:  S_INIT 
+        Action:
+if ( mEX . has_space (  ) ) {
+    commit_exceptions (  ) ;
+    taken_flush (  ) ;
+    change_state ( S_EX ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID . has_space (  ) ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MM:
+        To-States:  S_WB 
+        From-States:  S_EX S_ID S_INIT 
+        Action:
+if ( mWB . has_space (  ) ) {
+    change_state ( S_WB ) ;
+}
+
+      S_WB:
+        To-States:  S_INIT 
+        From-States:  S_EX S_ID S_INIT S_MM 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+  Instruction Class:  stmw
+    Instructions:
+      stmw
+        Src1 = (src: FOO[mask 0x00100000]/p), (src: GPR(RA)), (src: dsESR?), (src: dsFoo[mask 0xff000000]/p?), 
+        Src2 = (src: GPR(RS . uint32 (  ),31)), 
+
+    Commit On Exception:  1
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_IDe = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_EXe = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_MMe = mMM
+      S_WB = mWB
+      S_WBp = mWB
+      S_WBe = mWB
+    State actions:
+      S_EX:
+        To-States:  S_MM 
+        From-States:  S_ID S_INIT 
+        Action:
+if ( mMM . has_space (  ) && Mem . can_request_write (  ) ) {
+    exec (  ) ;
+    Mem . send_write_request ( 8 ) ;
+    change_state ( S_MM ) ;
+}
+
+      S_EXe:
+        To-States:  S_MMe 
+        Action:
+if ( mMM . has_space (  ) ) {
+    change_state ( S_MMe ) ;
+}
+
+      S_ID:
+        To-States:  S_EX 
+        From-States:  S_INIT 
+        Action:
+if ( Src1 . can_read (  ) && Src2 . can_read (  ) && mEX . has_space (  ) ) {
+    Src1 . read (  ) ;
+    Src2 . read (  ) ;
+    change_state ( S_EX ) ;
+}
+
+      S_IDe:
+        To-States:  S_EXe 
+        Action:
+if ( mEX . has_space (  ) ) {
+    change_state ( S_EXe ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID . has_space (  ) ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MM:
+        To-States:  S_MMp 
+        From-States:  S_EX S_ID S_INIT 
+        Action:
+if ( Mem . can_write (  ) ) {
+    exec_and_write ( Mem , 2 , 4 ) ;
+    change_state ( S_MMp ) ;
+}
+
+      S_MMe:
+        To-States:  S_WBe 
+        Action:
+if ( mWB . has_space (  ) ) {
+    change_state ( S_WBe ) ;
+}
+
+      S_MMp:
+        To-States:  S_MM S_WB 
+        From-States:  S_EX S_ID S_INIT S_MM 
+        Action:
+if ( exec_done (  ) && mWB . has_space (  ) ) {
+    change_state ( S_WB ) ;
+} else if ( Mem . can_request_write (  ) ) {
+    Mem . send_write_request ( 8 ) ;
+    change_state ( S_MM ) ;
+}
+
+      S_WB:
+        To-States:  S_WBp 
+        From-States:  S_EX S_ID S_INIT S_MM S_MMp 
+        Action:
+{
+    change_state ( S_WBp ) ;
+}
+
+      S_WBe:
+        To-States:  S_INIT 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+      S_WBp:
+        To-States:  S_INIT 
+        From-States:  S_EX S_ID S_INIT S_MM S_MMp S_WB 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+

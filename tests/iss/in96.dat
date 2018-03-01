@@ -1,0 +1,97 @@
+#
+# Test to make sure that reading and writing to registers which are
+# aliases of context registers only affects that register itself;
+# context resources within read and write hooks still use the current
+# global context.
+#
+= asm
+
+  mtspr 61,r1
+  mfspr r2,62
+  mtspr 51,r0
+  .long 0
+  .long 0
+  mfspr r2,60
+  mfspr r2,62
+
+= /asm  
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C3D0BA6	#	mtspr 61,r1
+MD n=Mem ra=0x00000004 d=0x7C5E0AA6	#	mfspr r2,62
+MD n=Mem ra=0x00000008 d=0x7C130BA6	#	mtspr 51,r0
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000014 d=0x7C5C0AA6	#	mfspr r2,60
+MD n=Mem ra=0x00000018 d=0x7C5E0AA6	#	mfspr r2,62
+# </GEN>
+CORE n=:P
+
+RD n=XX0  d=0xdeadbeef
+RD n=XX1  d=0x12345678
+
+RD n=NIA0 d=0x00
+RD n=NIA1 d=0x14
+
+CTX n=thread cn=0
+
+RD n=GPR i=1 d=10
+
+CTX n=thread cn=1
+
+RD n=GPR i=1 d=50
+
+CTX n=thread cn=0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c3d0ba6
+INSTR op=0x7c3d0ba6					asm="mtspr r1,61"
+R n=FOO d=0x00000004
+R n=XX1 d=0x0000000a
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c5e0aa6
+INSTR op=0x7c5e0aa6					asm="mfspr r2,62"
+R n=GPR i=2 d=0x00000004
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c130ba6
+INSTR op=0x7c130ba6					asm="mtspr r0,51"
+R n=TEN0 d=0x00000000
+R n=TEN1 d=0x00000000
+R n=TEN1 d=0x00000001
+R n=TACTIVE d=0x00000001
+
+CTX n=thread cn=1
+
+I ea=0x14 id=4
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c5c0aa6
+INSTR op=0x7c5c0aa6					asm="mfspr r2,60"
+R n=FOO d=0x00000018
+R n=GPR i=2 d=0xdeadbeef
+
+I ea=0x18 id=5
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7c5e0aa6
+INSTR op=0x7c5e0aa6					asm="mfspr r2,62"
+R n=GPR i=2 d=0x00000018
+
+I ea=0x1c id=6
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+CTX n=thread cn=0
+
+RD n=XX      d=0xdeadbeef
+RD n=GPR i=1 d=0x0000000a
+RD n=GPR i=2 d=0x00000004
+
+CTX n=thread cn=1
+
+RD n=XX      d=0x0000000a
+RD n=GPR i=1 d=0x00000032
+RD n=GPR i=2 d=0x00000018
+

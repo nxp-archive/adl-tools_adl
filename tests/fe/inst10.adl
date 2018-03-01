@@ -1,0 +1,73 @@
+//
+// This demonstrates support of encoding when inst fields overlap completely and one is
+// smaller than the other.
+// 
+//
+define (arch=minippc) {
+
+
+
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=XOE) {
+    bits = (21,31);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {};
+  }
+  define (instr=a) {
+    fields=(OPCD(31),RT,RA,RB,XOE(301));
+    action = {};
+  }
+  define (instr=b) {
+    fields=(OPCD(31),RT,RA,RB,XOE(300));
+    action = {};
+  }
+  define (instr=c) {
+    fields=(OPCD(31),RT,RA,RB,XO(150));
+    action = {};
+  }
+  define (instr=foo) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {};
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

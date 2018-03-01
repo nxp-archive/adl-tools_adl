@@ -1,0 +1,272 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Example of having a shared MMU.
+//
+
+#import "mod1.adl"
+
+define (arch=mt) {
+
+  attrs = (translation_attr,unarchitected,indeterminate);
+
+  define (parm=Mode) {
+    options = (ModeA,ModeB);
+    value = ModeA;
+  }
+
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      // This should essentially be a hidden field.
+      define (wayfield=XX1) {
+        bits = 1;
+        attrs = unarchitected;
+      }
+      // This should only show up in initial and final results.
+      define (wayfield=XX2) {
+        bits = 1;
+        attrs = indeterminate;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+
+      reset = {
+        // Reset state: One 4k translation at top of memory.  In this case,
+        // it maps the top 4k to the bottom 4k.
+        TlbCam_t t;
+      
+        t.EPN  = 0x3fffff;
+        t.TID  = 0;
+        t.V    = 1;
+        t.TS   = 0;
+                      
+        t.RPN  = 0;
+        t.SIZE = 1;
+                                  
+        TlbCam(0,0) = t;
+      };
+
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+    }
+
+  }
+
+  attrs = trans_control;
+  attrs = (instr,data);
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=IR) {
+      attrs = (trans_control,instr);
+      bits = 10;
+    }
+    define (field=DR) {
+      attrs = (trans_control,data);
+      bits = 11;
+    }
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=PID1) {
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=30) { reg = NIA0; };
+    define (entry=31) { reg = NIA1; };
+  }
+
+  define (reg=NIA0) { }
+
+  define (reg=NIA1) { }
+
+  define (reg=MAS0) {
+    """
+    Memory assist register 0.
+    """;
+    define (field=EPN) {
+      bits=(0,23);
+    }
+    define (field=TID) {
+      bits=(24,29);
+    }
+    define (field=V) {
+      bits=30;
+    }
+    define (field=TS) {
+      bits=31;
+    }
+  }
+
+  define (reg=MAS1) {
+    """
+    Memory assist register 1.
+    """;
+    define (field=RPN) {
+      bits=(0,23);
+    }
+    define (field=SIZE) {
+      bits=(24,29);
+    }
+  }
+
+  define (reg=MAS2) {
+    """
+    Memory assist register 2.
+    """;
+    define (field=XX1) {
+      bits = 0;
+    }
+    define (field=XX2) {
+      bits = 1;
+    }
+    define (field=WIMG) {
+      bits=(6,9);
+    }
+    define (field=Set) {
+      bits=(20,27);
+    }
+    define (field=Way) {
+      bits=(28,31);
+    }
+  }
+
+  void populateMasRegs(int set,int way) {
+    var t = TlbCam(set,way);
+      
+    MAS0.EPN  = t.EPN;
+    MAS0.TID  = t.TID;
+    MAS0.V    = t.V;
+    MAS0.TS   = t.TS;
+
+    MAS1.RPN  = t.RPN;
+    MAS1.SIZE = t.SIZE;
+
+    MAS2.XX1   = t.XX1;
+    MAS2.XX2   = t.XX2;
+    MAS2.WIMG  = t.WIMG;
+  }
+
+  define (instr=tlbre) {
+    fields=(OPCD(31),XO(946));
+    action = {
+      var set = MAS2.Set;
+      var way = MAS2.Way;
+      populateMasRegs(set.uint32(),way.uint32());
+    };
+  }
+
+  define (instr=tlbwe) {
+    fields=(OPCD(31),XO(978));
+    action = {
+      var set = MAS2.Set;
+      var way = MAS2.Way;
+      TlbCam_t t;
+      
+      t.EPN  = MAS0.EPN;
+      t.TID  = MAS0.TID;
+      t.V    = MAS0.V; 
+      t.TS   = MAS0.TS;
+                      
+      t.RPN  = MAS1.RPN;
+      t.SIZE = MAS1.SIZE;
+                      
+      t.XX1  = MAS2.XX1;
+      t.XX2  = MAS2.XX2;
+      t.WIMG = MAS2.WIMG;
+            
+      TlbCam(set,way) = t;
+    };
+  }
+
+}
+
+define (sys=PMT) {
+  type="PowerPC";
+  define (core = Thread0) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+    define (reg=NIA) {
+      attrs = nia;
+      define (write) {
+        alias = NIA0;
+      }
+      define (read) {
+        alias = NIA0;
+      }
+    }
+  }
+  define (core = Thread1) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+    define (reg=NIA) {
+      attrs = nia;
+      define (write) {
+        alias = NIA1;
+      }
+      define (read) {
+        alias = NIA1;
+      }
+    }
+  }
+  define (shared) {
+    regs = (NIA0,NIA1,HID0);
+    mmulookups = TlbCam;
+    parms = Mode;
+  }
+  Thread0 t0;
+  Thread1 t1;
+}
+
+define (core=P) {
+  remove = 1;
+}

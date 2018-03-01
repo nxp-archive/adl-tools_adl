@@ -1,0 +1,18 @@
+
+define (sys=PMT) {
+  define (core=Thread) {
+    define (config) {
+      dyn_caches = L1i;
+    }
+  }
+  defmod (core=Thread) {
+    defmod (config) {
+      dyn_caches = L1d;
+    }
+  }
+  defmod (core=Thread) {
+    defmod (config) {
+      reg_callbacks = (CBTEST1,CBTEST2);
+    }
+  }
+}

@@ -1,0 +1,86 @@
+#
+# This makes sure that if we have two multipliers available,
+# we'll pick the first available.  The fifth multiply should
+# launch at time 8 b/c it will use the multiplier used by the
+# second and fourth instruction.
+#
+# <ASM>
+# mullw r1,r2,r3
+# mullw r4,r5,r6
+# mullw r7,r1,r8
+# mullw r9,r10,r11
+# mullw r12,r13,r14
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C2219D6	# mullw r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x7C8531D6	# mullw r4,r5,r6
+MD n=Mem ra=0x00000008 d=0x7CE141D6	# mullw r7,r1,r8
+MD n=Mem ra=0x0000000c d=0x7D2A59D6	# mullw r9,r10,r11
+MD n=Mem ra=0x00000010 d=0x7D8D71D6	# mullw r12,r13,r14
+# </GEN>
+CORE n=:P
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=8 d=8
+RD n=GPR i=10 d=10
+RD n=GPR i=11 d=11
+RD n=GPR i=13 d=13
+RD n=GPR i=14 d=14
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 d=0x7c2219d6
+INSTR op=0x7c2219d6 asm="mullw 1,2,3"
+R n=GPR i=1 d=0x00000006
+ITIME t=0
+CTIME t=8
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 d=0x7c8531d6
+INSTR op=0x7c8531d6 asm="mullw 4,5,6"
+R n=GPR i=4 d=0x00000000
+ITIME t=0
+CTIME t=8
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 d=0x7ce141d6
+INSTR op=0x7ce141d6 asm="mullw 7,1,8"
+R n=GPR i=7 d=0x00000030
+ITIME t=8
+CTIME t=16
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc d=0x7d2a59d6
+INSTR op=0x7d2a59d6 asm="mullw 9,10,11"
+R n=GPR i=9 d=0x0000006e
+ITIME t=4
+CTIME t=12
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10 d=0x7d8d71d6
+INSTR op=0x7d8d71d6 asm="mullw 12,13,14"
+R n=GPR i=12 d=0x000000b6
+ITIME t=8
+CTIME t=16
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14 d=0x0
+INSTR op=0x0 asm="halt"
+ITIME t=5
+CTIME t=6
+
+RESULTS
+
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=7 d=48
+RD n=GPR i=8 d=8
+RD n=GPR i=9 d=110
+RD n=GPR i=10 d=10
+RD n=GPR i=11 d=11
+RD n=GPR i=12 d=182
+RD n=GPR i=13 d=13
+RD n=GPR i=14 d=14

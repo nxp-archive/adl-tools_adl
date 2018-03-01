@@ -1,0 +1,95 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "SPEFSCR"
+  Usage:  field-read, field-written
+  Width:  32
+    FDBZ[21]   
+    FDBZE[27]   
+    FDBZH[5]   
+    FDBZS[12]   
+    FG[18]   
+    FGH[2]   
+    FINV[20]   
+    FINVE[26]   
+    FINVH[4]   
+    FINVS[11]   
+    FINXE[25]   
+    FINXS[10]   
+    FOVF[23]   
+    FOVFE[29]   
+    FOVFH[7]   
+    FOVFS[14]   
+    FRMC[30,31]   
+    FUNF[22]   
+    FUNFE[28]   
+    FUNFH[6]   
+    FUNFS[13]   
+    FX[19]   
+    FXH[3]   
+    MODE[15]   
+    OV[17]   
+      Usage:  field-written
+    OVH[1]   
+      Usage:  field-written
+    SOV[16]   
+      Usage:  field-read, field-written
+    SOVH[0]   
+      Usage:  field-read, field-written
+  Documention:
+
+    The SPE status and control register.
+    
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  SE_OPCD8: [0,7] 
+        Primary opcode, 8-bit width, for 16-bit instructions.
+    
+  SE_RX: [12,15] 
+        Field used to specify a General Purpose Register in the ranges R0:R7 or
+    R24:31 to be used as a source or as a destination.
+    
+  SE_RY: [8,11] 
+        Field used to specify a General Purpose Register in the ranges R0:R7 or
+    R24:31 to be used as a source.
+    
+Instructions:
+  Name:  foo (rank: 100)
+  Width:  16
+  Fields:  SE_OPCD8(67) SE_RY SE_RX
+  Action:  {
+     uint32_t ovh = 1 ;
+     uint32_t ovl = 1 ;
+    SPEFSCR . OVH = ovh ;
+    SPEFSCR . OV = ovl ;
+    SPEFSCR . SOVH = SPEFSCR . SOVH | ovh ;
+    SPEFSCR . SOV = SPEFSCR . SOV | ovl ;
+}
+  Source Registers:  SPEFSCR[mask 0x80008000]/p 
+  Target Registers:  SPEFSCR[mask 0xc000c000] 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff000000
+    67(43000000):  foo
+-------------------------------
+

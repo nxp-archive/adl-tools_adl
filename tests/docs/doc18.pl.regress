@@ -1,0 +1,604 @@
+$data = {
+"cores" => {
+"P" => {
+"doc" => <<DATA
+Example documentation string- place overview information here.
+
+DATA
+,
+"bit_endianness" => "little",
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+Current instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+Next instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+"SR" => {
+"width" => 32,
+"fields" => {
+"C" => {
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"LF" => {
+"bits" => [
+[
+30,
+27,
+],
+],
+},
+"OVF" => {
+"bits" => [
+[
+10,
+10,
+],
+],
+},
+"P0" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"P1" => {
+"bits" => [
+[
+31,
+31,
+],
+],
+},
+"P2" => {
+"bits" => [
+[
+30,
+30,
+],
+],
+},
+"P3" => {
+"bits" => [
+[
+29,
+29,
+],
+],
+},
+"P4" => {
+"bits" => [
+[
+28,
+28,
+],
+],
+},
+"P5" => {
+"bits" => [
+[
+27,
+27,
+],
+],
+},
+"RF" => {
+"bits" => [
+[
+13,
+13,
+],
+],
+},
+"RM" => {
+"bits" => [
+[
+3,
+3,
+],
+],
+},
+"S" => {
+"bits" => [
+[
+6,
+6,
+],
+],
+},
+"SAT" => {
+"bits" => [
+[
+11,
+11,
+],
+],
+},
+"SCM" => {
+"bits" => [
+[
+8,
+8,
+],
+[
+5,
+4,
+],
+],
+},
+"SM" => {
+"bits" => [
+[
+2,
+2,
+],
+],
+},
+"SM2" => {
+"bits" => [
+[
+7,
+7,
+],
+],
+},
+"T" => {
+"bits" => [
+[
+1,
+1,
+],
+],
+},
+"W20" => {
+"bits" => [
+[
+12,
+12,
+],
+],
+},
+},
+"reserved_mask" => "0b00000111111111111100001000000000",
+"shared" => 0,
+"write" => {
+<<DATA
+{
+    ThisReg = ( x & 0xff000000 ) ;
+}
+DATA
+,
+},
+},
+"XR" => {
+"width" => 32,
+"fields" => {
+"A" => {
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"B" => {
+"bits" => [
+[
+10,
+1,
+],
+],
+},
+"C" => {
+"bits" => [
+[
+23,
+11,
+],
+],
+},
+},
+"reserved_mask" => "0b11111111000000000000000000000000",
+"shared" => 0,
+"write" => {
+<<DATA
+{
+    ThisReg ( start , stop ) = x ( start , stop ) | ThisReg ( start , stop ) ;
+}
+DATA
+,
+},
+},
+},
+"regfiles" => {
+"GPR" => {
+"doc" => <<DATA
+General purpose registers.
+    
+DATA
+,
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+},
+"instrfields" => {
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+5,
+0,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3f",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+15,
+11,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+20,
+16,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) as a target.
+    
+DATA
+,
+"bits" => [
+[
+10,
+6,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+10,
+6,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"Src1" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Src2" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Trg" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+30,
+21,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe00000",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add_family" => {
+"syntax" => "add_family Src1, Src2, Trg",
+"dsyntax" => "add_family ${Src1}, ${Src2}, ${Trg}",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+},
+"action" => <<DATA
+{
+    SR . OVF = 1 ;
+    SR . SAT = 1 ;
+}
+DATA
+,
+"disassemble" => 1,
+"outputs" => [
+"SR.OVF/p",
+"SR.SAT/p",
+],
+},
+"add1" => {
+"width" => 32,
+"syntax" => "add1 RB, RA, RT",
+"dsyntax" => "add1 ${RB}, ${RA}, ${RT}",
+"fields" => {
+"XO" => 266,
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 31,
+},
+"aliases" => {
+"add_family" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"misc" => {
+"field" => "Src2",
+"value" => "RB",
+},
+"misc" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"parent_action" => <<DATA
+{
+    SR . OVF = 1 ;
+    SR . SAT = 1 ;
+}
+DATA
+,
+},
+},
+"parent" => "add_family",
+"disassemble" => 1,
+"outputs" => [
+"SR.OVF/p",
+"SR.SAT/p",
+],
+},
+"sub_family" => {
+"syntax" => "sub_family Src1, Src2, Trg",
+"dsyntax" => "sub_family ${Src1}, ${Src2}, ${Trg}",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+},
+"action" => <<DATA
+{
+    XR . A = 1 ;
+    XR . B = XR . C + 2 ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"XR.C/p",
+],
+"outputs" => [
+"XR.B",
+"XR.A",
+],
+},
+"sub1" => {
+"width" => 32,
+"syntax" => "sub1 RB, RA, RT",
+"dsyntax" => "sub1 ${RB}, ${RA}, ${RT}",
+"fields" => {
+"XO" => 266,
+"RB" => "",
+"RA" => "",
+"RT" => "",
+"OPCD" => 32,
+},
+"aliases" => {
+"sub_family" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "Src1",
+"value" => "RA",
+},
+"misc" => {
+"field" => "Src2",
+"value" => "RB",
+},
+"misc" => {
+"field" => "Trg",
+"value" => "RT",
+},
+],
+"parent_action" => <<DATA
+{
+    XR . A = 1 ;
+    XR . B = XR . C + 2 ;
+}
+DATA
+,
+},
+},
+"parent" => "sub_family",
+"disassemble" => 1,
+"inputs" => [
+"XR.C/p",
+],
+"outputs" => [
+"XR.B",
+"XR.A",
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+},
+},
+"systems" => {
+},
+};
+

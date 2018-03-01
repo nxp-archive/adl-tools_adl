@@ -1,0 +1,83 @@
+#
+# Tests the internal DMI cache to make sure we can handle large addresses
+# properly.
+#
+= asm
+
+	ld r1,0x100(r0)				# Load source and destination.
+	ld r2,0x108(r0)
+	li r3,10
+	mtctr r3
+L1:
+	lwzu r3,4(r1)
+	stwu r3,4(r2)
+	bdnz L1
+
+= /asm
+
+= aopts
+ -mregnames -mppc64
+= /aopts
+
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xE8200100	#	ld r1,0x100(r0)				# Load source and destination.
+MD n=Mem ra=0x00000004 d=0xE8400108	#	ld r2,0x108(r0)
+MD n=Mem ra=0x00000008 d=0x3860000A	#	li r3,10
+MD n=Mem ra=0x0000000c d=0x7C6903A6	#	mtctr r3
+MD n=Mem ra=0x00000010 d=0x84610004	#	lwzu r3,4(r1)
+MD n=Mem ra=0x00000014 d=0x94620004	#	stwu r3,4(r2)
+MD n=Mem ra=0x00000018 d=0x4200FFF8	#	bdnz L1
+# </GEN>
+
+MD n=Mem ra=0x100 d=0xffee00
+MD n=Mem ra=0x104 d=0x00000ffc
+
+MD n=Mem ra=0x108 d=0xffff00
+MD n=Mem ra=0x10c d=0x00001ffc
+
+MD n=Mem ra=0xffee0000001000 d=10
+MD n=Mem ra=0xffee0000001004 d=20
+MD n=Mem ra=0xffee0000001008 d=30
+MD n=Mem ra=0xffee000000100c d=40
+MD n=Mem ra=0xffee0000001010 d=50
+MD n=Mem ra=0xffee0000001014 d=60
+MD n=Mem ra=0xffee0000001018 d=70
+MD n=Mem ra=0xffee000000101c d=80
+MD n=Mem ra=0xffee0000001020 d=90
+MD n=Mem ra=0xffee0000001024 d=100
+
+MD n=Mem ra=0xffff0000002000 d=0
+MD n=Mem ra=0xffff0000002004 d=0
+MD n=Mem ra=0xffff0000002008 d=0
+MD n=Mem ra=0xffff000000200c d=0
+MD n=Mem ra=0xffff0000002010 d=0
+MD n=Mem ra=0xffff0000002014 d=0
+MD n=Mem ra=0xffff0000002018 d=0
+MD n=Mem ra=0xffff000000201c d=0
+MD n=Mem ra=0xffff0000002020 d=0
+MD n=Mem ra=0xffff0000002024 d=0
+
+RESULTS
+
+MD n=Mem ra=0xffee0000001000 d=10
+MD n=Mem ra=0xffee0000001004 d=20
+MD n=Mem ra=0xffee0000001008 d=30
+MD n=Mem ra=0xffee000000100c d=40
+MD n=Mem ra=0xffee0000001010 d=50
+MD n=Mem ra=0xffee0000001014 d=60
+MD n=Mem ra=0xffee0000001018 d=70
+MD n=Mem ra=0xffee000000101c d=80
+MD n=Mem ra=0xffee0000001020 d=90
+MD n=Mem ra=0xffee0000001024 d=100
+
+MD n=Mem ra=0xffff0000002000 d=10
+MD n=Mem ra=0xffff0000002004 d=20
+MD n=Mem ra=0xffff0000002008 d=30
+MD n=Mem ra=0xffff000000200c d=40
+MD n=Mem ra=0xffff0000002010 d=50
+MD n=Mem ra=0xffff0000002014 d=60
+MD n=Mem ra=0xffff0000002018 d=70
+MD n=Mem ra=0xffff000000201c d=80
+MD n=Mem ra=0xffff0000002020 d=90
+MD n=Mem ra=0xffff0000002024 d=100

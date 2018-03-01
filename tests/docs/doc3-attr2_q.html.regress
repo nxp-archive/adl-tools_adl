@@ -1,0 +1,40 @@
+     <html>
+     <big>
+     <head>
+     <title>ADL Database Report</title>
+     </head>
+     <body>
+     <table border="10">
+     <tr bgcolor="lightblue">
+
+<tr bgcolor="lightblue">
+<td>
+<big><b>NAME</big></b></td>
+<td>
+<big><b>STRING</big></b></td>
+<td>
+<big><b>INTEGER</big></b></td>
+<td>
+<big><b>INTLIST</big></b></td>
+<td>
+<big><b>STRLIST</big></b></td>
+<td>
+<big><b>ATTRS</big></b></td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+I1</td>
+<td>
+d</td>
+<td>
+3</td>
+<td>
+1,2,3</td>
+<td>
+d,d,g</td>
+<td>
+integer,intlist,string,strlist,usual</td>
+</tr>
+</table>
+</body>
+</html>

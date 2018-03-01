@@ -1,0 +1,588 @@
+XML:<?xml encoding="UTF-8" version="1.0"?>
+ <data>
+  <cores>
+   <core name="zen">
+    <RaMask>
+     <initial>
+      <str>
+       0xffffffff
+      </str>
+     </initial>
+     <constant>
+      <true />
+     </constant>
+    </RaMask>
+    <EaMask>
+     <initial>
+      <str>
+       0xffffffff
+      </str>
+     </initial>
+     <constant>
+      <true />
+     </constant>
+    </EaMask>
+    <regs>
+     <register name="pc">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <attributes>
+       <attribute name="cia">
+        <str />
+       </attribute>
+       <attribute name="nia">
+        <str />
+       </attribute>
+      </attributes>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+    </regs>
+    <instrfields>
+     <instrfield name="A">
+      <bits>
+       <range>
+        <int>
+         6
+        </int>
+        <int>
+         20
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        15
+       </int>
+      </width>
+      <size>
+       <int>
+        15
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x3fff800
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="B">
+      <bits>
+       <range>
+        <int>
+         21
+        </int>
+        <int>
+         30
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        10
+       </int>
+      </width>
+      <size>
+       <int>
+        10
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x7fe
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="OPCD">
+      <bits>
+       <range>
+        <int>
+         0
+        </int>
+        <int>
+         5
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        6
+       </int>
+      </width>
+      <size>
+       <int>
+        6
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0xfc000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+    </instrfields>
+    <instrs>
+     <instruction name="i1">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <syntax>
+       <str>
+        i1 A, B
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        i1 ${A}, ${B}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="OPCD">
+        <int>
+         1
+        </int>
+       </field>
+       <field name="A">
+        <str />
+       </field>
+       <field name="B">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+     <instruction name="i2">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <syntax>
+       <str>
+        i2 A, B
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        i2 ${A}, ${B}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="OPCD">
+        <int>
+         2
+        </int>
+       </field>
+       <field name="A">
+        <str />
+       </field>
+       <field name="B">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+     <instruction name="i3">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <syntax>
+       <str>
+        i3 A, B
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        i3 ${A}, ${B}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="OPCD">
+        <int>
+         3
+        </int>
+       </field>
+       <field name="A">
+        <str />
+       </field>
+       <field name="B">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+     <instruction name="i4">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <syntax>
+       <str>
+        i4 A, B
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        i4 ${A}, ${B}
+       </str>
+      </dsyntax>
+      <attributes>
+       <attribute name="red">
+        <str />
+       </attribute>
+      </attributes>
+      <fields>
+       <field name="OPCD">
+        <int>
+         4
+        </int>
+       </field>
+       <field name="A">
+        <str />
+       </field>
+       <field name="B">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+     <instruction name="i5">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <syntax>
+       <str>
+        i5 A, B
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        i5 ${A}, ${B}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="OPCD">
+        <int>
+         5
+        </int>
+       </field>
+       <field name="A">
+        <str />
+       </field>
+       <field name="B">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+     <instruction name="i6">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <syntax>
+       <str>
+        i6 A, B
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        i6 ${A}, ${B}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="OPCD">
+        <int>
+         6
+        </int>
+       </field>
+       <field name="A">
+        <str />
+       </field>
+       <field name="B">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+    </instrs>
+    <core-level-hooks>
+     <decode-miss>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </decode-miss>
+     <pre-cycle>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </pre-cycle>
+     <post-cycle>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-cycle>
+     <pre-fetch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </pre-fetch>
+     <post-fetch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-fetch>
+     <post-exec>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-exec>
+     <post-asm>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-asm>
+     <post-packet-asm>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-packet-asm>
+     <post-packet>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-packet>
+     <active-watch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </active-watch>
+     <instr-table-watch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </instr-table-watch>
+    </core-level-hooks>
+    <groups>
+     <group name="g1">
+      <type>
+       <str>
+        instr
+       </str>
+      </type>
+      <items>
+       <str>
+        i1
+       </str>
+       <str>
+        i2
+       </str>
+       <str>
+        i3
+       </str>
+      </items>
+     </group>
+     <group name="g2">
+      <type>
+       <str>
+        instr
+       </str>
+      </type>
+      <items>
+       <str>
+        i3
+       </str>
+       <str>
+        i4
+       </str>
+       <str>
+        i5
+       </str>
+      </items>
+     </group>
+     <group name="g3">
+      <type>
+       <str>
+        instr
+       </str>
+      </type>
+      <items>
+       <str>
+        i3
+       </str>
+       <str>
+        i6
+       </str>
+      </items>
+     </group>
+     <group name="g4">
+      <type>
+       <str>
+        instr
+       </str>
+      </type>
+      <items>
+       <str>
+        i1
+       </str>
+       <str>
+        i2
+       </str>
+       <str>
+        i6
+       </str>
+      </items>
+     </group>
+     <group name="g5">
+      <type>
+       <str>
+        instr
+       </str>
+      </type>
+      <items>
+       <str>
+        i3
+       </str>
+       <str>
+        i6
+       </str>
+      </items>
+     </group>
+    </groups>
+    <asm_config>
+     <comments>
+      <str>
+       #
+      </str>
+     </comments>
+     <line_comments>
+      <str>
+       #
+      </str>
+     </line_comments>
+    </asm_config>
+   </core>
+  </cores>
+  <systems />
+ </data>
+
+

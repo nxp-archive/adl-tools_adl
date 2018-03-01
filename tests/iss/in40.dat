@@ -1,0 +1,173 @@
+#
+# Checks that an undecodable instruction will log an illop message.
+#
+= asm
+addi r1,r1,1
+bl 0x40
+addi r1,r1,1
+bl 0x40
+addi r1,r1,1
+bl 0x40
+addi r1,r1,1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x48000041	# bl 0x40
+MD n=Mem ra=0x00000008 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x48000041	# bl 0x40
+MD n=Mem ra=0x00000010 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x48000041	# bl 0x40
+MD n=Mem ra=0x00000018 d=0x38210001	# addi r1,r1,1
+# </GEN>
+
+CORE n=:P
+# Program-interrupt handler.
+# addi  r31,r31,1
+# mfspr r30,SRR0
+# addi r30,r30,4
+# mtspr SRR0,r30
+# rfi
+MD n=Mem ra=0x00010100 d=0x3BFF0001	# addi r31,r31,1
+MD n=Mem ra=0x00010104 d=0x7FDA02A6	# mfspr r30,SRR0
+MD n=Mem ra=0x00010108 d=0x3BDE0004	# addi r30,r30,4
+MD n=Mem ra=0x0001010c d=0x7FDA03A6	# mtspr SRR0,r30
+MD n=Mem ra=0x00010110 d=0x4C000064	# rfi
+
+RD n=IVPR d=0x00010000
+RD n=IVOR6 d=0x00000100
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001 asm="#1 addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x48000041
+INSTR op=0x48000041 asm="#2 <illop>"
+E n=Program
+R n=SRR0 d=0x00000004
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+
+I id=3 ea=0x10100
+M n=Mem t=ifetch ea=0x10100 ra=0x10100 d=0x3bff0001
+INSTR op=0x3bff0001 asm="#3 addi 31,31,1"
+R n=GPR i=31 d=0x00000001
+
+I id=4 ea=0x10104
+M n=Mem t=ifetch ea=0x10104 ra=0x10104 d=0x7fda02a6
+INSTR op=0x7fda02a6 asm="#4 mfspr 30,26"
+R n=GPR i=30 d=0x00000004
+
+I id=5 ea=0x10108
+M n=Mem t=ifetch ea=0x10108 ra=0x10108 d=0x3bde0004
+INSTR op=0x3bde0004 asm="#5 addi 30,30,4"
+R n=GPR i=30 d=0x00000008
+
+I id=6 ea=0x1010c
+M n=Mem t=ifetch ea=0x1010c ra=0x1010c d=0x7fda03a6
+INSTR op=0x7fda03a6 asm="#6 mtspr 30,26"
+R n=SRR0 d=0x00000008
+
+I id=7 ea=0x10110
+M n=Mem t=ifetch ea=0x10110 ra=0x10110 d=0x4c000064
+INSTR op=0x4c000064 asm="#7 rfi 0,0,0"
+R n=MSR d=0x00000000
+
+I id=8 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210001
+INSTR op=0x38210001 asm="#8 addi 1,1,1"
+R n=GPR i=1 d=0x00000002
+
+I id=9 ea=0xc
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x48000041
+INSTR op=0x48000041 asm="#9 <illop>"
+R n=ESR d=0x08000000
+E n=Program
+R n=SRR0 d=0x0000000c
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+
+I id=10 ea=0x10100
+M n=Mem t=ifetch ea=0x10100 ra=0x10100 d=0x3bff0001
+INSTR op=0x3bff0001 asm="#10 addi 31,31,1"
+R n=GPR i=31 d=0x00000002
+
+I id=11 ea=0x10104
+M n=Mem t=ifetch ea=0x10104 ra=0x10104 d=0x7fda02a6
+INSTR op=0x7fda02a6 asm="#11 mfspr 30,26"
+R n=GPR i=30 d=0x0000000c
+
+I id=12 ea=0x10108
+M n=Mem t=ifetch ea=0x10108 ra=0x10108 d=0x3bde0004
+INSTR op=0x3bde0004 asm="#12 addi 30,30,4"
+R n=GPR i=30 d=0x00000010
+
+I id=13 ea=0x1010c
+M n=Mem t=ifetch ea=0x1010c ra=0x1010c d=0x7fda03a6
+INSTR op=0x7fda03a6 asm="#13 mtspr 30,26"
+R n=SRR0 d=0x00000010
+
+I id=14 ea=0x10110
+M n=Mem t=ifetch ea=0x10110 ra=0x10110 d=0x4c000064
+INSTR op=0x4c000064 asm="#14 rfi 0,0,0"
+R n=MSR d=0x00000000
+
+I id=15 ea=0x10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38210001
+INSTR op=0x38210001 asm="#15 addi 1,1,1"
+R n=GPR i=1 d=0x00000003
+
+I id=16 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x48000041
+INSTR op=0x48000041 asm="#16 <illop>"
+E n=Program
+R n=SRR0 d=0x00000014
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+
+I id=17 ea=0x10100
+M n=Mem t=ifetch ea=0x10100 ra=0x10100 d=0x3bff0001
+INSTR op=0x3bff0001 asm="#17 addi 31,31,1"
+R n=GPR i=31 d=0x00000003
+
+I id=18 ea=0x10104
+M n=Mem t=ifetch ea=0x10104 ra=0x10104 d=0x7fda02a6
+INSTR op=0x7fda02a6 asm="#18 mfspr 30,26"
+R n=GPR i=30 d=0x00000014
+
+I id=19 ea=0x10108
+M n=Mem t=ifetch ea=0x10108 ra=0x10108 d=0x3bde0004
+INSTR op=0x3bde0004 asm="#19 addi 30,30,4"
+R n=GPR i=30 d=0x00000018
+
+I id=20 ea=0x1010c
+M n=Mem t=ifetch ea=0x1010c ra=0x1010c d=0x7fda03a6
+INSTR op=0x7fda03a6 asm="#20 mtspr 30,26"
+R n=SRR0 d=0x00000018
+
+I id=21 ea=0x10110
+M n=Mem t=ifetch ea=0x10110 ra=0x10110 d=0x4c000064
+INSTR op=0x4c000064 asm="#21 rfi 0,0,0"
+R n=MSR d=0x00000000
+
+I id=22 ea=0x18
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x38210001
+INSTR op=0x38210001 asm="#22 addi 1,1,1"
+R n=GPR i=1 d=0x00000004
+
+I id=23 ea=0x1c
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x0
+INSTR op=0x0 asm="#23 halt"
+
+RESULTS
+
+RD n=GPR i=1 d=4
+RD n=GPR i=31 d=3
+
+RD n=FCNT  d=23
+RD n=ICNT  d=20

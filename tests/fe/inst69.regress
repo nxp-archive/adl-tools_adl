@@ -1,0 +1,78 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ bits < 32 > MASK ( const bits < 32 > & x , const bits < 32 > & y ) {
+     bits < 32 > m ;
+    return m . mask ( x % 32 , y % 32 ) ;
+}
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, slice-written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Memories:
+  Name:  MemA (1)
+  Size:   2048
+  Addressing unit: 1
+
+Instruction Fields:
+  MB: [21,25] 
+  ME: [26,30] 
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR]
+  RB: [16,20] [regfile:  GPR] [not used]
+  RS: [6,10] [regfile:  GPR]
+  RT: [6,10] [regfile:  GPR] [not used]
+  Rc: [31,31] [not used] 
+  SH: [16,20] 
+  XO: [21,30] [not used] 
+Instructions:
+  Name:  rlwinm (rank: 100)
+  Width:  32
+  Syntax:  "rlwinm %f,%f,%f,%f,%f":   RA RS SH MB ME
+  Fields:  OPCD(21) RS RA SH MB ME
+  Action:  {
+     var m = 32 ;
+     var b = MB + 32 ;
+     var e = ME + 32 ;
+     var r = ROTL32 ( GPR ( RS ) , SH ) ;
+     var k = MASK ( b , e ) ;
+    GPR ( RA ) ( m , 32 - 1 ) = ( r & k ) | ( GPR ( RA ) & ~ k ) ;
+}
+  Source Registers:  GPR(RA) GPR(RS) 
+  Target Registers:  GPR(RA) 
+  Helper Functions:  ROTL32 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    21(54000000):  rlwinm
+
+Helper Functions:
+  ROTL32:
+ bits < 32 > ROTL32 ( const bits < 32 > & x , unsigned sh ) {
+}
+-------------------------------
+

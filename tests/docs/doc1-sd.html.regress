@@ -1,0 +1,440 @@
+     <html>
+     <big>
+     <head>
+     <title>ADL Database Report</title>
+     </head>
+     <body>
+     <table border="10">
+     <tr bgcolor="lightblue">
+
+<tr bgcolor="lightblue">
+<td>
+<big><b>SYNTAX</big></b></td>
+<td>
+<big><b>SOURCES</big></b></td>
+<td>
+<big><b>DESTINATIONS</big></b></td>
+<td>
+<big><b>INPUTS</big></b></td>
+<td>
+<big><b>OUTPUTS</big></b></td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RB)</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add2<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(0)</td>
+<td>
+GPR(0)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addi RT, RA, SI<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA)?</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addic. RT, RA, SI<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+CR, GPR(RA)</td>
+<td>
+CR, GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addis RT, RA, SI<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA)?</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+bc BO, BI, BD<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+CIA?, CR/p, CTR?</td>
+<td>
+CTR?, NIA?</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+cmp BF, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+CR, GPR(RA), GPR(RB)</td>
+<td>
+CR</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+cmpi BF, RA, SI<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+CR, GPR(RA)</td>
+<td>
+CR</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+crand RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+FOO2/p</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+crandc RS, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RS)</td>
+<td>
+FOO2/p</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+dum1F1 RA,RS<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+halt<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+li RT,SI32<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+lwz RT, RA, D<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA)</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+lwzx RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RB)</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mfspr RT, SPRN<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+ESR?, SPR(SPRN)</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mr RA,RS<br>
+</td>
+<td>
+RS(RS), RB(RS)</td>
+<td>
+RA(RA)</td>
+<td>
+GPR(RS)</td>
+<td>
+GPR(RA)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mtspr RS, SPRN<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+ESR?, GPR(RS)</td>
+<td>
+SPR(SPRN)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mullw RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RB)</td>
+<td>
+GPR(RT)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+or RS, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RB), GPR(RS)</td>
+<td>
+GPR(RA)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+ori RS, RA, UI<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RS)</td>
+<td>
+GPR(RA)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+rfi RS, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+SRR0, SRR1</td>
+<td>
+MSR, NIA</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+rlwinm RS, RA, SH, MB, ME<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RS)</td>
+<td>
+GPR(RA)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+se_add RY, RX<br>
+</td>
+<td>
+RA(RX), RB(RY)</td>
+<td>
+RT(RX)</td>
+<td>
+GPR(RX), GPR(RY)</td>
+<td>
+GPR(RX)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+se_addi RX,OIM5<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+rGPR(RX)</td>
+<td>
+rGPR(RX)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stw RS, RA, D<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RS)</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stwu RS, RA, D<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RS)</td>
+<td>
+GPR(RA)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stwx RS, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RB), GPR(RS)</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+tw RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+GPR(RA), GPR(RB + 1)</td>
+<td>
+FOO1, GPR(RB)</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vaddubm RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+VPR(RA)/p, VPR(RB)/p</td>
+<td>
+VPR(RT)/p</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vadduhm RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+VPR(RA)/p, VPR(RB)/p</td>
+<td>
+VPR(RT)/p</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vadduwm RT, RA, RB<br>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+VPR(RA)/p, VPR(RB)/p</td>
+<td>
+VPR(RT)/p</td>
+</tr>
+</table>
+</body>
+</html>

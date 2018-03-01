@@ -1,0 +1,19 @@
+
+= asm
+  
+  oris 2,1,0x1000
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x64221000	#	oris 2,1,0x1000
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=1 d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0xfeebdaed

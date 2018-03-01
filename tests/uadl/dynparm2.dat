@@ -1,0 +1,187 @@
+#
+# Make sure that performance caches are resized by dynamic parameters, as well
+# as the main cache.  We check this by looking at instruction timing, since
+# the functionality will be the same because the functional caches are used
+# by the ISS.
+#
+CORE n=:P
+
+= asm
+
+	# Turn on the cache.  Shouldn't change number of sets.
+	mtspr 52,r11   
+	# Load data.  If the cache is its original size, then sets 1 and 31 will be
+	# over-full, so that the initial loads will be evicted.
+	lwz r10,0x0(r9)
+	addi r9,r9,0x4000
+	lwz r10,0x0(r9)
+	addi r9,r9,0x4000
+	lwz r10,0x0(r9)
+	addi r9,r9,0x4000
+	lwz r10,0x0(r9)
+	# If the cache has only 64 sets, then this will overwrite 0x10080.
+	addi  r9,r0,0x2080
+	addis r9,r9,0x0001
+	lwz r10,0x0(r9)
+	addi  r9,r0,0x0080
+	addis r9,r9,0x0001
+	# If the cache has only 64 sets, this will cause a cache miss and thus
+	# performance will be lower than if the cache is larger and it hits in the
+	# cache.
+	lwz r11,0x0(r9)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7D740BA6	#	mtspr 52,r11   
+MD n=Mem ra=0x00000004 d=0x81490000	#	lwz r10,0x0(r9)
+MD n=Mem ra=0x00000008 d=0x39294000	#	addi r9,r9,0x4000
+MD n=Mem ra=0x0000000c d=0x81490000	#	lwz r10,0x0(r9)
+MD n=Mem ra=0x00000010 d=0x39294000	#	addi r9,r9,0x4000
+MD n=Mem ra=0x00000014 d=0x81490000	#	lwz r10,0x0(r9)
+MD n=Mem ra=0x00000018 d=0x39294000	#	addi r9,r9,0x4000
+MD n=Mem ra=0x0000001c d=0x81490000	#	lwz r10,0x0(r9)
+MD n=Mem ra=0x00000020 d=0x39202080	#	addi  r9,r0,0x2080
+MD n=Mem ra=0x00000024 d=0x3D290001	#	addis r9,r9,0x0001
+MD n=Mem ra=0x00000028 d=0x81490000	#	lwz r10,0x0(r9)
+MD n=Mem ra=0x0000002c d=0x39200080	#	addi  r9,r0,0x0080
+MD n=Mem ra=0x00000030 d=0x3D290001	#	addis r9,r9,0x0001
+MD n=Mem ra=0x00000034 d=0x81690000	#	lwz r11,0x0(r9)
+# </GEN>
+
+RD n=CTR      d=256
+RD n=GPR i=1  d=0xab000001
+RD n=GPR i=9  d=0x00010080
+RD n=GPR i=11 d=0xc0000800
+
+MD n=Mem ra=0x10080 d=0xdeadbeef
+MD n=Mem ra=0x12080 d=0x12345678
+
+TRACE
+
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7d740ba6
+INSTR op=0x7d740ba6					asm="mtspr CCR,r11"
+R n=CCR d=0xc0000000
+ITIME t=3
+CTIME t=7
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x81490000
+INSTR op=0x81490000					asm="lwz r10,0(r9)"
+D n=Mem t=read ea=0x10080 nb=4
+M n=Mem t=read ea=0x10080 ra=0x10080 d=0xdeadbeef
+R n=GPR i=10 d=0xdeadbeef
+ITIME t=7
+CTIME t=13
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x39294000
+INSTR op=0x39294000					asm="addi r9,r9,16384"
+R n=GPR i=9 d=0x00014080
+ITIME t=10
+CTIME t=14
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x81490000
+INSTR op=0x81490000					asm="lwz r10,0(r9)"
+D n=Mem t=read ea=0x14080 nb=4
+M n=Mem t=read ea=0x14080 ra=0x14080 d=0x00000000
+R n=GPR i=10 d=0x00000000
+ITIME t=13
+CTIME t=29
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x39294000
+INSTR op=0x39294000					asm="addi r9,r9,16384"
+R n=GPR i=9 d=0x00018080
+ITIME t=16
+CTIME t=30
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x81490000
+INSTR op=0x81490000					asm="lwz r10,0(r9)"
+D n=Mem t=read ea=0x18080 nb=4
+M n=Mem t=read ea=0x18080 ra=0x18080 d=0x00000000
+R n=GPR i=10 d=0x00000000
+ITIME t=19
+CTIME t=45
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x39294000
+INSTR op=0x39294000					asm="addi r9,r9,16384"
+R n=GPR i=9 d=0x0001c080
+ITIME t=30
+CTIME t=46
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x81490000
+INSTR op=0x81490000					asm="lwz r10,0(r9)"
+D n=Mem t=read ea=0x1c080 nb=4
+M n=Mem t=read ea=0x1c080 ra=0x1c080 d=0x00000000
+R n=GPR i=10 d=0x00000000
+ITIME t=33
+CTIME t=61
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x39202080
+INSTR op=0x39202080					asm="li r9,8320"
+R n=GPR i=9 d=0x00002080
+ITIME t=46
+CTIME t=62
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x3d290001
+INSTR op=0x3d290001					asm="addis r9,r9,1"
+R n=GPR i=9 d=0x00012080
+ITIME t=49
+CTIME t=65
+
+I ea=0x28 id=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x81490000
+INSTR op=0x81490000					asm="lwz r10,0(r9)"
+D n=Mem t=read ea=0x12080 nb=4
+M n=Mem t=read ea=0x12080 ra=0x12080 d=0x12345678
+R n=GPR i=10 d=0x12345678
+ITIME t=62
+CTIME t=77
+
+I ea=0x2c id=12
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x39200080
+INSTR op=0x39200080					asm="li r9,128"
+R n=GPR i=9 d=0x00000080
+ITIME t=65
+CTIME t=78
+
+I ea=0x30 id=13
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x3d290001
+INSTR op=0x3d290001					asm="addis r9,r9,1"
+R n=GPR i=9 d=0x00010080
+ITIME t=68
+CTIME t=81
+
+I ea=0x34 id=14
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x81690000
+INSTR op=0x81690000					asm="lwz r11,0(r9)"
+D n=Mem t=read ea=0x10080 nb=4
+M n=Mem t=read ea=0x10080 ra=0x10080 d=0xdeadbeef
+R n=GPR i=11 d=0xdeadbeef
+ITIME t=78
+CTIME t=85
+
+I ea=0x38 id=15
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=81
+CTIME t=86
+
+RESULTS
+
+RD n=GPR i=10 d=0x12345678
+RD n=GPR i=11 d=0xdeadbeef
+
+
+
+

@@ -1,0 +1,100 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A simple test of course-grained MT.  The active thread is identified by
+// the TACTIVE register, so only one thread can be active at a time.
+//
+// The model also has a data cache which will cause a thread-swap on a miss
+// if the cache is enabled.  The exception is marked as instruction-squashing,
+// so the UVP writer will not print the instruction.
+//
+
+#import "mod1.adl"
+
+define (arch=mt) {
+
+  define (reg=NIA0) { }
+  define (reg=NIA1) { }
+
+  define (reg=TACTIVE) { }
+
+  define (reg=SWAP) {
+    define (write) {
+      action = func (bits<32>) {
+        TACTIVE = TACTIVE ^ 1;
+      };
+    }
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=30) { reg = NIA0; }
+    define (entry=31) { reg = NIA1; }
+    define (entry=50) { reg = TACTIVE; }
+    define (entry=51) { reg = SWAP; }
+  }
+
+  define (reg=CCR) {
+    define (field=L1E) { bits = 0; }
+  }
+
+  attrs = (squash_instr);
+
+  define (exception=ThreadSwap) {
+    attrs = (squash_instr);
+    action = {
+      NIA = NIA - 4;
+      TACTIVE = TACTIVE ^ 1;
+    };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess ca) { return (CCR.L1E == 1); };
+    miss      = func (CacheAccess ca,addr_t a) {
+      raiseException(ThreadSwap);
+    };
+  }
+
+}
+
+define (core = P) {
+  remove = 1;
+}
+
+define (sys=PMT) {
+  type="PowerPC";
+  define (core = Thread0) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+    define (reg=NIA) {
+      attrs = nia;
+      alias = NIA0;
+    }
+    active = { return (TACTIVE == 0); };
+  }
+  define (core = Thread1) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+    define (reg=NIA) {
+      attrs = nia;
+      alias = NIA1;
+    }
+    active = { return (TACTIVE == 1); };
+  }
+  define (shared) {
+    regs = (NIA0,NIA1,TACTIVE);
+    caches = L1d;
+  }
+  Thread0 t0;
+  Thread1 t1;
+}
+

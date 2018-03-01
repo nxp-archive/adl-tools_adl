@@ -1,0 +1,117 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  ADCD: [5,5] 
+        secondary opcode.
+    
+  OPCD: [0,4] 
+        Primary opcode.
+    
+  RA: [11,15] 
+  Table:  (( 0 1 ), reserved, ( 2 3 ), reserved)
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] 
+        Field used to specify a General Purpose Register as a target.
+    
+Subinstructions:
+Name:  addOp
+Syntax:  "add":  
+Fields:  OPCD(10)
+Action:  func ( bits < 32 > RX , bits < 32 > a , bits < 32 > & res ) {
+    res = RX + a ;
+}
+-------------------------------
+Name:  eaRegDirect
+Syntax:  "":  
+Fields:  ADCD(1)
+Action:  func ( bits < 32 > Rn , bits < 32 > & res ) {
+    res = Rn ;
+}
+-------------------------------
+Name:  eaRegIndirect
+Syntax:  "i":  
+Fields:  ADCD(0)
+Action:  func ( bits < 32 > Rn , bits < 32 > & res ) {
+    res = Mem ( Rn , 4 ) ;
+    Rn = Rn + 1 ;
+}
+Source Memories:  Mem 
+-------------------------------
+Name:  subOp
+Syntax:  "sub":  
+Fields:  OPCD(11)
+Action:  func ( bits < 32 > RX , bits < 32 > a , bits < 32 > & res ) {
+    res = RX - a ;
+}
+-------------------------------
+Instructions:
+  Name:  add (rank: 0)
+  Width:  16
+  Syntax:  "add  %f %f":   RA RS
+  Fields:  OPCD(10) ADCD(1) RS RA
+  Action:  {
+     bits < 32 > addr ;
+    eaRegDirect( RS , addr ) ;
+     bits < 32 > res ;
+    addOp( RA , addr , res ) ;
+    GPR ( RA . uint32 (  ) ) = res ;
+}
+  Target Registers:  GPR(RA . uint32 (  )) 
+  -------------------------------
+  Name:  addi (rank: 0)
+  Width:  16
+  Syntax:  "sub  %f %f":   RA RS
+  Fields:  OPCD(11) ADCD(1) RS RA
+  Action:  {
+     bits < 32 > addr ;
+    eaRegDirect( RS , addr ) ;
+     bits < 32 > res ;
+    subOp( RA , addr , res ) ;
+    GPR ( RA . uint32 (  ) ) = res ;
+}
+  Target Registers:  GPR(RA . uint32 (  )) 
+  -------------------------------
+  Name:  subi (rank: 0)
+  Width:  16
+  Syntax:  "sub i %f %f":   RA RS
+  Fields:  OPCD(11) ADCD(0) RS RA
+  Action:  {
+     bits < 32 > addr ;
+    eaRegIndirect( RS , addr ) ;
+     bits < 32 > res ;
+    subOp( RA , addr , res ) ;
+    GPR ( RA . uint32 (  ) ) = res ;
+}
+  Target Registers:  GPR(RA . uint32 (  )) 
+  Source Memories:  Mem 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    21(54000000):  add
+    22(58000000):  subi
+    23(5c000000):  addi
+-------------------------------
+

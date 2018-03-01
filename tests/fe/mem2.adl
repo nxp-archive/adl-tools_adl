@@ -1,0 +1,96 @@
+
+define (arch=minippc) {
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=D) {
+    """
+    Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+
+  define (mem=data) {
+    size = 512;
+    addr_unit = 1;	
+    parent = (instr, 256);	
+  }	
+
+  define (mem=instr) {
+    instr_mem = true;
+    size = 1024;
+    addr_unit = 4;		 		
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    action = {
+      var d = signExtend(D,32);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = data(addr,4);
+      // Dummy: Check that this will be parsed.
+      checkInstrPerms();
+      checkDataPerms();
+    };
+  }
+
+  define (instr=ilwz) {
+    fields=(OPCD(31),RT,RA,D);
+    action = {
+      var d = signExtend(D,32);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = instr(addr,4);
+    };
+  }
+
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

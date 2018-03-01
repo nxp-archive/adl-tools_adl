@@ -1,0 +1,11 @@
+Breakpoint hit on node: P  at address: 0x0000000000010020 count: 0  InstrCount: 9
+GPR3: 0xa
+Breakpoint hit on node: P  at address: 0x0000000000010020 count: 0  InstrCount: 12
+GPR3: 0x14
+Breakpoint hit on node: P  at address: 0x0000000000010020 count: 0  InstrCount: 15
+GPR3: 0x1e
+Breakpoint hit on node: P  at address: 0x0000000000010038 count: 0  InstrCount: 30
+GPR2: 0x8
+GPR3: 0x3c
+
+Instructions executed: 29

@@ -1,0 +1,41 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests the skip_instruction() function.
+//
+
+#import "mod1.adl"
+
+define (arch = delay_slot) {
+
+  define (parm=Skip) {
+    options = (true,false);
+    value = false;
+  }
+
+  pre_fetch = {
+    if (Skip) {
+      Skip = false;
+      NIA = NIA + 4;
+      skip_instruction();
+    }
+  };
+
+  // This is just for experimenting with skip_instruction.()
+  define (instr=tw) {
+    fields=(OPCD(31),RA,RB,XO(4));
+    action = {
+      Skip=true;
+    };
+  }  
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,delay_slot);
+}

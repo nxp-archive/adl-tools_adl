@@ -1,0 +1,6 @@
+Output:
+
+li     r7,100
+mtctr  r7
+lis    r9,0
+

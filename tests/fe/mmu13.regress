@@ -1,0 +1,203 @@
+mmu13.adl:179: warning: Item 'y' was redefined.
+mmu13.adl:58: warning:     Previous definition was here.
+======
+Cores:
+======
+Name:  "P"
+Exceptions:
+  Name:  DTlbMiss
+  Action:  func (  ) {
+}
+  -------------------------------
+  Name:  ITlbMiss
+  Action:  func (  ) {
+}
+  -------------------------------
+  Name:  ProtectionFault
+  Action:  func (  ) {
+}
+  -------------------------------
+Registers:
+  Name:  "DEAR"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "EPID"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "HDBCR0"
+  Usage:  field-read
+  Width:  32
+    MMU_ENABLE[0]   
+      Usage:  field-read
+  -------------------------------
+  Name:  "MSR"
+  Usage:  field-read
+  Width:  32
+    PR[10]   
+      Usage:  field-read
+  -------------------------------
+  Name:  "PID0"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "PID1"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+MMU:
+  Attributes:  foo
+
+  Interleaved fetch :  1
+  Interleaved reads :  0
+  Interleaved writes:  0
+
+  Enable:  {
+    return HDBCR0 . MMU_ENABLE (  ) ;
+}
+    Source Registers:  HDBCR0[mask 0x80000000]/p 
+
+  Instr miss action:  func ( addr_t a , unsigned seq ) {
+    raiseException ( ITlbMiss ) ;
+}
+    Does raise exceptions.
+
+  Data miss action:  func ( addr_t a , unsigned seq ) {
+    DEAR = a ;
+    raiseException ( DTlbMiss ) ;
+}
+    Target Registers:  DEAR 
+    Does raise exceptions.
+
+  Aligned-write action:  func ( addr_t ea , addr_t ra ) {
+     int i = 20 ;
+}
+
+  Misaligned-write action:  func ( addr_t ea , addr_t ra ) {
+     int j = 30 ;
+}
+
+  Misaligned-read action:  func ( addr_t ea , addr_t ra ) {
+     int k = 40 ;
+}
+
+  Pre-read action:  func ( addr_t ea , addr_t ra ) {
+     int l = 50 ;
+}
+
+  Post-read action:  func ( addr_t ea , addr_t ra ) {
+     int l = 60 ;
+}
+
+  Pre-write action:  func ( addr_t ea , addr_t ra ) {
+     int m = 70 ;
+}
+
+  Post-write action:  func ( addr_t ea , addr_t ra ) {
+     int m = 80 ;
+}
+
+  Lookup:  TlbCam
+    Type:  both
+    Attributes:  minippc_mmu
+    Priority:  0
+    Size:  2^(1 * SIZE + 0) << 10
+    Page Number Shift:  0
+    Real-page Field:  RPN
+    Min Page Size:  1024 (bytes)
+    Array:  16 entries, fully associative.
+    Way Fields:
+      EPN:  24 bits.
+        Reset value:  0
+      Documention:
+
+        Example documentation string for an MMU field.
+        
+      RPN:  24 bits.
+        Reset value:  0
+      SIZE:  6 bits.
+        Reset value:  0
+      TID:  6 bits.
+        Reset value:  0
+      V:  1 bits.
+        Reset value:  0
+      WIMG:  4 bits.
+        Reset value:  0
+        Attributes:  translation_attr
+      a:  5 bits.
+        Reset value:  0
+      x:  2 bits.
+        Reset value:  2
+      y:  5 bits.
+        Reset value:  0
+
+    Tests:
+      Test Set:  Normal
+        Enable:  func ( TransType tt ) {
+    return instrHasAttr ( foo ) ;
+}
+
+        Compare ( TID , PID0 , PID1 )
+        AddrComp ( EPN )
+      Test Set:  Extended
+        Compare ( TID , EPID )
+        AddrComp ( EPN )
+
+    Execute permission:  func ( TlbCam_t t , addr_t  , unsigned seq ) {
+    instrHasAttr ( fetch ) ;
+    if ( ! ( ( MSR . PR (  ) ) ? t . SX : t . UX ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+      Source Registers:  MSR[mask 0x00200000]/p 
+      Does raise exceptions.
+
+    Load permission:  func ( TlbCam_t t , addr_t  , unsigned seq ) {
+    instrHasAttr ( load ) ;
+    if ( ! ( ( MSR . PR (  ) ) ? t . SR : t . UR ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+      Source Registers:  MSR[mask 0x00200000]/p 
+      Does raise exceptions.
+
+    Store permission:  func ( TlbCam_t t , addr_t  , unsigned seq ) {
+    instrHasAttr ( store ) ;
+    if ( ! ( ( MSR . PR (  ) ) ? t . SW : t . UW ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+      Source Registers:  MSR[mask 0x00200000]/p 
+      Does raise exceptions.
+
+    Valid Predicate:  {
+    return ( V != 0 ) ;
+}
+
+    Miss handler:  func ( TransType tt , addr_t  , unsigned seq ) {
+}
+
+    Hit handler:  func ( TransType tt , TlbCam_t x , addr_t  , unsigned seq ) {
+    instrHasAttr ( bar ) ;
+}
+
+    Reset handler:  func (  ) {
+}
+  -------------------------------
+-------------------------------
+
+Instruction Attributes:  foo(mmu) bar(mmu) load(mmu) store(mmu) fetch(mmu) 
+-------------------------------
+

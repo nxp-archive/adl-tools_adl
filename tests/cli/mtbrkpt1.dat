@@ -1,0 +1,105 @@
+#
+# Breakpoint testing for MT models.
+#
+= asm
+
+Start1:
+	b Prog1
+	.long 0x0
+Start2:
+	b Prog2
+	.long 0x0
+
+Prog1:
+	li r2,0
+	li r1,1000
+	mtctr r1
+L1:
+	addi r2,r2,1
+	bdnz L1
+	addi r3,r3,1	# Break here.
+
+	li r3,0
+	li r1,2000
+	mtctr r1
+L2:
+	addi r3,r3,1
+	bdnz L2
+	addi r4,r4,1	# Break here.
+
+	li r4,0
+	li r1,3000
+	mtctr r1
+L3:
+	addi r4,r4,1
+	bdnz L3
+	addi r5,r5,1
+
+	.long 0x0			# Break here.
+
+Prog2:
+	# The second core runs an infinite loop, to make sure that breakpoints can
+	# stop a running core.
+	li r1,1
+L4:
+	addi r2,r2,1
+	cmpwi r2,0
+	bne L5							# We don't want r2 to be 0, so load from r1 if 0.
+	mr r2,r1						
+L5:
+	b L4								# Infinite loop.
+	addi r4,r4,1				# Should never get here.
+	.long 0x0
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x48000010	#	b Prog1
+MD n=Mem ra=0x00000004 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000008 d=0x48000054	#	b Prog2
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x38400000	#	li r2,0
+MD n=Mem ra=0x00000014 d=0x382003E8	#	li r1,1000
+MD n=Mem ra=0x00000018 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x0000001c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000020 d=0x4200FFFC	#	bdnz L1
+MD n=Mem ra=0x00000024 d=0x38630001	#	addi r3,r3,1	# Break here.
+MD n=Mem ra=0x00000028 d=0x38600000	#	li r3,0
+MD n=Mem ra=0x0000002c d=0x382007D0	#	li r1,2000
+MD n=Mem ra=0x00000030 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x00000034 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000038 d=0x4200FFFC	#	bdnz L2
+MD n=Mem ra=0x0000003c d=0x38840001	#	addi r4,r4,1	# Break here.
+MD n=Mem ra=0x00000040 d=0x38800000	#	li r4,0
+MD n=Mem ra=0x00000044 d=0x38200BB8	#	li r1,3000
+MD n=Mem ra=0x00000048 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x0000004c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000050 d=0x4200FFFC	#	bdnz L3
+MD n=Mem ra=0x00000054 d=0x38A50001	#	addi r5,r5,1
+MD n=Mem ra=0x00000058 d=0x00000000	#	.long 0x0			# Break here.
+MD n=Mem ra=0x0000005c d=0x38200001	#	li r1,1
+MD n=Mem ra=0x00000060 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000064 d=0x2C020000	#	cmpwi r2,0
+MD n=Mem ra=0x00000068 d=0x40820008	#	bne L5							# We don't want r2 to be 0, so load from r1 if 0.
+MD n=Mem ra=0x0000006c d=0x7C220B78	#	mr r2,r1						
+MD n=Mem ra=0x00000070 d=0x4BFFFFF0	#	b L4								# Infinite loop.
+MD n=Mem ra=0x00000074 d=0x38840001	#	addi r4,r4,1				# Should never get here.
+MD n=Mem ra=0x00000078 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:procs:P0
+
+RD n=NIA d=0x0
+
+CORE n=:procs:P1
+
+RD n=NIA d=0x8
+
+RESULTS
+
+CORE n=:procs:P0
+
+RD n=GPR i=2 d=1000
+RD n=GPR i=3 d=2000
+RD n=GPR i=4 d=3000

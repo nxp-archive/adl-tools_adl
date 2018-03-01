@@ -1,0 +1,97 @@
+#
+# <ASM>
+# mullw r1,r2,r3
+# add   r4,r5,r6
+# mullw r4,r5,r6
+# mullw r7,r8,r9
+# mullw r10,r11,r12
+# mullw r13,r14,r15
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C2219D6	# mullw r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x7C853214	# add r4,r5,r6
+MD n=Mem ra=0x00000008 d=0x7C8531D6	# mullw r4,r5,r6
+MD n=Mem ra=0x0000000c d=0x7CE849D6	# mullw r7,r8,r9
+MD n=Mem ra=0x00000010 d=0x7D4B61D6	# mullw r10,r11,r12
+MD n=Mem ra=0x00000014 d=0x7DAE79D6	# mullw r13,r14,r15
+# </GEN>
+CORE n=:P
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=5 d=5
+RD n=GPR i=6 d=6
+RD n=GPR i=8 d=8
+RD n=GPR i=9 d=9
+RD n=GPR i=11 d=11
+RD n=GPR i=12 d=12
+RD n=GPR i=14 d=14
+RD n=GPR i=15 d=15
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 
+INSTR asm="mullw 1,2,3"
+R n=GPR i=1 d=0x00000006
+ITIME t=0
+CTIME t=8
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 
+INSTR asm="add 4,5,6"
+R n=GPR i=4 d=0x0000000b
+ITIME t=0
+CTIME t=1
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 
+INSTR asm="mulhw 4,5,6"
+R n=GPR i=4 d=0x0000001e
+ITIME t=1
+CTIME t=9
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc 
+INSTR asm="mulhw 7,8,9"
+R n=GPR i=7 d=0x00000048
+ITIME t=4
+CTIME t=12
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10 
+INSTR asm="mulhw 10,11,12"
+R n=GPR i=10 d=0x00000084
+ITIME t=5
+CTIME t=13
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14 
+INSTR asm="mulhw 13,14,15"
+R n=GPR i=13 d=0x000000d2
+ITIME t=8
+CTIME t=16
+
+I id=7 ea=0x18
+M n=Mem t=ifetch ea=0x18 
+INSTR asm="halt"
+ITIME t=9
+CTIME t=10
+
+RESULTS
+
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=30
+RD n=GPR i=5 d=5
+RD n=GPR i=6 d=6
+RD n=GPR i=7 d=72
+RD n=GPR i=8 d=8
+RD n=GPR i=9 d=9
+RD n=GPR i=10 d=132
+RD n=GPR i=11 d=11
+RD n=GPR i=12 d=12
+RD n=GPR i=13 d=210
+RD n=GPR i=14 d=14
+RD n=GPR i=15 d=15

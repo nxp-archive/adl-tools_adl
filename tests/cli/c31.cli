@@ -1,0 +1,25 @@
+#
+# Another test of callback functions.
+#
+
+proc c1 {name type set way ea ra args } {
+    switch $type {
+	load -
+	store {
+	    puts "MMU access:  $type from $name:  $args"
+	}
+    }
+}
+
+proc c2 {id pre name} {
+	if { $pre } {
+		puts "Exception $name"
+	}
+	if { ! $pre } {
+		puts "Exception $name finished.  Now at NIA = [ reg NIA ]"
+	}
+}
+
+setlogcmd mmu_translation c1
+setlogcmd exception c2
+go

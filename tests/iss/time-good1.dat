@@ -1,0 +1,34 @@
+CORE n=:powerpc
+
+TRACE
+I ea=0x0017c168 id=1
+CTIME t=11
+
+I ea=0x0017c16c id=2
+CTIME t=12
+
+I ea=0x0017c170 id=3
+CTIME t=13
+
+I ea=0x0017c174 id=4
+CTIME t=14
+
+I ea=0x0017c178 id=5
+CTIME t=15
+
+I ea=0x0017c17c id=6
+CTIME t=17
+
+I ea=0x0017c180 id=7
+CTIME t=28
+
+I ea=0x0017c184 id=8
+CTIME t=31
+
+I ea=0x0017c188 id=9
+CTIME t=32
+
+I ea=0x0017c18c id=10
+CTIME t=33
+
+RESULTS

@@ -1,0 +1,254 @@
+//
+// A DLX model with unified L1 cache.
+//
+// test items: cache store buffer enable predicate
+//             cache parameter: streaming_linefill
+//             cache parameter: preemptive
+//             fetch unit parameter: can_cancel
+//             inquire: request_queue_empty()
+//             transaction: add_latency()
+//
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = L1;
+      entries = 16;
+      entry_size = 4;
+      fetch_size = (8,4);
+      can_cancel = false;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {}
+
+    define (pipestage=(mEX, mMM, mWB)) {}
+
+    // memory system
+    define (cache L1) {
+      next_level_memory = mMEM;
+      write_mode = WriteThrough;
+      data_width = 32;
+      store_buffer_enable = func() { return true; };
+      preemptive = true;
+      linefill_read_latency = 0;
+      linefill_lock_cycle = 1;
+      linefill_lock_holdoff_cycle = 2;
+      linefill_lazy_writeback = true;
+      linefill_lock_on_valid = true;
+    }
+    
+    define (memory mMEM) {
+      data_width = 32;
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDp, S_EX, S_EXp, S_MM, S_MMp, S_WB, S_WBp,
+               S_IDe, S_EXe, S_MMe, S_WBe );
+
+    define (mapping) {
+      mID = (S_ID,S_IDp);
+      mEX = (S_EX,S_EXp);
+      mMM = (S_MM,S_MMp);
+      mWB = (S_WB,S_WBp);
+    };
+
+    define (exception_mapping) {
+      S_IDe = (S_ID,S_IDp);
+      S_EXe = (S_EX,S_EXp);
+      S_MMe = (S_MM,S_MMp);
+      S_WBe = (S_WB,S_WBp);
+    }
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     add, or, mullw, rlwinm, cmpi, cmp, 
+                     mtspr, mfspr, srw, halt );
+
+    allow_missing_operands = true;
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && L1.request_queue_empty()) {
+				Src.read();
+				Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp:  { change_state(S_EX); }
+		S_EX: {
+			exec();
+			change_state(S_EXp);
+		}
+    S_EXp:  { change_state(S_MM); }
+		S_MM: { 
+			change_state(S_WB); 
+		}
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+  };
+
+ define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzu, lwzx );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      Imm = field(D);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write()) {
+        Src.read();
+				Trg.allocate();
+        set_latency(2);
+				change_state(S_IDp);
+			}
+    S_IDp: if (mEX.has_space() && check_latency()) {
+        change_state(S_EX);
+      } else {
+        decr_latency();
+      }
+    S_EX: if (mMM.has_space() && L1.can_request_read()) {
+        // Calc ea.
+        exec();
+        L1.send_read_request();
+        change_state(S_EXp);
+      }
+    S_EXp:  { change_state(S_MM); }
+		S_MM: if (L1.can_read()) { 
+        exec_and_read(L1);
+        change_state(S_MMp);
+      }
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (L1.can_request_read()) {
+        L1.send_read_request();
+        change_state(S_MM);
+      }
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+
+ define (instr_class store) {
+    instructions = (stb, sth, sthx, stw, stwu, stwx);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    // TBD:  send_read_request_queue_inquire(L1);
+		S_ID: if (Src.can_read() && Trg.can_write()) {
+				Src.read();
+        Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp: {
+        change_state(S_EX);
+      }
+    S_EX: if (mMM.has_space() && L1.can_request_write()) {
+        // Calc ea.
+        exec();
+        L1.send_write_request();
+        change_state(S_MM);
+      }
+		S_MM: if (L1.can_write()) { 
+        exec_and_write(L1);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (L1.can_request_write()) {
+        L1.send_write_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+define (instr_class branch) {
+   instructions = ( bc, b, bl, bclr );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+   
+   action = {
+   S_INIT :{
+     change_state(S_ID);
+   };
+   S_ID: if (can_read_ops() && can_write_ops()) {
+       read_ops();
+       allocate_ops();
+       exec();
+       write_ops();
+       if (branch_taken()) {
+         taken_flush();
+       }
+       change_state(S_IDp);
+     }
+   S_IDp:  { change_state(S_EX); }
+   S_EX: {
+       change_state(S_MM);
+     }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+   };
+ }
+
+};

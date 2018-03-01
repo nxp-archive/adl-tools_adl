@@ -1,0 +1,177 @@
+# <ASM>
+# 	.file	"sieve.c"
+# gcc2_compiled.:
+# 	.section	".text"
+# 	.align 2
+# 	.globl main
+# 	.type	 main,@function
+# main:
+# 	stwu 1,-32(1)
+# 	stw 26,8(1)
+# 	stw 27,12(1)
+# 	stw 28,16(1)
+# 	stw 29,20(1)
+# 	stw 30,24(1)
+# 	stw 31,28(1)
+# 	lis 9,0x0
+# 	lis 11,0x0
+# 	la 31,0x1000(9)
+# 	la 11,0x2000(11)
+# 	lis 12,0xf
+# 	mr 26,31
+# 	mr 27,11
+# 	li 10,0
+# 	li 29,1
+# 	li 30,0
+# 	ori 12,12,16960
+# 	lis 28,0x0
+# .L6:
+# 	li 0,5
+# 	mtctr 0
+# 	addi 9,10,1
+# 	li 10,0
+# .L31:
+# 	stwx 29,10,31
+# 	stwx 30,10,11
+# 	addi 10,10,4
+# 	bdnz .L31
+# 	la 4,0x1000(28)
+# 	mr 3,4
+# 	li 7,2
+# .L15:
+# 	slwi 6,7,2
+# 	lwzx 0,4,6
+# 	addi 5,7,1
+# 	cmpwi 0,0,0
+# 	bc 12,2,.L14
+# 	add 10,7,7
+# 	cmpwi 0,10,4
+# 	bc 12,1,.L14
+# 	slwi 0,10,2
+# 	add 8,0,3
+# 	mr 0,6
+# 	li 6,0
+# .L20:
+# 	add 10,10,7
+# 	cmpwi 0,10,4
+# 	stw 6,0(8)
+# 	add 8,8,0
+# 	bc 4,1,.L20
+# .L14:
+# 	mr 7,5
+# 	mullw 0,7,7
+# 	cmpwi 0,0,4
+# 	bc 4,1,.L15
+# 	li 0,3
+# 	mtctr 0
+# 	li 10,2
+# 	addi 7,26,8
+# 	mr 8,27
+# .L30:
+# 	lwz 0,0(7)
+# 	addi 7,7,4
+# 	cmpwi 0,0,0
+# 	bc 12,2,.L25
+# 	stw 10,0(8)
+# 	addi 8,8,4
+# .L25:
+# 	addi 10,10,1
+# 	bdnz .L30
+# 	mr 10,9
+# 	cmpw 0,10,12
+# 	bc 4,2,.L6
+# 	li 3,0
+# 	lwz 26,8(1)
+# 	lwz 27,12(1)
+# 	lwz 28,16(1)
+# 	lwz 29,20(1)
+# 	lwz 30,24(1)
+# 	lwz 31,28(1)
+# 	la 1,32(1)
+# .Lfe1:
+# 	.size	 main,.Lfe1-main
+# 	.comm	sieve,20,4
+# 	.comm	results,20,4
+# 	.ident	"GCC: (GNU) 2.95.3 19991030 (prerelease)"
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x9421FFE0	# stwu 1,-32(1)
+MD n=Mem ra=0x00000004 d=0x93410008	# stw 26,8(1)
+MD n=Mem ra=0x00000008 d=0x9361000C	# stw 27,12(1)
+MD n=Mem ra=0x0000000c d=0x93810010	# stw 28,16(1)
+MD n=Mem ra=0x00000010 d=0x93A10014	# stw 29,20(1)
+MD n=Mem ra=0x00000014 d=0x93C10018	# stw 30,24(1)
+MD n=Mem ra=0x00000018 d=0x93E1001C	# stw 31,28(1)
+MD n=Mem ra=0x0000001c d=0x3D200000	# lis 9,0x0
+MD n=Mem ra=0x00000020 d=0x3D600000	# lis 11,0x0
+MD n=Mem ra=0x00000024 d=0x3BE91000	# la 31,0x1000(9)
+MD n=Mem ra=0x00000028 d=0x396B2000	# la 11,0x2000(11)
+MD n=Mem ra=0x0000002c d=0x3D80000F	# lis 12,0xf
+MD n=Mem ra=0x00000030 d=0x7FFAFB78	# mr 26,31
+MD n=Mem ra=0x00000034 d=0x7D7B5B78	# mr 27,11
+MD n=Mem ra=0x00000038 d=0x39400000	# li 10,0
+MD n=Mem ra=0x0000003c d=0x3BA00001	# li 29,1
+MD n=Mem ra=0x00000040 d=0x3BC00000	# li 30,0
+MD n=Mem ra=0x00000044 d=0x618C4240	# ori 12,12,16960
+MD n=Mem ra=0x00000048 d=0x3F800000	# lis 28,0x0
+MD n=Mem ra=0x0000004c d=0x38000005	# li 0,5
+MD n=Mem ra=0x00000050 d=0x7C0903A6	# mtctr 0
+MD n=Mem ra=0x00000054 d=0x392A0001	# addi 9,10,1
+MD n=Mem ra=0x00000058 d=0x39400000	# li 10,0
+MD n=Mem ra=0x0000005c d=0x7FAAF92E	# stwx 29,10,31
+MD n=Mem ra=0x00000060 d=0x7FCA592E	# stwx 30,10,11
+MD n=Mem ra=0x00000064 d=0x394A0004	# addi 10,10,4
+MD n=Mem ra=0x00000068 d=0x4200FFF4	# bdnz .L31
+MD n=Mem ra=0x0000006c d=0x389C1000	# la 4,0x1000(28)
+MD n=Mem ra=0x00000070 d=0x7C832378	# mr 3,4
+MD n=Mem ra=0x00000074 d=0x38E00002	# li 7,2
+MD n=Mem ra=0x00000078 d=0x54E6103A	# slwi 6,7,2
+MD n=Mem ra=0x0000007c d=0x7C04302E	# lwzx 0,4,6
+MD n=Mem ra=0x00000080 d=0x38A70001	# addi 5,7,1
+MD n=Mem ra=0x00000084 d=0x2C000000	# cmpwi 0,0,0
+MD n=Mem ra=0x00000088 d=0x41820034	# bc 12,2,.L14
+MD n=Mem ra=0x0000008c d=0x7D473A14	# add 10,7,7
+MD n=Mem ra=0x00000090 d=0x2C0A0004	# cmpwi 0,10,4
+MD n=Mem ra=0x00000094 d=0x41810028	# bc 12,1,.L14
+MD n=Mem ra=0x00000098 d=0x5540103A	# slwi 0,10,2
+MD n=Mem ra=0x0000009c d=0x7D001A14	# add 8,0,3
+MD n=Mem ra=0x000000a0 d=0x7CC03378	# mr 0,6
+MD n=Mem ra=0x000000a4 d=0x38C00000	# li 6,0
+MD n=Mem ra=0x000000a8 d=0x7D4A3A14	# add 10,10,7
+MD n=Mem ra=0x000000ac d=0x2C0A0004	# cmpwi 0,10,4
+MD n=Mem ra=0x000000b0 d=0x90C80000	# stw 6,0(8)
+MD n=Mem ra=0x000000b4 d=0x7D080214	# add 8,8,0
+MD n=Mem ra=0x000000b8 d=0x4081FFF0	# bc 4,1,.L20
+MD n=Mem ra=0x000000bc d=0x7CA72B78	# mr 7,5
+MD n=Mem ra=0x000000c0 d=0x7C0739D6	# mullw 0,7,7
+MD n=Mem ra=0x000000c4 d=0x2C000004	# cmpwi 0,0,4
+MD n=Mem ra=0x000000c8 d=0x4081FFB0	# bc 4,1,.L15
+MD n=Mem ra=0x000000cc d=0x38000003	# li 0,3
+MD n=Mem ra=0x000000d0 d=0x7C0903A6	# mtctr 0
+MD n=Mem ra=0x000000d4 d=0x39400002	# li 10,2
+MD n=Mem ra=0x000000d8 d=0x38FA0008	# addi 7,26,8
+MD n=Mem ra=0x000000dc d=0x7F68DB78	# mr 8,27
+MD n=Mem ra=0x000000e0 d=0x80070000	# lwz 0,0(7)
+MD n=Mem ra=0x000000e4 d=0x38E70004	# addi 7,7,4
+MD n=Mem ra=0x000000e8 d=0x2C000000	# cmpwi 0,0,0
+MD n=Mem ra=0x000000ec d=0x4182000C	# bc 12,2,.L25
+MD n=Mem ra=0x000000f0 d=0x91480000	# stw 10,0(8)
+MD n=Mem ra=0x000000f4 d=0x39080004	# addi 8,8,4
+MD n=Mem ra=0x000000f8 d=0x394A0001	# addi 10,10,1
+MD n=Mem ra=0x000000fc d=0x4200FFE4	# bdnz .L30
+MD n=Mem ra=0x00000100 d=0x7D2A4B78	# mr 10,9
+MD n=Mem ra=0x00000104 d=0x7C0A6000	# cmpw 0,10,12
+MD n=Mem ra=0x00000108 d=0x4082FF44	# bc 4,2,.L6
+MD n=Mem ra=0x0000010c d=0x38600000	# li 3,0
+MD n=Mem ra=0x00000110 d=0x83410008	# lwz 26,8(1)
+MD n=Mem ra=0x00000114 d=0x8361000C	# lwz 27,12(1)
+MD n=Mem ra=0x00000118 d=0x83810010	# lwz 28,16(1)
+MD n=Mem ra=0x0000011c d=0x83A10014	# lwz 29,20(1)
+MD n=Mem ra=0x00000120 d=0x83C10018	# lwz 30,24(1)
+MD n=Mem ra=0x00000124 d=0x83E1001C	# lwz 31,28(1)
+MD n=Mem ra=0x00000128 d=0x38210020	# la 1,32(1)
+# </GEN>
+
+RESULTS
+
+DR 0x2000 0x2064 0

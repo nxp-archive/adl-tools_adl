@@ -1,0 +1,25 @@
+syntax,sources,destinations,parent_action
+"add1 RT, RA, RB","Src1(RA), Src2(RB)","Trg(RT)","{
+    {
+         int j = 20 ;
+    }
+    {
+        GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+        setCrField0 ( GPR ( RT ) , 0 ) ;
+        setXerField ( false , false , true , 0 ) ;
+    }
+}
+"
+"add2 RT, RA, RB","Src1(RA), Src2(RB)","Trg(RT)","{
+    {
+         int j = 20 ;
+    }
+    {
+        GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+        setCrField0 ( GPR ( RT ) , 0 ) ;
+        setXerField ( false , false , true , 0 ) ;
+    }
+}
+"
+"add_family Src1, Src2, Trg","","",""
+

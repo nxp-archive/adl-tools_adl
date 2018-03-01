@@ -1,0 +1,143 @@
+// Test how instruction-type fields with long widths are copied and run 
+// Little endianness for instruction
+
+define (core = rubber) {
+  archs = rubber; 
+  instrtables = (other, instr_micro, instr_asm);
+}
+
+define (arch = rubber) {
+
+//##############################################################################
+// Parameters
+//##############################################################################
+
+  bit_endianness = little;
+  instr_endianness = little;
+     
+//==============================================================================
+
+
+//##############################################################################
+// Attributes
+//##############################################################################
+   
+    attrs = (instr_micro, instr_asm);
+
+//==============================================================================
+
+
+//##############################################################################
+// Registers
+//##############################################################################
+
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+  }
+
+//============================================================================== 
+
+//##############################################################################
+// Instruction Fields
+//##############################################################################
+
+  define(instrfield=opHw1) {
+    display = hex;
+	pseudo = true;
+	width = 127;
+	type = instr;
+	ref = instr_micro;
+  }
+  
+  define(instrfield=opHw2) {
+    display = hex;
+	pseudo = true;
+	width = 127;
+	type = instr;
+	ref = instr_micro;
+  } 
+
+//============================================================================== 
+
+//##############################################################################
+// Instructions
+//##############################################################################
+
+ 
+  define (instr = instr2561){ 
+    width = 256;
+    fields = ((bits(255),b1),
+             (bits(254,128),opHw1),
+             (bits(126,0),opHw2));
+    syntax = ("instr2561");
+    action={ run(opHw2, opHw1); };
+  }  
+
+  define (instr = instr1281){ 
+    width = 127;
+    fields = (
+             (bits(126,124),b101),
+             (bits(3,0),b1010));
+    syntax = ("instr1281");
+    attrs = (instr_micro);    
+    action={ };
+  }   
+
+  define (instr = instr1282){ 
+    width = 127;
+    fields = (
+             (bits(126,124),b010),
+             (bits(3,0),b1101));
+    syntax = ("instr1282");
+    attrs = (instr_micro);    
+    action={ };
+  }  
+  
+  define (instr = instr2562){ 
+    width = 256;
+    fields = ((bits(255),b1),
+             (bits(254,252),b101), (bits(131,128),b1010),
+             (bits(126,124),b010), (bits(3,0),b1101));
+    syntax = ("instr2562");
+    attrs = (instr_asm);
+    action={ };
+  }  
+
+    define (instr = done){ 
+    width = 256;
+    fields = ((bits(255),b0));
+    syntax = ("done");
+    action={ halt(); };
+  } 
+ 
+//============================================================================== 
+
+//##############################################################################
+// Assembler
+//##############################################################################
+  
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = (".", "//", "#");
+    line_separators = (";");
+    asm_instrtables = (instr_asm);
+    disasm_instrtables = (instr_asm);
+  }
+
+//============================================================================== 
+
+
+}
+
+
+

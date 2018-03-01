@@ -1,0 +1,97 @@
+#
+# This test is set up so that, for the first word, the second two bytes (the
+# first half of the srw instruction) can be interpreted as a valid instruction-
+# in this case it will be a cmp instruction.  So, this tests to make sure that
+# we don't incorrectly decode items by not fetching all of the required data.
+# This is mainly the case for uADL, which might try and see if an instruction
+# can be decoded, in order to avoid another fetch.
+#
+
+= asm
+
+  se_add 1,4
+  srw    3,2,1
+  addi   3,3,1
+  addi   3,3,1
+
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0441 s=2	#	se_add 1,4
+MD n=Mem ra=0x00000002 d=0x7C430C30	#	srw    3,2,1
+MD n=Mem ra=0x00000006 d=0x38630001	#	addi   3,3,1
+MD n=Mem ra=0x0000000a d=0x38630001	#	addi   3,3,1
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA     d=0x00000000
+
+RD n=GPR i=1 d=3
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=4 d=1
+
+MD n=Mem ra=0x1000 d=0x10
+MD n=Mem ra=0x1004 d=0x20
+MD n=Mem ra=0x1008 d=0x30
+MD n=Mem ra=0x100c d=0x40
+MD n=Mem ra=0x1010 d=0x50
+MD n=Mem ra=0x1014 d=0x60
+MD n=Mem ra=0x1018 d=0x70
+MD n=Mem ra=0x101c d=0x80
+MD n=Mem ra=0x1020 d=0x90
+MD n=Mem ra=0x1024 d=0xA0
+MD n=Mem ra=0x1028 d=0xB0
+MD n=Mem ra=0x102c d=0xC0
+MD n=Mem ra=0x1030 d=0xD0
+MD n=Mem ra=0x1034 d=0xE0
+MD n=Mem ra=0x1038 d=0xF0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04417c43
+INSTR op=0x0441					asm="se_add r4,r1"
+R n=GPR i=1 d=0x00000004
+ITIME t=1
+CTIME t=5
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x04417c43
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x0c303863
+INSTR op=0x7c430c30					asm="srw r2,r3,r1"
+R n=GPR i=3 d=0x0deadbee
+ITIME t=3
+CTIME t=7
+
+I ea=0x6 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x0c303863
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00013863
+INSTR op=0x38630001					asm="addi r3,r3,0x00000001"
+R n=GPR i=3 d=0x0deadbef
+ITIME t=5
+CTIME t=9
+
+I ea=0xa id=4
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00013863
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00010000
+INSTR op=0x38630001					asm="addi r3,r3,0x00000001"
+R n=GPR i=3 d=0x0deadbf0
+ITIME t=7
+CTIME t=11
+
+I ea=0xe id=5
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00010000
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=9
+CTIME t=13
+
+RESULTS
+
+RD n=GPR i=1 d=4
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0x0deadbf0

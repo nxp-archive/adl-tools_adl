@@ -1,0 +1,488 @@
+$data = {
+"cores" => {
+"P" => {
+"doc" => <<DATA
+Example documentation string- place overview information here.
+
+DATA
+,
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+Current instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"CR" => {
+"width" => 32,
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+Next instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"doc" => <<DATA
+General purpose registers.
+    
+DATA
+,
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+},
+"instrfields" => {
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+0,
+5,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"mask" => "0xfc000000",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"Src1" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Src2" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"Trg" => {
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+21,
+30,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"mask" => "0x7fe",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add_family" => {
+"doc" => <<DATA
+This description should represent the entire family
+    and appear at the top.
+DATA
+,
+"syntax" => "add_family Src1, Src2, Trg",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+},
+"action" => <<DATA
+{
+    GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+    setCrField ( 0 , GPR ( Trg ) , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR",
+"GPR(Src1)",
+"GPR(Src2)",
+],
+"outputs" => [
+"CR",
+"GPR(Trg)",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"add1" => {
+"width" => 32,
+"doc" => <<DATA
+This description should be appended
+      to that of the family.
+DATA
+,
+"syntax" => "add1 RT, RA, RB",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 266,
+},
+"alias" => {
+"target" => "add_family",
+"sources" => [
+"source" => [
+"field" => "Src1",
+"value" => "RA",
+],
+"source" => [
+"field" => "Src2",
+"value" => "RB",
+],
+],
+"destinations" => [
+"destination" => [
+"field" => "Trg",
+"value" => "RT",
+],
+],
+},
+"disassemble" => 1,
+"doc_op" => <<DATA
+Ra + Rb -> Rt
+DATA
+,
+},
+"add2" => {
+"width" => 32,
+"doc" => <<DATA
+This description should also be appended
+      to that of the family.
+DATA
+,
+"syntax" => "add2 RT, RA, RB",
+"fields" => {
+"OPCD" => 32,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 300,
+},
+"alias" => {
+"target" => "add_family",
+"sources" => [
+"source" => [
+"field" => "Src1",
+"value" => "RA",
+],
+"source" => [
+"field" => "Src2",
+"value" => "RB",
+],
+],
+"destinations" => [
+"destination" => [
+"field" => "Trg",
+"value" => "RT",
+],
+],
+},
+"disassemble" => 1,
+"doc_op" => <<DATA
+Ra2 + Rb2 -> Rt2
+DATA
+,
+},
+"sub_family" => {
+"syntax" => "sub_family Src1, Src2, Trg",
+"fields" => {
+"Src1" => "",
+"Src2" => "",
+"Trg" => "",
+},
+"action" => <<DATA
+{
+    GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+    setCrField ( 0 , GPR ( Trg ) , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR",
+"GPR(Src1)",
+"GPR(Src2)",
+],
+"outputs" => [
+"CR",
+"GPR(Trg)",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"sub1" => {
+"width" => 32,
+"doc" => <<DATA
+This is the only description.
+DATA
+,
+"syntax" => "sub1 RT, RA, RB",
+"fields" => {
+"OPCD" => 33,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 266,
+},
+"alias" => {
+"target" => "sub_family",
+"sources" => [
+"source" => [
+"field" => "Src1",
+"value" => "RA",
+],
+"source" => [
+"field" => "Src2",
+"value" => "RB",
+],
+],
+"destinations" => [
+"destination" => [
+"field" => "Trg",
+"value" => "RT",
+],
+],
+},
+"disassemble" => 1,
+"doc_op" => <<DATA
+Ra - Rb -> Rt
+DATA
+,
+},
+"sub2" => {
+"width" => 32,
+"syntax" => "sub2 RT, RA, RB",
+"fields" => {
+"OPCD" => 34,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 300,
+},
+"alias" => {
+"target" => "sub_family",
+"sources" => [
+"source" => [
+"field" => "Src1",
+"value" => "RA",
+],
+"source" => [
+"field" => "Src2",
+"value" => "RB",
+],
+],
+"destinations" => [
+"destination" => [
+"field" => "Trg",
+"value" => "RT",
+],
+],
+},
+"disassemble" => 1,
+"doc_op" => <<DATA
+Ra - Rb -> Rt
+DATA
+,
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+"helpers" => {
+"setCrField" => {
+"action" => <<DATA
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+DATA
+,
+"inputs" => [
+"CR",
+],
+"outputs" => [
+"CR",
+],
+},
+},
+},
+},
+"systems" => {
+},
+};
+

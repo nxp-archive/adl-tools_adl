@@ -1,0 +1,39 @@
+
+asm14.o:     file format elf32-powerpc
+asm14.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000100  00000000  00000000  00000100  2**8
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000200  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000200  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000 l     F .text  00000000 $$one_word
+
+
+
+Disassembly of section .text:
+
+00000000 <$$one_word>:
+   0:	00 00 0f d0 	mv    d0:d2:d4:d6,d4
+   4:	00 00 0f ee 	mv    d8:d10:d12:d14,d11
+   8:	00 00 2e d2 	add   d0,d2,d5
+   c:	00 03 2e 50 	add   d8,d0,d12
+  10:	00 0b 2e 61 	add   d8,-d0,d12
+  14:	00 03 2e 70 	add   d8.L,d0.H,d12
+  18:	00 0b 2e 21 	add   d8.H,d0.L,d12
+  1c:	0e 84       	doen0 d1
+  1e:	0e 8d       	doen1 d3
+  20:	0e 92       	doen2 d4
+  22:	0e 97       	doen3 d5
+  24:	00 00 0e 84 	mv    sp,d1
+	...

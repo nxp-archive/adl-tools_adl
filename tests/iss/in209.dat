@@ -1,0 +1,69 @@
+#
+# Tests write hooks which use ValueBundle and the updateReg function.
+# Code assembled using as-mod50 (which isn't built by default).
+#
+CORE n=:P
+
+= asm
+
+	addi r1,r1,10
+	addi r2,r1,20
+	cadd 0,5
+	cadd 1,8
+	cadd 1,3
+	cadd 2,7
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000a
+MD n=Mem ra=0x00000004 d=0x38410014
+MD n=Mem ra=0x00000008 d=0xc0050000
+MD n=Mem ra=0x0000000c d=0xc0280000
+MD n=Mem ra=0x00000010 d=0xc0230000
+MD n=Mem ra=0x00000014 d=0xc0470000
+# </GEN>
+
+RD n=SCR d=0x80000000
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a                                     asm="addi r1,r1,10"
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38410014
+INSTR op=0x38410014                                     asm="addi r2,r1,20"
+R n=GPR i=1 d=0x0000000a
+R n=GPR i=2 d=0x00000014
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0xc0050000
+INSTR op=0xc0050000                                     asm="cadd 0x00,0x05"
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xc0280000
+INSTR op=0xc0280000                                     asm="cadd 0x01,0x08"
+R n=CReg d=0x0000000d
+R n=CReg d=0x5800000d
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0xc0230000
+INSTR op=0xc0230000                                     asm="cadd 0x01,0x03"
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0xc0470000
+INSTR op=0xc0470000                                     asm="cadd 0x02,0x07"
+R n=CReg d=0x5800000a
+R n=CReg d=0x5370000a
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+
+RESULTS
+
+RD n=CReg d=0x5370000a
+RD n=GPR i=1 d=0x0000000a
+RD n=GPR i=2 d=0x00000014

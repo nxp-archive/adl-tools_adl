@@ -1,0 +1,265 @@
+======
+Cores:
+======
+Name:  "P"
+Exceptions:
+  Name:  DTlb
+  Fields:
+    DEAR:  32 bits.
+      Reset value:  0
+  Action:  func ( DTlb_t info ) {
+    DEAR = info . DEAR ;
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR ( 0 , 15 ) , IVOR13 ( 16 , 31 ) ) ;
+}
+  -------------------------------
+  Name:  ITlb
+  Fields:
+    DEAR:  32 bits.
+      Reset value:  0
+  Action:  func ( ITlb_t info ) {
+    DEAR = info . DEAR ;
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR ( 0 , 15 ) , IVOR14 ( 16 , 31 ) ) ;
+}
+  -------------------------------
+  Name:  Program
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR ( 0 , 15 ) , IVOR6 ( 16 , 31 ) ) ;
+    CIA = NIA ;
+}
+  -------------------------------
+  Name:  ProtectionFault
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR ( 0 , 15 ) , IVOR7 ( 16 , 31 ) ) ;
+}
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "DEAR"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "IVOR13"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register for dtlb misses.
+    
+  -------------------------------
+  Name:  "IVOR14"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register for itlb misses.
+    
+  -------------------------------
+  Name:  "IVOR6"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 6.
+    
+  -------------------------------
+  Name:  "IVOR7"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register for protection faults.
+    
+  -------------------------------
+  Name:  "IVPR"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector prefix register.
+    
+  -------------------------------
+  Name:  "MAS0"
+  Width:  32
+    LB[0,31]   
+  Documention:
+
+    Memory assist register 0.
+    
+  -------------------------------
+  Name:  "MAS1"
+  Width:  32
+    UB[0,31]   
+  Documention:
+
+    Memory assist register 1.
+    
+  -------------------------------
+  Name:  "MAS2"
+  Width:  32
+    SR[2]   
+    SW[1]   
+    SX[0]   
+    UR[5]   
+    UW[4]   
+    UX[3]   
+    V[6]   
+    Way[28,31]   
+  Documention:
+
+    Memory assist register 2.
+    
+  -------------------------------
+  Name:  "MSR"
+  Usage:  read, written, field-read
+  Width:  32
+    PR[10]   
+      Usage:  field-read
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+  Name:  "SRR0"
+  Usage:  written
+  Width:  32
+  Documention:
+
+    Save-restore register 0.
+    
+  -------------------------------
+  Name:  "SRR1"
+  Usage:  written
+  Width:  32
+  Documention:
+
+    Save-restore register 1.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+MMU:
+
+  Interleaved fetch :  1
+  Interleaved reads :  1
+  Interleaved writes:  1
+
+  Enable:  <always>
+  Instr miss action:  func ( addr_t ea , unsigned  ) {
+     ITlb_t itlb ;
+    itlb . DEAR = ea ;
+    raiseException ( itlb ) ;
+}
+    Does raise exceptions.
+
+  Data miss action:  func ( addr_t ea , unsigned  ) {
+     DTlb_t dtlb ;
+    dtlb . DEAR = ea ;
+    raiseException ( dtlb ) ;
+}
+    Does raise exceptions.
+
+  Lookup:  MpuCam
+    Type:  both
+    Priority:  0
+    Page Number Shift:  0
+    Min Page Size:  0 (bytes)
+    Array:  16 entries, fully associative.
+    Way Fields:
+      LB:  32 bits.
+        Reset value:  0
+      SR:  1 bits.
+        Reset value:  0
+      SW:  1 bits.
+        Reset value:  0
+      SX:  1 bits.
+        Reset value:  0
+      UB:  32 bits.
+        Reset value:  0
+      UR:  1 bits.
+        Reset value:  0
+      UW:  1 bits.
+        Reset value:  0
+      UX:  1 bits.
+        Reset value:  0
+      V:  1 bits.
+        Reset value:  0
+
+    Tests:
+
+      Compare ( V , 1 )
+      Bounded ( LB , UB )
+
+    Execute permission:  func ( MpuCam_t t , addr_t ea , unsigned seq ) {
+    if ( ( ( MSR . PR == 0 ) ? t . SX : t . UX ) == 0 ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+      Source Registers:  MSR[mask 0x00200000]/p 
+      Does raise exceptions.
+
+    Load permission:  func ( MpuCam_t t , addr_t  , unsigned seq ) {
+    if ( ( ( MSR . PR == 0 ) ? t . SR : t . UR ) == 0 ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+      Source Registers:  MSR[mask 0x00200000]/p 
+      Does raise exceptions.
+
+    Store permission:  func ( MpuCam_t t , addr_t  , unsigned seq ) {
+    if ( ( ( MSR . PR == 0 ) ? t . SW : t . UW ) == 0 ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+      Source Registers:  MSR[mask 0x00200000]/p 
+      Does raise exceptions.
+
+    Valid Predicate:  {
+    return ( V != 0 ) ;
+}
+
+    Reset handler:  {
+     MpuCam_t t ;
+    t . LB = 0 ;
+    t . UB = 0xfff ;
+    t . V = 1 ;
+    t . SX = 1 ;
+    t . SW = 1 ;
+    t . SR = 1 ;
+    t . UX = 1 ;
+    t . UW = 1 ;
+    t . UR = 1 ;
+    MpuCam ( 0 , 0 ) = t ;
+}
+  -------------------------------
+-------------------------------
+-------------------------------
+

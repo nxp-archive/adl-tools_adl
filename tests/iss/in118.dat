@@ -1,0 +1,22 @@
+#
+# This just sets up the MMU for the test.  The code portion is stored in in118.c
+# (loaded as in118.elf).  This tests to make sure that the ELF loader can
+# do address translation using the program headers in the ELF file.
+#
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=2 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x10000 ra=0xA0000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x280 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x40
+
+# ea=0x20000 ra=0xB0000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x2C0 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x80
+
+# Branch to a 0 location to halt.
+RD n=LR d=0x10300
+
+RESULTS
+
+MD n=Mem ra=0x0000000000011004 d=0x00000015
+MD n=Mem ra=0x0000000000012000 d=0xdeadbeef

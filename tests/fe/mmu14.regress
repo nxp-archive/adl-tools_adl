@@ -1,0 +1,7 @@
+mmu14.adl:158: warning: Item 'y' was redefined.
+mmu14.adl:58: warning:     Previous definition was here.
+mmu14.adl:102: Expected an argument of type TransType for test-set enable predicate.
+mmu14.adl:103: Unknown variable/resource found in action code:  PID2
+mmu14.adl:91: Unknown attribute 'stuff' in instrHasAttr call.
+mmu14.adl:52: Unknown test-set Foo
+mmu14.adl:52: Test-set Extra has no enable predicate.

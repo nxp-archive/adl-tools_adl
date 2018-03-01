@@ -1,0 +1,148 @@
+//
+// Tests encoding.  The two instructions have non-overlapping opcodes in the middle of the instruction,
+// so re-encoding is necessary, but the first attempt to re-encode will cause a conflict and force
+// another re-encoding.
+//
+
+define (arch = qe_risc_3_11)
+{
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA)
+    {
+      """
+		Current instruction address for fetch.
+		""";
+      attrs = cia;
+    }
+
+  define (reg=NIA) 
+    {
+      """
+		Next instruction address for fetch.
+	    """;
+      attrs = nia;
+    }
+	
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) 
+    {
+      """
+		Primary opcode.
+		""";
+      bits = (0,4);
+    }
+
+  define (instrfield=INVA) 
+    {
+      """
+		INV operand B in ALU instruction.
+		""";
+      bits = (5,5);
+    }
+
+  define (instrfield=OPCD_ALU) 
+    {
+      """
+		Secondary opcode for ALU instructions.
+		""";
+      bits = (6,8);
+    }
+
+  define (instrfield=UPDATE) 
+    {
+      """
+		Update option of ALU instruction.
+		""";
+      bits = (9,9);
+    }
+
+  define (instrfield=FLAGS) 
+    {
+      """
+		CR update for ALU instruction.
+		""";
+      bits = (10,10);
+    }
+
+  define (instrfield=SWAP_TYPE) 
+    {
+      """
+		ALU swap type.
+		""";
+      bits = (26,28);
+    }
+
+  define (instrfield=DS_ALU) 
+    {
+      """
+		data size for cnt and ffs instructions.
+		""";
+      bits = (26,29);
+    }
+
+  define (instrfield=OPCD_B31) 
+    {
+      """
+		Secondary opcode.
+		""";
+      bits = (31,31);
+    }
+
+  define (instrfield=RA)
+    {
+      """
+		RA.
+		""";
+      bits = (11,15);
+    }
+	
+  define (instrfield=RB)
+    {
+      """
+		RB.
+		""";
+      bits = (16,20);
+    }
+	
+  define (instrfield=RC)
+    {
+      """
+		RC.
+		""";
+      bits = (21,25);
+    }
+	
+
+  define(instr=bset)
+    {
+      fields=(OPCD(0x1b), INVA, OPCD_ALU(5), UPDATE, FLAGS, RA, RB, RC, SWAP_TYPE(7), OPCD_B31(0));
+      action =
+        {
+          ;
+        };
+    }
+
+  define(instr=cnt)
+    {
+      fields=(OPCD(0x1b), INVA, OPCD_ALU(5), UPDATE, FLAGS, RA(0x1f), RB, RC, DS_ALU, OPCD_B31(1));
+      action =
+        {
+          ;
+        };
+    }
+
+}
+
+define (core = qe_risc) {
+  archs = qe_risc_3_11;
+}
+
+
+

@@ -1,0 +1,72 @@
+//
+// Tests that an instruction must be either an alias or have
+// an action function.
+// 
+
+define (arch = mixed) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO2) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+  }
+
+  define(instrfield=UI) {
+    bits = (21,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=e_ori) {
+    fields=(OPCD(6),RS,RA,XO2(26),UI);
+  }
+
+}
+
+define (core = P) {
+  archs = mixed;
+}

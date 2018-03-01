@@ -1,0 +1,2 @@
+powerpc:  Warning:  Time differences were found for completion-time, but were less than the allowed time delta.
+              6 cycles off out of 33 cycles (18.1818% error).

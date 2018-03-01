@@ -1,0 +1,78 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  RT: [6,10] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  SI32: 
+    Pseudo:  1
+    Width:   32
+Instructions:
+  Name:  li_c_big (rank: 100) (shorthand) (no-disassemble)
+  Width:  16
+  Syntax:  "lic %f,%f":   RT SI32
+  Fields:  RT SI32
+  Alias Action:  func ( const InstrArgs & args ) {
+     unsigned r = args [ 0 ] ;
+     uint64_t c = args [ 1 ] ;
+     InstrBundle b ;
+    if ( ( c & 0xffff ) == 0 ) {
+        b . push_back ( createInstr ( "addis" , r , 0 , ( c >> 16 ) ) ) ;
+    } else if ( ( c & 0xffff ) == c ) {
+        b . push_back ( createInstr ( "ori" , r , 0 , c ) ) ;
+    } else {
+        create_constant_loader ( b , r , c ) ;
+    }
+    return b ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+  
+Helper Functions:
+  create_constant_loader:
+ void create_constant_loader ( InstrBundle & b , unsigned r , uint64_t c ) {
+     unsigned upper = ( c >> 16 ) + ( ( c & 0x8000 ) ? 1 : 0 ) ;
+    b . push_back ( createInstr ( "addis" , r , 0 , upper ) ) ;
+    b . push_back ( createInstr ( "addi" , r , r , ( c & 0xffff ) ) ) ;
+}
+-------------------------------
+

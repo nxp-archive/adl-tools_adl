@@ -1,0 +1,86 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A model with a split L1.  This is used to test the DMI cache with caches,
+// especially to make sure that we don't wind up with issues when enabling or
+// disabling the caches, wrt. the contents of the DMI cache.
+//
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=52)  { reg = CCR; }
+  }
+  
+  define (reg=SRR0) {}
+  define (reg=SRR1) {}
+  define (reg=IVPR) {}
+  define (reg=MSR)  {}
+  define (reg=DEC)  {}
+  define (reg=IVOR10) {}
+
+  defmod (regfile=SPR) {
+    define (entry=22)  { reg = DEC; }
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+  }
+
+  define (exception=dec) {
+    action = {
+      // The real decrementer interrupt doesn't use the critical save/restore
+      // registers, but this allows us to test simultaneous interrupts.  Note
+      // that we will return to the next instruction address.
+      SRR0 = NIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR10(16,31));
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}

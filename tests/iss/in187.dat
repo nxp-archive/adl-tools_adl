@@ -1,0 +1,90 @@
+#
+# This tests large, complex encodings, ala StarCore, in which
+# the encoding differs by the second word for 64-bit instructions.
+# Thus, the first word must be skipped when decoding.
+#
+# The assembly is processed using a custom assembler
+# built from the model.
+#
+# To create the assembler and generate the .dat file:
+#
+# adl2asm --setpfx=$adl --bprefix=$adl/external/binutils-adl mod57.adl
+#
+# makedat --as=./as-mod57 test.dat
+#
+
+= asm
+
+	add 3,0xdeadbeef
+	add 4,200
+	and 5,3,0x00ffff00
+	cmple 6,4,100
+	cmple 7,4,300
+	halt
+
+= /asm
+
+CORE n=:sc
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7F636ADB	#	add 3,0xdeadbeef
+MD n=Mem ra=0x00000004 d=0x777F8720
+MD n=Mem ra=0x00000008 d=0x7C040000	#	add 4,200
+MD n=Mem ra=0x0000000c d=0x06478720
+MD n=Mem ra=0x00000010 d=0x0C050FFF	#	and 5,3,0x00ffff00
+MD n=Mem ra=0x00000014 d=0x78078D60
+MD n=Mem ra=0x00000018 d=0x101E0000	#	cmple 6,4,100
+MD n=Mem ra=0x0000001c d=0x03278D40
+MD n=Mem ra=0x00000020 d=0x101F0000	#	cmple 7,4,300
+MD n=Mem ra=0x00000024 d=0x09678D40
+MD n=Mem ra=0x00000028 d=0x00000000	#	halt
+MD n=Mem ra=0x0000002c d=0x00000000
+# </GEN>
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7f636adb
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x777f8720
+INSTR op=0x7f636adb777f8720					asm="add 3,0xdeadbeef"
+R n=GPR i=3 d=0xdeadbeef
+
+I ea=0x8 id=2
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c040000
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x06478720
+INSTR op=0x7c04000006478720					asm="add 4,0xc8"
+R n=GPR i=4 d=0x000000c8
+
+I ea=0x10 id=3
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x0c050fff
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x78078d60
+INSTR op=0x0c050fff78078d60					asm="and 5,3,0xffff00"
+R n=GPR i=5 d=0x00adbe00
+
+I ea=0x18 id=4
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x101e0000
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x03278d40
+INSTR op=0x101e000003278d40					asm="cmple 6,4,0x64"
+R n=GPR i=6 d=0x00000000
+
+I ea=0x20 id=5
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x101f0000
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x09678d40
+INSTR op=0x101f000009678d40					asm="cmple 7,4,0x12c"
+R n=GPR i=7 d=0x00000001
+
+I ea=0x28 id=6
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00000000
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x00000000
+INSTR op=0x0000000000000000					asm="halt "
+
+RESULTS
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000000
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0xdeadbeef
+RD n=GPR i=4 d=0x000000c8
+RD n=GPR i=5 d=0x00adbe00
+RD n=GPR i=6 d=0x00000000
+RD n=GPR i=7 d=0x00000001

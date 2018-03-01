@@ -1,0 +1,301 @@
+# CORTEXM0PLUS TARMAC 00000000
+# testbench.u_tarmac
+       63.000ns R CONTROL 00000000
+       63.000ns R PRIMASK 00000000
+       63.000ns R PSR xX000003
+       63.000ns E HRESETn 0
+       63.000ns E LOCKUP 0
+       63.000ns E HALTED 0
+       63.000ns E INT_READY 0
+       63.000ns E ATOMIC 1
+     2827.000ns E HRESETn 1
+     2871.000ns MR4_D 00000000 2c000fff
+     2871.000ns R MSP 2c000ffc
+     2893.000ns MR4_D 00000004 1c000081
+     2915.000ns R PSR x1000000
+     2915.000ns E ATOMIC 0
+     2937.000ns MR4_I 1c000080 2301b510
+     2959.000ns IT 1c000080 b510        PUSH     {r4,lr}
+     2981.000ns MW4_D 2c000ff4 xxxxxxxx
+     3003.000ns MW4_D 2c000ff8 xxxxxxxx
+     3003.000ns R MSP 2c000ff4
+     3025.000ns MR4_I 1c000084 330146c0
+     3025.000ns IT 1c000082 2301        MOVS     r3,#1
+     3025.000ns R r3 00000001
+     3047.000ns R PSR X1000000
+     3047.000ns IT 1c000084 46c0        MOV      r8,r8
+     3047.000ns R r8 xxxxxxxx
+     3069.000ns MR4_I 1c000088 2b0bb29b
+     3069.000ns IT 1c000086 3301        ADDS     r3,#1
+     3069.000ns R r3 00000002
+     3091.000ns R PSR 01000000
+     3091.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3091.000ns R r3 00000002
+     3113.000ns MR4_I 1c00008c 4b3ed1fa
+     3113.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3135.000ns R PSR 81000000
+     3135.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3157.000ns MR4_I 1c000084 330146c0
+     3179.000ns IT 1c000084 46c0        MOV      r8,r8
+     3179.000ns R r8 xxxxxxxx
+     3201.000ns MR4_I 1c000088 2b0bb29b
+     3201.000ns IT 1c000086 3301        ADDS     r3,#1
+     3201.000ns R r3 00000003
+     3223.000ns R PSR 01000000
+     3223.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3223.000ns R r3 00000003
+     3245.000ns MR4_I 1c00008c 4b3ed1fa
+     3245.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3267.000ns R PSR 81000000
+     3267.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3289.000ns MR4_I 1c000084 330146c0
+     3311.000ns IT 1c000084 46c0        MOV      r8,r8
+     3311.000ns R r8 xxxxxxxx
+     3333.000ns MR4_I 1c000088 2b0bb29b
+     3333.000ns IT 1c000086 3301        ADDS     r3,#1
+     3333.000ns R r3 00000004
+     3355.000ns R PSR 01000000
+     3355.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3355.000ns R r3 00000004
+     3377.000ns MR4_I 1c00008c 4b3ed1fa
+     3377.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3399.000ns R PSR 81000000
+     3399.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3421.000ns MR4_I 1c000084 330146c0
+     3443.000ns IT 1c000084 46c0        MOV      r8,r8
+     3443.000ns R r8 xxxxxxxx
+     3465.000ns MR4_I 1c000088 2b0bb29b
+     3465.000ns IT 1c000086 3301        ADDS     r3,#1
+     3465.000ns R r3 00000005
+     3487.000ns R PSR 01000000
+     3487.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3487.000ns R r3 00000005
+     3509.000ns MR4_I 1c00008c 4b3ed1fa
+     3509.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3531.000ns R PSR 81000000
+     3531.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3553.000ns MR4_I 1c000084 330146c0
+     3575.000ns IT 1c000084 46c0        MOV      r8,r8
+     3575.000ns R r8 xxxxxxxx
+     3597.000ns MR4_I 1c000088 2b0bb29b
+     3597.000ns IT 1c000086 3301        ADDS     r3,#1
+     3597.000ns R r3 00000006
+     3619.000ns R PSR 01000000
+     3619.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3619.000ns R r3 00000006
+     3641.000ns MR4_I 1c00008c 4b3ed1fa
+     3641.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3663.000ns R PSR 81000000
+     3663.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3685.000ns MR4_I 1c000084 330146c0
+     3707.000ns IT 1c000084 46c0        MOV      r8,r8
+     3707.000ns R r8 xxxxxxxx
+     3729.000ns MR4_I 1c000088 2b0bb29b
+     3729.000ns IT 1c000086 3301        ADDS     r3,#1
+     3729.000ns R r3 00000007
+     3751.000ns R PSR 01000000
+     3751.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3751.000ns R r3 00000007
+     3773.000ns MR4_I 1c00008c 4b3ed1fa
+     3773.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3795.000ns R PSR 81000000
+     3795.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3817.000ns MR4_I 1c000084 330146c0
+     3839.000ns IT 1c000084 46c0        MOV      r8,r8
+     3839.000ns R r8 xxxxxxxx
+     3861.000ns MR4_I 1c000088 2b0bb29b
+     3861.000ns IT 1c000086 3301        ADDS     r3,#1
+     3861.000ns R r3 00000008
+     3883.000ns R PSR 01000000
+     3883.000ns IT 1c000088 b29b        UXTH     r3,r3
+     3883.000ns R r3 00000008
+     3905.000ns MR4_I 1c00008c 4b3ed1fa
+     3905.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     3927.000ns R PSR 81000000
+     3927.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     3949.000ns MR4_I 1c000084 330146c0
+     3971.000ns IT 1c000084 46c0        MOV      r8,r8
+     3971.000ns R r8 xxxxxxxx
+     3993.000ns MR4_I 1c000088 2b0bb29b
+     3993.000ns IT 1c000086 3301        ADDS     r3,#1
+     3993.000ns R r3 00000009
+     4015.000ns R PSR 01000000
+     4015.000ns IT 1c000088 b29b        UXTH     r3,r3
+     4015.000ns R r3 00000009
+     4037.000ns MR4_I 1c00008c 4b3ed1fa
+     4037.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     4059.000ns R PSR 81000000
+     4059.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     4081.000ns MR4_I 1c000084 330146c0
+     4103.000ns IT 1c000084 46c0        MOV      r8,r8
+     4103.000ns R r8 xxxxxxxx
+     4125.000ns MR4_I 1c000088 2b0bb29b
+     4125.000ns IT 1c000086 3301        ADDS     r3,#1
+     4125.000ns R r3 0000000a
+     4147.000ns R PSR 01000000
+     4147.000ns IT 1c000088 b29b        UXTH     r3,r3
+     4147.000ns R r3 0000000a
+     4169.000ns MR4_I 1c00008c 4b3ed1fa
+     4169.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     4191.000ns R PSR 81000000
+     4191.000ns IT 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     4213.000ns MR4_I 1c000084 330146c0
+     4235.000ns IT 1c000084 46c0        MOV      r8,r8
+     4235.000ns R r8 xxxxxxxx
+     4257.000ns MR4_I 1c000088 2b0bb29b
+     4257.000ns IT 1c000086 3301        ADDS     r3,#1
+     4257.000ns R r3 0000000b
+     4279.000ns R PSR 01000000
+     4279.000ns IT 1c000088 b29b        UXTH     r3,r3
+     4279.000ns R r3 0000000b
+     4301.000ns MR4_I 1c00008c 4b3ed1fa
+     4301.000ns IT 1c00008a 2b0b        CMP      r3,#0xb
+     4323.000ns R PSR 61000000
+     4323.000ns IS 1c00008c d1fa        BNE      {pc} - 0x8  ; 0x1c000084
+     4345.000ns MR4_I 1c000090 701a2200
+     4345.000ns IT 1c00008e 4b3e        LDR      r3,[pc,#248]  ; [0x1c000188]
+     4367.000ns MR4_D 1c000188 4002b400
+     4367.000ns R r3 4002b400
+     4389.000ns IT 1c000090 2200        MOVS     r2,#0
+     4389.000ns R r2 00000000
+     4411.000ns MR4_I 1c000094 22144b3d
+     4411.000ns IT 1c000092 701a        STRB     r2,[r3,#0]
+     4433.000ns MW1_D 4002b400 00000000
+     4455.000ns IT 1c000094 4b3d        LDR      r3,[pc,#244]  ; [0x1c00018c]
+     4477.000ns MR4_D 1c00018c 4002a100
+     4477.000ns R r3 4002a100
+     4499.000ns MR4_I 1c000098 4b3d731a
+     4499.000ns IT 1c000096 2214        MOVS     r2,#0x14
+     4499.000ns R r2 00000014
+     4521.000ns R PSR 21000000
+     4521.000ns IT 1c000098 731a        STRB     r2,[r3,#0xc]
+     4543.000ns MW1_D 4002a10c 14141414
+     4565.000ns MR4_I 1c00009c 701a2220
+     4565.000ns IT 1c00009a 4b3d        LDR      r3,[pc,#244]  ; [0x1c000190]
+     4587.000ns MR4_D 1c000190 4002a800
+     4587.000ns R r3 4002a800
+     4609.000ns IT 1c00009c 2220        MOVS     r2,#0x20
+     4609.000ns R r2 00000020
+     4631.000ns MR4_I 1c0000a0 4b3cbf20
+     4631.000ns IT 1c00009e 701a        STRB     r2,[r3,#0]
+     4653.000ns MW1_D 4002a800 20202020
+     4675.000ns IT 1c0000a0 bf20        WFE
+     4719.000ns MR4_I 1c0000a4 2b00681b
+     4719.000ns IT 1c0000a2 4b3c        LDR      r3,[pc,#240]  ; [0x1c000194]
+     4741.000ns MR4_D 1c000194 4002a300
+     4741.000ns R r3 4002a300
+     4763.000ns IT 1c0000a4 681b        LDR      r3,[r3,#0]
+     4785.000ns MR4_D 4002a300 0000ff00
+     4785.000ns R r3 0000ff00
+     4807.000ns MR4_I 1c0000a8 4a3bd102
+     4807.000ns IT 1c0000a6 2b00        CMP      r3,#0
+     4829.000ns IT 1c0000a8 d102        BNE      {pc} + 0x8  ; 0x1c0000b0
+     4851.000ns MR4_I 1c0000b0 22004b3b
+     4873.000ns IT 1c0000b0 4b3b        LDR      r3,[pc,#236]  ; [0x1c0001a0]
+     4895.000ns MR4_D 1c0001a0 4002a900
+     4895.000ns R r3 4002a900
+     4917.000ns MR4_I 1c0000b4 4b37619a
+     4917.000ns IT 1c0000b2 2200        MOVS     r2,#0
+     4917.000ns R r2 00000000
+     4939.000ns R PSR 61000000
+     4939.000ns IT 1c0000b4 619a        STR      r2,[r3,#0x18]
+     4961.000ns MW4_D 4002a918 00000000
+     4983.000ns MR4_I 1c0000b8 601a4934
+     4983.000ns IT 1c0000b6 4b37        LDR      r3,[pc,#220]  ; [0x1c000194]
+     5005.000ns MR4_D 1c000194 4002a300
+     5005.000ns R r3 4002a300
+     5027.000ns IT 1c0000b8 4934        LDR      r1,[pc,#208]  ; [0x1c00018c]
+     5049.000ns MR4_D 1c00018c 4002a100
+     5049.000ns R r1 4002a100
+     5071.000ns MR4_I 1c0000bc 04d8684b
+     5071.000ns IT 1c0000ba 601a        STR      r2,[r3,#0]
+     5093.000ns MW4_D 4002a300 00000000
+     5115.000ns IT 1c0000bc 684b        LDR      r3,[r1,#4]
+     5137.000ns MR4_D 4002a104 04000800
+     5137.000ns R r3 04000800
+     5159.000ns MR4_I 1c0000c0 73cad500
+     5159.000ns IT 1c0000be 04d8        LSLS     r0,r3,#19
+     5159.000ns R r0 40000000
+     5181.000ns R PSR 01000000
+     5181.000ns IT 1c0000c0 d500        BPL      {pc} + 0x4  ; 0x1c0000c4
+     5203.000ns MR4_I 1c0000c4 24024931
+     5225.000ns IT 1c0000c4 4931        LDR      r1,[pc,#196]  ; [0x1c00018c]
+     5247.000ns MR4_D 1c00018c 4002a100
+     5247.000ns R r1 4002a100
+     5269.000ns MR4_I 1c0000c8 bf40730c
+     5269.000ns IT 1c0000c6 2402        MOVS     r4,#2
+     5269.000ns R r4 00000002
+     5291.000ns IT 1c0000c8 730c        STRB     r4,[r1,#0xc]
+     5313.000ns MW1_D 4002a10c 02020202
+     5335.000ns MR4_I 1c0000cc bf20bf20
+     5335.000ns IT 1c0000ca bf40        SEV
+     5357.000ns IT 1c0000cc bf20        WFE
+     5401.000ns MR4_I 1c0000d0 68034834
+     5401.000ns IT 1c0000ce bf20        WFE
+     5819.000ns IT 1c0000d0 4834        LDR      r0,[pc,#208]  ; [0x1c0001a4]
+     5841.000ns MR4_D 1c0001a4 4002a500
+     5841.000ns R r0 4002a500
+     5863.000ns MR4_I 1c0000d4 d8422b03
+     5863.000ns IT 1c0000d2 6803        LDR      r3,[r0,#0]
+     5885.000ns MR4_D 4002a500 00000026
+     5885.000ns R r3 00000026
+     5907.000ns IT 1c0000d4 2b03        CMP      r3,#3
+     5929.000ns R PSR 21000000
+     5929.000ns MR4_I 1c0000d8 46894680
+     5929.000ns IT 1c0000d6 d842        BHI      {pc} + 0x88  ; 0x1c00015e
+     5951.000ns MR2_I 1c00015e 490b0000
+     5973.000ns MR4_I 1c000160 680b4a15
+     5973.000ns IT 1c00015e 490b        LDR      r1,[pc,#44]  ; [0x1c00018c]
+     5995.000ns MR4_D 1c00018c 4002a100
+     5995.000ns R r1 4002a100
+     6017.000ns IT 1c000160 4a15        LDR      r2,[pc,#84]  ; [0x1c0001b8]
+     6039.000ns MR4_D 1c0001b8 ffffbfff
+     6039.000ns R r2 ffffbfff
+     6061.000ns MR4_I 1c000164 600b4013
+     6061.000ns IT 1c000162 680b        LDR      r3,[r1,#0]
+     6083.000ns MR4_D 4002a100 10007400
+     6083.000ns R r3 10007400
+     6105.000ns IT 1c000164 4013        ANDS     r3,r3,r2
+     6105.000ns R r3 10003400
+     6127.000ns MR4_I 1c000168 23804a0c
+     6127.000ns IT 1c000166 600b        STR      r3,[r1,#0]
+     6149.000ns MW4_D 4002a100 10003400
+     6171.000ns IT 1c000168 4a0c        LDR      r2,[pc,#48]  ; [0x1c00019c]
+     6193.000ns MR4_D 1c00019c 4002a000
+     6193.000ns R r2 4002a000
+     6215.000ns MR4_I 1c00016c 7013425b
+     6215.000ns IT 1c00016a 2380        MOVS     r3,#0x80
+     6215.000ns R r3 00000080
+     6237.000ns IT 1c00016c 425b        RSBS     r3,r3,#0
+     6237.000ns R r3 ffffff80
+     6259.000ns R PSR 81000000
+     6259.000ns MR4_I 1c000170 730b2301
+     6259.000ns IT 1c00016e 7013        STRB     r3,[r2,#0]
+     6281.000ns MW1_D 4002a000 80808080
+     6303.000ns IT 1c000170 2301        MOVS     r3,#1
+     6303.000ns R r3 00000001
+     6325.000ns R PSR 01000000
+     6325.000ns MR4_I 1c000174 23e04a0e
+     6325.000ns IT 1c000172 730b        STRB     r3,[r1,#0xc]
+     6347.000ns MW1_D 4002a10c 01010101
+     6369.000ns IT 1c000174 4a0e        LDR      r2,[pc,#56]  ; [0x1c0001b0]
+     6391.000ns MR4_D 1c0001b0 e000ed08
+     6391.000ns R r2 e000ed08
+     6413.000ns MR4_I 1c000178 6013055b
+     6413.000ns IT 1c000176 23e0        MOVS     r3,#0xe0
+     6413.000ns R r3 000000e0
+     6435.000ns IT 1c000178 055b        LSLS     r3,r3,#21
+     6435.000ns R r3 1c000000
+     6457.000ns MR4_I 1c00017c 23e04a0d
+     6457.000ns IT 1c00017a 6013        STR      r3,[r2,#0]
+     6501.000ns IT 1c00017c 4a0d        LDR      r2,[pc,#52]  ; [0x1c0001b4]
+     6523.000ns MR4_D 1c0001b4 e000e100
+     6523.000ns R r2 e000e100
+     6545.000ns MR4_I 1c000180 6013005b
+     6545.000ns IT 1c00017e 23e0        MOVS     r3,#0xe0
+     6545.000ns R r3 000000e0
+     6567.000ns IT 1c000180 005b        LSLS     r3,r3,#1
+     6567.000ns R r3 000001c0
+     6589.000ns MR4_I 1c000184 e7eabf20
+     6589.000ns IT 1c000182 6013        STR      r3,[r2,#0]
+     6633.000ns IT 1c000184 bf20        WFE

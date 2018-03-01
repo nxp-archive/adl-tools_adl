@@ -1,0 +1,49 @@
+//
+// Test that unknown machines are caught.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+
+    define (pipestage mID) {}
+
+    define (pipestage mEX) {}
+
+    define (forwarding_path reorder) {
+      size = 32;
+    }    
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = (S_ID, S_EX);
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+    };
+
+  }
+
+  define (instr_class a) {
+    instructions = (addi,add);
+
+    machine = foobar;
+
+    action = {
+    S_INIT: { change_state(S_ID); };
+    S_ID: { change_state(S_INIT); };
+    };
+
+  }
+
+}

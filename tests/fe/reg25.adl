@@ -1,0 +1,30 @@
+//
+// Register hook type-checking test.
+//
+define (arch = minippc) {
+  define (regfile = RF1) {
+    size=32;
+    define (write) {
+      action = func(unsigned index,intbv<31> v) { ; };
+    }
+  }
+  define (regfile = RF2) {
+    size=32;
+    define (read) {
+      action = func(char *) { ; };
+    }
+  }
+  define (reg = R1) {
+    width = 64;
+    define (write) {
+      action = func(bits<63> v) { ; };
+    }
+  }
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+}
+
+define (core = P) {
+  archs = (minippc);
+}

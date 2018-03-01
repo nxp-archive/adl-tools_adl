@@ -1,0 +1,95 @@
+//
+// More tests of fixed-source/target propagation through helpers.  We should
+// mark a variable as non-const if we encounter an arithmetic assignment, e.g. +=.
+// However, decls/assignments of instruction fields should be OK.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      var ea = ( RA == 0 ) ? 0 : GPR(RA);
+      int r = RT . uint32 (  ) ;
+      for (  ; r < 32 ; r += 1 , ea += 4 ) {
+        GPR ( r ) ( 32 , 63 ) = Mem ( ea , 4 ) ;
+      }
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      int r = RT . uint32 (  ) ;
+      for (int r = 1  ; r < 32 ; r += 1 ) {
+        int i = 10;
+      }
+      GPR(r) = GPR(RA);
+    };
+  }
+
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    action = {
+      int r;
+      r = RT . uint32 (  ) ;
+      GPR(r) = GPR(RA);
+    };
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

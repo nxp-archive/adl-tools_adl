@@ -1,0 +1,193 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Contrived example to test register read/write hooks.
+//
+
+define (arch = MiniPPC) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+    define (read) {
+      action = { return CTR/2; };
+    }
+    define (write) {
+      action = func (bits<32> x) { CTR = x * 2; };
+    }
+  }
+
+  define (reg=FOO) {
+  }
+
+  define (reg=aFOO) {
+    define (read) {
+      alias = FOO;
+    }
+    define (write) {
+      alias = FOO;
+    }
+  }
+
+  // Tests various get/set operations on registers within a writehook.
+  define (reg=FOO2) {
+    define (field=A) {
+      bits=(0,7);
+    }
+    define (field=B) {
+      bits=(8,15);
+    }
+    define (field=C) {
+      bits=(16,31);
+    }
+    define (write) {
+      action = func(bits<32> x) {
+        bits<32> v = x;
+        // Tests assignments to intbv objects.
+        v(0,7) = x(24,31) + 1;
+        v = v + 1;
+        // Test assignment to fields within a writehook.
+        if ( x(28,31) == 0) {
+          ThisReg.A = 1;
+        } else {
+          ThisReg.B = 1;
+        }
+        // Test an assignment to a slice within a hook.  The increment should be
+        // discarded due to the slice on the rhs.
+        FOO2(24,31) = v(0,7);
+      };
+    }
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (regfile=SPR) {
+    """
+Special purpose registers.
+    """;
+    size=1024;
+    define (entry=10)  { reg = FOO; }
+    define (entry=11)  { reg = aFOO; }
+    define (entry=12)  { reg = FOO2; }
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    bits = (6,10);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SPRN) {
+    """
+Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+    ref = SPR;
+    type = regfile;
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = CTR + (signExtend(SI,32) << 16);
+      } else {
+        GPR(RT) = GPR(RA) + (signExtend(SI,32) << 16);
+      }
+      CTR = GPR(RT);
+    };
+  }
+
+  define (instr=mfspr) {
+    fields=(OPCD(31),RT,SPRN,XO(339));
+    action = {
+      GPR(RT) = SPR(SPRN);
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC);
+}

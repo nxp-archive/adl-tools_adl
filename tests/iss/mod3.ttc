@@ -1,0 +1,25 @@
+//
+// Adds a cycle-ratio for testing this feature.
+//
+
+define (config) {
+  max_delay_slots = 4;
+  packet_pool_size = 100;    // Just for testing.
+  gen_all_reg_code = false;  // Just to make sure that the option parses.
+  gen_full_regs = FOO14;     // Make sure we generate all code for this register.
+}
+
+// Test that we get defines from the command-line.
+#ifdef ClkRatio
+
+define (core = P) {
+
+  define (config) {
+  
+    clock_cycle_ratio = ClkRatio;
+
+  }
+
+}
+
+#endif

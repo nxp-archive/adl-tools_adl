@@ -1,0 +1,78 @@
+
+//
+// Example cache- this should parse correctly.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (reg=L2HitReg) { }
+
+  define (reg=L2MissReg) { }
+
+  define (reg=L2CR) {
+    define (field=EN) {
+      bits=0;
+    }
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+
+    enable = func(CacheAccess ca) { return L2CR.EN == 1; };
+
+    hit = func (CacheAccess ca,addr_t) {
+      L2HitReg = L2HitReg + 1;
+    };
+
+    miss = func (CacheAccess ca,addr_t) {
+      L2MissReg = L2MissReg + 1;
+    };
+  }
+
+}
+
+define (sys=PChip) {
+  define (core = P) {
+    archs = foo;
+  }
+  define (shared) {
+    caches = (L1i,L1d,L2);
+  }
+  P context0;
+  P context1;
+  P context2;
+}

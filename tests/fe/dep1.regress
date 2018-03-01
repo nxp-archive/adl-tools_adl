@@ -1,0 +1,123 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  -------------------------------
+  Name:  "CR"
+  Width:  32
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D: [16,31] 
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+  RS: [6,10] 
+  RT: [6,10] 
+  SI: [16,31] 
+    Display:  dec
+    Signed:  1
+  XO: [21,30] 
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  Dependencies:
+    GPR = GPR
+  -------------------------------
+  Name:  addi (rank: 100)
+  Width:  32
+  Fields:  OPCD(14) RT RA SI
+  Action:  {
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + SI ;
+    }
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  Dependencies:
+    GPR(RT) = GPR(RA)
+  -------------------------------
+  Name:  lwz (rank: 100)
+  Width:  32
+  Fields:  OPCD(32) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) 
+  Source Memories:  Mem 
+  Dependencies:
+    GPR(RT) = Mem
+  -------------------------------
+  Name:  lwzux (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(55)
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+    GPR ( RA ) = addr ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RA) GPR(RT) 
+  Source Memories:  Mem 
+  Dependencies:
+    GPR(RT) = Mem($1)
+    GPR(RA) = GPR(RB), Mem($2), GPR(RA)
+  -------------------------------
+  Name:  stw (rank: 100)
+  Width:  32
+  Fields:  OPCD(36) RS RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+  Source Registers:  GPR(RA) GPR(RS) 
+  Target Memories:  Mem 
+  Dependencies:
+    Mem = GPR(RS)
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    14(38000000):  addi
+    31(7c000000):      Mask:  0x7fe
+      55(6e):  lwzux
+      266(214):  add
+    32(80000000):  lwz
+    36(90000000):  stw
+-------------------------------
+

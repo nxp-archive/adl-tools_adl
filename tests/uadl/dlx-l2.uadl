@@ -1,0 +1,305 @@
+//
+// A DLX model with a split L1 cache and unified L2 cache test:
+// send_cache_command() and wait_cache_command()
+//
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4);
+    }
+
+    // pipeline stages
+    define (pipestage=(mID, mEX, mMM, mWB)) {}
+
+    // memory system
+    define (cache L1i) {
+      next_level_memory = L2;
+      write_mode = WriteThrough;
+      data_width = 32;
+    }
+
+    define (cache L1d) {
+      next_level_memory = L2;
+      write_mode = WriteThrough;
+      data_width = 32;
+    }
+
+    define (cache L2) {
+      next_level_memory = Mem;
+      write_mode = WriteThrough;
+      data_width = 32;
+    }
+
+    define (memory Mem) {
+      data_width = 32;
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDp, S_IDe, S_EX, S_EXp, S_EXe, S_MM, S_MMp, S_MMe, S_WB, S_WBp, S_WBe );
+
+    define (mapping) {
+      mID = (S_ID,S_IDp,S_IDe);
+      mEX = (S_EX,S_EXp,S_EXe);
+      mMM = (S_MM,S_MMp,S_MMe);
+      mWB = (S_WB,S_WBp,S_WBe);
+    };
+
+    define (exception_mapping) {
+      S_IDe = (S_ID,S_IDp);
+      S_EXe = (S_EX,S_EXp);
+      S_MMe = (S_MM,S_MMp);
+      S_WBe = (S_WB,S_WBp);
+    }
+
+  }
+
+# define ExceptionStates \
+    S_IDe: { change_state(S_EXe); };  \
+    S_EXe: { change_state(S_MMe); };  \
+    S_MMe: { change_state(S_WBe); };  \
+    S_WBe: { change_state(S_INIT); };
+
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     add, or, mullw, rlwinm, cmpi, cmp, 
+                     mtspr, mfspr, srw, halt );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write()) {
+				Src.read();
+				Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp:  { change_state(S_EX); }
+		S_EX: {
+			exec();
+			change_state(S_EXp);
+		}
+    S_EXp:  { change_state(S_MM); }
+		S_MM: { 
+			change_state(S_WB); 
+		}
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+    };
+  };
+
+
+ define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzu, lwzx );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      Imm = field(D);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write()) {
+        Src.read();
+				Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp: {
+        change_state(S_EX);
+      }
+    S_EX: if (mMM.has_space() && L1d.can_request_read()) {
+        // Calc ea.
+        exec();
+        L1d.send_read_request();
+        change_state(S_EXp);
+      }
+    S_EXp:  { change_state(S_MM); }
+		S_MM: if (L1d.can_read()) { 
+        exec_and_read(L1d);
+        change_state(S_MMp);
+      }
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (L1d.can_request_read()) {
+        L1d.send_read_request();
+        change_state(S_MM);
+      }
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+
+    ExceptionStates;
+    };
+  }
+
+ define (instr_class store) {
+    instructions = (stb, sth, sthx, stw, stwu, stwx);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    // TBD:  send_read_request_queue_inquire(L1d);
+		S_ID: if (Src.can_read() && Trg.can_write()) {
+				Src.read();
+        Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp: {
+        change_state(S_EX);
+      }
+    S_EX: if (mMM.has_space() && L1d.can_request_write()) {
+        // Calc ea.
+        exec();
+        L1d.send_write_request();
+        change_state(S_MM);
+      }
+		S_MM: if (L1d.can_write()) { 
+        exec_and_write(L1d);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (L1d.can_request_write()) {
+        L1d.send_write_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+    };
+  }
+
+ define (instr_class branch) {
+   instructions = ( bc, b, bl, bclr );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+   
+   action = {
+   S_INIT :{
+     change_state(S_ID);
+   };
+   S_ID: if (can_read_ops() && can_write_ops()) {
+       read_ops();
+       allocate_ops();
+       exec();
+       write_ops();
+       if (branch_taken()) {
+         taken_flush();
+       }
+       change_state(S_IDp);
+     }
+   S_IDp:  { change_state(S_EX); }
+   S_EX: {
+       change_state(S_MM);
+     }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+
+    ExceptionStates;
+   };
+ }
+
+ define (instr_class cache) {
+    instructions = ( dcbt, dcbf, dcbst, dcbz, dcbi, dcba );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+    };
+
+    action = {
+		S_INIT: if (mID.empty() && mEX.empty() && mMM.empty() && mWB.empty()) { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && mEX.has_space()) {
+        Src.read();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && L1d.can_request_cmd()) {
+        // Calc ea.
+        exec();
+        L1d.send_cmd();
+        exec();
+        change_state(S_EXp);
+      }
+    S_EXp: if (exec_done() && mMM.has_space()) {
+        change_state(S_MM);
+      }
+      else if (L1d.can_request_cmd()) {
+        // dcbf consists of a flush and an invalidate.
+        L1d.send_cmd();
+        exec();
+        if (mMM.has_space()) {
+          change_state(S_MM);
+        }
+      }
+    S_MM: {
+      change_state(S_WB);
+    }
+		S_WB: {
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+    };
+  }
+
+}

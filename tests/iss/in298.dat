@@ -1,0 +1,87 @@
+#
+# Make sure that slice-writes register as targets.  We use lbz in this case,
+# where mod89 was modified so that lbz uses a slice-write.
+#
+= asm
+
+	lbz r1,0x1000(r0)
+	addi r2,r1,100
+	addi r3,r3,20
+	stw r2,0x2000(r0)
+	stw r5,0x2004(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x88201000	#	lbz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x38410064	#	addi r2,r1,100
+MD n=Mem ra=0x00000008 d=0x38630014	#	addi r3,r3,20
+MD n=Mem ra=0x0000000c d=0x90402000	#	stw r2,0x2000(r0)
+MD n=Mem ra=0x00000010 d=0x90A02004	#	stw r5,0x2004(r0)
+# </GEN>
+
+MD n=Mem ra=0x1000 d=10
+MD n=Mem ra=0x1004 d=20
+MD n=Mem ra=0x1008 d=30
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x88201000
+INSTR op=0x88201000					asm="lbz r1,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=1
+C n=L1d a=miss t=read set=32 way=0 lm=0x7f ra=0x1000
+C n=L1d a=load t=read set=32 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000000a
+R n=GPR i=1 d=0x00000000
+R n=GPR i=1 d=0x00000000
+ITIME t=11
+CTIME t=24
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38410064
+INSTR op=0x38410064					asm="addi r2,r1,100"
+R n=GPR i=2 d=0x00000064
+ITIME t=22
+CTIME t=25
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38630014
+INSTR op=0x38630014					asm="addi r3,r3,20"
+R n=GPR i=3 d=0x00000014
+ITIME t=22
+CTIME t=25
+
+I ea=0xc id=4 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x90402000
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=64 way=0 lm=0x7f ra=0x2000
+C n=L1d a=load t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x00000064
+ITIME t=23
+CTIME t=36
+
+I ea=0x10 id=5 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90a02004
+INSTR op=0x90a02004					asm="stw r5,8196(r0)"
+D n=Mem t=write ea=0x2004 nb=4
+C n=L1d a=hit t=write set=64 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2004 ra=0x2004 d=0x00000000
+ITIME t=24
+CTIME t=37
+
+I ea=0x14 id=6 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=24
+CTIME t=37
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=10
+MD n=Mem ra=0x1004 d=20
+MD n=Mem ra=0x1008 d=30
+MD n=Mem ra=0x2000 d=100

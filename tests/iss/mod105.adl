@@ -1,0 +1,316 @@
+//
+// Testing of micro instructions in a little-endian model.
+//
+// This tests that we can have an instruction that's larger than 32-bits in such
+// an encoding, and that it works if it's not byte-aligned (in this case, it's a
+// 36-bit instruction).
+//
+// We also test that a modifier (expression in an instruction alias) works
+// properly with >32b micro-ops.
+//
+// This also contains a simple example of using an assembler parameter
+// (loop_start) to control the setting of an assembler field (flags) in an
+// instruction.  This is specifically testing that this works in a little-endian
+// assembler with non-pseudo fields.
+//
+define (arch = packet_ops) {
+  
+  attrs = (other, instr_subinstr1,imm_op,imm_op_short,flag_op);
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+  
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+    width = 64;
+  }
+
+  define (regfile=GPR) {
+    """
+      The complete general-purpose register file.  r0 always reads as 0.
+    """;
+    size = 16;
+    width = 32;
+    prefix = r;
+  }
+
+  define (reloc=RELOC_1) {
+    value = 1;
+    abbrev = "lo";
+    instrfield = (imm,opA);
+  }
+
+  define (reloc=RELOC_2) {
+    value = 2;
+    abbrev = "j";
+    instrfield = (jt,opA);
+  }  
+
+  define (instrfield=fop) {
+    """
+    Outer 'envelope' instruction opcode.
+
+    """;    
+    bits = (3,0);
+  }
+
+  define (instrfield=opA) {
+    """
+    Instruction field for storing a 36-bit instruction.
+    """;
+    //bits = (43,4);
+    bits = (39,4);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+  
+  define(instrfield=opc2) {
+    """
+    Remaining bits.
+    """;
+    bits = (63,40);
+    //bits = (63,44);    
+  }
+
+  define (instrfield = opcode) {
+    """
+    Primary opcode field.
+    """;
+    bits = (35,28);
+  }
+
+  define (instrfield = rt) {
+    bits = (27,24);
+    ref = GPR;
+  }
+
+  define (instrfield = ra) {
+    bits = (23,20);
+    ref = GPR;
+  }
+
+  define (instrfield = imm) {
+    bits = (19,0);
+  }
+
+  define (instrfield = icnt) {
+    bits = (19,0);
+  }
+
+  define (instrfield = flags) {
+    bits = (2,0);
+    enumerated = ("",",s",",e",",3",",4",",5",",6",",7");
+    assembler = true;
+  }
+
+  define (instrfield = simm) {
+    bits = (19,0);
+    is_signed = true;
+  }
+
+  define (instrfield = jt) {
+    bits = (27,0);
+    // Absolute address so that we always generate relocations, in order to
+    // exercisee the linker.
+    addr = abs;
+  }
+
+  define (instrfield = lb) {
+    width = 32;
+    pseudo = true;
+    addr = pc;
+  }
+
+  define (instrfield = le) {
+    width = 32;
+    pseudo = true;
+    addr = pc;
+  }  
+  
+  define (instrfield = Rt) {
+    bits = (7,4);
+    ref = GPR;
+  }
+
+  define (instrfield = Ra) {
+    bits = (11,8);
+    ref = GPR;
+  }
+
+  define (instrfield = Imm) {
+    bits = (39,12);
+  }
+
+  define (instr = addi) {
+    width = 36;
+    fields = (opcode(0xfa),rt,ra,imm);
+    attrs = (instr_subinstr1,imm_op);
+    syntax = ("%i %f,%f,%f",rt,ra,imm);
+    action = {
+      GPR(rt) = GPR(ra) + imm;
+    };
+  }
+
+  define (instr = addi_) {
+    width = 36;
+    syntax = ("addi %f,%f",rt,imm);
+    attrs = imm_op_short;
+    alias = addi(rt(rt),ra(rt),imm(imm));
+  }  
+
+  define (instr = subi) {
+    alias = addi(rt(rt),ra(ra),imm(-simm));
+    syntax = ("%i %f,%f,%f",rt,ra,simm);
+  }
+
+  define (instr = nop) {
+    width = 36;
+    fields = (opcode(0x0));
+    attrs = instr_subinstr1;
+    action = {
+    };
+  } 
+
+  define (instr = jmp) {
+    width = 36;
+    fields = (opcode(0xfb),jt);
+    attrs = instr_subinstr1;
+    syntax = ("%i %f",jt);
+    action = {
+      NIA = jt;
+    };
+  } 
+
+  define (instr = loop) {
+    width = 36;
+    fields = (opcode(0xfc),rt,icnt);
+    attrs = instr_subinstr1;
+    dsyntax = ("%i %f,%f",rt,icnt);
+    assemble = false;
+    action = {
+
+    };
+  }
+
+  // We use this to test setting fields explicitly in the post-packet handler.
+  define (instr = lflag) {
+    width = 36;
+    fields = (opcode(0xfd),flags);
+    attrs = (instr_subinstr1,flag_op);
+    dsyntax = ("%i%f",flags);    
+    action = {
+
+    };
+  }  
+
+  define (instr = loop_) {
+    syntax = ("loop %f,%f,%f",rt,lb,le);
+    alias = loop(rt(rt),icnt(le-lb));
+  }
+
+  define (instr = std) {
+    """
+    Contains one 36-bit instruction.
+    """;
+    width = 64;
+    fields = (fop(1),opA,opc2(0x100));
+    dsyntax = ("%f",opA);
+    attrs = (other);
+  }
+
+  define (instr = big_addi) {
+    """
+    A big, standalone function, designed to test its behavior alongside micro-ops.
+""";
+    width = 64;
+    fields = (fop(2),Rt,Ra,Imm,opc2(0x200));
+    syntax = ("addi+ %f,%f,%f",Rt,Ra,Imm);
+    action = {
+    };
+  }
+
+  int64_t negate_it(int64_t x)
+  {
+    return -x;
+  }
+  
+  define (instr = big_subi) {
+    alias = big_addi(Rt(Rt),Ra(Ra),Imm(negate_it(Imm)));
+    syntax = ("subi+ %f,%f,%f",Rt,Ra,Imm);
+  }
+   
+  
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = ("//", "#");
+    packet_grouping = ("\n");
+    line_separators = ("\n"); // In additional to new-line separator, default is ";"
+    asm_instrtables = (other, instr_subinstr1);
+    instr_separators = (" ",";");
+
+    define (parm=loop_start) {
+      type = integer;
+      value = 1;
+    }
+  }
+
+  bool is_subinstr1(const InstrInfo &info)
+  {
+    return info.instrHasAttr(instr_subinstr1);
+  }
+
+  // Assemble instructions into a packet.  For two-instruction packets, we
+  // decide between parallel and serial by examining the instruction separator
+  // (equals implies parallel, semicolon or space implies serial).  Instructions must be
+  // consistent, so if one instruction is format 1 (31-bit), then so must the
+  // second be.
+  post_packet_asm = func(InstrBundle b) {
+    InstrBundle newb;
+    
+    if (b.size() == 1 && !is_subinstr1(b[0])) {
+      return;
+    } else if (is_subinstr1(b[0])) {
+      // Test explicitly setting fields.
+      if (b[0].instrHasAttr(flag_op)) {
+        if (loop_start) {
+          b[0].flags = 1;
+        } else {
+          loop_start = false;
+          b[0].flags = 2;
+        }
+      }
+      // Make sure that we can query an instruction operand- just put in an
+      // arbitrary test here.
+      if (b[0].instrHasAttr(imm_op)) {
+        var v = (b[0].instrHasAttr(imm_op_short)) ? b[0].getOpValue(1) : b[0].getOpValue(2);
+        if (v < -1000 || v > 1000) {
+          info(1,"Immediate value is big.");
+        }
+      }
+      
+      newb.push_back(combineInstr("std",0));      
+    } else {
+      error(1,"Unknown type of instruction found.");
+    }
+    
+    b = newb;
+  };
+
+}
+
+
+define (core = packet_ops) {
+  archs = packet_ops; 
+  instrtables = (other, instr_subinstr1);
+}

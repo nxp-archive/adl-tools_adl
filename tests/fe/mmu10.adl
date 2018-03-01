@@ -1,0 +1,206 @@
+//
+// Makes sure that we flag as an error nested lookups with the same name.
+//
+define (arch=foo) {
+
+  define (reg=MSR) {
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 10;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  // Classic MMU
+  define(mmu) {
+
+    define (lookup=Seg1) {
+      type = Both;
+      priority = 1;
+
+      define (wayfield=T) {
+        bits = 1;
+      }
+      define (wayfield=Ks) {
+        bits = 1;
+      }
+      define (wayfield=Kp) {
+        bits = 1;
+      }
+      define (wayfield=N) {
+        bits = 1;
+      }
+      define (wayfield=VSID) {
+        bits = 24;
+      }
+    
+      define (array) {
+        entries = 16;
+        set_assoc = 1;
+      }
+      test = AddrIndex(0,3);
+    
+      define (lookup=PTE) {
+        priority = 0;
+
+        define (wayfield=V) {
+          bits = 1;
+        }
+        define (wayfield=VSID) {
+          bits = 24;
+        }
+        define (wayfield=H) {
+          bits = 1;
+        }
+        define (wayfield=API) {
+          bits = 16;
+        }
+        define (wayfield=RPN) {
+          bits = 20;
+        }
+        define (wayfield=R) {
+          bits = 1;
+        }
+        define (wayfield=C) {
+          bits = 1;
+        }
+        define (wayfield=WIMG) {
+          bits = 4;
+        }
+        define (wayfield=PP) {
+          bits = 2;
+        }
+      
+        define (array) {
+          entries = 128;
+          set_assoc = 2;
+        }
+        size = 4096;
+        test = Compare(VSID,Seg1.VSID);
+        test = AddrComp(API);
+        realpage = RPN;
+        exec_perm = func(PTE p,Seg1 s,addr_t) {
+          if (!(s.N == 1)) {
+            raiseException(ProtectionFault);
+          }
+        };
+        load_perm = func(PTE p,Seg1 s,addr_t) {
+          if ((MSR.PR() ? s.KS : s.KP) == 1 && (p.PP == 0)) {
+            raiseException(ProtectionFault);
+          }
+        };
+        store_perm = func(PTE p,Seg1 s,addr_t) {
+          if (((MSR.PR() ? s.KS : s.KP) == 1 && (p.PP == 1)) || (p.PP==11)) {
+            raiseException(ProtectionFault);
+          }
+        };
+      }
+    }
+
+    define (lookup=Seg2) {
+      type = Both;
+      priority = 1;
+
+      define (wayfield=T) {
+        bits = 1;
+      }
+      define (wayfield=Ks) {
+        bits = 1;
+      }
+      define (wayfield=Kp) {
+        bits = 1;
+      }
+      define (wayfield=N) {
+        bits = 1;
+      }
+      define (wayfield=VSID) {
+        bits = 24;
+      }
+    
+      define (array) {
+        entries = 16;
+        set_assoc = 1;
+      }
+      test = AddrIndex(0,3);
+    
+      define (lookup=PTE) {
+        priority = 0;
+
+        define (wayfield=V) {
+          bits = 1;
+        }
+        define (wayfield=VSID) {
+          bits = 24;
+        }
+        define (wayfield=H) {
+          bits = 1;
+        }
+        define (wayfield=API) {
+          bits = 16;
+        }
+        define (wayfield=RPN) {
+          bits = 20;
+        }
+        define (wayfield=R) {
+          bits = 1;
+        }
+        define (wayfield=C) {
+          bits = 1;
+        }
+        define (wayfield=WIMG) {
+          bits = 4;
+        }
+        define (wayfield=PP) {
+          bits = 2;
+        }
+      
+        define (array) {
+          entries = 128;
+          set_assoc = 2;
+        }
+        size = 4096;
+        test = Compare(VSID,Seg2.VSID);
+        test = AddrComp(API);
+        realpage = RPN;
+        exec_perm = func(PTE p,Seg2 s,addr_t) {
+          if (!(s.N == 1)) {
+            raiseException(ProtectionFault);
+          }
+        };
+        load_perm = func(PTE p,Seg2 s,addr_t) {
+          if ((MSR.PR() ? s.KS : s.KP) == 1 && (p.PP == 0)) {
+            raiseException(ProtectionFault);
+          }
+        };
+        store_perm = func(PTE p,Seg2 s,addr_t) {
+          if (((MSR.PR() ? s.KS : s.KP) == 1 && (p.PP == 1)) || (p.PP==11)) {
+            raiseException(ProtectionFault);
+          }
+        };
+      }
+    }
+
+  }
+
+}
+
+define (core=P) {
+  archs=foo;
+}

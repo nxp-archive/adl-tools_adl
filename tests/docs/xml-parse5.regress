@@ -1,0 +1,3117 @@
+XML:<?xml encoding="UTF-8" version="1.0"?>
+ <data>
+  <cores>
+   <core name="myCore">
+    <doc>
+     <str>
+      <![CDATA[ my Core ]]>
+     </str>
+    </doc>
+    <type>
+     <str>
+      someCore
+     </str>
+    </type>
+    <bit_endianness>
+     <str>
+      little
+     </str>
+    </bit_endianness>
+    <blocks>
+     <str>
+      x
+     </str>
+    </blocks>
+    <type_declarations>
+     <str>
+      enum MsgTypes {
+      Read
+      ,
+      Write
+      ,
+      LastMsg
+      } ;
+     </str>
+     <str>
+      enum  {
+      Foo1 = LastMsg + 1
+      ,
+      Bar
+      } ;
+     </str>
+    </type_declarations>
+    <parallel_execution>
+     <int>
+      2
+     </int>
+    </parallel_execution>
+    <RaMask>
+     <initial>
+      <str>
+       0xffffff
+      </str>
+     </initial>
+     <constant>
+      <true />
+     </constant>
+    </RaMask>
+    <EaMask>
+     <initial>
+      <str>
+       0xffffff
+      </str>
+     </initial>
+     <constant>
+      <true />
+     </constant>
+    </EaMask>
+    <regs>
+     <register name="CCR">
+      <doc>
+       <str>
+        <![CDATA[ Cache control register. ]]>
+       </str>
+      </doc>
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <fields>
+       <field name="H">
+        <bits>
+         <range>
+          <int>
+           31
+          </int>
+          <int>
+           16
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L">
+        <bits>
+         <range>
+          <int>
+           15
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L1E">
+        <bits>
+         <range>
+          <int>
+           0
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L1dHitCnt">
+        <bits>
+         <range>
+          <int>
+           7
+          </int>
+          <int>
+           4
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L1dMissCnt">
+        <bits>
+         <range>
+          <int>
+           11
+          </int>
+          <int>
+           8
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L2E">
+        <bits>
+         <range>
+          <int>
+           1
+          </int>
+          <int>
+           1
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L2dMissCnt">
+        <bits>
+         <range>
+          <int>
+           19
+          </int>
+          <int>
+           16
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L2iMissCnt">
+        <bits>
+         <range>
+          <int>
+           15
+          </int>
+          <int>
+           12
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="WAY8">
+        <bits>
+         <range>
+          <int>
+           2
+          </int>
+          <int>
+           2
+          </int>
+         </range>
+        </bits>
+       </field>
+      </fields>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="DEAR">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="ELPC">
+      <doc>
+       <str>
+        <![CDATA[ External PID Load Context Register. ]]>
+       </str>
+      </doc>
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <fields>
+       <field name="EAS">
+        <doc>
+         <str>
+          <![CDATA[ Replaces the MSR.IS/MSR.DS bit for external-PID translations. ]]>
+         </str>
+        </doc>
+        <bits>
+         <range>
+          <int>
+           1
+          </int>
+          <int>
+           1
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="EPID">
+        <doc>
+         <str>
+          <![CDATA[ Replaces the PID registers for external-PID translations. ]]>
+         </str>
+        </doc>
+        <bits>
+         <range>
+          <int>
+           31
+          </int>
+          <int>
+           2
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="EPR">
+        <doc>
+         <str>
+          <![CDATA[ Replaces the MSR.PR bit for external-PID translations. ]]>
+         </str>
+        </doc>
+        <bits>
+         <range>
+          <int>
+           0
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+      </fields>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="FOOBAR">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <attributes>
+       <attribute name="doc_hidden">
+        <str />
+       </attribute>
+      </attributes>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="HDBCR0">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <fields>
+       <field name="MMU_ENABLE">
+        <bits>
+         <range>
+          <int>
+           0
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+      </fields>
+      <reserved_mask>
+       <str>
+        0b11111111111111111111111111111110
+       </str>
+      </reserved_mask>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="MSR">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <fields>
+       <field name="PR">
+        <bits>
+         <range>
+          <int>
+           10
+          </int>
+          <int>
+           10
+          </int>
+         </range>
+        </bits>
+       </field>
+      </fields>
+      <reserved_mask>
+       <str>
+        0b11111111111111111111101111111111
+       </str>
+      </reserved_mask>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="PC">
+      <doc>
+       <str>
+        <![CDATA[ PC ]]>
+       </str>
+      </doc>
+      <width>
+       <int>
+        24
+       </int>
+      </width>
+      <offset>
+       <int>
+        2
+       </int>
+      </offset>
+      <serial>
+       <true />
+      </serial>
+      <fields>
+       <field name="A">
+        <bits>
+         <range>
+          <int>
+           18
+          </int>
+          <int>
+           16
+          </int>
+         </range>
+        </bits>
+        <reserved>
+         <true />
+        </reserved>
+       </field>
+       <field name="B">
+        <bits>
+         <range>
+          <int>
+           15
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+        <readonly>
+         <true />
+        </readonly>
+       </field>
+      </fields>
+      <reserved_mask>
+       <str>
+        0b111111000000000000000011
+       </str>
+      </reserved_mask>
+      <readonly_mask>
+       <str>
+        0b000000111111111111111100
+       </str>
+      </readonly_mask>
+      <attributes>
+       <attribute name="cia">
+        <str />
+       </attribute>
+       <attribute name="nia">
+        <str />
+       </attribute>
+      </attributes>
+      <reset>
+       <str>
+        3
+       </str>
+      </reset>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </register>
+     <register name="PID0">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <attributes>
+       <attribute name="doc_no_code">
+        <str />
+       </attribute>
+      </attributes>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+      <read>
+       <str>
+        <![CDATA[ 
+{
+    return ThisReg ;
+}
+ ]]>
+       </str>
+      </read>
+      <write>
+       <str>
+        <![CDATA[ 
+{
+    ThisReg = x ;
+}
+ ]]>
+       </str>
+      </write>
+     </register>
+     <register name="PID1">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+      <read>
+       <str>
+        <![CDATA[ 
+{
+    return ThisReg ;
+}
+ ]]>
+       </str>
+      </read>
+      <write>
+       <str>
+        <![CDATA[ 
+{
+    ThisReg = x ;
+}
+ ]]>
+       </str>
+      </write>
+     </register>
+    </regs>
+    <regfiles>
+     <regfile name="D">
+      <width>
+       <int>
+        40
+       </int>
+      </width>
+      <fields>
+       <field name="E">
+        <bits>
+         <range>
+          <int>
+           39
+          </int>
+          <int>
+           32
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="H">
+        <bits>
+         <range>
+          <int>
+           31
+          </int>
+          <int>
+           16
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="HH">
+        <bits>
+         <range>
+          <int>
+           31
+          </int>
+          <int>
+           24
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="HL">
+        <bits>
+         <range>
+          <int>
+           23
+          </int>
+          <int>
+           16
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="IL">
+        <bits>
+         <range>
+          <int>
+           31
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="L">
+        <bits>
+         <range>
+          <int>
+           15
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="LH">
+        <bits>
+         <range>
+          <int>
+           15
+          </int>
+          <int>
+           8
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="LL">
+        <bits>
+         <range>
+          <int>
+           7
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="WH">
+        <bits>
+         <range>
+          <int>
+           39
+          </int>
+          <int>
+           36
+          </int>
+         </range>
+         <range>
+          <int>
+           31
+          </int>
+          <int>
+           16
+          </int>
+         </range>
+        </bits>
+       </field>
+       <field name="WL">
+        <bits>
+         <range>
+          <int>
+           35
+          </int>
+          <int>
+           32
+          </int>
+         </range>
+         <range>
+          <int>
+           15
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+       </field>
+      </fields>
+      <size>
+       <int>
+        32
+       </int>
+      </size>
+      <prefix>
+       <str>
+        d
+       </str>
+      </prefix>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+     </regfile>
+     <regfile name="NEVER_SEEN">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <attributes>
+       <attribute name="doc_hidden">
+        <str />
+       </attribute>
+      </attributes>
+      <size>
+       <int>
+        64
+       </int>
+      </size>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+      <entries>
+       <entry name="1">
+        <syntax>
+         <str>
+          DEAR
+         </str>
+        </syntax>
+        <reg>
+         <str>
+          DEAR
+         </str>
+        </reg>
+       </entry>
+       <entry name="2">
+        <syntax>
+         <str>
+          NEVER_SEEN2
+         </str>
+        </syntax>
+        <read>
+         <str>
+          <![CDATA[ 
+{
+    return 0xdeadbeef ;
+}
+ ]]>
+         </str>
+        </read>
+        <write>
+         <str>
+          <![CDATA[ 
+{
+    DEAR = 0x0 ;
+}
+ ]]>
+         </str>
+        </write>
+       </entry>
+      </entries>
+     </regfile>
+     <regfile name="WXY">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <size>
+       <int>
+        2
+       </int>
+      </size>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+      <entries>
+       <entry name="0">
+        <syntax>
+         <str>
+          DEAR
+         </str>
+        </syntax>
+        <reg>
+         <str>
+          DEAR
+         </str>
+        </reg>
+       </entry>
+       <entry name="1">
+        <syntax>
+         <str>
+          WXY1
+         </str>
+        </syntax>
+        <read>
+         <str>
+          <![CDATA[ 
+{
+    return 0xeeeeaaaa ;
+}
+ ]]>
+         </str>
+        </read>
+        <write>
+         <str>
+          <![CDATA[ 
+{
+    DEAR = 0x1 ;
+}
+ ]]>
+         </str>
+        </write>
+       </entry>
+      </entries>
+     </regfile>
+     <regfile name="XYZ">
+      <width>
+       <int>
+        32
+       </int>
+      </width>
+      <attributes>
+       <attribute name="doc_no_code">
+        <str />
+       </attribute>
+      </attributes>
+      <size>
+       <int>
+        64
+       </int>
+      </size>
+      <shared>
+       <int>
+        0
+       </int>
+      </shared>
+      <entries>
+       <entry name="1">
+        <syntax>
+         <str>
+          DEAR
+         </str>
+        </syntax>
+        <reg>
+         <str>
+          DEAR
+         </str>
+        </reg>
+       </entry>
+       <entry name="2">
+        <syntax>
+         <str>
+          XYZ:2
+         </str>
+        </syntax>
+        <read>
+         <str>
+          <![CDATA[ 
+{
+    return 0xdeadbeef ;
+}
+ ]]>
+         </str>
+        </read>
+        <write>
+         <str>
+          <![CDATA[ 
+{
+    DEAR = 0x0 ;
+}
+ ]]>
+         </str>
+        </write>
+       </entry>
+      </entries>
+     </regfile>
+    </regfiles>
+    <relocations>
+     <reloc name="a">
+      <attributes>
+       <attribute name="a1">
+        <str />
+       </attribute>
+      </attributes>
+      <doc>
+       <str>
+        <![CDATA[ An example of an ADL relocation. ]]>
+       </str>
+      </doc>
+      <abbrev>
+       <str />
+      </abbrev>
+      <field_width>
+       <int>
+        4
+       </int>
+      </field_width>
+      <pcrel>
+       <false />
+      </pcrel>
+      <value>
+       <int>
+        101
+       </int>
+      </value>
+      <right_shift>
+       <int>
+        0
+       </int>
+      </right_shift>
+      <width>
+       <int>
+        16
+       </int>
+      </width>
+     </reloc>
+     <reloc name="b">
+      <abbrev>
+       <str />
+      </abbrev>
+      <field_width>
+       <int>
+        0
+       </int>
+      </field_width>
+      <pcrel>
+       <false />
+      </pcrel>
+      <value>
+       <int>
+        102
+       </int>
+      </value>
+      <right_shift>
+       <int>
+        0
+       </int>
+      </right_shift>
+      <width>
+       <int>
+        16
+       </int>
+      </width>
+     </reloc>
+     <reloc name="c">
+      <abbrev>
+       <str />
+      </abbrev>
+      <field_width>
+       <int>
+        0
+       </int>
+      </field_width>
+      <pcrel>
+       <false />
+      </pcrel>
+      <value>
+       <int>
+        103
+       </int>
+      </value>
+      <right_shift>
+       <int>
+        0
+       </int>
+      </right_shift>
+      <width>
+       <int>
+        16
+       </int>
+      </width>
+     </reloc>
+     <reloc name="d">
+      <abbrev>
+       <str />
+      </abbrev>
+      <field_width>
+       <int>
+        0
+       </int>
+      </field_width>
+      <pcrel>
+       <false />
+      </pcrel>
+      <value>
+       <int>
+        104
+       </int>
+      </value>
+      <right_shift>
+       <int>
+        0
+       </int>
+      </right_shift>
+      <width>
+       <int>
+        16
+       </int>
+      </width>
+     </reloc>
+    </relocations>
+    <instrfields>
+     <instrfield name="Foo">
+      <syntax>
+       <str>
+        Db,Da
+       </str>
+      </syntax>
+      <attributes>
+       <attribute name="doc_hidden">
+        <str />
+       </attribute>
+      </attributes>
+      <alias>
+       <str>
+        JJJJJ
+       </str>
+      </alias>
+     </instrfield>
+     <instrfield name="JJJJJ">
+      <doc>
+       <str>
+        <![CDATA[ 
+    Example documentation string for an instruction field.
+    This is multiple lines, too.
+
+    Previous indentation preservation::
+
+        example {
+            abc();
+        }
+    
+ ]]>
+       </str>
+      </doc>
+      <syntax>
+       <str>
+        Da,Db,Dc
+       </str>
+      </syntax>
+      <pseudo>
+       <true />
+      </pseudo>
+      <width>
+       <int>
+        8
+       </int>
+      </width>
+      <size>
+       <int>
+        8
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        regfile
+       </str>
+      </type>
+      <ref>
+       <str>
+        D
+       </str>
+      </ref>
+      <fields>
+       <field name="DaDbDc">
+        <int>
+         1
+        </int>
+       </field>
+       <field name="DaDbDc">
+        <int>
+         0
+        </int>
+       </field>
+       <field name="DaDbDc">
+        <int>
+         2
+        </int>
+       </field>
+      </fields>
+      <instrfields>
+       <instrfield name="Da">
+        <size>
+         <int>
+          4
+         </int>
+        </size>
+        <fields>
+         <int>
+          3
+         </int>
+         <int>
+          0
+         </int>
+        </fields>
+       </instrfield>
+       <instrfield name="DaDbDc">
+        <size>
+         <int>
+          3
+         </int>
+        </size>
+        <bits>
+         <range>
+          <int>
+           4
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+        <table>
+         <entry name="0">
+          <int>
+           0
+          </int>
+          <int>
+           4
+          </int>
+          <int>
+           1
+          </int>
+         </entry>
+         <entry name="1">
+          <int>
+           0
+          </int>
+          <int>
+           5
+          </int>
+          <int>
+           2
+          </int>
+         </entry>
+         <entry name="2">
+          <int>
+           0
+          </int>
+          <int>
+           6
+          </int>
+          <int>
+           3
+          </int>
+         </entry>
+         <entry name="3">
+          <int>
+           0
+          </int>
+          <int>
+           7
+          </int>
+          <int>
+           4
+          </int>
+         </entry>
+         <entry name="4">
+          <int>
+           1
+          </int>
+          <int>
+           4
+          </int>
+          <int>
+           5
+          </int>
+         </entry>
+         <entry name="5">
+          <int>
+           1
+          </int>
+          <int>
+           5
+          </int>
+          <int>
+           6
+          </int>
+         </entry>
+         <entry name="6">
+          <int>
+           1
+          </int>
+          <int>
+           6
+          </int>
+          <int>
+           7
+          </int>
+         </entry>
+         <entry name="7">
+          <int>
+           2
+          </int>
+          <int>
+           1
+          </int>
+          <int>
+           1
+          </int>
+         </entry>
+         <entry name="8">
+          <int>
+           2
+          </int>
+          <int>
+           1
+          </int>
+          <int>
+           2
+          </int>
+         </entry>
+        </table>
+       </instrfield>
+       <instrfield name="Db">
+        <size>
+         <int>
+          2
+         </int>
+        </size>
+        <fields>
+         <int>
+          7
+         </int>
+         <int>
+          6
+         </int>
+        </fields>
+       </instrfield>
+       <instrfield name="Dc">
+        <size>
+         <int>
+          2
+         </int>
+        </size>
+        <fields>
+         <int>
+          5
+         </int>
+         <int>
+          4
+         </int>
+        </fields>
+       </instrfield>
+      </instrfields>
+     </instrfield>
+     <instrfield name="JJJJJ_imp_bits__11_4_">
+      <syntax>
+       <str>
+        Da,Db,Dc
+       </str>
+      </syntax>
+      <bits>
+       <range>
+        <int>
+         11
+        </int>
+        <int>
+         4
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        8
+       </int>
+      </width>
+      <size>
+       <int>
+        8
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000ff0
+       </str>
+      </mask>
+      <type>
+       <str>
+        regfile
+       </str>
+      </type>
+      <implements>
+       <str>
+        JJJJJ
+       </str>
+      </implements>
+      <ref>
+       <str>
+        D
+       </str>
+      </ref>
+      <fields>
+       <field name="DaDbDc">
+        <int>
+         1
+        </int>
+       </field>
+       <field name="DaDbDc">
+        <int>
+         0
+        </int>
+       </field>
+       <field name="DaDbDc">
+        <int>
+         2
+        </int>
+       </field>
+      </fields>
+      <instrfields>
+       <instrfield name="Da">
+        <size>
+         <int>
+          4
+         </int>
+        </size>
+        <fields>
+         <int>
+          3
+         </int>
+         <int>
+          0
+         </int>
+        </fields>
+       </instrfield>
+       <instrfield name="DaDbDc">
+        <size>
+         <int>
+          3
+         </int>
+        </size>
+        <bits>
+         <range>
+          <int>
+           4
+          </int>
+          <int>
+           0
+          </int>
+         </range>
+        </bits>
+        <table>
+         <entry name="0">
+          <int>
+           0
+          </int>
+          <int>
+           4
+          </int>
+          <int>
+           1
+          </int>
+         </entry>
+         <entry name="1">
+          <int>
+           0
+          </int>
+          <int>
+           5
+          </int>
+          <int>
+           2
+          </int>
+         </entry>
+         <entry name="2">
+          <int>
+           0
+          </int>
+          <int>
+           6
+          </int>
+          <int>
+           3
+          </int>
+         </entry>
+         <entry name="3">
+          <int>
+           0
+          </int>
+          <int>
+           7
+          </int>
+          <int>
+           4
+          </int>
+         </entry>
+         <entry name="4">
+          <int>
+           1
+          </int>
+          <int>
+           4
+          </int>
+          <int>
+           5
+          </int>
+         </entry>
+         <entry name="5">
+          <int>
+           1
+          </int>
+          <int>
+           5
+          </int>
+          <int>
+           6
+          </int>
+         </entry>
+         <entry name="6">
+          <int>
+           1
+          </int>
+          <int>
+           6
+          </int>
+          <int>
+           7
+          </int>
+         </entry>
+         <entry name="7">
+          <int>
+           2
+          </int>
+          <int>
+           1
+          </int>
+          <int>
+           1
+          </int>
+         </entry>
+         <entry name="8">
+          <int>
+           2
+          </int>
+          <int>
+           1
+          </int>
+          <int>
+           2
+          </int>
+         </entry>
+        </table>
+       </instrfield>
+       <instrfield name="Db">
+        <size>
+         <int>
+          2
+         </int>
+        </size>
+        <fields>
+         <int>
+          7
+         </int>
+         <int>
+          6
+         </int>
+        </fields>
+       </instrfield>
+       <instrfield name="Dc">
+        <size>
+         <int>
+          2
+         </int>
+        </size>
+        <fields>
+         <int>
+          5
+         </int>
+         <int>
+          4
+         </int>
+        </fields>
+       </instrfield>
+      </instrfields>
+     </instrfield>
+     <instrfield name="Opcode">
+      <pseudo>
+       <true />
+      </pseudo>
+      <width>
+       <int>
+        0
+       </int>
+      </width>
+      <size>
+       <int>
+        0
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="Res">
+      <pseudo>
+       <true />
+      </pseudo>
+      <width>
+       <int>
+        4
+       </int>
+      </width>
+      <size>
+       <int>
+        4
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+      <reloc>
+       <str>
+        a
+       </str>
+      </reloc>
+     </instrfield>
+     <instrfield name="Res_imp_bits__11_8_">
+      <bits>
+       <range>
+        <int>
+         11
+        </int>
+        <int>
+         8
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        4
+       </int>
+      </width>
+      <size>
+       <int>
+        4
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000f00
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+      <implements>
+       <str>
+        Res
+       </str>
+      </implements>
+      <reloc>
+       <str>
+        a
+       </str>
+      </reloc>
+     </instrfield>
+     <instrfield name="Src1">
+      <pseudo>
+       <true />
+      </pseudo>
+      <width>
+       <int>
+        4
+       </int>
+      </width>
+      <size>
+       <int>
+        4
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="Src1_imp_bits__3_0_">
+      <bits>
+       <range>
+        <int>
+         3
+        </int>
+        <int>
+         0
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        4
+       </int>
+      </width>
+      <size>
+       <int>
+        4
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x000000000000000f
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+      <implements>
+       <str>
+        Src1
+       </str>
+      </implements>
+     </instrfield>
+     <instrfield name="Src2">
+      <pseudo>
+       <true />
+      </pseudo>
+      <width>
+       <int>
+        4
+       </int>
+      </width>
+      <size>
+       <int>
+        4
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="VarInstrOpcode_imp_bits__15_8_">
+      <bits>
+       <range>
+        <int>
+         15
+        </int>
+        <int>
+         8
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        8
+       </int>
+      </width>
+      <size>
+       <int>
+        8
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x000000000000ff00
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="VarInstrOpcode_imp_bits__22_21_">
+      <bits>
+       <range>
+        <int>
+         22
+        </int>
+        <int>
+         21
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        2
+       </int>
+      </width>
+      <size>
+       <int>
+        2
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x0000000000600000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="VarInstrOpcode_imp_bits__61_48_x_47_16_x_15_15_x_14_14_x_13_13_x_12_12_x_7_0_">
+      <bits>
+       <range>
+        <int>
+         61
+        </int>
+        <int>
+         12
+        </int>
+       </range>
+       <range>
+        <int>
+         7
+        </int>
+        <int>
+         0
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        58
+       </int>
+      </width>
+      <size>
+       <int>
+        58
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0x3ffffffffffff0ff
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+     <instrfield name="reserved_imp_bits__63_62_">
+      <bits>
+       <range>
+        <int>
+         63
+        </int>
+        <int>
+         62
+        </int>
+       </range>
+      </bits>
+      <width>
+       <int>
+        2
+       </int>
+      </width>
+      <size>
+       <int>
+        2
+       </int>
+      </size>
+      <shift>
+       <int>
+        0
+       </int>
+      </shift>
+      <offset>
+       <int>
+        0
+       </int>
+      </offset>
+      <mask>
+       <str>
+        0xc000000000000000
+       </str>
+      </mask>
+      <type>
+       <str>
+        imm
+       </str>
+      </type>
+     </instrfield>
+    </instrfields>
+    <instrs>
+     <instruction name="affect_multiple_nested_fields">
+      <width>
+       <int>
+        24
+       </int>
+      </width>
+      <syntax>
+       <str>
+        amnf JJJJJ,Src1
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        amnf ${JJJJJ},${Src1}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="VarInstrOpcode_imp_bits__22_21_">
+        <int>
+         1
+        </int>
+       </field>
+       <field name="JJJJJ_imp_bits__11_4_">
+        <str />
+       </field>
+       <field name="Src1_imp_bits__3_0_">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+    JJJJJ . Da = D ( Src1 ) . HL ;
+    JJJJJ . Db = D ( Src1 ) . H ;
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+      <inputs>
+       <str>
+        D(Src1)[mask 0x00ffff0000]/p
+       </str>
+      </inputs>
+     </instruction>
+     <instruction name="dummy_two_source">
+      <syntax>
+       <str>
+        dummy_two_source Src1, Src2
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        dummy_two_source ${Src1}, ${Src2}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="Src1">
+        <str />
+       </field>
+       <field name="Src2">
+        <str />
+       </field>
+       <field name="VarInstrOpcode_imp_bits__15_8_">
+        <int>
+         1
+        </int>
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+     <instruction name="dummy_nested_ifield">
+      <width>
+       <int>
+        16
+       </int>
+      </width>
+      <syntax>
+       <str>
+        dni JJJJJ
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        dni ${JJJJJ}
+       </str>
+      </dsyntax>
+      <fields>
+       <field name="JJJJJ.Da">
+        <str />
+       </field>
+       <field name="JJJJJ.Db">
+        <str />
+       </field>
+      </fields>
+      <aliases>
+       <alias name="dummy_two_source">
+        <sources />
+        <destinations />
+        <miscs>
+         <misc>
+          <field>
+           <str>
+            Src1
+           </str>
+          </field>
+          <value>
+           <str>
+            JJJJJ.Da
+           </str>
+          </value>
+         </misc>
+         <misc>
+          <field>
+           <str>
+            Src2
+           </str>
+          </field>
+          <value>
+           <str>
+            JJJJJ.Db
+           </str>
+          </value>
+         </misc>
+        </miscs>
+        <parent_action>
+         <str>
+          <![CDATA[ 
+{
+}
+ ]]>
+         </str>
+        </parent_action>
+       </alias>
+      </aliases>
+      <parent>
+       <str>
+        dummy_two_source
+       </str>
+      </parent>
+      <disassemble>
+       <false />
+      </disassemble>
+     </instruction>
+     <instruction name="nop">
+      <width>
+       <int>
+        64
+       </int>
+      </width>
+      <doc>
+       <str>
+        <![CDATA[ No operation. ]]>
+       </str>
+      </doc>
+      <syntax>
+       <str>
+        nop Res
+       </str>
+      </syntax>
+      <dsyntax>
+       <str>
+        nop ${Res}
+       </str>
+      </dsyntax>
+      <block>
+       <str>
+        x
+       </str>
+      </block>
+      <fields>
+       <field name="reserved_imp_bits__63_62_">
+        <str>
+         reserved
+        </str>
+       </field>
+       <field name="VarInstrOpcode_imp_bits__61_48_x_47_16_x_15_15_x_14_14_x_13_13_x_12_12_x_7_0_">
+        <int>
+         4491871681242626
+        </int>
+       </field>
+       <field name="Res_imp_bits__11_8_">
+        <str />
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+      <disassemble>
+       <true />
+      </disassemble>
+     </instruction>
+    </instrs>
+    <exceptions>
+     <exception name="DEAR">
+      <priority>
+       <int>
+        0
+       </int>
+      </priority>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+     </exception>
+     <exception name="DTlbMiss">
+      <priority>
+       <int>
+        0
+       </int>
+      </priority>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+     </exception>
+     <exception name="ITlbMiss">
+      <priority>
+       <int>
+        0
+       </int>
+      </priority>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+     </exception>
+     <exception name="ProtectionFault">
+      <priority>
+       <int>
+        0
+       </int>
+      </priority>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+}
+ ]]>
+       </str>
+      </action>
+     </exception>
+    </exceptions>
+    <eventbuses>
+     <eventbus name="msg">
+      <fields>
+       <field name="addr">
+        <doc>
+         <str>
+          <![CDATA[  ]]>
+         </str>
+        </doc>
+        <bits>
+         <int>
+          32
+         </int>
+        </bits>
+       </field>
+       <field name="data">
+        <doc>
+         <str>
+          <![CDATA[  ]]>
+         </str>
+        </doc>
+        <bits>
+         <int>
+          32
+         </int>
+        </bits>
+       </field>
+       <field name="foo">
+        <doc>
+         <str>
+          <![CDATA[  ]]>
+         </str>
+        </doc>
+        <bits>
+         <int>
+          20
+         </int>
+        </bits>
+       </field>
+       <field name="type">
+        <doc>
+         <str>
+          <![CDATA[  ]]>
+         </str>
+        </doc>
+        <bits>
+         <int>
+          0
+         </int>
+        </bits>
+       </field>
+      </fields>
+      <action>
+       <str>
+        <![CDATA[ 
+{
+    CCR = x . data ;
+}
+ ]]>
+       </str>
+      </action>
+     </eventbus>
+    </eventbuses>
+    <memories>
+     <memory name="PreFetch">
+      <instr_mem>
+       <false />
+      </instr_mem>
+      <prefetch_mem>
+       <true />
+      </prefetch_mem>
+      <size>
+       <int>
+        16
+       </int>
+      </size>
+      <addr_unit>
+       <int>
+        4
+       </int>
+      </addr_unit>
+     </memory>
+     <memory name="data">
+      <instr_mem>
+       <false />
+      </instr_mem>
+      <size>
+       <int>
+        512
+       </int>
+      </size>
+      <addr_unit>
+       <int>
+        1
+       </int>
+      </addr_unit>
+      <parent>
+       <str>
+        instr
+       </str>
+       <int>
+        256
+       </int>
+      </parent>
+      <read>
+       <str>
+        <![CDATA[ 
+{
+    return d . swap_bytes (  ) ;
+}
+ ]]>
+       </str>
+      </read>
+      <write>
+       <str>
+        <![CDATA[ 
+{
+    return d . swap_bytes (  ) ;
+}
+ ]]>
+       </str>
+      </write>
+     </memory>
+     <memory name="instr">
+      <instr_mem>
+       <true />
+      </instr_mem>
+      <size>
+       <int>
+        1024
+       </int>
+      </size>
+      <addr_unit>
+       <int>
+        4
+       </int>
+      </addr_unit>
+     </memory>
+     <memory name="instr2">
+      <instr_mem>
+       <false />
+      </instr_mem>
+      <size>
+       <int>
+        32
+       </int>
+      </size>
+      <addr_unit>
+       <int>
+        1
+       </int>
+      </addr_unit>
+      <parent>
+       <str>
+        instr
+       </str>
+       <int>
+        512
+       </int>
+      </parent>
+     </memory>
+    </memories>
+    <mmu>
+     <interleaved-fetch>
+      <true />
+     </interleaved-fetch>
+     <interleaved-reads>
+      <true />
+     </interleaved-reads>
+     <interleaved-writes>
+      <true />
+     </interleaved-writes>
+     <mmulookups name="lookups">
+      <mmulookup name="Tlb4k">
+       <priority>
+        <int>
+         1
+        </int>
+       </priority>
+       <page-size>
+        <const>
+         <true />
+        </const>
+        <size>
+         <int>
+          4096
+         </int>
+        </size>
+       </page-size>
+       <entries>
+        <int>
+         512
+        </int>
+       </entries>
+       <set_assoc>
+        <int>
+         2
+        </int>
+       </set_assoc>
+       <setfields>
+        <field name="Foo">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           0
+          </int>
+         </bits>
+        </field>
+        <field name="NV">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           1
+          </int>
+         </bits>
+        </field>
+       </setfields>
+       <wayfields>
+        <field name="EPN">
+         <doc>
+          <str>
+           <![CDATA[ Example documentation string for an MMU field. ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           24
+          </int>
+         </bits>
+        </field>
+        <field name="RPN">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           24
+          </int>
+         </bits>
+        </field>
+        <field name="SIZE">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           6
+          </int>
+         </bits>
+        </field>
+        <field name="TID">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           6
+          </int>
+         </bits>
+        </field>
+        <field name="TS">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           1
+          </int>
+         </bits>
+        </field>
+        <field name="V">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           1
+          </int>
+         </bits>
+        </field>
+        <field name="WIMG">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           4
+          </int>
+         </bits>
+        </field>
+       </wayfields>
+       <tests>
+        <str>
+         <![CDATA[ Compare ( V , 1 ) ]]>
+        </str>
+        <str>
+         <![CDATA[ Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) ) ]]>
+        </str>
+        <str>
+         <![CDATA[ Compare ( TID , 0 , PID0 , PID1 ) ]]>
+        </str>
+        <str>
+         <![CDATA[ AddrComp ( EPN ) ]]>
+        </str>
+       </tests>
+       <exec-perm>
+        <str>
+         <![CDATA[ 
+{
+    if ( ! ( ( MSR . PR (  ) ) ? t . SX : t . UX ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+ ]]>
+        </str>
+       </exec-perm>
+       <load-perm>
+        <str>
+         <![CDATA[ 
+{
+    if ( ! ( ( MSR . PR (  ) ) ? t . SR : t . UR ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+ ]]>
+        </str>
+       </load-perm>
+       <store-perm>
+        <str>
+         <![CDATA[ 
+{
+    if ( ! ( ( MSR . PR (  ) ) ? t . SW : t . UW ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+ ]]>
+        </str>
+       </store-perm>
+       <valid>
+        <str>
+         <![CDATA[  ]]>
+        </str>
+       </valid>
+       <hit>
+        <str>
+         <![CDATA[ 
+{
+}
+ ]]>
+        </str>
+       </hit>
+       <miss>
+        <str>
+         <![CDATA[ 
+{
+}
+ ]]>
+        </str>
+       </miss>
+       <reset>
+        <str>
+         <![CDATA[ 
+{
+}
+ ]]>
+        </str>
+       </reset>
+       <mem_read>
+        <str>
+         <![CDATA[  ]]>
+        </str>
+       </mem_read>
+       <mem_write>
+        <str>
+         <![CDATA[  ]]>
+        </str>
+       </mem_write>
+       <mem_size>
+        <int>
+         0
+        </int>
+       </mem_size>
+      </mmulookup>
+      <mmulookup name="TlbCam">
+       <priority>
+        <int>
+         0
+        </int>
+       </priority>
+       <page-size>
+        <bitsize>
+         <true />
+        </bitsize>
+        <scale>
+         <int>
+          2
+         </int>
+        </scale>
+        <field>
+         <str>
+          SIZE
+         </str>
+        </field>
+        <offset>
+         <int>
+          0
+         </int>
+        </offset>
+        <shift>
+         <int>
+          10
+         </int>
+        </shift>
+       </page-size>
+       <entries>
+        <int>
+         16
+        </int>
+       </entries>
+       <fully_assoc>
+        <true />
+       </fully_assoc>
+       <setfields>
+        <field name="Foo">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           0
+          </int>
+         </bits>
+        </field>
+       </setfields>
+       <wayfields>
+        <field name="EPN">
+         <doc>
+          <str>
+           <![CDATA[ Example documentation string for an MMU field. ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           24
+          </int>
+         </bits>
+        </field>
+        <field name="RPN">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           24
+          </int>
+         </bits>
+        </field>
+        <field name="SIZE">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           6
+          </int>
+         </bits>
+        </field>
+        <field name="TID">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           6
+          </int>
+         </bits>
+        </field>
+        <field name="TS">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           1
+          </int>
+         </bits>
+        </field>
+        <field name="V">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           1
+          </int>
+         </bits>
+        </field>
+        <field name="WIMG">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           4
+          </int>
+         </bits>
+        </field>
+        <field name="x">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           2
+          </int>
+         </bits>
+        </field>
+        <field name="y">
+         <doc>
+          <str>
+           <![CDATA[  ]]>
+          </str>
+         </doc>
+         <bits>
+          <int>
+           3
+          </int>
+         </bits>
+        </field>
+       </wayfields>
+       <testsets>
+        <testset name="External">
+         <enable>
+          <str>
+           <![CDATA[ 
+{
+    return instrHasAttr ( external_pid ) ;
+}
+ ]]>
+          </str>
+         </enable>
+         <tests>
+          <str>
+           <![CDATA[ Compare ( V , 1 ) ]]>
+          </str>
+          <str>
+           <![CDATA[ Compare ( TS , ELPC . EAS ) ]]>
+          </str>
+          <str>
+           <![CDATA[ Compare ( TID , ELPC . EPID ) ]]>
+          </str>
+          <str>
+           <![CDATA[ AddrComp ( EPN ) ]]>
+          </str>
+         </tests>
+        </testset>
+        <testset name="Normal">
+         <tests>
+          <str>
+           <![CDATA[ Compare ( V , 1 ) ]]>
+          </str>
+          <str>
+           <![CDATA[ Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) ) ]]>
+          </str>
+          <str>
+           <![CDATA[ Compare ( TID , 0 , PID0 , PID1 ) ]]>
+          </str>
+          <str>
+           <![CDATA[ AddrComp ( EPN ) ]]>
+          </str>
+         </tests>
+        </testset>
+       </testsets>
+       <exec-perm>
+        <str>
+         <![CDATA[ 
+{
+    if ( ! ( ( MSR . PR (  ) ) ? t . SX : t . UX ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+ ]]>
+        </str>
+       </exec-perm>
+       <load-perm>
+        <str>
+         <![CDATA[ 
+{
+    if ( ! ( ( MSR . PR (  ) ) ? t . SR : t . UR ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+ ]]>
+        </str>
+       </load-perm>
+       <store-perm>
+        <str>
+         <![CDATA[ 
+{
+    if ( ! ( ( MSR . PR (  ) ) ? t . SW : t . UW ) ) {
+        raiseException ( ProtectionFault ) ;
+    }
+}
+ ]]>
+        </str>
+       </store-perm>
+       <valid>
+        <str>
+         <![CDATA[ 
+{
+    return ( V != 0 ) ;
+}
+ ]]>
+        </str>
+       </valid>
+       <hit>
+        <str>
+         <![CDATA[ 
+{
+}
+ ]]>
+        </str>
+       </hit>
+       <miss>
+        <str>
+         <![CDATA[ 
+{
+}
+ ]]>
+        </str>
+       </miss>
+       <reset>
+        <str>
+         <![CDATA[ 
+{
+}
+ ]]>
+        </str>
+       </reset>
+       <mem_read>
+        <str>
+         <![CDATA[ 
+{
+    return addr ;
+}
+ ]]>
+        </str>
+       </mem_read>
+       <mem_write>
+        <str>
+         <![CDATA[ 
+{
+    return addr ;
+}
+ ]]>
+        </str>
+       </mem_write>
+       <mem_size>
+        <int>
+         192
+        </int>
+       </mem_size>
+      </mmulookup>
+     </mmulookups>
+     <instr-enable>
+      <str>
+       <![CDATA[ 
+{
+    return HDBCR0 . MMU_ENABLE (  ) ;
+}
+ ]]>
+      </str>
+     </instr-enable>
+     <data-enable>
+      <str>
+       <![CDATA[ 
+{
+    return HDBCR0 . MMU_ENABLE (  ) ;
+}
+ ]]>
+      </str>
+     </data-enable>
+     <instr-miss>
+      <str>
+       <![CDATA[ 
+{
+    raiseException ( ITlbMiss ) ;
+}
+ ]]>
+      </str>
+     </instr-miss>
+     <data-miss>
+      <str>
+       <![CDATA[ 
+{
+    DEAR = a ;
+    raiseException ( DTlbMiss ) ;
+}
+ ]]>
+      </str>
+     </data-miss>
+     <load-miss>
+      <str>
+       <![CDATA[ 
+{
+    DEAR = 0 ;
+    raiseException ( DTlbMiss ) ;
+}
+ ]]>
+      </str>
+     </load-miss>
+     <store-miss>
+      <str>
+       <![CDATA[ 
+{
+    DEAR = 1 ;
+    raiseException ( DTlbMiss ) ;
+}
+ ]]>
+      </str>
+     </store-miss>
+     <multi-hit>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </multi-hit>
+     <aligned-write>
+      <str>
+       <![CDATA[ 
+{
+     int i = 20 ;
+}
+ ]]>
+      </str>
+     </aligned-write>
+     <misaligned-write>
+      <str>
+       <![CDATA[ 
+{
+     int j = 30 ;
+}
+ ]]>
+      </str>
+     </misaligned-write>
+     <misaligned-read>
+      <str>
+       <![CDATA[ 
+{
+     int k = 40 ;
+}
+ ]]>
+      </str>
+     </misaligned-read>
+     <post-write>
+      <str>
+       <![CDATA[ 
+{
+     int m = 60 ;
+}
+ ]]>
+      </str>
+     </post-write>
+     <post-read>
+      <str>
+       <![CDATA[ 
+{
+     int l = 50 ;
+}
+ ]]>
+      </str>
+     </post-read>
+    </mmu>
+    <core-level-hooks>
+     <decode-miss>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </decode-miss>
+     <pre-cycle>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </pre-cycle>
+     <post-cycle>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-cycle>
+     <pre-fetch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </pre-fetch>
+     <post-fetch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-fetch>
+     <post-exec>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-exec>
+     <post-asm>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-asm>
+     <post-packet-asm>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-packet-asm>
+     <post-packet>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </post-packet>
+     <active-watch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </active-watch>
+     <instr-table-watch>
+      <str>
+       <![CDATA[  ]]>
+      </str>
+     </instr-table-watch>
+    </core-level-hooks>
+    <asm_config>
+     <comments>
+      <str>
+       //
+      </str>
+      <str>
+       #
+      </str>
+      <str>
+       ;
+      </str>
+     </comments>
+     <line_comments>
+      <str>
+       #rem
+      </str>
+      <str>
+       #
+      </str>
+     </line_comments>
+     <line_seps>
+      <str>
+       \t
+      </str>
+     </line_seps>
+     <instr_seps>
+      <str>
+       \t
+      </str>
+     </instr_seps>
+     <group_seps>
+      <group_sep>
+       <str>
+        [
+       </str>
+       <str>
+        ]
+       </str>
+      </group_sep>
+      <group_sep>
+       <str>
+        \t
+       </str>
+       <str>
+        \t
+       </str>
+      </group_sep>
+     </group_seps>
+     <asm_instrtables>
+      <str>
+       prefix
+      </str>
+      <str>
+       other
+      </str>
+     </asm_instrtables>
+     <disasm_instrtables>
+      <str>
+       prefix
+      </str>
+      <str>
+       other
+      </str>
+     </disasm_instrtables>
+     <parms>
+      <parm name="L1">
+       <type>
+        <str>
+         label
+        </str>
+       </type>
+      </parm>
+      <parm name="PktCnt">
+       <value>
+        <int>
+         0
+        </int>
+       </value>
+       <type>
+        <str>
+         int
+        </str>
+       </type>
+      </parm>
+     </parms>
+    </asm_config>
+   </core>
+  </cores>
+  <systems />
+ </data>
+
+

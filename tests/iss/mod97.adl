@@ -1,0 +1,106 @@
+//
+// A simple model with 128b instructions, used to test assembling and linking large instructinos.
+//
+
+define (arch=SPT) {
+
+  define (regfile=R) {
+    size = 40;
+    width = 32;
+    prefix = r;
+  }
+
+  attrs = (nia,cia);
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  bit_endianness = little;
+
+  define (instrfield=opcode) {
+    bits = (127,122);
+  }
+
+  define (reloc=R_PPC_ADDR32) {
+    """
+PDMS relocation
+""";
+	value=1;
+	offset=4;
+	pcrel=false;
+	field_width=32;
+  }
+
+  define (reloc=R_PPC_REL32) {
+    """
+JUMP relocation
+""";
+    value=26;
+    action = func (addr_t relocation,int is_linker) {
+      return (is_linker) ? relocation + 8 : relocation;
+    };
+    instrfield = jmp_addr;
+  }
+
+  define (instrfield=jmp_type) {
+	// conditional jump
+    bits = 121;
+    enumerated = (("",".always"), ".cond");
+  }
+
+  define (instrfield=jmp_sel) {
+	// conditional bit selection
+    bits = (120,117);
+    enumerated = (".bit0",".bit1",".bit2",".bit3",".bit4",
+	".bit5",".bit6",".bit7",".bit8",".bit9");
+  }
+
+  define (instrfield=jmp_addr) {
+	// target address relative to @jump instr
+    bits = (63,32);
+    addr=pc;
+  }
+
+  define (instrfield=jmp_wr) {
+	// conditional wr
+    bits = (88,83);
+    display=name;
+    valid_ranges = (0,47);
+  }
+
+  define (instr=stop) {
+
+    width = 128;
+    fields = (opcode(0x4));
+
+    action = { };
+  }
+
+  define (instr=next) {
+
+    width = 128;
+    fields = (opcode(0x6));
+
+    action = { };
+  }
+
+
+  define (instr=jump_) {
+    width = 128;
+    fields = (opcode(0xD),jmp_type,jmp_sel,jmp_wr,jmp_addr);
+    action = { };
+  }
+
+  define (instr=jump_alw) {
+    width = 128;
+    alias = jump_(jmp_type(0),jmp_sel(0),jmp_wr(0),jmp_addr(jmp_addr));
+    syntax = ("jump %f",jmp_addr);
+    dsyntax = ("jump %f",jmp_addr);
+  }
+
+}
+
+define (core=SPT) {
+  archs = SPT;
+}

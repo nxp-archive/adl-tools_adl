@@ -1,0 +1,165 @@
+#
+# Tests to make sure that we clear out instruction attributes after each
+# instruction executes, so that an external exception does not inadvertently get
+# stale attribute data.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	mtspr 26,r1
+	addi r1,r1,1
+	mtctr r1
+	addi r1,r1,1
+	.long 0x0
+	addi r2,r2,1
+	mfspr r10,26
+	addi r10,r10,4
+	mtspr 26,r10
+	mfmsr r20
+	rfi
+	.long 0x0
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x7C3A03A6	#	mtspr 26,r1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x00000014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000020 d=0x7D5A02A6	#	mfspr r10,26
+MD n=Mem ra=0x00000024 d=0x394A0004	#	addi r10,r10,4
+MD n=Mem ra=0x00000028 d=0x7D5A03A6	#	mtspr 26,r10
+MD n=Mem ra=0x0000002c d=0x7E8000A6	#	mfmsr r20
+MD n=Mem ra=0x00000030 d=0x4C000064	#	rfi
+MD n=Mem ra=0x00000034 d=0x00000000	#	.long 0x0
+# </GEN>
+
+RD n=MSR   d=0x00400000
+RD n=IVOR6 d=0x0000001c
+
+TRACE
+
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c3a03a6
+INSTR op=0x7c3a03a6					asm="mtspr SRR0,r1"
+E n=Program
+R n=SRR0 d=0x00000008
+R n=SRR1 d=0x00400000
+R n=MSR d=0x00000000
+R n=MSR d=0x00000001
+B taken=1 ea=0x1c
+
+I ea=0x1c id=4
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000001
+
+I ea=0x20 id=5
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x7d5a02a6
+INSTR op=0x7d5a02a6					asm="mfspr r10,SRR0"
+R n=GPR i=10 d=0x00000008
+
+I ea=0x24 id=6
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x394a0004
+INSTR op=0x394a0004					asm="addi r10,r10,4"
+R n=GPR i=10 d=0x0000000c
+
+I ea=0x28 id=7
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x7d5a03a6
+INSTR op=0x7d5a03a6					asm="mtspr SRR0,r10"
+R n=SRR0 d=0x0000000c
+
+I ea=0x2c id=8
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x7e8000a6
+INSTR op=0x7e8000a6					asm="mfmsr r20"
+R n=GPR i=20 d=0x00000001
+
+I ea=0x30 id=9
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi r0,r0,r0"
+R n=MSR d=0x00400000
+B taken=1 ea=0xc
+
+I ea=0xc id=10
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000003
+
+I ea=0x10 id=11
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c2903a6
+INSTR op=0x7c2903a6					asm="mtctr r1"
+R n=CTR d=0x00000003
+BP ea=0x14
+E n=Program
+R n=SRR0 d=0x00000010
+R n=SRR1 d=0x00400000
+R n=MSR d=0x00000000
+R n=MSR d=0x00000000
+B taken=1 ea=0x1c
+
+I ea=0x1c id=12
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+R n=GPR i=2 d=0x00000002
+
+I ea=0x20 id=13
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x7d5a02a6
+INSTR op=0x7d5a02a6					asm="mfspr r10,SRR0"
+R n=GPR i=10 d=0x00000010
+
+I ea=0x24 id=14
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x394a0004
+INSTR op=0x394a0004					asm="addi r10,r10,4"
+R n=GPR i=10 d=0x00000014
+
+I ea=0x28 id=15
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x7d5a03a6
+INSTR op=0x7d5a03a6					asm="mtspr SRR0,r10"
+R n=SRR0 d=0x00000014
+
+I ea=0x2c id=16
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x7e8000a6
+INSTR op=0x7e8000a6					asm="mfmsr r20"
+R n=GPR i=20 d=0x00000000
+
+I ea=0x30 id=17
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi r0,r0,r0"
+R n=MSR d=0x00400000
+B taken=1 ea=0x14
+
+I ea=0x14 id=18
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000004
+
+I ea=0x18 id=19
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000004
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=20 d=0x00000000
+
+RD n=MSR d=0x00400000

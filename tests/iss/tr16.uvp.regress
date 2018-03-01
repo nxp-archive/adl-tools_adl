@@ -1,0 +1,3 @@
+powerpc:t0:  Instr 3 (local count 3):  Unexpected register update found:  GPR18 = 0x00000000ce4c1342
+powerpc:t0:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

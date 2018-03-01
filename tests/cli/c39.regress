@@ -1,0 +1,15 @@
+JIT is on
+Breakpoint hit on node: P  at address: 0x0000000000000078 count: 0  InstrCount: 427
+r10:  0x6
+Breakpoint hit on node: P  at address: 0x0000000000000078 count: 0  InstrCount: 432
+r10:  0x8
+Breakpoint hit on node: P  at address: 0x0000000000000078 count: 0  InstrCount: 437
+r10:  0xa
+Breakpoint hit on node: P  at address: 0x00000000000000d8 count: 0  InstrCount: 1715
+0x200c:  
+          0x200c: 00000007 
+0x2038:  
+          0x2038: 0000002f 
+0x205c:  
+          0x205c: 00000059 
+JIT is off

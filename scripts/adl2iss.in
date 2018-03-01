@@ -1,0 +1,951 @@
+#!@PERL@ 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+adl2iss [options] <.adl file>
+
+=head1 SYNOPSIS
+
+adl2iss [options] <.adl file>
+
+Produces an ISS executable, object file, or source-code file from an ADL
+description.  The default is to produce an executable ISS.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--man, -m>
+
+Display the complete help as a man page.
+
+=item B<--version, -v>
+
+Display the ADL version number.
+
+=item B<--target=[exe|so|base-so]>
+
+Specify the target type.  The default is I<exe> which means that a standalone
+executable will be produced.  If the I<so> option is selected, a standalone
+shared object will be generated.  
+
+If the I<base-so> option is set, a barebones shared object will be created which
+contains only the minimum support libraries.  This is generally only useful if
+the ISS is to be linked against another application.
+
+=item B<--output=file, -o=file>
+
+Specify the output file name.  If not specified, the base name of the input file
+will be used, with the appropriate extension of the desired output.
+
+=item B<--src-prefix=path>
+
+Specify a directory for storing the generated source files.
+
+=item B<--top-level=s, -tl=s>
+
+Specify the top-level element for which to generate the ISS.
+
+=item B<--trace-mode, -t>
+
+Generate code for tracing (producing intermediate results).  This is a negatable
+option.  The default is TRUE.
+
+=item B<--log-instr-args>
+
+Generate code for logging instruction arguments. The default is FALSE.
+
+=item B<--log-reg-reads>
+
+Generate code for logging register reads.  The default is FALSE.
+
+=item B<--log-reg-masks>
+
+Generate code for logging partial register read/write accesses.  The default is FALSE.
+
+=item B<--log-unarch>
+
+Toggle whether items marked as unarchitected should be logged.  For example, if
+this option is set to false, then registers marked as unarchitected do not
+generate logging calls when written.  The default is TRUE.  The option may be
+negated.
+
+=item B<--log-td-commit>
+
+Log instruction completion times using the temporal decoupling counter value.
+
+=item B<--log-writeregs>
+
+Turn on logging during external register modifications (writeReg calls).  The
+default is true.  This option may be negated.
+
+=item B<--log-usage[=prog:verr]>
+
+Turn usage logging on or off.  The user may supply an optional program-name
+and version string to be logged.  If omitted, then the input-file root will
+be used as the program-name and the version will default to
+<year>.<month>.<day>.
+
+To disable the option, use --log-usage=false or --log-usage=no.  You may also
+use the negated form of --no-log-usage.
+
+=item B<--dep-tracking>
+
+Enable dependency tracking.  This means that the ISS will log memory and
+register reads and use information from an instruction's ``dependencies``
+block to correlate register and memory writes with these reads.  
+
+The B<--log-reg-reads> option must also be enabled for this feature to work.
+This option may be negated.  The default is false.
+
+=item B<--time-tagged, -tm>
+
+Generate a time-tagged ISS.  This is a negatable option.  The default is FALSE.
+
+=item B<--transactional-iss>
+
+Generate a transactional ISS.  The default is FALSE.
+
+=item B<--debug-mode, -dm>
+
+Generate a model with debug support.  This is a negatable option.  The default is TRUE.
+
+=item B<--lib-mode>
+
+Generate a model for use as a library.  The resulting ISS is a template, where
+the template parameter specifies a base class which implements register storage
+and instruction decoding.
+
+=item B<--syscall-enabled>
+
+Enable system-call support.  This is a negatable option.  The default is TRUE.
+
+=item B<--extern-event-bus>
+
+Enable the use of the external event-bus interface.
+
+=item B<--rollback-mode>
+
+Toggle support for restoring state after an instruction is executed.  Only
+relevant for normal or hybrid-ISS modes.  Default is FALSE.
+
+=item B<--ignore-mode>
+
+Toggle support for ignore-mode, which allows the model to toggle whether to
+ignore register updates and stores.  Default is FALSE.
+
+=item B<--with-cli>
+
+Specify that you want to link in a cli.
+
+=item B<--rnumber>
+
+Generate code with RNumber support.  RNumber is a dynamic arbitrary-sized
+integer class and is used to provide support for setting and getting register
+values of arbitrarily-large size.  Without this, only values of 64-bits in width
+or smaller may be accessed.  This is a negatable option.  The default is TRUE.
+
+=item B<--td-api>
+
+Add support for temporal decoupling, which allows a model to execute extra
+instructions within a platform model as long as they are performed within a
+certain time quantum.  This is a negatable option.  The default is true if
+either the JIT or the decode-cache are being generated, false otherwise..
+
+=item B<--per-instr-td-incr>
+
+Enable per-instruction temporal-decoupling counter increments for decode-cache
+and JIT models.  False means that increments are grouped at the end of a basic
+block.  If true, then fidelity is higher at a cost of some performance.  The
+default is true.
+
+=item B<--mt-support>
+
+Enable multi-threaded simulation support.  This turns on thread-safe memory if
+using the default, internal global memory, and adds necessary support to ensure
+thread safety with event buses, etc.
+
+=item B<--mt-locked-mem>
+
+If compiling a model with B<--mt-support>, this causes all memory accesses to
+invoke a lock.  Normally, locking is only done for atomic instructions.
+
+=item B<--event-bus-send>
+
+Generate support for the automatic broadcasting of event bus data to all
+instantiated cores.  Thee default is TRUE.  By negating this option, code will
+be generated to allow wrapper code to perform the sending and receiving of this
+data.
+
+=item B<--disassembler>
+
+Generate a disassembler function in the model.  This allows an external program
+to disassemble arbitrary memory, using the model's memory-hierarchy access
+routines.
+
+=item B<--jit>
+
+Generate JIT (just-in-time) compilation support code.  This is a negatable
+option.  The default is FALSE.
+
+=item B<--decode-cache, --dc>
+
+Generate decode-cache compilation support code.  This is a negatable option.
+The default is FALSE.
+
+=item B<--graphite>
+
+Creates a model with support for a performance model based upon MIT Graphite's
+core models.  A plugin or external driver must be used to actually install the
+performance model.
+
+=item B<--extern-mem>
+
+Generate a model with the global memory defined externally.  This is a negatable
+option.  The default is FALSE.  This information may also be specified within
+the configuration file, which is the only way to generate externally-defined
+local memories,
+
+=item B<--extern-dmi>
+
+Toggle support for an external direct-memory-interface cache.  This is
+only valid if *--extern-mem* is also set.
+
+=item B<--extern-dmi-entry-size>
+
+Specify the entry size of the external dmi cache in bits, e.g. 7 = 128
+byte entries.
+
+=item B<--extern-dmi-size>
+
+Specify the number of entries in the external dmi cache.
+
+=item B<--dmi-cache>
+
+Toggle the use of an internal software cache for improving performance.  This is
+on by default if either the JIT or the decode-cache are being generated.  This
+option may be negated.
+
+=item B<--tags-only-caches>
+
+When enabled, caches in the model will only store tags and not data.  This is
+convenient for modeling a multi-core system with caches without having to model
+cache coherency.  This option may be negated.
+
+=item B<--incl-unused-helpers>
+
+Specify whether unused helper functions should be included in the generated
+model.  The default is B<false>: Unused helpers are not included.  This option
+may be negated.
+
+=item B<--tlm2-endianness>
+
+Specify that TLM 2.0 compatible address swizzling should be used for handling
+endianness conversions, rather than byte-swapping.  The default is B<false>.
+
+=item B<--print-data, -pd>
+
+Display ADL data to standard-out, do not generate an ISS.
+
+=item B<--show-config, -sc>
+
+Display ADL configuration data to standard-out.
+
+=item B<--depfile=file, -df=file>
+
+Instruct the preprocessor to generate a dependency file suitable for inclusion
+by a Makefile.  This is done as a side-effect and does not affect the
+compilation process.
+
+=item B<--gen>
+
+Controls whether new C++ files are generated or not.  If negated,
+e.g. I<--no-gen>, then the model is just recompiled.  This feature can be used
+to compile a model when only generated C++ files are distributed.  Note: If the
+input file has an extension of I<.cc>, then B<--no-gen> is assumed.
+
+=item B<--gen-only, -go>
+
+Only generate the ISS source code, producing a C++ source file.  Do not compile
+or link.
+
+=item B<--compile-only, -co>
+
+Generate the ISS source code and compile it, producing an object file.
+
+=item B<--jit-compile-only, -jco>
+
+Generate the ISS source code.  Compile only the JIT byte-code file and not the main object file.
+
+=item B<--optimize=[level]>
+
+Compile the model with optimization.  The default optimization level is 3,
+corresponding to compiling with -O3.  Another level may be specified.  A value
+of 0 turns off optimization (equivalent to using the B<--no-optimize> option).
+
+=item B<--static>
+
+Link everything statically.
+
+=item B<--pgo-1>
+
+Enable the first pass of profile-guided optimization.  This generates a model
+and compiles it such that profile-guided optimization files (.gcda files for
+gcc) will be created.
+
+=item B<--pgo-2>
+
+Enable the second pass of profile-guided optimization.  This does not generate a
+model, but instead re-uses an existing model. It recompiles it using
+branch-prediction results obtained from profile-guided optimization (.gcda
+files) generated during the first pass.
+
+B<Note:> This does not re-generate the model, so do not edit the source files
+between the first and second pass.  Be sure to not change any other compilation
+options, such as optimization level, since the pgo data is only relevant for the
+same level of optimization.
+
+=item B<--block-memory, -bm>
+
+Compile with a block (non-sparse) memory.
+
+=item B<--sparse-memory, -sm>
+
+Compile with a sparse memory.  This is the default.
+
+=item B<--config-file=file, -cf=file>
+
+Specify a configuration file for model generation.
+
+=item B<--preamble=str>
+
+Add a preamble string to the model.  This data is displayed by the model at
+startup time.
+
+=item B<--iss-namespace=str>
+
+Specify an alternate namespace name which will wrap the ISS.  The default is
+'adliss'.  This allows you to generate multiple simulators and then include them
+into a single application.
+
+=item B<--line-directives>
+
+Toggle on or off the inclusion of preprocessor line directives for debugging
+purposes.
+
+=item B<--cc=path>
+
+Specify an alternative compiler to use for preprocessing, compiling, and linking.
+
+=item B<--mflags=str>
+
+Specify flags to be given to the model generator.
+
+=item B<--cflags=str>
+
+Specify flags to be given to the compiler.  This option may be repeated.
+
+=item B<--ldflags=str>
+
+Specify flags to be given to the linker.  This option may be repeated.
+
+=item B<--define=str, -D=str>
+
+Specify a preprocessor define.
+
+=item B<--include=path, -I=path>
+
+Specify a preprocessor include directory.
+
+=item <--cpp-cmd=str>
+
+Specify an additional include or define directive to add to the generated source
+code.  Normally, the preprocessor is run before the ADL parser, but there may be
+reasons, such as including a standard library header, where only the compiler
+should process the directive and not the ADL parser.
+
+The format is type:option, where type can be 'include' for an #include directive
+or 'define' for a #define directive.  For example: I<--cpp-cmd=include:"foo.h">
+will result in B<#include "foo.h"> appearing in the resulting C++ code.  Note
+that include directives require the quotes, since includes can either use angle
+brackets or double quotes.
+
+=item B<--no-optimize>
+
+Turn off compiler optimization.
+
+=item B<--jobs=n,-j=n>
+
+Specify the number of jobs into which to break the ISS compilation.
+
+=item B<--low-mem,-lm>       
+
+Enable code generation that requires less memory to compile.
+
+=item B<--parallel-build[=max-jobs],-p[=max-jobs]>
+
+Run the compile jobs in parallel.  This is the default.  Negate this feature to
+compile all items sequentially.  An optional maximum number of parallel jobs may
+be specified.  This option may be negated to disable parallel builds.
+
+=item B<--cleanup=all|obj|none>
+
+Remove temporary, intermediate files.  By default, this is set to I<obj>, which
+means that object file sare cleaned up.  if I<none> is selected, then no cleanup
+is performed.  If I<all> is selected, then all intermediate files, including
+source files, are removed.
+
+=item B<--verbose>
+
+Show the output of all internally executed commands.  This may be set to a
+numerical value, in which case extra verbosity may be enabled.  Off is equal to
+a value of 0, 1 is minimal, 2 is more, etc.
+
+=item B<--strict>
+
+Use strict mode for parser.
+
+=item B<--warn-redefine>
+
+Warn if a define block overwrites another define block.  This option may be
+negated.  The default is true.
+
+=item B<--lsf=str>
+
+Use as a prefix for running commands. The string defining prefix is optional,
+default value is 'bsub -Ip -P adl'
+
+=item B<--distcc>
+
+If enabled, use distcc to distribute compile jobs if distcc is currently set up
+on the system.  This requires that B<distcc> and B<pump> be in the current path
+and that the B<DISTCC_POTENTIAL_HOSTS> or B<DISTCC_HOSTS> environment variables
+be set.  This option may be negated and is on by default.
+
+=back
+
+=cut
+
+use FindBin;
+use Getopt::Long 2.33 qw(:config permute);
+use Pod::Usage;
+use strict;
+use File::Basename;
+use File::Temp;
+use Data::Dumper;
+
+use lib "@prefix@/share";
+use lib "@adl_top_srcdir@/scripts";
+use adl_wrapper_support;
+
+# The default prefix is the installation prefix set by Autoconf.
+# This may be overridden using the "prefix" command-line option.
+my $bdir=$FindBin::RealBin;
+my $prefix = '@prefix@';
+my $llvm_bindir = '@LLVM_BINDIR@';
+my $jit_ok = '@JIT_OK@';
+my $jit_flags = '@JITFLAGS@';
+my $ver = "@PACKAGE_VERSION@";
+my $cc = '@CXXPROG@';
+
+my $warn_redefine = 1;
+
+my ($model,$help,$man,$output,$srcprefix,$strict,$time_tagged,$transactional,$debug_mode,$gen_mmu,$gen_caches,
+		$depfile,$configfile,$syscall_enabled,$extern_syscalls,$extern_event_bus,$rollback_mode,$ignore_mode,$with_cli,$trace_cache,$td_api,$per_instr_td_incr,$mt_support,$mt_locked_mem,$jit,$decode_cache,
+		$printdata,$showconfig,$genonly,$componly,$jitcomponly,$trace_mode,$log_instr_args,$log_reg_reads,$log_reg_masks,$log_unarch,$log_td_commit,$log_writeregs,$log_usage,$dep_tracking,$toplevel,$extern_mem,$version,
+		$extern_dmi,$extern_dmi_entry_size,$extern_dmi_size,$dmi_cache,$incl_unused_helpers,$tlm2_endianness,$graphite,
+		$iss_namespace,$low_mem,$disassembler,$lib_mode,$line_directives,$tags_only_caches,$static_link);
+
+my $do_gen = 1;
+my $rnumber = 1;
+my $sparse_mem = 1;
+my $cleanup = "obj";
+my $event_bus_send = 1;
+
+my (@preamble,@user_mflags,@user_cflags,@user_ldflags,@user_defines,@user_includes,@cpp_cmds);
+
+my $optimize = 3;
+my $target = "exe";
+my $pgo = 0;
+
+if (!&GetOptions
+	(
+	 "h|help"             => \$help,
+	 "m|man"              => \$man,
+	 "o|output=s"         => \$output,
+	 "src-prefix=s"       => \$srcprefix,
+	 "v|version"          => \$version,
+	 "verbose:i"          => \$verbose,
+	 "strict!"            => \$strict,
+	 "warn-redefine!"     => \$warn_redefine,
+	 "target=s"           => \$target,
+	 "tt|time-tagged!"    => \$time_tagged,
+     "transactional-iss"  => \$transactional,
+	 "disassembler!"      => \$disassembler,
+	 "dm|debug-mode!"     => \$debug_mode,
+	 "lib-mode!"          => \$lib_mode,
+	 "syscall-enabled!"   => \$syscall_enabled,
+	 "extern-event-bus!"  => \$extern_event_bus,
+	 "rollback-mode!"     => \$rollback_mode,
+	 "ignore-mode!"       => \$ignore_mode,
+	 "with-cli!"          => \$with_cli,
+	 "rnumber!"           => \$rnumber,
+	 "td-api!"            => \$td_api,
+	 "per-instr-td-incr!" => \$per_instr_td_incr,
+	 "mt-support!"        => \$mt_support,
+	 "mt-locked-mem!"     => \$mt_locked_mem,
+	 "jit!"               => \$jit,
+	 "dc|decode-cache!"   => \$decode_cache,
+	 "graphite!"          => \$graphite,
+	 "extern-mem!"        => \$extern_mem,
+	 "extern-dmi!"        => \$extern_dmi,
+	 "extern-dmi-entry-size=i" => \$extern_dmi_entry_size,
+	 "extern-dmi-size=i"  => \$extern_dmi_size,
+	 "dmi-cache!"         => \$dmi_cache,
+	 "tags-only-caches!"  => \$tags_only_caches,
+	 "incl-unused-helpers!" => \$incl_unused_helpers,
+	 "tlm2-endianness!"   => \$tlm2_endianness,
+	 "t|trace-mode!"      => \$trace_mode,
+	 "log-instr-args"     => \$log_instr_args,
+	 "log-reg-reads!"     => \$log_reg_reads,
+	 "log-reg-masks!"     => \$log_reg_masks,
+	 "log-unarch!"        => \$log_unarch,
+	 "log-td-commit!"     => \$log_td_commit,
+	 "log-writeregs!"     => \$log_writeregs,
+	 "log-usage:s"        => \$log_usage,
+	 "dep-tracking!"      => \$dep_tracking,
+	 "no-log-usage"       => sub { $log_usage="false"; },
+	 "event-bus-send!"    => \$event_bus_send,
+	 "pd|print-data"      => \$printdata,
+	 "sc|show-config"     => \$showconfig,
+	 "gen!"               => \$do_gen,
+	 "go|gen-only"        => \$genonly,
+	 "co|compile-only"    => \$componly,
+	 "static"             => \$static_link,
+	 "jco|jit-compile-only"=> \$jitcomponly,
+	 "setpfx|prefix=s"    => \$prefix,
+	 "setbpfx=s"          => sub {}, # Ignored.  Here for compatibility with adl-config.
+	 "df|depfile=s"       => \$depfile,
+	 "tl|top-level=s"     => \$toplevel,
+	 "no-optimize"        => sub { my ($arg,$val) = @_; $optimize = 0; },
+	 "optimize:i"         => sub { my ($arg,$val) = @_; $optimize = ($val) ? $val : 3 },
+	 "cf|config-file=s"   => \$configfile,
+	 "iss-namespace=s"    => \$iss_namespace,
+	 "sm|sparse-memory"   => sub { $sparse_mem = 1; },
+	 "bm|block-memory"    => sub { $sparse_mem = 0; },
+	 "p|parallel-build:i"=> \$parallel_build,
+	 "no-p|no-parallel-build" => sub { $parallel_build = -1; },
+	 "j|jobs=i"           => \$jobs,
+	 "lm|low-mem"         => \$low_mem,
+	 "lsf:s"              => \$lsf,
+	 "distcc!"            => \$distcc,
+	 "cleanup=s"          => \$cleanup,
+	 "line-directives!"   => \$line_directives,
+	 "preamble=s"         => \@preamble,
+	 "mflags=s"           => \@user_mflags,
+	 "cflags=s"           => \@user_cflags,
+	 "ldflags=s"          => \@user_ldflags,
+	 "D|define=s"         => \@user_defines,
+	 "I|include=s"        => \@user_includes,
+	 "cpp-cmd=s"          => \@cpp_cmds,
+	 "pgo-1"              => sub { $pgo=1; },
+	 "pgo-2"              => sub { $pgo=2; },
+	 "cc=s"               => \$cc,
+	 "<>"                 => \&plusargs,
+	)) {
+  printhelp(1,\&printversion,1);
+}
+
+
+sub plusargs {
+  $model = shift;
+}
+
+sub printversion {
+  print "ADL Version $ver\n";
+}
+
+
+if ( $target !~ /^exe|so|base-so$/ ) {
+  print "Error:  Unknown target type $target.  Valid options are 'exe', 'so', and 'base-so'.\n";
+	exit 1;
+}
+
+if ($jobs < 1) {
+  $jobs = 0;
+}
+
+# Massage any defines into the appropriate form.
+my @m_user_defines  = map { "--define=$_ "; } @user_defines;
+my @m_user_includes = map { "--include=$_ "; } @user_includes;
+my @m_cpp_cmds      = map { "--cpp-cmd=$_"; } @cpp_cmds;
+my @c_user_defines  = map { "-D$_ "; } @user_defines;
+
+my $w = "";
+if ($with_cli) {
+  $w = "--with-cli";
+}
+
+my ($ac_options,$gen_options);
+
+if (!$rnumber && ($target eq "base-so" || $genonly)) {
+  $ac_options .= " --no-rnumber";
+  $gen_options .= " --no-rnumber";
+}
+
+if ($target eq "so" || $target eq "base-so") {
+  $ac_options .= " --so-target";
+}
+
+if ($transactional) {
+  $ac_options .= " --trans";
+  $gen_options .= " --transactional-iss --trans-pool-size=1" .
+                  " --no-line-directives";
+}
+
+if ($sparse_mem) {
+  $ac_options .= " --sparse-mem";
+} else {
+  $ac_options .= " --block-mem";
+}
+
+if ($extern_mem) {
+  $gen_options .= " --extern-mem";
+}
+
+if ($jit) {
+	$ac_options .= " --jit";
+}
+
+# Add on necessary graphite options.
+if ($graphite) {
+	$ac_options .= " --graphite";
+	$gen_options .= " --graphite --td-api";
+}
+
+my $adl_pfx    = `$bdir/adl-config --setpfx=$prefix --prefix`;
+#print "cflags invocation:  $bdir/adl-config --setpfx=$prefix --cflags $ac_options\n";
+my $adl_cflags = `$bdir/adl-config --setpfx=$prefix --cflags $ac_options`;
+
+my $lib_opt    = ($static_link) ? "--static-libs" : "--libs";
+my $adl_libs   = ($target eq "base-so") 
+  ? `$bdir/adl-config $w --setpfx=$prefix --basic $lib_opt $ac_options`
+		: `$bdir/adl-config $w --setpfx=$prefix $lib_opt $ac_options`;
+
+chomp $adl_pfx;
+chomp $adl_cflags;
+chomp $adl_libs;
+
+if ($static_link) {
+	$adl_libs .= " -static-libstdc++ -static-libgcc";
+}
+
+#print "prefix:  $adl_pfx\n";
+#print "cflags:  $adl_cflags\n";
+#print "libs  :  $adl_libs\n";
+
+#exit 0;
+
+my $default_gen     = "$adl_pfx/bin@archsuffix@/make-iss";
+my $default_lt      = "$adl_pfx/bin@archsuffix@/libtool";
+my $default_cflags  = "-Wall -g -O$optimize $adl_cflags";
+my $default_ldflags = "$adl_libs";
+
+my $gen     = $default_gen;
+my $lt      = $default_lt;
+my $mflags  = "@user_mflags";
+my $cflags  = "$default_cflags @user_cflags @c_user_defines";
+my $ldflags = "@user_ldflags $default_ldflags";
+
+if ($pgo == 1) {
+  $cflags  .= " -fprofile-arcs";
+  $ldflags .= " -fprofile-arcs";
+}
+elsif ($pgo == 2) {
+  $cflags  .= " -fbranch-probabilities";
+  $ldflags .= " -fbranch-probabilities";
+}
+
+# So that plugins will work.
+if ($graphite) {
+	$cflags .= " -export-dynamic";
+}
+
+
+# Print help if requested to do so.
+printhelp(0,,\&printversion,1) if $help;
+
+printhelp(0,,\&printversion,2) if $man;
+
+if ($version) {
+  printversion();
+  exit 0;
+}
+
+if (!$model) {
+  print "Error:  No model was specified.\n\n";
+  printhelp(1,,\&printversion,1);
+}
+
+if ($printdata) {
+  exec "$gen $model --print-data @m_user_defines @m_user_includes";
+}
+
+my ($base,$path,$type) = fileparse($model,qr/\.(adl|cc)/);
+
+# If the user supplies a C++ file, then we assume that they don't want to
+# generate!
+if ($type eq ".cc") {
+  $do_gen = 0;
+}
+
+if ($jitcomponly) {
+	$componly = 1;
+	$jit = 1;
+	$do_gen = 0;
+}
+
+my ($jbase,$obase);
+
+if ($output) {
+	# Remove the extension from the base.  The extension might be a shared object
+	# or a C++ file extension; we don't know, so we'll try and be really general.
+	my ($of,$od) = fileparse($output,qr/\.([^.]+)$/);  
+	$obase = ($od eq "./") ? $of : $od . $of;
+	# If we're not generating, then the location of the JIT file comes from the
+	# location specified by the source file.  Otherwise, we pick it up from the
+	# output file location.
+	if (!$do_gen) {
+		$jbase = "$path$base";
+	} else {
+		$jbase = $obase;
+	}
+} else {
+	if (!$do_gen) {
+		# If we're not generating, then we use the full path for the intermediate
+		# file (which is actually the source file in this case.
+		$obase = "$path$base";
+	} else {
+    $obase = $base;
+  }
+	$jbase = $obase;
+}
+
+# Add on the source prefix, but only if we're generating, since otherwise the source
+# already exists.
+if ($srcprefix && $do_gen) {
+  if ( ! -d $srcprefix ) {
+		`install -d $srcprefix 2>&1`;
+		if ($?) {
+			"Could not create source directory $srcprefix: $?";
+		}
+  }
+	$obase = "$srcprefix/$obase";
+}
+
+# We append -so to shared object source files in order to differentiate them, in
+# case both a shared object and an executable are being built in the same
+# directory.  We don't add it on if it already exists, e.g. the user is
+# specifying source files directly.
+if ($target ne "exe" and $obase !~ /-so$/ ) {
+  $obase .= "-so";
+	$jbase .= "-so";
+}
+
+# For the JIT, we have to specify the JIT instruction handler source file name.
+my ($jfile,$bcfile,$bctmpfile);
+if ($jit) {
+	if (!$jit_ok) {
+		print "JIT support not enabled for this installation of ADL.\n";
+		exit 1;
+	}
+	$jfile     = "$jbase-jit.cc";
+	$bcfile    = "$obase.bc";
+	$bctmpfile = "$obase.full.bc"; 
+  $gen_options .= " --jit --jit-ihname=$jfile --jit-bcname=$bcfile";
+}
+
+# If in library-mode, then we only generate, since the file is not usable as a standalone executable.
+$genonly = 1 if ($lib_mode);
+
+my $sfile = ($genonly && $output) ? $output : "$obase.cc";
+my $ofile = ($componly && $output) ? $output : "$obase.o";
+my $efile = ($output) ? $output : $base;
+
+# First, generate the source code.
+my $deptarget = ($genonly) ? $sfile :
+  ($componly) ? $ofile :
+  $efile;
+
+# Skip if we're in the second pass of profile-guided optimization.
+if ($do_gen && $pgo < 2) {
+  my $gencmd = "$gen $mflags --cpp=$cc $model --output=$sfile $gen_options @m_user_defines @m_user_includes @m_cpp_cmds";
+  $gencmd .= " --depfile=$depfile --deptarget=$deptarget" if ($depfile);
+  $gencmd .= addOption("top-level",$toplevel);
+  $gencmd .= addOption("config",$configfile);
+  $gencmd .= addOption("preamble",@preamble);
+  $gencmd .= addOption("iss-namespace",$iss_namespace);
+  $gencmd .= addOption("jobs",$jobs);
+  $gencmd .= addOption("verbose",$verbose);
+  $gencmd .= addOption("log-usage",$log_usage);
+	$gencmd .= addFlag("show-config",$showconfig);
+	$gencmd .= addFlag("decode-cache",$decode_cache);
+  $gencmd .= addFlag("td-api",$td_api);
+  $gencmd .= addFlag("per-instr-td-incr",$per_instr_td_incr);
+  $gencmd .= addFlag("mt-support",$mt_support);
+  $gencmd .= addFlag("mt-locked-mem",$mt_locked_mem);
+  $gencmd .= addFlag("event-bus-send",$event_bus_send);
+  $gencmd .= addFlag("strict",$strict);
+  $gencmd .= addFlag("warn-redefine",$warn_redefine);
+  $gencmd .= addFlag("trace-mode",$trace_mode);
+  $gencmd .= addFlag("time-tagged",$time_tagged);
+  $gencmd .= addFlag("debug-mode",$debug_mode);
+  $gencmd .= addFlag("lib-mode",$lib_mode);
+  $gencmd .= addFlag("syscall-enabled",$syscall_enabled);
+  $gencmd .= addFlag("extern-event-bus",$extern_event_bus);
+  $gencmd .= addFlag("rollback-mode",$rollback_mode);
+  $gencmd .= addFlag("ignore-mode",$ignore_mode);
+  $gencmd .= addFlag("log-instr-args",$log_instr_args);
+  $gencmd .= addFlag("log-reg-reads",$log_reg_reads);
+  $gencmd .= addFlag("log-reg-masks",$log_reg_masks);
+  $gencmd .= addFlag("log-unarch",$log_unarch);
+  $gencmd .= addFlag("log-td-commit",$log_td_commit);
+  $gencmd .= addFlag("log-writeregs",$log_writeregs);
+	$gencmd .= addFlag("dep-tracking",$dep_tracking);
+  $gencmd .= addFlag("low-mem",$low_mem);
+  $gencmd .= addFlag("disassembler",$disassembler);
+  $gencmd .= addFlag("extern-dmi",$extern_dmi);
+  $gencmd .= addFlag("dmi-cache",$dmi_cache);
+  $gencmd .= addFlag("tags-only-caches",$tags_only_caches);
+  $gencmd .= addFlag("incl-unused-helpers",$incl_unused_helpers);
+  $gencmd .= addFlag("tlm2-endianness",$tlm2_endianness);
+  $gencmd .= addFlag("line-directives",$line_directives);
+  $gencmd .= addOption("extern-dmi-entry-size",$extern_dmi_entry_size);
+  $gencmd .= addOption("extern-dmi-size",$extern_dmi_size);
+	# Always show make-iss warnings.
+	{
+		$show_output = 1;
+		runcmd $gencmd;
+		$show_output = 0;
+	}
+  
+  # We're done if we're only generating.
+  exit 0 if ($genonly);
+}
+
+# Modify the path to handle possible OS differences and add on the compiler's
+# path to PATH so that the compiler will find binutils stuff, such as ld,
+# properly.
+$cc = get_compiler_invocation($cc);
+
+# Next, we must compile the model.
+
+# Add compiler options for transactional ISS
+if ($transactional) {
+  open(MODEL, "<$model") or die("error: cannot open $model\n");
+
+  my ($line, $modelType);
+
+  while ($line = <MODEL>) {
+    # match the first "(core = ...)"
+    if ($line =~ /\(\s*core\s*=\s*(\w+)\s*\)/) {
+      $modelType = $1;
+      last;
+    }
+  }
+
+  $cflags .= " -I. -DMTYPE=$modelType -DMODEL='\"$sfile\"'" .
+             " -DMNAME='\"$modelType\"'";
+
+  $sfile = "$prefix/share/tdriver.C"
+}
+
+my @ofiles = dobuild($sfile,$ofile);
+
+# We're done if we're only compiling.
+exit 0 if ($componly);
+
+# Next, we link.  Filter out the JIT file, since it's LLVM bitcode.
+my $olist = join ' ',(map { $_->{jit} ? "" : $_->{obj}; } @ofiles);
+my $ldcmd = "$cc $olist $ldflags";
+if ($target =~ "so\$") {
+  if ( $efile !~ /\.so$/ ) {
+	$efile = "$efile.so";
+  }
+  $ldcmd .= " -shared";
+}
+$ldcmd .= " -o $efile";
+runcmd $ldcmd;
+
+# Remove source files if allowed to do so.
+cleanupFiles(@ofiles);
+
+# We're done at this point.
+exit 0;
+
+# Perform the build.  This sets up the source and object files, then passes it
+# to the runbuild routine which invokes the compiler.
+sub dobuild {
+  my ($sfile,$ofile) = @_;
+  my ($sbase,$spath,$sext) = fileparse($sfile,".cc");
+  my ($obase,$opath,$oext) = fileparse($ofile,".o");
+  my $count = 0;
+  my @ofiles;
+
+	if (!$jitcomponly) {
+		# We store source-file/object-file info as pairs in an array.
+		push @ofiles,{ cmd => $cc, src => $sfile, obj => $ofile, flags => "$cflags -c" };
+
+		if ($jobs) {
+			for (0..$jobs-1) {
+				my $sf = "$spath$sbase-$_.cc";
+				my $of = "$opath$obase-$_.o";
+				push @ofiles,{ cmd => $cc, src => $sf, obj => $of, flags => "$cflags -c" };
+			}
+		}
+	}
+
+  # If we are generating a JIT, we have to create the bitcode file as well.
+	if ($jit) {
+		my $cflags = "-fexceptions -O3 -c -emit-llvm -Wno-c++11-extensions -I$adl_pfx/include $jit_flags";
+		push @ofiles,{ cmd => "$llvm_bindir/clang++", src => $jfile, obj => $bctmpfile, flags => $cflags, jit => 1 };
+	}
+	
+	runbuild \@ofiles;
+
+	# We then filter the resulting bitcode file to remove extraneous stuff (we
+	# only want the instruction handlers and any globals.  If it fails because
+	# none of those symbols exist, then just copy the file over.
+	if ($jit) {
+		my $extcmd = "$llvm_bindir/llvm-extract $bctmpfile --rfunc='.*_adl_instr__.*' --rfunc='.*_read_jit.*' --rfunc='.*_cache_*' ".
+				"--rfunc='.*_write_jit.*' --rglob='.str.*' --rfunc='.*adl12MemoryAccess.* *_slice_set*' --rfunc='.*intbv_base.*' > $bcfile 2>/dev/null || cp $bctmpfile $bcfile";
+		runcmd $extcmd;
+	}
+
+	return @ofiles;
+}
+
+sub cleanupFiles {
+  if ($cleanup ne "none") {
+		for (@_) {
+			unlink $_->{obj} if (!$_->{jit});
+			next if ($cleanup ne "all");
+			unlink $_->{src};
+		}
+		unlink $bctmpfile;
+  }
+}
+

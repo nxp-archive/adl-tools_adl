@@ -1,0 +1,18 @@
+Item:  outer outer
+  Children:
+    Item:  group foo
+      Keys:
+        instrs = ( a , b , c , d )
+    Item:  group bar
+      Keys:
+        instrs = ( addi , "addi." )
+    Item:  timing 
+      Keys:
+        add = 2
+        addi. = 10
+    Item:  timing 
+      Keys:
+        or = 2
+        or. = 10
+
+

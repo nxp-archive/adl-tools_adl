@@ -1,0 +1,27 @@
+//
+// This adds caches to mod79, to test icache touches with decode-cache models,
+// when we have variable-length instructions.
+//
+
+#import "mod79.adl"
+
+defmod (core = P) {
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+}
+

@@ -1,0 +1,94 @@
+#
+# Note:  The assembler 'as-mod76' was used to create this file.
+#
+
+= asm
+
+				# Test of nested field, with table-based extraction.
+				add d2::d4,d1
+				add d1::d5,d2
+				add d0:d2:d4,d3
+				add d3:d6:d9,d4
+				add d7::d11,d5
+				stop
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4420 s=2	#	add d2::d4,d1
+MD n=Mem ra=0x00000002 d=0x6840 s=2	#	add d1::d5,d2
+MD n=Mem ra=0x00000004 d=0x5C60 s=2	#	add d0:d2:d4,d3
+MD n=Mem ra=0x00000006 d=0x7680 s=2	#	add d3:d6:d9,d4
+MD n=Mem ra=0x00000008 d=0x6EA0 s=2	#	add d7::d11,d5
+MD n=Mem ra=0x0000000a d=0x8000 s=2	#	stop
+# </GEN>
+
+CORE n=:SC
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x44206840
+INSTR op=0x4420					asm="add d2::d4,d1"
+R n=D i=2 d=0x0000000002
+R n=D i=3 d=0x0000000003
+R n=D i=4 d=0x0000000004
+R n=D i=1 d=0x0000000009
+
+I ea=0x2 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x44206840
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x5c607680
+INSTR op=0x6840					asm="add d1::d5,d2"
+R n=D i=1 d=0x0000000001
+R n=D i=3 d=0x0000000003
+R n=D i=5 d=0x0000000005
+R n=D i=2 d=0x0000000009
+
+I ea=0x4 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x5c607680
+INSTR op=0x5c60					asm="add d0:d2:d4,d3"
+R n=D i=0 d=0x0000000000
+R n=D i=2 d=0x0000000002
+R n=D i=4 d=0x0000000004
+R n=D i=3 d=0x0000000006
+
+I ea=0x6 id=4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x5c607680
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x6ea08000
+INSTR op=0x7680					asm="add d3:d6:d9,d4"
+R n=D i=3 d=0x0000000003
+R n=D i=6 d=0x0000000006
+R n=D i=9 d=0x0000000009
+R n=D i=4 d=0x0000000012
+
+I ea=0x8 id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x6ea08000
+INSTR op=0x6ea0					asm="add d7::d11,d5"
+R n=D i=7 d=0x0000000007
+R n=D i=9 d=0x0000000009
+R n=D i=11 d=0x000000000b
+R n=D i=5 d=0x000000001b
+
+I ea=0xa id=6
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x6ea08000
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x8000					asm="stop"
+
+RESULTS
+RD n=D i=0 d=0x0000000000
+RD n=D i=1 d=0x0000000001
+RD n=D i=2 d=0x0000000002
+RD n=D i=3 d=0x0000000003
+RD n=D i=4 d=0x0000000012
+RD n=D i=5 d=0x000000001b
+RD n=D i=6 d=0x0000000006
+RD n=D i=7 d=0x0000000007
+RD n=D i=8 d=0x0000000000
+RD n=D i=9 d=0x0000000009
+RD n=D i=10 d=0x0000000000
+RD n=D i=11 d=0x000000000b
+RD n=D i=12 d=0x0000000000
+RD n=D i=13 d=0x0000000000
+RD n=D i=14 d=0x0000000000
+RD n=D i=15 d=0x0000000000

@@ -1,0 +1,315 @@
+// Test assembler prefix grouping
+define (arch = MiniStarCore) {
+
+  parallel_execution = 3;
+  attrs = (type1,prefix,prefix1,first,second);  
+  blk = (red,blue);
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 8;  prefix = r; };
+  define (regfile = AGPR)  {
+    size = 2;
+    define(entry=0) { reg = GPR(7); } 
+    define(entry=1) { reg = SR; } 	
+  };
+
+  define (reg=SR) 	 {  define(field=T) { bits = 3; } };
+
+  // -------- INSTRFIELDS ----------
+  
+
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RT)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; } // Serial Grouping
+  define (instrfield = IMM) { width = 4; pseudo = true; is_signed=true;}
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+
+
+
+  define (instrfield = LpmarkA)    { width = 1; prefix = true; pseudo = true; value  = 0; }
+  define (instrfield = LpmarkB)    { width = 1; prefix = true; pseudo = true; value  = 0; }
+
+
+  
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+
+
+  define (instr = LPREFIX1) {
+    fields = (
+              (bits(0,14),6),
+              (bits(15),LpmarkA));
+    prefix = true;
+    syntax = ("LPREFIX1, LpmarkA %f",LpmarkA);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+
+  // --------- ASM INSTRUCTIONS ---------
+
+  define (instr = LPMARK1) {
+    syntax = ("lpmarkA");
+    assembler = { LpmarkA = 1; };
+  }
+  define (instr = LPMARK2) {
+    syntax = ("lpmarkB");
+    assembler = { LpmarkB = 1; };
+  }
+
+
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr=nop) {
+    attrs = (type1,first);
+    fields = (
+              (bits(0,15),5));
+    action = {
+    };
+  }
+
+  define(instr=sub) {
+    attrs = (type1,first);
+    blk = red;
+    asm_rules = (R1,R2);
+    fields = (
+              (bits(0,3),2),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      GPR(RT) = GPR(RA) - GPR(RB);
+    };
+    syntax = ("sub %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=asub) {
+    attrs = (type1,first);
+    blk = blue;
+    asm_rules = (R1,R2);
+    fields = (
+              (bits(0,3),4),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      if (RA > 1 || RB > 1 || RT > 1) {
+      } else {
+        AGPR(RT) = AGPR(RA) - AGPR(RB);		
+      }
+    };
+    syntax = ("asub %f,%f,%f",RA,RB,RT);
+  }
+
+
+  define(instr=add) {
+    attrs = (type1,first);
+    asm_rules = R3;
+    fields = (
+              (bits(0,3),8),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+    syntax = ("add %f,%f,%f",RA,RB,RT);
+  }
+
+  define (instr = move) {
+    attrs = (type1,second);
+    blk = (red,blue);
+    fields = (
+              (bits(0,3),3),
+              (bits(4,6),RA),
+              (bits(7,10),IMM),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+
+    action = { 
+      GPR(RA) = IMM; 
+    };
+    syntax = ("move %f,%f",IMM,RA);
+  }
+
+
+
+  define (instr = halt) {
+    fields = ((bits(0,12),0),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    attrs = (type1,second);
+    action = { halt(); };
+  }
+
+  // -------- POST EXEC ----------------
+  
+
+  post_exec = func() {
+
+    if (getCurrentInstrTable() == prefix) {	   	
+      setCurrentInstrTable(type1);
+    } else {
+      int num_bytes;
+      uint32_t *x = getCurrentInstr(num_bytes);
+      if (x[0] & 0x40000) {
+      	setPacketPosition(0);
+      }
+    } 
+  };
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+  };    
+
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+ 
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (type1,prefix);
+    disasm_instrtables = (type1,prefix); 
+    explicit_regs = true;
+    symbol_chars =  ("+","(",")","#","-");
+
+    define(rule=R1) {
+      action = func (InstrInfo) {
+        if (RA <= RB) {
+          error(1,"R1: First source must be larger than second.");
+        }
+      };
+    }
+	   
+    define(rule=R2) {
+      action = func (InstrInfo ii) {
+        if (ii.instrBlk(red) && RT > 2) {
+          error(1,"R2: Red instruction target larger than 2.");
+        }
+      };
+    }
+	
+    define(rule=R3) {
+      action = func (InstrInfo ii) {
+        if ((ii.instrHasAttr(first) && RT > 4) || (ii.instrHasAttr(second) && RT < 8)) {
+          error(1,"R3: First/Second rule violation.");
+        }
+      };
+    }
+
+
+    define(rule=R4) { 
+      action = func(InstrBundle b) {
+        int r_cnt = 0;
+        for(unsigned i=0; i < b.size(); ++i) {
+          // If it's a pure-red instruction, then count it.
+          if (b[i].instrBlk(red) && b[i].numInstrBlks() == 1) {
+            r_cnt++;
+          }  
+        }
+
+        if (r_cnt > 1) {
+          error(1,"R4: Too many red instructions.");
+        }
+      };
+    }	
+
+    define(rule=R5) {
+      action = func(InstrBundle b) {
+        int i;
+        RegWrites rw1;
+        RegWrites rw2;
+        RegWrites rw3;
+
+        if (b.size() == 2) {
+          b[0].get_dest(rw1);
+          b[1].get_dest(rw2);
+          intersect_dest(rw1,rw2,rw3);
+        }
+        for(i=0; i < rw3.size; ++i) {
+          if (rw3[i].reg() != SR) { 
+            if (rw3[i].mask(0) & rw3[i].mask(1)) {
+              error(1,"R5: Mutual exclusion violation");
+            }	
+          } else if (rw3[i].mask(0) & SR.T) {
+            error(1,"R5: Mutual exclusion violation");
+          }
+        }
+        info(4,"R5 checked");
+      };
+    }
+   
+  };
+
+  post_packet_asm = func(InstrBundle b) {
+    SG = 1;
+
+    // Rearrange instructions so that blue comes before red before anything else.
+    InstrBundle newb(b);
+    unsigned cur = 0;
+    bool handled[b.size()];
+    for (unsigned i = 0; i != b.size(); ++i) { handled[i] = false; }
+
+    // Blue comes first.
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (b[i].instrBlk(blue)) {
+        newb[cur++] = b[i];
+        handled[i] = true;
+      }
+    }
+    // Then red.
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (!handled[i] && b[i].instrBlk(red)) {
+        newb[cur++] = b[i];
+        handled[i] = true;
+      }
+    }
+    // Then anything else.
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (!handled[i]) {
+        newb[cur++] = b[i];
+        handled[i] = true;
+      }
+    }
+    b = newb;
+  } ;
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

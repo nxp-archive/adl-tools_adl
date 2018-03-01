@@ -1,0 +1,101 @@
+======
+Cores:
+======
+Name:  "P"
+Architectural Parameters:
+  Name:  p1
+  Options:  big_lie lie statistics 
+  Value:  big_lie
+  Const:  0
+  Boolean:  0
+  -------------------------------
+  Name:  p2
+  Options:  goodbye hello 
+  Value:  hello
+  Const:  0
+  Boolean:  0
+  Watch Expr:  {
+    "d" ;
+}
+  -------------------------------
+  Name:  p3
+  Options:  mode1 mode2 mode3 mode4 
+  Value:  mode3
+  Const:  0
+  Boolean:  0
+  Watch Expr:  {
+    "d" ;
+}
+  -------------------------------
+  Name:  p4
+  Options:  a b c d 
+  Value:  a
+  Const:  0
+  Boolean:  0
+  Watch Expr:  {
+    "d" ;
+}
+  -------------------------------
+Register Files:
+  Name:  "gprs"
+  Size:  128
+  Width:  32
+  -------------------------------
+  Name:  "sprs"
+  Size:  128
+  Contained registers:
+    20:  a
+    21:  b
+    22:  c
+    50:  d
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "a"
+  Usage:  read, written
+  Width:  24
+  Attributes:  cia nia
+  -------------------------------
+  Name:  "b"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "c"
+  Usage:  read, written
+  Width:  24
+  -------------------------------
+  Name:  "d"
+  Usage:  read, written
+  Width:  24
+  -------------------------------
+Current-instruction-address register:  a
+Next-instruction-address register:  a
+Real-address Mask:
+  Initial mask:  0xffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffff (constant)
+Instruction Fields:
+  A: [6,20] [not used]  
+  B: [21,30] [not used]  
+  OPCD: [0,5] [not used]  
+    Signed:  1
+
+Groups:
+  Name:  opcd_g
+  Type:  instrfield
+  Items: OPCD 
+  -------------------------------
+  Name:  parm_g
+  Type:  parm
+  Items: p2 p4 
+  -------------------------------
+  Name:  reg_g
+  Type:  reg
+  Items: c d 
+  -------------------------------
+  Name:  regfile_g
+  Type:  regfile
+  Items: sprs 
+  -------------------------------
+-------------------------------
+

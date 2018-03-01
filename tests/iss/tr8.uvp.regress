@@ -1,0 +1,5 @@
+
+Register mismatch:
+Expected VPIR = 0x2
+Found 0x3002
+Error:  Test 1:  Core powerpc:t2:  Register mismatch

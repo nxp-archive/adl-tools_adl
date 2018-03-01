@@ -1,0 +1,11 @@
+Hc-1
+qC
+qOffsets
+?
+Hg0
+p40
+g
+m1c000080,4
+qTStatus
+vCont;s:1;c
+@

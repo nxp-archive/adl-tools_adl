@@ -1,0 +1,93 @@
+//
+// Tests of attribute-base class definition and user functions.
+// 
+
+bool out_bar() {
+	return true;
+}
+
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  bool isUserMode(unsigned i, unsigned j) {
+   return (GPR(i) == j); 	
+  }	
+
+  bool isFooMode() {
+    return (Foo != 0) ;	
+  }
+
+  unsigned foo1(unsigned x1) {
+    return x1;
+  }
+
+  unsigned foo2(unsigned x1, unsigned x2) {
+    return x1+x2;
+  }
+
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+
+    define (pipestage mID) {}
+
+    define (pipestage mEX) {}
+
+    define (pipestage mWB) {}
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDp, S_EX, S_WB );
+
+    define (mapping) {
+      mID = (S_ID,S_IDp);
+      mEX = S_EX;
+      mWB = (S_WB);
+    };
+
+  }
+
+  define (instr_class a) {
+    instr_attrs = classA;
+
+    attrs = (Foo,Bar);
+
+    machine = normal;
+    
+    define (operands) {
+      RA = GPR(RA);
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+    S_INIT: { change_state(S_ID); }
+    S_ID:   if (mEX.has_space() && isUserMode(RA,1) && Src.can_read()) {
+              flush(2);
+              Src.read();
+              change_state(S_IDp);
+      }
+    S_IDp: { 
+      L1i.send_write_request(); 
+      change_state(S_EX);
+    }
+    S_EX: {
+      exec();
+      L1i.write();
+      if (isFooMode() || out_bar()) {
+        write_ops();
+      }
+      change_state (S_INIT);
+    }
+    };
+
+  }
+
+}

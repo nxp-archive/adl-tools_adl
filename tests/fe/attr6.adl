@@ -1,0 +1,87 @@
+//
+// Attribute declarations should be handled first, when processing cores, so
+// that the architecture-specific elements declared within a core can use those
+// attributes.
+//
+define (core=P) {
+
+  attrs = (classA, classB, classC, classS, doc_hidden);	
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    attrs = doc_hidden;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    attrs = classA;
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr="andi.") {
+    fields=(OPCD(28),RT,RA,UI);
+    attrs = classB;
+    action = {
+      GPR(RA) = GPR(RT) & UI;
+    };
+  }  
+
+}

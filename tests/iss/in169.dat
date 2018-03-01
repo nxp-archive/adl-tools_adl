@@ -1,0 +1,76 @@
+#
+# On a split memory transaction, make sure that the second entry
+# in the DMI cache has the correct EA, and not the first EA of the
+# overall transaction.
+#
+= asm
+
+  lwz r1,2(r10)    # split between high and low word.
+  lwz r2,0(r10)    # Load in last word in memory.
+  add r7,r6,r8
+  dcbtls r7,r0     # Lock line, set 32.
+  add r7,r7,r8
+  dcbtls r7,r0
+  add r7,r7,r8
+  dcbtls r7,r0
+  add r7,r7,r8
+  dcbtls r7,r0
+  stw r3,0xffe(r0)  # Now the second half of the split transaction will not
+                    # update the cache b/c of locking.
+  stw r4,0x1000(r0)
+  dcbf r5,r0
+  dcbf r6,r0
+
+= /asm
+
+= aopts
+  -mregnames -me500
+= /aopts
+
+= mdopts
+  instr-offset: 0x100
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x802A0002	#	lwz r1,2(r10)    # split between high and low word.
+MD n=Mem ra=0x00000104 d=0x804A0000	#	lwz r2,0(r10)    # Load in last word in memory.
+MD n=Mem ra=0x00000108 d=0x7CE64214	#	add r7,r6,r8
+MD n=Mem ra=0x0000010c d=0x7C07014C	#	dcbtls r7,r0     # Lock line, set 32.
+MD n=Mem ra=0x00000110 d=0x7CE74214	#	add r7,r7,r8
+MD n=Mem ra=0x00000114 d=0x7C07014C	#	dcbtls r7,r0
+MD n=Mem ra=0x00000118 d=0x7CE74214	#	add r7,r7,r8
+MD n=Mem ra=0x0000011c d=0x7C07014C	#	dcbtls r7,r0
+MD n=Mem ra=0x00000120 d=0x7CE74214	#	add r7,r7,r8
+MD n=Mem ra=0x00000124 d=0x7C07014C	#	dcbtls r7,r0
+MD n=Mem ra=0x00000128 d=0x90600FFE	#	stw r3,0xffe(r0)  # Now the second half of the split transaction will not
+MD n=Mem ra=0x0000012c d=0x90801000	#	stw r4,0x1000(r0)
+MD n=Mem ra=0x00000130 d=0x7C0500AC	#	dcbf r5,r0
+MD n=Mem ra=0x00000134 d=0x7C0600AC	#	dcbf r6,r0
+# </GEN>
+
+RD n=NIA      d=0x100
+RD n=CCR      d=0xc0000000
+RD n=GPR i=3  d=0xb0f0babe
+RD n=GPR i=4  d=0x12345678
+RD n=GPR i=5  d=0xffc
+RD n=GPR i=6  d=0x1000
+RD n=GPR i=8  d=0x100000
+RD n=GPR i=10 d=0xfffffffc
+
+MD n=Mem ra=0xffc      d=0
+MD n=Mem ra=0x1000     d=0
+MD n=Mem ra=0x1004     d=0
+
+MD n=Mem ra=0x00000000 d=0xbeef5678
+MD n=Mem ra=0xfffffffc d=0x1234dead
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x1234dead
+
+MD n=Mem ra=0xffc      d=0x0000b0f0
+MD n=Mem ra=0x1000     d=0x12345678
+MD n=Mem ra=0x1004     d=0x00000000

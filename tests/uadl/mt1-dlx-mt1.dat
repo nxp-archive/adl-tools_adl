@@ -1,0 +1,122 @@
+#
+# A very simple mt test case.
+#
+CORE n=:PMT
+
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	addi r3,r3,3
+	.long 0x0
+	addi r4,r4,4
+	addi r5,r5,5
+	addi r6,r6,6
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000014 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000018 d=0x38C60006	#	addi r6,r6,6
+# </GEN>
+
+CORE n=:PMT
+
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA d=0x0
+
+CORE n=:PMT:t1
+
+RD n=NIA d=0x10
+
+TRACE
+
+
+CORE n=:PMT:t0
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=1
+R n=GPR i=1 d=0x00000001
+CTIME t=4
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+ITIME t=1
+R n=GPR i=2 d=0x00000002
+CTIME t=4
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=3
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38840004
+INSTR op=0x38840004					asm="addi r4,r4,4"
+ITIME t=1
+R n=GPR i=4 d=0x00000004
+CTIME t=4
+
+I ea=0x14 id=4
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38a50005
+INSTR op=0x38a50005					asm="addi r5,r5,5"
+ITIME t=1
+R n=GPR i=5 d=0x00000005
+CTIME t=4
+
+CORE n=:PMT:t0
+
+
+I ea=0x8 id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38630003
+INSTR op=0x38630003					asm="addi r3,r3,3"
+ITIME t=2
+R n=GPR i=3 d=0x00000003
+CTIME t=5
+
+I ea=0xc id=6
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=2
+CTIME t=5
+
+CORE n=:PMT:t1
+
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x38c60006
+INSTR op=0x38c60006					asm="addi r6,r6,6"
+ITIME t=2
+R n=GPR i=6 d=0x00000006
+CTIME t=5
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=2
+CTIME t=5
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000003
+
+CORE n=:PMT:t1
+
+RD n=GPR i=4 d=0x00000004
+RD n=GPR i=5 d=0x00000005
+RD n=GPR i=6 d=0x00000006

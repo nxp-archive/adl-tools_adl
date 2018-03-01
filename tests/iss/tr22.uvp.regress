@@ -1,0 +1,3 @@
+powerpc:t0:  Instr 6 (local count 6):  Register GPR11 update not found:  Expected 0x00000000f66db48f
+powerpc:t0:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

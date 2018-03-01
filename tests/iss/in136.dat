@@ -1,0 +1,27 @@
+#
+# This tests some very particular behavior of a transactional ISS- that if a
+# slice of a field is taken and passed to a helper, we'll correctly set up
+# the slot indices for the helper call.  This also makes sure that default
+# parameters can be used correctly.
+#
+
+= asm
+
+  crnor 6,2,3  # This will actually put its result into GPR1 and GPR6
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4CC21842	#	crnor 6,2,3  # This will actually put its result into GPR1 and GPR6
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=0 d=0x12345678
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=6 d=0x12345678

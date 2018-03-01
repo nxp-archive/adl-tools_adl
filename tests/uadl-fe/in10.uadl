@@ -1,0 +1,91 @@
+//
+// Error handling with graph processing.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {};
+
+    // memory system
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+    define (semaphore MulFlag) {}
+  }
+
+  // Sample predicate.
+  bool foobar()
+  {
+    return true;
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_MM, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( add, addi, halt );
+
+    machine = normal;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read() && Src2.can_read() && 
+							Trg.can_allocate() && mEX.has_space()) {
+				Src1.read();
+				Src2.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+		// No space-check, so one will be inserted.
+		S_EX: {
+			exec();
+			change_state(S_MM);
+		}
+		// No mMM state transition- will produce an error.
+
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: if (Trg.can_write()) {
+				write_ops();
+				change_state(S_WBp);
+			}
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+}

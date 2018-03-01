@@ -1,0 +1,243 @@
+//
+// A model with prefixes and with 32-bit instructions.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+  parallel_execution = 4;
+  attrs = (type1,prefix,first,second);  
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 32;  prefix = r; };
+  // SR (T,...);
+  define (reg = SR) { 
+    define (field = T1) { bits = 0;}; define (field = T6) { bits = 1;}; width = 32; 
+  };
+  define (reg =LC) {width =32;};
+
+  // -------- INSTRFIELDS ----------
+  
+  define (instrfield = RT)  { width = 5; pseudo = true; ref=GPR;}
+  define (instrfield = RA)  { width = 5; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 5; pseudo = true; ref=GPR;}
+  define (instrfield = SH)  { width = 2; pseudo = true; }
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; reserved = true; } // Serial Grouping
+  define (instrfield = IMM) { width = 18; pseudo = true; is_signed=true;}
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+  define (instrfield = Enc1)   { width = 32;  pseudo = true; }
+
+  define (instrfield = HighReg)  { pseudo = true; prefix = true; indexed = 3; index_endianness = big; }
+
+  define (instrfield = VlesSize)  { width = 2; prefix = true; pseudo = true; value = 1;};
+
+  define (prefixcounter=VlesSizeCtr) { reset = 1; }
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = PREFIX) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),
+              (bits(7),0),
+              (bits(19,8),HighReg),
+              (bits(21,20),VlesSize),
+              (bits(31,22),reserved));
+    prefix = true;
+    syntax = ("LPREFIX, VlesSize = %f, HighReg = %f",VlesSize,HighReg);  
+    attrs = prefix;
+    width  = 32;
+    next_table = {
+      VlesSizeCtr = VlesSize;
+    };
+  }
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+  define (instr = nop) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),
+              (bits(7),0),
+              (bits(8),1),
+              (bits(9),0),
+              (bits(10),1),
+              (bits(11),1),
+              (bits(12),0),
+              (bits(13),1),
+              (bits(14),0),
+              (bits(34,15),reserved));
+    attrs = (type1);
+    type = OneWord;
+    action = {};
+  }
+
+
+  define(instr = OneWord) 
+    {
+      fields = ((bits(31,0), Enc1),
+                (bits(34,32),HighReg));
+      pseudo = true;
+    }
+
+  define(instr=add) {
+    attrs = (type1,first);
+    type = OneWord;
+    fields = (
+              (bits(0),1),
+              (bits(1),0),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),0),
+              (bits(9,6),RT(3,0)),	
+              (bits(13,10),RA(3,0)),			
+              (bits(17,14),RB(3,0)),		
+              (bits(30,18),0),
+              (bits(31),SG),
+              (bits(33),RB(4)),
+              (bits(32),RA(4)),
+              (bits(34),RT(4))
+              );
+
+    action = {
+      info (1,"RA= "<<RA, ", RB= "<<RB, ", RT= "<<RT );
+      GPR(RT) = GPR(RB) + GPR(RA);
+    };
+    syntax = ("add %f,%f,%f",RA,RB,RT);
+  }
+
+  // Specifically test decoding of operands right at word boundaries to make sure
+  // we're not losing bits when handling prefixes.
+  define(instr=adds) {
+    attrs = (type1,first);
+    type = OneWord;
+    fields = (
+              (bits(0),SH(0)),
+              (bits(1),SH(1)),
+              (bits(2),0),
+              (bits(3),0),
+      	      (bits(4),1),
+              (bits(5),1),
+              (bits(9,6),RT(3,0)),	
+              (bits(13,10),RA(3,0)),			
+              (bits(17,14),RB(3,0)),		
+              (bits(30,18),0),
+              (bits(31),SG),
+              (bits(33),RB(4)),
+              (bits(32),RA(4)),
+              (bits(34),RT(4))
+              );
+
+    action = {
+      info (1,"RA= "<<RA, ", RB= "<<RB, ", RT= "<<RT, ", SH= "<<SH );
+      GPR(RT) = GPR(RB) + (GPR(RA) << SH);
+    };
+    syntax = ("adds %f,%f,%f(%f)",RA,RB,RT,SH);
+  }
+
+  define(instr=mv) {
+    attrs = (type1,first);
+    type = OneWord;
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),0),
+              (bits(9,6),RT(3,0)),	
+              (bits(13,10),RA(3,0)),			
+              (bits(30,14),IMM(16,0)),
+              (bits(31),SG),
+              (bits(33),IMM(17)),
+              (bits(32),RA(4)),
+              (bits(34),RT(4))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM;
+    };
+    syntax = ("mv %f,%f,%f",RA,IMM,RT);
+  }
+
+  define(instr=halt)  {
+    attrs = (type1,first);
+    type = OneWord;
+    fields = (
+              (bits(31,0),0),
+              (bits(34,32),reserved)
+              );
+    action = { halt(); };
+
+  }
+
+  define (group=all_instrs) {
+    type = instr;
+    items = "*" - PREFIX;
+  }
+
+  defmod (instr=*all_instrs) {
+    prefix_counter_decr = VlesSizeCtr;
+    next_table = {
+      if (VlesSizeCtr == 0) {
+        setPacketPosition(0);
+      }
+    };
+  }
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+  };    
+
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  post_packet_asm = func(InstrBundle b) {
+    VlesSize = b.size();
+    b.set_prefix_fields();
+  } ;
+ 
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type1);
+    disasm_instrtables = (prefix,type1); 
+    explicit_regs = true;	
+
+   
+  };
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

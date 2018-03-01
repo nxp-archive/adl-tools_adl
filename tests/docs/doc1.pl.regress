@@ -1,0 +1,2073 @@
+$data = {
+"cores" => {
+"P" => {
+"doc" => <<DATA
+Example documentation string- place overview information here.
+
+DATA
+,
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+Current instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"CR" => {
+"doc" => <<DATA
+The condition register.
+    
+DATA
+,
+"width" => 32,
+"fields" => {
+"CR" => {
+"indexed" => {
+"width" => 4,
+"count" => 8,
+},
+"attributes" => {
+"one" => "",
+},
+},
+"EQ" => {
+"doc" => <<DATA
+Zero (EQ)- This bit is set when the result is zero.
+
+DATA
+,
+"bits" => [
+[
+2,
+2,
+],
+],
+"attributes" => {
+"three" => "",
+},
+},
+"FEX" => {
+"doc" => <<DATA
+Floating-point enabled exception (FEX). Copy of the final state of FPSCR(FEX)
+at the completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+5,
+5,
+],
+],
+},
+"FX" => {
+"doc" => <<DATA
+Floating point exception (FX). Copy of the final state of FPSCR(FX) at the
+completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+4,
+4,
+],
+],
+},
+"GT" => {
+"doc" => <<DATA
+Positive (GT)- This bit is set when the result is positive (and not zero).
+
+DATA
+,
+"bits" => [
+[
+1,
+1,
+],
+],
+"attributes" => {
+"two" => "",
+},
+},
+"LT" => {
+"doc" => <<DATA
+Negative (LT)- This bit is set when the result is negative.
+
+DATA
+,
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"OX" => {
+"doc" => <<DATA
+Floating-point overflow exception (OX). Copy of the final state of FPSCR(OX) at
+the completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+7,
+7,
+],
+],
+},
+"SO" => {
+"doc" => <<DATA
+Summary overflow (SO)- This is a copy of the final state of XER(SO) at the
+completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+3,
+3,
+],
+],
+},
+"VX" => {
+"doc" => <<DATA
+Floating-point invalid exception (VX). Copy of the final state of FPSCR(CX) at
+the completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+6,
+6,
+],
+],
+},
+},
+"shared" => 0,
+},
+"CTR" => {
+"doc" => <<DATA
+The counter register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+"read" => {
+<<DATA
+{
+    return CTR / 2 ;
+}
+DATA
+,
+},
+"write" => {
+<<DATA
+{
+    CTR = x * 2 ;
+}
+DATA
+,
+},
+},
+"ESR" => {
+"doc" => <<DATA
+Exception syndrome register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"FOO" => {
+"width" => 32,
+"shared" => 0,
+},
+"FOO1" => {
+"width" => 32,
+"fields" => {
+"A" => {
+"bits" => [
+[
+0,
+7,
+],
+],
+"attributes" => {
+"one" => "",
+"two" => "",
+"three" => "",
+},
+},
+"B" => {
+"bits" => [
+[
+8,
+15,
+],
+],
+"readonly" => 1,
+},
+"C" => {
+"bits" => [
+[
+16,
+23,
+],
+],
+},
+},
+"reserved_mask" => "0b00000000000000000000000011111111",
+"readonly_mask" => "0b00000000111111110000000000000000",
+"reset" => "0xdead1100",
+"shared" => 0,
+},
+"FOO2" => {
+"width" => 64,
+"fields" => {
+"X" => {
+"indexed" => {
+"width" => 8,
+"count" => 8,
+},
+},
+"Y" => {
+"indexed" => {
+"width" => 16,
+"count" => 4,
+},
+},
+"Z" => {
+"indexed" => {
+"width" => 32,
+"count" => 2,
+},
+},
+},
+"reset" => <<DATA
+{
+    FOO2 = 0xdeadbeef ;
+}
+DATA
+,
+"shared" => 0,
+},
+"IVOR6" => {
+"doc" => <<DATA
+Interrupt-vector offset register 6.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"IVPR" => {
+"doc" => <<DATA
+Interrupt-vector prefix register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"MSR" => {
+"doc" => <<DATA
+Machine state register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+Next instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+"SRR0" => {
+"doc" => <<DATA
+Save-restore register 0.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"SRR1" => {
+"doc" => <<DATA
+Save-restore register 1.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"aFOO" => {
+"width" => 32,
+"pseudo" => 1,
+"shared" => 0,
+"read" => {
+"alias" => "FOO",
+},
+"write" => {
+"alias" => "FOO",
+},
+},
+},
+"regfiles" => {
+"GPR" => {
+"doc" => <<DATA
+General purpose registers.
+    
+DATA
+,
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+"SPR" => {
+"width" => 32,
+"size" => 1024,
+"shared" => 0,
+"entries" => {
+"9" => {
+"syntax" => "CTR",
+"reg" => "CTR",
+},
+"26" => {
+"syntax" => "SRR0",
+"reg" => "SRR0",
+},
+"27" => {
+"syntax" => "SRR1",
+"reg" => "SRR1",
+},
+"30" => {
+"syntax" => "FOO1",
+"reg" => "FOO1",
+},
+"31" => {
+"syntax" => "FOO2",
+"reg" => "FOO2",
+},
+"32" => {
+"syntax" => "SPR32",
+"read" => <<DATA
+{
+    ESR = 0x00040020 ;
+    return 0 ;
+}
+DATA
+,
+"write" => <<DATA
+{
+    ESR = 0x00040020 ;
+}
+DATA
+,
+},
+"62" => {
+"syntax" => "ESR",
+"reg" => "ESR",
+},
+},
+},
+"VPR" => {
+"doc" => <<DATA
+Vector registers.
+    
+DATA
+,
+"width" => 128,
+"fields" => {
+"B" => {
+"indexed" => {
+"width" => 8,
+"count" => 16,
+},
+},
+"H" => {
+"indexed" => {
+"width" => 16,
+"count" => 8,
+},
+},
+"W" => {
+"indexed" => {
+"width" => 32,
+"count" => 4,
+},
+},
+},
+"size" => 32,
+"shared" => 0,
+},
+"aGPR" => {
+"doc" => <<DATA
+Alternate GPRs for VLE: Middle block of 16 registers.
+    
+DATA
+,
+"width" => 32,
+"pseudo" => 1,
+"size" => 16,
+"shared" => 0,
+"read" => {
+"alias" => {
+"reg" => "GPR",
+"map" => {
+"0" => 8,
+"1" => 9,
+"2" => 10,
+"3" => 11,
+"4" => 12,
+"5" => 13,
+"6" => 14,
+"7" => 15,
+"8" => 16,
+"9" => 17,
+"10" => 18,
+"11" => 19,
+"12" => 20,
+"13" => 21,
+"14" => 22,
+"15" => 23,
+},
+},
+},
+"write" => {
+"alias" => {
+"reg" => "GPR",
+"map" => {
+"0" => 8,
+"1" => 9,
+"2" => 10,
+"3" => 11,
+"4" => 12,
+"5" => 13,
+"6" => 14,
+"7" => 15,
+"8" => 16,
+"9" => 17,
+"10" => 18,
+"11" => 19,
+"12" => 20,
+"13" => 21,
+"14" => 22,
+"15" => 23,
+},
+},
+},
+},
+"rGPR" => {
+"doc" => <<DATA
+Upper and lower halves of GPR for use by VLE instructions.
+    
+DATA
+,
+"width" => 32,
+"pseudo" => 1,
+"size" => 16,
+"shared" => 0,
+"read" => {
+"alias" => {
+"reg" => "GPR",
+"map" => {
+"0" => 0,
+"1" => 1,
+"2" => 2,
+"3" => 3,
+"4" => 4,
+"5" => 5,
+"6" => 6,
+"7" => 7,
+"8" => 24,
+"9" => 25,
+"10" => 26,
+"11" => 27,
+"12" => 28,
+"13" => 29,
+"14" => 30,
+"15" => 31,
+},
+},
+},
+"write" => {
+"alias" => {
+"reg" => "GPR",
+"map" => {
+"0" => 0,
+"1" => 1,
+"2" => 2,
+"3" => 3,
+"4" => 4,
+"5" => 5,
+"6" => 6,
+"7" => 7,
+"8" => 24,
+"9" => 25,
+"10" => 26,
+"11" => 27,
+"12" => 28,
+"13" => 29,
+"14" => 30,
+"15" => 31,
+},
+},
+},
+},
+},
+"instrfields" => {
+"AA" => {
+"doc" => <<DATA
+Absolute address bit.
+    
+DATA
+,
+"bits" => [
+[
+30,
+30,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x2",
+"type" => "imm",
+},
+"BD" => {
+"doc" => <<DATA
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    
+DATA
+,
+"bits" => [
+[
+16,
+29,
+],
+],
+"width" => 14,
+"size" => 14,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfffc",
+"type" => "imm",
+},
+"BF" => {
+"doc" => <<DATA
+Field used to specify one of the Condition Register (CR_) fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+8,
+],
+],
+"width" => 3,
+"size" => 3,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3800000",
+"type" => "imm",
+},
+"BI" => {
+"doc" => <<DATA
+Field used to specify a bit in the Condition Register (CR_) to be used
+as the condition of a Branch Conditional instruction.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"BO" => {
+"doc" => <<DATA
+Field used to specify options for the Branch Conditional (`bc BO, BI, BD`_) instruction.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"D" => {
+"doc" => <<DATA
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"F1" => {
+"doc" => <<DATA
+An example enumerated field.
+    
+DATA
+,
+"bits" => [
+[
+28,
+31,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf",
+"enumerated" => {
+"0" => "",
+"1" => ",1",
+"1" => ",bark",
+"2" => ",2",
+"3" => ",3",
+"3" => ",woof",
+"4" => "reserved",
+"5" => "reserved",
+"6" => ",foo",
+},
+"type" => "imm",
+},
+"LK" => {
+"doc" => <<DATA
+LINK bit.
+    
+DATA
+,
+"bits" => [
+[
+31,
+31,
+],
+],
+"width" => 1,
+"size" => 1,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1",
+"type" => "imm",
+},
+"MB" => {
+"bits" => [
+[
+21,
+25,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7c0",
+"type" => "imm",
+},
+"ME" => {
+"bits" => [
+[
+26,
+30,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e",
+"type" => "imm",
+},
+"OIM5" => {
+"doc" => <<DATA
+    Offset Immediate field used to specify a 5-bit unsigned integer in the
+    range [1:32] encoded as [0:31].
+    
+DATA
+,
+"bits" => [
+[
+7,
+11,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 1,
+"mask" => "0x1f00000",
+"type" => "imm",
+},
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+0,
+5,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfc000000",
+"type" => "imm",
+},
+"OPCD7" => {
+"doc" => <<DATA
+    Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+0,
+6,
+],
+],
+"width" => 7,
+"size" => 7,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfe000000",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"RX" => {
+"bits" => [
+[
+12,
+15,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf0000",
+"type" => "imm",
+},
+"RY" => {
+"bits" => [
+[
+8,
+11,
+],
+],
+"width" => 4,
+"size" => 4,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf00000",
+"type" => "imm",
+},
+"SH" => {
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"SI" => {
+"doc" => <<DATA
+Signed immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"SI32" => {
+"pseudo" => 1,
+"width" => 32,
+"size" => 32,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0",
+"type" => "imm",
+},
+"SPRN" => {
+"doc" => <<DATA
+Field used to specify a Special Purpose Register (SPR_) for the *mtspr* and *mfspr* instructions.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+[
+11,
+15,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1ff800",
+"type" => "imm",
+},
+"UI" => {
+"doc" => <<DATA
+Unsigned immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+21,
+30,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add" => {
+"width" => 32,
+"syntax" => "add RT, RA, RB",
+"dsyntax" => "add ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 266,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"add2" => {
+"width" => 32,
+"syntax" => "add2",
+"dsyntax" => "add2",
+"alias" => {
+"target" => "add",
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "RT",
+"value" => 0,
+},
+"misc" => {
+"field" => "RA",
+"value" => 0,
+},
+"misc" => {
+"field" => "RB",
+"value" => 0,
+},
+],
+},
+"parent_action" => <<DATA
+{
+    GPR ( 0 ) = GPR ( 0 ) + GPR ( 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(0)",
+],
+"outputs" => [
+"GPR(0)",
+],
+},
+"addi" => {
+"width" => 32,
+"syntax" => "addi RT, RA, SI",
+"dsyntax" => "addi ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 14,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var si = signExtend ( SI , 32 ) ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + si ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"addic." => {
+"width" => 32,
+"syntax" => "addic. RT, RA, SI",
+"dsyntax" => "addic. ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 13,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var si = signExtend ( SI , 32 ) ;
+    GPR ( RT ) = GPR ( RA ) + si ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR",
+"GPR(RA)",
+],
+"outputs" => [
+"CR",
+"GPR(RT)",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"addis" => {
+"width" => 32,
+"syntax" => "addis RT, RA, SI",
+"dsyntax" => "addis ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 15,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     bits < 32 > si = SI ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si << 16 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + ( si << 16 ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"bc" => {
+"width" => 32,
+"syntax" => "bc BO, BI, BD",
+"dsyntax" => "bc ${BO}, ${BI}, ${BD}",
+"fields" => {
+"OPCD" => 16,
+"BO" => "",
+"BI" => "",
+"BD" => "",
+"AA" => 0,
+"LK" => 0,
+},
+"action" => <<DATA
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = BO ( 2 ) || ( ( CTR != 0 ) ^ BO ( 3 ) ) ;
+     var cond_ok = BO ( 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+         var ea = signExtend ( concat ( BD , zero ( 2 ) ) , 32 ) ;
+        NIA = CIA + ea ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA?",
+"CR/p",
+"CTR?",
+],
+"outputs" => [
+"CTR?",
+"NIA?",
+],
+},
+"cmp" => {
+"width" => 32,
+"syntax" => "cmp BF, RA, RB",
+"dsyntax" => "cmp ${BF}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"BF" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 0,
+},
+"action" => <<DATA
+{
+    setCrField ( BF , GPR ( RA ) , GPR ( RB ) ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR",
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"CR",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"cmpi" => {
+"width" => 32,
+"syntax" => "cmpi BF, RA, SI",
+"dsyntax" => "cmpi ${BF}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 11,
+"BF" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var si = signExtend ( SI , 32 ) ;
+    setcrfield ( BF , GPR ( RA ) , si ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR",
+"GPR(RA)",
+],
+"outputs" => [
+"CR",
+],
+"helpers" => [
+"setcrfield",
+],
+},
+"crand" => {
+"width" => 32,
+"syntax" => "crand RT, RA, RB",
+"dsyntax" => "crand ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 19,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 257,
+},
+"action" => <<DATA
+{
+    if ( RB == 0 ) {
+        GPR ( RT ) = FOO2 . X ( RA ) ;
+    } else if ( RB == 1 ) {
+        GPR ( RT ) = FOO2 . Y ( RA ) ;
+    } else {
+        GPR ( RT ) = FOO2 . Z ( RA ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"FOO2/p",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"crandc" => {
+"width" => 32,
+"syntax" => "crandc RS, RA, RB",
+"dsyntax" => "crandc ${RS}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 19,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 129,
+},
+"action" => <<DATA
+{
+    if ( RB == 0 ) {
+        FOO2 . X ( RA ) = GPR ( RS ) ;
+    } else if ( RB == 1 ) {
+        FOO2 . Y ( RA ) = GPR ( RS ) ;
+    } else {
+        FOO2 . Z ( RA ) = GPR ( RS ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"FOO2/p",
+],
+},
+"dum1" => {
+"width" => 32,
+"doc" => <<DATA
+Dummy field to test enumerated fields.
+    
+DATA
+,
+"syntax" => "dum1F1 RA,RS",
+"dsyntax" => "dum1${F1} ${RA},${RS}",
+"fields" => {
+"OPCD" => 69,
+"RS" => "",
+"RA" => "",
+"F1" => "",
+},
+"action" => <<DATA
+{
+     ;
+}
+DATA
+,
+"disassemble" => 1,
+},
+"halt" => {
+"width" => 32,
+"syntax" => "halt",
+"dsyntax" => "halt",
+"fields" => {
+"OPCD" => 0,
+},
+"action" => <<DATA
+{
+    halt (  ) ;
+}
+DATA
+,
+"disassemble" => 1,
+},
+"li" => {
+"width" => 16,
+"syntax" => "li RT,SI32",
+"dsyntax" => "li ${RT},${SI32}",
+"alias_action" => <<DATA
+{
+     unsigned r = args [ 0 ] ;
+     uint64_t c = args [ 1 ] ;
+     InstrBundle b ;
+    if ( ( c & 0xffff ) == 0 ) {
+        b . push_back ( createInstr ( "addis" , r , 0 , ( c >> 16 ) ) ) ;
+    } else if ( ( c & 0xffff ) == c ) {
+        b . push_back ( createInstr ( "ori" , r , 0 , c ) ) ;
+    } else {
+        create_constant_loader ( b , r , c ) ;
+    }
+    return b ;
+}
+DATA
+,
+"disassemble" => 0,
+},
+"lwz" => {
+"width" => 32,
+"syntax" => "lwz RT, RA, D",
+"dsyntax" => "lwz ${RT}, ${RA}, ${D}",
+"fields" => {
+"OPCD" => 32,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + d ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"lwzx" => {
+"width" => 32,
+"syntax" => "lwzx RT, RA, RB",
+"dsyntax" => "lwzx ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 23,
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"mfspr" => {
+"width" => 32,
+"syntax" => "mfspr RT, SPRN",
+"dsyntax" => "mfspr ${RT}, ${SPRN}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"SPRN" => "",
+"XO" => 339,
+},
+"action" => <<DATA
+{
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    GPR ( RT ) = SPR ( SPRN ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"ESR?",
+"SPR(SPRN)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"raises_exception" => 1,
+},
+"mr" => {
+"width" => 32,
+"syntax" => "mr RA,RS",
+"dsyntax" => "mr ${RA},${RS}",
+"alias" => {
+"target" => "or",
+"sources" => [
+"source" => {
+"field" => "RS",
+"value" => "RS",
+},
+"source" => {
+"field" => "RB",
+"value" => "RS",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RA",
+"value" => "RA",
+},
+],
+},
+"parent_action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"mtspr" => {
+"width" => 32,
+"syntax" => "mtspr RS, SPRN",
+"dsyntax" => "mtspr ${RS}, ${SPRN}",
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"SPRN" => "",
+"XO" => 467,
+},
+"action" => <<DATA
+{
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    SPR ( SPRN ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"ESR?",
+"GPR(RS)",
+],
+"outputs" => [
+"SPR(SPRN)",
+],
+"raises_exception" => 1,
+},
+"mullw" => {
+"width" => 32,
+"syntax" => "mullw RT, RA, RB",
+"dsyntax" => "mullw ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 235,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"or" => {
+"width" => 32,
+"doc" => <<DATA
+The contents of **rS** are ORed with the contents of **rB** and the result is placed into **rA**.
+
+The simplified mnemonic **`mr RA,RS`_** demonstrates the use of the **or** instruction
+to move register contents.
+
+DATA
+,
+"syntax" => "or RS, RA, RB",
+"dsyntax" => "or ${RS}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 444,
+},
+"action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RB)",
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"ori" => {
+"width" => 32,
+"syntax" => "ori RS, RA, UI",
+"dsyntax" => "ori ${RS}, ${RA}, ${UI}",
+"fields" => {
+"OPCD" => 24,
+"RS" => "",
+"RA" => "",
+"UI" => "",
+},
+"action" => <<DATA
+{
+    GPR ( RA ) = GPR ( RS ) | UI ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"rfi" => {
+"width" => 32,
+"syntax" => "rfi RS, RA, RB",
+"dsyntax" => "rfi ${RS}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 19,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 50,
+},
+"action" => <<DATA
+{
+    MSR = SRR1 ;
+    NIA = SRR0 ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"SRR0",
+"SRR1",
+],
+"outputs" => [
+"MSR",
+"NIA",
+],
+},
+"rlwinm" => {
+"width" => 32,
+"syntax" => "rlwinm RS, RA, SH, MB, ME",
+"dsyntax" => "rlwinm ${RS}, ${RA}, ${SH}, ${MB}, ${ME}",
+"fields" => {
+"OPCD" => 21,
+"RS" => "",
+"RA" => "",
+"SH" => "",
+"MB" => "",
+"ME" => "",
+},
+"action" => <<DATA
+{
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( MB , ME ) ;
+    GPR ( RA ) = r & m ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+},
+"se_add" => {
+"width" => 16,
+"syntax" => "se_add RY, RX",
+"dsyntax" => "se_add ${RY}, ${RX}",
+"fields" => {
+"OPCD" => 1,
+"RY" => "",
+"RX" => "",
+},
+"alias" => {
+"target" => "add",
+"sources" => [
+"source" => {
+"field" => "RA",
+"value" => "RX",
+},
+"source" => {
+"field" => "RB",
+"value" => "RY",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "RT",
+"value" => "RX",
+},
+],
+},
+"parent_action" => <<DATA
+{
+    GPR ( RX ) = GPR ( RX ) + GPR ( RY ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RX)",
+"GPR(RY)",
+],
+"outputs" => [
+"GPR(RX)",
+],
+},
+"se_addi" => {
+"width" => 16,
+"syntax" => "se_addi RX,OIM5",
+"dsyntax" => "se_addi ${RX},${OIM5}",
+"fields" => {
+"OPCD7" => 16,
+"OIM5" => "",
+"RX" => "",
+},
+"action" => <<DATA
+{
+    rGPR ( RX ) = rGPR ( RX ) + OIM5 ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"rGPR(RX)",
+],
+"outputs" => [
+"rGPR(RX)",
+],
+},
+"stw" => {
+"width" => 32,
+"syntax" => "stw RS, RA, D",
+"dsyntax" => "stw ${RS}, ${RA}, ${D}",
+"fields" => {
+"OPCD" => 36,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var d = signExtend ( D , 32 ) ;
+     var addr = b + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"stwu" => {
+"width" => 32,
+"syntax" => "stwu RS, RA, D",
+"dsyntax" => "stwu ${RS}, ${RA}, ${D}",
+"fields" => {
+"OPCD" => 37,
+"RS" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var d = signExtend ( D , 32 ) ;
+     var addr = GPR ( RA ) + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+    GPR ( RA ) = addr ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RS)",
+],
+"outputs" => [
+"GPR(RA)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"stwx" => {
+"width" => 32,
+"syntax" => "stwx RS, RA, RB",
+"dsyntax" => "stwx ${RS}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RS" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 151,
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+"GPR(RS)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"tw" => {
+"width" => 32,
+"syntax" => "tw RA, RB",
+"dsyntax" => "tw ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RA" => "",
+"RB" => "",
+"XO" => 4,
+},
+"action" => <<DATA
+{
+    FOO1 = GPR ( RA ) ;
+    GPR ( RB ) = FOO1 . A + 1 ;
+    FOO1 . C = GPR ( RB + 1 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB + 1)",
+],
+"outputs" => [
+"FOO1",
+"GPR(RB)",
+],
+},
+"vaddubm" => {
+"width" => 32,
+"syntax" => "vaddubm RT, RA, RB",
+"dsyntax" => "vaddubm ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 4,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 0,
+},
+"action" => <<DATA
+{
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 8 ; ++ i ) {
+        VPR ( RT ) . B ( i ) = VPR ( RA ) . B ( i ) + VPR ( RB ) . B ( i ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"VPR(RA)/p",
+"VPR(RB)/p",
+],
+"outputs" => [
+"VPR(RT)/p",
+],
+},
+"vadduhm" => {
+"width" => 32,
+"syntax" => "vadduhm RT, RA, RB",
+"dsyntax" => "vadduhm ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 4,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 32,
+},
+"action" => <<DATA
+{
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 16 ; ++ i ) {
+        VPR ( RT ) . H ( i ) = VPR ( RA ) . H ( i ) + VPR ( RB ) . H ( i ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"VPR(RA)/p",
+"VPR(RB)/p",
+],
+"outputs" => [
+"VPR(RT)/p",
+],
+},
+"vadduwm" => {
+"width" => 32,
+"syntax" => "vadduwm RT, RA, RB",
+"dsyntax" => "vadduwm ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 4,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 64,
+},
+"action" => <<DATA
+{
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 32 ; ++ i ) {
+        VPR ( RT ) . W ( i ) = VPR ( RA ) . W ( i ) + VPR ( RB ) . W ( i ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"VPR(RA)/p",
+"VPR(RB)/p",
+],
+"outputs" => [
+"VPR(RT)/p",
+],
+},
+},
+"exceptions" => {
+"Program" => {
+"doc" => <<DATA
+The program interrupt occurs for various reasons, such as when an illegal
+instruction is encountered.
+
+DATA
+,
+"priority" => 0,
+"action" => <<DATA
+{
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR . get < 16 > ( 0 , 15 ) , IVOR6 . get < 16 > ( 16 , 31 ) ) ;
+}
+DATA
+,
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+{
+    ESR . set ( 4 ) ;
+    raiseException ( Program ) ;
+}
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+"helpers" => {
+"create_constant_loader" => {
+"action" => <<DATA
+ void create_constant_loader ( InstrBundle & b , unsigned r , uint64_t c ) {
+     unsigned upper = ( c >> 16 ) + ( ( c & 0x8000 ) ? 1 : 0 ) ;
+    b . push_back ( createInstr ( "addis" , r , 0 , upper ) ) ;
+    b . push_back ( createInstr ( "addi" , r , r , ( c & 0xffff ) ) ) ;
+}
+DATA
+,
+},
+"setCrField" => {
+"action" => <<DATA
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+DATA
+,
+"inputs" => [
+"CR",
+],
+"outputs" => [
+"CR",
+],
+},
+"setcrfield" => {
+"action" => <<DATA
+ void setcrfield ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+DATA
+,
+"inputs" => [
+"CR",
+],
+"outputs" => [
+"CR",
+],
+},
+},
+},
+},
+"systems" => {
+},
+};
+

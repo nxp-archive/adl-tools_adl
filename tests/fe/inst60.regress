@@ -1,0 +1,8 @@
+inst60.adl:48: warning: Item 'F6' was redefined.
+inst60.adl:33: warning:     Previous definition was here.
+inst60.adl:18: Complementary instruction fields have no bits.
+inst60.adl:24: Complementary fields have no width/size.
+inst60.adl:29: Non-prefix indexed field.
+inst60.adl:13: Pseudo instruction fields have no bits.
+inst60.adl:68: Non-pseudo type instruction.
+inst60.adl:63: More then one variable width field used.

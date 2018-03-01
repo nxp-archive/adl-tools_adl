@@ -1,0 +1,10 @@
+
+simload $env(srcdir)/setup-count64.dat
+simload $env(srcdir)/count64.elf setpc no-elf-pa
+traceon count64.out.dat 
+setpath :procs:powerpc0
+setbrk main
+go
+go
+traceoff
+quit

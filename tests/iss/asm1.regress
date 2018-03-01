@@ -1,0 +1,95 @@
+
+asm1.elf:     file format elf32-powerpc
+asm1.elf
+architecture: powerpc:common, flags 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+start address 0x01800074
+
+Program Header:
+    LOAD off    0x00000000 vaddr 0x01800000 paddr 0x01800000 align 2**16
+         filesz 0x00000150 memsz 0x00000150 flags r-x
+    LOAD off    0x00000150 vaddr 0x01810150 paddr 0x01810150 align 2**16
+         filesz 0x00000000 memsz 0x00000320 flags rw-
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000dc  01800074  01800074  00000074  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .bss          00000320  01810150  01810150  00000150  2**2
+                  ALLOC
+  2 .comment      00000028  00000000  00000000  00000150  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+01800074 l    d  .text	00000000 .text
+01810150 l    d  .bss	00000000 .bss
+00000000 l    d  .comment	00000000 .comment
+00000000 l    df *ABS*	00000000 sieve.c
+01800074 l       .text	00000000 gcc2_compiled.
+01810150 g     O .bss	00000190 sieve
+018102e0 g     O .bss	00000190 results
+01810470 g       *ABS*	00000000 __end
+01810150 g       *ABS*	00000000 __bss_start
+01800074 g     F .text	000000dc main
+01810150 g       *ABS*	00000000 _edata
+01810470 g       *ABS*	00000000 _end
+
+
+
+Disassembly of section .text:
+
+01800074 <main>:
+ 1800074:	38 e0 00 64 	li     r7,100
+ 1800078:	7c e9 03 a6 	mtctr  r7
+ 180007c:	3d 20 00 00 	lis    r9,0
+ 1800080:	3d 60 00 00 	lis    r11,0
+ 1800084:	39 29 10 00 	addi   r9,r9,4096
+ 1800088:	39 6b 20 00 	addi   r11,r11,8192
+ 180008c:	39 00 00 01 	li     r8,1
+ 1800090:	38 00 00 00 	li     r0,0
+ 1800094:	39 40 00 00 	li     r10,0
+ 1800098:	7d 0a 49 2e 	stwx   r8,r10,r9
+ 180009c:	7c 0a 59 2e 	stwx   r0,r10,r11
+ 18000a0:	39 4a 00 04 	addi   r10,r10,4
+ 18000a4:	42 00 ff f4 	bdnz+  1800098 <main+0x24>
+ 18000a8:	3d 20 00 00 	lis    r9,0
+ 18000ac:	39 29 10 00 	addi   r9,r9,4096
+ 18000b0:	7d 25 4b 78 	mr     r5,r9
+ 18000b4:	39 00 00 02 	li     r8,2
+ 18000b8:	55 07 10 3a 	rlwinm r7,r8,2,0,29
+ 18000bc:	7c 09 38 2e 	lwzx   r0,r9,r7
+ 18000c0:	38 c8 00 01 	addi   r6,r8,1
+ 18000c4:	2c 00 00 00 	cmpwi  r0,0
+ 18000c8:	41 82 00 34 	beq-   18000fc <main+0x88>
+ 18000cc:	7d 48 42 14 	add    r10,r8,r8
+ 18000d0:	2c 0a 00 63 	cmpwi  r10,99
+ 18000d4:	41 81 00 28 	bgt-   18000fc <main+0x88>
+ 18000d8:	55 40 10 3a 	rlwinm r0,r10,2,0,29
+ 18000dc:	7d 60 2a 14 	add    r11,r0,r5
+ 18000e0:	7c e0 3b 78 	mr     r0,r7
+ 18000e4:	38 e0 00 00 	li     r7,0
+ 18000e8:	7d 4a 42 14 	add    r10,r10,r8
+ 18000ec:	2c 0a 00 63 	cmpwi  r10,99
+ 18000f0:	90 eb 00 00 	stw    r7,0(r11)
+ 18000f4:	7d 6b 02 14 	add    r11,r11,r0
+ 18000f8:	40 81 ff f0 	ble+   18000e8 <main+0x74>
+ 18000fc:	7c c8 33 78 	mr     r8,r6
+ 1800100:	7c 08 41 d6 	mullw  r0,r8,r8
+ 1800104:	2c 00 00 63 	cmpwi  r0,99
+ 1800108:	40 81 ff b0 	ble+   18000b8 <main+0x44>
+ 180010c:	38 00 00 62 	li     r0,98
+ 1800110:	7c 09 03 a6 	mtctr  r0
+ 1800114:	3d 20 00 00 	lis    r9,0
+ 1800118:	39 29 10 00 	addi   r9,r9,4096
+ 180011c:	3d 60 00 00 	lis    r11,0
+ 1800120:	39 29 00 08 	addi   r9,r9,8
+ 1800124:	39 6b 20 00 	addi   r11,r11,8192
+ 1800128:	39 40 00 02 	li     r10,2
+ 180012c:	80 09 00 00 	lwz    r0,0(r9)
+ 1800130:	39 29 00 04 	addi   r9,r9,4
+ 1800134:	2c 00 00 00 	cmpwi  r0,0
+ 1800138:	41 82 00 0c 	beq-   1800144 <main+0xd0>
+ 180013c:	91 4b 00 00 	stw    r10,0(r11)
+ 1800140:	39 6b 00 04 	addi   r11,r11,4
+ 1800144:	39 4a 00 01 	addi   r10,r10,1
+ 1800148:	42 00 ff e4 	bdnz+  180012c <main+0xb8>
+ 180014c:	38 60 00 00 	li     r3,0

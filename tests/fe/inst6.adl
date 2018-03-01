@@ -1,0 +1,44 @@
+//
+// Simple test of instructions:  This should
+// fail because we reference a field that is
+// outside of the valid range for the instruction's
+// size.
+//
+define (arch=minippc) {
+
+
+
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instr=addi) {
+    width = 16;
+    attrs=(fxu,base);
+    fields=(OPCD(40),RT,RA,RB);
+    action = {};
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

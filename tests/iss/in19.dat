@@ -1,0 +1,30 @@
+#
+# Source file:  in19.dat
+#
+RD n=CR d=0x0577594e
+RD n=GPR i=10 d=0x1ef8a6af
+RD n=GPR i=5 d=0xe7fbceb3
+RD n=GPR i=8 d=0x7fffc7c5
+RD n=NIA d=0xca6498c0
+RD n=XER d=0xe0000017
+MD n=Mem ra=0x06f47560 d=0x047c126a
+MD n=Mem ra=0xca6498c0 d=0x7d0a2b2e	# # sthx 8,10,5 (EA=06f47562,RA=06f47562) #1
+
+CORE n=:P
+
+TRACE
+
+I id=1 ea=#
+M n=Mem t=ifetch ea=0xca6498c0
+INSTR op=0x7d0a2b2e	 asm="sthx d=8,10,5"
+# This will miscompare.
+MD n=Mem ra=0x06f47560 d=0x047dd7c5
+
+RESULTS
+
+RD n=CR d=0x0577594e
+RD n=GPR i=10 d=0x1ef8a6af
+RD n=GPR i=5 d=0xe7fbceb3
+RD n=GPR i=8 d=0x7fffc7c5
+RD n=XER d=0xe0000017
+MD n=Mem ra=0x06f47560 d=0x047cc7c5

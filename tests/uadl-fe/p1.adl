@@ -1,0 +1,34 @@
+
+define (core=P) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define (reg=Foo) {
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  // Dummy to test uadl-strict.
+  defmod(reg=Foo) {}
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+}

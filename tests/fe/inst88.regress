@@ -1,0 +1,140 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CR"
+  Width:  32
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D: [16,31] 
+    Display:  dec
+    Signed:  1
+        Signed immediate field for addressing.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SI: [16,31] [not used] 
+        Signed immediate field for arithmetic operations.
+    
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Fields:  OPCD(46) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var EA = b + D ;
+     int r = RT . uint32 (  ) ;
+    do {
+        GPR ( r ) = Mem ( EA , 4 ) ;
+        r = r + 1 ;
+        EA = EA + 4 ;
+    } while ( r <= 31 ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT . uint32 (  ),31) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  32
+  Fields:  OPCD(47) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var EA = b + D ;
+     int r = 31 ;
+    do {
+        GPR ( r ) = Mem ( EA , 4 ) ;
+        -- r ;
+        EA = EA + 4 ;
+    } while ( r >= RT ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(31,RT) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  32
+  Fields:  OPCD(48) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var EA = b + D ;
+     int r = RT . uint32 (  ) ;
+    while ( r <= 31 ) {
+        GPR ( r ++ ) = Mem ( EA , 4 ) ;
+        EA = EA + 4 ;
+    }
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT . uint32 (  ),31) 
+  Source Memories:  Mem 
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  32
+  Fields:  OPCD(49) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var EA = b + D ;
+    for (  int r = RT . uint32 (  ) ; r != 32 ; r += 1 ) {
+        GPR ( r ) = Mem ( EA , 4 ) ;
+        EA = EA + 4 ;
+    }
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT . uint32 (  ),31) 
+  Source Memories:  Mem 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    46(b8000000):  a
+    47(bc000000):  b
+    48(c0000000):  c
+    49(c4000000):  d
+-------------------------------
+

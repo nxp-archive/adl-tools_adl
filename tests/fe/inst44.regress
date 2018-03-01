@@ -1,0 +1,46 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D: [16,31] 
+    Display:  dec
+    Signed:  1
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR]
+  RS: [6,10] [regfile:  GPR]
+Instructions:
+  Name:  stb (rank: 100)
+  Width:  32
+  Fields:  OPCD(38) RS RA D
+  Action:  {
+    Mem ( ( ( ( RA == 0 ) ? 0 : GPR ( RA ) ) + D ) , 1 ) = GPR ( RS ) ;
+}
+  Source Registers:  GPR(RA) GPR(RS) 
+  Target Memories:  Mem 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    38(98000000):  stb
+-------------------------------
+

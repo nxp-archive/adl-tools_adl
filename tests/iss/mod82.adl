@@ -1,0 +1,108 @@
+//
+// Simple model for testing large reads and writes.
+//
+define (core = rubber) {
+  archs = rubber; 
+}
+
+define (arch = rubber) {
+
+  bit_endianness = little;
+     
+  define (reg = CIA) {
+    attrs = cia;
+  }
+
+  define (reg = NIA) {
+    attrs = nia;
+  }
+
+  define (reg = r1024) {
+    width = 1024;
+  }
+  
+  define (reg = r512) {
+    width = 512;
+  }  
+
+  define (reg = r256) {
+    width = 256;
+  }    
+  
+
+  define (instrfield=IMM) {
+    width = 10;
+    pseudo = true;
+  }
+
+  define (mem = dmem) {
+    instr_mem = false; 
+    size = 512; //512 bytes = 4096 bits = 128 words
+    addr_unit = 4; //4 bytes = 32 bits = 1 word  
+  }
+ 
+  define (instr = rd256) {  
+    width = 16;
+    fields = ((bits(15,12),1),(bits(9,0),IMM));
+    syntax = ("rd %f,256",IMM);   
+    action =  { 
+      r256 = dmem(IMM, 32);
+    };
+  }
+
+  define (instr = wr256) {  
+    width = 16;
+    fields = ((bits(15,12),2),(bits(9,0),IMM));
+    syntax = ("wr %f,256",IMM);   
+    action =  { 
+      dmem(IMM, 32) = r256;
+    };
+  }
+
+  
+  define (instr = rd512) {  
+    width = 16;
+    fields = ((bits(15,12),3),(bits(9,0),IMM));
+    syntax = ("rd %f,512",IMM);
+    action =  { 
+      r512 = dmem(IMM, 64);
+    };
+  }
+
+  define (instr = wr512) {  
+    width = 16;
+    fields = ((bits(15,12),4),(bits(9,0),IMM));
+    syntax = ("wr %f,512",IMM);
+    action =  { 
+      dmem(IMM, 64) = r512;
+    };
+  }
+
+
+  define (instr = rd1024) {  
+    width = 16;
+    fields = ((bits(15,12),5),(bits(9,0),IMM));
+    syntax = ("rd %f,1024",IMM);
+    action =  { 
+      r1024 = dmem(IMM, 128);
+    };
+  }
+
+  define (instr = wr1024) {  
+    width = 16;
+    fields = ((bits(15,12),6),(bits(9,0),IMM));
+    syntax = ("wr %f,1024",IMM);
+    action =  { 
+      dmem(IMM, 128) = r1024;
+    };
+  }
+
+
+  define (instr = done) { 
+    width = 8;  
+    fields = ((bits(7,0),0));
+    syntax = ("done");
+    action =  { halt(); };
+  }  
+   
+}

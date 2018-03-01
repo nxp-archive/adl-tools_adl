@@ -1,0 +1,134 @@
+#
+# Make sure that we properly log/don't-log branches when we have a write hook on
+# nia.
+#
+= asm
+	
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	b L1          # Will branch.
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+L1:
+	beq L2        # Shouldn't branch.
+	addi r3,r3,1
+	addi r3,r3,1
+	addi r3,r3,1
+L2:
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x48000010	#	b L1          # Will branch.
+MD n=Mem ra=0x00000010 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000014 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000018 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000001c d=0x41820010	#	beq L2        # Shouldn't branch.
+MD n=Mem ra=0x00000020 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000024 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00000028 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x0000002c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000030 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000034 d=0x38840001	#	addi r4,r4,1
+# </GEN>
+CORE n=:P
+
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=NIA d=0x00000004
+R n=GPR i=1 d=0x0000000000000001 m=0x00000000ffffffff
+R n=GPR i=1 d=0x0000000000000001
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=NIA d=0x00000008
+R n=GPR i=1 d=0x0000000000000002 m=0x00000000ffffffff
+R n=GPR i=1 d=0x0000000000000002
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210001
+INSTR op=0x38210001					asm="addi 1,1,0x1"
+R n=NIA d=0x0000000c
+R n=GPR i=1 d=0x0000000000000003 m=0x00000000ffffffff
+R n=GPR i=1 d=0x0000000000000003
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x48000010
+INSTR op=0x48000010					asm="b 0x000000000000001c"
+R n=NIA d=0x00000010
+R n=NIA d=0x0000001c
+B taken=1 ea=0x1c
+
+I ea=0x1c id=5
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x41820010
+INSTR op=0x41820010					asm="bc 0xc,0x2,0x000000000000002c"
+R n=NIA d=0x00000020
+
+I ea=0x20 id=6
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x38630001
+INSTR op=0x38630001					asm="addi 3,3,0x1"
+R n=NIA d=0x00000024
+R n=GPR i=3 d=0x0000000000000001 m=0x00000000ffffffff
+R n=GPR i=3 d=0x0000000000000001
+
+I ea=0x24 id=7
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38630001
+INSTR op=0x38630001					asm="addi 3,3,0x1"
+R n=NIA d=0x00000028
+R n=GPR i=3 d=0x0000000000000002 m=0x00000000ffffffff
+R n=GPR i=3 d=0x0000000000000002
+
+I ea=0x28 id=8
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x38630001
+INSTR op=0x38630001					asm="addi 3,3,0x1"
+R n=NIA d=0x0000002c
+R n=GPR i=3 d=0x0000000000000003 m=0x00000000ffffffff
+R n=GPR i=3 d=0x0000000000000003
+
+I ea=0x2c id=9
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38840001
+INSTR op=0x38840001					asm="addi 4,4,0x1"
+R n=NIA d=0x00000030
+R n=GPR i=4 d=0x0000000000000001 m=0x00000000ffffffff
+R n=GPR i=4 d=0x0000000000000001
+
+I ea=0x30 id=10
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x38840001
+INSTR op=0x38840001					asm="addi 4,4,0x1"
+R n=NIA d=0x00000034
+R n=GPR i=4 d=0x0000000000000002 m=0x00000000ffffffff
+R n=GPR i=4 d=0x0000000000000002
+
+I ea=0x34 id=11
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x38840001
+INSTR op=0x38840001					asm="addi 4,4,0x1"
+R n=NIA d=0x00000038
+R n=GPR i=4 d=0x0000000000000003 m=0x00000000ffffffff
+R n=GPR i=4 d=0x0000000000000003
+
+I ea=0x38 id=12
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x00000000
+INSTR op=0x00					asm="halt "
+R n=NIA d=0x00000039
+
+RESULTS
+
+RD n=GPR i=0 d=0x0000000000000000
+RD n=GPR i=1 d=0x0000000000000003
+RD n=GPR i=2 d=0x0000000000000000
+RD n=GPR i=3 d=0x0000000000000003
+RD n=GPR i=4 d=0x0000000000000003
+RD n=GPR i=5 d=0x0000000000000000

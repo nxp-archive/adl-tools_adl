@@ -1,0 +1,46 @@
+#
+# Some testing of logging of reads and partial register accesses.
+#
+#
+= asm
+
+  addic. r1,0,0x1000
+  add    r2,r1,r1
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x34201000	#	addic. r1,0,0x1000
+MD n=Mem ra=0x00000004 d=0x7C410A14	#	add    r2,r1,r1
+# </GEN>
+CORE n=:P
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=0x1000
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x34201000
+INSTR op=0x34201000					asm="addic. 1,0,0x1000"
+R a=read n=GPR i=0 d=0x00000000
+R n=GPR i=1 d=0x00001000
+R a=read n=GPR i=1 d=0x00001000
+R n=CR d=0x40000000 m=0xf0000000
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c410a14
+INSTR op=0x7c410a14					asm="add 2,1,1"
+R a=read n=GPR i=1 d=0x00001000
+R a=read n=GPR i=1 d=0x00001000
+R n=GPR i=2 d=0x00002000
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0x1000
+RD n=GPR i=2 d=0x2000

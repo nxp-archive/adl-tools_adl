@@ -1,0 +1,124 @@
+//
+// Tests to make sure parm instruction fields are correctly defined.
+// 
+//
+
+define (arch = MiniPPC) {
+
+  //
+  // Registers.
+  //
+
+  blk = agu;
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (reloc=R1) {
+    value = 3;
+  } 
+
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=XP) {
+    bits = (21,30);
+    parm = true;	
+  }
+  define (instrfield=X1) {
+    parm = true;
+  }
+
+  define (instrfield=X2) {
+    parm = true;
+    width = 3;
+    assembler = true;	
+  }
+
+  define (instrfield=X3) {
+    parm = true;
+    width = 3;
+    valid_ranges = (1,3);	
+  }
+  define (instrfield=X4) {
+    parm = true;
+    width = 3;
+    valid_masks = (0xFFFF0000,7);	
+  }
+  define (instrfield=X5) {
+    parm = true;
+    width = 3;
+    table = ((0,1),(2,3));
+  }
+  define (instrfield=X6) {
+    parm = true;
+    width = 3;
+    blk = agu;
+  }
+  define (instrfield=X7) {
+    parm = true;
+    prefix = true;
+    width = 3;
+
+  }
+  define (instrfield=X8) {
+    parm = true;
+    is_signed = true;
+    width = 3;
+  }
+  define (instrfield=X9) {
+    parm = true;
+    overlay = true;
+    width = 3;
+  }
+  define (instrfield=X10) {
+    parm = true;
+    is_inverted = true;
+    width = 3;
+  }
+
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),XO(266));
+    action = {
+    };
+  }
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

@@ -1,0 +1,181 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "RF1"
+  Size:  32
+  Width:  32
+  Attributes:  simple1 intlist(1, 3, 6, 45)
+  -------------------------------
+  Name:  "RF2"
+  Size:  32
+  Width:  32
+  Attributes:  str2 int1 int2
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+MMU:
+  Attributes:  intlist(12, 13, 26, 45)
+
+  Interleaved fetch :  1
+  Interleaved reads :  1
+  Interleaved writes:  1
+
+  Enable:  {
+    return true ;
+}
+
+  Lookup:  TlbCam
+    Type:  both
+    Attributes:  str2('d')  int1 int2(33) strlist('d', 'a')
+    Priority:  0
+    Size:  1 bytes.
+    Page Number Shift:  0
+    Real-page Field:  x
+    Min Page Size:  1 (bytes)
+    Array:  16 entries, fully associative.
+    Way Fields:
+      x:  2 bits.
+        Reset value:  2
+
+    Tests:
+
+      AddrComp ( x )
+  -------------------------------
+-------------------------------
+Caches:
+  L1i (level 1, unified)
+    Size    :  32768 bytes
+    Linesize:  256 bytes
+    Sets    :  32 
+    Ways    :  4 
+    Attributes:  str1 str2('d')  int1 int2(33) strlist('d', 'dd') intlist(12, 13, 26, 45)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RT: [6,10] 
+    Attributes:  str2 int2
+  XO: [30,31] 
+Subinstructions:
+Name:  addOp
+Syntax:  "add":  
+Fields:  OPCD(10)
+Action:  {
+     int x = 1 + 2 ;
+}
+-------------------------------
+Name:  eaRegDirect
+Syntax:  "%f":   RT
+Fields:  RT XO(0)
+Action:  {
+     int indir = 0 ;
+}
+-------------------------------
+Name:  eaRegIndirect
+Syntax:  "i %f":   RT
+Fields:  RT XO(1)
+Action:  {
+     int dif = 0 ;
+}
+-------------------------------
+Name:  subOp
+Syntax:  "sub":  
+Fields:  OPCD(11)
+Action:  {
+     int x = 1 + 2 ;
+}
+-------------------------------
+Instructions:
+  Name:  a (rank: 100)
+  Width:  16
+  Attributes:  simple1 str1('d')  int1(6)
+  Fields:  OPCD(14) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  add (rank: 0)
+  Width:  32
+  Syntax:  "add %f":   RT
+  Attributes:  str2
+  Fields:  OPCD(10) RT XO(0)
+  Action:  {
+    addOp ;
+    eaRegDirect ;
+}
+  -------------------------------
+  Name:  addi (rank: 0)
+  Width:  32
+  Syntax:  "add i %f":   RT
+  Attributes:  str1 str2
+  Fields:  OPCD(10) RT XO(1)
+  Action:  {
+    addOp ;
+    eaRegIndirect ;
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  16
+  Attributes:  simple2 str1('ad')  int1(45)
+  Fields:  OPCD(31) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  16
+  Attributes:  simple1 str1('d')  int1 strlist
+  Fields:  OPCD(32) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  16
+  Attributes:  simple2 str1 str2('d')  int1(6)
+  Fields:  OPCD(33) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  sub (rank: 0)
+  Width:  32
+  Syntax:  "sub %f":   RT
+  Fields:  OPCD(11) RT XO(0)
+  Action:  {
+    subOp ;
+    eaRegDirect ;
+}
+  -------------------------------
+  Name:  subi (rank: 0)
+  Width:  32
+  Syntax:  "sub i %f":   RT
+  Fields:  OPCD(11) RT XO(1)
+  Action:  {
+    subOp ;
+    eaRegIndirect ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    10(28000000):      Mask:  0x3
+      0(0):  add
+      1(1):  addi
+    11(2c000000):      Mask:  0x3
+      0(0):  sub
+      1(1):  subi
+    14(38000000):  a
+    31(7c000000):  b
+    32(80000000):  c
+    33(84000000):  d
+-------------------------------
+

@@ -1,0 +1,47 @@
+#
+# For this example, decorations are defined as follows:
+# 0:  No decoration.
+# 1:  Clear memory.
+# 2:  Increment memory.
+# 3:  Set memory to all ones.
+#
+
+proc handle_decoration {type ra value} {
+	set d [reg Decoration]
+	set valid 0
+	if {$d == 1} {
+		set valid 1
+		set nv 0
+	} elseif {$d == 2} {
+		set valid 1
+		set nv [expr $value + 1]
+	} elseif {$d == 3} {
+		set valid 1
+		set nv 0xffffffff
+	}
+	if {$valid == 1} {
+		#puts "Store:  New value at $ra:  $nv"
+		tracemsg 1 [format "Decorated $type of $nv at 0x%x" $ra]
+		setmem $ra $nv
+	}
+}
+
+proc on_write {id name pre seq ea ra value} {
+	if { !$pre } {
+		handle_decoration "store" $ra $value
+	}
+}
+
+proc on_read {id name pre seq ea ra value} {
+	if { $pre } {
+		handle_decoration "load" $ra $value
+	}
+}
+
+
+setlogcmd mem_write on_write Mem 0x1000 0x1fff
+setlogcmd mem_read  on_read  Mem 0x1000 0x1fff
+
+go
+
+quit

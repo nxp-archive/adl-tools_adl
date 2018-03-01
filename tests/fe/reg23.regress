@@ -1,0 +1,4 @@
+reg23.adl:7: Register name must be a valid C identifier.
+reg23.adl:10: Register name must be a valid C identifier.
+reg23.adl:13: Register-file name must be a valid C identifier.
+reg23.adl:16: Register-file name must be a valid C identifier.

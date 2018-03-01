@@ -1,0 +1,75 @@
+//
+// Tests of helper template functions.
+//
+
+// A sample declaration
+const int RegSize = 64;
+
+define (arch=Base) {
+
+  template <class T> class Foo { };
+
+  template <typename T> void stuff1(T x) {
+    int i = a;
+  }
+
+  template <typename A,typename B> void stuff2(A x,B y) {
+    int i = 10;
+  }
+
+  attrs = (foo,stuff);
+
+  define (reg=CR) {};
+
+  define (regfile=sprs) {
+    size = 1024;
+    attrs = foo;
+  }
+}
+
+define (arch=minippc) {
+
+  attrs = gpr;
+
+  template <typename T> void stuff1(T x,T y) {
+    a = x; 
+    b = c + y; 
+  }
+
+  define (regfile=gprs) {
+    size = 32;
+    attrs = (foo,stuff);
+  }
+
+  define (reg=a) {
+    """ This is a sample register!. """;
+    width = 32;
+    attrs = (foo,cia,nia);
+  }
+
+  define (reg=b) {
+    width = 32;
+  }
+
+  define (reg=c) {
+    width = 32;
+  }
+
+  define (reg=d) {
+    width = 32;
+    attrs = stuff;
+  }
+
+  defmod(regfile=sprs) {
+    define (entry=20) { reg=a; };
+    define (entry=21) { reg=b; };
+    define (entry=22) { reg=c; };
+    define (entry=50) { reg=d; };
+  }
+
+}
+
+define (core=P) {
+  archs = (Base,minippc);
+}
+

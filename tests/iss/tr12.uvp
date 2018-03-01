@@ -1,0 +1,779 @@
+//
+// This contains multiple errors in each thread (against trorig.uvp).  We're checking to make sure
+// that we will report all errors and not just stop at the first thread.
+//
+format=huvp;
+//------------------------------------------------------------------------------
+test => eip1 {
+  num     = 1001;
+  ver     = "Raptor release: Name: r-2006Aug24  raptor (rnumber v1_25_2  rutil v1_33_4, rml v1_19_2, rvc v1_18_2, ruvp v1_10_1 built on  cde-tx32-ldt217 Linux cde-tx32-ldt217 2.4.21-37.EL #1 Wed Sep 7 13:35:21 EDT 2005 i686 unknown)";
+  genseed = 0x4f432eac;
+  seed    = ">)QC\\W?66P/\"+ Q P&C(SL[ #@$P>A3@!0RCXPR486& TW\\L!HN)$'1L.-/,   /E++4H"
+  " P";
+  genver  = {
+    {"/_TOOLS_/dist/fs-raptor-/r-2006Aug24/i686-pc-linux2.4/lib/RaptorDefaultTest.so","1.347" }, 
+    {"powerpc_base/PowerPC.so","1.373" }, 
+    {"powerpc_embedded/PpcEmbedded.so","1.348" }, 
+    {"units/ppc64/ppc64.so","1.3" }, 
+    {"units/floatbase/floatbase.so","1.338" }, 
+    {"units/fpu/fpu.so","1.340" }, 
+    {"units/fpu64/fpu64.so","1.341" }, 
+    {"units/altivec/altivec.so","1.343" }, 
+    {"altair/altair.so","1.3" }, 
+    {"powerpc_base/PowerPC.so","1.373" }, 
+    {"powerpc_embedded/PpcEmbedded.so","1.348" }, 
+    {"units/ppc64/ppc64.so","1.3" }, 
+    {"units/floatbase/floatbase.so","1.338" }, 
+    {"units/fpu/fpu.so","1.340" }, 
+    {"units/fpu64/fpu64.so","1.341" }, 
+    {"units/altivec/altivec.so","1.343" }, 
+    {"altair/altair.so","1.3" }, 
+    {"powerpc_base/PowerPC.so","1.373" }, 
+    {"powerpc_embedded/PpcEmbedded.so","1.348" }, 
+    {"units/ppc64/ppc64.so","1.3" }, 
+    {"units/floatbase/floatbase.so","1.338" }, 
+    {"units/fpu/fpu.so","1.340" }, 
+    {"units/fpu64/fpu64.so","1.341" }, 
+    {"units/altivec/altivec.so","1.343" }, 
+    {"altair/altair.so","1.3" }, 
+    {"/_TOOLS_/dist/fs-raptor-/r-2006Aug24/i686-pc-linux2.4/lib/new_powersim/libAltairPwrSim.so","0.0" }, 
+    {"powersim version string ","v6_3_2" }, 
+    {"Options","--cl=altair_mt.so eip1.rmf " }, 
+    {"/temp/mreese/work/adl/tests/designs/eip1.rmf","Crc:  0x79b2f062" }, 
+  };
+
+  altair => powerpc {
+    I : R {nm="AVPID0"; d=0x00000000;};
+    //   VPID:0
+    I : R {nm="EDBCR0"; d=0x40000000;};
+    //   DNH_EN:1 EDM:0
+    I : R {nm="EDBCR1"; d=0x000000a7;};
+    //   E:1 G:1 I:0 IJER:1 IJMODE:1 L:0 M:0 W:1
+    I : R {nm="HDBCR2"; d=0x00000000;};
+    //   BIU_CODTQ_SIZE:0 BIU_DIN_GAT_DIS:0 BIU_DRQ_SIZE:0 BIU_SINT_DIS:0
+    //   BIU_SNP_PIPE_DIS:0 BIU_STDTQ_SIZE:0 BIU_TLBMARK_2X:0
+    //   EIP_DRLTMISSL2STALLLS_AR:0 EIP_DRLTMISSL2STALLLS_EN:0 EIP_DRLTMISSL2_DIS:0
+    //   EIP_DRLTMISSL2_MAX:0 EIP_DRLTMISS_EN:0 EIP_DRLTMISS_MAX:0
+    //   EIP_IRLTL2MISSCB_EN:0 EIP_IRLTL2MISSIB_DIS:0 EIP_MDOOM_DIS:0
+    //   EIP_TIMEOUT_AR:0 EIP_TIMEOUT_BITSEL:0 EIP_TIMEOUT_EN:0 YIELD_DIS:0
+    I : R {nm="HID0"; d=0x00000000;};
+    //   DOZE:0 DPM:0 EDPM:0 EIEC:0 EIEIO_EN:0 EMCP:0 LWSYNC_EN:0 NAP:0 NOPDST:0
+    //   NOPTI:0 NOPTST:0 PIPE_EN:0 SEL_TBCLK:0 SFR:0 SGE:0 SLEEP:0 TBEN:0 TH_EN:0
+    I : R {nm="L1CSR0"; d=0x00000000;};
+    //   DCBZ32:0 DCE:1 DCFI:0 DCLFC:0 DCLO:0 DCLOA:0 DCPE:0 DCPI:0 DCUL:0
+    I : R {nm="L1CSR1"; d=0x00000000;};
+    //   ICE:0 ICFI:0 ICLFC:0 ICLO:0 ICLOA:0 ICPE:0 ICPI:0 ICUL:0
+    I : R {nm="L2CSR0"; d=0x00000000;};
+    //   L2DO:0 L2E:0 L2FI:0 L2FL:0 L2IO:0 L2LFC:0 L2LO:0 L2LOA:0 L2PE:0 L2REP:0
+    //   L2WP:0
+    I : R {nm="NIA0"; d=0xb6363614d472e43c;};
+    //   NIA:2d8d8d85351cb90f
+    I : R {nm="NIA1"; d=0xd3ed1f9d557b528c;};
+    //   NIA:34fb47e7555ed4a3
+    I : R {nm="NIA2"; d=0x6d68fb080aba7aa8;};
+    //   NIA:1b5a3ec202ae9eaa
+    I : R {nm="PVR"; d=0x80300010;};
+    //   Revision:10 Version:8030
+    I : R {nm="SBSR0"; d=0x00000000;};
+    //   CHKSTOP:0 DE_HALT:0 DNHM:0 DNH_HALT:0 EXT_HALT:0 EXT_STOP:0 HALTED:0
+    //   JHALT:0 JSTOP:0 PM_HALT:0 PM_STOP:0 RUNN_HALT:0 RUNN_STOP:0
+    I : R {nm="SPTP"; d=0x80000001;};
+    //   SPTBIT:1 TBSEL:1
+    I : R {nm="TEN0"; d=0x00000001;};
+    //   E:1
+    I : R {nm="TEN1"; d=0x00000001;};
+    //   E:1
+    I : R {nm="TEN2"; d=0x00000001;};
+    //   E:1
+    I : R {nm="TPRI0"; d=0x00000003;};
+    //   PRI:3
+    I : R {nm="TPRI1"; d=0x00000003;};
+    //   PRI:3
+    I : R {nm="TPRI2"; d=0x00000003;};
+    //   PRI:3
+    I : R {nm="VPIA0"; d=0x00000000;};
+    I : T {n="TLBCAM"; t="D"; way=0; ep=0x147f74efb8000000;
+            d={{"EPN",0x051fdd3bee0000},{"IPROT",0x0},{"L",0x0},{"NV",0x0},{"RPN",0x00000000000000},
+              {"SIZE",0x8},{"SR",0x1},{"SW",0x0},{"SX",0x1},{"TID",0x1539},
+              {"TS",0x0},{"UA",0x1},{"UR",0x1},{"UW",0x1},{"UX",0x0},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="D"; way=0; ep=0x22bd8ea8fa5b6000;
+            d={{"EPN",0x08af63aa3e96d8},{"L",0x1},{"NV",0x5},{"RPN",0x0000000002c000},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x1},{"SX",0x0},{"TID",0xc0},{"TS",0x0},
+              {"UA",0x6},{"UR",0x1},{"UW",0x0},{"UX",0x1},{"V",0x1},{"WIMGE",0x2},};};
+    I : T {n="TLBCAM"; t="D"; way=2; ep=0x53468fcd9cf18000;
+            d={{"EPN",0x14d1a3f3673c60},{"IPROT",0x0},{"L",0x0},{"NV",0x0},{"RPN",0x00000000014000},
+              {"SIZE",0x2},{"SR",0x1},{"SW",0x1},{"SX",0x0},{"TID",0x3334},
+              {"TS",0x0},{"UA",0xd},{"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="I"; way=0; ep=0x6d68fb080aba7000;
+            d={{"EPN",0x1b5a3ec202ae9c},{"L",0x1},{"NV",0x4},{"RPN",0x00000283080610},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x0},{"SX",0x1},{"TID",0x0},{"TS",0x0},
+              {"UA",0x7},{"UR",0x0},{"UW",0x1},{"UX",0x1},{"V",0x1},{"WIMGE",0x8},};};
+    I : T {n="TLB4K"; t="I"; way=0; ep=0xb6363614d472e000;
+            d={{"EPN",0x2d8d8d85351cb8},{"L",0x0},{"NV",0x5},{"RPN",0x00000154616ebc},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x0},{"SX",0x1},{"TID",0x1539},
+              {"TS",0x0},{"UA",0x7},{"UR",0x0},{"UW",0x0},{"UX",0x0},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="D"; way=0; ep=0xb67780a985a03000;
+            d={{"EPN",0x2d9de02a61680c},{"L",0x0},{"NV",0x0},{"RPN",0x00000000020000},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x1},{"SX",0x0},{"TID",0x1539},
+              {"TS",0x0},{"UA",0x0},{"UR",0x0},{"UW",0x1},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="D"; way=0; ep=0xbaa5de82f7ffa000;
+            d={{"EPN",0x2ea977a0bdffe8},{"L",0x1},{"NV",0x7},{"RPN",0x00000000018000},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x0},{"SX",0x1},{"TID",0x1539},
+              {"TS",0x0},{"UA",0xb},{"UR",0x1},{"UW",0x1},{"UX",0x0},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="D"; way=0; ep=0xbaa5de82f7fff000;
+            d={{"EPN",0x2ea977a0bdfffc},{"L",0x1},{"NV",0x3},{"RPN",0x00000000024000},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x0},{"SX",0x0},{"TID",0x1539},
+              {"TS",0x0},{"UA",0x3},{"UR",0x1},{"UW",0x1},{"UX",0x0},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLBCAM"; t="D"; way=1; ep=0xbaa5de82f8000000;
+            d={{"EPN",0x2ea977a0be0000},{"IPROT",0x0},{"L",0x0},{"NV",0x0},{"RPN",0x00000000010000},
+              {"SIZE",0x5},{"SR",0x1},{"SW",0x0},{"SX",0x1},{"TID",0x1539},
+              {"TS",0x0},{"UA",0x0},{"UR",0x0},{"UW",0x1},{"UX",0x0},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="D"; way=0; ep=0xce184646d3254000;
+            d={{"EPN",0x33861191b4c950},{"L",0x0},{"NV",0x7},{"RPN",0x00000000004000},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x0},{"SX",0x1},{"TID",0x1539},
+              {"TS",0x0},{"UA",0xf},{"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="I"; way=0; ep=0xd3ed1f9d557b5000;
+            d={{"EPN",0x34fb47e7555ed4},{"L",0x0},{"NV",0x5},{"RPN",0x0000025d174f20},
+              {"SIZE",0x1},{"SR",0x0},{"SW",0x0},{"SX",0x1},{"TID",0x17c3},
+              {"TS",0x0},{"UA",0x6},{"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLB4K"; t="D"; way=0; ep=0xff68751fe7149000;
+            d={{"EPN",0x3fda1d47f9c524},{"L",0x0},{"NV",0x7},{"RPN",0x00000000028000},
+              {"SIZE",0x1},{"SR",0x1},{"SW",0x0},{"SX",0x0},{"TID",0x29e3},
+              {"TS",0x0},{"UA",0x1},{"UR",0x1},{"UW",0x0},{"UX",0x0},{"V",0x1},
+              {"WIMGE",0x0},};};
+    I : T {n="TLBCAM"; t="D"; way=3; ep=0x3ced87a000000000;
+            d={{"EPN",0x0f3b61e8000000},{"IPROT",0x0},{"L",0x1},{"NV",0x0},{"RPN",0x00000000000000},
+              {"SIZE",0xd},{"SR",0x1},{"SW",0x0},{"SX",0x0},{"TID",0x1539},
+              {"TS",0x0},{"UA",0xf},{"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x0},};};
+    // no initial tlb entries in memory owned by thread t0
+    // no initial tlb entries in memory owned by thread t1
+    // no initial tlb entries in memory owned by thread t2
+    thread => t0 {
+      I : R {nm="CR"; d=0xf6c58ebe;};
+      //   CR0:f CR1:6 CR2:c CR3:5 CR4:8 CR5:e CR6:b CR7:e EQ:1 GT:1 LT:1 SO:1
+      I : R {nm="DAC1"; d=0x127d16630b65377a;};
+      I : R {nm="DAC2"; d=0xc86e6411eba65305;};
+      I : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      I : R {nm="DBCR1"; d=0xdf8007c0;};
+      //   IAC12M:2 IAC1ER:1 IAC1US:3 IAC2ER:3 IAC2US:3 IAC34M:3 IAC3ER:0 IAC3US:0
+      //   IAC4ER:3 IAC4US:1
+      I : R {nm="DBCR2"; d=0x29000000;};
+      //   DAC12M:0 DAC1ER:2 DAC1US:0 DAC2ER:1 DAC2US:2 DACLINK:0
+      I : R {nm="DBSR"; d=0xfade8000;};
+      //   BRT:0 DAC1R:1 DAC1W:1 DAC2R:1 DAC2W:0 IAC1:1 IAC2:1 IAC3:0 IAC4:1 ICMP:1
+      //   IDE:1 IRPT:1 MRR:3 RET:1 TRAP:0 UDE:1
+      I : R {nm="DEAR"; d=0x2df698c321cfb055;};
+      I : R {nm="DSRR0"; d=0x0549ad8f80293184;};
+      I : R {nm="DSRR1"; d=0x255fe38b;};
+      I : R {nm="EPLC"; d=0xc00035aa;};
+      //   EAS:1 EPID:35aa EPR:1
+      I : R {nm="EPSC"; d=0x4000020e;};
+      //   EAS:1 EPID:20e EPR:0
+      I : R {nm="ESR"; d=0x05930000;};
+      //   AP:0 AV:0 BO:1 DLK:1 EPID:0 FP:1 PIE:1 PIL:0 PPR:1 PTR:0 PUO:0 ST:1
+      I : R {nm="FPSCR"; d=0xb203e717;};
+      //   C:1 FE:1 FEX:0 FG:1 FI:1 FL:1 FPCC:e FPRF:1e FR:0 FU:0 FX:1 NI:1 OE:0 OX:1
+      //   RN:3 UE:0 UX:0 VE:0 VX:1 VXCVI:1 VXIDI:0 VXIMZ:0 VXISI:0 VXSNAN:0 VXSOFT:1
+      //   VXSQRT:1 VXVC:0 VXZDZ:0 XE:0 XX:1 ZE:1 ZX:0
+      I : R {nm="GPR11"; d=0xbaa5de82f7ffd243;};
+      I : R {nm="GPR12"; d=0x53468fcd9cf1771b;};
+      I : R {nm="GPR14"; d=0x3ced87a0070070c2;};
+      I : R {nm="GPR16"; d=0x6402000064020000;};
+      I : R {nm="GPR17"; d=0x41fc0dffd04b640b;};
+      I : R {nm="GPR19"; d=0x147f74efbaffff10;};
+      I : R {nm="GPR23"; d=0x0000000000000000;};
+      I : R {nm="GPR24"; d=0x147f74efba007b64;};
+      I : R {nm="GPR26"; d=0xd3a3e24ec7fdab0b;};
+      I : R {nm="GPR3"; d=0xbaa5de82f80029d2;};
+      I : R {nm="GPR30"; d=0xce184646d3258cb2;};
+      I : R {nm="GPR31"; d=0xb67780a9859fb47b;};
+      I : R {nm="GPR7"; d=0xd768b9fc265ecf48;};
+      I : R {nm="IAC1"; d=0x51b146c61f34bb4c;};
+      //   ADDR:146c51b187cd2ed3
+      I : R {nm="IAC2"; d=0x1ff900ba5682bc5c;};
+      //   ADDR:07fe402e95a0af17
+      I : R {nm="IAR"; d=0xb6363614d472e43c;};
+      I : R {nm="IVOCR"; d=0x000000a1;};
+      //   IVPR0:a IVOE:1
+      I : R {nm="MAS0"; d=0x00150006;};
+      //   ESEL:15 NVPR4K:6 TLBSEL:0
+      I : R {nm="MAS1"; d=0xf2801a00;};
+      //   IPROT:1 TID:3280 TS:1 TSIZE:a V:1
+      I : R {nm="MAS2"; d=0x889b87fa84cac01b;};
+      //   E:1 EPN:889b87fa84cac G:1 I:1 L:0 M:0 W:1
+      I : R {nm="MAS3"; d=0xb4a55191;};
+      //   RPN:b4a55 SR:1 SW:0 SX:1 U0:0 U1:1 U2:1 U3:0 UR:0 UW:0 UX:0
+      I : R {nm="MAS4"; d=0x00030a3f;};
+      //   ED:1 GD:1 ID:1 LD:1 MD:1 TIDDSEL:3 TLBSELD:0 TSIZED:a WD:1
+      I : R {nm="MAS6"; d=0x15220000;};
+      //   SAS:0 SPID0:1522
+      I : R {nm="MAS7"; d=0x00000e92;};
+      //   RPN:e92
+      I : R {nm="MSR"; d=0xe2002000;};
+      //   CE:0 CM:1 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 ICM:1 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   TSE:1 UCLE:0 VEC:1 WE:0
+      I : R {nm="PID0"; d=0x00001539;};
+      //   PID:1539
+      I : R {nm="PID1"; d=0x00003334;};
+      //   PID:3334
+      I : R {nm="PID2"; d=0x00002b19;};
+      //   PID:2b19
+      I : R {nm="TCR"; d=0xd341e000;};
+      //   ARE:1 DIE:0 FIE:0 FP:3 FPEXT:f WIE:0 WP:3 WPEXT:0 WRC:1
+      I : R {nm="TEN"; d=0x00000001;};
+      //   E:1
+      I : R {nm="TPRI"; d=0x00000003;};
+      //   PRI:3
+      I : R {nm="TSR"; d=0xa8000000;};
+      //   DIS:1 ENW:1 FIS:0 WIS:0 WRS:2
+      I : R {nm="VPIR"; d=0x00000000;};
+      //   ID:0
+      I : R {nm="VSCR"; d=0x00010001;};
+      //   NJ:1 SAT:1
+      I : R {nm="XER"; d=0xc0000010;};
+      //   CA:0 CNT:10 OV:1 SO:1
+      I : D {ea=0xce184646d3254000; ra=0x0000000001000000; d=0x7745a34e; ta=0xf;};
+      I : D {ea=0x147f74efba000000; ra=0x0000000002000000; d=0xc5dd8c45; ta=0x1;};
+      I : D {ea=0x147f74efbb000000; ra=0x0000000003000000; d=0xce4c1342; ta=0x1;};
+      I : D {ea=0xbaa5de82f8000000; ra=0x0000000004000000; d=0x69aa0569; ta=0x0;};
+      I : D {ea=0x53468fcd9cf18000; ra=0x0000000005000000; d=0xa081250e; ta=0xd;};
+      I : D {ea=0xbaa5de82f7ffa000; ra=0x0000000006000000; d=0xf66db48f; ta=0x20b;};
+      I : D {ea=0x3ced87a007000000; ra=0x0000000007000000; d=0xda5fa8dc; ta=0x20f;};
+      I : D {ea=0xb67780a985a03000; ra=0x0000000008000000; d=0xd176468e; ta=0x0;};
+      I : D {ea=0xbaa5de82f7fff000; ra=0x0000000009000000; d=0x11feffc7; ta=0x203;};
+      E : I {asm="lwz 26,30,0xb34e (EA=0xce184646d3254000,RA=0x0000000001000000)"; c=1;
+                     ea=0xb6363614d472e43c; ra=0x0000055185baf43c; d=0x835eb34e; op=0x835eb34e; ta=0x7;
+                     tea=0xce184646d3254000; tra=0x0000000001000000; 
+                     ir={[ t=>"reg", rn=>"GPR26", d=>0x000000007745a34e ],
+                         [ t=>"load", ra=>0x0000000001000000, d=>0x7745a34e, ta=>0xf ],};};
+      E : I {asm="lwz 26,24,0x849c (EA=0x147f74efba000000,RA=0x0000000002000000)"; c=2;
+                     ea=0xb6363614d472e440; ra=0x0000055185baf440; d=0x8358849c; op=0x8358849c; ta=0x7;
+                     tea=0x147f74efba000000; tra=0x0000000002000000; 
+                     ir={[ t=>"reg", rn=>"GPR26", d=>0x00000000c5dd8c45 ],
+                         [ t=>"load", ra=>0x0000000002000000, d=>0xc5dd8c45, ta=>0x1 ],};};
+      E : I {asm="lwz 17,19,0xf0 (EA=0x147f74efbb000000,RA=0x0000000003000000)"; c=3;
+                     ea=0xb6363614d472e444; ra=0x0000055185baf444; d=0x823300f0; op=0x823300f0; ta=0x7;
+                     tea=0x147f74efbb000000; tra=0x0000000003000000; 
+                     ir={[ t=>"reg", rn=>"GPR17", d=>0x00000000ce4c1342 ],
+                         [ t=>"load", ra=>0x0000000003000000, d=>0xce4c1342, ta=>0x1 ],};};
+      E : I {asm="lwz 7,11,0x2dbd (EA=0xbaa5de82f8000000,RA=0x0000000004000000)"; c=4;
+                     ea=0xb6363614d472e448; ra=0x0000055185baf448; d=0x80eb2dbd; op=0x80eb2dbd; ta=0x7;
+                     tea=0xbaa5de82f8000000; tra=0x0000000004000000; 
+                     ir={[ t=>"reg", rn=>"GPR7", d=>0x0000000069aa0569 ],
+                         [ t=>"load", ra=>0x0000000004000000, d=>0x69aa0569, ta=>0x0 ],};};
+      E : I {asm="lwz 17,12,0x8e5 (EA=0x53468fcd9cf18000,RA=0x0000000005000000)"; c=5;
+                     ea=0xb6363614d472e44c; ra=0x0000055185baf44c; d=0x822c08e5; op=0x822c08e5; ta=0x7;
+                     tea=0x53468fcd9cf18000; tra=0x0000000005000000; 
+                     ir={[ t=>"reg", rn=>"GPR17", d=>0x00000000a081250f ],
+                         [ t=>"load", ra=>0x0000000005000000, d=>0xa081250e, ta=>0xd ],};};
+      E : I {asm="lwz 11,11,0xcdbd (EA=0xbaa5de82f7ffa000,RA=0x0000000006000000)"; c=6;
+                     ea=0xb6363614d472e450; ra=0x0000055185baf450; d=0x816bcdbd; op=0x816bcdbd; ta=0x7;
+                     tea=0xbaa5de82f7ffa000; tra=0x0000000006000000; 
+                     ir={[ t=>"reg", rn=>"GPR11", d=>0x00000000f66db48f ],
+                         [ t=>"load", ra=>0x0000000006000000, d=>0xf66db48f, ta=>0x20b ],};};
+      E : I {asm="lwz 17,14,0x8f3e (EA=0x3ced87a007000000,RA=0x0000000007000000)"; c=7;
+                     ea=0xb6363614d472e454; ra=0x0000055185baf454; d=0x822e8f3e; op=0x822e8f3e; ta=0x7;
+                     tea=0x3ced87a007000000; tra=0x0000000007000000; 
+                     ir={[ t=>"reg", rn=>"GPR17", d=>0x00000000da5fa8dc ],
+                         [ t=>"load", ra=>0x0000000007000000, d=>0xda5fa8dc, ta=>0x20f ],};};
+      E : I {asm="lwz 31,31,0x7b85 (EA=0xb67780a985a03000,RA=0x0000000008000000)"; c=8;
+                     ea=0xb6363614d472e458; ra=0x0000055185baf458; d=0x83ff7b85; op=0x83ff7b85; ta=0x7;
+                     tea=0xb67780a985a03000; tra=0x0000000008000000; 
+                     ir={[ t=>"reg", rn=>"GPR31", d=>0x00000000d176468f ],
+                         [ t=>"load", ra=>0x0000000008000000, d=>0xd176468e, ta=>0x0 ],};};
+      E : I {asm="addis 16,0,0x0"; c=9; t="X"; 
+                     ea=0xb6363614d472e45c; ra=0x0000055185baf45c; d=0x3e000000; op=0x3e000000; ta=0x7;
+                     ir={[ t=>"reg", rn=>"GPR16", d=>0x0000000000000000 ],};};
+      E : I {asm="oris 16,16,0x6402"; c=10; t="X"; 
+                     ea=0xb6363614d472e460; ra=0x0000055185baf460; d=0x66106402; op=0x66106402; ta=0x7;
+                     ir={[ t=>"reg", rn=>"GPR16", d=>0x0000000064020000 ],};};
+      E : I {asm="mtspr HDBCR2,16"; c=11;
+                     ea=0xb6363614d472e464; ra=0x0000055185baf464; d=0x7e12f3a6; op=0x7e12f3a6; ta=0x7;
+                     ir={[ t=>"reg", rn=>"HDBCR2", d=>0x64020000 ],};};
+      E : I {asm="lwz 3,3,0xc62e (EA=0xbaa5de82f7fff000,RA=0x0000000009000000)"; c=12;
+                     ea=0xb6363614d472e468; ra=0x0000055185baf468; d=0x8063c62e; op=0x8063c62e; ta=0x7;
+                     tea=0xbaa5de82f7fff000; tra=0x0000000009000000; 
+                     ir={[ t=>"reg", rn=>"GPR3", d=>0x0000000011feffc7 ],
+                         [ t=>"load", ra=>0x0000000009000000, d=>0x11feffc7, ta=>0x203 ],};};
+      E : I {asm="mttmr TEN,23"; c=13;
+                     ea=0xb6363614d472e46c; ra=0x0000055185baf46c; d=0x7ee10b8e; op=0x7ee10b8e; ta=0x7;
+                     ir={[ t=>"reg", rn=>"TEN", d=>0x00000000 ],};};
+      R : RES {ea=0xb6363614d472e470; ra=0x0000055185baf470; ta=0x7;};
+      R : R {nm="CR"; d=0xf6c58ebe;};
+      //   CR0:f CR1:6 CR2:c CR3:5 CR4:8 CR5:e CR6:b CR7:e EQ:1 GT:1 LT:1 SO:1
+      R : R {nm="DAC1"; d=0x127d16630b65377a;};
+      R : R {nm="DAC2"; d=0xc86e6411eba65305;};
+      R : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      R : R {nm="DBCR1"; d=0xdf8007c0;};
+      //   IAC12M:2 IAC1ER:1 IAC1US:3 IAC2ER:3 IAC2US:3 IAC34M:3 IAC3ER:0 IAC3US:0
+      //   IAC4ER:3 IAC4US:1
+      R : R {nm="DBCR2"; d=0x29000000;};
+      //   DAC12M:0 DAC1ER:2 DAC1US:0 DAC2ER:1 DAC2US:2 DACLINK:0
+      R : R {nm="DBSR"; d=0xfade8000;};
+      //   BRT:0 DAC1R:1 DAC1W:1 DAC2R:1 DAC2W:0 IAC1:1 IAC2:1 IAC3:0 IAC4:1 ICMP:1
+      //   IDE:1 IRPT:1 MRR:3 RET:1 TRAP:0 UDE:1
+      R : R {nm="DEAR"; d=0x2df698c321cfb055;};
+      R : R {nm="DSRR0"; d=0x0549ad8f80293184;};
+      R : R {nm="DSRR1"; d=0x255fe38b;};
+      R : R {nm="EPLC"; d=0xc00035aa;};
+      //   EAS:1 EPID:35aa EPR:1
+      R : R {nm="EPSC"; d=0x4000020e;};
+      //   EAS:1 EPID:20e EPR:0
+      R : R {nm="ESR"; d=0x05930000;};
+      //   AP:0 AV:0 BO:1 DLK:1 EPID:0 FP:1 PIE:1 PIL:0 PPR:1 PTR:0 PUO:0 ST:1
+      R : R {nm="FPSCR"; d=0xb203e717;};
+      //   C:1 FE:1 FEX:0 FG:1 FI:1 FL:1 FPCC:e FPRF:1e FR:0 FU:0 FX:1 NI:1 OE:0 OX:1
+      //   RN:3 UE:0 UX:0 VE:0 VX:1 VXCVI:1 VXIDI:0 VXIMZ:0 VXISI:0 VXSNAN:0 VXSOFT:1
+      //   VXSQRT:1 VXVC:0 VXZDZ:0 XE:0 XX:1 ZE:1 ZX:0
+      R : R {nm="GPR11"; d=0x00000000f66db48f;};
+      R : R {nm="GPR12"; d=0x53468fcd9cf1771b;};
+      R : R {nm="GPR14"; d=0x3ced87a0070070c2;};
+      R : R {nm="GPR16"; d=0x0000000064020000;};
+      R : R {nm="GPR17"; d=0x00000000da5fa8dc;};
+      R : R {nm="GPR19"; d=0x147f74efbaffff10;};
+      R : R {nm="GPR23"; d=0x0000000000000000;};
+      R : R {nm="GPR24"; d=0x147f74efba007b64;};
+      R : R {nm="GPR26"; d=0x00000000c5dd8c45;};
+      R : R {nm="GPR3"; d=0x0000000011feffc7;};
+      R : R {nm="GPR30"; d=0xce184646d3258cb2;};
+      R : R {nm="GPR31"; d=0x00000000d176468e;};
+      R : R {nm="GPR7"; d=0x0000000069aa0569;};
+      R : R {nm="IAC1"; d=0x51b146c61f34bb4c;};
+      //   ADDR:146c51b187cd2ed3
+      R : R {nm="IAC2"; d=0x1ff900ba5682bc5c;};
+      //   ADDR:07fe402e95a0af17
+      R : R {nm="IAR"; d=0xb6363614d472e470;};
+      R : R {nm="IVOCR"; d=0x000000a1;};
+      //   IVPR0:a IVOE:1
+      R : R {nm="MAS0"; d=0x00150006;};
+      //   ESEL:15 NVPR4K:6 TLBSEL:0
+      R : R {nm="MAS1"; d=0xf2801a00;};
+      //   IPROT:1 TID:3280 TS:1 TSIZE:a V:1
+      R : R {nm="MAS2"; d=0x889b87fa84cac01b;};
+      //   E:1 EPN:889b87fa84cac G:1 I:1 L:0 M:0 W:1
+      R : R {nm="MAS3"; d=0xb4a55191;};
+      //   RPN:b4a55 SR:1 SW:0 SX:1 U0:0 U1:1 U2:1 U3:0 UR:0 UW:0 UX:0
+      R : R {nm="MAS4"; d=0x00030a3f;};
+      //   ED:1 GD:1 ID:1 LD:1 MD:1 TIDDSEL:3 TLBSELD:0 TSIZED:a WD:1
+      R : R {nm="MAS6"; d=0x15220000;};
+      //   SAS:0 SPID0:1522
+      R : R {nm="MAS7"; d=0x00000e92;};
+      //   RPN:e92
+      R : R {nm="MSR"; d=0xe2002000;};
+      //   CE:0 CM:1 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 ICM:1 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   TSE:1 UCLE:0 VEC:1 WE:0
+      R : R {nm="PID0"; d=0x00001539;};
+      //   PID:1539
+      R : R {nm="PID1"; d=0x00003334;};
+      //   PID:3334
+      R : R {nm="PID2"; d=0x00002b19;};
+      //   PID:2b19
+      R : R {nm="TCR"; d=0xd341e000;};
+      //   ARE:1 DIE:0 FIE:0 FP:3 FPEXT:f WIE:0 WP:3 WPEXT:0 WRC:1
+      R : R {nm="TEN"; d=0x00000000;};
+      //   E:0
+      R : R {nm="TPRI"; d=0x00000003;};
+      //   PRI:3
+      R : R {nm="TSR"; d=0xa8000000;};
+      //   DIS:1 ENW:1 FIS:0 WIS:0 WRS:2
+      R : R {nm="VPIR"; d=0x00000000;};
+      //   ID:0
+      R : R {nm="VSCR"; d=0x00010001;};
+      //   NJ:1 SAT:1
+      R : R {nm="XER"; d=0xc0000010;};
+      //   CA:0 CNT:10 OV:1 SO:1
+      R : D {ea=0xce184646d3254000; ra=0x0000000001000000; d=0x7745a34e; ta=0xf;};
+      R : D {ea=0x147f74efba000000; ra=0x0000000002000000; d=0xc5dd8c45; ta=0x1;};
+      R : D {ea=0x147f74efbb000000; ra=0x0000000003000000; d=0xce4c1342; ta=0x1;};
+      R : D {ea=0xbaa5de82f8000000; ra=0x0000000004000000; d=0x69aa0569; ta=0x0;};
+      R : D {ea=0x53468fcd9cf18000; ra=0x0000000005000000; d=0xa081250e; ta=0xd;};
+      R : D {ea=0xbaa5de82f7ffa000; ra=0x0000000006000000; d=0xf66db48f; ta=0x20b;};
+      R : D {ea=0x3ced87a007000000; ra=0x0000000007000000; d=0xda5fa8dc; ta=0x20f;};
+      R : D {ea=0xb67780a985a03000; ra=0x0000000008000000; d=0xd176468e; ta=0x0;};
+      R : D {ea=0xbaa5de82f7fff000; ra=0x0000000009000000; d=0x11feffc7; ta=0x203;};
+    } // powerpc::t0
+    thread => t1 {
+      I : R {nm="CR"; d=0x66a67d4c;};
+      //   CR0:6 CR1:6 CR2:a CR3:6 CR4:7 CR5:d CR6:4 CR7:c EQ:1 GT:1 LT:0 SO:0
+      I : R {nm="DAC1"; d=0xa67517a20468c8bd;};
+      I : R {nm="DAC2"; d=0x96ccb2d76c3b97be;};
+      I : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      I : R {nm="DBCR1"; d=0xa200f240;};
+      //   IAC12M:0 IAC1ER:2 IAC1US:2 IAC2ER:2 IAC2US:0 IAC34M:1 IAC3ER:3 IAC3US:3
+      //   IAC4ER:2 IAC4US:0
+      I : R {nm="DBCR2"; d=0x5b000000;};
+      //   DAC12M:0 DAC1ER:1 DAC1US:1 DAC2ER:3 DAC2US:2 DACLINK:0
+      I : R {nm="DBSR"; d=0x0d078000;};
+      //   BRT:1 DAC1R:0 DAC1W:1 DAC2R:1 DAC2W:1 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:1
+      //   IDE:0 IRPT:0 MRR:0 RET:1 TRAP:1 UDE:0
+      I : R {nm="DEAR"; d=0x37106f87dd48623e;};
+      I : R {nm="DSRR0"; d=0x8113f13a02b71ac9;};
+      I : R {nm="DSRR1"; d=0x89dd8e5a;};
+      I : R {nm="EPLC"; d=0x00003be1;};
+      //   EAS:0 EPID:3be1 EPR:0
+      I : R {nm="EPSC"; d=0xc0002e10;};
+      //   EAS:1 EPID:2e10 EPR:1
+      I : R {nm="ESR"; d=0x0f100000;};
+      //   AP:0 AV:0 BO:0 DLK:1 EPID:0 FP:1 PIE:0 PIL:1 PPR:1 PTR:1 PUO:0 ST:0
+      I : R {nm="FPSCR"; d=0xa5c67046;};
+      //   C:0 FE:1 FEX:0 FG:1 FI:1 FL:0 FPCC:7 FPRF:7 FR:1 FU:1 FX:1 NI:1 OE:1 OX:0
+      //   RN:2 UE:0 UX:0 VE:0 VX:1 VXCVI:0 VXIDI:1 VXIMZ:0 VXISI:1 VXSNAN:1 VXSOFT:0
+      //   VXSQRT:0 VXVC:0 VXZDZ:0 XE:0 XX:0 ZE:0 ZX:1
+      I : R {nm="GPR23"; d=0xff68751fe71496d7;};
+      I : R {nm="GPR31"; d=0x0000000000000000;};
+      I : R {nm="IAC1"; d=0x35d2d42d00fe38b0;};
+      //   ADDR:0d74b50b403f8e2c
+      I : R {nm="IAC2"; d=0x60a73bd3fa4042d0;};
+      //   ADDR:1829cef4fe9010b4
+      I : R {nm="IAR"; d=0xd3ed1f9d557b528c;};
+      I : R {nm="IVOCR"; d=0x00000091;};
+      //   IVPR0:9 IVOE:1
+      I : R {nm="MAS0"; d=0x00340003;};
+      //   ESEL:34 NVPR4K:3 TLBSEL:0
+      I : R {nm="MAS1"; d=0x67fb0500;};
+      //   IPROT:1 TID:27fb TS:0 TSIZE:5 V:0
+      I : R {nm="MAS2"; d=0x973793c48f26b017;};
+      //   E:1 EPN:973793c48f26b G:1 I:0 L:0 M:1 W:1
+      I : R {nm="MAS3"; d=0x08ce4060;};
+      //   RPN:8ce4 SR:0 SW:0 SX:0 U0:0 U1:0 U2:0 U3:1 UR:0 UW:0 UX:1
+      I : R {nm="MAS4"; d=0x00030107;};
+      //   ED:1 GD:1 ID:0 LD:0 MD:1 TIDDSEL:3 TLBSELD:0 TSIZED:1 WD:0
+      I : R {nm="MAS6"; d=0x084e0001;};
+      //   SAS:1 SPID0:84e
+      I : R {nm="MAS7"; d=0x00000c9e;};
+      //   RPN:c9e
+      I : R {nm="MSR"; d=0xe2002000;};
+      //   CE:0 CM:1 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 ICM:1 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   TSE:1 UCLE:0 VEC:1 WE:0
+      I : R {nm="PID0"; d=0x000029e3;};
+      //   PID:29e3
+      I : R {nm="PID1"; d=0x000017c3;};
+      //   PID:17c3
+      I : R {nm="PID2"; d=0x000004d4;};
+      //   PID:4d4
+      I : R {nm="TCR"; d=0xe31bc000;};
+      //   ARE:0 DIE:0 FIE:0 FP:3 FPEXT:e WIE:0 WP:3 WPEXT:d WRC:2
+      I : R {nm="TEN"; d=0x00000001;};
+      //   E:1
+      I : R {nm="TPRI"; d=0x00000003;};
+      //   PRI:3
+      I : R {nm="TSR"; d=0x8c000000;};
+      //   DIS:1 ENW:1 FIS:1 WIS:0 WRS:0
+      I : R {nm="VPIR"; d=0x00000001;};
+      //   ID:1
+      I : R {nm="VSCR"; d=0x00000001;};
+      //   NJ:0 SAT:1
+      I : R {nm="XER"; d=0x4000001b;};
+      //   CA:0 CNT:1b OV:1 SO:0
+      I : D {ea=0xff68751fe7149000; ra=0x000000000a000000; d=0xef52a0cd; ta=0x1;};
+      E : I {asm="lhz 23,23,0xf929 (EA=0xff68751fe7149000,RA=0x000000000a000000)"; c=1;
+                     ea=0xd3ed1f9d557b528c; ra=0x000009745d3c828c; d=0xa2f7f929; op=0xa2f7f929; ta=0x6;
+                     tea=0xff68751fe7149000; tra=0x000000000a000000; 
+                     ir={[ t=>"reg", rn=>"GPR23", d=>0x000000000000ef52 ],
+                         [ t=>"load", ra=>0x000000000a000000, d=>0xef52a0cf, ta=>0x1 ],};};
+      E : I {asm="mttmr TEN,31"; c=2;
+                     ea=0xd3ed1f9d557b5290; ra=0x000009745d3c8290; d=0x7fe10b8e; op=0x7fe10b8e; ta=0x6;
+                     ir={[ t=>"reg", rn=>"TEN", d=>0x00000000 ],};};
+      R : RES {ea=0xd3ed1f9d557b5294; ra=0x000009745d3c8294; ta=0x6;};
+      R : R {nm="CR"; d=0x66a67d4c;};
+      //   CR0:6 CR1:6 CR2:a CR3:6 CR4:7 CR5:d CR6:4 CR7:c EQ:1 GT:1 LT:0 SO:0
+      R : R {nm="DAC1"; d=0xa67517a20468c8bd;};
+      R : R {nm="DAC2"; d=0x96ccb2d76c3b97be;};
+      R : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      R : R {nm="DBCR1"; d=0xa200f240;};
+      //   IAC12M:0 IAC1ER:2 IAC1US:2 IAC2ER:2 IAC2US:0 IAC34M:1 IAC3ER:3 IAC3US:3
+      //   IAC4ER:2 IAC4US:0
+      R : R {nm="DBCR2"; d=0x5b000000;};
+      //   DAC12M:0 DAC1ER:1 DAC1US:1 DAC2ER:3 DAC2US:2 DACLINK:0
+      R : R {nm="DBSR"; d=0x0d078000;};
+      //   BRT:1 DAC1R:0 DAC1W:1 DAC2R:1 DAC2W:1 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:1
+      //   IDE:0 IRPT:0 MRR:0 RET:1 TRAP:1 UDE:0
+      R : R {nm="DEAR"; d=0x37106f87dd48623e;};
+      R : R {nm="DSRR0"; d=0x8113f13a02b71ac9;};
+      R : R {nm="DSRR1"; d=0x89dd8e5a;};
+      R : R {nm="EPLC"; d=0x00003be1;};
+      //   EAS:0 EPID:3be1 EPR:0
+      R : R {nm="EPSC"; d=0xc0002e10;};
+      //   EAS:1 EPID:2e10 EPR:1
+      R : R {nm="ESR"; d=0x0f100000;};
+      //   AP:0 AV:0 BO:0 DLK:1 EPID:0 FP:1 PIE:0 PIL:1 PPR:1 PTR:1 PUO:0 ST:0
+      R : R {nm="FPSCR"; d=0xa5c67046;};
+      //   C:0 FE:1 FEX:0 FG:1 FI:1 FL:0 FPCC:7 FPRF:7 FR:1 FU:1 FX:1 NI:1 OE:1 OX:0
+      //   RN:2 UE:0 UX:0 VE:0 VX:1 VXCVI:0 VXIDI:1 VXIMZ:0 VXISI:1 VXSNAN:1 VXSOFT:0
+      //   VXSQRT:0 VXVC:0 VXZDZ:0 XE:0 XX:0 ZE:0 ZX:1
+      R : R {nm="GPR23"; d=0x000000000000ef52;};
+      R : R {nm="GPR31"; d=0x0000000000000000;};
+      R : R {nm="IAC1"; d=0x35d2d42d00fe38b0;};
+      //   ADDR:0d74b50b403f8e2c
+      R : R {nm="IAC2"; d=0x60a73bd3fa4042d0;};
+      //   ADDR:1829cef4fe9010b4
+      R : R {nm="IAR"; d=0xd3ed1f9d557b5294;};
+      R : R {nm="IVOCR"; d=0x00000091;};
+      //   IVPR0:9 IVOE:1
+      R : R {nm="MAS0"; d=0x00340003;};
+      //   ESEL:34 NVPR4K:3 TLBSEL:0
+      R : R {nm="MAS1"; d=0x67fb0500;};
+      //   IPROT:1 TID:27fb TS:0 TSIZE:5 V:0
+      R : R {nm="MAS2"; d=0x973793c48f26b017;};
+      //   E:1 EPN:973793c48f26b G:1 I:0 L:0 M:1 W:1
+      R : R {nm="MAS3"; d=0x08ce4060;};
+      //   RPN:8ce4 SR:0 SW:0 SX:0 U0:0 U1:0 U2:0 U3:1 UR:0 UW:0 UX:1
+      R : R {nm="MAS4"; d=0x00030107;};
+      //   ED:1 GD:1 ID:0 LD:0 MD:1 TIDDSEL:3 TLBSELD:0 TSIZED:1 WD:0
+      R : R {nm="MAS6"; d=0x084e0001;};
+      //   SAS:1 SPID0:84e
+      R : R {nm="MAS7"; d=0x00000c9e;};
+      //   RPN:c9e
+      R : R {nm="MSR"; d=0xe2002000;};
+      //   CE:0 CM:1 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 ICM:1 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   TSE:1 UCLE:0 VEC:1 WE:0
+      R : R {nm="PID0"; d=0x000029e3;};
+      //   PID:29e3
+      R : R {nm="PID1"; d=0x000017c3;};
+      //   PID:17c3
+      R : R {nm="PID2"; d=0x000004d4;};
+      //   PID:4d4
+      R : R {nm="TCR"; d=0xe31bc000;};
+      //   ARE:0 DIE:0 FIE:0 FP:3 FPEXT:e WIE:0 WP:3 WPEXT:d WRC:2
+      R : R {nm="TEN"; d=0x00000000;};
+      //   E:0
+      R : R {nm="TPRI"; d=0x00000003;};
+      //   PRI:3
+      R : R {nm="TSR"; d=0x8c000000;};
+      //   DIS:1 ENW:1 FIS:1 WIS:0 WRS:0
+      R : R {nm="VPIR"; d=0x00000001;};
+      //   ID:1
+      R : R {nm="VSCR"; d=0x00000001;};
+      //   NJ:0 SAT:1
+      R : R {nm="XER"; d=0x4000001b;};
+      //   CA:0 CNT:1b OV:1 SO:0
+      R : D {ea=0xff68751fe7149000; ra=0x000000000a000000; d=0xef52a0cd; ta=0x1;};
+    } // powerpc::t1
+    thread => t2 {
+      I : R {nm="CR"; d=0x1f41fa46;};
+      //   CR0:1 CR1:f CR2:4 CR3:1 CR4:f CR5:a CR6:4 CR7:6 EQ:0 GT:0 LT:0 SO:1
+      I : R {nm="DAC1"; d=0x41e3934015f57d61;};
+      I : R {nm="DAC2"; d=0x81c6c3939dff1ab2;};
+      I : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      I : R {nm="DBCR1"; d=0x2bc00f80;};
+      //   IAC12M:3 IAC1ER:2 IAC1US:0 IAC2ER:3 IAC2US:2 IAC34M:2 IAC3ER:0 IAC3US:0
+      //   IAC4ER:3 IAC4US:3
+      I : R {nm="DBCR2"; d=0x23800000;};
+      //   DAC12M:2 DAC1ER:2 DAC1US:0 DAC2ER:3 DAC2US:0 DACLINK:0
+      I : R {nm="DBSR"; d=0x087d8000;};
+      //   BRT:0 DAC1R:1 DAC1W:1 DAC2R:0 DAC2W:1 IAC1:0 IAC2:1 IAC3:1 IAC4:1 ICMP:1
+      //   IDE:0 IRPT:0 MRR:0 RET:1 TRAP:0 UDE:0
+      I : R {nm="DEAR"; d=0xb8eee341beda599b;};
+      I : R {nm="DSRR0"; d=0x843444cba4de90a1;};
+      I : R {nm="DSRR1"; d=0x1d9914d7;};
+      I : R {nm="EPLC"; d=0x800000e6;};
+      //   EAS:0 EPID:e6 EPR:1
+      I : R {nm="EPSC"; d=0xc0001518;};
+      //   EAS:1 EPID:1518 EPR:1
+      I : R {nm="ESR"; d=0x082a00c0;};
+      //   AP:1 AV:1 BO:1 DLK:2 EPID:1 FP:0 PIE:0 PIL:1 PPR:0 PTR:0 PUO:0 ST:0
+      I : R {nm="FPSCR"; d=0xa9742754;};
+      //   C:0 FE:1 FEX:0 FG:0 FI:0 FL:0 FPCC:2 FPRF:2 FR:1 FU:0 FX:1 NI:1 OE:1 OX:0
+      //   RN:0 UE:0 UX:1 VE:0 VX:1 VXCVI:1 VXIDI:1 VXIMZ:1 VXISI:0 VXSNAN:1 VXSOFT:1
+      //   VXSQRT:1 VXVC:0 VXZDZ:1 XE:0 XX:0 ZE:1 ZX:0
+      I : R {nm="GPR17"; d=0x22bd8ea8fa5afe69;};
+      I : R {nm="GPR25"; d=0x0000000000000000;};
+      I : R {nm="IAC1"; d=0x4b30684c628a5374;};
+      //   ADDR:12cc1a1318a294dd
+      I : R {nm="IAC2"; d=0x8aee92a4432dc91c;};
+      //   ADDR:22bba4a910cb7247
+      I : R {nm="IAR"; d=0x6d68fb080aba7aa8;};
+      I : R {nm="IVOCR"; d=0x00000070;};
+      //   IVPR0:7 IVOE:0
+      I : R {nm="MAS0"; d=0x00120006;};
+      //   ESEL:12 NVPR4K:6 TLBSEL:0
+      I : R {nm="MAS1"; d=0xa9b40c00;};
+      //   IPROT:0 TID:29b4 TS:0 TSIZE:c V:1
+      I : R {nm="MAS2"; d=0x2f299669f2235038;};
+      //   E:0 EPN:2f299669f2235 G:0 I:1 L:1 M:0 W:1
+      I : R {nm="MAS3"; d=0xded0b383;};
+      //   RPN:ded0b SR:1 SW:0 SX:0 U0:1 U1:1 U2:1 U3:0 UR:1 UW:0 UX:0
+      I : R {nm="MAS4"; d=0x00000326;};
+      //   ED:0 GD:1 ID:0 LD:1 MD:1 TIDDSEL:0 TLBSELD:0 TSIZED:3 WD:0
+      I : R {nm="MAS6"; d=0x29f00000;};
+      //   SAS:0 SPID0:29f0
+      I : R {nm="MAS7"; d=0x0000030c;};
+      //   RPN:30c
+      I : R {nm="MSR"; d=0xe2002000;};
+      //   CE:0 CM:1 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 ICM:1 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   TSE:1 UCLE:0 VEC:1 WE:0
+      I : R {nm="PID0"; d=0x000000c0;};
+      //   PID:c0
+      I : R {nm="PID1"; d=0x0000362e;};
+      //   PID:362e
+      I : R {nm="PID2"; d=0x00001ac8;};
+      //   PID:1ac8
+      I : R {nm="TCR"; d=0x110e4000;};
+      //   ARE:0 DIE:0 FIE:0 FP:1 FPEXT:2 WIE:0 WP:0 WPEXT:7 WRC:1
+      I : R {nm="TEN"; d=0x00000001;};
+      //   E:1
+      I : R {nm="TPRI"; d=0x00000003;};
+      //   PRI:3
+      I : R {nm="TSR"; d=0x6c000000;};
+      //   DIS:1 ENW:0 FIS:1 WIS:1 WRS:2
+      I : R {nm="VPIR"; d=0x00000002;};
+      //   ID:2
+      I : R {nm="VSCR"; d=0x00010000;};
+      //   NJ:1 SAT:0
+      I : R {nm="XER"; d=0x60000011;};
+      //   CA:1 CNT:11 OV:1 SO:0
+      I : D {ea=0x22bd8ea8fa5b6000; ra=0x000000000b000000; d=0x73cd8830; ta=0x226;};
+      E : I {asm="lbz 17,17,0x6197 (EA=0x22bd8ea8fa5b6000,RA=0x000000000b000000)"; c=1;
+                     ea=0x6d68fb080aba7aa8; ra=0x00000a0c20184aa8; d=0x8a316197; op=0x8a316197; ta=0x287;
+                     tea=0x22bd8ea8fa5b6000; tra=0x000000000b000000; 
+                     ir={[ t=>"reg", rn=>"GPR17", d=>0x0000000000000073 ],
+                         [ t=>"load", ra=>0x000000000b000000, d=>0x73cd8830, ta=>0x226 ],};};
+      E : I {asm="mttmr TEN,25"; c=2;
+                     ea=0x6d68fb080aba7aac; ra=0x00000a0c20184aac; d=0x7f210b8e; op=0x7f210b8e; ta=0x287;
+                     ir={[ t=>"reg", rn=>"TEN", d=>0x0000000f ],};};
+      R : RES {ea=0x6d68fb080aba7ab0; ra=0x00000a0c20184ab0; ta=0x287;};
+      R : R {nm="CR"; d=0x1f41fa46;};
+      //   CR0:1 CR1:f CR2:4 CR3:1 CR4:f CR5:a CR6:4 CR7:6 EQ:0 GT:0 LT:0 SO:1
+      R : R {nm="DAC1"; d=0x41e3934015f57d61;};
+      R : R {nm="DAC2"; d=0x81c6c3939dff1ab2;};
+      R : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      R : R {nm="DBCR1"; d=0x2bc00f80;};
+      //   IAC12M:3 IAC1ER:2 IAC1US:0 IAC2ER:3 IAC2US:2 IAC34M:2 IAC3ER:0 IAC3US:0
+      //   IAC4ER:3 IAC4US:3
+      R : R {nm="DBCR2"; d=0x23800000;};
+      //   DAC12M:2 DAC1ER:2 DAC1US:0 DAC2ER:3 DAC2US:0 DACLINK:0
+      R : R {nm="DBSR"; d=0x087d8000;};
+      //   BRT:0 DAC1R:1 DAC1W:1 DAC2R:0 DAC2W:1 IAC1:0 IAC2:1 IAC3:1 IAC4:1 ICMP:1
+      //   IDE:0 IRPT:0 MRR:0 RET:1 TRAP:0 UDE:0
+      R : R {nm="DEAR"; d=0xb8eee341beda599b;};
+      R : R {nm="DSRR0"; d=0x843444cba4de90a1;};
+      R : R {nm="DSRR1"; d=0x1d9914d7;};
+      R : R {nm="EPLC"; d=0x800000e6;};
+      //   EAS:0 EPID:e6 EPR:1
+      R : R {nm="EPSC"; d=0xc0001518;};
+      //   EAS:1 EPID:1518 EPR:1
+      R : R {nm="ESR"; d=0x082a00c0;};
+      //   AP:1 AV:1 BO:1 DLK:2 EPID:1 FP:0 PIE:0 PIL:1 PPR:0 PTR:0 PUO:0 ST:0
+      R : R {nm="FPSCR"; d=0xa9742754;};
+      //   C:0 FE:1 FEX:0 FG:0 FI:0 FL:0 FPCC:2 FPRF:2 FR:1 FU:0 FX:1 NI:1 OE:1 OX:0
+      //   RN:0 UE:0 UX:1 VE:0 VX:1 VXCVI:1 VXIDI:1 VXIMZ:1 VXISI:0 VXSNAN:1 VXSOFT:1
+      //   VXSQRT:1 VXVC:0 VXZDZ:1 XE:0 XX:0 ZE:1 ZX:0
+      R : R {nm="GPR17"; d=0x0000000000000073;};
+      R : R {nm="GPR25"; d=0x0000000000000000;};
+      R : R {nm="IAC1"; d=0x4b30684c628a5374;};
+      //   ADDR:12cc1a1318a294dd
+      R : R {nm="IAC2"; d=0x8aee92a4432dc91c;};
+      //   ADDR:22bba4a910cb7247
+      R : R {nm="IAR"; d=0x6d68fb080aba7ab0;};
+      R : R {nm="IVOCR"; d=0x00000070;};
+      //   IVPR0:7 IVOE:0
+      R : R {nm="MAS0"; d=0x00120006;};
+      //   ESEL:12 NVPR4K:6 TLBSEL:0
+      R : R {nm="MAS1"; d=0xa9b40c00;};
+      //   IPROT:0 TID:29b4 TS:0 TSIZE:c V:1
+      R : R {nm="MAS2"; d=0x2f299669f2235038;};
+      //   E:0 EPN:2f299669f2235 G:0 I:1 L:1 M:0 W:1
+      R : R {nm="MAS3"; d=0xded0b383;};
+      //   RPN:ded0b SR:1 SW:0 SX:0 U0:1 U1:1 U2:1 U3:0 UR:1 UW:0 UX:0
+      R : R {nm="MAS4"; d=0x00000326;};
+      //   ED:0 GD:1 ID:0 LD:1 MD:1 TIDDSEL:0 TLBSELD:0 TSIZED:3 WD:0
+      R : R {nm="MAS6"; d=0x29f00000;};
+      //   SAS:0 SPID0:29f0
+      R : R {nm="MAS7"; d=0x0000030c;};
+      //   RPN:30c
+      R : R {nm="MSR"; d=0xe2002000;};
+      //   CE:0 CM:1 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 ICM:1 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   TSE:1 UCLE:0 VEC:1 WE:0
+      R : R {nm="PID0"; d=0x000000c0;};
+      //   PID:c0
+      R : R {nm="PID1"; d=0x0000362e;};
+      //   PID:362e
+      R : R {nm="PID2"; d=0x00001ac8;};
+      //   PID:1ac8
+      R : R {nm="TCR"; d=0x110e4000;};
+      //   ARE:0 DIE:0 FIE:0 FP:1 FPEXT:2 WIE:0 WP:0 WPEXT:7 WRC:1
+      R : R {nm="TEN"; d=0x00000000;};
+      //   E:0
+      R : R {nm="TPRI"; d=0x00000003;};
+      //   PRI:3
+      R : R {nm="TSR"; d=0x6c000000;};
+      //   DIS:1 ENW:0 FIS:1 WIS:1 WRS:2
+      R : R {nm="VPIR"; d=0x00000002;};
+      //   ID:2
+      R : R {nm="VSCR"; d=0x00010000;};
+      //   NJ:1 SAT:0
+      R : R {nm="XER"; d=0x60000011;};
+      //   CA:1 CNT:11 OV:1 SO:0
+      R : D {ea=0x22bd8ea8fa5b6000; ra=0x000000000b000000; d=0x73cd8830; ta=0x226;};
+    } // powerpc::t2
+    R : R {nm="AVPID0"; d=0x00000000;};
+    //   VPID:0
+    R : R {nm="EDBCR0"; d=0x40000000;};
+    //   DNH_EN:1 EDM:0
+    R : R {nm="EDBCR1"; d=0x000000a7;};
+    //   E:1 G:1 I:0 IJER:1 IJMODE:1 L:0 M:0 W:1
+    R : R {nm="HDBCR2"; d=0x64020000;};
+    //   BIU_CODTQ_SIZE:0 BIU_DIN_GAT_DIS:0 BIU_DRQ_SIZE:0 BIU_SINT_DIS:0
+    //   BIU_SNP_PIPE_DIS:0 BIU_STDTQ_SIZE:0 BIU_TLBMARK_2X:0
+    //   EIP_DRLTMISSL2STALLLS_AR:0 EIP_DRLTMISSL2STALLLS_EN:0 EIP_DRLTMISSL2_DIS:1
+    //   EIP_DRLTMISSL2_MAX:0 EIP_DRLTMISS_EN:1 EIP_DRLTMISS_MAX:0
+    //   EIP_IRLTL2MISSCB_EN:0 EIP_IRLTL2MISSIB_DIS:1 EIP_MDOOM_DIS:1
+    //   EIP_TIMEOUT_AR:0 EIP_TIMEOUT_BITSEL:0 EIP_TIMEOUT_EN:0 YIELD_DIS:0
+    R : R {nm="HID0"; d=0x00000000;};
+    //   DOZE:0 DPM:0 EDPM:0 EIEC:0 EIEIO_EN:0 EMCP:0 LWSYNC_EN:0 NAP:0 NOPDST:0
+    //   NOPTI:0 NOPTST:0 PIPE_EN:0 SEL_TBCLK:0 SFR:0 SGE:0 SLEEP:0 TBEN:0 TH_EN:0
+    R : R {nm="L1CSR0"; d=0x00000000;};
+    //   DCBZ32:0 DCE:1 DCFI:0 DCLFC:0 DCLO:0 DCLOA:0 DCPE:0 DCPI:0 DCUL:0
+    R : R {nm="L1CSR1"; d=0x00000000;};
+    //   ICE:0 ICFI:0 ICLFC:0 ICLO:0 ICLOA:0 ICPE:0 ICPI:0 ICUL:0
+    R : R {nm="L2CSR0"; d=0x00000000;};
+    //   L2DO:0 L2E:0 L2FI:0 L2FL:0 L2IO:0 L2LFC:0 L2LO:0 L2LOA:0 L2PE:0 L2REP:0
+    //   L2WP:0
+    R : R {nm="NIA0"; d=0xb6363614d472e470;};
+    //   NIA:2d8d8d85351cb91c
+    R : R {nm="NIA1"; d=0xd3ed1f9d557b5294;};
+    //   NIA:34fb47e7555ed4a5
+    R : R {nm="NIA2"; d=0x6d68fb080aba7ab0;};
+    //   NIA:1b5a3ec202ae9eac
+    R : R {nm="SBSR0"; d=0x00000000;};
+    //   CHKSTOP:0 DE_HALT:0 DNHM:0 DNH_HALT:0 EXT_HALT:0 EXT_STOP:0 HALTED:0
+    //   JHALT:0 JSTOP:0 PM_HALT:0 PM_STOP:0 RUNN_HALT:0 RUNN_STOP:0
+    R : R {nm="SPTP"; d=0x80000001;};
+    //   SPTBIT:1 TBSEL:1
+    R : R {nm="TEN0"; d=0x00000000;};
+    //   E:0
+    R : R {nm="TEN1"; d=0x00000000;};
+    //   E:0
+    R : R {nm="TEN2"; d=0x00000000;};
+    //   E:0
+    R : R {nm="TPRI0"; d=0x00000003;};
+    //   PRI:3
+    R : R {nm="TPRI1"; d=0x00000003;};
+    //   PRI:3
+    R : R {nm="TPRI2"; d=0x00000003;};
+    //   PRI:3
+    R : R {nm="VPIA0"; d=0x00000000;};
+  } // powerpc
+} // eip1

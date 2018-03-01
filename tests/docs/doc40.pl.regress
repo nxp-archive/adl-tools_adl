@@ -1,0 +1,1485 @@
+$data = {
+"cores" => {
+"packet_ops" => {
+"bit_endianness" => "little",
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+    Current instruction address
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+    Next instruction address
+    
+DATA
+,
+"width" => 64,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"width" => 64,
+"size" => 32,
+"prefix" => "r",
+"shared" => 0,
+},
+},
+"relocations" => {
+"RELOC_1_A" => {
+"abbrev" => "lo_a",
+"field_width" => 16,
+"pcrel" => 0,
+"value" => 1,
+"right_shift" => 0,
+},
+"RELOC_1_B" => {
+"abbrev" => "lo_b",
+"field_width" => 16,
+"pcrel" => 0,
+"value" => 2,
+"right_shift" => 0,
+},
+},
+"instrfields" => {
+"bdo" => {
+"doc" => <<DATA
+    Branch destination packet offset field.
+
+    This specifies the micro-op to execute within the target instruction.
+    
+DATA
+,
+"bits" => [
+[
+30,
+29,
+],
+],
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000060000000",
+"type" => "imm",
+},
+"bdp" => {
+"doc" => <<DATA
+    PC-relative branch destination-packet field.
+
+    This is used to specify the address of the instruction.
+    
+DATA
+,
+"bits" => [
+[
+28,
+10,
+],
+],
+"width" => 19,
+"size" => 19,
+"shift" => 3,
+"offset" => 0,
+"mask" => "0x000000001ffffc00",
+"addr" => "pc",
+"type" => "imm",
+"signed" => 1,
+},
+"bsimm" => {
+"doc" => <<DATA
+    Big signed immediate field.
+    
+DATA
+,
+"bits" => [
+[
+61,
+10,
+],
+],
+"width" => 52,
+"size" => 52,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3ffffffffffffc00",
+"display" => "hex",
+"type" => "imm",
+"signed" => 1,
+},
+"fop" => {
+"doc" => <<DATA
+    Outer 'envelope' instruction opcode.
+
+    Encodings:
+      0: Single large 62-bit instruction.
+      1: Two 32-bit instructions (serial execution).
+      2: Three 20-bit instructions (serial execution).
+      3: Two 32-bit instructions (parallel execution).
+    
+DATA
+,
+"bits" => [
+[
+1,
+0,
+],
+],
+"width" => 2,
+"size" => 2,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000003",
+"type" => "imm",
+},
+"op" => {
+"doc" => <<DATA
+    Primary opcode for sub-instrutions.
+    
+DATA
+,
+"bits" => [
+[
+4,
+0,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000000000001f",
+"type" => "imm",
+},
+"opA" => {
+"doc" => <<DATA
+    Instruction field for storing a 31-bit instruction (first slot).
+    
+DATA
+,
+"bits" => [
+[
+32,
+2,
+],
+],
+"width" => 31,
+"size" => 31,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000001fffffffc",
+"type" => "instr",
+"reloc" => "RELOC_1_A",
+"ref" => "instr_subinstr1",
+"instrtable" => "instr_subinstr1",
+},
+"opAA" => {
+"doc" => <<DATA
+    Instruction field for storing a 62-bit instruction.
+    
+DATA
+,
+"bits" => [
+[
+63,
+2,
+],
+],
+"width" => 62,
+"size" => 62,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfffffffffffffffc",
+"type" => "instr",
+"ref" => "instr_subinstr3",
+"instrtable" => "instr_subinstr3",
+},
+"opB" => {
+"doc" => <<DATA
+    Instruction field for storing a 31-bit instruction (second slot).
+    
+DATA
+,
+"bits" => [
+[
+63,
+33,
+],
+],
+"width" => 31,
+"size" => 31,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfffffffe00000000",
+"type" => "instr",
+"reloc" => "RELOC_1_B",
+"ref" => "instr_subinstr1",
+"instrtable" => "instr_subinstr1",
+},
+"opC" => {
+"doc" => <<DATA
+    Instruction field for storing a 20-bit instruction (first slot).
+    
+DATA
+,
+"bits" => [
+[
+21,
+2,
+],
+],
+"width" => 20,
+"size" => 20,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000003ffffc",
+"type" => "instr",
+"ref" => "instr_subinstr2",
+"instrtable" => "instr_subinstr2",
+},
+"opD" => {
+"doc" => <<DATA
+    Instruction field for storing a 20-bit instruction (second slot).
+    
+DATA
+,
+"bits" => [
+[
+41,
+22,
+],
+],
+"width" => 20,
+"size" => 20,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000003ffffc00000",
+"type" => "instr",
+"ref" => "instr_subinstr2",
+"instrtable" => "instr_subinstr2",
+},
+"opE" => {
+"doc" => <<DATA
+    Instruction field for storing a 20-bit instruction (third slot).
+    
+DATA
+,
+"bits" => [
+[
+61,
+42,
+],
+],
+"width" => 20,
+"size" => 20,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3ffffc0000000000",
+"type" => "instr",
+"ref" => "instr_subinstr2",
+"instrtable" => "instr_subinstr2",
+},
+"ra" => {
+"doc" => <<DATA
+    First operand source instruction field.
+    
+DATA
+,
+"bits" => [
+[
+14,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000007c00",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"ra_p" => {
+"doc" => <<DATA
+    First operand source instruction field.
+    
+DATA
+,
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"ra_p_imp_bits__14_10_" => {
+"bits" => [
+[
+14,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000007c00",
+"type" => "regfile",
+"implements" => "ra_p",
+"ref" => "GPR",
+},
+"rb" => {
+"doc" => <<DATA
+    Second operand source instruction field.
+    
+DATA
+,
+"bits" => [
+[
+19,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000f8000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"reserved_imp_bits__30_15_" => {
+"bits" => [
+[
+30,
+15,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000007fff8000",
+"type" => "imm",
+},
+"rs" => {
+"doc" => <<DATA
+    Standard source instruction field.
+    
+DATA
+,
+"bits" => [
+[
+9,
+5,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000003e0",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"rt" => {
+"doc" => <<DATA
+    Standard target instruction field.
+    
+DATA
+,
+"bits" => [
+[
+9,
+5,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000003e0",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"rt_p" => {
+"doc" => <<DATA
+    Standard target instruction field.
+    
+DATA
+,
+"pseudo" => 1,
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"rt_p_imp_bits__9_5_" => {
+"bits" => [
+[
+9,
+5,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x00000000000003e0",
+"type" => "regfile",
+"implements" => "rt_p",
+"ref" => "GPR",
+},
+"scale" => {
+"pseudo" => 1,
+"width" => 32,
+"size" => 32,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"type" => "imm",
+},
+"simm" => {
+"doc" => <<DATA
+    Signed immediate field.
+    
+DATA
+,
+"bits" => [
+[
+30,
+15,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000007fff8000",
+"display" => "dec",
+"type" => "imm",
+"signed" => 1,
+},
+"simm_p" => {
+"doc" => <<DATA
+    Unsigned immediate field.
+    
+DATA
+,
+"pseudo" => 1,
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x0000000000000000",
+"display" => "dec",
+"type" => "imm",
+"signed" => 1,
+"reloc" => "RELOC_1_A",
+},
+"simm_p_imp_bits__30_15_" => {
+"bits" => [
+[
+30,
+15,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x000000007fff8000",
+"display" => "dec",
+"type" => "imm",
+"signed" => 1,
+"implements" => "simm_p",
+"reloc" => "RELOC_1_A",
+},
+},
+"instrs" => {
+"add" => {
+"width" => 20,
+"doc" => <<DATA
+    Add register-register.
+    
+DATA
+,
+"syntax" => "add rt,ra,rb",
+"dsyntax" => "add ${rt},${ra},${rb}",
+"attributes" => {
+"instr_subinstr2" => "",
+},
+"fields" => {
+"rb" => "",
+"ra" => "",
+"rt" => "",
+"op" => 1,
+},
+"action" => <<DATA
+{
+    GPR ( rt ) = GPR ( ra ) + GPR ( rb ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+"GPR(rb)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+},
+"add_scaled" => {
+"width" => 31,
+"syntax" => "addiS rt_p,simm_p,scale",
+"dsyntax" => "addiS ${rt_p},${simm_p},${scale}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"aliases" => {
+"addi" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "simm_p_imp_bits__30_15_",
+"value" => "scale_up ( simm_p , scale )",
+},
+"misc" => {
+"field" => "ra_p_imp_bits__14_10_",
+"value" => "rt_p",
+},
+"misc" => {
+"field" => "rt_p_imp_bits__9_5_",
+"value" => "rt_p",
+},
+],
+"parent_action" => <<DATA
+{
+    GPR ( rt_p ) = GPR ( ra_p ) + simm_p ;
+}
+DATA
+,
+},
+},
+"disassemble" => 0,
+"inputs" => [
+"GPR(ra_p)",
+],
+"outputs" => [
+"GPR(rt_p)",
+],
+},
+"addi" => {
+"width" => 31,
+"doc" => <<DATA
+    Add immediate.
+    
+DATA
+,
+"syntax" => "addi rt_p,ra_p,simm_p",
+"dsyntax" => "addi ${rt_p},${ra_p},${simm_p}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"simm_p_imp_bits__30_15_" => "",
+"ra_p_imp_bits__14_10_" => "",
+"rt_p_imp_bits__9_5_" => "",
+"op" => 1,
+},
+"action" => <<DATA
+{
+    GPR ( rt_p ) = GPR ( ra_p ) + simm_p ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra_p)",
+],
+"outputs" => [
+"GPR(rt_p)",
+],
+},
+"addi_" => {
+"width" => 31,
+"syntax" => "addi rt_p,simm_p",
+"dsyntax" => "addi ${rt_p},${simm_p}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"aliases" => {
+"addi" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "simm_p_imp_bits__30_15_",
+"value" => "simm_p",
+},
+"misc" => {
+"field" => "ra_p_imp_bits__14_10_",
+"value" => "rt_p",
+},
+"misc" => {
+"field" => "rt_p_imp_bits__9_5_",
+"value" => "rt_p",
+},
+],
+"parent_action" => <<DATA
+{
+    GPR ( rt_p ) = GPR ( ra_p ) + simm_p ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra_p)",
+],
+"outputs" => [
+"GPR(rt_p)",
+],
+},
+"addi_test_replace" => {
+"width" => 31,
+"syntax" => "addit rt_p,simm_p",
+"dsyntax" => "addit ${rt_p},${simm_p}",
+"attributes" => {
+"instr_subinstr1" => "",
+"addi_replace" => "",
+},
+"aliases" => {
+"addi" => {
+"sources" => [
+],
+"destinations" => [
+],
+"miscs" => [
+"misc" => {
+"field" => "simm_p_imp_bits__30_15_",
+"value" => "simm_p",
+},
+"misc" => {
+"field" => "ra_p_imp_bits__14_10_",
+"value" => "rt_p",
+},
+"misc" => {
+"field" => "rt_p_imp_bits__9_5_",
+"value" => "rt_p",
+},
+],
+"parent_action" => <<DATA
+{
+    GPR ( rt_p ) = GPR ( ra_p ) + simm_p ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra_p)",
+],
+"outputs" => [
+"GPR(rt_p)",
+],
+},
+"bc" => {
+"width" => 31,
+"doc" => <<DATA
+    Branch conditional.
+
+    Unconditional branch if rs is 0.
+    
+DATA
+,
+"syntax" => "bc rs,bdp,bdo",
+"dsyntax" => "bc ${rs},${bdp},${bdo}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"bdo" => "",
+"bdp" => "",
+"rs" => "",
+"op" => 3,
+},
+"action" => <<DATA
+{
+    if ( ( rs == 0 ) || GPR ( rs ) != 0 ) {
+        setMicroOpOffset ( bdo ) ;
+        NIA = bdp ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA",
+"GPR(rs)",
+],
+"outputs" => [
+"NIA?",
+],
+},
+"bcl" => {
+"width" => 31,
+"doc" => <<DATA
+    Branch conditional and link.
+
+    Unconditional branch if rs is 0.
+    
+DATA
+,
+"syntax" => "bcl rs,bdp,bdo",
+"dsyntax" => "bcl ${rs},${bdp},${bdo}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"bdo" => "",
+"bdp" => "",
+"rs" => "",
+"op" => 4,
+},
+"action" => <<DATA
+{
+    if ( ( rs == 0 ) || GPR ( rs ) != 0 ) {
+        if ( getMicroOpOffset (  ) > 1 ) {
+            GPR ( 31 ) = NIA ;
+        } else {
+            GPR ( 31 ) = CIA | 1 ;
+        }
+        setMicroOpOffset ( bdo ) ;
+        NIA = bdp ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CIA?",
+"GPR(rs)",
+"NIA?",
+],
+"outputs" => [
+"GPR(31)?",
+"NIA?",
+],
+},
+"big" => {
+"width" => 64,
+"doc" => <<DATA
+    Contains one 62-bit instruction.
+    
+DATA
+,
+"syntax" => "big opAA",
+"dsyntax" => "${opAA}",
+"attributes" => {
+"other" => "",
+},
+"fields" => {
+"opAA" => "",
+"fop" => 0,
+},
+"disassemble" => 1,
+},
+"blr" => {
+"width" => 20,
+"doc" => <<DATA
+    Branch to link register.
+    
+DATA
+,
+"syntax" => "blr",
+"dsyntax" => "blr",
+"attributes" => {
+"instr_subinstr2" => "",
+},
+"fields" => {
+"op" => 4,
+},
+"action" => <<DATA
+{
+    setMicroOpOffset ( GPR ( 31 ) ( 1 , 0 ) ) ;
+    NIA = GPR ( 31 ) & ~ 0x3 ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(31)/p",
+],
+"outputs" => [
+"NIA",
+],
+},
+"halt" => {
+"width" => 62,
+"doc" => <<DATA
+    Halt simulation.
+    
+DATA
+,
+"syntax" => "halt",
+"dsyntax" => "halt",
+"attributes" => {
+"instr_subinstr3" => "",
+},
+"fields" => {
+"op" => 0,
+},
+"action" => <<DATA
+{
+    halt (  ) ;
+}
+DATA
+,
+"disassemble" => 1,
+},
+"ld" => {
+"width" => 31,
+"doc" => <<DATA
+    Load double.
+    
+DATA
+,
+"syntax" => "ld rt,simm(ra)",
+"dsyntax" => "ld ${rt},${simm}(${ra})",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"simm" => "",
+"ra" => "",
+"rt" => "",
+"op" => 6,
+},
+"action" => <<DATA
+{
+     var ea = GPR ( ra ) + simm ;
+    GPR ( rt ) = signExtend ( Mem ( ea , 8 ) , 64 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"li" => {
+"width" => 62,
+"doc" => <<DATA
+    Load large immediate.
+    
+DATA
+,
+"syntax" => "li rt,bsimm",
+"dsyntax" => "li ${rt},${bsimm}",
+"attributes" => {
+"instr_subinstr3" => "",
+},
+"fields" => {
+"bsimm" => "",
+"rt" => "",
+"op" => 1,
+},
+"action" => <<DATA
+{
+    GPR ( rt ) = signExtend ( bsimm , 64 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"outputs" => [
+"GPR(rt)",
+],
+},
+"lw" => {
+"width" => 31,
+"doc" => <<DATA
+    Load word.
+    
+DATA
+,
+"syntax" => "lw rt,simm(ra)",
+"dsyntax" => "lw ${rt},${simm}(${ra})",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"simm" => "",
+"ra" => "",
+"rt" => "",
+"op" => 5,
+},
+"action" => <<DATA
+{
+     var ea = GPR ( ra ) + simm ;
+    GPR ( rt ) = signExtend ( Mem ( ea , 4 ) , 64 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+"mul" => {
+"width" => 20,
+"doc" => <<DATA
+    Multiply register-register.
+    
+DATA
+,
+"syntax" => "mul rt,ra,rb",
+"dsyntax" => "mul ${rt},${ra},${rb}",
+"attributes" => {
+"instr_subinstr2" => "",
+},
+"fields" => {
+"rb" => "",
+"ra" => "",
+"rt" => "",
+"op" => 3,
+},
+"action" => <<DATA
+{
+    GPR ( rt ) = GPR ( ra ) * GPR ( rb ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+"GPR(rb)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+},
+"mulli" => {
+"width" => 31,
+"doc" => <<DATA
+    Multiply immediate.
+    
+DATA
+,
+"syntax" => "mulli rt,ra,simm",
+"dsyntax" => "mulli ${rt},${ra},${simm}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"simm" => "",
+"ra" => "",
+"rt" => "",
+"op" => 2,
+},
+"action" => <<DATA
+{
+    GPR ( rt ) = GPR ( ra ) * simm ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+},
+"mulli_" => {
+"width" => 31,
+"syntax" => "mulli rt,simm",
+"dsyntax" => "mulli ${rt},${simm}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"aliases" => {
+"mulli" => {
+"sources" => [
+"source" => {
+"field" => "ra",
+"value" => "rt",
+},
+],
+"destinations" => [
+"destination" => {
+"field" => "rt",
+"value" => "rt",
+},
+],
+"miscs" => [
+"misc" => {
+"field" => "simm",
+"value" => "simm",
+},
+],
+"parent_action" => <<DATA
+{
+    GPR ( rt ) = GPR ( rt ) * simm ;
+}
+DATA
+,
+},
+},
+"disassemble" => 1,
+"inputs" => [
+"GPR(rt)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+},
+"neg" => {
+"width" => 31,
+"doc" => <<DATA
+    Negate
+    
+DATA
+,
+"syntax" => "neg ra_p, rt_p",
+"dsyntax" => "neg ${ra_p}, ${rt_p}",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"reserved_imp_bits__30_15_" => "reserved",
+"ra_p_imp_bits__14_10_" => "",
+"rt_p_imp_bits__9_5_" => "",
+"op" => 9,
+},
+"action" => <<DATA
+{
+    GPR ( rt_p ) = - GPR ( ra_p ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra_p)",
+],
+"outputs" => [
+"GPR(rt_p)",
+],
+},
+"nop1" => {
+"width" => 31,
+"doc" => <<DATA
+    Format-1 no-op.
+    
+DATA
+,
+"syntax" => "nop1",
+"dsyntax" => "nop1",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"op" => 0,
+},
+"action" => <<DATA
+{
+}
+DATA
+,
+"disassemble" => 1,
+},
+"nop2" => {
+"width" => 20,
+"doc" => <<DATA
+    Format-2 no-op.
+    
+DATA
+,
+"syntax" => "nop2",
+"dsyntax" => "nop2",
+"attributes" => {
+"instr_subinstr2" => "",
+},
+"fields" => {
+"op" => 0,
+},
+"action" => <<DATA
+{
+}
+DATA
+,
+"disassemble" => 1,
+},
+"parallel" => {
+"width" => 64,
+"doc" => <<DATA
+    Contains two 31-bit instructions. Implies parallel execution.
+    
+DATA
+,
+"syntax" => "parallel opB, opA",
+"dsyntax" => "${opB} = ${opA}",
+"attributes" => {
+"other" => "",
+},
+"fields" => {
+"opB" => "",
+"opA" => "",
+"fop" => 3,
+},
+"disassemble" => 1,
+},
+"sd" => {
+"width" => 31,
+"doc" => <<DATA
+    Store double.
+    
+DATA
+,
+"syntax" => "sd rt,simm(ra)",
+"dsyntax" => "sd ${rt},${simm}(${ra})",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"simm" => "",
+"ra" => "",
+"rt" => "",
+"op" => 8,
+},
+"action" => <<DATA
+{
+     var ea = GPR ( ra ) + simm ;
+    Mem ( ea , 8 ) = GPR ( rt ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+"GPR(rt)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+"serial1" => {
+"width" => 64,
+"doc" => <<DATA
+    Contains two 31-bit instructions. Implies serial execution.
+    
+DATA
+,
+"syntax" => "serial1 opB, opA",
+"dsyntax" => "${opB} ; ${opA}",
+"attributes" => {
+"other" => "",
+},
+"fields" => {
+"opB" => "",
+"opA" => "",
+"fop" => 1,
+},
+"disassemble" => 1,
+},
+"serial2" => {
+"width" => 64,
+"doc" => <<DATA
+    Contains three 20-bit instructions. Implies serial execution.
+    
+DATA
+,
+"syntax" => "serial2 opE, opD, opC",
+"dsyntax" => "${opE} ; ${opD} ; ${opC}",
+"attributes" => {
+"other" => "",
+},
+"fields" => {
+"opE" => "",
+"opD" => "",
+"opC" => "",
+"fop" => 2,
+},
+"disassemble" => 1,
+},
+"sub" => {
+"width" => 20,
+"doc" => <<DATA
+    Subtract register-register.
+    
+DATA
+,
+"syntax" => "sub rt,ra,rb",
+"dsyntax" => "sub ${rt},${ra},${rb}",
+"attributes" => {
+"instr_subinstr2" => "",
+},
+"fields" => {
+"rb" => "",
+"ra" => "",
+"rt" => "",
+"op" => 2,
+},
+"action" => <<DATA
+{
+    GPR ( rt ) = GPR ( ra ) - GPR ( rb ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+"GPR(rb)",
+],
+"outputs" => [
+"GPR(rt)",
+],
+},
+"sw" => {
+"width" => 31,
+"doc" => <<DATA
+    Store word.
+    
+DATA
+,
+"syntax" => "sw rt,simm(ra)",
+"dsyntax" => "sw ${rt},${simm}(${ra})",
+"attributes" => {
+"instr_subinstr1" => "",
+},
+"fields" => {
+"simm" => "",
+"ra" => "",
+"rt" => "",
+"op" => 7,
+},
+"action" => <<DATA
+{
+     var ea = GPR ( ra ) + simm ;
+    Mem ( ea , 4 ) = GPR ( rt ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(ra)",
+"GPR(rt)",
+],
+"output_mems" => [
+"Mem",
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+{
+     InstrBundle newb ;
+    if ( b [ 0 ] . instrHasAttr ( addi_replace ) ) {
+        b [ 0 ] = replaceInstr ( b [ 0 ] , "addi_" ) ;
+    }
+     InstrBundle & prior = getPriorPacket ( 1 ) ;
+    if ( prior . size (  ) == 1 && is_subinstr1 ( prior [ 0 ] ) && b . size (  ) == 1 && is_subinstr1 ( b [ 0 ] ) && ! hasLabel (  ) ) {
+         var r = ( prior [ 0 ] . getReloc ( 1 ) ) ;
+        if ( ! r . empty (  ) && r == "lo_b" ) {
+            prior [ 0 ] . replaceReloc ( 1 , "lo_a" ) ;
+        }
+        b . push_back ( prior [ 0 ] ) ;
+        prior . pop_back (  ) ;
+    }
+    if ( hasLabel (  ) ) {
+        adjustCurLabel ( 8 ) ;
+    }
+    if ( b . size (  ) == 1 && ! is_subinstr1 ( b [ 0 ] ) && ! is_subinstr2 ( b [ 0 ] ) && ! is_subinstr3 ( b [ 0 ] ) ) {
+        error ( 1 , "No micro-instruction specified." ) ;
+    } else if ( is_subinstr3 ( b [ 0 ] ) ) {
+        newb . push_back ( combineInstr ( "big" , 0 ) ) ;
+    } else if ( is_subinstr1 ( b [ 0 ] ) ) {
+        if ( b . size (  ) > 2 ) {
+            error ( 1 , "More than 2 instructions of format-1 type." ) ;
+        }
+        if ( b . size (  ) > 1 && ! b [ 1 ] . instrHasAttr ( instr_subinstr1 ) ) {
+            error ( 1 , "Second instruction of format-1 is not a format-1 instruction." ) ;
+        }
+        if ( b . size (  ) == 1 ) {
+            newb . push_back ( combineInstr ( "serial1" , 0 , - 1 ) ) ;
+        } else if ( b . separators (  ) [ 0 ] == "=" ) {
+            newb . push_back ( combineInstr ( "parallel" , 0 , 1 ) ) ;
+        } else {
+            newb . push_back ( combineInstr ( "serial1" , 0 , 1 ) ) ;
+        }
+    } else if ( is_subinstr2 ( b [ 0 ] ) ) {
+        if ( b . size (  ) == 1 ) {
+            newb . push_back ( combineInstr ( "serial2" , 0 , - 1 , - 1 ) ) ;
+        } else if ( b . size (  ) == 2 ) {
+            if ( ! b [ 1 ] . instrHasAttr ( instr_subinstr2 ) ) {
+                error ( 1 , "Second instruction of format-2 is not a format-2 instruction." ) ;
+            }
+            newb . push_back ( combineInstr ( "serial2" , 0 , 1 , - 1 ) ) ;
+        } else if ( b . size (  ) == 3 ) {
+            if ( ! b [ 1 ] . instrHasAttr ( instr_subinstr2 ) || ! b [ 2 ] . instrHasAttr ( instr_subinstr2 ) ) {
+                error ( 1 , "Inconsistent format-2 instruction packet." ) ;
+            }
+            newb . push_back ( combineInstr ( "serial2" , 0 , 1 , 2 ) ) ;
+        } else {
+            error ( 1 , "More than 3 instructions of format-2 type." ) ;
+        }
+    } else {
+        error ( 1 , "Unknown type of instruction found." ) ;
+    }
+    b = newb ;
+}
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"//",
+"#",
+],
+"line_comments" => [
+"//",
+"#",
+],
+"line_seps" => [
+"\n",
+],
+"instr_seps" => [
+"\n",
+],
+"group_seps" => [
+[
+"\n",
+"\n",
+],
+],
+"asm_instrtables" => [
+"other",
+"instr_subinstr1",
+"instr_subinstr2",
+"instr_subinstr3",
+],
+},
+"helpers" => {
+"is_subinstr1" => {
+"action" => <<DATA
+ bool is_subinstr1 ( const InstrInfo & info ) {
+    return info . instrHasAttr ( instr_subinstr1 ) ;
+}
+DATA
+,
+},
+"is_subinstr2" => {
+"action" => <<DATA
+ bool is_subinstr2 ( const InstrInfo & info ) {
+    return info . instrHasAttr ( instr_subinstr2 ) ;
+}
+DATA
+,
+},
+"is_subinstr3" => {
+"action" => <<DATA
+ bool is_subinstr3 ( const InstrInfo & info ) {
+    return info . instrHasAttr ( instr_subinstr3 ) ;
+}
+DATA
+,
+},
+"scale_up" => {
+"action" => <<DATA
+ unsigned scale_up ( unsigned x , unsigned s ) {
+    return x << s ;
+}
+DATA
+,
+},
+},
+},
+},
+"systems" => {
+},
+};
+

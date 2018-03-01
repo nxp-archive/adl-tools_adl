@@ -1,0 +1,6 @@
+Write to register TEN0:  0x0
+Write to register TEN0:  0x1
+Write to register TEN0:  0x0
+Write to GPR[3]:  0x4000
+Write to GPR[4]:  0x4032
+Simulation halted at address: 0x0000000000000020

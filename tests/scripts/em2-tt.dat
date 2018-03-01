@@ -1,0 +1,366 @@
+
+CORE n=P
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=1
+CTIME t=4
+
+I ea=0x4 id=2 tic=2
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=2
+CTIME t=5
+
+I ea=0x8 id=3 tic=3
+INSTR op=0x80401000					asm="lwz r2,4096(r0)"
+ITIME t=3
+CTIME t=11
+
+I ea=0xc id=4 tic=4
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=4
+CTIME t=16
+
+I ea=0x10 id=5 tic=5
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=8
+CTIME t=17
+
+I ea=0x14 id=6 tic=6
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=9
+CTIME t=22
+
+I ea=0x18 id=7 tic=7
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=16
+CTIME t=23
+
+I ea=0x1c id=8 tic=8
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=17
+CTIME t=28
+
+I ea=0x20 id=9 tic=9
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=219
+CTIME t=222
+
+I ea=0xc id=10 tic=10
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=220
+CTIME t=228
+
+I ea=0x10 id=11 tic=11
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=224
+CTIME t=229
+
+I ea=0x14 id=12 tic=12
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=225
+CTIME t=234
+
+I ea=0x18 id=13 tic=13
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=228
+CTIME t=235
+
+I ea=0x1c id=14 tic=14
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=229
+CTIME t=240
+
+I ea=0x20 id=15 tic=15
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=237
+CTIME t=241
+
+I ea=0xc id=16 tic=16
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=238
+CTIME t=246
+
+I ea=0x10 id=17 tic=17
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=242
+CTIME t=247
+
+I ea=0x14 id=18 tic=18
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=243
+CTIME t=252
+
+I ea=0x18 id=19 tic=19
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=246
+CTIME t=253
+
+I ea=0x1c id=20 tic=20
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=247
+CTIME t=258
+
+I ea=0x20 id=21 tic=21
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=255
+CTIME t=259
+
+I ea=0xc id=22 tic=22
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=256
+CTIME t=264
+
+I ea=0x10 id=23 tic=23
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=260
+CTIME t=265
+
+I ea=0x14 id=24 tic=24
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=261
+CTIME t=270
+
+I ea=0x18 id=25 tic=25
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=264
+CTIME t=271
+
+I ea=0x1c id=26 tic=26
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=265
+CTIME t=276
+
+I ea=0x20 id=27 tic=27
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=273
+CTIME t=277
+
+I ea=0xc id=28 tic=28
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=274
+CTIME t=282
+
+I ea=0x10 id=29 tic=29
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=278
+CTIME t=283
+
+I ea=0x14 id=30 tic=30
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=279
+CTIME t=288
+
+I ea=0x18 id=31 tic=31
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=282
+CTIME t=289
+
+I ea=0x1c id=32 tic=32
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=283
+CTIME t=294
+
+I ea=0x20 id=33 tic=33
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=291
+CTIME t=295
+
+I ea=0xc id=34 tic=34
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=292
+CTIME t=300
+
+I ea=0x10 id=35 tic=35
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=296
+CTIME t=301
+
+I ea=0x14 id=36 tic=36
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=297
+CTIME t=306
+
+I ea=0x18 id=37 tic=37
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=300
+CTIME t=307
+
+I ea=0x1c id=38 tic=38
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=301
+CTIME t=312
+
+I ea=0x20 id=39 tic=39
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=309
+CTIME t=313
+
+I ea=0xc id=40 tic=40
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=310
+CTIME t=318
+
+I ea=0x10 id=41 tic=41
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=314
+CTIME t=319
+
+I ea=0x14 id=42 tic=42
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=315
+CTIME t=324
+
+I ea=0x18 id=43 tic=43
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=318
+CTIME t=325
+
+I ea=0x1c id=44 tic=44
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=319
+CTIME t=330
+
+I ea=0x20 id=45 tic=45
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=327
+CTIME t=331
+
+I ea=0xc id=46 tic=46
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=328
+CTIME t=336
+
+I ea=0x10 id=47 tic=47
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=332
+CTIME t=337
+
+I ea=0x14 id=48 tic=48
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=333
+CTIME t=342
+
+I ea=0x18 id=49 tic=49
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=336
+CTIME t=343
+
+I ea=0x1c id=50 tic=50
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=337
+CTIME t=348
+
+I ea=0x20 id=51 tic=51
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=345
+CTIME t=349
+
+I ea=0xc id=52 tic=52
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=346
+CTIME t=354
+
+I ea=0x10 id=53 tic=53
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=350
+CTIME t=355
+
+I ea=0x14 id=54 tic=54
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=351
+CTIME t=360
+
+I ea=0x18 id=55 tic=55
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=354
+CTIME t=361
+
+I ea=0x1c id=56 tic=56
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=355
+CTIME t=366
+
+I ea=0x20 id=57 tic=57
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=363
+CTIME t=367
+
+I ea=0xc id=58 tic=58
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+ITIME t=364
+CTIME t=372
+
+I ea=0x10 id=59 tic=59
+INSTR op=0x7c421a14					asm="add r2,r2,r3"
+ITIME t=368
+CTIME t=373
+
+I ea=0x14 id=60 tic=60
+INSTR op=0x90402000					asm="stw r2,8192(r0)"
+ITIME t=369
+CTIME t=378
+
+I ea=0x18 id=61 tic=61
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=372
+CTIME t=379
+
+I ea=0x1c id=62 tic=62
+INSTR op=0x90802004					asm="stw r4,8196(r0)"
+ITIME t=373
+CTIME t=384
+
+I ea=0x20 id=63 tic=63
+INSTR op=0x4200ffec					asm="bdnz+ 0x000000000000000c"
+ITIME t=381
+CTIME t=385
+
+I ea=0x24 id=64 tic=64
+INSTR op=0x8140601e					asm="lwz r10,24606(r0)"
+ITIME t=382
+CTIME t=394
+
+I ea=0x28 id=65 tic=65
+INSTR op=0x8160600d					asm="lwz r11,24589(r0)"
+ITIME t=384
+CTIME t=403
+
+I ea=0x2c id=66 tic=66
+INSTR op=0x9140701a					asm="stw r10,28698(r0)"
+ITIME t=390
+CTIME t=412
+
+I ea=0x30 id=67 tic=67
+INSTR op=0x9160700b					asm="stw r11,28683(r0)"
+ITIME t=391
+CTIME t=421
+
+I ea=0x34 id=68 tic=68
+INSTR op=0x00000000					asm="halt "
+ITIME t=394
+CTIME t=422
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0xabcd00b0
+RD n=GPR i=3 d=0x00000010
+RD n=GPR i=4 d=0xabcd00b1
+
+MD n=Mem ra=0x1000 d=0xabcd0010
+MD n=Mem ra=0x1004 d=0x00000010
+MD n=Mem ra=0x2000 d=0xabcd00b0
+MD n=Mem ra=0x2004 d=0xabcd00b1
+
+MD n=Mem ra=0x601c d=0x0000dead
+MD n=Mem ra=0x6020 d=0xbeef0000
+MD n=Mem ra=0x600c d=0x00123456
+MD n=Mem ra=0x6010 d=0x78000000
+
+MD n=Mem ra=0x7018 d=0x0000dead
+MD n=Mem ra=0x701c d=0xbeef0000
+MD n=Mem ra=0x7008 d=0x00000012
+MD n=Mem ra=0x700c d=0x34567800

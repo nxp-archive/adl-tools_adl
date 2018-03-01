@@ -1,0 +1,75 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "ERegfile"
+  Size:  4
+  Write alias/hook:
+    Immediate
+    func ( unsigned i , bits < 32 > v ) {
+    ThisReg ( i ) . Y = v ;
+}
+    Target Registers:  ERegfile[mask 0x7fffffff]/p 
+
+  Usage:  field-written
+  Width:  32
+    X[0]   
+    Y[1,31]   
+      Usage:  field-written
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "CReg"
+  Write alias/hook:
+    func ( ValueBundle v ) {
+    updateReg ( v ) ;
+}
+
+  Width:  32
+    A[0,3]   
+    B[4,7]   
+    C[8,11]   
+    S[28,31]   
+  -------------------------------
+  Name:  "EReg"
+  Write alias/hook:
+    Immediate
+    func ( bits < 32 > v ) {
+    ThisReg . Y = v ;
+}
+    Target Registers:  EReg[mask 0x7fffffff]/p 
+
+  Usage:  field-written
+  Width:  32
+    X[0]   
+    Y[1,31]   
+      Usage:  field-written
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Parallel execution packet size: 2
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Concurrent Write Targets:  CReg 
+-------------------------------
+

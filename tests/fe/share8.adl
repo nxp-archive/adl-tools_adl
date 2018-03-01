@@ -1,0 +1,68 @@
+//
+// Tests the use of the 'active' key and use of architectural elements in cores.
+//
+
+define (arch=mt) {
+
+  define (reg=CIA) {
+    attrs=cia;
+  }
+  define (reg=NIA0) {
+  }
+  define (reg=NIA1) {
+  }
+
+  define (reg=HID0) {
+    define (field=EN0) {
+      bits = 0;
+    }
+    define (field=EN1) {
+      bits = 1;
+    }
+
+    reset = 0xC0000000;
+  }
+
+}
+
+define (core = P) {
+  remove = 1;
+}
+
+define (sys=PMT) {
+  type="minippc";
+  define (core = Thread0) {
+    type="Thread";
+    archs = (mt);
+    define (reg=NIA) {
+      attrs = nia;
+      define (write) {
+        alias = NIA0;
+      }
+      define (read) {
+        alias = NIA0;
+      }
+    }
+    active = { return (HID0.EN0 == 1); };
+  }
+  define (core = Thread1) {
+    type="Thread";
+    archs = (mt);
+    define (reg=NIA) {
+      attrs = nia;
+      define (write) {
+        alias = NIA1;
+      }
+      define (read) {
+        alias = NIA1;
+      }
+    }
+    active = { return (HID0.EN1 == 1); };
+  }
+  define (shared) {
+    regs = (NIA0,NIA1,HID0);
+  }
+  Thread0 t0;
+  Thread1 t1;
+}
+

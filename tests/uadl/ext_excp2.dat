@@ -1,0 +1,50 @@
+#
+# This is an infinite loop which is only exited via a generation of an external
+# exception from the scripting interface.
+#
+= asm
+
+L1:
+  addi r1,r1,1
+  addi r2,r2,2
+	cmpwi r10,0
+  beq L1
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	addi r10,r10,1
+	rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x2C0A0000	#	cmpwi r10,0
+MD n=Mem ra=0x0000000c d=0x4182FFF4	#	beq L1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x00000028 d=0x4C000064	#	rfi
+# </GEN>
+
+CORE n=:P
+
+CORE n=:P
+RD n=NIA     d=0x00000000
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=XER     d=0x00000000
+RD n=IVOR4   d=0x24
+
+RESULTS
+
+RD n=GPR i=1  d=0x00000038
+RD n=GPR i=2  d=0x00000098
+RD n=GPR i=10 d=0x00000001

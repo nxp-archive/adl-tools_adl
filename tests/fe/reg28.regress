@@ -1,0 +1,2 @@
+reg28.adl:50: We only allow simple assignments to registers.  Arithmetic operator assignments are not allowed.
+reg28.adl:59: We only allow simple assignments to register files.  Arithmetic operator assignments are not allowed.

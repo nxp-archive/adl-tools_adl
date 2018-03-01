@@ -1,0 +1,4 @@
+P:thread1:  Instr 2:  IR element 1 of type INSTR:  Bad tags:  (op => 0x80202000 )
+  Found data:  (op => 0x802032000 )
+P:thread1:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

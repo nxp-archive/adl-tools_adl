@@ -1,0 +1,223 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A simple model with an MMU and variable length instructions, for testing
+// translation effects with the potential for misaligned instruction accesses.
+//
+
+#include "mod8.adl"
+
+defmod (core = P) {
+
+  attrs = (translation_attr);
+
+  define (reg=HID0) { }
+
+  define (reg=HDBCR0) {
+    """
+    Hardware debug control register 0.
+    """;
+    define (field=REALMODE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+    define (field=AS) {
+      bits = 12;
+    }
+    define (field=EE) {
+      bits = 13;
+    }
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR5) {
+    """
+    Interrupt-vector offset register 5.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7.
+    """;
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (mmu) {
+
+    // Both reads and fetches are non-interleaved.
+    interleaved_fetch = false;
+    interleaved_reads = false;
+
+    // Writes *are* interleaved so that writes can partially complete.
+    interleaved_writes = true;
+
+    both_enable = { return (HDBCR0.REALMODE == 0); };
+
+    define(lookup=TlbCam) {
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=E) {
+        bits = 1;
+        attrs = translation_attr;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+
+      exec_perm = func(TlbCam_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SX : t.UX) == 0) {
+          raiseException(ProtectionFault);
+        }
+        if (ea & 0x3) {
+          raiseException(AlignmentFault);
+        }
+      };
+
+      load_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SR : t.UR) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      store_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SW : t.UW) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+    }
+
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      ESR(0,0) = (instrHasAttr(store)) ? 1 : 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (exception=AlignmentFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR5(16,31));
+    };
+  }
+
+
+  remove itable_watch;
+
+  archs = (MiniPPC,Mixed);
+  instrtables=(mixed);
+}
+

@@ -1,0 +1,232 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  F: [not used] 
+    Pseudo:  1
+    Width:   8
+  OPCD: [not used] 
+    Pseudo:  1
+    Width:   8
+    Primary opcode.
+    
+  VarInstrOpcode_imp_bits__0_7_: [0,7] [not used] 
+  VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_: [0,15] [24,31] 
+  VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_: [0,15] [32,39] 
+  VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_: [0,15] [40,47] 
+  X1: 
+    Pseudo:  1
+    Width:   8
+  X1_imp_bits__16_23_: [16,23] 
+    Implements:  X1
+  X1_imp_bits__32_39_: [32,39] 
+    Implements:  X1
+  X1_imp_bits__40_47_: [40,47] 
+    Implements:  X1
+  X1_imp_bits__48_55_: [48,55] 
+    Implements:  X1
+  X2: 
+    Pseudo:  1
+    Width:   16
+  X2_imp_bits__16_31_: [16,31] 
+    Implements:  X2
+  X2_imp_bits__32_47_: [32,47] 
+    Implements:  X2
+  X2_imp_bits__40_55_: [40,55] 
+    Implements:  X2
+  X2_imp_bits__48_63_: [48,63] 
+    Implements:  X2
+  X3: 
+    Pseudo:  1
+    Width:   24
+  X3_imp_bits__16_39_: [16,39] 
+    Implements:  X3
+  X3_imp_bits__32_55_: [32,55] 
+    Implements:  X3
+  X3_imp_bits__40_63_: [40,63] 
+    Implements:  X3
+  X3_imp_bits__48_71_: [48,71] 
+    Implements:  X3
+Subinstructions:
+Name:  a1
+Fields:  X1 F(0)
+Action:  {
+}
+-------------------------------
+Name:  a2
+Fields:  X2 F(1)
+Action:  {
+}
+-------------------------------
+Name:  a3
+Fields:  X3 F(2)
+Action:  {
+}
+-------------------------------
+Name:  b1
+Fields:  X1 F(0)
+Action:  {
+}
+-------------------------------
+Name:  b2
+Fields:  X2 F(1)
+Action:  {
+}
+-------------------------------
+Name:  b3
+Fields:  X3 F(2)
+Action:  {
+}
+-------------------------------
+Instructions:
+  Name:  bar_a1_b1 (rank: 0)
+  Width:  40
+  Fields:  X1_imp_bits__16_23_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_ X1_imp_bits__32_39_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a1_b2 (rank: 0)
+  Width:  48
+  Fields:  X1_imp_bits__16_23_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_ X2_imp_bits__32_47_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a1_b3 (rank: 0)
+  Width:  56
+  Fields:  X1_imp_bits__16_23_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_ X3_imp_bits__32_55_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a2_b1 (rank: 0)
+  Width:  48
+  Fields:  X2_imp_bits__16_31_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_ X1_imp_bits__40_47_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a2_b2 (rank: 0)
+  Width:  56
+  Fields:  X2_imp_bits__16_31_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_ X2_imp_bits__40_55_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a2_b3 (rank: 0)
+  Width:  64
+  Fields:  X2_imp_bits__16_31_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_ X3_imp_bits__40_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a3_b1 (rank: 0)
+  Width:  56
+  Fields:  X3_imp_bits__16_39_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_ X1_imp_bits__48_55_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a3_b2 (rank: 0)
+  Width:  64
+  Fields:  X3_imp_bits__16_39_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_ X2_imp_bits__48_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  bar_a3_b3 (rank: 0)
+  Width:  72
+  Fields:  X3_imp_bits__16_39_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_ X3_imp_bits__48_71_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b1 (rank: 0)
+  Width:  40
+  Fields:  X1_imp_bits__16_23_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_ X1_imp_bits__32_39_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b2 (rank: 0)
+  Width:  48
+  Fields:  X1_imp_bits__16_23_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_ X2_imp_bits__32_47_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b3 (rank: 0)
+  Width:  56
+  Fields:  X1_imp_bits__16_23_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_24_31_ X3_imp_bits__32_55_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b1 (rank: 0)
+  Width:  48
+  Fields:  X2_imp_bits__16_31_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_ X1_imp_bits__40_47_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b2 (rank: 0)
+  Width:  56
+  Fields:  X2_imp_bits__16_31_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_ X2_imp_bits__40_55_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b3 (rank: 0)
+  Width:  64
+  Fields:  X2_imp_bits__16_31_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_32_39_ X3_imp_bits__40_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b1 (rank: 0)
+  Width:  56
+  Fields:  X3_imp_bits__16_39_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_ X1_imp_bits__48_55_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b2 (rank: 0)
+  Width:  64
+  Fields:  X3_imp_bits__16_39_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_ X2_imp_bits__48_63_
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b3 (rank: 0)
+  Width:  72
+  Fields:  X3_imp_bits__16_39_ VarInstrOpcode_imp_bits__0_7_x_8_15_x_40_47_ X3_imp_bits__48_71_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xffff00000000000000000000
+    7680(1e0000000000000000000000):      Mask:  0x000000ff0000000000000000
+      0(000000000000000000000000):  foo_a1_b1
+      1(000000010000000000000000):  foo_a1_b2
+      2(000000020000000000000000):  foo_a1_b3
+    7681(1e0100000000000000000000):      Mask:  0x00000000ff00000000000000
+      0(000000000000000000000000):  foo_a2_b1
+      1(000000000100000000000000):  foo_a2_b2
+      2(000000000200000000000000):  foo_a2_b3
+    7682(1e0200000000000000000000):      Mask:  0x0000000000ff000000000000
+      0(000000000000000000000000):  foo_a3_b1
+      1(000000000001000000000000):  foo_a3_b2
+      2(000000000002000000000000):  foo_a3_b3
+    11776(2e0000000000000000000000):      Mask:  0x000000ff0000000000000000
+      0(000000000000000000000000):  bar_a1_b1
+      1(000000010000000000000000):  bar_a1_b2
+      2(000000020000000000000000):  bar_a1_b3
+    11777(2e0100000000000000000000):      Mask:  0x00000000ff00000000000000
+      0(000000000000000000000000):  bar_a2_b1
+      1(000000000100000000000000):  bar_a2_b2
+      2(000000000200000000000000):  bar_a2_b3
+    11778(2e0200000000000000000000):      Mask:  0x0000000000ff000000000000
+      0(000000000000000000000000):  bar_a3_b1
+      1(000000000001000000000000):  bar_a3_b2
+      2(000000000002000000000000):  bar_a3_b3
+-------------------------------
+

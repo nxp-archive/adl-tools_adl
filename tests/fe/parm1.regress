@@ -1,0 +1,11 @@
+parm1.adl:25: warning: Item 'p4' was redefined.
+parm1.adl:17: warning:     Previous definition was here.
+parm1.adl:7: Parameter 'p1' has no options.
+parm1.adl:10: 'what' is not a valid option for parameter 'p2'.
+parm1.adl:14: No default value was specified for parameter 'p3'.
+parm1.adl:25: Parameter 'p4' has no options.
+parm1.adl:35: Register modifications are not allowed here.
+parm1.adl:40: No default value was specified for parameter 'p6'.
+parm1.adl:40: Parameter 'p6' may only have the option 'true' if it is strictly a boolean.
+parm1.adl:43: No default value was specified for parameter 'p7'.
+parm1.adl:43: Parameter 'p7' may only have the option 'false' if it is strictly a boolean.

@@ -1,0 +1,4 @@
+cfg3.ttc:6: 'stuff' is not a valid instruction or instruction class defined within core P.
+cfg3.ttc:10: 'mull' is not a valid instruction or instruction class defined within core P.
+cfg3.ttc:14: Unrecognized key 'lutancy'.
+Error:  Error parsing ISS configuration file.

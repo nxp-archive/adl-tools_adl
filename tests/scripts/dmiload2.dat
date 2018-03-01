@@ -1,0 +1,60 @@
+#
+# Same as dmiload1.dat, except that this enables the cache in mod18-tlm2-em.
+#
+= asm
+
+	stw r1,0x110(r0)
+	lwz r2,0x110(r0)
+	lwz r3,0x110(r0)
+	li r4,10
+	stwu r4,0x114(r10)
+	addi r4,r4,10
+	stwu r4,0x4(r10)
+	addi r4,r4,10
+	stwu r4,0x4(r10)
+	addi r4,r4,10
+	stwu r4,0x4(r10)
+	dcbf r10,r0
+
+= /asm
+
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90200110	#	stw r1,0x110(r0)
+MD n=Mem ra=0x00000004 d=0x80400110	#	lwz r2,0x110(r0)
+MD n=Mem ra=0x00000008 d=0x80600110	#	lwz r3,0x110(r0)
+MD n=Mem ra=0x0000000c d=0x3880000A	#	li r4,10
+MD n=Mem ra=0x00000010 d=0x948A0114	#	stwu r4,0x114(r10)
+MD n=Mem ra=0x00000014 d=0x3884000A	#	addi r4,r4,10
+MD n=Mem ra=0x00000018 d=0x948A0004	#	stwu r4,0x4(r10)
+MD n=Mem ra=0x0000001c d=0x3884000A	#	addi r4,r4,10
+MD n=Mem ra=0x00000020 d=0x948A0004	#	stwu r4,0x4(r10)
+MD n=Mem ra=0x00000024 d=0x3884000A	#	addi r4,r4,10
+MD n=Mem ra=0x00000028 d=0x948A0004	#	stwu r4,0x4(r10)
+MD n=Mem ra=0x0000002c d=0x7C0A00AC	#	dcbf r10,r0
+# </GEN>
+
+CORE n=:P
+
+RD n=CCR d=0xc0000000
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678
+RD n=GPR i=3 d=0xb0f0babe
+
+MD n=Mem ra=0x110 d=0
+MD n=Mem ra=0x114 d=0
+MD n=Mem ra=0x118 d=0
+MD n=Mem ra=0x11c d=0
+MD n=Mem ra=0x120 d=0
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeadbeef
+
+MD n=Mem ra=0x110 d=0xdeadbeef
+MD n=Mem ra=0x114 d=10
+MD n=Mem ra=0x118 d=20
+MD n=Mem ra=0x11c d=30
+MD n=Mem ra=0x120 d=40

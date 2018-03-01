@@ -1,0 +1,77 @@
+//
+// This demonstrates that a instruction can be encoded in a non-leaf node, as long as
+// there are other fields that can be used to differntiate between the instrcutins.
+// 
+
+
+define (arch = minippc) {
+    
+  //
+  // Instruction fields.
+  //
+  
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+  
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+  
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=RC) {
+    """
+    Extended RC opcode.
+    """;
+    bits = (31,31);
+  }
+  
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  //
+  // Instructions.
+  //
+    
+  define (instr=or) {
+    fields=(OPCD(31),RA,RS,RB,XO(444));
+    action = { };
+  }
+  
+  define (instr="or.") {
+    fields=(OPCD(31),RS,RA,RB,XO(444),RC(1));
+    action = { };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

@@ -1,0 +1,1652 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use rdriver;
+use regress_utils;
+use strict;
+use Data::Dumper;
+use File::Basename;
+
+use vars qw($src $is_external_release);
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+my @Tests = (
+	model_test("./dlx",     "$src/load1.dat"),
+	model_test("./dlx-vd",  "$src/load1.dat"),
+	model_test("./dlx-safe","$src/load1.dat"),
+	model_test("./dlx-64",  "$src/load1-dlx-64.dat"),
+
+	model_test("./dlx",     "$src/store1.dat"),
+	model_test("./dlx-vd",  "$src/store1.dat"),
+	model_test("./dlx-safe","$src/store1.dat"),
+	model_test("./dlx-64",  "$src/store1-dlx-64.dat"),
+
+	model_test("./dlx",     "$src/store2.dat"),
+	model_test("./dlx-vd",  "$src/store2.dat"),
+	model_test("./dlx-safe","$src/store2.dat"),
+	model_test("./dlx-64",  "$src/store2.dat"),
+
+	model_test("./dlx",     "$src/branch1.dat"),
+	model_test("./dlx-vd",  "$src/branch1.dat"),
+	model_test("./dlx-safe","$src/branch1.dat"),
+	model_test("./dlx-64",  "$src/branch1.dat"),
+
+	model_test("./dlx",     "$src/lat1.dat"),
+	model_test("./dlx-vd",  "$src/lat1.dat"),
+	model_test("./dlx-safe","$src/lat1.dat"),
+
+	model_test("./dlx",     "$src/lat2.dat"),
+	model_test("./dlx-vd",  "$src/lat2.dat"),
+	model_test("./dlx-safe","$src/lat2.dat"),
+
+	model_test("./dlx",     "$src/flag1.dat"),
+	model_test("./dlx-vd",  "$src/flag1.dat"),
+	model_test("./dlx-safe","$src/flag1.dat"),
+
+	model_test("./dlx",     "$src/stall4.dat"),
+	model_test("./dlx-vd",  "$src/stall4.dat"),
+	model_test("./dlx-safe","$src/stall4.dat"),
+
+	model_test("./dlx",     "$src/in1.dat"),
+	model_test("./dlx-vd",  "$src/in1.dat"),
+	model_test("./dlx-safe","$src/in1-safe.dat"),
+	model_test("./dlx-64",  "$src/in1.dat"),
+
+	model_test("./dlx",        "$src/in2.dat"),
+	model_test("./dlx-vd",     "$src/in2.dat"),
+	model_test("./dlx-safe",   "$src/in2.dat"),
+	model_test("./dlx-ext-mem","$src/in2.dat"),
+	model_test("./dlx-64",     "$src/in2.dat"),
+
+	model_test("./dlx",        "$src/in3.dat"),
+	model_test("./dlx-vd",     "$src/in3.dat"),
+	model_test("./dlx-safe",   "$src/in3.dat"),
+	model_test("./dlx-ext-mem","$src/in3.dat"),
+	model_test("./dlx-64",     "$src/in3.dat"),
+
+	model_test("./dlx",        "$src/in4.dat"),
+	model_test("./dlx-vd",     "$src/in4.dat"),
+	model_test("./dlx-safe",   "$src/in4.dat"),
+	model_test("./dlx-ext-mem","$src/in4.dat"),
+	model_test("./dlx-64",     "$src/in4.dat"),
+
+	model_test("./dlx",        "$src/in17.dat"),
+	model_test("./dlx-vd",     "$src/in17.dat"),
+	model_test("./dlx-safe",   "$src/in17.dat"),
+	model_test("./dlx-ext-mem","$src/in17.dat"),
+	model_test("./dlx-64",     "$src/in17-dlx-64.dat"),
+
+	model_test("./dlx",        "$src/in18.dat"),
+	model_test("./dlx-vd",     "$src/in18.dat"),
+	model_test("./dlx-safe",   "$src/in18.dat"),
+	model_test("./dlx-ext-mem","$src/in18.dat"),
+	model_test("./dlx-64",     "$src/in18-dlx-64.dat"),
+
+	model_test("./dlx",        "$src/in19.dat",1),
+	model_test("./dlx-vd",     "$src/in19.dat",1),
+	model_test("./dlx-safe",   "$src/in19.dat",1),
+	model_test("./dlx-64",     "$src/in19.dat",1),
+	
+	# Test the use of a plugin and logging of branch taken/untaken behavior.
+	{
+		cmd  => "./dlx-safe $src/../iss/in4.dat -o=in4.bcnt --plugin=./../iss/count-branches.so -trace",
+		checker => sub { 
+			file_diff("in4.bcnt","$src/../iss/in4.bcnt.regress"); 
+		},
+	},
+
+	# These make sure that a safe-mode model which models branches incorrectly (in
+	# this case, never flushes) will still execute correctly.
+	model_test("./dlx-bad-br", "$src/in3.dat",0,0,0,"--ignore-timing"),
+	model_test("./dlx-bad-br", "$src/in4.dat",0,0,0,"--ignore-timing"),
+
+	# Test the scripting language and event callbacks.
+	{
+		cmd     => "./dlx --script=$src/events1.cli > events1.out",
+		checker => \&check_events1,
+		stdio   => 1,
+		temps   => [ "events1.uapipe", "events1.out" ],
+	},
+	{
+		cmd     => "./dlx --script=$src/events2.cli > events2.out",
+		checker => \&check_events2,
+		stdio   => 1,
+		temps   => [ "events2.uapipe", "events2.out" ],
+	},
+	{
+		cmd     => "./dlx $src/in3.dat --script=$src/haltn.cli --script-arg=0x8 --script-arg=2 -trace > haltn.out",
+		checker => \&check_haltn,
+		temps   => [ "haltn.out" ],
+	},
+
+	model_test("./dlx-fwd",     "$src/fwd1.dat"),
+	model_test("./dlx-fwd-safe","$src/fwd1.dat"),
+
+	model_test("./dlx-fwd",     "$src/fwd2.dat"),
+	model_test("./dlx-fwd-safe","$src/fwd2.dat"),
+
+	model_test("./dlx-fwd",     "$src/fwd3.dat"),
+	model_test("./dlx-fwd-safe","$src/fwd3.dat"),
+
+	model_test("./dlx-fwd",     "$src/fwd4.dat"),
+	model_test("./dlx-fwd-safe","$src/fwd4.dat"),
+
+	model_test("./dlx-fwd",     "$src/fwd5.dat"),
+	model_test("./dlx-fwd-safe","$src/fwd5.dat"),
+
+	model_test("./dlx-fwd",     "$src/store6.dat"),
+	model_test("./dlx-fwd-safe","$src/store6.dat"),
+
+	# Make sure that custom resources work and that we can see their logging
+	# information.
+	{
+		cmd     => "./dlx-fwd $src/cr1.dat -trace-all -trace",
+		checker => \&check_cr1,
+		stdio   => 1,
+		temps   => [ "cr1.out.dat" ],
+	},
+	{
+		cmd     => "./dlx-fwd-safe $src/cr1.dat -trace-all -trace",
+		checker => \&check_cr1,
+		stdio   => 1,
+		temps   => [ "cr1.out.dat" ],
+	},
+
+	ext_model_test(	model   => "./dlx-fwd -trace", input   => "$src/in2.dat",	results => "$src/in2-dlx-fwd.dat"	),
+	ext_model_test(	model   => "./dlx-fwd-safe -trace",	input   => "$src/in2.dat", results => "$src/in2-dlx-fwd.dat" ),
+
+	ext_model_test(	model   => "./dlx-fwd -trace", input   => "$src/in3.dat",	results => "$src/in3-dlx-fwd.dat"	),
+	ext_model_test(	model   => "./dlx-fwd-safe -trace",	input   => "$src/in3.dat", results => "$src/in3-dlx-fwd.dat" ),
+
+	ext_model_test(	model   => "./dlx-fwd -trace", input   => "$src/in4.dat",	results => "$src/in4-dlx-fwd.dat"	),
+	ext_model_test(	model   => "./dlx-fwd-safe -trace",	input   => "$src/in4.dat", results => "$src/in4-dlx-fwd.dat" ),
+
+	ext_model_test(	model   => "./dlx-fwd -trace", input   => "$src/in17.dat",	results => "$src/in17-dlx-fwd.dat"	),
+	ext_model_test(	model   => "./dlx-fwd-safe -trace",	input   => "$src/in17.dat", results => "$src/in17-dlx-fwd.dat" ),
+
+	ext_model_test(	model   => "./dlx-fwd -trace", input   => "$src/in18.dat",	results => "$src/in18-dlx-fwd.dat"	),
+	ext_model_test(	model   => "./dlx-fwd-safe -trace",	input   => "$src/in18.dat", results => "$src/in18-dlx-fwd.dat" ),
+
+	ext_model_test(	model   => "./dlx-fwd -trace", input   => "$src/in19.dat",	results => "$src/in19-dlx-fwd.dat"	),
+	ext_model_test(	model   => "./dlx-fwd-safe -trace",	input   => "$src/in19.dat", results => "$src/in19-dlx-fwd.dat" ),
+
+	ext_model_test(	model   => "./dlx2 -trace", input   => "$src/no_mmu.dat $src/in2.dat",	results => "$src/in2-dlx2.dat"	),
+	ext_model_test(	model   => "./dlx2-safe -trace", input   => "$src/no_mmu.dat $src/in2.dat",	results => "$src/in2-dlx2.dat"	),
+
+	ext_model_test(	model   => "./dlx2 -trace", input   => "$src/no_mmu.dat $src/in3.dat",	results => "$src/in3-dlx2.dat"	),
+	ext_model_test(	model   => "./dlx2-safe -trace", input   => "$src/no_mmu.dat $src/in3.dat",	results => "$src/in3-dlx2.dat"	),
+
+	ext_model_test(	model   => "./dlx2 -trace", input   => "$src/no_mmu.dat $src/in4.dat",	results => "$src/in4-dlx2.dat"	),
+	ext_model_test(	model   => "./dlx2-safe -trace", input   => "$src/no_mmu.dat $src/in4.dat",	results => "$src/in4-dlx2.dat"	),
+
+	ext_model_test(	model   => "./dlx2 -trace", input   => "$src/no_mmu.dat $src/in17.dat",	results => "$src/in17-dlx2.dat"	),
+	ext_model_test(	model   => "./dlx2-safe -trace", input   => "$src/no_mmu.dat $src/in17.dat",	results => "$src/in17-dlx2.dat"	),
+
+	ext_model_test(	model   => "./dlx2 -trace", input   => "$src/no_mmu.dat $src/in18.dat",	results => "$src/in18-dlx2.dat"	),
+	ext_model_test(	model   => "./dlx2-safe -trace", input   => "$src/no_mmu.dat $src/in18.dat",	results => "$src/in18-dlx2.dat"	),
+
+	ext_model_test(	model   => "./dlx2 -trace", input   => "$src/no_mmu.dat $src/in19.dat",	results => "$src/in19-dlx2.dat"	),
+	ext_model_test(	model   => "./dlx2-safe -trace", input   => "$src/no_mmu.dat $src/in19.dat",	results => "$src/in19-dlx2.dat"	),
+
+	model_test("./dlx2",     "$src/issue1.dat"),
+	model_test("./dlx2-safe","$src/issue1.dat"),
+
+	model_test("./dlx2",     "$src/issue2.dat"),
+	model_test("./dlx2-safe","$src/issue2.dat"),
+
+	model_test("./dlx2",     "$src/issue3.dat"),
+	model_test("./dlx2-safe","$src/issue3.dat"),
+
+	model_test("./dlx2",     "$src/issue4.dat"),
+	model_test("./dlx2-safe","$src/issue4.dat"),
+
+	model_test("./dlx2",     "$src/issue5.dat"),
+	model_test("./dlx2-safe","$src/issue5.dat"),
+
+	model_test("./dlx2",     "$src/issue6.dat"),
+	model_test("./dlx2-safe","$src/issue6.dat"),
+
+	model_test("./dlx2",     "$src/issue7.dat"),
+	model_test("./dlx2-safe","$src/issue7.dat"),
+
+	model_test("./dlx2",     "$src/issue8.dat"),
+	model_test("./dlx2-safe","$src/issue8.dat"),
+
+	model_test("./dlx2",     "$src/issue9.dat"),
+	model_test("./dlx2-safe","$src/issue9.dat"),
+
+	model_test("./dlx2",     "$src/issue14.dat"),
+	model_test("./dlx2-safe","$src/issue14.dat"),
+
+	model_test("./dlx2",     "$src/flush2.dat"),
+	model_test("./dlx2-safe","$src/flush2.dat"),
+
+	model_test("./dlx2",     "$src/oprnd2.dat"),
+	model_test("./dlx2-safe","$src/oprnd2.dat"),
+
+	model_test("./dlx2",     "$src/oprnd3.dat"),
+	model_test("./dlx2-safe","$src/oprnd3.dat"),
+
+	model_test("./dlx2",     "$src/ex1.dat"),
+	model_test("./dlx2-safe","$src/ex1.dat"),
+
+	model_test("./dlx2",      "$src/ex2.dat"),
+	model_test("./dlx2-safe","$src/ex2.dat"),
+
+	model_test("./dlx2",     "$src/ex3.dat"),
+	model_test("./dlx2-safe","$src/ex3.dat"),
+
+	model_test("./dlx2",     "$src/ex4.dat"),
+	model_test("./dlx2-safe","$src/ex4.dat"),
+
+	model_test("./dlx2",     "$src/ex5.dat"),
+	model_test("./dlx2-safe","$src/ex5.dat"),
+
+	model_test("./dlx2",     "$src/ex6.dat"),
+	model_test("./dlx2-safe","$src/ex6.dat"),
+
+	model_test("./dlx2",     "$src/ex7.dat"),
+	model_test("./dlx2-safe","$src/ex7.dat"),
+
+	model_test("./dlx2",        "$src/ex8.dat"),
+	model_test("./dlx2-lm",     "$src/ex8.dat"),
+	model_test("./dlx2-safe",   "$src/ex8.dat"),
+	model_test("./dlx2-safe-lm","$src/ex8.dat"),
+
+	model_test("./dlx2",        "$src/ex9.dat"),
+	model_test("./dlx2-lm",     "$src/ex9.dat"),
+	model_test("./dlx2-safe",   "$src/ex9.dat"),
+	model_test("./dlx2-safe-lm","$src/ex9.dat"),
+
+	model_test("./dlx2",     "$src/../iss/in132.dat"),
+	model_test("./dlx2-safe","$src/../iss/in132.dat",0,0,[ "NIA" ]),
+
+	# make sure that we don't process multiple fetch exceptions in one cycle,
+	# since that'll screw up the SRR1 value.
+	model_test("./dlx2",     "$src/issue6.dat"),
+	model_test("./dlx2-safe","$src/issue6.dat"),
+
+	# check lock-step behavior for multi-issue.
+	model_test("./dlx2",     "$src/stall5.dat"),
+	model_test("./dlx2-safe","$src/stall5.dat"),
+
+	# another external exception test.
+	model_test("./dlx2 --script=$src/ext_excp2.cli",     "$src/ext_excp2.dat"),
+	model_test("./dlx2-safe --script=$src/ext_excp2.cli","$src/ext_excp2.dat"),
+
+	# another external exception test, this one with edge sensitive interrupts.
+	ext_model_test(
+		model   => "./dlx2-ese --script=$src/ext_excp3.cli",
+		input   => "$src/ext_excp2.dat",
+		output  => "ext_excp3.out.dat",
+		results => "$src/ext_excp2.dat",
+	),
+	ext_model_test(
+		model   => "./dlx2-ese-safe --script=$src/ext_excp3.cli",
+		input   => "$src/ext_excp2.dat",
+		output  => "ext_excp3.out.dat",
+		results => "$src/ext_excp2.dat",
+	),
+
+	# breakpoint test, checking multi-issue behavior.
+	ext_model_test(	
+		model   => "./dlx2 -trace -script=$src/haltn.cli --script-arg=0x8 --script-arg=3", 
+		input   => "$src/in3.dat",	
+		results => "$src/in3-halt3.dat"	
+	),
+
+	# breakpoint test, checking multi-issue behavior.
+	model_test("./dlx2 -trace -script=$src/haltn.cli --script-arg=0x10 --script-arg=1", "$src/branch2.dat"),
+
+	model_test("./dlx2-fwd",     "$src/in3-dlx2-fwd.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/in3-dlx2-fwd.dat"),
+	model_test("./dlx2-fwd-safe","$src/in3-dlx2-fwd.dat"),
+
+	model_test("./dlx2-fwd",     "$src/in4-dlx2-fwd.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/in4-dlx2-fwd.dat"),
+	model_test("./dlx2-fwd-safe","$src/in4-dlx2-fwd.dat"),
+
+	model_test("./dlx2-fwd",     "$src/issue10.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/issue10.dat"),
+	model_test("./dlx2-fwd-safe","$src/issue10.dat"),
+
+	model_test("./dlx2-fwd",     "$src/issue11.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/issue11.dat"),
+	model_test("./dlx2-fwd-safe","$src/issue11.dat"),
+
+	model_test("./dlx2-fwd",     "$src/issue12.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/issue12.dat"),
+	model_test("./dlx2-fwd-safe","$src/issue12.dat"),
+
+	model_test("./dlx2-fwd",     "$src/fwd6.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/fwd6.dat"),
+	model_test("./dlx2-fwd-safe","$src/fwd6.dat"),
+
+	model_test("./dlx2-fwd",     "$src/fwd7.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/fwd7.dat"),
+	model_test("./dlx2-fwd-safe","$src/fwd7.dat"),
+
+	model_test("./dlx2-fwd",     "$src/fwd8.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/fwd8.dat"),
+	model_test("./dlx2-fwd-safe","$src/fwd8.dat"),
+
+	model_test("./dlx2-fwd",     "$src/fwd9.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/fwd9.dat"),
+	model_test("./dlx2-fwd-safe","$src/fwd9.dat"),
+
+	model_test("./dlx2-fwd",     "$src/fwd10.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/fwd10.dat"),
+	model_test("./dlx2-fwd-safe","$src/fwd10.dat"),
+
+	model_test("./dlx2-fwd",     "$src/fwd11.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/fwd11.dat"),
+	model_test("./dlx2-fwd-safe","$src/fwd11.dat"),
+
+	model_test("./dlx2-fwd",     "$src/store5.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/store5.dat"),
+	model_test("./dlx2-fwd-safe","$src/store5.dat"),
+
+	model_test("./dlx2-fwd",     "$src/branch3.dat"),
+	model_test("./dlx2-fwd-vd",  "$src/branch3.dat"),
+	model_test("./dlx2-fwd-safe","$src/branch3.dat"),
+
+	model_test("./dlx2-fwd-bad-br","$src/branch9.dat"),
+
+	model_test("./dlx2-bp2",     "$src/in3-dlx2-bp2.dat"),
+	model_test("./dlx2-bp2-safe","$src/in3-dlx2-bp2.dat"),
+
+	model_test("./dlx2-bp2",     "$src/in4-dlx2-bp2.dat"),
+	model_test("./dlx2-bp2-safe","$src/in4-dlx2-bp2.dat"),
+
+	model_test("./dlx2-bp2",     "$src/branch4.dat"),
+	model_test("./dlx2-bp2-safe","$src/branch4.dat"),
+
+	model_test("./dlx2-bp2",     "$src/branch5.dat"),
+	model_test("./dlx2-bp2-safe","$src/branch5.dat"),
+
+	model_test("./dlx2-bp2",     "$src/branch6.dat"),
+	model_test("./dlx2-bp2-safe","$src/branch6.dat"),
+	model_test("./dlx2-bp2-bad-br","$src/branch6.dat"),
+
+	# We ignore the RPN field due to the fact that we're relying upon the miss
+  # object (we're not setting up translations) and its value can vary due to the
+  # different EPNs.
+	model_test("./dlx2-bp3-safe","$src/in3-dlx2-bp3-safe.dat"),
+
+	model_test("./dlx2-bp3-safe","$src/in4-dlx2-bp3-safe.dat",0,0,0,"--ignore-field=RPN"),
+
+	model_test("./dlx2-bp3-safe","$src/branch8.dat"),
+
+	# For these tests, we want to make sure that they pass, ignoring timing, but
+	# that they fail their timing check, in order to ensure that we really are
+	# testing with a bad predictor.
+	{
+		cmd     => "./dlx2-bp2-bad-br $src/branch4.dat -trace",
+		checker => sub {
+			check_results ("$src/branch4.dat","branch4.out.dat",0,0,0,0,"--ignore-timing");
+			eval {
+				check_results ("$src/branch4.dat","branch4.out.dat",1,0,0,0);
+			};
+			if (! $@ ) {
+				die "Did not find expected failure of timing results check.";
+			}
+		},
+		temps   => [ "branch4.out.dat" ],
+	},
+	{
+		cmd     => "./dlx2-bp2-bad-br $src/branch5.dat -trace",
+		checker => sub {
+			check_results ("$src/branch5.dat","branch5.out.dat",0,0,0,0,"--ignore-timing");
+			eval {
+				check_results ("$src/branch5.dat","branch5.out.dat",1,0,0,0);
+			};
+			if (! $@ ) {
+				die "Did not find expected failure of timing results check.";
+			}
+		},
+		temps   => [ "branch5.out.dat" ],
+	},
+
+	model_test("./dlx2-pmr",     "$src/in4-dlx2-pmr.dat"),
+	model_test("./dlx2-pmr-safe","$src/in4-dlx2-pmr.dat"),
+
+	model_test("./dlx2-pmr",     "$src/in17-dlx2-pmr.dat"),
+	model_test("./dlx2-pmr-safe","$src/in17-dlx2-pmr.dat"),
+
+	model_test("./dlx2-pmr",     "$src/in18-dlx2-pmr.dat"),
+	model_test("./dlx2-pmr-safe","$src/in18-dlx2-pmr.dat"),
+
+	model_test("./dlx2-pmr",     "$src/load1-dlx2-pmr.dat"),
+	model_test("./dlx2-pmr-safe","$src/load1-dlx2-pmr.dat"),
+
+	model_test("./dlx2-pmr",     "$src/store1-dlx2-pmr.dat"),
+	model_test("./dlx2-pmr-safe","$src/store1-dlx2-pmr.dat"),
+
+	model_test("./dlx2-pmr",     "$src/fwd12.dat"),
+	model_test("./dlx2-pmr-safe","$src/fwd12.dat"),
+
+	model_test("./dlx2-wide-safe","$src/loadstore9.dat"),
+	model_test("./dlx2-wide-safe","$src/loadstore10.dat"),
+	model_test("./dlx2-wide-safe","$src/issue13.dat"),
+
+	ext_model_test(	model => "./dlx-bp-fetch -trace",      input => "$src/in3.dat", results => "$src/in3-dlx-bp-fetch.dat"	),
+	ext_model_test(	model => "./dlx-bp-fetch-safe -trace", input => "$src/in3.dat", results => "$src/in3-dlx-bp-fetch.dat"	),
+
+	ext_model_test(	model => "./dlx-bp-fetch -trace",      input => "$src/in4.dat", results => "$src/in4-dlx-bp-fetch.dat"	),
+	ext_model_test(	model => "./dlx-bp-fetch-safe -trace", input => "$src/in4.dat", results => "$src/in4-dlx-bp-fetch.dat"	),
+
+	model_test("./dlx-bp-fetch",     "$src/loadstore2.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/loadstore2.dat"),
+
+	model_test("./dlx-bp-fetch",     "$src/bp_alias.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/bp_alias.dat"),
+
+	model_test("./dlx-bp-fetch",     "$src/bt_alias.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/bt_alias.dat"),
+
+	model_test("./dlx-bp-fetch",     "$src/bp_tag.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/bp_tag.dat"),
+
+	model_test("./dlx-bp-fetch",     "$src/../iss/in135.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/../iss/in135.dat"),
+
+	model_test("./dlx-bp-fetch",     "$src/bp_enable.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/bp_enable.dat"),
+
+	model_test("./dlx-bp-fetch",     "$src/oprnd4.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/oprnd4.dat"),
+
+	# test: exceptions generated by an external memory
+	model_test("./dlx-bp-fetch-safe-ext-mem --test-exception=0x1000","$src/ext_mem_excp.dat"),
+	
+	# Example of using the scripting interface to modify dynamic parameters.
+	ext_model_test(	
+		model   => "./dlx-bp-fetch", 
+		flags   => "--script=$src/dynparm1.cli",	
+		results => "$src/dynparm1.dat" 
+	),
+	
+	# Scripting-interface breakpoints with uADL.
+	{
+		cmd     => "./dlx-bp-fetch-safe $src/../iss/in3.dat --script=$src/brkpts1.cli -trace",
+		stdio   => 1,
+		diff    => "$src/brkpts1.regress",
+	},
+
+	# Example of using the scripting interface to generate an external
+	# exception.
+	ext_model_test(
+		model   => "./dlx-bp-fetch-safe",
+		flags   => "-trace --script=$src/../cli/c38.cli",
+		results => "$src/test_ext_excp.dat",
+		ignores => ["NIA"],
+	),
+
+	# Test that the  --mic option works.
+	ext_model_test(model   => "./dlx-bp-fetch-safe --mic=100 -trace",
+								 results => "$src/in4-short.dat",
+	),
+
+	# Test again, this time with a model that has only 1 fetch size.  Note: The
+	# max instruction count is different b/c right now --mic triggers off of the
+	# instruction count in the ISS.  We might want to change that in the future.
+	ext_model_test(model    => "./dlx2 --mic=124 -trace",
+								 results  => "$src/in4-short.dat",
+								 td_flags => "--ignore-timing",
+	),
+	
+	# Test that we recover all memory objects when exceptions occur.
+	model_test("./dlx-bp-fetch",     "$src/loadstore6.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/loadstore6.dat"),
+
+	# Test that we correctly convey instruction attributes to exception handlers.
+	model_test("./dlx-bp-fetch",     "$src/../iss/in219.dat"),
+	model_test("./dlx-bp-fetch-safe","$src/../iss/in219.dat"),
+
+	ext_model_test(	model => "./dlx-bp-issue -trace",      input => "$src/in3.dat", results => "$src/in3-dlx-bp-issue.dat", td_flags => "--ignore-field=RPN"	),
+	ext_model_test(	model => "./dlx-bp-issue-safe -trace", input => "$src/in3.dat", results => "$src/in3-dlx-bp-issue.dat", td_flags => "--ignore-field=RPN"	),
+
+	ext_model_test(	model => "./dlx-bp-issue -trace",      input => "$src/in4.dat", results => "$src/in4-dlx-bp-issue.dat", td_flags => "--ignore-field=RPN"	),
+	ext_model_test(	model => "./dlx-bp-issue-safe -trace", input => "$src/in4.dat", results => "$src/in4-dlx-bp-issue.dat", td_flags => "--ignore-field=RPN"	),
+
+	model_test("./dlx-bp-issue","$src/bp_alias.dat"),
+	model_test("./dlx-bp-issue-safe","$src/bp_alias.dat"),
+
+	# Branch prediction enable test
+	ext_model_test(
+		model    => "./dlx-bp-issue",
+		flags    => "-ti -trace-all",
+		results  => "$src/bp_enable.dat",
+		stdio    => 1,
+		checker  => sub { check_bp_enable(@_); }
+	),
+
+	ext_model_test(	model => "./dlx-z0 -trace",         input => "$src/in2.dat",	 results => "$src/in2-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-safe -trace",    input => "$src/in2.dat",	 results => "$src/in2-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-ext-mem -trace", input => "$src/in2.dat",	 results => "$src/in2-dlx-z0.dat"	),
+
+	ext_model_test(	model => "./dlx-z0 -trace",         input => "$src/in3.dat",	 results => "$src/in3-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-safe -trace",    input => "$src/in3.dat",	 results => "$src/in3-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-ext-mem -trace", input => "$src/in3.dat",	 results => "$src/in3-dlx-z0.dat"	),
+
+	ext_model_test(	model => "./dlx-z0 -trace",         input => "$src/in4.dat",	 results => "$src/in4-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-safe -trace",    input => "$src/in4.dat",	 results => "$src/in4-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-ext-mem -trace", input => "$src/in4.dat",	 results => "$src/in4-dlx-z0.dat"	),
+
+	ext_model_test(	model => "./dlx-z0 -trace",      input => "$src/in17.dat", results => "$src/in17-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-safe -trace", input => "$src/in17.dat", results => "$src/in17-dlx-z0.dat"	),
+
+	ext_model_test(	model => "./dlx-z0 -trace",      input => "$src/in18.dat", results => "$src/in18-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-safe -trace", input => "$src/in18.dat", results => "$src/in18-dlx-z0.dat"	),
+	
+	ext_model_test(	model => "./dlx-z0 -trace",      input => "$src/in19.dat", results => "$src/in19-dlx-z0.dat"	),
+	ext_model_test(	model => "./dlx-z0-safe -trace", input => "$src/in19.dat", results => "$src/in19-dlx-z0.dat"	),
+
+	model_test("./dlx-z0",     "$src/cust-lat1.dat"),
+	model_test("./dlx-z0-safe","$src/cust-lat1.dat"),
+
+	model_test("./dlx-z0",     "$src/cust-lat2.dat"),
+	model_test("./dlx-z0-safe","$src/cust-lat2.dat"),
+
+	model_test("./dlx-z0",     "$src/BookeAlu01.dat"),
+	model_test("./dlx-z0-safe","$src/BookeAlu01.dat"),
+
+	model_test("./dlx-z0",     "$src/flush1.dat"),
+	model_test("./dlx-z0-safe","$src/flush1.dat"),
+
+	model_test("./dlx-z0",     "$src/../iss/in6.dat",0,0,[ "PREEXCPT", "POSTEXCPT", "ICNT", "FCNT" ]),
+	model_test("./dlx-z0-safe","$src/../iss/in6.dat",0,0,[ "PREEXCPT", "POSTEXCPT", "ICNT", "FCNT" ]),
+
+	model_test("./dlx-z0 --dat-map-core-name=powerpc:P",     "$src/../designs/adpcm.dat",0,0,[],"--map-core-name=powerpc:P"),
+	model_test("./dlx-z0-safe --dat-map-core-name=powerpc:P","$src/../designs/adpcm.dat",0,0,[],"--map-core-name=powerpc:P"),
+
+	model_test("./dlx-z0 --dat-map-core-name=powerpc:P",     "$src/../designs/compress.dat",0,0,[],"--map-core-name=powerpc:P"),
+	model_test("./dlx-z0-safe --dat-map-core-name=powerpc:P","$src/../designs/compress.dat",0,0,[],"--map-core-name=powerpc:P"),
+
+	model_test("./dlx-z0 --dat-map-core-name=powerpc:P",     "$src/../designs/des.dat",0,0,[],"--map-core-name=powerpc:P"),
+	model_test("./dlx-z0-safe --dat-map-core-name=powerpc:P","$src/../designs/des.dat",0,0,[],"--map-core-name=powerpc:P"),
+
+	model_test("./dlx-z0 --dat-map-core-name=powerpc:P",     "$src/../designs/fir.dat",0,0,[],"--map-core-name=powerpc:P"),
+	model_test("./dlx-z0-safe --dat-map-core-name=powerpc:P","$src/../designs/fir.dat",0,0,[],"--map-core-name=powerpc:P"),
+
+	model_test("./dlx-z0 --dat-map-core-name=powerpc:P",     "$src/../designs/ucbqsort.dat",0,0,[],"--map-core-name=powerpc:P"),
+	model_test("./dlx-z0-safe --dat-map-core-name=powerpc:P","$src/../designs/ucbqsort.dat",0,0,[],"--map-core-name=powerpc:P"),
+
+	model_test("./dlx-z0-safe --fep","$src/../designs/dhry.elf",0,"dhry.dat",["NIA", "CCR", "card:CD"],"--map-core-name=powerpc:P"),
+
+	model_test("./dlx-z0",     "$src/stall6.dat"),
+	model_test("./dlx-z0-safe","$src/stall6.dat"),
+
+	model_test("./dlx-zl2-safe","$src/in2-dlx-zl2-safe.dat"),
+
+	model_test("./dlx-zl2-safe","$src/in4-dlx-zl2-safe.dat"),
+
+	{
+		cmd     => "./dlx-zl2-safe -fep -syscall-enabled -no-output $src/../designs/hello.elf",
+		stdout  => 1,
+		checker => sub { 
+									 checkstr($_[0],
+														"Hello, the results are 20 and 30."
+											 ) },
+	},
+
+	model_test("./dlx-vle",     "$src/in5.dat"),
+	model_test("./dlx-vle-ic",  "$src/in5.dat"),
+	model_test("./dlx-vle-safe","$src/in5.dat"),
+
+	model_test("./dlx-vle",     "$src/../iss/in121.dat"),
+	model_test("./dlx-vle-ic",  "$src/../iss/in121.dat"),
+	model_test("./dlx-vle-safe","$src/../iss/in121.dat"),
+
+	model_test("./dlx-vle",     "$src/in127.dat"),
+	model_test("./dlx-vle-ic",  "$src/in127.dat"),
+	model_test("./dlx-vle-safe","$src/in127.dat"),
+
+	model_test("./dlx-vle",     "$src/../iss/in128.dat",0,0,[ "NIA" ]),
+	model_test("./dlx-vle-ic",  "$src/../iss/in128.dat",0,0,[ "NIA" ]),
+	model_test("./dlx-vle-safe","$src/../iss/in128.dat",0,0,[ "NIA" ]),
+
+	model_test("./dlx-vle",     "$src/vle1.dat"),
+	model_test("./dlx-vle-ic",  "$src/vle1.dat"),
+	model_test("./dlx-vle-safe","$src/vle1.dat"),
+
+	model_test("./dlx-vle",     "$src/vle2.dat"),
+	model_test("./dlx-vle-ic",  "$src/vle2.dat"),
+	model_test("./dlx-vle-safe","$src/vle2.dat"),
+
+	# Make sure that logging is correct wrt. opcodes displayed.
+	{
+		cmd     => "./dlx-vle --trace-all --no-output $src/vle2.dat",
+		stdio   => 1,
+		checker => \&check_vle2,
+	},
+
+	model_test("./dlx-vle",     "$src/vle3.dat"),
+	model_test("./dlx-vle-ic",  "$src/vle3.dat"),
+	model_test("./dlx-vle-safe","$src/vle3.dat"),
+
+	ext_model_test(	model => "./dlx-cache-split2 -trace",      input => "$src/in2.dat",	 results => "$src/in2-dlx-cache-split2.dat"	),
+	ext_model_test(	model => "./dlx-cache-split2-safe -trace", input => "$src/in2.dat",	 results => "$src/in2-dlx-cache-split2.dat", td_flags => "-ic=C" ),
+
+	ext_model_test(	model => "./dlx-cache-split2 -trace",      input => "$src/in3.dat",	 results => "$src/in3-dlx-cache-split2.dat"	),
+	ext_model_test(	model => "./dlx-cache-split2-safe -trace", input => "$src/in3.dat",	 results => "$src/in3-dlx-cache-split2.dat", td_flags => "-ic=C" ),
+
+	ext_model_test(	model => "./dlx-cache-split2 -trace",      input => "$src/in4.dat",	 results => "$src/in4-dlx-cache-split2.dat"	),
+	ext_model_test(	model => "./dlx-cache-split2-safe -trace", input => "$src/in4.dat",	 results => "$src/in4-dlx-cache-split2.dat", td_flags => "-ic=C"	),
+
+	ext_model_test(	model => "./dlx-cache-split2 -trace",      input => "$src/in17.dat", results => "$src/in17-dlx-cache-split2.dat"	),
+	ext_model_test(	model => "./dlx-cache-split2-safe -trace", input => "$src/in17.dat", results => "$src/in17-dlx-cache-split2.dat", td_flags => "-ic=C"	),
+
+	ext_model_test(	model => "./dlx-cache-split2 -trace",      input => "$src/in18.dat", results => "$src/in18-dlx-cache-split2.dat"	),
+	ext_model_test(	model => "./dlx-cache-split2-safe -trace", input => "$src/in18.dat", results => "$src/in18-dlx-cache-split2.dat", td_flags => "-ic=C"	),
+
+	ext_model_test(	model => "./dlx-cache-split2 -trace",      input => "$src/in19.dat", results => "$src/in19-dlx-cache-split2.dat"	),
+	ext_model_test(	model => "./dlx-cache-split2-safe -trace", input => "$src/in19.dat", results => "$src/in19-dlx-cache-split2.dat", td_flags => "-ic=C"	),
+
+	model_test("./dlx-cache-split2",     "$src/../iss/in52.dat",0,0,[ "NIA", "card:C", "card:A" ]),
+	model_test("./dlx-cache-split2-safe","$src/../iss/in52.dat",0,0,[ "NIA", "card:C", "card:A" ]),
+
+	model_test("./dlx-cache-split",         "$src/in2-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-safe",    "$src/in2-dlx-cache-split-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe","$src/in2-dlx-cache-split-imm-safe.dat"),
+
+	model_test("./dlx-cache-split",         "$src/in3-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-safe",    "$src/in3-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-imm-safe","$src/in3-dlx-cache-split-imm-safe.dat"),
+
+	model_test("./dlx-cache-split",         "$src/in4-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-safe",    "$src/in4-dlx-cache-split-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe","$src/in4-dlx-cache-split-imm-safe.dat"),
+
+	model_test("./dlx-cache-split",         "$src/in17-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-safe",    "$src/in17-dlx-cache-split-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe","$src/in17-dlx-cache-split-imm-safe.dat"),
+
+	model_test("./dlx-cache-split",         "$src/in18-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-safe",    "$src/in18-dlx-cache-split-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe","$src/in18-dlx-cache-split-imm-safe.dat"),
+
+  # Repeat, setting up the model to use 128-bit linefill accesses.
+	model_test("./dlx-cache-split --config=$src/lf-128.tcl",          "$src/in2-dlx-cache-split-128.dat"),
+	model_test("./dlx-cache-split-safe --config=$src/lf-128.tcl",     "$src/in2-dlx-cache-split-128-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe --config=$src/lf-128.tcl", "$src/in2-dlx-cache-split-128-imm-safe.dat"),
+
+	model_test("./dlx-cache-split --config=$src/lf-128.tcl",          "$src/in3-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-safe --config=$src/lf-128.tcl",     "$src/in3-dlx-cache-split.dat"),
+	model_test("./dlx-cache-split-imm-safe --config=$src/lf-128.tcl", "$src/in3-dlx-cache-split-imm-safe.dat"),
+
+	model_test("./dlx-cache-split --config=$src/lf-128.tcl",          "$src/in4-dlx-cache-split-128.dat"),
+	model_test("./dlx-cache-split-safe --config=$src/lf-128.tcl",     "$src/in4-dlx-cache-split-128-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe --config=$src/lf-128.tcl", "$src/in4-dlx-cache-split-128-imm-safe.dat"),
+
+	model_test("./dlx-cache-split --config=$src/lf-128.tcl",          "$src/in17-dlx-cache-split-128.dat"),
+	model_test("./dlx-cache-split-safe --config=$src/lf-128.tcl",     "$src/in17-dlx-cache-split-128-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe --config=$src/lf-128.tcl", "$src/in17-dlx-cache-split-128-imm-safe.dat"),
+
+	model_test("./dlx-cache-split --config=$src/lf-128.tcl",          "$src/in18-dlx-cache-split-128.dat"),
+	model_test("./dlx-cache-split-safe --config=$src/lf-128.tcl",     "$src/in18-dlx-cache-split-128-safe.dat"),
+	model_test("./dlx-cache-split-imm-safe --config=$src/lf-128.tcl", "$src/in18-dlx-cache-split-128-imm-safe.dat"),
+
+	# For the non-safe model, we have to ignore final memory, because the cache is
+	# not write-through.
+	model_test("./dlx-cache-split",     "$src/loadstore5.dat",0,0,[ "card:MD" ]),
+	model_test("./dlx-cache-split-safe","$src/loadstore5.dat"),
+
+	# Check of memory-port latencies.
+	{
+		cmd     => "./dlx-cache-split $src/loadstore3.dat -trace-all -trace",
+		checker => \&check_loadstore3,
+		stdio   => 1,
+		temps   => [ "loadstore3.out.dat" ],
+	},
+	{
+		cmd     => "./dlx-cache-split-safe $src/loadstore3.dat -trace-all -trace",
+		checker => \&check_loadstore3,
+		stdio   => 1,
+		temps   => [ "loadstore3.out.dat" ],
+	},
+
+	model_test("./dlx-cache-split     ","$src/in43.dat"),
+	model_test("./dlx-cache-split-safe","$src/in43-safe.dat"),
+
+	# Safe-mode dynamically-sized cache test.
+	ext_model_test(model   => "./dlx-cache-split-safe",
+								 flags   => "-trace --config=$src/../iss/in182.tcl",
+								 results => "$src/../iss/in182.dat",
+								 ignores => [ "NIA" ],
+	),
+
+	model_test("./dlx-cache-split",          "$src/touch1.dat"),
+	model_test("./dlx-cache-split-safe",     "$src/touch1.dat"),
+	model_test("./dlx-cache-split-imm-safe", "$src/touch1.dat"),
+
+	# Testing of icache ops and proper caching of the allocation predicate.
+	model_test("./dlx-cache-split",          "$src/cache5.dat"),
+	model_test("./dlx-cache-split-safe",     "$src/cache5.dat"),
+
+	# Just to make sure that the external memory w/cache works.
+	ext_model_test(	model => "./dlx-cache-split-safe-ext-mem -trace -latency=2", input => "$src/in4.dat", results => "$src/in4-dlx-cache-split-safe-ext-mem.dat"),
+	
+	# Check that we can set memory latencies and that they affect
+	# model timing.
+	model_test("./dlx-cache-split-safe-ext-mem -latency 3","$src/loadstore4.dat"),
+
+	# Check that we can resize a cache and that it will affect the
+	# performance caches and functional caches.
+	model_test("./dlx-cache-split-safe-ext-mem -trace -l1d-num-sets=256","$src/dynparm2.dat"),
+
+	# Make sure that safe-mode fetch goes through memory, not through the cache.
+	# This uses an inconsistent memory setup (different data in L1i and Mem) to
+	# test this.
+	model_test("./dlx-cache-split-safe","$src/safe_mode_fetch.dat"),
+		
+	# Safe-mode test w/pipelined cache but non-pipelined harvard memory.
+	model_test("./dlx-cache-split-pc-safe","$src/load2.dat"),
+
+	# Safe-mode test w/pipelined cache and consecutive linefills.
+	model_test("./dlx-cache-split-pc2-safe","$src/load4.dat"),
+	
+	# A test of serialized loads.
+	model_test("./dlx-cache-split-pc2-safe","$src/load5.dat"),
+
+	# A test of serialized loads with cache enabled.
+	model_test("./dlx-cache-split-pc2-safe","$src/load6.dat"),
+
+	# A test of dcbz w/no write allocation.
+	model_test("./dlx-cache-split-pc2-safe","$src/cache7.dat"),
+
+	# Tests proper cancellation with multiple outstanding fetch transactions.
+	model_test("./dlx-cache-split-pc3-safe","$src/branch7.dat"),
+
+	# Tests proper icache-enablement.
+	model_test("./dlx-cache-split-pc3-safe","$src/cache4.dat"),
+
+	# Tests loads/stores with the store buffer disabled.
+	model_test("./dlx-cache-split-pc3-safe","$src/cache6.dat"),
+
+	# Tests proper cancellation of stores due to external exceptions.
+	model_test("./dlx-cache-split-pc3-safe-ext-mem --test-exception=0x10004","$src/store8.dat"),
+
+	# Test for a store-buffer corner case which can cause a segfault.
+	model_test("./dlx-cache-split-pc4-safe","$src/loadstore8.dat"),
+
+	# A test of serialized stores.  The serialized store should not complete
+	# until the store buffer is done.
+	{
+		cmd     => "./dlx-cache-split-pc2-safe $src/store4.dat -trace-all -trace",
+		checker => \&check_store4,
+		stdio   => 1,
+		temps   => [ "store4.out.dat" ],
+	},
+	
+	# A test of is_misaligned- it should be looking at the current memory request.
+	model_test("./dlx-cache-split-pc2-safe","$src/store3.dat"),
+
+	# A test of misaligned loads w/64-bit memory, so that only a single word access is created.
+	model_test("./dlx-cache-split-pc2-safe","$src/load1-dlx-cache-split-pc2-safe.dat"),
+
+	ext_model_test(	model => "./dlx-cache-unified -trace",      input => "$src/in2.dat",  results => "$src/in2-dlx-cache-unified.dat"	),
+	# in2.dat ommitted from the safe-mode model b/c the different execution times
+	# of halt interferes with cache timing, resulting in different timing.
+
+	ext_model_test(	model => "./dlx-cache-unified -trace",      input => "$src/in3.dat",  results => "$src/in3-dlx-cache-unified.dat"	),
+	ext_model_test(	model => "./dlx-cache-unified-safe -trace", input => "$src/in3.dat",  results => "$src/in3-dlx-cache-unified.dat", td_flags => "--ic=C"	),
+
+	ext_model_test(	model => "./dlx-cache-unified -trace",      input => "$src/in4.dat",  results => "$src/in4-dlx-cache-unified.dat"	),
+	ext_model_test(	model => "./dlx-cache-unified-safe -trace", input => "$src/in4.dat",  results => "$src/in4-dlx-cache-unified.dat", td_flags => "--ic=C"	),
+
+	ext_model_test(	model => "./dlx-cache-unified -trace",      input => "$src/in17.dat", results => "$src/in17-dlx-cache-unified.dat"	),
+	ext_model_test(	model => "./dlx-cache-unified-safe -trace", input => "$src/in17.dat", results => "$src/in17-dlx-cache-unified.dat", td_flags => "--ic=C" ),
+
+	ext_model_test(	model => "./dlx-cache-unified -trace",      input => "$src/in18.dat",	results => "$src/in18-dlx-cache-unified.dat"	),
+	ext_model_test(	model => "./dlx-cache-unified-safe -trace", input => "$src/in18.dat",	results => "$src/in18-dlx-cache-unified.dat", td_flags => "--ic=C" ),
+
+	# Test: loads/stores preemption over fetches
+	#       inquire request_queue_empty()
+	#       locking of linefill due to lock-cycle.
+	{
+		cmd     => "./dlx-cache-unified -ta --no-output $src/in2.dat",
+		stdio   => 1,
+		checker => sub {
+			die if (!grep(/preempt/, @_));
+			die if (!grep(/request queue not empty/, @_));
+			die if (!grep(/fetch stalled: L1 unavailable/, @_));
+		}
+	},
+	
+	# Test: linefill lock/writeback at proper cycles.
+	{
+		cmd     => "./dlx-cache-unified -ta --no-output $src/cache2.dat",
+		stdio   => 1,
+		checker => \&check_cache2,
+	},
+
+	# test:  lazy linefill buffers store to the cache at end of simulation.
+	model_test("./dlx-cache-unified","$src/cache3.dat"),
+
+	model_test("./dlx-l2",     "$src/in2-dlx-l2.dat"),
+	model_test("./dlx-l2-safe","$src/in2-dlx-l2-safe.dat"),
+
+	model_test("./dlx-l2",     "$src/in3-dlx-l2.dat"),
+	model_test("./dlx-l2-safe","$src/in3-dlx-l2-safe.dat"),
+
+	model_test("./dlx-l2",     "$src/in4-dlx-l2.dat"),
+	model_test("./dlx-l2-safe","$src/in4-dlx-l2-safe.dat"),
+
+	model_test("./dlx-l2",     "$src/in17-dlx-l2.dat"),
+	model_test("./dlx-l2-safe","$src/in17-dlx-l2-safe.dat"),
+
+	model_test("./dlx-l2",     "$src/in18-dlx-l2.dat"),
+	model_test("./dlx-l2-safe","$src/in18-dlx-l2-safe.dat"),
+
+	# test: can we stall until all memory activity is finished?
+	{
+		cmd     => "./dlx-stwcx -ta --no-output $src/stall2.dat",
+		stdio   => 1,
+		checker => \&check_mem_inactive,
+		temps   => [ "stall2.out.dat" ],
+	},
+
+	# test: that conditional memory accesses don't cause segfaults.
+	model_test("./dlx-stwcx","$src/loadstore7.dat"),
+
+	# test: deadlock detection.
+	{
+		cmd     => "./dlx-stall --no-output $src/dead1.dat",
+		stderr  => 1,
+		fail    => 1,
+		checker => sub { die if (!grep(/Detected deadlock/, @_)); }
+	},
+
+	# test: deadlock detection and recovery.
+	{
+		cmd     => "./dlx-stall-safe -trace -trace-all $src/dead1.dat",
+		stdio   => 1,
+		checker => \&check_dead1,
+		temps   => [ "dead1.out.dat" ],
+	},
+	
+	model_test("./dlx-all",     "$src/in2-dlx-all.dat"),
+	model_test("./dlx-all-safe","$src/in2-dlx-all.dat",0,0,[ "card:C" ]),
+
+	model_test("./dlx-all",     "$src/in3-dlx-all.dat"),
+	model_test("./dlx-all-safe","$src/in3-dlx-all.dat"),
+
+	model_test("./dlx-all",     "$src/in4-dlx-all.dat"),
+	model_test("./dlx-all-safe","$src/in4-dlx-all.dat",0,0,[ "card:C" ]),
+
+	model_test("./dlx-all",     "$src/in17-dlx-all.dat"),
+	model_test("./dlx-all-safe","$src/in17-dlx-all.dat"),
+
+	model_test("./dlx-all",     "$src/in18-dlx-all.dat"),
+	model_test("./dlx-all-safe","$src/in18-dlx-all.dat",0,0,[ "card:C" ]),
+
+	# test: fetch unit parameter 'reuse_data'
+	#       pause_fetch() transaction and fetch stall logging
+	{
+		cmd     => "./dlx-all -trace-all --no-output $src/test_reuse_data.dat",
+		stdio   => 1,
+		checker => sub {
+			die "Did not find expected fetch-pause message." if (!grep(/fetch paused by instruction/, @_));
+			die "Found more than one request to ea=0x4." if (scalar(grep(/send request.+ea=0x4/, split(/\n/, $_[0]))) != 1);
+		}
+	},
+
+	ext_model_test(	model => "./dlx-hrvd -trace",       input   => "$src/in2.dat", results => "$src/in2-dlx-hrvd.dat"	),
+	ext_model_test(	model => "./dlx-hrvd-safe -trace",	input   => "$src/in2.dat", results => "$src/in2-dlx-hrvd.dat" ),
+
+	ext_model_test(	model => "./dlx-hrvd -trace",       input   => "$src/in3.dat", results => "$src/in3-dlx-hrvd.dat"	),
+	ext_model_test(	model => "./dlx-hrvd-safe -trace",	input   => "$src/in3.dat", results => "$src/in3-dlx-hrvd.dat" ),
+
+	ext_model_test(	model => "./dlx-hrvd -trace",       input   => "$src/in4.dat", results => "$src/in4-dlx-hrvd.dat"	),
+	ext_model_test(	model => "./dlx-hrvd-safe -trace",	input   => "$src/in4.dat", results => "$src/in4-dlx-hrvd.dat" ),
+
+	ext_model_test(	model => "./dlx-hrvd -trace",       input   => "$src/in17.dat", results => "$src/in17-dlx-hrvd.dat"	),
+	ext_model_test(	model => "./dlx-hrvd-safe -trace",	input   => "$src/in17.dat", results => "$src/in17-dlx-hrvd.dat" ),
+
+	ext_model_test(	model => "./dlx-hrvd -trace",       input   => "$src/in18.dat", results => "$src/in18-dlx-hrvd.dat"	),
+	ext_model_test(	model => "./dlx-hrvd-safe -trace",	input   => "$src/in18.dat", results => "$src/in18-dlx-hrvd.dat" ),
+
+	# test:  lock and delayed unlock.
+	{
+		cmd     => "./dlx-hrvd -trace-all -trace $src/lock1.dat",
+		stdio   => 1,
+		checker => \&check_lock1,
+		temps   => [ "lock1.out.dat" ],
+	},
+
+	# test: Make sure that a Harvard architecture with a higher read latency
+	# doesn't have any problems.
+	model_test("./dlx-delay",     "$src/load8.dat"),
+	model_test("./dlx-delay-safe","$src/load8.dat"),
+
+	model_test("./dlx-bubble",     "$src/stall1.dat"),
+	model_test("./dlx-bubble-safe","$src/stall1.dat"),
+
+	model_test("./dlx3", "$src/ooo1.dat"),
+
+	model_test("./dlx3", "$src/ooo2.dat"),
+
+	model_test("./dlx3", "$src/in2-dlx3.dat"),
+
+	model_test("./dlx3", "$src/in3-dlx3.dat"),
+
+	model_test("./dlx3", "$src/in4-dlx3.dat"),
+
+	model_test("./dlx3", "$src/in17-dlx3.dat"),
+
+	model_test("./dlx3", "$src/in18-dlx3.dat"),
+
+	model_test("./dlx-mt1",      "$src/mt1.dat"),
+	model_test("./dlx-mt1-safe", "$src/mt1.dat"),
+
+	model_test("./dlx-mt1",      "$src/mt2.dat"),
+	model_test("./dlx-mt1-safe", "$src/mt2.dat"),
+
+	model_test("./dlx-mt1",          "$src/mt3.dat"),
+	model_test("./dlx-mt1-safe",     "$src/mt3.dat"),
+	model_test("./dlx-mt1-imm-safe", "$src/mt3-imm-safe.dat"),
+
+	# We have slightly different timing towards the end due to differences in
+	# fetch due to the halt instructions, between safe and normal-mode models.
+	model_test("./dlx-mt1",      "$src/mt4.dat"),
+	model_test("./dlx-mt1-safe", "$src/mt4-safe.dat"),
+
+	# Make sure that we'll detect and fail on a deadlock.
+	{
+		cmd     => "./dlx-mt1-safe --fail-on-deadlock $src/dead2.dat",
+		fail    => 1,
+		temps   => [ "dead2.out.dat" ],
+	},
+	# Now make sure that we can recover from the deadlock.
+	{
+		cmd     => "./dlx-mt1-safe -trace -trace-all $src/dead2.dat",
+		stdio   => 1,
+		checker => \&check_dead2,
+		temps   => [ "dead2.out.dat" ],
+	},	
+	# Scripting-interface breakpoints with uADL with an MT model.
+	{
+		cmd     => "./dlx-mt1-safe $src/mt2.dat --script=$src/brkpts2.cli",
+		stdio   => 1,
+		diff    => "$src/brkpts2.regress",
+	},
+
+
+	# Make sure that our branch-error detection logic for safe-mode models doesn't
+	# get confused in an MT model.  We run on a normal-mode model just as a sanity
+	# check.
+	model_test("./dlx-mt1",      "$src/mt10.dat"),
+	model_test("./dlx-mt1-safe", "$src/mt10.dat"),
+
+	# Make sure that we update the fetch unit when activating a thread, so that we
+	# start at the correct location.
+	model_test("./dlx-mt1",      "$src/../iss/in313.dat"),
+	model_test("./dlx-mt1-safe", "$src/../iss/in313.dat"),
+
+	# Example of using the scripting interface to modify dynamic parameters and
+	# then reseting the model.
+	{
+		cmd     => "./dlx-mt1-safe --script=$src/dynparm3.cli",
+		checker => sub {
+			# This should produce two identical tests which both compare properly
+			# against the original input.
+			check_results ("$src/mt3.dat","mt3-0.out.dat");
+			check_results ("$src/mt3.dat","mt3-1.out.dat");
+		},
+	},
+
+	model_test ("./dlx-mt2", "$src/mt1-dlx-mt1.dat"),
+
+	model_test ("./dlx-mt2", "$src/mt2.dat"),
+
+	model_test ("./dlx-mt2", "$src/mt3.dat"),
+
+	model_test ("./dlx-mt2", "$src/mt4.dat",0,0,0,"--ignore-timing"),
+
+	model_test ("./dlx-mt2", "$src/mt5.dat"),
+
+	model_test ("./dlx-mt3", "$src/mt6.dat"),
+
+	model_test ("./dlx-mt3", "$src/mt7.dat"),
+
+	model_test ("./dlx-mt3", "$src/mt8.dat"),
+
+	model_test ("./dlx-mt3", "$src/mt9.dat"),
+
+		);
+
+# SystemC tests- only test if the model was built.
+if ( -f "./test-sysc-thread") {
+  push(@Tests, (
+				 model_test("./test-sysc-thread","$src/in4.dat"),
+				 model_test("./test-sysc-method","$src/in4.dat"),
+				 model_test("./test-sysc-pc2 --sim-time=6000","$src/../iss/in4.dat"),
+				 model_test("./test-sysc-thread --wake-up=30 --wd-holdoff=10","$src/wake1.dat"),
+				 model_test("./test-sysc-method --wake-up=30 --wd-holdoff=10","$src/wake1.dat"),
+				 model_test("./test-sysc-mt1","$src/mt1.dat"),
+				 {
+					 cmd     => "./test-sysc-mt1 --log-mem-tid $src/mt12.dat",
+					 stdio   => 1,
+					 checker => sub {
+						 check_results ("$src/mt12.dat","mt12.out.dat");
+						 checkstr($_[0],
+											"Mem:  read: tid=0, ea=0x1000, ra=0x1000",
+											"Mem:  read: tid=0, ea=0x1004, ra=0x1004",
+											"Mem:  read: tid=0, ea=0x1008, ra=0x1008",
+											"Mem:  read: tid=0, ea=0x100c, ra=0x100c",
+											"Mem:  read: tid=1, ea=0x2000, ra=0x2000",
+											"Mem:  read: tid=1, ea=0x2004, ra=0x2004",
+											"Mem:  read: tid=1, ea=0x2008, ra=0x2008",
+											"Mem:  read: tid=1, ea=0x200c, ra=0x200c");
+								 },
+				 },
+			 ));
+}
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## <TESTS>
+##
+
+# Make sure that each string in the arguments exists in the output.  Order is
+# not important.
+#
+# arg0   :  Test output.
+# arg1..n:  Strings to check.
+sub checkstr
+{
+	my ($out,@strings) = @_;
+	my @l = split (/\n/,$out);
+	my %lines;
+	@lines{@l} = (1) x @l;
+	
+	for my $s (@strings) {
+		if (!exists $lines{$s}) {
+			print "Did not find required string in output:  $s\n";
+			print "Output was:\n$out\n\n";
+			die;
+		}
+	}
+}
+
+# Expand this as necessary.  The idea is to have a general function for checking various events in a trace file.
+# Arguments:
+# arg0:  Pipeline trace data as an array of lines.
+# arg1:  Expects.  Hash reference.  Keys are time values, values are an array ref. of events.
+#        For example:  { 10 => [ "flush" ] }
+#        Currently supported events:
+#          flush:  A pipeline flush event.
+#          stall: <msg>:  A stall event.
+#          fetch stalled: <msg>:  A fetch-stall event.
+#          read request <addr>:  A read request event, where <addr> is the ra.
+#          write request <addr>:  A write request event, where <addr> is the ra.
+#          receive write request <addr> <mem-item>:  A memory item, e.g. L1d, Mem, etc., received a 
+#                                                    write request, where <addr> is the ra.
+#          receive write data <addr> <mem-item>:  A memory item, e.g. L1d, Mem, etc., received
+#                                                 write data, where <addr> is the ra.
+#          acquire: <res>:  Acquisition of resource <res>.
+#          release: <res>:  Release of resource <res>.
+#          deadlock:  Discard of instruction for deadlock recovery.
+sub check_times {
+  my ($data,$expects) = @_;
+
+  my @lines = split /\n/,$data;
+
+  my $time = -1;
+  my $flush = 0;
+  my $stall;
+  my $fetch_stall;
+  my $fails = 0;
+  my $read_request = 0;
+  my $write_request = 0;
+  my $receive_write_request = 0;
+  my $receive_write_data = 0;
+  my $linefill_lock = 0;
+  my $linefill_writeback = 0;
+  my $linefill_lock_ok = 0;
+  my $linefill_writeback_ok = 0;
+	my $release = "";
+	my $acquire = "";
+	my $deadlock = 0;
+  my $stage;
+
+  for (@$data) {
+		if ( /^(\S+): / ) {
+			# Stage/memory-subsystem-resource update.
+			if ($1 ne "time") {
+				$stage = $1;
+			}
+		}
+		if ( /^time (\d+):/ ) {
+			# Check anything for the last time element.
+			if (exists $expects->{$time}) {
+				my $edata = $expects->{$time};
+				
+				my $wanted_flushes = 0;
+				for ( @$edata ) {
+					if ($_ eq "flush") {
+						$wanted_flushes = 1;
+						if (!$flush) {
+							print "Expected a flush at time $time but didn't find it.\n";
+							$fails++;
+						} else {
+							$flush--;
+						}
+					}
+					elsif ( /^(stall: .*)/ ) {
+						if ( !$stall ) {
+							print "No stall found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $stall ne $1 ) {
+							print "Invalid stall at time $time:  Expected '$1' but found '$stall'\n";
+							$fails++;
+						}
+					}
+					elsif ( /^(fetch stalled: .*)/ ) {
+						if ( !$fetch_stall ) {
+							print "No fetch-stall found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $fetch_stall ne $1 ) {
+							print "Invalid fetch-stall at time $time:  Expected '$1' but found '$fetch_stall'\n";
+							$fails++;
+						}
+					}
+					elsif ( /^read request (\S+)/ ) {
+						if ( !$read_request ) {
+							print "No read request found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $read_request ne $1 ) {
+							print "Invalid read request at time $time:  Expected $1 but found $read_request\n";
+							$fails++;
+						}
+					}
+					elsif ( /^write request (\S+)/ ) {
+						if ( !$write_request ) {
+							print "No write request found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $write_request ne $1 ) {
+							print "Invalid write request at time $time:  Expected $1 but found $write_request\n";
+							$fails++;
+						}
+					}
+					elsif ( /^receive write request (\S+) (\S+)/ ) {
+						if ( !$receive_write_request ) {
+							print "No receive-write-request event found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $receive_write_request->[0] ne $2 ) {
+							print "Invalid receive-write-request memory item at time $time:  Expected $2 but found $receive_write_request->[0]\n";
+							$fails++;
+						}
+						elsif ( $receive_write_request->[1] ne $1 ) {
+							print "Invalid receive-write-request at time $time:  Expected $1 but found $receive_write_request->[1]\n";
+							$fails++;
+						}
+					}
+					elsif ( /^receive write data (\S+) (\S+)/ ) {
+						if ( !$receive_write_data ) {
+							print "No receive-write-data event found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $receive_write_data->[0] ne $2 ) {
+							print "Invalid receive-write-data memory item at time $time:  Expected $2 but found $receive_write_data->[0]\n";
+							$fails++;
+						}
+						elsif ( $receive_write_data->[1] ne $1 ) {
+							print "Invalid receive-write-data at time $time:  Expected $1 but found $receive_write_data->[1]\n";
+							$fails++;
+						}
+					}
+					elsif ( /linefill lock/ ) {
+						$linefill_lock_ok = 1;
+						if (!$linefill_lock) {
+							print "No line-fill buffer lock cycle found at time $time.\n";
+							$fails++;
+						}
+					}
+					elsif ( /linefill writeback/ ) {
+						$linefill_writeback_ok = 1;
+						if (!$linefill_writeback) {
+							print "No line-fill buffer writeback found at time $time.\n";
+							$fails++;
+						}
+					}
+					elsif ( /^release: (\w+)/ ) {
+						if ( !$release ) {
+							print "No release-event found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $release ne $1 ) {
+							print "Invalid release at time $time:  Expected '$1' but found '$release'\n";
+							$fails++;
+						}
+					}
+					elsif ( /^acquire: (\w+)/ ) {
+						if ( !$acquire ) {
+							print "No acquire-event found at time $time.\n";
+							$fails++;
+						}
+						elsif ( $acquire ne $1 ) {
+							print "Invalid acquire at time $time:  Expected '$1' but found '$acquire'\n";
+							$fails++;
+						}
+					}
+					elsif ( /^deadlock/ ) {
+						if ( !$deadlock) {
+							print "No deadlock discard found at time $time.\n";
+							$fails++;
+						}
+					}
+				}
+				if ($wanted_flushes && $flush) {
+					print "Found $flush extra flushes at time $time.\n";
+					$fails++;
+				}
+			}
+			if (!$linefill_lock_ok && $linefill_lock) {
+				print "Found an extra linefill lock at time $time.\n";
+			}
+			if (!$linefill_writeback && $linefill_writeback) {
+				print "Found an extra linefill writeback at time $time.\n";
+			}
+
+			# Update our time.
+			$time = $1;
+			# Reset status.
+			$flush = 0;
+			$stall = 0;
+			$fetch_stall = 0;
+			$read_request = 0;
+			$write_request = 0;
+			$receive_write_request = 0;
+			$receive_write_data = 0;
+			$linefill_lock = 0;
+			$linefill_writeback = 0;
+			$linefill_lock_ok = 0;
+			$linefill_writeback_ok = 0;
+			$release = "";
+			$acquire = "";
+			$deadlock = 0;
+			next;
+		}
+		elsif ( /flush: pipeline/ ) {
+			$flush++;
+		}
+		elsif ( /^\s*(stall: .*)/ ) {
+			$stall = $1;
+		}
+		elsif ( /\s+(fetch stalled: .*)/ ) {
+			$fetch_stall = $1;
+		}
+		elsif ( /send read request/ ) {
+			$read_request = ( /ra=([^, ]+)/)[0];
+		}
+		elsif ( /send write request/ ) {
+			$write_request = ( /ra=([^, ]+)/)[0];
+		}
+		elsif ( /receive write request/ ) {
+			$receive_write_request = [ $stage , ( /ra=([^ ,]+)/)[0] ];
+		}
+		elsif ( /receive write data/ ) {
+			$receive_write_data = [ $stage , ( /ra=([^ ,]+)/)[0] ];
+		}
+		elsif ( /Line-fill buffer writeback/ ) {
+			$linefill_writeback = 1;
+		}
+		elsif ( /Line-fill buffer lock cycle/ ) {
+			$linefill_lock = 1;
+		}
+		elsif ( /release (\w+)/ ) {
+			$release = $1;
+		}
+		elsif ( /acquire (\w+)/ ) {
+			$acquire = $1;
+		}
+		elsif ( /discarding instruction to break deadlock/ ) {
+			$deadlock = 1;
+		}
+	}
+
+  die if ($fails);
+}
+
+sub check_bp_enable {
+  my ($data) = @_;
+
+  my @lines = split /\n/,$data;
+
+  # Expected results.  Numbers are commit-ids.
+  my @expects = (
+		1,
+		2,
+		3,
+		"not-predicted",
+		4,
+		5,
+		6,
+		"not-predicted",
+		7,
+		8,
+		9,
+		10,
+		11,
+		12,
+		13,
+		14,
+		15,
+		16,
+		17,
+		18,
+		19,
+			);
+
+  my @found;
+
+  # Parse the pipeline file.  We store commit-id values and whether we find
+  # a "predicted" token.
+  for (@lines) {
+		if ( /issue \[iid=(\d+), cid=(\d+), ea=0x/ ) {
+			if ($1) { push @found, $1; }
+		}
+		elsif ( /branch predicted not taken/ ) {
+			push @found,"not-predicted";
+		}
+		elsif ( /branch prediction miss/ ) {
+			push @found,"not-predicted";
+		}
+		elsif ( /branch predicted taken/ ) {
+			push @found,"predicted";
+		}
+  }
+
+  # Now compare the two.
+  my $c = 0;
+  for my $e (@expects) {
+		my $f = shift @found;
+		if (! ($e eq $f || $e == $f)) {
+			die "Found a mismatch at element $c:  Expected '$e', found '$f'\n";
+		}
+		++$c;
+  }
+}
+
+sub check_loadstore3 {
+  my ($data) = @_;
+
+  check_results("$src/loadstore3.dat","loadstore3.out.dat");
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+				 15 =>  [ "receive write request 0x2000 Mem" ],
+				 17 =>  [ "receive write data 0x2000 Mem" ],
+				 19 =>  [ "receive write request 0x2004 Mem" ],
+				 21 =>  [ "receive write data 0x2004 Mem" ],
+				);
+
+  check_times(\@lines,\%expects);
+}
+
+sub check_cache2 {
+  my ($data) = @_;
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+				 23 =>  [ "linefill writeback" ],
+				 25 =>  [ "linefill lock" ],
+				);
+
+  check_times(\@lines,\%expects);
+}
+
+sub check_mem_inactive {
+  my ($data) = @_;
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+				 4 => [ "mMEM: request queue not inactive for this cycle" ],
+				 5 => [ "mMEM: request queue not inactive for this cycle" ],
+				 6 => [ "mMEM: request queue not inactive for this cycle" ],
+				 7 => [ "mMEM: request queue not inactive for this cycle" ],
+				 8 => [ "mMEM: request queue not inactive for this cycle" ],
+				);
+
+  check_times(\@lines,\%expects);
+}
+
+sub check_dead1 {
+  my ($data) = @_;
+
+	check_results("$src/dead1.dat","dead1.out.dat");
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+		5   => [
+			"acquire: FooFlag",
+		],
+		109 => [ 
+			"release: FooFlag",
+			"deadlock",
+		],
+			);
+
+  check_times(\@lines,\%expects);
+}
+
+sub check_dead2 {
+  my ($data) = @_;
+
+	check_results("$src/dead2.dat","dead2.out.dat");
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+		7   => [
+			"acquire: dead_flag",
+		],
+		211 => [ 
+			"release: dead_flag",
+			"deadlock",
+		],
+		214   => [
+			"acquire: dead_flag",
+		],
+		419 => [ 
+			"release: dead_flag",
+			"deadlock",
+		],
+			);
+
+  check_times(\@lines,\%expects);
+}
+
+sub check_lock1 {
+  my ($data) = @_;
+
+  check_results("$src/lock1.dat","lock1.out.dat");
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+				 12 =>  [ "fetch stalled: L1i unavailable" ],
+				 13 =>  [ "fetch stalled: L1i unavailable" ],
+				 14 =>  [ "fetch stalled: L1i unavailable" ],
+				);
+
+  check_times(\@lines,\%expects);  
+}
+
+sub check_store4 {
+  my ($data) = @_;
+
+  check_results("$src/store4.dat","store4.out.dat");
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+				 10 =>  [ "L1d: store-buffer entry not done" ],
+				 11 =>  [ "L1d: store-buffer entry not done" ],
+				 12 =>  [ "L1d: store-buffer entry not done" ],
+				);
+
+  check_times(\@lines,\%expects);  
+}
+
+sub check_load7 {
+  my ($data) = @_;
+
+  check_results("$src/load7.dat","load7.out.dat");
+
+  my @lines = split /\n/,$data;
+
+  my %expects = (
+				 22 =>  [ "stall: L1d: blocked due to linefill request-block." ],
+				 23 =>  [ "stall: L1d: blocked due to linefill request-block." ],
+				);
+
+  check_times(\@lines,\%expects);  
+}
+
+sub check_cr1 {
+  my ($data) = @_;
+
+  check_results("$src/cr1.dat","cr1.out.dat");
+
+  my @lines = split /\n/,$data;
+
+	my ($exp_precount,$exp_postcount) = (18,18);
+
+	my ($precount,$postcount) = (0,0);
+
+	my $mclog = 0;
+	for (@lines) {
+		if ( /^MyCounter/ ) {
+			$mclog = 1;
+		} elsif ( /^time \d+:/ ) {
+			$mclog = 0;
+		}
+
+		if ($mclog) {
+			if ( /In preCycle/ ) {
+				++$precount;
+			} elsif ( /In postCycle/ ) {
+				++$postcount;
+			}
+		}
+	}
+
+	if ( $precount != $exp_precount ) {
+		die "Didn't find expected number of pre-cycle messages (found $precount, expected $exp_precount).\n";
+	}
+
+	if ( $postcount != $exp_postcount ) {
+		die "Didn't find expected number of post-cycle messages (found $postcount, expected $exp_postcount).\n";
+	}
+
+}
+
+# Make sure we get the scripting output and that we produce a pipeline file.
+sub check_events1 {
+
+	file_diff("events1.out","$src/events1.regress");
+
+	open IN,"events1.uapipe" or die "Could not open events1.uapipe";
+	my @lines = (<IN>);
+	
+	my %expects = (
+		 7 => [ "flush" ],
+		14 => [ "flush" ],
+		21 => [ "flush" ],
+		28 => [ "flush" ],
+		35 => [ "flush" ],
+		42 => [ "flush" ],
+		49 => [ "flush" ],
+		56 => [ "flush" ],
+		63 => [ "flush" ],
+		71 => [ "flush" ],
+			);
+
+  check_times(\@lines,\%expects);  
+}
+
+# Makes sure that the cycle function and stall callbacks work.
+sub check_events2 {
+
+	file_diff("events2.out","$src/events2.regress");
+
+	open IN,"events2.uapipe" or die "Could not open events2.uapipe";
+	my @lines = (<IN>);
+	
+	my %expects = (
+		13 => [ "stall: mMEM: write in progress" ],
+			);
+
+  check_times(\@lines,\%expects);  
+}
+
+# Check the output trace and the standard out generated by the script.
+sub check_haltn {
+
+  check_results("$src/in3-halt2.dat","in3.out.dat");
+
+	file_diff("haltn.out","$src/haltn.regress");
+}
+
+# Make sure that we get the expected opcodes in the pipeline output.
+sub check_vle2 {
+  my ($data) = @_;
+
+  my @lines = split /\n/,$data;
+
+	my ($efn,$ffn) = ("vle2.expects","vle2.found");
+
+	open TMP1,">$efn" or die "Couldn't open temporary expects file.\n";
+	print TMP1 <<END;
+mWB:  [iid=1, cid=1, ea=0x0, op=0x38420001] addi r2,r2,1
+mWB:  [iid=2, cid=1, ea=0x4, op=0x0421] se_add rr1,rr2
+mWB:  [iid=3, cid=1, ea=0x6, op=0x38420001] addi r2,r2,1
+mWB:  [iid=4, cid=2, ea=0xa, op=0x0421] se_add rr1,rr2
+mWB:  [iid=5, cid=3, ea=0xc, op=0x38420001] addi r2,r2,1
+mWB:  [iid=6, cid=4, ea=0x10, op=0x0421] se_add rr1,rr2
+mWB:  [iid=7, cid=5, ea=0x12, op=0x38420001] addi r2,r2,1
+mWB:  [iid=8, cid=6, ea=0x16, op=0x0421] se_add rr1,rr2
+mWB:  [iid=9, cid=7, ea=0x18, op=0x00000000] halt
+END
+  close TMP1;
+
+	open TMP2,">$ffn" or die "Couldn't open temporary found file.\n";
+	print TMP2 (join "\n",(grep { /^mWB:/ && /op=0x/; } @lines));
+	close TMP2;
+
+	file_diff ($ffn,$efn);
+	unlink $efn;
+}
+
+##
+## </TESTS>
+##

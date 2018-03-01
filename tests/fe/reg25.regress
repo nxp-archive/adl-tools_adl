@@ -1,0 +1,3 @@
+reg25.adl:20: First argument to write-hook action function must be a `bits` of the same width as the registers in a register file.
+reg25.adl:8: Second argument to write-hook action function must be a `bits` of the same width as the registers in a register file.
+reg25.adl:14: First argument to read-hook action function must be an unsigned integer.

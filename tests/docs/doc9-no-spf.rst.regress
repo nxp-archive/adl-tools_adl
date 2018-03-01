@@ -1,0 +1,503 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+
+
+.. _adl-internal-target-1:
+Registers
+---------
+
+
+.. _adl-internal-target-2:
+*A*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">A</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-3:
+*B*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">B</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-4:
+*C*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">C</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-5:
+*D*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">D</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-6:
+*E*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">E</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-7:
+*REG1*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">REG1</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-8:
+Register Files
+--------------
+
+
+.. _adl-internal-target-9:
+*S*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">S</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  1024
+
+.. list-table:: Constituent Registers
+   :class: sparsecontents
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Index
+     - Register Usage
+   * - 1
+     - `C <#adl-internal-target-4>`__
+   * - 8
+     - `A <#adl-internal-target-2>`__
+   * - 9
+     - `B <#adl-internal-target-3>`__
+   * - 50
+     - `D <#adl-internal-target-5>`__
+   * - 51
+     - `E <#adl-internal-target-6>`__
+   
+
+.. _adl-internal-target-10:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-f">&nbsp;&nbsp;F&nbsp;&nbsp;</a> <a href="#ifield-section-n">&nbsp;&nbsp;N&nbsp;&nbsp;</a> <a href="#ifield-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#ifield-section-p">&nbsp;&nbsp;P&nbsp;&nbsp;</a> <a href="#ifield-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#ifield-section-x">&nbsp;&nbsp;X&nbsp;&nbsp;</a> <a href="#ifield-section-y">&nbsp;&nbsp;Y&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-f:
+
+
+.. _adl-internal-target-11:
+*F1*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Bits
+     - [9,10] 
+
+.. raw:: html
+
+   <table class="enumeratedfield">
+   <tr>
+     <th>Enumeration</th>
+     <th>Value</th>
+   </tr>
+   <tr><td></td><td>0</td></tr>
+   <tr><td>.up</td><td>0</td></tr>
+   <tr><td>.down</td><td>1</td></tr>
+   <tr><td>.up1</td><td>2</td></tr>
+   <tr><td>.up2</td><td>2</td></tr>
+   <tr><td>.a1</td><td>3</td></tr>
+   <tr><td>.a2</td><td>3</td></tr>
+   <tr><td>.a3</td><td>3</td></tr>
+   <tr><td>.a4</td><td>3</td></tr>
+   </table>
+   
+
+.. _adl-internal-target-12:
+*F2*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Bits
+     - [11,12] 
+
+.. raw:: html
+
+   <table class="enumeratedfield">
+   <tr>
+     <th>Enumeration</th>
+     <th>Value</th>
+   </tr>
+   <tr><td></td><td>0</td></tr>
+   <tr><td>.left0</td><td>0</td></tr>
+   <tr><td>.right0</td><td>1</td></tr>
+   <tr><td>.left1</td><td>2</td></tr>
+   <tr><td>.left2</td><td>2</td></tr>
+   <tr><td>.left3</td><td>2</td></tr>
+   <tr><td>.right1</td><td>3</td></tr>
+   </table>
+   
+
+.. _ifield-section-n:
+
+
+.. _adl-internal-target-13:
+*NG*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Bits
+     - [4,5] 
+
+
+.. _ifield-section-o:
+
+
+.. _adl-internal-target-14:
+*OPCD*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+   * - Bits
+     - [1,3] 
+
+
+.. _ifield-section-p:
+
+
+.. _adl-internal-target-15:
+*PR*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Bits
+     - [6,7] 
+
+
+.. _adl-internal-target-16:
+*PRn0*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+
+.. raw:: html
+
+   <table class="enumeratedfield">
+   <tr>
+     <th>Enumeration</th>
+     <th>Value</th>
+   </tr>
+   <tr><td></td><td>0</td></tr>
+   <tr><td>if0</td><td>0</td></tr>
+   <tr><td>if1</td><td>1</td></tr>
+   <tr><td>if2</td><td>2</td></tr>
+   <tr><td>if3</td><td>3</td></tr>
+   </table>
+   
+
+.. _adl-internal-target-17:
+*PRn1*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+
+.. raw:: html
+
+   <table class="enumeratedfield">
+   <tr>
+     <th>Enumeration</th>
+     <th>Value</th>
+   </tr>
+   <tr><td></td><td>0</td></tr>
+   <tr><td>ife0</td><td>0</td></tr>
+   <tr><td>ife1</td><td>1</td></tr>
+   <tr><td>ife2</td><td>2</td></tr>
+   <tr><td>ife3</td><td>3</td></tr>
+   </table>
+   
+
+.. _ifield-section-r:
+
+
+.. _adl-internal-target-18:
+*R1*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [13,17] 
+
+
+.. _adl-internal-target-19:
+*R2*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [18,22] 
+
+
+.. _adl-internal-target-20:
+*R3*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 10
+   * - Bits
+     - [18,27] 
+
+
+Reference: **`S <#adl-internal-target-9>`__**
+
+Permitted values:
+  0 - 1023
+
+
+.. _ifield-section-x:
+
+
+.. _adl-internal-target-21:
+*X*
+```
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 4
+
+
+.. _ifield-section-y:
+
+
+.. _adl-internal-target-22:
+*Y*
+```
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 4
+
+
+.. _adl-internal-target-23:
+Instructions
+------------
+
+
+.. _adl-internal-target-24:
+*foo{F1}{F2} R1,R2*
+```````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="4.16667%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="12.5%" class="field">1&nbsp;OPCD</td>
+     <td colspan="2" width="8.33333%" class="field">NG</td>
+     <td colspan="2" width="8.33333%" class="field">PR</td>
+     <td width="4.16667%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="8.33333%" class="field">F1</td>
+     <td colspan="2" width="8.33333%" class="field">F2</td>
+     <td colspan="2" width="20.8333%" class="field">R1</td>
+     <td colspan="2" width="20.8333%" class="field">R2</td>
+     <td width="4.16667%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="singleodd">0</td>
+     <td class="lefteven">1</td><td class="righteven">3</td>
+     <td class="leftodd">4</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">7</td>
+     <td class="singleodd">8</td>
+     <td class="lefteven">9</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">12</td>
+     <td class="lefteven">13</td><td class="righteven">17</td>
+     <td class="leftodd">18</td><td class="rightodd">22</td>
+     <td class="singleeven">23</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-25:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+

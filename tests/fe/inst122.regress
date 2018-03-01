@@ -1,0 +1,125 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CG: 
+    Conflict allowed.
+    Pseudo:  1
+    Width:   1
+  CG_imp_bits__4_4_: [4,4] 
+    Implements:  CG
+  R1: 
+    Pseudo:  1
+    Width:   6
+  R1_imp_bits__11_16_: [11,16] 
+    Implements:  R1
+  R2: 
+    Pseudo:  1
+    Width:   6
+  R2_imp_bits__17_22_: [17,22] 
+    Implements:  R2
+  R3: 
+    Pseudo:  1
+    Width:   6
+  R3_imp_bits__26_31_: [26,31] 
+    Implements:  R3
+  VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_: [0,3] [5,10] 
+  VarInstrOpcode_imp_bits__0_7_: [0,7] 
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Attributes:  one
+  Fields:  VarInstrOpcode_imp_bits__0_7_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  32
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  Next Table:  {
+    if ( CG == 0 ) {
+        setCurrentInstrTable ( two ) ;
+    } else {
+        setCurrentInstrTable ( one ) ;
+    }
+}
+  -------------------------------
+  Name:  b1 (rank: 100) (shorthand)
+  Width:  32
+  Syntax:  "b %f,%f,%f":   R1 R2 R3
+  Attributes:  one two
+  Fields:  R1 R2 R3
+  Alias:  b CG_imp_bits__4_4_(0) R1_imp_bits__11_16_(R1) R2_imp_bits__17_22_(R2) R3_imp_bits__26_31_(R3) 
+  -------------------------------
+  Name:  b2 (rank: 100) (shorthand)
+  Width:  32
+  Syntax:  "b %f,%f,%f":   R1 R2 R3
+  Attributes:  one two
+  Fields:  R1 R2 R3
+  Alias:  b CG_imp_bits__4_4_(1) R1_imp_bits__11_16_(R1) R2_imp_bits__17_22_(R2) R3_imp_bits__26_31_(R3) 
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  32
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  Next Table:  {
+    if ( CG == 0 ) {
+        setCurrentInstrTable ( two ) ;
+    } else {
+        setCurrentInstrTable ( one ) ;
+    }
+}
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  32
+  Attributes:  one two
+  Fields:  CG_imp_bits__4_4_ VarInstrOpcode_imp_bits__0_3_x_5_7_x_8_10_ R1_imp_bits__11_16_ R2_imp_bits__17_22_ R3_imp_bits__26_31_
+  Action:  {
+}
+  Next Table:  {
+    if ( CG == 0 ) {
+        setCurrentInstrTable ( two ) ;
+    } else {
+        setCurrentInstrTable ( one ) ;
+    }
+}
+  -------------------------------
+
+Instruction Tables:
+one:
+    Mask:  0x8000000
+    1(8000000):      Mask:  0xf7000000
+      196(c4000000):  a
+    default:      Mask:  0xf7e00000
+      1572(c4800000):  b
+        Shorthand:  b1: b CG_imp_bits__4_4_(0) R1_imp_bits__11_16_(R1) R2_imp_bits__17_22_(R2) R3_imp_bits__26_31_(R3) 
+        Shorthand:  b2: b CG_imp_bits__4_4_(1) R1_imp_bits__11_16_(R1) R2_imp_bits__17_22_(R2) R3_imp_bits__26_31_(R3) 
+      1573(c4a00000):  c
+      1574(c4c00000):  d
+two:
+    Mask:  0xf7e00000
+    1572(c4800000):  b
+      Shorthand:  b1: b CG_imp_bits__4_4_(0) R1_imp_bits__11_16_(R1) R2_imp_bits__17_22_(R2) R3_imp_bits__26_31_(R3) 
+      Shorthand:  b2: b CG_imp_bits__4_4_(1) R1_imp_bits__11_16_(R1) R2_imp_bits__17_22_(R2) R3_imp_bits__26_31_(R3) 
+    1573(c4a00000):  c
+    1574(c4c00000):  d
+-------------------------------
+

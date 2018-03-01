@@ -1,0 +1,32 @@
+Executing lwz
+Write to register NIA:  0x104
+Read from memory at 0x1000:  0xdeadbeef
+Write to GPR[2]:  0xdeadbeef
+Write to general-purpose-register 2:  0xdeadbeef
+Write to GPR2 (specific):  0xdeadbeef
+Executing addi
+Write to register NIA:  0x108
+Write to GPR[10]:  0x100
+Write to general-purpose-register 10:  0x100
+Executing add
+Write to register NIA:  0x10c
+Write to GPR[3]:  0xdeaddeee
+Write to general-purpose-register 3:  0xdeaddeee
+Executing addic.
+Write to register NIA:  0x110
+Write to GPR[5]:  0xfffffffe
+Write to general-purpose-register 5:  0xfffffffe
+Write to register CR:  0x80000000
+Write to register XER:  0x0
+Write to XER:  0x0
+Executing stw
+Write to register NIA:  0x114
+Write to memory at 0x2000:  0xdeaddeee
+Write to 0x2000-0x2ffff memory at 0x2000:  0xdeaddeee
+Executing stw
+Write to register NIA:  0x118
+Write to memory at 0xfffffffc:  0xdead
+Write to memory at 0x0:  0xdeee0000
+Executing halt
+Write to register NIA:  0x11c
+Simulation halted at address: 0x000000000000011c

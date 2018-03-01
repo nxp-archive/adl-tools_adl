@@ -1,0 +1,10 @@
+
+define (arch=Base) {
+
+  attrs = (foo,stuff);
+
+  define (regfile=sprs) {
+    size = 1024;
+    attrs = foo;
+  }
+}

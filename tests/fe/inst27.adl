@@ -1,0 +1,111 @@
+//
+// This checks that we can evaluate simple constant expressions, such as for
+// functions which need constant arguments b/c they're transformed into template
+// calls.
+//
+
+#define RegSize 32
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      var f = bits<64>(0xFFFFFFFFFFFFFFFFULL);
+      if (RA == 0) {
+        GPR(RT) = signExtend(SI,RegSize) << 16;
+      } else {
+        // Second argument to signExtend should be evaluated by front-end.
+        GPR(RT) = GPR(RA) + (signExtend(SI,RegSize-2*4) << 16);
+      }
+    };
+  }
+
+  define (instr=halt1) {
+    fields=(OPCD(0));
+    enable_post_fetch = false;
+    action = {
+      halt();
+    };
+  }
+
+  define (instr=halt2) {
+    fields=(OPCD(1));
+    enable_post_fetch = func() {
+      return (GPR(31) == 0);
+    };
+    action = {
+      halt();
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc);
+}

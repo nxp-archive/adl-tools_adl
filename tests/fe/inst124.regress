@@ -1,0 +1,62 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  A: [23,23] 
+  B: [24,24] 
+  F1: [9,9] 
+    Enums:  '.up' '.down' ( '.up1' '.up2' ) '.down1' ( 'a1' 'a2' 'a3' 'a4' ) 
+    Default value :'.up'
+  F2: [10,10] 
+    Enums:  '.left0' '.right0' ( '.left1' '.left2' '.left3' ) '.right1' 
+    Default value :'.left1'
+  NG: [6,6] 
+    Enums:  '' 'ng' 
+  OPCD: [1,5] 
+  R1: [11,16] 
+  R2: [17,22] 
+Instructions:
+  Name:  family (rank: 100)
+  Width:  32
+  Fields:  OPCD NG F1 F2 R1 R2 A B
+  Action:  {
+}
+  Nested insructions:  
+    Name:  a (rank: 100)
+    Width:  32
+    Syntax:  "%p a%p%p %f %f":   NG F1 F2 R1 R2 A(( R1 > 1 ) ? 1 : 0) B(( R2 > 1 ) ? 1 : 0)
+    DSyntax:  "%f a%f%f %f %f":   NG F1 F2 R1 R2
+    Attributes:  one
+    Fields:  OPCD(2) NG F1 F2 R1 R2 A B
+    Alias:  family NG(NG) F1(F1) F2(F2) R1(R1) R2(R2) A(A) B(B) 
+    -------------------------------
+    Name:  b (rank: 100)
+    Width:  32
+    Syntax:  "%p b%p%p %f %f":   NG F1 F2 R1 R2 A(( R1 > 1 ) ? 1 : 0) B(( R2 > 1 ) ? 1 : 0)
+    DSyntax:  "%f b%f%f %f %f":   NG F1 F2 R1 R2
+    Attributes:  one
+    Fields:  OPCD(3) NG F1 F2 R1 R2 A B
+    Alias:  family NG(NG) F1(F1) F2(F2) R1(R1) R2(R2) A(A) B(B) 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+one:
+    Mask:  0x7c000000
+    2(8000000):  a
+    3(c000000):  b
+-------------------------------
+

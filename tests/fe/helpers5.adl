@@ -1,0 +1,17 @@
+//
+// Another test of helper functions:  Should no fail b/c we allow outer-level definitions.
+//
+
+int  signExtend(int a,int signbit) ;
+
+define (arch=minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

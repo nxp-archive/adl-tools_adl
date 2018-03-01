@@ -1,0 +1,28 @@
+//
+// Basic test of using defmod with uADL stuff.
+//
+
+define (core=P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+  
+  }
+
+}
+
+defmod (core=P) {
+  defmod (resources) {
+    defmod(fetchunit=Fetcher) {
+      fetch_memory = Mem;
+    }
+  }
+}

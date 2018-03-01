@@ -1,0 +1,18 @@
+
+define (group=foo) {
+	instrs = (a,b,c,d);
+}
+
+define (group=bar) {
+	instrs = (addi,"addi.");
+}
+
+define (timing) {
+	add = 2;
+	"addi." = 10;
+}
+
+define (timing) {
+	or = 2;
+	"or." = 10;
+}

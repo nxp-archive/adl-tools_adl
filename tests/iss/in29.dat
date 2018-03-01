@@ -1,0 +1,67 @@
+#
+# <ASM>
+# lwz  r2,0x1000(0)
+# add  r3,r2,r1
+# subic. r5,r5,2
+# stw  r3,0(r4)
+# stw  r3,0xfff(r4)
+# lhz  r6,0xfff(r4)
+# lwz  r7,0x100(r20)
+# addi r7,r7,0x1000
+# stw  r7,0x200(r20)
+# </ASM>
+# <MDOPTS>
+# instr-offset: 0x10000
+# </MDOPTS>
+#
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x80401000	# lwz r2,0x1000(0)
+MD n=Mem ra=0x00010004 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00010008 d=0x34A5FFFE	# subic. r5,r5,2
+MD n=Mem ra=0x0001000c d=0x90640000	# stw r3,0(r4)
+MD n=Mem ra=0x00010010 d=0x90640FFF	# stw r3,0xfff(r4)
+MD n=Mem ra=0x00010014 d=0xA0C40FFF	# lhz r6,0xfff(r4)
+MD n=Mem ra=0x00010018 d=0x80F40100	# lwz r7,0x100(r20)
+MD n=Mem ra=0x0001001c d=0x38E71000	# addi r7,r7,0x1000
+MD n=Mem ra=0x00010020 d=0x90F40200	# stw r7,0x200(r20)
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=4 d=0x2000
+RD n=GPR i=20 d=0x101000
+MD n=Mem ra=0xa1000 d=0xdeadbeef
+MD n=Mem ra=0xA2100 d=0x12345678
+MD n=Mem ra=0xA2200 d=0x00000000
+MD n=Mem ra=0xb2000 d=0x00000000
+MD n=Mem ra=0xb2ffc d=0x00000000
+MD n=Mem ra=0xb7000 d=0x00000000
+
+# ea=0x000000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x001000 ra=0xA1000
+TD n=Tlb4k set=1 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x4
+
+# ea=0x101000 ra=0xA2000
+TD n=Tlb4k set=1 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x288 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x404
+
+# ea=0x002000 ra=0xB2000
+TD n=Tlb4k set=2 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x2c8 WIMG=0x3 SX=1 SR=1 SW=1 EPN=0x8
+
+# ea=0x003000 ra=0xB7000
+TD n=Tlb4k set=3 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x2dc WIMG=0x4 SX=1 SR=1 SW=1 EPN=0xc
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=5 d=0xfffffffe
+RD n=GPR i=6 d=0x0000dead
+RD n=GPR i=7 d=0x12346678
+
+MD n=Mem ra=0xa1000 d=0xdeadbeef
+MD n=Mem ra=0xb2000 d=0xdeaddeee
+MD n=Mem ra=0xb2ffc d=0x000000de
+MD n=Mem ra=0xb7000 d=0xaddeee00
+MD n=Mem ra=0xA2100 d=0x12345678
+MD n=Mem ra=0xA2200 d=0x12346678

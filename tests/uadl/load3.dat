@@ -1,0 +1,82 @@
+#
+# Test the use of the instruction flag to communicate address/mmu information
+# from the ISS to the pipeline model.
+#
+
+= asm
+
+	lwz r2,0x1000(r0)   # Normal load.
+	lwz r3,0(r10)       # "Guarded" load.
+	lwz r4,0x1004(r0)  # Normal load.
+	lwz r5,0x1008(r0)  # Normal load.
+
+
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80401000	#	lwz r2,0x1000(r0)   # Normal load.
+MD n=Mem ra=0x00000004 d=0x806A0000	#	lwz r3,0(r10)       # "Guarded" load.
+MD n=Mem ra=0x00000008 d=0x80801004	#	lwz r4,0x1004(r0)  # Normal load.
+MD n=Mem ra=0x0000000c d=0x80A01008	#	lwz r5,0x1008(r0)  # Normal load.
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x0
+
+RD n=GPR i=10 d=0x10010
+
+MD n=Mem ra=0x1000  d=10
+MD n=Mem ra=0x1004  d=20
+MD n=Mem ra=0x1008  d=30
+MD n=Mem ra=0x10010 d=40
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80401000
+INSTR op=0x80401000					asm="lwz r2,4096(r0)"
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x0000000a
+R n=GPR i=2 d=0x0000000a
+ITIME t=2
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x806a0000
+INSTR op=0x806a0000					asm="lwz r3,0(r10)"
+M n=Mem t=read ea=0x10010 ra=0x10010 d=0x00000028
+R n=GPR i=3 d=0x00000028
+ITIME t=4
+CTIME t=7
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x80801004
+INSTR op=0x80801004					asm="lwz r4,4100(r0)"
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000014
+R n=GPR i=4 d=0x00000014
+ITIME t=8
+CTIME t=11
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x80a01008
+INSTR op=0x80a01008					asm="lwz r5,4104(r0)"
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x0000001e
+R n=GPR i=5 d=0x0000001e
+ITIME t=9
+CTIME t=12
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=13
+CTIME t=16
+
+RESULTS
+
+RD n=GPR i=2 d=10
+RD n=GPR i=3 d=40
+RD n=GPR i=4 d=20
+RD n=GPR i=5 d=30

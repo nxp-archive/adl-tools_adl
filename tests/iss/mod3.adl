@@ -1,0 +1,1570 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+#import "stat.adl"
+
+define (arch = MiniPPC) {
+
+  // Various helper routines.
+
+  // Note: Modified y so that its type is purely a template parameter.  This was
+  // causing a crash with OpenCxx.
+  template <size_t Nb1,typename Y>
+  void setCrField(bits<3> field,bits<Nb1> x,Y y) {
+
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+
+    cr_update(field,r);
+    bar();
+  }
+
+  // This used to crash OpenCxx.  We should just ignore the sizing, as we can't
+  // determine the width explicitly.
+  template <size_t _Nb>
+  bits<(_Nb-1)> SItoSISat(const bits<_Nb> &x,int count)
+  {
+    bits<(_Nb-1)> result;
+    int foo = _Nb + 1;
+    result = concat(bits<1>(x(0)),bits<(_Nb-2)>(x(2,count)));
+    return(result);
+  }
+
+
+  // This should take a packet, but the 'void' parameter should be removed to have
+  // a legal syntax.
+  void bar(void)
+  {
+    int i = 10;
+  }
+
+  // This should also take a packet.
+  void cr_update(bits<3> field,bits<4> &r)
+  {
+    CR.cr(field) = r;
+  }
+
+  attrs = (load,store,squash,unarchitected);
+
+  // Exceptions will not be considered branches.
+  exception_is_branch = false;
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=DEC) {}
+
+  define (reg=CR) {
+    """
+    The condition register.
+    """;
+    define (field=cr) {
+      indexed=4;
+    }
+    define (field=crb) {
+      indexed=1;
+    }
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+  }
+
+  // For testing purposes, we want to make sure that we can communicate, via
+  // registers, values from an instruction to an exception.  This is mainly an
+  // issue with the transactional ISS.
+  define (reg=tmpESR) {}
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+    define (field=AS) {
+      bits = 12;
+    }
+    define (field=EE) {
+      bits = 16;
+    }
+  }
+
+  define (reg=XER) {
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=CSRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=CSRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR4) {
+    """
+    Interrupt-vector offset register 4 (External Interrupt).
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6 (Program Interrupt).
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7 (Post-cycle Exceptions).
+    """;
+  }
+
+  define (reg=IVOR10) {
+    """
+    Interrupt-vector offset register 10 (Decrementer Interrupt).
+    """;
+  }
+
+
+  attrs = (unarchitected,indeterminate);
+
+  define (reg=FOO1) {
+    attrs = unarchitected;
+    offset = 32;
+    define (field=A) {
+      bits=(32,39);
+    }
+    define (field=B) {
+      bits=(40,47);
+      readonly=true;
+    }
+    define (field=C) {
+      bits=(48,55);
+    }
+    reset = 0xdead1100;
+  }
+
+  define (reg=FOO2) {
+    width = 64;
+
+    define (field=X) {
+      indexed = 8;
+    }
+    define (field=Y) {
+      indexed = 16;
+    }
+    define (field=Z) {
+      indexed = 32;
+    }
+  }
+
+  define (reg=FOO3) {
+    attrs = indeterminate;
+    offset = 32;
+  }
+
+  define (reg=FOO4) {
+    alias = GPR(2);
+  }
+
+  define (reg=FOO5) {
+    define (field=A) {
+      bits = (0,15);
+    }
+    define (field=AA) {
+      bits = (0,15);
+    }
+    define (field=B) {
+      bits = (16,31);
+    }
+    define (read) {
+      action = {
+        var x = FOO5;
+        x = x + 0;
+        FOO5_RD = FOO5_RD + 1;
+        return x;
+      };
+    }
+    define (write) {
+      action = func (bits<32> x) {
+        FOO5_WR = FOO5_WR + 1;
+        FOO5 = x;
+      };
+    }
+  }
+
+  define (reg=FOO6) {
+    alias = FOO5;
+  }
+
+  define (reg=FOO7) {
+    define (field=A) {
+      bits = (0,15);
+    }
+    define (write) {
+      action = func (bits<32> x) {
+        // This write should respect the reserved bits.
+        FOO7 = x;
+      };
+    }
+  }
+
+  define (reg=FOO8) {
+    alias = FOO1;
+    width = 64;
+  }
+
+  define (reg=FOO9) {
+    width = 32;
+  }
+
+  define (reg=FOO10) {
+    width = 16;
+    define (read) {
+      alias = FOO9;
+      slice = (0,15);
+    }
+    define (write) {
+      alias = FOO9;
+      slice = (0,15);
+    }
+  }
+
+  define (reg=FOO11) {
+    define (write) {
+      action = func (bits<32> x) {
+        FOO11 = x;
+        raiseException(Program);
+      };
+    }
+  }
+
+  define (reg=FOO12) {
+    define (write) {
+      action = func (bits<32> x) {
+        ternary_test1(true,31);
+      };
+    }
+  }
+
+  define (reg=FOO13) {
+    define (read) {
+      action = func() {
+        if (MSR == 0) {
+          return ThisReg;
+        } else {
+          return 0;
+        }
+      };
+    }
+    define (write) {
+      action = func(bits<32> x) {
+        if (MSR == 0) {
+          ThisReg = x;
+        }
+      };
+    }
+  }
+
+  // Unused register, but we'll override the model generator so that we generate
+  // code for it (just to make sure that this works).
+  define (reg=FOO14) {
+    define (field=A) { bits = 0; }
+    define (field=B) { bits = 1; }
+    define (field=C) { bits = 2; }
+    define (field=D) { bits = 3; }
+  }
+
+  define (reg=FOO5_RD) {
+  }
+
+  define (reg=FOO5_WR) {
+  }
+
+  define (reg=EWTEST) {
+    // For testing of external-write hooks.  This models write-one-to-clear
+    // behavior.
+    external_write = func (bits<32> x) {
+      ThisReg = ThisReg & ~x;
+    };
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (regfile=XPR) {
+    size = 32;
+
+    define (field=A) {
+      bits = (0,15);
+    }
+    define (field=B) {
+      bits = (16,31);
+    }
+
+    define (read) {
+      action = func (unsigned index) {
+        FOO5_RD = FOO5_RD + 1;
+        return XPR(index);
+      };
+    }
+    define (write) {
+      action = func (unsigned index,bits<32> x) {
+        FOO5_WR = FOO5_WR + 1;
+        XPR(index) = x;
+      };
+    }
+  }
+
+  define (reg=Slice) { }
+
+  define (regfile=VPR) {
+    """
+    Vector registers.
+    """;
+    width=128;
+    size = 32;
+
+    define (field=B) {
+      indexed = 8;
+    }
+    define (field=H) {
+      indexed = 16;
+    }
+    define (field=W) {
+      indexed = 32;
+    }
+  }
+
+  define (reg=ITEST) {}
+
+  define (reg=BranchTaken) {}
+
+  define (regfile=SPR) {
+    size=1024;
+    define (entry=1)   { reg = XER; }
+    define (entry=9)   { reg = CTR; }
+    define (entry=22)  { reg = DEC; }
+    define (entry=62)  { reg = ESR; }
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+    define (entry=30)  { reg = FOO1; }
+    define (entry=31)  { reg = FOO2; }
+    define (entry=58)  { reg = CSRR0; }
+    define (entry=59)  { reg = CSRR1; }    
+    define (entry=100) { reg = GPR(20); }
+    define (entry=101) { reg = GPR(21); }
+    define (entry=200) { reg = FOO4; }
+    define (entry=201) { reg = FOO3; }
+    define (entry=202) { reg = FOO5; }
+    define (entry=208) { reg = FOO8; }
+    define (entry=209) { reg = FOO9; }
+    define (entry=210) { reg = FOO10; }
+    define (entry=211) { reg = FOO11; }
+
+    define (entry=230) { reg = foobar(0).AR; }
+    define (entry=231) { reg = foobar(1).AR; }
+    define (entry=232) { reg = foobar(2).AR; }
+    define (entry=233) { reg = foobar(0).ARF(0); }
+    define (entry=234) { reg = foobar(1).ARF(1); }
+    define (entry=235) { reg = foobar(2).ARF(2); }
+
+    define (entry=250) {
+      define(write) {
+        action = func (bits<32> value) {
+          Program_t prog;
+          prog.ESR.set(5,5,1);
+          raiseException(prog);  // read-only register
+        };
+      }
+      define(read) {
+        action = {
+          Program_t prog;
+          prog.ESR.set(5,5,1);
+          raiseException(prog);
+          return 0;  // just to avoid the compiler warning
+        };
+      }      
+    }
+    define (entry=301) {
+      reg = FOO2;
+      define (read) {
+        action = {
+          ThisReg = ThisReg - 1;
+          return FOO3;
+        };
+      }
+      define (write) {
+        action = func (bits<32> x) {
+          ThisReg = ThisReg + 1;
+          FOO3 = x;
+        };
+      }
+    }
+    define (entry=302) {
+      define (read) {
+        action = {
+          return DEC;
+        };
+      }
+      define (write) {
+        action = func (bits<32> x) {
+          DEC = x;
+        };
+      }
+    }
+    define (entry=303) {
+      define (read) {
+        action = {
+          return VPR(0)(0,31) + VPR(0)(96,127);
+        };
+      }
+      define (write) {
+        action = func (bits<32> x) {
+          VPR(0)(0,31) = x;
+          VPR(0)(96,127) = x;
+        };
+      }
+    }
+    
+    define (entry=304) {
+      reg = ITEST;
+      define (write) {
+        ignore = true;
+      }
+    }
+
+    define (entry=251) { reg=BranchTaken; }
+    define (entry=400) { reg=EWTEST; }
+  }
+
+  define (reg=AR_W) {};
+  define (reg=AR_R) {};
+
+  define (reg=AR) {
+    define (field=A) { bits = (0,15); }
+    define (field=B) { bits = (16,31); }
+    define (field=C) { indexed = 8; };
+
+    define (read) {
+      action = { AR_R = AR_R + 1; return AR; };
+    }
+    define (write) {
+      action = func(bits<32> x) { AR_W = AR_W + 1; AR = x; };
+    }
+  }
+
+  define (reg=BR) {
+    define (field=A) { bits = (0,15); }
+    define (field=B) { bits = (16,31); }
+    define (field=C) { indexed = 8; };
+  }
+
+  define (reg=DR) {}
+
+  define (reg=DRL) {
+    alias = DR;
+  }
+
+  define (regfile=ARF) {
+    size = 32;
+    log_name = A;
+    define (field=A) { bits = (0,15); }
+    define (field=B) { bits = (16,31); }
+    define (field=C) { indexed = 8; };
+
+    define (read) {
+      action = func (unsigned index) { AR_R = AR_R + 1; return ARF(index); };
+    }
+    define (write) {
+      action = func(unsigned index,bits<32> x) { AR_W = AR_W + 1; ARF(index) = x; };
+    }
+  }
+
+  define (regfile=ARF16) {
+    size = 16;
+    define (read) {
+      alias = ARF;
+      regs = ((0,7),(24,31));
+    }
+    define (write) {
+      alias = ARF;
+      regs = ((0,7),(24,31));
+    }
+  }
+
+
+  define (reg=FBCTRL) {};
+
+  define (regfile=CRF) {
+    size = 8;
+    log_name = C;
+  }
+
+  define (reg=CRFL5) {
+    alias = CRF(5);
+  }
+
+
+  define (context=foobar) {
+    regfiles = (ARF,ARF16,CRF);
+    regs = (AR,BR,DR);
+    num_contexts = 3;
+
+    active = { return FBCTRL.uint32(); };
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+    addr = pc;
+    shift = 2;
+    is_signed = true;
+  }
+
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=LI) {
+    """
+    Immediate address field for branch instructions.
+    """;
+    bits = (6,29);
+    
+    is_signed = true;
+    shift = 2;
+    addr = pc;
+  }
+
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=TO) {
+    bits = (6,10);
+  }
+  define (instrfield=D) {
+    """
+    Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+  define (instrfield=UI) {
+    """
+    Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  //
+  // Instructions.
+  //
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT.uint32()) = GPR(RA.uint32()) + GPR(RB.uint32());
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      if (RA == 0) {
+        GPR(RT) = si;
+      } else {
+        GPR(RT) = GPR(RA) + si;
+      }
+    };
+  }
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      GPR(RT) = GPR(RA) + si;
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      bits<32> si = SI;
+      if (RA == 0) {
+        GPR(RT) = si << 16;
+      } else {
+        GPR(RT) = GPR(RA) + (si << 16);
+      }
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(18),LI,AA(0),LK(0));
+    action =  {
+      NIA = LI;
+    };
+  }
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    action = func() {
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = (BO(2)!=0) || (( (CTR!=0) ^ BO(3))!=0);
+      var cond_ok = (BO(0)!=0) || (( CR(BI) == BO(1))!=0);
+      if ( ctr_ok && cond_ok ) {
+        NIA = BD;
+      }
+    };
+  }
+
+  // For testing purposes: Make sure that we can handle a conditional branch
+  // with jit and trace-cache that has no translation-time conditionals.
+  define (instr=bc2) {
+    fields=(OPCD(17),BO,BI,BD,AA(0),LK(0));
+    action = func() {
+      var cond_ok = (BO(0)!=0) || (( CR(BI) == BO(1))!=0);
+      if ( cond_ok ) {
+        NIA = BD;
+      }
+    };
+  }
+
+  define (instr=cmpi) {
+    fields=(OPCD(11),BF,RA,SI);
+    action = func () {
+      var si = signExtend(SI,32);
+      setCrField(BF,GPR(RA),si);
+    };
+  }
+
+  define (instr=cmp) {
+    fields=(OPCD(31),BF,RA,RB,XO(0));
+    action = {
+      setCrField(BF,GPR(RA),GPR(RB));
+    };
+  }
+
+//   define (instr=lwz) {
+//     fields=(OPCD(32),RT,RA,D);
+//     attrs = load;
+//     action = {
+//       var d = signExtend(D,32);
+//       var b = (RA == 0) ? 0 : GPR(RA);
+//       var addr = b + d;
+//       GPR(RT) = Mem(addr,4);
+//     };
+//   }
+
+  // Not a real lmw; this is for testing a very large load.
+  define (instr=lmw) {
+    fields=(OPCD(46),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      bits<512> mem_data = Mem(addr,64);
+      if (RT < 16) {
+        GPR(0)  = mem_data(0, 31);
+        GPR(1)  = mem_data(32,63);
+        GPR(2)  = mem_data(64,95);
+        GPR(3)  = mem_data(96,127);
+        GPR(4)  = mem_data(128,159);
+        GPR(5)  = mem_data(160,191);
+        GPR(6)  = mem_data(192,223);
+        GPR(7)  = mem_data(224,255);
+        GPR(8)  = mem_data(256,287);
+        GPR(9)  = mem_data(288,319);
+        GPR(10) = mem_data(320,351);
+        GPR(11) = mem_data(352,383);
+        GPR(12) = mem_data(384,415);
+        GPR(13) = mem_data(416,447);
+        GPR(14) = mem_data(448,479);
+        GPR(15) = mem_data(480,511);
+      } else {
+        GPR(16) = mem_data(0, 31);
+        GPR(17) = mem_data(32,63);
+        GPR(18) = mem_data(64,95);
+        GPR(19) = mem_data(96,127);
+        GPR(20) = mem_data(128,159);
+        GPR(21) = mem_data(160,191);
+        GPR(22) = mem_data(192,223);
+        GPR(23) = mem_data(224,255);
+        GPR(24) = mem_data(256,287);
+        GPR(25) = mem_data(288,319);
+        GPR(26) = mem_data(320,351);
+        GPR(27) = mem_data(352,383);
+        GPR(28) = mem_data(384,415);
+        GPR(29) = mem_data(416,447);
+        GPR(30) = mem_data(448,479);
+        GPR(31) = mem_data(480,511);
+      }
+    };
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    attrs = load;
+    action = {
+      var d = signExtend(D,32);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      if (addr % 4 != 0) {
+        raiseException(Program);
+      }
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=lwzx) {
+    fields=(OPCD(31),RT,RA,RB,XO(23));
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=mcrxr) {
+    fields=(OPCD(31),BF,XO(512));
+    action = {
+      CR(4*BF+32,4*BF+35) = XER(32,35); 
+      XER(32,35) = 0;
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      if (!SPR.validIndex(SPRN)) {
+        // We want to make sure that we can either set a field in a register or
+        // fully set a register.
+        Program_t prog;
+        if (FOO1.A != 0) {
+          tmpESR(4,4) = 1;
+          prog.ESR.set(4,4,1);
+          raiseException(prog);
+        } else {
+          tmpESR = 0x00f00000;
+          prog.ESR = 0x00f00000;
+          raiseException(prog);
+        }
+      }
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  define (instr=mfspr) {
+    fields=(OPCD(31),RT,SPRN,XO(339));
+    action = {
+      if (!SPR.validIndex(SPRN)) {
+        tmpESR(4,4) = 1;
+        Program_t prog;
+        prog.ESR.set(4,4,1);
+        raiseException(prog);
+      }
+      GPR(RT) = SPR(SPRN);
+    };
+  }
+
+  define (instr=mullw) {
+    fields=(OPCD(31),RT,RA,RB,XO(235));
+    action = {
+      GPR(RT) = GPR(RA) * GPR(RB);
+    };
+  }
+
+  define (instr=mulhw) {
+    fields=(OPCD(31),RT,RA,RB,XO(75));
+    action = {
+      bits<64> a = GPR(RA);
+      bits<64> b = GPR(RB);
+      GPR(RT) = (a*b)(0,31);
+    };
+  }
+
+  define (instr=or) {
+    fields=(OPCD(31),RS,RA,RB,XO(444));
+    action = {
+      GPR(RA) = GPR(RS) | GPR(RB);
+    };
+  }
+
+  define (instr=ori) {
+    fields=(OPCD(24),RS,RA,UI);
+    action = {
+      GPR(RA) = GPR(RS) | UI;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define(instr=rlwimi) {
+    fields=(OPCD(20),RS,RA,SH,MB,ME);
+    action = {
+      int slice = Slice.uint32();
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA)(slice,31) = (r & m) | (GPR(RA) & ~m);
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (instr=rfci) {
+    fields=(OPCD(19),RS,RA,RB,XO(51));
+    action = {
+      MSR = CSRR1;
+      NIA = CSRR0;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var d = signExtend(D,32);
+      var addr = b + d;
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  define (instr=stwu) {
+    fields=(OPCD(37),RS,RA,D);
+    action = {
+      var d = signExtend(D,32);
+      var addr = GPR(RA) + d;
+      Mem(addr,4) = GPR(RS);
+      GPR(RA) = addr;
+    };
+  }
+
+  define (instr=stwx) {
+    fields=(OPCD(31),RS,RA,RB,XO(151));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  // For testing purposes: Combine into 64-bit writes for aligned writes.  The
+  // tricky part here is that the loop seems to stop at 30, but actually can
+  // reference GPR(31) b/c of the GPR(r+1) reference.  Thus, the use of the
+  // explicit source information to override what is derived automatically.
+  define (instr="stmw") {
+    fields=(OPCD(47),RS,RA,D);
+    attrs = store;
+    sources = (GPR(RA),GPR(RS.uint32(),31));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      int r = RS.uint32();
+      if ((addr & 0x7) != 0) {
+        Mem(addr,4) = GPR(r);
+        r = r + 1;
+        addr = addr + 4;
+      }
+      do {
+        Mem(addr,8) = concat(GPR(r),GPR(r+1));
+        r = r + 2;
+        addr = addr + 8;
+      } while (r <= 30);
+      if (r == 31) {
+        Mem(addr,4) = GPR(31);
+      }
+    };
+  }
+
+  // Just for testing- test that we can pass a type value for memory reads and writes.
+  define (instr=lwarx) {
+    fields=(OPCD(31),RT,RA,RB,XO(20));
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4,MaxCacheAccess+10);
+      XPR(CTR) = addr;
+    };
+  }
+
+  define (instr="stwcx.") {
+    fields=(OPCD(31),RS,RA,RB,XO(150));
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      Mem(addr,4,MaxCacheAccess+11) = GPR(RS);
+    };
+  }
+
+
+  void ternary_test1(bool b,int index) {
+    bits<32> x = (b) ? bits<4>(1) : bits<12>(0xbeef);
+    GPR(index) = x;
+  }
+
+  void ternary_test2(bool b,int index) {
+    bits<12> z = 1;
+    bits<32> x = (b) ? z : bits<4>(0xbeef);
+    GPR(index) = x;
+  }
+
+  void cond_test(int index1,int index2,bool flag) {
+    if (flag) {
+      GPR(index1) = 0x12345678;
+    } else {
+      GPR(index2) = 0xdeadbeef;
+    }
+  }
+
+  // This is just for experimenting with register fields.
+  define (instr=tw) {
+    fields=(OPCD(31),RA,RB,XO(4));
+    action = {
+      // This should respect read-only and reserved bits.
+      FOO1 = GPR(RA);
+      // Test reading from a field.
+      GPR(RB) = FOO1.A + 1;
+      // Test writing to a field.
+      FOO1.C = GPR(RB+1);
+      // Test reading from a slice of a field.
+      var xx = FOO1.A(0,3).uint32();
+      // Note that the write to a fixed GPR index tests aspects of the transactional ISS.
+      GPR(31) = xx + 1;
+      GPR(RB+7) = XPR(4).A(8,15);
+      // Test using indices that are relative to the
+      // registers' offsets.
+      GPR(RB+1) = concat(FOO3(48,63),FOO3(32,47));
+      var a = FOO3;
+      var b = a(0,31);
+      // Tests that we can have a ternary operator which returns bits of different sizes.
+      // This should be converted to the max of the two sides.
+      ternary_test1(true,(RB+2).uint32());
+      ternary_test2(false,(RB+3).uint32());
+      // Test the case where non-constant arguments are used:  We should still
+      // adjust the indices by the offset.
+      int m = 32;
+      GPR(RB+4) = FOO3(m,m+11);
+      // Test single bit case.
+      GPR(RB+4) = GPR(RB+4) + FOO3(63);
+      // Test assignment to a slice of a register-file element.
+      GPR(RB+5)(16,31) = FOO3(16,31);
+      // Same test, except from an integer value.
+      unsigned x = FOO3(0,1).uint32();
+      GPR(RB+5)(0,1) = x;
+      // Test of the same thing, with a single-bit write.
+      GPR(RB+5)(2) = FOO3(2);
+      GPR(RB+5)(3) = FOO3(3);
+      // Test of a slice-assignment with non-constant bit values.
+      {
+        unsigned a = 4, b = 7;
+        GPR(RB+5)(a,b) = FOO3(a+16,b+16);
+      }
+      {
+        bits<5> a = 8, b = 11;
+        GPR(RB+5)(a,b) = FOO3(a+16,b+16);
+      }
+
+      // Test of reading/writing registers using specific contexts.
+      foobar(0).AR = foobar(1).BR;
+      
+      // Test of reading/writing register files using specific contexts.
+      foobar(0).ARF(10) = foobar(1).ARF(12);
+      ARF16(10) = ARF16(3);
+
+      // Specific-context access using fields.
+      foobar(0).AR.A = foobar(1).BR.B;
+      foobar(0).BR.C(1) = foobar(1).AR.C(2);
+      foobar(1).BR.B = GPR(RA)(0,15);
+
+      foobar(0).ARF(13).A = foobar(1).ARF(14).B;
+      foobar(0).ARF(14).C(1) = foobar(1).ARF(15).C(2);
+
+      // Slice assignments.
+      foobar(1).AR(16,31) = foobar(0).BR(16,31);
+
+      foobar(0).ARF(15)(16,31) = foobar(1).ARF(16)(0,15);
+
+      warning(1,"This is a warning message and should always show up.");
+      int i = 7;
+      info(2,"This is an info message with data and should only show up when tracing is on.",
+           AdlDataStart,("ea",1),("ra",2+i),("stuff",0xdeadbeef12345678ull),("str1","foo"),("str2","bar"));
+
+      CRFL5 = 10;
+      GPR(RB+8) = CRFL5;
+      DRL = 20;
+      GPR(RB+9) = DRL;
+    };
+  }
+
+  // Just for experimentation.
+  define (instr=twi) {
+    fields=(OPCD(3),TO,RA,SI);
+    action = {
+      // We should see read/write-hook side-effects even when we access
+      // a field or write to a slice.
+      FOO5.A = FOO5.A+10;
+      FOO5(16,31) = SI*3;
+
+      XPR(RA).A = FOO5.A;
+      //      XPR(RA)(16,31) = SI*5;
+      XPR(RA)(16,31) = SI*5;
+
+      FOO7 = FOO5;
+
+      // Check to make sure that slices of instruction fields are properly
+      // sized.
+      GPR(RA) = SI(13,15) + bits<3>(5);
+
+      // Test get/set field helper functions.
+      var x = 0xdeadbeef;
+
+      bits<32> y = getfield_FOO5_AA(x);
+      y = setfield_FOO5_AA(y,0x1234);
+      GPR(RA+1) = y;
+    };
+  }
+
+  // Again, just for experimenting with register fields.
+  define (instr=crand) {
+    fields=(OPCD(19),RT,RA,RB,XO(257));
+    action = {
+      if (RB == 0) {
+        GPR(RT) = FOO2.X(RA);
+      } else if (RB == 1) {
+        GPR(RT) = FOO2.Y(RA);
+      } else {
+        GPR(RT) = FOO2.Z(RA);
+      }
+    };
+  }
+
+  // Just for experimentation.
+  define (instr=crandc) {
+    fields=(OPCD(19),RS,RA,RB,XO(129));
+    action = {
+      if (RB == 0) {
+        FOO2.X(RA) = GPR(RS);
+      } else if (RB == 1) {
+        FOO2.Y(RA) = GPR(RS);
+      } else {
+        FOO2.Z(RA) = GPR(RS);
+      }      
+    };
+  }
+
+  // Again, just for experimenting with register fields.
+  define (instr=creqv) {
+    fields=(OPCD(19),RT,RA,RB,XO(289));
+    action = {
+      cond_test(RA.uint32(),RB.uint32(),true);
+    };
+  }
+
+  // Again, just for experimenting with register fields.
+  define (instr=crnand) {
+    fields=(OPCD(19),RT,RA,RB,XO(225));
+    action = {
+      cond_test(RA.uint32(),RB.uint32(),false);
+    };
+  }
+
+
+  // For experimenting with delayed writes of registers and register-files.
+  define (instr=cror) {
+    fields=(OPCD(19),RT,RA,RB,XO(449));
+    action = {
+      // Delayed full-register write.
+      delayed_write(CTR,1) = GPR(RA)+GPR(RB);
+      // Delayed full-register-file element write.
+      delayed_write(GPR(RT),2) = GPR(RA)+GPR(RB);
+      // Delayed register-field write.
+      delayed_write(FOO1.C,1) = GPR(RA);
+      // Delayed indexed register-field write.
+      delayed_write(FOO2.X(1),2) = GPR(RB);
+      // Delayed register slice write.
+      delayed_write(XER(0,15),3) = 0x1234;
+      // Delayed register-file field write.
+      delayed_write(XPR(1).A,2) = 0x4321;
+      // Delayed register-file indexed-field write.
+      delayed_write(VPR(4).H(1),3) = 0xdead;
+      // Delayed register-file slice write.
+      delayed_write(GPR(RT+1)(8,23),3) = 2*GPR(RA);
+    };
+  }
+
+  // For experimenting with direct-access register reads/writes.
+  define (instr=xor) {
+    fields=(OPCD(31),RT,RA,RB,XO(316));
+    action = {
+      GPR(RA) = GPR(RB);
+      direct_access(GPR(RT)) = direct_access(GPR(RA)) * 2;
+    };
+  }
+
+  void str_func(const char *src_str,const char *action,int trg,int src)
+  {
+    const char *s = src_str;
+
+    for (int i = 0; i != 4; ++i) {
+      int index = *s++ - '0';
+
+      switch (*action++) {
+      case 'z':
+        GPR(trg)(i*8,i*8+7) = 0;
+        break;
+      case 'f':
+        GPR(trg)(i*8,i*8+7) = 0xff;
+        break;
+      case 'v':
+        GPR(trg)(i*8,i*8+7) = GPR(src)(index*8,index*8+7);
+        break;
+      }
+    }
+  }
+
+  // For testing: Make sure that a JIT model can handle symbols into read-only
+  // data.  In this case, the constant strings are the read-only data.
+  define (instr=crxor) {
+    fields=(OPCD(19),RT,RA,RB,XO(193));
+    action = {
+      str_func("3120","zvvv",RT.uint32(),RA.uint32());
+    };
+  }
+
+  void field_slice_test(bits<3> t,bits<5> a = 0)
+  {
+    GPR(t) = GPR(a);
+  }
+
+  // Test a helper function call using a slice of an instruction field.
+  // Also test the use of default parameters.
+  define (instr=crnor) {
+    fields=(OPCD(19),RT,RA,RB,XO(33));
+    action = {
+      field_slice_test(RT(0,2),RA);
+      field_slice_test(RT);
+    };
+  }
+
+  // For experimenting with rollback.  This instruction turns it on and off.
+  // Note: It's not clear if we really want to export this interface for real
+  // models, but it's at least useful for testing.
+  //
+  // Usage:  RT = 0:  Toggle rollback.  Enable is RA.
+  // Usage:  RT = 1:  Commit rollback.
+  // Usage:  RT = 2:  Flush rollback.
+  define (instr=crorc) {
+    fields=(OPCD(19),RT,RA,RB,XO(417));
+    action = {
+#     ifndef HYBRID_ISS
+      if (RT == 0) {
+        enable_rollback(RA.uint32());
+      }
+      else if (RT == 1) {
+        // We want to continue to make forward progress, so we have to preserve the NIA.
+        var nia = NIA;
+        commit_rollback();
+        NIA = nia;
+      } 
+      else if (RT == 2) {
+        flush_rollback();
+      }
+#     endif
+    };
+  }
+  
+  define (instr=lvx) {
+    fields=(OPCD(31),RT,RA,RB,XO(103));
+    action = {
+      var a = (RA == 0) ? 0 : GPR(RA);
+      var ea = a + GPR(RB);
+      var orig_ea = ea;
+      ea = ea &~ 0xfULL;
+      VPR(RT) = Mem(ea,16,CacheRead,true,orig_ea);
+    };
+  }
+
+  define (instr=stvx) {
+    fields=(OPCD(31),RS,RA,RB,XO(231));
+    action = {
+      var a = (RA == 0) ? 0 : GPR(RA);
+      var ea = a + GPR(RB);
+      var orig_ea = ea;
+      ea = ea &~ 0xfULL;
+      Mem(ea,16,CacheWrite,true,orig_ea) = VPR(RS);
+    };
+  }
+
+  define (instr=vaddubm) {
+    fields=(OPCD(4),RT,RA,RB,XO(0));
+    action = {
+      for (unsigned i = 0; i != VPR(RT).size()/8; ++i) {
+        VPR(RT).B(i) = VPR(RA).B(i) + VPR(RB).B(i);
+      }
+    };
+  }
+
+  define (instr=vadduhm) {
+    fields=(OPCD(4),RT,RA,RB,XO(32));
+    action = {
+      for (unsigned i = 0; i != VPR(RT).size()/16; ++i) {
+        VPR(RT).H(i) = VPR(RA).H(i) + VPR(RB).H(i);
+      }
+    };
+  }
+
+  define (instr=vadduwm) {
+    fields=(OPCD(4),RT,RA,RB,XO(64));
+    action = {
+      for (unsigned i = 0; i != VPR(RT).size()/32; ++i) {
+        VPR(RT).W(i) = VPR(RA).W(i) + VPR(RB).W(i);
+      }
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    width = 32;
+    action = {
+      halt();
+    };
+  }
+
+  pre_cycle = {
+    register_pre_cycle();
+  };
+
+  pre_fetch = { 
+    register_fetch(); 
+    if (DEC > 0) {
+      DEC = DEC - 1;
+      if (DEC == 0) {
+        setException(dec);
+      }
+    }
+  };
+
+  branch_taken = { BranchTaken = BranchTaken + 1; };
+
+  post_exec = { register_commit(); };
+
+  post_cycle = { register_post_cycle(); };
+
+  define (reg=BCCNT) {}
+  define (reg=PCCNT) {}
+  define (reg=PCEXCPT) {};
+
+  void register_post_cycle() {
+    PCCNT = PCCNT + 1;
+    if (PCEXCPT != 0 && PCCNT == PCEXCPT) {
+      raiseException(pcex);
+    }
+  }
+
+  void register_pre_cycle() {
+    BCCNT = BCCNT + 1;
+  }
+
+  //
+  // Decode miss handler.
+  // 
+  decode_miss = func (addr_t ea,unsigned) {
+    tmpESR(4,4) = 1;
+    Program_t prog;
+    prog.ESR.set(4,4,1);
+    raiseException(prog);
+  };
+
+  define (reg=PREEXCPT) {}
+  define (reg=POSTEXCPT) {}
+
+  addr_check = func(addr_t ea,addr_t ra,TransType tt) { ; };
+
+  // Test use of a helper with pre_exception.  This makes sure that we can use
+  // helper code with the Exception enum declaration.
+  void test_pre_exception(Exception e) {
+    PREEXCPT = PREEXCPT + 1;
+  }
+
+  pre_exception = func (Exception e) {
+    test_pre_exception(e);
+  };
+
+  post_exception = func (Exception e) {
+    POSTEXCPT = POSTEXCPT + 1;
+  };
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    priority = 1;
+    
+    define (field=ESR) {
+      bits = 32;
+    }
+
+    action = func (Program_t prog) {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      ESR = prog.ESR;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+      // This allows us to properly handle a critical interrupt which occurs at
+      // the same time as a non-critical interrupt.
+      CIA = NIA;
+    };
+  }
+
+  attrs = asynchronous;
+
+  //
+  // Decrementer interrupt.
+  // 
+  define (exception=dec) {
+    attrs = asynchronous;
+    // This is the highest priority exception.
+    priority = 0;
+    action = {
+      // The real decrementer interrupt doesn't use the critical save/restore
+      // registers, but this allows us to test simultaneous interrupts.  Note
+      // that we will return to the next instruction address.
+      CSRR0 = NIA;
+      CSRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR10(16,31));
+    };
+  }
+
+  // This is just here to test the ability to raise exceptions in post_cycle code.
+  define (exception=pcex) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));      
+    };
+  }
+
+
+  //
+  // External interrupt.
+  //
+  define (exception=External) {
+    sensitivity = level;
+    enable = { return (MSR.EE == 1); };
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR4(16,31));
+      // This allows us to properly handle a critical interrupt which occurs at
+      // the same time as a non-critical interrupt.
+      CIA = NIA;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,stat);
+}

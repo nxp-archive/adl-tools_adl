@@ -1,0 +1,85 @@
+
+//
+// Cache example w/custom replacement algorithm that should
+// not parse due to errors.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+
+    define (setfield=a) {
+    };
+    define (wayfield=x) {
+    };
+
+    replace = func (CacheAccess,unsigned set) { 
+      unsigned tmp =  L1d(set).b;
+      ThisCache(set).b = (L1d(set).b % 4);
+      FOO;
+      return tmp;
+    };
+
+    line_access = func (CacheAccess,unsigned set,unsigned way,addr_t) {
+      ThisCache(set,way).y++;
+      return 2;
+    };
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  // A reference to a cache in action code is okay.
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      L1d.flush(0);
+    };
+  }  
+
+}
+
+define (core=P) {
+  archs=(foo);
+}

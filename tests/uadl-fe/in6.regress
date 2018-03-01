@@ -1,0 +1,6 @@
+in6.uadl:29: Machine a has no state foo.
+in6.uadl:29: Machine a has no state S_WBp.
+in6.uadl:42: Machine b has no state foo.
+in6.uadl:42: State S_EX is mapped to an undefined pipeline stage foo.
+in6.uadl:6: warning: Instructions access no data memory
+Could not parse in6.uadl

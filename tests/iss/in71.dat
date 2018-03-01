@@ -1,0 +1,74 @@
+#
+# Some simple load/store tests with data little-endian.
+#
+
+CORE n=:P
+
+= asm
+
+ ld   r1,0x1010(0)
+ lwz  r3,0x1000(0)
+ lhz  r4,0x1006(0)
+ lbz  r5,0x1003(0)
+
+ std  r1,0x2010(0)
+ stw  r3,0x2000(0)
+ sth  r4,0x2006(0)
+ stb  r5,0x2008(0)
+
+
+= /asm
+
+= aopts
+
+  -mregnames -mppc64
+
+= /aopts
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0xE8201010	#	ld   r1,0x1010(0)
+MD n=Mem ra=0x00000104 d=0x80601000	#	lwz  r3,0x1000(0)
+MD n=Mem ra=0x00000108 d=0xA0801006	#	lhz  r4,0x1006(0)
+MD n=Mem ra=0x0000010c d=0x88A01003	#	lbz  r5,0x1003(0)
+MD n=Mem ra=0x00000110 d=0xF8202010	#	std  r1,0x2010(0)
+MD n=Mem ra=0x00000114 d=0x90602000	#	stw  r3,0x2000(0)
+MD n=Mem ra=0x00000118 d=0xB0802006	#	sth  r4,0x2006(0)
+MD n=Mem ra=0x0000011c d=0x98A02008	#	stb  r5,0x2008(0)
+# </GEN>
+
+RD n=NIA d=0x0100
+
+RD n=MSR d=0x00040000
+
+MD n=Mem ra=0x1000 d=0xefbeadde
+MD n=Mem ra=0x1004 d=0x78563412
+MD n=Mem ra=0x1010 d=0xf0debc8a
+MD n=Mem ra=0x1014 d=0x67452301
+
+MD n=Mem ra=0x2000 d=0
+MD n=Mem ra=0x2004 d=0
+MD n=Mem ra=0x2008 d=0
+MD n=Mem ra=0x2010 d=0
+MD n=Mem ra=0x2014 d=0
+
+RESULTS
+
+RD n=GPR i=1 d=0x01234567
+RD n=GPR i=2 d=0x8abcdef0
+RD n=GPR i=3 d=0xdeadbeef
+RD n=GPR i=4 d=0x00001234
+RD n=GPR i=5 d=0x000000de
+
+MD n=Mem ra=0x0000000000002000 d=0xefbeadde     #       (4022250974)
+MD n=Mem ra=0x0000000000002004 d=0x00003412     #       (13330)
+MD n=Mem ra=0x0000000000002008 d=0xde000000     #       (3724541952)
+MD n=Mem ra=0x0000000000002010 d=0xf0debc8a     #       (4041129098)
+MD n=Mem ra=0x0000000000002014 d=0x67452301     #       (1732584193)
+
+

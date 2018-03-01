@@ -1,0 +1,8 @@
+inst16.adl:38: Non-pseudo field without bits or fields.
+inst16.adl:44: Unknown variable/resource found in action code:  GPRS
+inst16.adl:44: Unknown variable/resource found in action code:  GPRS
+inst16.adl:51: First argument to post-fetch handler must be an unsigned integer.
+inst16.adl:57: Third argument to address-check handler must be of type TransType.
+inst16.adl:64: Argument to pre-exception handler must be of type Exception.
+inst16.adl:66: Argument to post-exception handler must be of type Exception.
+inst16.adl:49: Second argument to decode-miss handler must be an unsigned integer.

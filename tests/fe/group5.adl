@@ -1,0 +1,214 @@
+// Tests "all_items" group
+
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+  bit_endianness = little;    
+  
+  define (instrfield = OPCD1) { bits = (31 , 23);}  
+  define (instrfield = A   ) { bits = (22 ,10);}
+  define (instrfield = B   ) { bits = (9,0);}
+  
+  
+  define (instr = i1) { fields = (OPCD1(11),A,B); action  = {};}
+  define (instr = i2) { fields = (OPCD1(12),A,B); action  = {};}
+  define (instr = i3) { fields = (OPCD1(13),A,B); action  = {};}  
+  define (instr = i4) { fields = (OPCD1(14),A,B); action  = {};}  
+  define (instr = i5) { fields = (OPCD1(15),A,B); action  = {};}  
+  define (instr = i6) { fields = (OPCD1(0x1f),A,B); action  = {};}  
+ 
+  define (instrfield=OPCD) {
+    width = variable; 
+    pseudo = true;
+  }
+
+
+  define (instrfield=Src1) {
+    width = 6; 
+    pseudo = true;
+    pseudo=true;
+  }
+
+  define (instrfield=Src2) {
+    width = 2; 
+    pseudo = true;
+  }
+
+  define (instrfield=Res) {
+    width = 4; 
+    pseudo = true;
+  }
+
+  define (regfile=D) {
+    size = 256;
+    width = 32;
+    prefix = d;
+  }
+
+  define (instrfield=RA) {
+    pseudo = true;
+    width = 6;
+    ref = D;
+  }
+
+  define (instrfield=RA1) {
+    pseudo = true;
+    width = 6;
+    ref = D;
+  }
+
+  define (instrfield=RB) {
+    pseudo = true;
+    width = 2;
+    ref = D;
+  }
+
+  define (instrfield=RT) {
+    pseudo = true;
+    width = 4;
+    ref = D;
+  }
+
+   
+  define(instr=add_outer) { 
+    fields = (OPCD, Src1, Src2, Res); 
+    width = 16;
+    define(instr=add_nested1) { 
+      fields = (
+	  (bits(6), RA(0)),       
+	  (bits(7), RA(1)),       
+	  (bits(8), RA(2)),       
+	  (bits(9), RA(3)),       
+	  (bits(10),RA(4)),       
+	  (bits(11),RA(5)),
+	  (bits(0), RT(0)),       
+	  (bits(1), RT(1)),       
+	  (bits(2), RT(2)),       
+	  (bits(3), RT(3)),       
+	  (bits(4), RB(0)),       
+	  (bits(5), RB(1)),       
+	  (bits(12),b1),
+	  (bits(13),b0),
+	  (bits(14),b0),
+	  (bits(15),b0));
+
+      alias = add_outer(OPCD(OPCD),Src1(RA>>1),Src2(RB),Res(RT)); 
+      syntax = ("add %f,%f,%f",RA,RB,RT);
+    } 
+    define(instr=add_nested2) { 
+      fields = (
+	  (bits(6), RA(0)),       
+	  (bits(7), RA(1)),       
+	  (bits(8), RA(2)),       
+	  (bits(9), RA(3)),       
+	  (bits(10),RA(4)),       
+	  (bits(11),RA(5)),
+	  (bits(0), RT(0)),       
+	  (bits(1), RT(1)),       
+	  (bits(2), RT(2)),       
+	  (bits(3), RT(3)),       
+	  (bits(4), RB(0)),       
+	  (bits(5), RB(1)),       
+	  (bits(12),b0),
+	  (bits(13),b0),
+	  (bits(14),b0),
+	  (bits(15),b0));
+
+      alias = add_outer(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT)); 
+      syntax = ("add %f,%f,%f",RA,RB,RT);
+    } 
+    define(instr=add_nested3) { 
+       //not defined
+    }
+    action = { D(Res) = D(Src1) + D(Src2); };
+  }
+
+  define(instr=sub_outer) { 
+    fields = (OPCD, Src1, Src2, Res); 
+    width = 16;
+    define(instr=sub_nested1) { 
+      fields = (
+	  (bits(6), RA(0)),       
+	  (bits(7), RA(1)),       
+	  (bits(8), RA(2)),       
+	  (bits(9), RA(3)),       
+	  (bits(10),RA(4)),       
+	  (bits(11),RA(5)),
+	  (bits(0), RT(0)),       
+	  (bits(1), RT(1)),       
+	  (bits(2), RT(2)),       
+	  (bits(3), RT(3)),       
+	  (bits(4), RB(0)),       
+	  (bits(5), RB(1)),       
+	  (bits(12),b0),
+	  (bits(13),b0),
+	  (bits(14),b1),
+	  (bits(15),b0));
+
+      alias = sub_outer(OPCD(OPCD),Src1(RA>>1),Src2(RB),Res(RT)); 
+      syntax = ("sub %f,%f,%f",RA,RB,RT);
+    } 
+    define(instr=sub_nested2) { 
+      fields = (
+	  (bits(6), RA(0)),       
+	  (bits(7), RA(1)),       
+	  (bits(8), RA(2)),       
+	  (bits(9), RA(3)),       
+	  (bits(10),RA(4)),       
+	  (bits(11),RA(5)),
+	  (bits(0), RT(0)),       
+	  (bits(1), RT(1)),       
+	  (bits(2), RT(2)),       
+	  (bits(3), RT(3)),       
+	  (bits(4), RB(0)),       
+	  (bits(5), RB(1)),       
+	  (bits(12),b1),
+	  (bits(13),b0),
+	  (bits(14),b1),
+	  (bits(15),b0));
+
+      alias = sub_outer(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT)); 
+      syntax = ("sub %f,%f,%f",RA,RB,RT);
+    } 
+    action = { D(Res) = D(Src1) - D(Src2); };
+  } 
+
+  define (group = all) { 
+    items = "*";
+    type = instr;
+  }
+  
+  define (group = sc3400) {
+    items = (i1,i2,i3,add_nested1);
+    items = (i1,i2,i3);
+    type = instr;
+  }
+  
+  define (group = sc3450) {
+    items = (*sc3400,i4,add_nested2);
+    type = instr;
+  }
+  
+  define (group = sc3850) {
+    items = (*sc3450,i5);
+    type = instr;
+  }
+
+  define (group = to_remove) {
+    items = (*all - *sc3400);
+    type = instr;
+  }
+
+  defmod (instr = *to_remove) {
+    remove = 1;
+  }
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

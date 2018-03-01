@@ -1,0 +1,87 @@
+//
+// Simple test of instructions:  This should
+// fail because we reference an unkown field.
+// It should also fail b/c we have an instruction
+// field whose name conflicts with a register file,
+// and fail b/c the warning, info, and error messages
+// do not have 2 or more parms.
+//
+define (arch=minippc) {
+
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=SPR) {
+    bits = (16,20);
+  }
+
+  define (instr=addi) {
+    attrs=(fxu,base);
+    fields=(OPCD(40),RT,RA,RB);
+    action = {};	
+  }
+
+  define (instr=v) {
+    attrs=(fxu,base);
+    fields=(OPCD(41),RA,RB);
+    action = {
+      info("message with data.",AdlDataStart,1,("ra",2));
+    };
+  }
+
+  define (instr=w) {
+    attrs=(fxu,base);
+    fields=(OPCD(41),RA,RB);
+    action = {
+      info("message with data.",AdlDataStart,(1,2));
+    };
+  }
+
+  define (instr=x) {
+    attrs=(fxu,base);
+    fields=(OPCD(41),RA,RB);
+    action = {
+      info("message #1");
+    };
+  }
+
+  define (instr=y) {
+    attrs=(fxu,base);
+    fields=(OPCD(42),RA,RB);
+    action = {
+      warning("message #2");
+    };
+  }
+
+  define (instr=z) {
+    attrs=(fxu,base);
+    fields=(OPCD(43),RA,RB);
+    action = {
+      error("message #3");
+    };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (regfile=SPR) { 
+    size=32;
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

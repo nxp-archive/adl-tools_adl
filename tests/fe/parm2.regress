@@ -1,0 +1,48 @@
+======
+Cores:
+======
+Name:  "bar"
+Architectural Parameters:
+  Name:  p1
+  Options:  mode1 mode2 mode3 mode4 
+  Value:  mode1
+  Const:  0
+  Boolean:  0
+  -------------------------------
+  Name:  p2
+  Options:  a b c d 
+  Value:  d
+  Const:  1
+  Boolean:  0
+  Watch Expr:  {
+    if ( A == 2 && B == 3 ) {
+        p2 = b ;
+    } else {
+        p2 = d ;
+    }
+}
+  -------------------------------
+  Name:  p3
+  Options:  false true 
+  Value:  true
+  Const:  0
+  Boolean:  1
+  -------------------------------
+Registers:
+  Name:  "A"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+  Name:  "B"
+  Usage:  read
+  Width:  32
+  -------------------------------
+Current-instruction-address register:  A
+Next-instruction-address register:  A
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

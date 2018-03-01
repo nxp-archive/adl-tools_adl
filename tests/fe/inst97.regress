@@ -1,0 +1,6 @@
+inst97.adl:13: Variable field can not have relocations.
+inst97.adl:18: Only immediate field can have relocations.
+inst97.adl:23: Only immediate field can have relocations.
+inst97.adl:28: Prefix field can not have relocations.
+inst97.adl:33: Relocation is not defined for instruction field alias.
+inst97.adl:38: Unknown instruction field Foo

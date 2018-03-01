@@ -1,0 +1,58 @@
+// Tests "all_items" group
+
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+      
+  
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,30);}
+  
+  
+  define (instr = i1) { fields = (OPCD(1),A,B); action  = {};}
+  define (instr = i2) { fields = (OPCD(2),A,B); action  = {};}
+  define (instr = i3) { fields = (OPCD(3),A,B); action  = {};}  
+  define (instr = i4) { fields = (OPCD(4),A,B); action  = {};}  
+  define (instr = i5) { fields = (OPCD(5),A,B); action  = {};}  
+  define (instr = i6) { fields = (OPCD(6),A,B); action  = {};}  
+    
+
+  define (group = all) { 
+    items = "*";
+    type = instr;
+  }
+  
+  define (group = sc3400) {
+    items = (i1,i2,i3);
+  }
+  
+  define (group = sc3450) {
+    items = (*sc3400,i4);
+  }
+  
+  define (group = sc3850) {
+    items = (*sc3450,i5);
+  }
+
+  define (group = to_remove) {
+    items = (*all - *sc3450);
+  }
+
+  defmod (instr = (*to_remove)) {
+    remove = 1;
+  }
+
+  define (group = aaa) {
+     items = f;
+  }
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

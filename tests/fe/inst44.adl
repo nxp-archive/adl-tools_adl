@@ -1,0 +1,50 @@
+//
+// This makes sure that we correctly handle arguments to functions on the left
+// of an assignment as not part of the assignment.  
+//
+
+define (arch=minippc) {
+
+  define (regfile = GPR) { 
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=D) {
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instr=stb) {
+    fields=(OPCD(38),RS,RA,D);
+    action = {
+      // GPR(RA) is a source in this case, not a target.
+      Mem( (((RA == 0) ? 0 : GPR(RA)) + D),1) = GPR(RS);
+    };
+  }
+  
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

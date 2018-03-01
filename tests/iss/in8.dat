@@ -1,0 +1,46 @@
+#
+# Miscellaneous write-hook testing.
+#
+= asm
+       addis 3,2,1
+       addis 4,0,100
+	   mtspr 10,20
+	   mfspr 21,11
+	   mtspr 12,8
+	   mfspr 8,12
+	   mtspr 12,8
+	   mfspr 8,12
+	   mtspr 12,8
+	   mfspr 8,12
+	   mtspr 12,8
+	   mfspr 8,12
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3C620001	#	addis 3,2,1
+MD n=Mem ra=0x00000004 d=0x3C800064	#	addis 4,0,100
+MD n=Mem ra=0x00000008 d=0x7E8A03A6	#	mtspr 10,20
+MD n=Mem ra=0x0000000c d=0x7EAB02A6	#	mfspr 21,11
+MD n=Mem ra=0x00000010 d=0x7D0C03A6	#	mtspr 12,8
+MD n=Mem ra=0x00000014 d=0x7D0C02A6	#	mfspr 8,12
+MD n=Mem ra=0x00000018 d=0x7D0C03A6	#	mtspr 12,8
+MD n=Mem ra=0x0000001c d=0x7D0C02A6	#	mfspr 8,12
+MD n=Mem ra=0x00000020 d=0x7D0C03A6	#	mtspr 12,8
+MD n=Mem ra=0x00000024 d=0x7D0C02A6	#	mfspr 8,12
+MD n=Mem ra=0x00000028 d=0x7D0C03A6	#	mtspr 12,8
+MD n=Mem ra=0x0000002c d=0x7D0C02A6	#	mfspr 8,12
+# </GEN>
+CORE n=:P
+RD n=GPR i=2 d=1000
+RD n=GPR i=20 d=0xdeadbeef
+
+RESULTS
+
+RD n=CTR d=0xCA07d0
+RD n=GPR i=2 d=0x3e8
+RD n=GPR i=3 d=0x103e8
+RD n=GPR i=4 d=0x6503e8
+RD n=GPR i=8 d=0x01010004
+
+RD n=FOO  d=0xdeadbeef
+RD n=FOO2 d=0x01010004

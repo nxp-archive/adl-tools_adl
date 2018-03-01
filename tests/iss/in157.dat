@@ -1,0 +1,26 @@
+#
+# Very simple test to see if we can resolve indirection via sparse register
+# files to the actual register- checked by printing the instruction packet's operands.
+# 
+= asm
+
+  mflr  r3
+  mfctr r4
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C6802A6	#	mflr  r3
+MD n=Mem ra=0x00000004 d=0x7C8902A6	#	mfctr r4
+# </GEN>
+
+RD n=LR  d=0xdeadbeef
+RD n=CTR d=0x12345678
+
+TRACE
+
+
+RESULTS
+
+RD n=GPR i=3 d=0xdeadbeef
+RD n=GPR i=4 d=0x12345678

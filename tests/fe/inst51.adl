@@ -1,0 +1,73 @@
+// instructions/subinstructions: defmods on 
+// subinstruction with "instr" key etc.
+
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (left,right,time);
+    
+  define (instrfield = OPCD)  { bits = (0 , 4);}  
+  define (instrfield = OPCDX) { bits = 5;}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,23);}
+  
+
+  
+  define (subinstr = addOp) { fields=(OPCD(10),A); attrs = left ;action = {};}
+  define (subinstr = subOp) { fields=(OPCD(11),A); action = {};}
+
+  define (subinstr = multOp) { fields=(OPCD(12),A); action = {};}
+  define (subinstr = divideOp) { fields=(OPCD(13),A); action = {};}
+
+  define (subinstr = eaRegDirect  ) {fields=(OPCDX(0),B);action = {};}
+  define (subinstr = eaRegIndirect) {fields=(OPCDX(1),B);action = {};}  
+  
+
+
+  define (instr=intOp) {
+    fields=(theOp,theEa);
+    define (subinstrs=theOp) { subs = (addOp,subOp);}	
+    define (subinstrs=theEa) { subs = (eaRegDirect,eaRegIndirect); }
+    names=(add,sub,addi,subi);
+    action = {};
+    attrs = time(2);
+  }
+  
+  define (instr=floatOp) {
+    fields=(theOp,theEa);
+    define (subinstrs=theOp) { subs = (multOp,divideOp);}	
+    define (subinstrs=theEa) { subs = (eaRegDirect,eaRegIndirect); }
+    names=(mult,div,multi,divi);
+    action = {};
+    attrs = time(5);
+  }
+  
+  defmod (instr = addOp) {
+    syntax = ("%i =  %f + %f ",A,B);
+  }
+  
+  defmod (instr = eaRegDirect) {
+    syntax = ("%i %f  (%f) ",A,B);
+    width = 32;
+  }  
+  
+  defmod (instr = multi) {
+    attrs = right;
+  }
+  
+  defmod (instr = div) {
+    attrs = time(12);
+  }
+
+  defmod (instr = subi) {
+    remove = 1;
+  }
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

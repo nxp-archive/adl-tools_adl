@@ -1,0 +1,835 @@
+======
+Cores:
+======
+Name:  "StarCore"
+Architectural Parameters:
+  Name:  EndianMode
+  Options:  Big Little 
+  Value:  Big
+  Const:  0
+  Boolean:  0
+  -------------------------------
+Blocks:
+agu dalu 
+Register Files:
+  Name:  "B"
+  Size:  8
+  Read alias/hook:
+    R (Regs:  8 9 10 11 12 13 14 15 )
+
+  Write alias/hook:
+    R (Regs:  8 9 10 11 12 13 14 15 )
+
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "D"
+  Size:  16
+  Prefix:  d
+  Usage:  read, written, slice-read
+  Width:  40
+    E[32,39]   
+    H[16,31]   
+    HH[24,31]   
+    HL[16,23]   
+    L[0,15]   
+    LH[8,15]   
+    LL[0,7]   
+  -------------------------------
+  Name:  "DRTable"
+  Size:  32
+  Contained registers:
+    0:  D(0)
+    1:  D(1)
+    2:  D(2)
+    3:  D(3)
+    4:  D(4)
+    5:  D(5)
+    6:  D(6)
+    7:  D(7)
+    8:  R(0)
+    9:  R(1)
+    10:  R(2)
+    11:  R(3)
+    12:  R(4)
+    13:  R(5)
+    14:  R(6)
+    15:  R(7)
+    16:  D(8)
+    17:  D(9)
+    18:  D(10)
+    19:  D(11)
+    20:  D(12)
+    21:  D(13)
+    22:  D(14)
+    23:  D(15)
+    24:  R(8)
+    25:  R(9)
+    26:  R(10)
+    27:  R(11)
+    28:  R(12)
+    29:  R(13)
+    30:  R(14)
+    31:  R(15)
+  Width:  32
+  -------------------------------
+  Name:  "L"
+  Size:  16
+  Usage:  written
+  Width:  1
+  -------------------------------
+  Name:  "LC"
+  Size:  4
+  Prefix:  LC
+  Width:  32
+  -------------------------------
+  Name:  "M"
+  Size:  4
+  Width:  32
+  -------------------------------
+  Name:  "N"
+  Size:  4
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "R"
+  Size:  16
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "RxTable_ESP"
+  Size:  32
+  Contained registers:
+    0:  N(0)
+    1:  N(1)
+    2:  N(2)
+    3:  N(3)
+    7:  ESP
+    8:  R(0)
+    9:  R(1)
+    10:  R(2)
+    11:  R(3)
+    12:  R(4)
+    13:  R(5)
+    14:  R(6)
+    15:  R(7)
+    24:  R(8)
+    25:  R(9)
+    26:  R(10)
+    27:  R(11)
+    28:  R(12)
+    29:  R(13)
+    30:  R(14)
+    31:  R(15)
+  Width:  32
+  -------------------------------
+  Name:  "RxTable_NSP"
+  Size:  32
+  Contained registers:
+    0:  N(0)
+    1:  N(1)
+    2:  N(2)
+    3:  N(3)
+    7:  NSP
+    8:  R(0)
+    9:  R(1)
+    10:  R(2)
+    11:  R(3)
+    12:  R(4)
+    13:  R(5)
+    14:  R(6)
+    15:  R(7)
+    24:  R(8)
+    25:  R(9)
+    26:  R(10)
+    27:  R(11)
+    28:  R(12)
+    29:  R(13)
+    30:  R(14)
+    31:  R(15)
+        Syntax: 'foo'
+  Width:  32
+  -------------------------------
+  Name:  "SA"
+  Size:  4
+  Prefix:  SA
+  Width:  32
+  -------------------------------
+  Name:  "rxTable_ESP"
+  Size:  32
+  Contained registers:
+    0:  N(0)
+    1:  N(1)
+    2:  N(2)
+    3:  N(3)
+    6:  PC
+    7:  ESP
+    8:  R(0)
+    9:  R(1)
+    10:  R(2)
+    11:  R(3)
+    12:  R(4)
+    13:  R(5)
+    14:  R(6)
+    15:  R(7)
+    24:  R(8)
+    25:  R(9)
+    26:  R(10)
+    27:  R(11)
+    28:  R(12)
+    29:  R(13)
+    30:  R(14)
+    31:  R(15)
+  Width:  32
+  -------------------------------
+  Name:  "rxTable_NSP"
+  Size:  32
+  Contained registers:
+    0:  N(0)
+    1:  N(1)
+    2:  N(2)
+    3:  N(3)
+    6:  PC
+    7:  NSP
+    8:  R(0)
+    9:  R(1)
+    10:  R(2)
+    11:  R(3)
+    12:  R(4)
+    13:  R(5)
+    14:  R(6)
+    15:  R(7)
+    24:  R(8)
+    25:  R(9)
+    26:  R(10)
+    27:  R(11)
+    28:  R(12)
+    29:  R(13)
+    30:  R(14)
+    31:  R(15)
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "EMR"
+  Read alias/hook:
+    {
+    if ( SR . PE == 1 && SR . EXP == 0 ) return ( EMR & 0x00000004 ) ; else return EMR ;
+}
+    Source Registers:  EMR SR[mask 0x00006000]/p 
+
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( EMR . DOVF == 0 && x ( 2 ) == 1 ) {
+        if ( SR . OVE == 1 ) raiseException ( Overflow ) ;
+    }
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR = ( ( x ^ 0x00000004 ) & 0x00000004 ) ; else {
+        EMR = x ^ EMR ;
+        if ( EMR . ILPR == 1 ) raiseException ( Privelege ) ;
+    }
+}
+    Source Registers:  EMR/p SR[mask 0x00006800]/p 
+    Target Registers:  EMR 
+    Does raise exceptions.
+
+  Usage:  read, written, field-read, field-written
+  Width:  32
+    BEM[16]   
+    DOVF[2]   
+      Usage:  field-read, field-written
+    EAP[25]   
+    GP0[17]   
+    GP1[18]   
+    GP2[19]   
+    GP3[20]   
+    GP4[21]   
+    GP5[22]   
+    GP6[23]   
+    ILIN[0]   
+    ILPR[4]   
+      Usage:  field-read, field-written
+    ILST[1]   
+    MEM[26]   
+    NIMID[3]   
+    SDD[24]   
+  Reset:  {
+    if ( EndianMode == Little ) EMR = 0 ; else EMR = 0x00010000 ;
+}
+  Documention:
+
+ Exception and Mode Register
+ 
+  -------------------------------
+  Name:  "ESP"
+  Read alias/hook:
+    {
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR . ILPR = 1 ; else return ESP ;
+}
+    Source Registers:  ESP? SR[mask 0x00006000]/p 
+    Target Registers:  EMR[mask 0x08000000]/p? 
+
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR . ILPR = 1 ;
+    if ( x & 00000007 != 0 ) raiseException ( IllegalAddress ) ; else ESP = x ;
+}
+    Source Registers:  SR[mask 0x00006000]/p 
+    Target Registers:  EMR[mask 0x08000000]/p? ESP? 
+    Does raise exceptions.
+
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+ Exception-Mode Stack Pointer
+ 
+  -------------------------------
+  Name:  "GCR"
+  Width:  32
+    BAM0[0]   
+    BAM1[1]   
+    BAM2[2]   
+  Documention:
+
+ General Configuration Register
+ 
+  -------------------------------
+  Name:  "IDCR"
+  Read alias/hook:
+    {
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR . ILPR = 1 ; else return IDCR ;
+}
+    Source Registers:  IDCR? SR[mask 0x00006000]/p 
+    Target Registers:  EMR[mask 0x08000000]/p? 
+
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR . ILPR = 1 ; else IDCR = x ;
+}
+    Source Registers:  SR[mask 0x00006000]/p 
+    Target Registers:  EMR[mask 0x08000000]/p? IDCR? 
+
+  Usage:  read, written
+  Width:  32
+    DBTB[1]   
+    DHLB[2]   
+    DSO[0]   
+  Reset:  0x00000000
+  Documention:
+
+ Implementation Dependent Configuration Register
+ 
+  -------------------------------
+  Name:  "MCTL"
+  Width:  32
+    AM_R[4bits x 8]  
+  Reset:  0
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+Next instruction address.
+
+  -------------------------------
+  Name:  "NSP"
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( x & 00000007 != 0 ) raiseException ( IllegalAddress ) ; else NSP = x ;
+}
+    Target Registers:  NSP? 
+    Does raise exceptions.
+
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+ Normal-Mode Stack Pointer
+ 
+  -------------------------------
+  Name:  "PC"
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( x ( 0 ) != 0 ) raiseException ( IllegalAddress ) ; else PC = x ;
+}
+    Target Registers:  PC? 
+    Does raise exceptions.
+
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+ Program Counter
+ 
+  -------------------------------
+  Name:  "SR"
+  Read alias/hook:
+    {
+    if ( SR . PE == 1 && SR . EXP == 0 ) return ( SR & 0xFF03FFFF ) ; else return SR ;
+}
+    Source Registers:  SR/p 
+
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( SR . PE == 1 && SR . EXP == 0 ) SR = x & 0xFF03FFFF ; else SR = x ;
+}
+    Source Registers:  SR[mask 0x00006000]/p 
+    Target Registers:  SR 
+
+  Usage:  read, written, field-read, field-written
+  Width:  32
+    C[0]   
+      Usage:  field-written
+    DI[19]   
+    EXP[18]   
+      Usage:  field-read
+    I[21,25]   
+    LF0[27]   
+    LF1[28]   
+    LF2[29]   
+    LF3[30]   
+    OVE[20]   
+      Usage:  field-read
+    PE[17]   
+      Usage:  field-read
+    RM[3]   
+    S[6]   
+    SCM[4,5]   
+      Usage:  field-read
+    SLF[31]   
+    SM[2]   
+      Usage:  field-read
+    SM2[7]   
+    T[1]   
+      Usage:  field-written
+    VF0[8]   
+    VF1[9]   
+    VF2[10]   
+    VF3[11]   
+  Reset:  0x03E40000
+  Documention:
+
+ Status Register
+ 
+  -------------------------------
+  Name:  "VBA"
+  Read alias/hook:
+    {
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR . ILPR = 1 ; else return VBA ;
+}
+    Source Registers:  SR[mask 0x00006000]/p VBA? 
+    Target Registers:  EMR[mask 0x08000000]/p? 
+
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( SR . PE == 1 && SR . EXP == 0 ) EMR . ILPR = 1 ; else VBA = x ;
+}
+    Source Registers:  SR[mask 0x00006000]/p 
+    Target Registers:  EMR[mask 0x08000000]/p? VBA? 
+
+  Usage:  read, written
+  Width:  32
+  Reset:  0x00000000
+  Documention:
+
+ Vector Base Address Register
+ 
+  -------------------------------
+Parallel execution packet size: 6
+Current-instruction-address register:  PC
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Memories:
+  Name:  DMEM (1)
+  Size:   8192
+  Addressing unit: 1
+
+  Name:  IMEM (2)
+  Instruction memory
+  Size:   4096
+  Addressing unit: 1
+
+Instruction Fields:
+  DaDa: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+    Size: 8
+    Block:  dalu 
+    Nested instruction fields:
+      Da: [regfile:  D]
+        Pseudo:  1
+        Width:   4
+        Block:  dalu 
+        Fields:  ( DaDa(0,3) )
+      Db: [regfile:  D]
+        Pseudo:  1
+        Width:   4
+        Block:  dalu 
+        Fields:  ( DaDa(4,7) )
+      jj: [0,1] [regfile:  D] [not used]
+        Pseudo:  1
+        Size: 3
+        Block:  dalu 
+      Table:  (( 1 1 ), ( 3 3 ), ( 5 5 ), ( 7 7 ))
+    Fields:  ( DaDa(3,3) jj(1) DaDa(2,2) jj(0) )
+  DaDa_imp_bits__0_1_x_17_18_: [0,1] [17,18] 
+    Implements:  DaDa
+  DaDb: [regfile:  D]
+    Pseudo:  1
+    Width:   7
+    Size: 8
+    Block:  dalu 
+    Nested instruction fields:
+      Da: [regfile:  D]
+        Pseudo:  1
+        Width:   4
+        Block:  dalu 
+        Fields:  ( DaDb(0,3) )
+      Db: [regfile:  D]
+        Pseudo:  1
+        Width:   4
+        Block:  dalu 
+        Fields:  ( DaDb(4,7) )
+      JJJJJ: [0,4] [regfile:  D] [not used]
+        Pseudo:  1
+        Size: 3
+        Block:  dalu 
+      Table:  (( 0 4 ), ( 0 5 ), ( 0 6 ), ( 0 7 ), ( 1 4 ), ( 1 5 ), ( 1 6 ), ( 1 7 ), ( 2 4 ), ( 2 5 ), ( 2 6 ), ( 2 7 ), ( 3 4 ), ( 3 5 ), ( 3 6 ), ( 3 7 ), ( 0 0 ), ( 0 1 ), ( 0 2 ), ( 0 3 ), ( 4 4 ), ( 4 5 ), ( 4 6 ), ( 4 7 ), ( 1 2 ), ( 1 3 ), ( 5 6 ), ( 5 7 ), ( 2 2 ), ( 2 3 ), ( 6 6 ), ( 6 7 ))
+    Fields:  ( DaDb(6,6) JJJJJ(1) DaDb(5,5) JJJJJ(0) )
+  DaDb_imp_bits__0_4_x_17_18_: [0,4] [17,18] 
+    Implements:  DaDb
+  DgDh: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+    Size: 8
+    Block:  dalu 
+    Nested instruction fields:
+      Dg: [regfile:  D]
+        Pseudo:  1
+        Width:   4
+        Block:  dalu 
+        Fields:  ( DgDh(0,3) )
+      Dh: [regfile:  D]
+        Pseudo:  1
+        Width:   4
+        Block:  dalu 
+        Fields:  ( DgDh(4,7) )
+      GG: [0,1] [regfile:  D] [not used]
+        Pseudo:  1
+        Size: 3
+        Block:  dalu 
+      Table:  (( 0 4 ), ( 1 5 ), ( 2 6 ), ( 3 7 ))
+    Fields:  ( DgDh(3,3) GG(1) DgDh(2,2) GG(0) )
+  DgDh_imp_bits__8_9_x_18_18_x_16_16_: [8,9] [18,18] [16,16] 
+    Implements:  DgDh
+  EEEEE: [not used] 
+    Pseudo:  1
+    Width:   6
+  ESG: 
+    Pseudo:  1
+    Width:   6
+    Size: 1
+    Prefix:  1
+    Indexed:  1 
+  ESG_imp_bits__19_19_: [19,19] 
+    Implements:  ESG
+  Enc1: 
+    Pseudo:  1
+    Width:   16
+  Enc1_imp_bits__0_15_: [0,15] 
+    Implements:  Enc1
+  Enc2: [not used] 
+    Pseudo:  1
+    Width:   16
+  Enc3: [not used] 
+    Pseudo:  1
+    Width:   16
+  FFF: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+  FFF_imp_bits__7_9_x_16_16_: [7,9] [16,16] 
+    Implements:  FFF
+  HighReg: [not used] 
+    Pseudo:  1
+    Width:   18
+    Size: 3
+    Prefix:  1
+    Indexed:  3 
+    Default value :'0'
+  HighRegister: 
+    Pseudo:  1
+    Width:   18
+    Size: 3
+    Prefix:  1
+    Indexed:  3 
+  HighRegister_imp_bits__16_18_: [16,18] 
+    Implements:  HighRegister
+  JJJ: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+  JJJ_imp_bits__0_2_x_18_18_: [0,2] [18,18] 
+    Implements:  JJJ
+  MMM: [not used] 
+    Pseudo:  1
+    Width:   3
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  RRR: [regfile:  R] [not used]
+    Pseudo:  1
+    Width:   4
+  RRRR: [not used] 
+    Pseudo:  1
+    Width:   5
+  Res: 
+    Pseudo:  1
+    Width:   4
+  Src1: 
+    Pseudo:  1
+    Width:   4
+  Src2: 
+    Pseudo:  1
+    Width:   4
+  VarInstrOpcode_imp_bits__0_7_x_10_13_x_15_15_x_19_19_: [0,7] [10,13] [15,15] [19,19] 
+  VarInstrOpcode_imp_bits__2_6_x_10_13_x_15_15_x_19_19_: [2,6] [10,13] [15,15] [19,19] 
+  VarInstrOpcode_imp_bits__3_6_x_10_13_x_15_15_x_19_19_: [3,6] [10,13] [15,15] [19,19] 
+  VarInstrOpcode_imp_bits__5_6_x_10_13_x_15_15_x_19_19_: [5,6] [10,13] [15,15] [19,19] 
+  VarInstrOpcode_imp_bits__5_6_x_10_13_x_19_19_: [5,6] [10,13] [19,19] 
+  VarPrefixOpcode_imp_bits__12_15_: [12,15] 
+    Prefix:  1
+  VarPrefixOpcode_imp_bits__6_15_: [6,15] 
+    Prefix:  1
+  VlesSize: 
+    Pseudo:  1
+    Width:   3
+    Prefix:  1
+  VlesSize_imp_bits__9_11_: [9,11] 
+    Implements:  VlesSize
+  a32: [not used] 
+    Pseudo:  1
+    Width:   32
+  ccc: 
+    Pseudo:  1
+    Width:   3
+    Prefix:  1
+  ccc_imp_bits__0_2_: [0,2] 
+    Implements:  ccc
+  eeeee: [not used] 
+    Pseudo:  1
+    Width:   6
+  iiiii: 
+    Pseudo:  1
+    Width:   6
+  iiiii_imp_bits__0_4_x_15_15_: [0,4] [15,15] 
+    Implements:  iiiii
+  lpmarkA: 
+    Pseudo:  1
+    Width:   1
+    Prefix:  1
+  lpmarkA_imp_bits__3_3_: [3,3] 
+    Implements:  lpmarkA
+  lpmarkB: 
+    Pseudo:  1
+    Width:   1
+    Prefix:  1
+  lpmarkB_imp_bits__4_4_: [4,4] 
+    Implements:  lpmarkB
+  reserved_imp_bits__14_14_: [14,14] 
+    Reserved:  1
+  reserved_imp_bits__14_14_x_17_17_: [14,14] [17,17] 
+    Reserved:  1
+  reserved_imp_bits__14_14_x_17_18_: [14,14] [17,18] 
+    Reserved:  1
+  rrrr: [not used] 
+    Pseudo:  1
+    Width:   5
+  yyyyyy: 
+    Pseudo:  1
+    Width:   6
+    Prefix:  1
+  yyyyyy_imp_bits__0_5_: [0,5] 
+    Implements:  yyyyyy
+Instructions:
+  Name:  ESG_Prefix (rank: 100)
+  Width:  16
+  Attributes:  prefix
+  Fields:  yyyyyy_imp_bits__0_5_ VarPrefixOpcode_imp_bits__6_15_
+  Prefix:  1
+  -------------------------------
+  Name:  OW_Prefix (rank: 100)
+  Width:  16
+  Attributes:  prefix
+  Fields:  ccc_imp_bits__0_2_ lpmarkA_imp_bits__3_3_ lpmarkB_imp_bits__4_4_ VlesSize_imp_bits__9_11_ VarPrefixOpcode_imp_bits__12_15_
+  Prefix:  1
+  -------------------------------
+  Name:  OneWord (rank: 100)
+  Width:  20
+  Fetch width:  16
+  Fields:  Enc1_imp_bits__0_15_ HighRegister_imp_bits__16_18_ ESG_imp_bits__19_19_
+  Pseudo:  1
+  -------------------------------
+  Name:  add (rank: 100)
+  Syntax:  "add %f,%f,%f ":   Src1 Src2 Res
+  Block:  dalu
+  Attributes:  simple1
+  Fields:  OPCD Src1 Src2 Res
+  Action:  {
+     bits < 41 > OVF_result = signExtend ( D ( Src1 ) , 41 ) + signExtend ( D ( Src2 ) , 41 ) ;
+     bits < 41 > result = D ( Src1 ) + D ( Src2 ) ;
+    SR . C = result ( 40 ) ;
+    D ( Res ) = result ( 0 , 39 ) ;
+    L ( Res ) = LnComputation ( Res ) ;
+    D ( Res ) = saturation32 ( Res ) ;
+    if ( ( SR . SM == 0 ) && ( OVF_result ( 40 ) ^ OVF_result ( 39 ) == 1 ) ) EMR . DOVF = 1 ;
+}
+  Source Registers:  D(Res)? D(Src1) D(Src2) SR[mask 0x2c000000]/p 
+  Target Registers:  D(Res) EMR[mask 0x20000000]/p? L(Res) SR[mask 0x80000000] 
+  Helper Functions:  LnComputation saturation32 
+  Type:  OneWord
+  Nested insructions:  
+    Name:  add1 (rank: 100)
+    Width:  20
+    Fetch width:  16
+    Syntax:  "add %f,%f,%f ":   DaDb.Da DaDb.Db FFF
+    Block:  dalu
+    Attributes:  simple1 simple2
+    Fields:  reserved_imp_bits__14_14_(reserved) FFF_imp_bits__7_9_x_16_16_ DaDb_imp_bits__0_4_x_17_18_ VarInstrOpcode_imp_bits__5_6_x_10_13_x_15_15_x_19_19_
+    Alias:  add OPCD(172) Src1(DaDb.Da) Src2(DaDb.Db) Res(FFF) 
+    Source Registers:  D(Res)? D(Src1) D(Src2) SR[mask 0x2c000000]/p 
+    Target Registers:  D(Res) EMR[mask 0x20000000]/p? L(Res) SR[mask 0x80000000] 
+    Helper Functions:  LnComputation saturation32 
+    Type:  
+    -------------------------------
+    Name:  add2 (rank: 100)
+    Width:  20
+    Fetch width:  16
+    Syntax:  "add %f,%f,%f ":   DaDa.Da DaDa.Db FFF
+    Block:  dalu
+    Attributes:  simple1
+    Fields:  reserved_imp_bits__14_14_(reserved) FFF_imp_bits__7_9_x_16_16_ DaDa_imp_bits__0_1_x_17_18_ VarInstrOpcode_imp_bits__2_6_x_10_13_x_15_15_x_19_19_
+    Alias:  add OPCD(1568) Src1(DaDa.Da) Src2(DaDa.Db) Res(FFF) 
+    Source Registers:  D(Res)? D(Src1) D(Src2) SR[mask 0x2c000000]/p 
+    Target Registers:  D(Res) EMR[mask 0x20000000]/p? L(Res) SR[mask 0x80000000] 
+    Helper Functions:  LnComputation saturation32 
+    Type:  
+    -------------------------------
+  -------------------------------
+  Name:  addu5 (rank: 100)
+  Width:  20
+  Fetch width:  16
+  Syntax:  "add #%f,%f ":   iiiii FFF
+  Block:  dalu
+  Fields:  iiiii_imp_bits__0_4_x_15_15_ FFF_imp_bits__7_9_x_16_16_ reserved_imp_bits__14_14_x_17_18_(reserved) VarInstrOpcode_imp_bits__5_6_x_10_13_x_19_19_
+  Action:  {
+     bits < 41 > OVF_result = concat ( zero ( 36 ) , iiiii ) + signExtend ( D ( FFF ) , 41 ) ;
+     bits < 41 > result = concat ( zero ( 35 ) , iiiii ) + D ( FFF ) ;
+    SR . C = result ( 40 ) ;
+    D ( FFF ) = result ( 39 , 0 ) ;
+    L ( FFF ) = LnComputation ( FFF ) ;
+    D ( FFF ) = saturation32 ( FFF ) ;
+    if ( ( SR . SM == 0 ) && ( OVF_result ( 40 ) ^ OVF_result ( 39 ) == 1 ) ) EMR . DOVF = 1 ;
+}
+  Source Registers:  D(FFF)? SR[mask 0x2c000000]/p 
+  Target Registers:  D(FFF) EMR[mask 0x20000000]/p? L(FFF) SR[mask 0x80000000] 
+  Helper Functions:  LnComputation saturation32 
+  Type:  OneWord
+  -------------------------------
+  Name:  brev (rank: 100)
+  Width:  20
+  Fetch width:  16
+  Syntax:  "brev %f,%f":   JJJ FFF
+  Block:  dalu
+  Fields:  FFF_imp_bits__7_9_x_16_16_ reserved_imp_bits__14_14_x_17_17_(reserved) JJJ_imp_bits__0_2_x_18_18_ VarInstrOpcode_imp_bits__3_6_x_10_13_x_15_15_x_19_19_
+  Action:  {
+    D ( FFF ) . swap_bytes (  ) ;
+    L ( FFF ) = 0 ;
+}
+  Source Registers:  D(FFF) 
+  Target Registers:  L(FFF) 
+  Type:  OneWord
+  -------------------------------
+  Name:  cmpeq (rank: 100)
+  Width:  20
+  Fetch width:  16
+  Syntax:  "cmpeq %f,%f":   JJJ FFF
+  Block:  dalu
+  Fields:  FFF_imp_bits__7_9_x_16_16_ reserved_imp_bits__14_14_x_17_17_(reserved) JJJ_imp_bits__0_2_x_18_18_ VarInstrOpcode_imp_bits__3_6_x_10_13_x_15_15_x_19_19_
+  Action:  {
+    if ( D ( JJJ ) == D ( FFF ) ) SR . T = 1 ; else SR . T = 0 ;
+}
+  Source Registers:  D(FFF) D(JJJ) 
+  Target Registers:  SR[mask 0x40000000]/p 
+  Type:  OneWord
+  -------------------------------
+  Name:  max (rank: 100)
+  Width:  20
+  Fetch width:  16
+  Syntax:  "max %f,%f":   DgDh_imp_bits__8_9_x_18_18_x_16_16_.Dg DgDh_imp_bits__8_9_x_18_18_x_16_16_.Dh
+  Block:  dalu
+  Fields:  reserved_imp_bits__14_14_x_17_17_(reserved) DgDh_imp_bits__8_9_x_18_18_x_16_16_ VarInstrOpcode_imp_bits__0_7_x_10_13_x_15_15_x_19_19_
+  Action:  {
+    if ( D ( DgDh . Dg ) > D ( DgDh . Dh ) ) D ( DgDh . Dh ) = D ( DgDh . Dg ) ;
+    L ( DgDh . Dh ) = 0 ;
+}
+  Source Registers:  D(DgDh . Dg) D(DgDh . Dh) 
+  Target Registers:  D(DgDh . Dh)? L(DgDh . Dh) 
+  Type:  OneWord
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0xf0000
+    0(0):      Mask:  0x3f00000
+      12(c00000):  ESG_Prefix
+    9(90000):  OW_Prefix
+other:
+    Mask:  0x63c1000
+    512(200000):      Mask:  0x38010000
+      12288(30000000):  add2
+    768(300000):      Mask:  0x18010000
+      6144(18000000):  cmpeq
+    17088(42c0000):      Mask:  0x10000
+      0(0):  add1
+      Mask:  0xf9000000
+        120(78000000):  max
+    17280(4380000):  addu5
+    25088(6200000):      Mask:  0x18010000
+      6144(18000000):  brev
+
+Helper Functions:
+  LnComputation:
+ bits < 1 > LnComputation ( bits < 4 > n ) {
+    if ( SR . SM == 0 ) {
+        if ( SR . SCM == 0 ) return ( ( D ( n ) & 0xFF80000000 == 0 ) || ( D ( n ) & 0xFF80000000 == 0xFF80000000 ) ? 0 : 1 ) ; else if ( SR . SCM == 1 ) return ( ( D ( n ) & 0xFF00000000 == 0 ) || ( D ( n ) & 0xFF00000000 == 0xFF00000000 ) ? 0 : 1 ) ; else return ( ( D ( n ) & 0xFFC0000000 == 0 ) || ( D ( n ) & 0xFFC0000000 == 0xFFC0000000 ) ? 0 : 1 ) ;
+    } else return 0 ;
+}
+    Source Registers:  D(n [parm #0])? SR[mask 0x2c000000]/p 
+
+  saturation32:
+ bits < 40 > saturation32 ( bits < 4 > n ) {
+    if ( SR . SM == 1 ) {
+        if ( ( D ( n ) & 0xFF80000000 != 0 ) || ( D ( n ) & 0xFF80000000 != 0xFF80000000 ) ) {
+            EMR . DOVF = 1 ;
+            if ( D ( n ) ( 39 ) == 1 ) return 0xFF80000000 ; else return 0x007FFFFFFF ;
+        }
+    }
+}
+    Source Registers:  D(n [parm #0])? SR[mask 0x20000000]/p 
+    Target Registers:  EMR[mask 0x20000000]/p? 
+
+User Type Declarations:
+   enum Exception {
+    Privelege
+    ,
+    Overflow
+    ,
+    IllegalAddress
+} ;
+-------------------------------
+

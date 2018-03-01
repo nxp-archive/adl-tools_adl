@@ -1,0 +1,19 @@
+
+
+Instruction Frequency (Ordered By Frequency):
+=============================================
+
+    bc:  427
+  addi:  347
+   add:  230
+  cmpi:  229
+  stwx:  200
+   stw:  136
+   lwz:  98
+    or:  13
+rlwinm:  12
+  lwzx:  8
+ mullw:  8
+ addis:  5
+ mtspr:  2
+  halt:  1

@@ -1,0 +1,259 @@
+
+= asm
+
+loop2:
+    se_add  r25,r24
+    subf.   r26,r27,r26
+    se_bne  loop2
+
+= /asm
+
+= aopts
+ -mvle -mregnames
+= /aopts
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x0489 s=2	#	se_add  r25,r24
+MD n=Mem ra=0x00000102 d=0x7F5BD051	#	subf.   r26,r27,r26
+MD n=Mem ra=0x00000106 d=0xE2FD s=2	#	se_bne  loop2
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA      d=0x100
+RD n=GPR i=24 d=30
+RD n=GPR i=25 d=100
+RD n=GPR i=26 d=10
+RD n=GPR i=27 d=1
+
+TRACE
+
+I ea=0x100 id=1
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x00000082
+
+I ea=0x102 id=2
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000009
+R n=CR d=0x40000000
+
+I ea=0x106 id=3
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=4
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x000000a0
+
+I ea=0x102 id=5
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000008
+R n=CR d=0x40000000
+
+I ea=0x106 id=6
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=7
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x000000be
+
+I ea=0x102 id=8
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000007
+R n=CR d=0x40000000
+
+I ea=0x106 id=9
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=10
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x000000dc
+
+I ea=0x102 id=11
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000006
+R n=CR d=0x40000000
+
+I ea=0x106 id=12
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=13
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x000000fa
+
+I ea=0x102 id=14
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000005
+R n=CR d=0x40000000
+
+I ea=0x106 id=15
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=16
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x00000118
+
+I ea=0x102 id=17
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000004
+R n=CR d=0x40000000
+
+I ea=0x106 id=18
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=19
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x00000136
+
+I ea=0x102 id=20
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000003
+R n=CR d=0x40000000
+
+I ea=0x106 id=21
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=22
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x00000154
+
+I ea=0x102 id=23
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000002
+R n=CR d=0x40000000
+
+I ea=0x106 id=24
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=25
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x00000172
+
+I ea=0x102 id=26
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000001
+R n=CR d=0x40000000
+
+I ea=0x106 id=27
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+R n=NIA d=0x00000100
+
+I ea=0x100 id=28
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+INSTR op=0x0489					asm="se_add rr9,rr8"
+R n=NIA d=0x00000102
+R n=GPR i=25 d=0x00000190
+
+I ea=0x102 id=29
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x04897f5b
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+INSTR op=0x7f5bd051					asm="subf. r26,r27,r26"
+R n=NIA d=0x00000106
+R n=GPR i=26 d=0x00000000
+R n=CR d=0x20000000
+
+I ea=0x106 id=30
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0xd051e2fd
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0xe2fd					asm="se_bne 0x0000000000000102"
+R n=NIA d=0x00000108
+
+I ea=0x108 id=31
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x00000000
+INSTR op=0x00					asm="halt "
+R n=NIA d=0x0000010c
+
+RESULTS
+
+RD n=GPR i=25 d=0x190
+RD n=GPR i=26 d=0
+
+
+
+
+

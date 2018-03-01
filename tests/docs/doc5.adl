@@ -1,0 +1,628 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+define (arch = myArch) {
+  """
+  my Core
+  """;
+
+  blk = x;
+  bit_endianness = little;
+  parallel_execution = 2;
+  define (reg=PC) {
+    """
+    PC
+    """;
+    width=24;
+    offset=2;
+    serial = true;
+    attrs = (cia,nia);
+    define (field = A) { bits = (18,16);reserved = true;}
+    define (field = B) { bits = (15,0);readonly = true;}
+    reset = 3;
+  }
+
+  define (reg=CCR) {
+    """
+      Cache control register.
+      """;
+    define (field=L1E) {
+      bits = 0;
+    }
+    define (field=L2E) {
+      bits = 1;
+    }
+    define (field=WAY8) {
+      bits = 2;
+    }
+    define (field=L1dHitCnt) {
+      bits = (7,4);
+    }
+    define (field=L1dMissCnt) {
+      bits = (11,8);
+    }
+    define (field=L2iMissCnt) {
+      bits = (15,12);
+    }
+    define (field=L2dMissCnt) {
+      bits = (19,16);
+    }
+    define (field=L) {
+      bits = (15,0);
+    }
+    define (field=H) {
+      bits = (31,16);
+    }
+  }
+
+  define (reg=ELPC) {
+    """
+    External PID Load Context Register.
+    """;
+    define (field=EPR) {
+      """
+      Replaces the MSR.PR bit for external-PID translations.
+      """;
+      bits = 0;
+    }
+    define (field=EAS) {
+      """
+      Replaces the MSR.IS/MSR.DS bit for external-PID translations.
+      """;
+      bits = 1;
+    }
+    define (field=EPID) {
+      """
+      Replaces the PID registers for external-PID translations.
+      """;
+      bits = (31,2);
+    }
+  }
+
+  // Enums at the architecture level are okay.
+  enum MsgTypes { Read, Write, LastMsg };
+
+  enum { Foo1 = LastMsg+1, Bar };
+  
+  define (eventbus=msg) {
+    define (field=type) {
+      reset = Read;
+    }
+    define (field=addr) {
+      bits = 32;
+      reset = 0x2000;
+    }
+    define (field=data) {
+      bits = 32;
+      reset = 5;
+    }
+    define (field=foo) {
+      bits = 20;
+    }
+
+    action = func (msg_t x) {
+      CCR = x.data;
+    };
+  }
+
+  define (mem=data) {
+    size = 512;
+    addr_unit = 1;	
+    parent = (instr, 256);	
+
+    read = func(unsigned size,bits<size> d) {
+      return d.swap_bytes();
+    };
+
+    write = func(unsigned size,bits<size> d) {
+      return d.swap_bytes();
+    };	
+
+  }	
+
+  define (mem=instr) {
+    instr_mem = true;
+    size = 1024;
+    addr_unit = 4;		 		
+    instr_read = func(unsigned size,bits<size> d) {
+      return d.swap_bytes();
+    };
+  }
+  define (mem=instr2) {
+    parent = (instr,512);
+    size =32;
+    addr_unit = 1;
+  }
+
+  define(mem=PreFetch) {
+    size = 16; 
+    prefetch_mem = true;
+  }
+
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=HDBCR0) {
+    define (field=MMU_ENABLE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=FOOBAR) {
+    // this won't show up in the documentation because of
+    // the attribute setting...
+    attrs = doc_hidden;
+  }
+
+  define (reg=PID0) {
+    // this won't show up in the documentation because of
+    // the attribute setting...
+    attrs = (doc_no_code);
+    define (read) {
+      action = {
+        // this shouldn't appear in documentation:
+        return ThisReg;
+      };
+    }
+    define (write) {
+      action = func (bits<32> x) {
+        // this shouldn't appear in documentation either
+        ThisReg = x;
+      };
+    }
+  }
+
+  define (reg=PID1) {
+    // ...however, this should show up in documentation
+    define (read) {
+      action = {
+        // this will appear in documentation
+        return ThisReg;
+      };
+    }
+    define (write) {
+      action = func (bits<32> x) {
+        // this will also appear in documentation
+        ThisReg = x;
+      };
+    }
+  }
+
+  define (regfile=D) {
+   size = 32;
+   width = 40;
+   prefix = d;
+   
+   define (field=H) {
+     bits = (31,16);
+   }
+   define (field=L) {
+     bits = (15,0);
+   }
+   define (field=E) {
+     bits = (39,32);
+   }
+   define (field=HH) {
+     bits = (31,24);
+   }
+   define (field=HL) {
+     bits = (23,16);
+   }
+   define (field=LH) {
+     bits = (15,8);
+   }
+   define (field=LL) {
+     bits = (7,0);
+   }
+   define (field=WH) {
+     bits =((39,36),(31,16));
+   }
+   define (field=WL) {
+     bits = ((35,32),(15,0));
+   }
+   define (field=IL) {
+     bits = (31,0);
+   }
+  }
+
+  define (regfile=XYZ) {
+    // none of this register file's code should appear in documentation
+    attrs = (doc_no_code);
+    size=64;
+    define (entry=1)  { reg = DEAR; }
+    define (entry=2)  { 
+      syntax="XYZ:2";
+      define(write) {
+        action = func (bits<regSize> value) {
+          DEAR = 0x0;
+        };
+      }
+      define(read) {
+        action = {
+          return 0xdeadbeef;
+        };
+      }
+    }
+  }
+
+  define (regfile=NEVER_SEEN) {
+    // this entire register file should not appear in the documentation
+    attrs = doc_hidden;
+    size=64;
+    define (entry=1)  { reg = DEAR; }
+    define (entry=2)  { 
+      define(write) {
+        action = func (bits<regSize> value) {
+          DEAR = 0x0;
+        };
+      }
+      define(read) {
+        action = {
+          return 0xdeadbeef;
+        };
+      }
+    }
+  }
+
+  define (regfile=WXY) {
+    size=2;
+    define (entry=0)  { reg = DEAR; }
+    define (entry=1)  { 
+      define(write) {
+        action = func (bits<regSize> value) {
+          DEAR = 0x1;
+        };
+      }
+      define(read) {
+        action = {
+          return 0xeeeeaaaa;
+        };
+      }
+    }
+  }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  // Define an exception whose name conflicts with a register
+  // that is referenced somewhere (e.g. in a file).  This
+  // should not cause any prest error.
+  define (exception=DEAR) {
+    action = func() { };
+  }
+
+  attrs = (translation_attr,minippc_mmu,foo,external_pid,a1);
+
+  define (mmu) {
+
+    attrs = foo;
+
+    both_enable = { return HDBCR0.MMU_ENABLE(); };
+
+    define(lookup=TlbBase) {
+
+      interface = true;
+      
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=EPN) {
+        """
+	  Example documentation string for an MMU field.
+	  """;
+        bits = 24;
+      }
+      define (setfield=Foo) { }
+
+      sizescale = 2;
+      sizeshift = 10;
+
+      realpage = RPN;
+
+      hit  = func (TransType tt,TlbBase_t x,addr_t,unsigned seq) { };
+      miss = func (TransType tt,addr_t,unsigned seq) { };
+      reset = func() {};
+
+      exec_perm = func(TlbBase_t t,addr_t,unsigned seq) {
+        if (!((MSR.PR()) ? t.SX : t.UX)) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      load_perm = func (TlbBase_t t,addr_t,unsigned seq) {
+        if (!((MSR.PR()) ? t.SR : t.UR)) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      store_perm = func (TlbBase_t t,addr_t,unsigned seq) {
+        if (! ((MSR.PR()) ? t.SW : t.UW)) {
+          raiseException(ProtectionFault);
+        }
+      };
+    }
+
+    define (lookup=Tlb4k) {
+      inherit = TlbBase;
+
+      priority = 1;
+
+      define (setfield=NV) {
+        bits = 1;
+      }
+
+      define (array) {
+        entries = 512;
+        set_assoc = 2;
+      }
+
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      size = 4096;
+
+    }
+
+    define(lookup=TlbCam) {
+      attrs = minippc_mmu;
+      inherit = TlbBase;
+      define (wayfield=x) {
+        bits = 2;
+        reset = 2;
+      }
+      define (wayfield=y) {
+        bits = 3;
+        reset = 1;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+
+      test_order = (External,Normal);
+
+      define (tests=Normal) {
+        test = Compare(V,1);
+        test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+        test = Compare(TID,0,PID0,PID1);      
+        test = AddrComp(EPN);
+      }
+
+      define (tests=External) {
+        enable = func(TransType) { return instrHasAttr(external_pid); };
+        test = Compare(V,1);
+        test = Compare(TS, ELPC.EAS );
+        test = Compare(TID,ELPC.EPID);      
+        test = AddrComp(EPN);
+      }
+
+      size = SIZE;
+      sizeshift = 10;
+      realpage = RPN;
+      valid = { return (V != 0); };
+
+      entry_mem_size = 12;
+      mem_read = func(unsigned set,unsigned way,addr_t addr) { return addr; };
+      mem_write = func(unsigned set,unsigned way,addr_t addr) { return addr; };
+    }
+
+    aligned_write = func(addr_t ea,addr_t ra) {
+      int i = 20;
+    };
+
+    misaligned_write = func(addr_t ea,addr_t ra) {
+      int j = 30;
+    };
+
+    misaligned_read = func(addr_t ea,addr_t ra) {
+      int k = 40;
+    };
+
+    post_read = func(addr_t ea,addr_t ra) {
+      int l = 50;
+    };
+
+    post_write = func(addr_t ea,addr_t ra) {
+      int m = 60;
+    };
+
+    instr_miss = func (addr_t a,unsigned seq) { raiseException(ITlbMiss); };
+    data_miss = func (addr_t a,unsigned seq) { DEAR = a; raiseException(DTlbMiss); };
+    load_miss = func (addr_t a,unsigned seq) { DEAR = 0; raiseException(DTlbMiss); };
+    store_miss = func (addr_t a,unsigned seq) { DEAR = 1; raiseException(DTlbMiss); };
+
+  }
+
+
+  define (assembler) {
+    comments = ("//","#",";");
+    line_comments =  ("#rem","#");
+    line_separators = ("\t");
+    packet_grouping = (("[","]"),"\t");
+    asm_instrtables = (prefix,other);
+    disasm_instrtables = (prefix,other);
+    queue_size = 5;
+
+    define(parm=L1) {
+      type = label;
+    }
+    define(parm=PktCnt) {
+      type = integer;
+      value = 0;
+    }	
+  }
+  define (instrfield = JJJJJ) { 
+    """
+    Example documentation string for an instruction field.
+    This is multiple lines, too.
+    
+    Previous indentation preservation::
+    
+        example {
+            abc();
+        }
+    """;
+    ref = D;
+    width = 8;
+    pseudo = true;
+    define (instrfield=DaDbDc) { 
+      bits = (4,0); 
+      table = ((0,4,1),(0,5,2),(0,6,3),(0,7,4), (1,4,5),(1,5,6),(1,6,7), (2,1,1),(2,1,2));
+    }
+    
+    fields = ( DaDbDc(1),DaDbDc(0),DaDbDc(2) ); 
+    
+    define(instrfield=Da) { 
+      """
+      Example documentation string for nested instruction field.
+      This is multiple lines, too.
+      """;
+      size = 4;
+      fields = (3,0);
+    }	
+    
+    define(instrfield=Dc) {
+      size = 2;
+      fields = (5,4);
+    }
+    
+    define(instrfield=Db) {
+      size = 2;
+      fields = (7,6);
+    }
+    
+    syntax = ("%f,%f,%f",Da,Db,Dc);
+  }
+
+
+  define (instrfield=Opcode) 		// the constant encoding bits for instruction
+  {
+    width  = variable; 
+    pseudo = true;
+  }
+
+  define (instrfield=Src1) 		// source1 field of instruction, can be dalu/agu (0..15)
+  {
+    width  = 4; 
+    pseudo = true;
+  }
+
+  define (instrfield=Src2) 		// source2 field of instruction, can be dalu/agu (0..15)
+  {
+    width  = 4; 
+    pseudo = true;
+  }
+
+  define (instrfield=Res) 		// result field of instruction, can be dalu/agu (0..15) 
+  {
+    width  = 4; 
+    pseudo = true;
+  }
+
+  define (instrfield=Foo)
+  {
+    alias = JJJJJ;
+    syntax = ("%f,%f",Db,Da);
+    attrs = doc_hidden;
+  }
+
+  define (instr=nop)
+  {
+    """No operation.""";
+    // example of VarInstrOpcode generation, which should now be *ignored*
+    // by the documentation generator (in older ADL versions, this would
+    // show a generated instruction field "VarInstrOpcode_imp_bits__3_0_");
+    // also, make sure that all mapped bit values appear in the documentation
+    fields = ((bits(7,0),2),(bits(11,8),Res),(bits(12),b0),(bits(13),b1),(bits(14),b1),(bits(15),b0),
+              (bits(47,16),0x5555fefe),(bits(61,48),0xff),(bits(63,62),reserved));
+    syntax = ("nop %f",Res);
+    action = {};
+    blk = x;
+  }
+
+  define (instr=dummy_two_source)
+  {
+    fields = ((bits(15,8),1),Src1,Src2);
+    action = {};
+    define (instr=dummy_nested_ifield)
+    {
+      // example of instruction that uses a nested instruction field
+      alias = dummy_two_source(Src1(JJJJJ.Da),Src2(JJJJJ.Db));
+      syntax = ("dni %f",JJJJJ);
+    }
+  }
+
+  // Example of instruction whose sources and/or targets use
+  // only part of a register containing nested fields.  The
+  // correct documentation display is to show only the longest
+  // affected field (i.e. show "H", not "H,HH,HL").
+  define (instr=affect_multiple_nested_fields)
+  {
+    fields = ((bits(22,21),1),JJJJJ,Src1);
+    syntax = ("amnf %f,%f",JJJJJ,Src1);
+    action = {
+      JJJJJ.Da = D(Src1).HL;
+      JJJJJ.Db = D(Src1).H;
+    };
+  }
+
+  attrs=one_word;
+
+  define (reloc=a) { 
+    """
+An example of an ADL relocation.
+""";
+    value=101; 
+    width = 16; 
+    attrs = a1;
+    instrfield = Res;
+  }
+  define (reloc=b) { value=102; width = 16; }
+  define (reloc=c) { value=103; width = 16; }
+  define (reloc=d) { value=104; width = 16; }
+
+
+}
+
+  define (core = myCore) {
+    type = "someCore";
+    instrtables=(prefix,other,one_word);
+    archs = myArch;
+  }

@@ -1,0 +1,832 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+makedat
+
+=head1 SYNOPSIS
+
+gdbclient [options] <input-file>
+
+Simple driver client for testing the GDB interface of an ADL ISS.  Can
+communicate via sockets or standard-IO.  It simply launches a model, specified
+via the I<--model> option which executes the program specified via the
+I<--input> option.
+
+This program then reads data from the input file (--test option) and sends that
+to the ISS.  The response from the ISS is sent to the output file (--outfile
+option).
+
+The idea is that the output file is then compared against an expected-results
+file using the standard ADL regression framework.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<-h | --help>
+
+Print help.
+
+=item B<-p=int | --port=int>
+
+Specify the port to be used.  If 0 (the default is used), then a port is chosen by the
+ISS and communicated to the client via the --port-file option.
+
+=item B<--port=file>
+
+If connecting via UNIX local sockets, use this option to specify the name of the
+pipe file.
+
+=item B<--pf=path | --port-file=path>
+
+Use the specified path as the port-file for obtaining the name of the port that
+the ISS is using.  For testing MP situations, where multiple connections will be
+established, this may be a string where each "%f" is substituted for a temporary
+file name.
+
+For an MP test, the port-file value may use the same syntax as used by the ISS
+to map nodes in the simulator to files.  Each file will be extracted and used as
+a port-file.
+
+=item B<--timeout=int>
+
+Specify a timeout value for a response.  The default is 1 second.
+
+=item B<--reap>
+
+If set, we will kill child processes after a certain amount of time.  If not
+set, then we will simply wait for child processes to finish.  The default is
+true.  This option is negatible via a "no-" prefix.
+
+=item B<-d=path | --directory=path>
+
+Specify a directory to prepend to the model name.
+
+=item B<-m=path | --model=path>
+
+Specify the model to be executed.
+
+=item B<-mo=str | --model-opts=str>
+
+Specify additional options to be passed to the model.  This option may be
+repeated.
+
+=item B<-i=path | --input=path>
+
+Specify the input file to be used by the model.
+
+=item B<-f=str | --format=str>
+
+Specify the input format.  Default is to have the ISS determine this by
+examining the input file's extension.
+
+=item B<-t=path | --test=path>
+
+Specify the stimulus data to send to the server.  Each line of the file is a
+single packet which will be sent.  A valid packet is formed from this data: The
+checksum and lead character should not be included in the file.  Each line of
+the file is also evaluated so that escape sequences are converted into the
+appropriate control characters.
+
+If a line starts with B<#>, it is treated as a comment and skipped.
+
+Note that the line is evaluated as a Perl string, so special characters, such as
+newlines, may be represented using their control sequencies, e.g. "\n".
+
+If a line starts with B<:cmd[,cmd..]:>, then the B<cmd(s)> are first processed.
+Note that multile commands are separated by commas between the colons.  Valid
+commands are:
+
+=over 8
+
+=item B<noresp>
+
+Do not expect a response and send the next data item.
+
+=item B<lit>
+
+Do not form into a packet, use the data literally and send as-is.
+
+=item B<litresp>
+
+Expect a literal response.  Do not remove packet data from the reply.
+
+=item B<hex>
+
+Expect a response consisting of ASCII data encoded as hex digits.  This will
+cause the response to be conveted to ASCII before it is written to the output
+file.
+
+=item B<noack>
+
+Do not send an acknowledge signal ("+").
+
+=item B<untilokay>
+
+Expect extra packets.  Normally, we just wait for a single packet as a response
+from the client.  If this command is set, we poll for more information until we
+receive an OK or error (Exx) packet, so that we can handle a response which
+consists of an arbitrary number of packets.  This is mainly useful for handling
+GDB monitor commands.
+
+=item B<extra>
+
+Expect an extra packet.  This item may be repeated in order to handle the
+expected number of extra packets.
+
+=item B<sleep>
+
+The rest of the line is taken as a wait-time in seconds.  The client will sleep
+for the specified amount of time, then proceed.
+
+=item B<socket>
+
+Changes the active socket.  The rest of the line is take as the socket index,
+where the first socket is 1.  Subsequent lines are then directed towards this
+new socket.
+
+=back
+
+Multiple commands may be specified by separating them by commas within the colon
+delimiters.
+
+=item B<-o=path | --outfile=path>
+
+Specify the file to which is written all responses from the ISS.
+
+=item B<-v | --verbose>
+
+Turn on verbose mode.  Debugging information in the client and ISS are both displayed.
+
+=item B<--debug>
+
+Enable extra debug printing.
+
+=item B<--stdio>
+
+Use standard-IO, rather than sockets, for communicating with the ISS.
+
+=item B<--udp>
+
+Use UDP for communicating with the ISS.
+
+=item B<--unix>
+
+Use Unix local sockets for communicating with the ISS.  Use the B<pipe> option
+to specify the name of the pipe file, or leave empty to have the ISS generate a
+temporary file to use.
+
+=item B<-mc | --multi-connect>
+
+Create independent connections for each socket.  By default, a port-file will be
+created for each socket in order to establish a connection.
+
+=item B<--exec>
+
+If set, then an ISS is run as a child process; all communications are directed
+to this process.  If negated (I<--no-exec>), no child process is started; it is
+the user's responsibility to launch the ISS.  This is useful for debugging
+purposes, where the ISS is launched via GDB and the gdbclient script is used for
+stimulus generation.
+
+=item B<--num-sockets=int>
+
+Specify the number of sockets to create.  This is really only useful for UDP
+communications, where it allows the user to test the multiplexing of traffic
+from multiple sources.
+
+=item B<--cmdfile=file>
+
+Execute the specified file (a Perl file) rather than using the default execution
+loop.
+
+=back
+
+=cut
+
+# Used for string escape-sequence evaluation.
+$data = "";
+
+# We need some sort of a timeout b/c we need to be able to handle the case where
+# the client sends back multiple packets for a single query, such as for an
+# qRcmd.  So, we have to see if there's more I/O waiting.  However, the timeout
+# can be short because everything is done on the same computer, so there's no
+# network lag.
+$timeout = 1;
+
+# Whether a command sends back a single response or possibly multiple.  Reset to false
+# for every message, but can be set using the command "untilokay".
+$extra_packets = 0;
+
+# Special message that just says to only read a response.  This string is just
+# used internally.
+$get_response_only = "&&&&";
+
+use vars qw ( $data $timeout $extra_packets );
+
+use Getopt::Long qw(:config permute);
+use Pod::Usage;
+use File::Basename;
+use IO::Socket;
+use File::Temp "tempfile";
+
+my $port = 0;
+my $pipe;
+my $exec = 1;
+my $reap = 1;
+my $hang = 0;
+my $socket;
+
+our ($infile,$model,$directory,$pid,$char,$input,$help,$verbose,$debug,
+    $line,$socket,$inline,$modelInput,$output,$outfile,$format,
+	$use_stdio,$use_udp,$use_unix,$port_file,@port_files,@model_opts,
+	 $cmdfile,$multi_conenct);
+
+my $num_sockets = 1;
+
+if (!&GetOptions
+    (
+     "h|help"                  => \$help,
+     "p|port=i"                => \$port,
+		 "pipe=s"                  => \$pipe,
+     "d|directory=s"           => \$directory,
+     "m|model=s"               => \$model,
+     "i|input=s"               => \$modelInput,
+     "f|format=s"              => \$format,
+     "t|test=s"                => \$input,
+     "o|outfile=s"             => \$output,
+		 "v|verbose"               => \$verbose,
+		 "debug"                   => \$debug,
+		 "pf|port-file=s"          => \$port_file,
+		 "stdio"                   => \$use_stdio,
+		 "udp"                     => \$use_udp,
+		 "unix"                    => \$use_unix,
+		 "exec!"                   => \$exec,
+		 "hang!"                   => \$hang,
+		 "reap!"                   => \$reap,
+		 "mc|multi-connect!"       => \$multi_connect,
+		 "ns|num-sockets=i"        => \$num_sockets,
+		 "cmdfile=s"               => \$cmdfile,
+		 "timeout=i"               => \$timeout,
+		 "mo|model-opts=s"         => \@model_opts,
+    )) {
+  printhelp(1,1);
+}
+
+print "model $model\n";
+print "port $port\n";
+
+if (!$input) {
+  print "Error:  No input file specified.\n";
+  printhelp(1,1);
+}
+
+if (!$output) {
+  print "Error:  No output file specified.\n";
+  printhelp(1,1);
+}
+
+open($infile, "$input") or die "Could not open $input";
+
+if (! -f $infile) {
+  print "Error:  File $input does not exist or could not be opened.\n";
+  printhelp(1,1);
+}
+
+open($outfile, ">$output") or die "Could not open $output";
+
+if (! -f $outfile) {
+  print "Error:  File $output does not exist or could not be opened.\n";
+  printhelp(1,1);
+}
+
+if (!$model && $exec) {
+  print "Error:  Model file: $model does not exist.\n";
+  printhelp(1,1);
+}
+
+if (!$modelInput && $exec) {
+  print "Error:  Model Input file: $modelInput does not exist.\n";
+  printhelp(1,1);
+}
+
+if (!$port && !($use_stdio || $use_unix)) {
+  print "No port specified. Using automatic port assignment.\n";
+  $port = 0;
+}
+
+if (!$pipe && $use_unix) {
+	print "No pipe file specified.  Using a temporary file.\n";
+}
+
+my $cmd;
+if ($directory) {
+  $cmd = "$directory/$model $directory/$modelInput";
+} else {
+  $cmd = "$model $modelInput";
+}
+
+$cmd .=" --gdb-hostname=localhost";
+
+$cmd .= " -use-file-entry-point -g";
+
+$cmd .= " -if=$format" if ($format);
+
+$cmd .= " --gdb-udp" if ($use_udp);
+
+$cmd .= " --gdb-local" if ($use_unix);
+
+$cmd .= " @model_opts" if (@model_opts);
+
+$cmd .= " -v" if ($verbose);
+
+my $temphandle;
+
+if ($port && !$use_unix) {
+  $cmd .= " -p=$port";
+} 
+elsif ($pipe && $use_unix) {
+  $cmd .= " --pipe=$pipe";
+} 
+else {
+  if ($port_file) {
+		# Do any substituations of the %f control-code.
+		$port_file =~ s/%f/{my ($th,$pf) = tempfile(); $pf}/eg;
+		# Now extract the port-files, since the user may have explicitly specified them.
+		my @pfs = split /,/,$port_file;
+		for my $el (@pfs) {
+			my ($n,$pf) = split /=/,$el;
+			push @port_files,$pf;
+		}
+		$cmd .= " -pf=$port_file";
+  } else {
+		($temphandle,$port_file) = tempfile();
+		$cmd .= " -pf=$port_file";
+		push @port_files,$port_file;
+  }
+}
+
+if (!$multi_connect) {
+  @port_files = ($port_file) x $num_sockets;
+}
+
+print "Port files:  @port_files\n" if ($verbose);
+
+$| = 1;
+
+if ($use_stdio) {
+  #
+  # Standard-IO coe: We fork off the client by using open2, then read and write
+  # data using the specified pipes.
+  #
+  $cmd .= " --gdb-stdio";
+  # We don't need to worry about socket delays, so we don't need a timeout.
+  #$timeout = 0;
+  use IPC::Open2;
+  my ($reader,$writer);
+  print "Connecting via stdio.\n";
+  $SIG{PIPE} = 'IGNORE';
+  print "Command:  $cmd" if $verbose;
+  $pid = open2($reader,$writer,$cmd);
+  while ($data = get_next_line()) {
+		if ($data eq $get_response_only) {
+			# A "getresp" command is signaled by a 0-length data value.  This means
+			# that we should just read a response from the socket.
+			dprint("Directly reading a response.");
+			read_response($reader,$writer,$outfile);
+		} else {
+			if (write_data($reader,$writer,$data)) {
+				read_response($reader,$writer,$outfile);
+			}
+		}
+  }
+  close $reader;
+  close $writer;
+} else {
+  #
+  # Socket code: Fork off the child process and open a socket.  The socket is
+  # chosen by the client if a value of 0 is given for port.  In such a case, we
+  # get the value by looking at the port-file written by the client.
+  #
+  print "Command:  $cmd\n" if $verbose;
+  if ($exec && (($pid = fork) == 0)) {
+	exec $cmd or die "Couldn't execute $cmd\n";
+  } else {
+	# We'll try a couple of times to connect, just in case there are spurious
+	# issues.
+	my $target_port;
+	my $trycount = 2;
+
+	$num_ports = 1;
+
+	print "Child pid:  $pid\n";
+
+	print "Creating $num_sockets sockets.\n" if ($verbose);
+
+	for my $i (1..$num_sockets) {
+
+		$port_file = shift @port_files;
+
+		if ($use_unix) {
+			if (!$port) {
+				next if ( ! -e $port_file);
+				open PORT,"$port_file" or die "Could not open port file '$port_file'";
+				my $pcmd;
+				while (1) {
+					$pcmd = <PORT>;
+					if ($pcmd) {
+						last;
+					} else {
+						sleep 1;
+					}
+				}
+				$pipe = ($pcmd =~ /unix:(\S+)/)[0];
+			}
+			if (!$pipe) {
+				print "No unix local pipe found.\n";
+				exit 1;
+			}
+		} else {
+			if (!$port) {
+				next if ( ! -e $port_file);
+				open PORT,"$port_file" or die "Could not open port file '$port_file'";
+				my $pcmd;
+				while (1) {
+					$pcmd = <PORT>;
+					if ($pcmd) {
+						last;
+					} else {
+						sleep 1;
+					}
+				}
+				$target_port = ($pcmd =~ /\S:(\d+)/)[0];
+			} else {
+				$target_port = $port;
+			}
+			if (!$target_port) {
+				print "Bad or zero port found.\n";
+				exit 1;
+			}
+		}
+		
+	  for ( ; $trycount; --$trycount) {
+
+			#sleep 2;
+
+			# Below, we make use of Perl's symbolic reference feature to generate a global pointing to
+			# a socket object.  The name of the socket is socket<n>, where n goes from 1 to num-sockets.
+			if ($use_unix) {
+				print "Trying to connect via pipe $pipe\n";
+
+				if (${"socket$i"} = IO::Socket::UNIX->new(Peer => "$pipe")) {
+					last;
+				} else {
+					print "  Failed on try $trycount, trying again...\n";
+				}
+			} else {
+				my $type = ($use_udp) ? "udp" : "tcp";
+				print "Trying to connect on $type port $target_port\n";
+
+				if (${"socket$i"} = IO::Socket::INET->new(PeerAddr => "localhost",
+																									PeerPort => $target_port,
+																									Proto => ($use_udp) ? "udp" : "tcp")) {
+					if ($multi_connect) {
+						my $ipaddr = inet_aton("localhost");
+						${"port_addr$i"} = sockaddr_in($target_port,$ipaddr);
+					}
+					last;
+				} else {
+					print "  Failed on try $trycount, trying again...\n";
+				}
+			}
+	  }
+	  die "Couldn't connect to localhost:$target_port : $!\n" if ($trycount == 0);
+	}
+
+	# Setup sending address once, if not doing a multi-connect.
+	if (!$multi_connect) {
+	  my $ipaddr = inet_aton("localhost");
+	  $port_addr1 = sockaddr_in($target_port,$ipaddr);
+	}
+
+	# We always start with the first socket.
+	$socket = $socket1;
+	$port_addr = $port_addr1;
+
+	# If the user has supplied a file to use as a main event loop, then evaluate
+	# that.  Otherwise, our default main loop simply reads sequential lines from
+	# the file, sends them out and then waits for a response.
+	if ($cmdfile) {
+	  unless ($return = do $cmdfile) {
+		die "Couldn't parse $cmdfile:  $@" if $@;
+		die "Couldn't do $cmdfile:  $!"    unless defined ($return);
+		die "Couldn't run $cmdfile"        unless $return;
+	  }
+	} else {
+	  # Read each line as a packet and send it over the socket.
+	  while ($data = get_next_line()) {
+			if ($data eq $get_response_only) {
+				read_response($socket,$socket,$outfile);
+			} else {
+				# Write the packet, then wait for a response
+				if (write_data($socket,$socket,$data)) {		  
+					read_response($socket,$socket,$outfile);
+				}
+			}
+	  }
+	}
+
+	# Cleanup.
+	close $input;
+	for my $i (1..$num_sockets) {
+	  close ${"socket$i"};
+	}
+  }
+}
+
+reap_child_procs();
+print "Done.\n";
+
+#
+# Helper routines.
+#
+
+# This is a debug print function:  If debug is enabled, the output will show up.
+sub dprint {
+  if ($debug) {
+	print @_;
+  }
+}
+
+sub get_next_line {
+
+  Line : while (1) {
+	my $line = <$infile>;
+
+	if (!$line) {
+	  return 0;
+	}
+
+	chomp $line;
+	my $data = $line;
+
+	dprint("Next line:  $data\n");
+
+	$hexdata = 0;
+	$lit = 0;
+	$litresp = 0;
+	$noresp = 0;
+	$noack = 0;
+	$extra_packets = 0;
+	$extra_packets_until = 0;
+
+	my $sleep;
+	if ($data =~ /^#/) {
+	  next;
+	} elsif (length ($data) == 0) {
+	  next;
+	} elsif ($data =~ /^:([^:]+):(.*)/) {
+	  my @cmds = split /,/,$1;
+	  $data = $2;
+	  for (@cmds) {
+		if ( $_ eq "sleep" ) {
+		  if ($data) {
+			$sleep = $data;
+		  } else {
+			$sleep = 1;
+		  }
+		} elsif ( $_ eq "lit" ) {
+		  $lit = 1;
+		} elsif ( $_ eq "litresp" ) {
+		  $litresp = 1;
+		} elsif ( $_ eq "hex" ) {
+		  $hexdata = 1;
+		} elsif ( $_ eq "noack" ) {
+		  $noack = 1;
+		} elsif ( $_ eq "noresp" ) {
+		  $noresp = 1;
+		} elsif ( $_ eq "getresp" ) {
+			$data = $get_response_only;
+		} elsif ( $_ eq "untilokay" ) {
+		  $extra_packets_until = 1;
+		} elsif ( $_ eq "extra" ) {
+		  ++$extra_packets;
+		} elsif ( $_ eq "socket" ) {
+		  print "Switching to socket $data\n" if ($verbose);
+		  $socket = ${"socket$data"};
+		  if ($multi_connect) {
+				$port_addr = ${"port_addr$data"};
+		  }
+		  next Line;
+		} else {
+		  die "Unknown command $1";
+		}
+	  }
+	} 
+
+	if ($sleep) {
+	  sleep $sleep;
+	  next Line;
+	}
+
+	eval "\$data = \"$data\"";
+
+	return $data;
+
+  }
+}
+
+sub write_data {
+  my ($rd,$wr,$data) = @_;
+
+  my $packet;
+
+  if ($lit) {
+		$packet = $data;
+  } else  {
+		my $checksum = 0;
+		for my $i (0 .. length ($data)) {
+			$checksum += ord(substr($data,$i));
+		}
+		$packet = sprintf("\$%s#%02x",$data,$checksum % 256);
+  }
+
+	my ($r,$l);
+	while (1) {
+		dprint("Writing '$packet'\n");
+		do_write($wr,$packet);
+
+		last if ($lit);
+		dprint("Doing read.\n");
+		my ($r,$l) = do_read_len($rd,1);		
+		dprint("Read '$r' ($l)\n");
+		if ($r eq "+") {
+			dprint("Got good reply.  Done with write.\n");
+			last;
+		} else {
+			dprint("Got bad reply.  Try again.\n");
+		}
+	}
+
+  print "Client Sent:  $data [$packet]\n" if ($verbose);
+
+  return !$noresp;
+}
+
+sub read_response {
+  my ($rd,$wr,$out) = @_;
+  my $rline;
+
+  my ($rout,$packet,$len);
+
+  my $rin = "";
+  vec($rin,fileno($rd),1) = 1;
+
+  LOOP : while (1) {
+		my ($nfound,$timeleft) = select($rout=$rin,undef,undef,$timeout);
+		last if ($nfound == 0);
+		($packet,$len) = do_read($rd);
+		# Exit the loop on error or a null-read.
+		if (!defined $len) {
+			last;
+		}
+		last if ($len == 0);
+		# Skip the ack reply from the client.
+		next if ($packet eq "+");
+		do_write($wr,"+") if (!$noack);
+		# In case the ack is read in with the rest of the packet, chomp it off.
+		my $data;
+		if ($litresp) {
+			$data = $packet;
+		} else {
+			my $off = ($packet =~ /^\+/) ? 2 : 1;
+			$data = (substr($packet,$off,-3))
+		}
+		if ($hexdata && $data ne "OK") {
+			# Ignore the leading character if it's O (a console output packet).
+			my $hex_in = ($data =~ /^O/) ? substr($data,1) : $data;
+			$data = pack "H*",$hex_in;
+		}
+		print $out "$data";
+		print "Reply ($len):  $data [$packet]\n" if ($verbose);
+
+		if ($extra_packets) {
+			print $out "\n";
+			--$extra_packets;
+			next LOOP;
+		}
+
+		#Keep trying to get data if we're expecting extra packets and we didn't
+		#receive an OK or error packet.
+		if (!$extra_packets_until) {
+			print $out "\n";
+			last;
+		}
+		if ($data =~ /^OK/ || $data =~ /^E\d\d/ ) {
+			print "Got terminating OK or error packet.\n" if ($verbose);
+			print $out "\n";
+			last;
+		}
+  }
+}
+
+sub do_read {
+  my ($rd) = @_;
+
+  my $blksize = 16384;
+  my ($packet,$len);
+
+  if ($use_udp) {
+		recv $rd,$packet,$blksize,0;
+		$len = length($packet);
+  } else {
+		# We read one char at a time so that we don't over-read in case multiple
+		# packets get sent.  Yeah, it's not fast, but who cares, since we're just a
+		# test harness.
+		my ($tmp,$rc);
+		# Read until the separator.
+		do {
+			$rc = sysread $rd,$tmp,1;
+			$packet .= $tmp;
+		} while ($tmp ne '#' && $rc);
+		# Then read the checksum.
+		if ($rc) {
+			sysread $rd,$tmp,2;
+			$packet .= $tmp;
+			$len = length($packet);
+		}
+  }
+  return ($packet,$len);
+}
+
+sub do_read_len {
+  my ($rd,$blksize) = @_;
+
+  my ($packet,$len);
+
+  if ($use_udp) {
+		recv $rd,$packet,$blksize,0;
+		$len = length($packet);
+  } else {
+		$len = sysread $rd,$packet,$blksize;
+  }
+  return ($packet,$len);
+}
+
+sub do_write {
+  my ($wr,$packet) = @_;
+
+  if ($use_udp) {
+		#print "Sending to:  ",unpack_sockaddr_in($port_addr),"\n";
+		send $wr,$packet,0,$port_addr;
+  } else {
+		syswrite $wr,$packet;
+  }
+}
+
+sub reap_child_procs {
+  my $kid;
+  my $trycount = 2;
+  use POSIX ":sys_wait_h";
+  if ($hang) {
+	while (1) {
+	  sleep 10;
+	}
+  }
+  if ($reap) {
+	do {
+	  print "Waiting for child to finish.\n";
+	  $kid = waitpid(-1,&WNOHANG);
+	  sleep 1 if ($kid == 0);
+	  if ($trycount == 0) {
+		# This clobbers everything by sending a kill to the entire process group
+		# (we ignore the signal ourselves so that we don't get killed).
+		print "Times up!  Explicitly killing child.\n";
+		kill 9,$pid;
+	  } else {
+		--$trycount;
+	  }
+	} until ($kid);
+  } else {
+	print "Waiting for child to finish (w/o killing).\n";
+	waitpid(-1,&WNOHANG);
+  }
+}
+
+sub printhelp($$) {
+  my ($eval,$verbose) = (shift,shift);
+  pod2usage(-exitval => $eval, -verbose=>$verbose);
+  exit 0;
+}
+
+exit 0;

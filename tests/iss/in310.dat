@@ -1,0 +1,69 @@
+#
+# Test to make sure that we'll properly invalidate the internal DMI cache after
+# enabling the L1d, in order to see data in the L1d, rather than global memory.
+#
+= asm
+
+	.set CCR,52
+
+	lwz r3,0x1000(r0)
+	lis r2,0x8000
+	mtspr CCR,r2
+	lis r4,0xdead
+	ori r4,r4,0xbeef
+	stw r4,0x1000(r0)
+	lwz r5,0x1000(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80601000	#	lwz r3,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x3C408000	#	lis r2,0x8000
+MD n=Mem ra=0x00000008 d=0x7C540BA6	#	mtspr CCR,r2
+MD n=Mem ra=0x0000000c d=0x3C80DEAD	#	lis r4,0xdead
+MD n=Mem ra=0x00000010 d=0x6084BEEF	#	ori r4,r4,0xbeef
+MD n=Mem ra=0x00000014 d=0x90801000	#	stw r4,0x1000(r0)
+MD n=Mem ra=0x00000018 d=0x80A01000	#	lwz r5,0x1000(r0)
+# </GEN>
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+INSTR op=0x80601000					asm="lwz r3,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+R n=GPR i=3 d=0x00000000
+
+I ea=0x4 id=2 tic=2
+INSTR op=0x3c408000					asm="lis r2,-32768"
+R n=GPR i=2 d=0x80000000
+
+I ea=0x8 id=3 tic=3
+INSTR op=0x7c540ba6					asm="mtspr CCR,r2"
+
+I ea=0xc id=4 tic=4
+INSTR op=0x3c80dead					asm="lis r4,-8531"
+R n=GPR i=4 d=0xdead0000
+
+I ea=0x10 id=5 tic=5
+INSTR op=0x6084beef					asm="ori r4,r4,0xbeef"
+R n=GPR i=4 d=0xdeadbeef
+
+I ea=0x14 id=6 tic=6
+INSTR op=0x90801000					asm="stw r4,4096(r0)"
+D n=Mem t=write ea=0x1000 nb=4
+
+I ea=0x18 id=7 tic=7
+INSTR op=0x80a01000					asm="lwz r5,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+R n=GPR i=5 d=0xdeadbeef
+
+I ea=0x1c id=8 tic=8
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0xdeadbeef
+RD n=GPR i=5 d=0xdeadbeef

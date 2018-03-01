@@ -1,0 +1,7 @@
+Model:  P
+
+Instr:  add+ r3,r15 [ GPR[3]=0x0000000a GPR[0]=0x00000000 ]
+Instr:  add+ r15,r1 [ GPR[15]=0x0000000a GPR[0]=0x00000000 ]
+Instr:  halt
+Instructions issued:  3
+

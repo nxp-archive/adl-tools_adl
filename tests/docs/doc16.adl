@@ -1,0 +1,193 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests some corner cases for database generation.
+//
+
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  bit_endianness = little;  
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (reg=SR) {
+    define (field = C)
+      {
+        bits=0;
+      }
+    define (field = (T,P0))
+      {
+        bits=1;
+      }
+    define (field = SM)
+      {
+        bits=2;
+      }
+    define (field = RM)
+      {
+        bits=3;
+      }
+    define (field = SCM)
+      {
+        bits=(8,5,4);
+      }
+    define (field = S)
+      {
+        bits=6;
+      }
+    define (field = SM2)
+      {
+        bits=7;
+      }
+    define (field = OVF)
+      {
+        bits=10;
+      }
+    define (field = SAT)
+      {
+        bits=11;
+      }
+
+    define (field = W20)
+      {
+        bits=12;
+      }
+    define (field = RF)
+      {
+        bits=13;
+      }
+    define (field = P5)
+      {
+        bits=27;
+      }
+    define (field = P4)
+      {
+        bits=28;
+      }
+    define (field = P3)
+      {
+        bits=29;
+      }
+    define (field = P2)
+      {
+        bits=30;
+      }
+    define (field = P1)
+      {
+        bits=31;
+      }
+    define (field =LF)
+      {
+        bits = (30,27);
+      }
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=Src1) { pseudo = true; width = 5; };
+  define (instrfield=Src2) { pseudo = true; width = 5; };
+  define (instrfield=Trg)  { pseudo = true; width = 5; };
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (5,0);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (30,21);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (15,11);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (20,16);
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    """;
+    bits = (10,6);
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register (GPR_) as a target.
+    """;
+    bits = (10,6);
+  }
+
+  //
+  // Instructions.
+  //
+
+  attrs = (a1,a2,a3,a4);
+
+  // test docstrings when nesting multiple aliases
+  define (instr=add_family) {
+    fields=(Src1,Src2,Trg);
+    action={
+      // All of these fields should be listed as inputs.  We had a bug where S
+      // was dropped b/c SCM was non-contiguous and covered bits on either side
+      // of S.
+      var i = SR.S;
+      var i = SR.SCM;
+      var i = SR.SM;
+    };
+
+    define (instr=add1) {
+      fields=(OPCD(31),RT,RA,RB,XO(266));
+      width = 32;
+      alias = add_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+  }
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

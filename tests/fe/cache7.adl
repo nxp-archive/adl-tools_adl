@@ -1,0 +1,75 @@
+//
+// Example of a cache with multiple sets and ways.  This will produce
+// errors.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+    define (field=L2E) {
+      bits = 1;
+    }
+    define (field=WAY8) {
+      bits = 2;
+    }
+    define (field=L1dHitCnt) {
+      bits = (4,7);
+    }
+    define (field=L1dMissCnt) {
+      bits = (8,11);
+    }
+    define (field=L2iMissCnt) {
+      bits = (12,15);
+    }
+    define (field=L2dMissCnt) {
+      bits = (16,19);
+    }
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    sets      = (128,255); // 255 is not a power of 2, so an error will be produced.
+    set_assoc = (4,8);
+    linesize  = 128;
+    size      = 131072;
+
+    // No sets_func or assoc_func specified, so an error will be produced.
+
+  }
+
+}
+
+define (core=P) {
+  archs=(foo);
+}

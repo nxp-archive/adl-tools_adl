@@ -1,0 +1,62 @@
+//
+// N-bit encodings,
+// if mask is not confined if one word it should be splitted (we need
+// it in order to use switch in simulator, it is faster.
+
+define (arch=minippc) {
+
+  
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+
+  
+  define (instrfield = OPCD) {
+    bits = (31,32);
+  }
+  
+  define (instrfield = A) {
+    bits = (0,30);
+  }
+  define (instrfield = B) {
+    bits = (33,63);
+  } 
+  
+  
+  define (instr = I1) {
+    fields = (A,OPCD(0),B);
+    action = {};
+  }
+  
+  define (instr = I2) {
+    fields = (A,OPCD(1),B);
+    action = {};
+  } 
+  
+  define (instr = I3) {
+    fields = (A,OPCD(2),B);
+    action = {};
+  }
+  
+  define (instr = I4) {
+    fields = (A,OPCD(3),B);
+    action = {};
+  }
+  
+  
+  
+  
+  
+  
+  
+    
+}
+
+define (core=P) {
+  archs=minippc;
+}

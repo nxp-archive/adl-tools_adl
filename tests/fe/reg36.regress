@@ -1,0 +1,137 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written, slice-read, slice-written, field-read, field-written
+  Width:  32
+    x[0,1]   
+      Usage:  field-read, field-written
+  -------------------------------
+  Name:  "VPR"
+  Size:  32
+  Usage:  field-read, field-written
+  Width:  32
+    xx[16bits x 2]  
+      Usage:  field-read, field-written
+  -------------------------------
+Registers:
+  Name:  "TACTIVE"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "X"
+  Usage:  read, written, slice-read, slice-written, field-read, field-written
+  Width:  32
+    x[0,1]   
+      Usage:  field-read, field-written
+  -------------------------------
+  Name:  "Y"
+  Usage:  read, field-read, field-written
+  Width:  32
+    xx[8bits x 4]  
+      Usage:  field-read, field-written
+  -------------------------------
+  Name:  "Z"
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    ThisReg = x[write thisreg: Z := x] ;
+    ThisReg . x = x + 1[write thisreg: Z.x := x + 1] ;
+}
+    Target Registers:  Z 
+
+  Usage:  written, field-written
+  Width:  32
+    x[0,15]   
+      Usage:  field-written
+  Reset:  func (  ) {
+    ThisReg = 0xdeadbeef[write thisreg: Z := 0xdeadbeef] ;
+}
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Contexts:
+  Name:  thread (thread)
+  Number contexts:  2
+  Registers:  X Y pc 
+  Register-files:  GPR VPR 
+  Context Activity Function:  {
+    return TACTIVE[read: TACTIVE] ;
+}
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Delayed Write Targets:  GPR VPR X Y 
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+  RT: [6,10] 
+  XO_X: [21,30] 
+Instructions:
+  Name:  g (rank: 100)
+  Width:  32
+  Fields:  OPCD(7) RT RA RB XO_X(10)
+  Action:  {
+    X = Y[read: Y] + 1[write: X := Y[read: Y] + 1] ;
+    GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + 1[write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + 1] ;
+    GPR ( RT ) ( 0 , 15 ) = GPR ( RA ) ( 0 , 15 )[read: GPR(RA)(0,15)] ;[write: GPR(RT)(0,15) := GPR ( RA ) ( 0 , 15 )[read: GPR(RA)(0,15)]]
+    GPR ( RT ) ( 10 ) = RA ;[write: GPR(RT)(10) := RA]
+    X ( 0 , 15 ) = RT[write: X(0,15) := RT] ;
+    X ( 23 ) = RT[write: X(23) := RT] ;
+    X . x = RT[write: X.x := RT] ;
+    GPR ( RT ) . x = GPR ( RA )[read: GPR(RA)][write: GPR(RT).x := GPR ( RA )[read: GPR(RA)]] ;
+    Y . xx ( 1 ) = RT[write: Y.xx(1) := RT] ;
+    VPR ( RT ) . xx ( 3 ) = GPR ( RA )[read: GPR(RA)][write: VPR(RT).xx(3) := GPR ( RA )[read: GPR(RA)]] ;
+    thread ( 0 ) . X[read(ctx 0): X] ;
+    thread ( 0 ) . X ( 1 , 13 )[read(ctx 0): X(1,13)] ;
+    thread ( 0 ) . X . x[read(ctx 0): X.x] ;
+    thread ( 0 ) . Y . xx ( 3 )[read(ctx 0): Y.xx(3)] ;
+    thread ( 0 ) . GPR ( RT )[read(ctx 0): GPR(RT)] ;
+    thread ( 1 ) . GPR ( RA ) ( 0 , 15 )[read(ctx 1): GPR(RA)(0,15)] ;
+    thread ( 1 ) . GPR ( RA ) . x[read(ctx 1): GPR(RA).x] ;
+    thread ( 1 ) . VPR ( 12 ) . xx ( 2 )[read(ctx 1): VPR(12).xx(2)] ;
+    thread ( 0 ) . X = 1[write(ctx 0): X := 1] ;
+    thread ( 0 ) . X ( 1 , 13 ) = 2[write(ctx 0): X(1,13) := 2] ;
+    thread ( 0 ) . X . x = 3[write(ctx 0): X.x := 3] ;
+    thread ( 0 ) . Y . xx ( 3 ) = 4[write(ctx 0): Y.xx(3) := 4] ;
+    thread ( 0 ) . GPR ( RT ) = 5[write(ctx 0): GPR(RT) := 5] ;
+    thread ( 1 ) . GPR ( RA ) ( 0 , 15 ) = 6[write(ctx 1): GPR(RA)(0,15) := 6] ;
+    thread ( 1 ) . GPR ( RA ) . x = 7[write(ctx 1): GPR(RA).x := 7] ;
+    thread ( 1 ) . VPR ( RA ) . xx ( 2 ) = 8[write(ctx 1): VPR(RA).xx(2) := 8] ;
+    delayed_write ( X , 2 ) = Y . xx ( 2 )[read: Y.xx(2)] + 1[delayed (by 2) write: X := Y . xx ( 2 )[read: Y.xx(2)] + 1] ;
+    delayed_write ( GPR ( RT ) , 2 ) = GPR ( RA ) . x[read: GPR(RA).x] + 1[delayed (by 2) write: GPR(RT) := GPR ( RA ) . x[read: GPR(RA).x] + 1] ;
+    delayed_write ( GPR ( RT ) ( 0 , 15 ) , 2 ) = VPR ( RA ) . xx ( 3 )[read: VPR(RA).xx(3)] + GPR ( RB )[read: GPR(RB)][delayed (by 2) write: GPR(RT)(0,15) := VPR ( RA ) . xx ( 3 )[read: VPR(RA).xx(3)] + GPR ( RB )[read: GPR(RB)]] ;
+    delayed_write ( GPR ( RT ) ( 10 ) , 2 ) = RT[delayed (by 2) write: GPR(RT)(10) := RT] ;
+    delayed_write ( X ( 0 , 15 ) , 2 ) = X ( 8 , 24 )[read: X(8,24)][delayed (by 2) write: X(0,15) := X ( 8 , 24 )[read: X(8,24)]] ;
+    delayed_write ( X ( 23 ) , 2 ) = RT[delayed (by 2) write: X(23) := RT] ;
+    delayed_write ( X . x , 2 ) = X . x[read: X.x][delayed (by 2) write: X.x := X . x[read: X.x]] ;
+    delayed_write ( GPR ( RT ) . x , 2 ) = GPR ( RA )[read: GPR(RA)][delayed (by 2) write: GPR(RT).x := GPR ( RA )[read: GPR(RA)]] ;
+    delayed_write ( Y . xx ( 1 ) , 2 ) = RT[delayed (by 2) write: Y.xx(1) := RT] ;
+    delayed_write ( VPR ( RT ) . xx ( 4 ) , 2 ) = GPR ( RA )[read: GPR(RA)][delayed (by 2) write: VPR(RT).xx(4) := GPR ( RA )[read: GPR(RA)]] ;
+    GPR ( RT ) = X . x[read: X.x] ( 0 , 4 )[write: GPR(RT) := X . x[read: X.x] ( 0 , 4 )] ;
+    X = GPR ( RT ) . x[read: GPR(RT).x] ( 0 , 15 )[write: X := GPR ( RT ) . x[read: GPR(RT).x] ( 0 , 15 )] ;
+    X = Y[read: Y] . uint32 (  )[write: X := Y[read: Y] . uint32 (  )] ;
+    X = GPR ( RA )[read: GPR(RA)] . uint32 (  )[write: X := GPR ( RA )[read: GPR(RA)] . uint32 (  )] ;
+    GPR[read: GPR] . validIndex ( 23 ) ;
+    GPR[read: GPR] . size (  ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) VPR(RA)/p Y 
+  Target Registers:  GPR(RT)/d[2] VPR(RT)/p/d[2] X/d[2] Y[mask 0x00ff0000]/d[2] 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    234881034(1c000014):  g
+-------------------------------
+

@@ -1,0 +1,42 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR] [not used]
+  RS: [6,10] [regfile:  GPR] [not used]
+  UI: [16,31] [not used] 
+  XO: [21,30] [not used] 
+Instructions:
+  Name:  halt (rank: 100)
+  Width:  8
+  Fields:  OPCD(0)
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    0(0):  halt
+-------------------------------
+

@@ -1,0 +1,141 @@
+#
+# Tests the use of forwarding path with range-based operands, stmw in this case.
+# We should be able to see that some of the needed sources can be read from
+# forwarding paths.
+#
+
+CORE n=:P
+
+= asm
+
+	addi r27,r27,27
+	addi r28,r28,28
+	addi r29,r29,29
+	addi r30,r30,30
+	addi r31,r31,31
+	stmw r27,0x1000(r0)
+	addi r30,r30,40
+	addic. r31,r31,50
+	stmw r30,0x1014(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3B7B001B	#	addi r27,r27,27
+MD n=Mem ra=0x00000004 d=0x3B9C001C	#	addi r28,r28,28
+MD n=Mem ra=0x00000008 d=0x3BBD001D	#	addi r29,r29,29
+MD n=Mem ra=0x0000000c d=0x3BDE001E	#	addi r30,r30,30
+MD n=Mem ra=0x00000010 d=0x3BFF001F	#	addi r31,r31,31
+MD n=Mem ra=0x00000014 d=0xBF601000	#	stmw r27,0x1000(r0)
+MD n=Mem ra=0x00000018 d=0x3BDE0028	#	addi r30,r30,40
+MD n=Mem ra=0x0000001c d=0x37FF0032	#	addic. r31,r31,50
+MD n=Mem ra=0x00000020 d=0xBFC01014	#	stmw r30,0x1014(r0)
+# </GEN>
+
+RD n=NIA d=0x0
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x1008 d=0
+MD n=Mem ra=0x100c d=0
+MD n=Mem ra=0x1010 d=0
+MD n=Mem ra=0x1014 d=0
+MD n=Mem ra=0x1018 d=0
+
+TRACE
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3b7b001b
+INSTR op=0x3b7b001b					asm="addi r27,r27,27"
+ITIME t=2
+R n=GPR i=27 d=0x0000001b
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3b9c001c
+INSTR op=0x3b9c001c					asm="addi r28,r28,28"
+ITIME t=2
+R n=GPR i=28 d=0x0000001c
+CTIME t=5
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x3bbd001d
+INSTR op=0x3bbd001d					asm="addi r29,r29,29"
+ITIME t=3
+R n=GPR i=29 d=0x0000001d
+CTIME t=6
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x3bde001e
+INSTR op=0x3bde001e					asm="addi r30,r30,30"
+ITIME t=3
+R n=GPR i=30 d=0x0000001e
+CTIME t=6
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x3bff001f
+INSTR op=0x3bff001f					asm="addi r31,r31,31"
+ITIME t=4
+R n=GPR i=31 d=0x0000001f
+CTIME t=7
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0xbf601000
+INSTR op=0xbf601000					asm="stmw r27,4096(r0)"
+ITIME t=5
+D n=Mem t=write ea=0x1000 nb=4
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x0000001b
+D n=Mem t=write ea=0x1004 nb=4
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x0000001c
+D n=Mem t=write ea=0x1008 nb=4
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x0000001d
+D n=Mem t=write ea=0x100c nb=4
+M n=Mem t=write ea=0x100c ra=0x100c d=0x0000001e
+D n=Mem t=write ea=0x1010 nb=4
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x0000001f
+CTIME t=10
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x3bde0028
+INSTR op=0x3bde0028					asm="addi r30,r30,40"
+ITIME t=5
+R n=GPR i=30 d=0x00000046
+CTIME t=10
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x37ff0032
+INSTR op=0x37ff0032					asm="addic. r31,r31,50"
+ITIME t=6
+R n=CR d=0x40000000
+R n=GPR i=31 d=0x00000051
+R n=XER d=0x00000000
+CTIME t=11
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0xbfc01014
+INSTR op=0xbfc01014					asm="stmw r30,4116(r0)"
+ITIME t=9
+D n=Mem t=write ea=0x1014 nb=4
+M n=Mem t=write ea=0x1014 ra=0x1014 d=0x00000046
+D n=Mem t=write ea=0x1018 nb=4
+M n=Mem t=write ea=0x1018 ra=0x1018 d=0x00000051
+CTIME t=12
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=12
+CTIME t=15
+
+RESULTS
+
+MD n=Mem ra=0x0000000000001000 d=0x0000001b
+MD n=Mem ra=0x0000000000001004 d=0x0000001c
+MD n=Mem ra=0x0000000000001008 d=0x0000001d
+MD n=Mem ra=0x000000000000100c d=0x0000001e
+MD n=Mem ra=0x0000000000001010 d=0x0000001f
+MD n=Mem ra=0x0000000000001014 d=0x00000046
+MD n=Mem ra=0x0000000000001018 d=0x00000051

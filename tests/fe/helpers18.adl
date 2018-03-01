@@ -1,0 +1,94 @@
+//
+// This tests to make sure that a series of partial writes which fully target
+// a register will then be considered a complete write.  Thus, a subsequent
+// read of the register should not regard the item as a source.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      //                  M  O  F  S  A
+      evmgrp1(RT, RA, RB, 1, 0, 1, 1, 3);
+    };
+  }
+
+  void evmgrp1 ( uint32_t d, uint32_t a, uint32_t b, uint8_t M, uint8_t O,
+                 uint8_t F, uint8_t S, uint8_t A ) // two 16*16->two 32.
+  {
+    uint64_t temp5 = 0, temp6 = 0;
+
+    // These writes fully cover the register...
+    GPR(d)(0,31) = fldru64(temp5,32,63);
+    GPR(d)(32,63) = fldru64(temp6,32,63);
+
+    // So this should mean that GPR(d) is not considered a source.
+    ACC = GPR(d);
+  }
+
+  uint64_t fldru64 ( uint64_t data, int msb, int lsb )
+  {
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+    width=64;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=ACC) {
+    width = 64;
+  };
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

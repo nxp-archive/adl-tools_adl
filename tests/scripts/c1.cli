@@ -1,0 +1,10 @@
+
+proc foobar {} {
+	puts "Running the pre-exec handler!"
+}
+
+traceon in4.out.dat
+simload $env(srcdir)/in4.dat
+go
+traceoff in4.out.dat
+quit

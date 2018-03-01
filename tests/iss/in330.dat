@@ -1,0 +1,39 @@
+#
+# Test a simple example with a complicated encoding scheme where conflicts must
+# be allowed in the decode tree.
+#
+= asm
+
+	add r1,r2,r3
+	sub r5,r1,r4
+	mul r7,r5,r6
+	halt
+
+= /asm
+
+= mdopts
+endian: little
+as: ./as-mod106
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x00000000	#	add r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x6110C000
+MD n=Mem ra=0x00000008 d=0x0000003C	#	sub r5,r1,r4
+MD n=Mem ra=0x0000000c d=0x65090000
+MD n=Mem ra=0x00000010 d=0x60000000	#	mul r7,r5,r6
+MD n=Mem ra=0x00000014 d=0x62C001CA
+MD n=Mem ra=0x00000018 d=0x00000000	#	halt
+MD n=Mem ra=0x0000001c d=0x00000000
+# </GEN>
+
+CORE n=:foo
+
+RD n=GPR i=2 d=10
+RD n=GPR i=3 d=20
+RD n=GPR i=4 d=5
+RD n=GPR i=6 d=4
+
+RESULTS
+
+RD n=GPR i=7 d=100

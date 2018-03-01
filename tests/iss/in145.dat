@@ -1,0 +1,82 @@
+#
+# Tests that a JIT model will handle exceptions which occur when
+# fetching a new page in the kernel.
+#
+
+= asm
+
+  addi r31,r31,1
+  mfspr r10,SRR0
+  blr              # Returns to instruction after blrl.
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  blrl             # Causes a fetch exception.
+  addi r1,r1,1
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+L1:
+  addi r1,r1,1     # Will never execute b/c SX is 0.
+  addi r1,r1,1
+  addi r1,r1,1  
+
+= /asm
+
+= mdopts
+
+instr-offset: 0x10fbc
+
+= /mdopts
+
+#
+# <GEN>
+MD n=Mem ra=0x00010fbc d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x00010fc0 d=0x7D5A02A6	#	mfspr r10,SRR0
+MD n=Mem ra=0x00010fc4 d=0x4E800020	#	blr
+MD n=Mem ra=0x00010fc8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fcc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fd0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fd4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fd8 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010fdc d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010fe0 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010fe4 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010fe8 d=0x4E800021	#	blrl
+MD n=Mem ra=0x00010fec d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010ff0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010ff4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010ff8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010ffc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00011000 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00011004 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00011008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0001100c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00011010 d=0x38210001	#	addi r1,r1,1  
+# </GEN>
+CORE n=:P
+
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x10000 ra=0x11000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x44 WIMG=0x2 SX=0 SR=1 SW=1 EPN=0x4
+
+RD n=NIA   d=0xfd8
+RD n=LR    d=0x1008
+RD n=IVOR7 d=0xfbc
+
+RESULTS
+
+RD n=GPR i=1  d=5
+RD n=GPR i=31 d=1
+RD n=GPR i=10 d=0x1008

@@ -1,0 +1,9 @@
+#
+# Tests the use of the setextreg function.
+# 
+
+step 4
+
+setregext EWTEST 0x0f0ff0f0
+go
+quit

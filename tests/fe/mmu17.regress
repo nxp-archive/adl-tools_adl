@@ -1,0 +1,7 @@
+mmu17.adl:65: warning: Item 'DEAR' was redefined.
+mmu17.adl:39: warning:     Previous definition was here.
+mmu17.adl:239: Expected a function of arity 3 but found arity of 0 for multiple-hit action.
+mmu17.adl:204: Argument 2 of multi-hit-handler must be of type addr_t.
+mmu17.adl:204: Argument 2 of multi-hit-handler must be of type addr_t.
+mmu17.adl:204: Argument 2 of multi-hit-handler must be of type addr_t.
+mmu17.adl:132: Not all lookup objects have unique priorities and no multi-hit or final-hit handler was specified.

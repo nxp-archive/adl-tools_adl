@@ -1,0 +1,8 @@
+
+define(core=P) {
+  define (config) {
+    reg_callbacks = (HID0,HID1);
+    reg_read_callbacks = (HID0,HID1);
+  }
+}
+

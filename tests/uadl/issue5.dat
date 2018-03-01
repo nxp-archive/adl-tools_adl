@@ -1,0 +1,99 @@
+#
+# This checks that we can model a dispatch-serialized instruction,
+# one which has to issue by itself, when nothing else is in the pipe
+# and has to complete before anything else can issue.
+#
+= asm
+
+  addi r1,r1,1
+  addi r2,r1,1
+  addi r3,r1,1
+  addi r4,r1,1
+  mtmsr r10
+  addi r5,r2,1
+  addi r6,r2,1
+  addi r7,r2,1
+  addi r8,r2,1
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38410001	#	addi r2,r1,1
+MD n=Mem ra=0x00000008 d=0x38610001	#	addi r3,r1,1
+MD n=Mem ra=0x0000000c d=0x38810001	#	addi r4,r1,1
+MD n=Mem ra=0x00000010 d=0x7D400124	#	mtmsr r10
+MD n=Mem ra=0x00000014 d=0x38A20001	#	addi r5,r2,1
+MD n=Mem ra=0x00000018 d=0x38C20001	#	addi r6,r2,1
+MD n=Mem ra=0x0000001c d=0x38E20001	#	addi r7,r2,1
+MD n=Mem ra=0x00000020 d=0x39020001	#	addi r8,r2,1
+# </GEN>
+
+RD n=NIA d=0x0
+RD n=GPR i=10 d=0x00400000
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=1
+CTIME t=5
+
+I ea=0x4 id=2
+INSTR op=0x38410001					asm="addi r2,r1,1"
+ITIME t=1
+CTIME t=8
+
+I ea=0x8 id=3
+INSTR op=0x38610001					asm="addi r3,r1,1"
+ITIME t=2
+CTIME t=8
+
+I ea=0xc id=4
+INSTR op=0x38810001					asm="addi r4,r1,1"
+ITIME t=5
+CTIME t=9
+
+I ea=0x10 id=5
+INSTR op=0x7d400124					asm="mtmsr r10"
+ITIME t=5
+CTIME t=12
+
+I ea=0x14 id=6
+INSTR op=0x38a20001					asm="addi r5,r2,1"
+ITIME t=6
+CTIME t=15
+
+I ea=0x18 id=7
+INSTR op=0x38c20001					asm="addi r6,r2,1"
+ITIME t=9
+CTIME t=15
+
+I ea=0x1c id=8
+INSTR op=0x38e20001					asm="addi r7,r2,1"
+ITIME t=12
+CTIME t=16
+
+I ea=0x20 id=9
+INSTR op=0x39020001					asm="addi r8,r2,1"
+ITIME t=12
+CTIME t=16
+
+I ea=0x24 id=10
+INSTR op=0x00000000					asm="halt "
+ITIME t=13
+CTIME t=17
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000002
+RD n=GPR i=4 d=0x00000002
+RD n=GPR i=5 d=0x00000003
+RD n=GPR i=6 d=0x00000003
+RD n=GPR i=7 d=0x00000003
+RD n=GPR i=8 d=0x00000003
+RD n=MSR     d=0x00400000

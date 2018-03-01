@@ -1,0 +1,15 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+
+// Grab the P core.
+#import "mod1.adl"
+
+define (sys=PSystem) {
+  P core0;
+  P core1;
+}

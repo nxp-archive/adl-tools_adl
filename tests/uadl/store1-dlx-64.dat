@@ -1,0 +1,89 @@
+
+= asm
+
+	addi r1,r1,1
+	stw r2,0x104(r0)
+	stw r2,0x10a(r0)
+	sth r3,0x10e(r0)
+	stb r2,0x110(r0)
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x90400104	#	stw r2,0x104(r0)
+MD n=Mem ra=0x00000008 d=0x9040010A	#	stw r2,0x10a(r0)
+MD n=Mem ra=0x0000000c d=0xB060010E	#	sth r3,0x10e(r0)
+MD n=Mem ra=0x00000010 d=0x98400110	#	stb r2,0x110(r0)
+# </GEN>
+
+RD n=NIA     d=0x0
+
+RD n=GPR i=2 d=0xb0f0babe
+RD n=GPR i=3 d=0x12345678
+
+MD n=Mem ra=0x100 d=0xdeadbeef
+MD n=Mem ra=0x104 d=0x00000000
+MD n=Mem ra=0x108 d=0x00000000
+MD n=Mem ra=0x10c d=0x00000000
+MD n=Mem ra=0x110 d=0x00000000
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=2
+R n=GPR i=1 d=0x00000001
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x90400104
+INSTR op=0x90400104					asm="stw r2,260(r0)"
+ITIME t=3
+D n=Mem t=write ea=0x104 nb=4
+M n=Mem t=write ea=0x104 ra=0x104 d=0xb0f0babe
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x9040010a
+INSTR op=0x9040010a					asm="stw r2,266(r0)"
+ITIME t=7
+D n=Mem t=write ea=0x10a nb=4
+M n=Mem t=write ea=0x108 ra=0x108 d=0x0000b0f0
+M n=Mem t=write ea=0x10c ra=0x10c d=0xbabe0000
+CTIME t=10
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xb060010e
+INSTR op=0xb060010e					asm="sth r3,270(r0)"
+ITIME t=8
+D n=Mem t=write ea=0x10e nb=2
+M n=Mem t=write ea=0x10c ra=0x10c d=0xbabe5678
+CTIME t=11
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x98400110
+INSTR op=0x98400110					asm="stb r2,272(r0)"
+ITIME t=12
+D n=Mem t=write ea=0x110 nb=1
+M n=Mem t=write ea=0x110 ra=0x110 d=0xbe000000
+CTIME t=15
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=13
+CTIME t=16
+
+
+RESULTS
+
+MD n=Mem ra=0x0000000000000100 d=0xdeadbeef     #       (3735928559)
+MD n=Mem ra=0x0000000000000104 d=0xb0f0babe     #       (2968566462)
+MD n=Mem ra=0x0000000000000108 d=0x0000b0f0     #       (45296)
+MD n=Mem ra=0x000000000000010c d=0xbabe5678     #       (3133036152)
+MD n=Mem ra=0x0000000000000110 d=0xbe000000     #       (3187671040)

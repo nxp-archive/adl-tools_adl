@@ -1,0 +1,47 @@
+#
+# Simple test to exercise register fields.
+# This checks to make sure that writes or slice-sets of registers
+# or reigster-files with read and write hooks will activate those
+# hooks and will log their changes.
+#
+# <ASM>
+#       twi 1,1,5
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0C210005	#	twi 1,1,5
+# </GEN>
+CORE n=:P
+
+RD n=FOO5 d=0x000a0000
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x0c210005
+INSTR op=0xc210005					asm="twi     1,1,0x5"
+R n=FOO5 d=0x0014000f
+R n=FOO5_RD d=0x00000007
+R n=FOO5_WR d=0x00000004
+R n=XPR i=1 d=0x00140019
+R n=FOO7 d=0x00140000
+R n=GPR i=1 d=0x00000002
+R n=GPR i=2 d=0x1234dead
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00000000
+INSTR op=0x0					asm="halt    "
+
+RESULTS
+
+RD n=GPR i=1 d=2
+RD n=GPR i=2 d=0x1234dead
+
+RD n=FOO5 d=0x0014000f
+RD n=FOO5_RD d=0x00000007
+RD n=FOO5_WR d=0x00000004
+
+RD n=FOO7    d=0x00140000
+
+RD n=XPR i=0 d=0x00000000
+RD n=XPR i=1 d=0x00140019
+RD n=XPR i=2 d=0x00000000

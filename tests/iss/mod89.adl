@@ -1,0 +1,130 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// An MP model which uses tags-only caches to ensure data coherency (caches never store data) and
+// an event bus to broadcast invalidates.  When a core misses in the data cache, it loads the new
+// line and broadcasts an invalidate to all other cores.
+//
+// It also has a second event bus used for communicating updates about data, to
+// model a message-passing architecture.
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  define (eventbus=coherency) {
+    define (field=addr) {
+      bits = 32;
+    }
+
+    action = func (coherency_t data) {
+      int set,way;
+      // If the line is in the cache, then it's valid.
+      if (L1d.find(set,way,data.addr.uint32())) {
+        // It's an invalidate, so our line should not be in a modified state.
+        // We simply invalidate the line.
+        info(1,"invalidate message for address 0x",hex,data.addr);
+        L1d(set,way).valid = false;
+      }
+    };
+  }
+
+  define (eventbus=msg) {
+    define (field=addr) {
+      bits = 32;
+    }
+    define (field=count) {
+      bits = 16;
+    }
+
+    action = func (msg_t data) {
+      ARECV = data.addr;
+      ACNT  = data.count;
+    };
+  }
+
+  define (reg=ARECV) {
+    define (read) {
+      action = {
+        var x = ThisReg;
+        ThisReg = 0;
+        return x;
+      };
+    }
+  }
+
+  define (reg=ACNT) {}
+
+  define (reg=ASEND) { 
+    pseudo = true;
+    define (read) {
+      action = { return 0; };
+    }
+    define (write) {
+      action = func (bits<32> t) {
+        msg_t tmp;
+        tmp.addr  = t;
+        tmp.count = ACNT;
+        msg.send(tmp);
+      };
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=300) { reg = ARECV; }
+    define (entry=301) { reg = ACNT;  }
+    define (entry=302) { reg = ASEND; }
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 65536;
+    linesize  = 128;
+    set_assoc = 4;
+
+    read_line = func(CacheAccess ca, unsigned set,unsigned way,addr_t addr) {
+      coherency_t d;
+      d.addr = addr;
+      // We need this line, so we're going to invalidate everybody else's copy.
+      coherency.send(d);
+      // This doesn't do anything, since we don't have any data, but it's here
+      // just to make sure we don't get any compile errors.
+      ThisCache.read_from_next(ca,set,way,addr,true);
+    };
+    
+  }
+
+  // I've purposefully modified this instruction in order to test the
+  // time-tagged ISS with slice-writes.
+  define (instr=lbz) {
+    fields=(OPCD(34),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      GPR(RT)(24,31) = Mem(addr,1);
+      GPR(RT)(0,23) = 0;
+    };
+  }
+
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}

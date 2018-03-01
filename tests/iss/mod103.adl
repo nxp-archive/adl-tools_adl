@@ -1,0 +1,5 @@
+//
+// This just inherits from mod102 and makes all memories external.
+//
+
+#include "mod102.adl"

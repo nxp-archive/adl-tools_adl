@@ -1,0 +1,60 @@
+//
+// A simple test of permutable fields.  In this situation, the instructions only
+// have permutable fields.  The only issue right now is that we always get a
+// trailing comma on a list of fields, but that's probably not a big deal...
+//
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    bits = (0,3);
+  }
+
+  define (reg=FOO) {   
+  }
+  
+  define (instrfield=A) {
+    bits = (4);
+    enumerated = ("",("a,","a"));
+  }
+
+
+  define (instrfield=B) {
+    bits = (5);
+    enumerated = ("",("b,","b"));
+  }
+
+  define (instrfield=C) {
+    bits = (6);
+    enumerated = ("",("c,","c"));
+  }
+
+  define (instrfield=D) {
+    bits = (7);
+    enumerated = ("",("d,","d"));
+  }
+  
+  define (reg = NIA) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (instr=pop) {
+    fields = (OPCD(0x1),A,B,C,D);
+    syntax = ("%i %p%p%p%p",A,B,C,D);
+    action = {
+    };
+  }
+
+  define (instr=push) {
+    fields = (OPCD(0x2),A,B,C,D);
+    syntax = ("%i %p%p%p%p",A,B,C,D);
+    action = {
+    };
+  }
+
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,7 @@
+
+define(core=P) {
+  define (config) {
+    dyn_caches = (L1d,L1i);
+    dyn_tlbs = TlbCam;
+  }
+}

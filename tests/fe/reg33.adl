@@ -1,0 +1,74 @@
+//
+//  Validity of enumerated register and register files
+//
+
+define (arch = minippc) {
+
+  post_exec = {
+    if (A == A::x) {
+	C = B::first;
+    }
+  };
+
+  define(reg = A) {
+    width = 32; 
+    define (read) {
+       action = func() {
+          if (ThisReg == x) {
+             return 1;
+         }
+       };
+    }
+    reset = x;
+    enumerated = ("x", "y", "z", "w");
+  }
+
+  define(reg = B) {
+    width = 32; 
+    reset = func() { 
+      B = first ; 
+    };
+    enumerated = ("first",reserved,reserved,"fourth");
+	
+  }
+
+  define(reg = C) {
+    width = 32;
+  }	
+
+  define(instrfield = OPCD) {
+    bits = (0,7);
+  }   
+
+  define(instrfield = RA) {
+    bits = (10,12);
+  }
+	
+
+  define(instr = In1) {
+    fields = (OPCD(1),RA);
+    action = {
+	if (B == 3) {
+	 B = B::fourth;
+        }
+    };
+  }
+
+  define(instr = In2) {
+    fields = (OPCD(2),RA);
+    action = {
+	if (A == A::x) {
+	  A = A::y;
+        }
+    };
+  }
+
+  define(reg = pc) {
+    attrs = (cia,nia);	
+  } 
+
+}
+
+define (core = P) {
+   archs = minippc;
+}

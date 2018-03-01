@@ -1,0 +1,9 @@
+//
+// Make sure that we insist that a core be defined.
+//
+
+define (arch=minippc) {
+
+  attrs = gpr;
+
+}

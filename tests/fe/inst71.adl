@@ -1,0 +1,40 @@
+//
+// This tests to make sure that we can re-encode at the
+// root level.  'a' is added first, then 'b', so 'b' cannnot
+// be immediately encoded because its first opcode has no common bits
+// with 'a'.  This forces us to re-encode, eventually settling on using
+// OPCD_3 as the first branch in the tree.
+//
+define (arch=minippc) {
+
+  define (instrfield=OPCD_1) {
+    bits = (1);
+  }
+
+  define (instrfield=OPCD_2) {
+    bits = (2);
+  }
+
+  define (instrfield=OPCD_3) {
+    bits = (3);
+  }
+
+  define(instr=a) {
+    width = 32;
+    fields=(OPCD_1(1),         OPCD_3(0));
+    action = {};
+  }
+ 
+  define(instr=b) {
+    width = 32;
+    fields=(         OPCD_2(0),OPCD_3(1));
+    action = {};
+  }
+ 
+  define (reg=pc) { attrs = (cia,nia);};
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,76 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  E: [16,16] [not used] 
+        Immediate field used to specify a 1-bit value used by *wrteei* to place in the
+    EE (External Input Enable) bit of the Machine State Register.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] [not used] 
+        Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SPRN: [16,20] [11,15] [not used] 
+        Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  XO: [21,30] 
+        Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    direct_access ( GPR ( RT ) ) = GPR ( RA )[read: GPR(RA)] + direct_access ( GPR ( RB ) )[direct read: GPR(RB)][direct write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + direct_access ( GPR ( RB ) )[direct read: GPR(RB)]] ;
+}
+  Source Registers:  GPR(RA) GPR(RB)/D 
+  Target Registers:  GPR(RT)/D 
+  Documention:
+
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    1040187658(7c000214):  add
+-------------------------------
+

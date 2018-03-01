@@ -1,0 +1,233 @@
+
+TEST id=0
+
+CORE n=:P
+
+= asm
+
+ lwz  r2,0x1000(0)
+ addi r10,r10,0x100
+ add  r3,r2,r1
+ subic. r5,r5,2
+ stw  r3,0(r4)
+ stw  r3,0(r6) # Note:  Should wraparound on 32-bit boundary.
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x80401000	# lwz r2,0x1000(0)
+MD n=Mem ra=0x00000104 d=0x394A0100	# addi r10,r10,0x100
+MD n=Mem ra=0x00000108 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x0000010c d=0x34A5FFFE	# subic. r5,r5,2
+MD n=Mem ra=0x00000110 d=0x90640000	# stw r3,0(r4)
+MD n=Mem ra=0x00000114 d=0x90660000	# stw r3,0(r6) # Note: Should wraparound on 32-bit boundary.
+# </GEN>
+
+RD n=NIA d=0x0100
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=4 d=0x2000
+RD n=GPR i=6 d=0xfffffffe
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0x00000000
+MD n=Mem ra=0xfffffffc d=0
+MD n=Mem ra=0x00000000 d=0
+
+CORE n=:P
+
+TRACE
+
+
+
+I ea=0x100 id=1
+C n=L1i a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x80401000
+INSTR op=0x80401000					asm="lwz r2,4096(r0)"
+ITIME t=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=2 d=0xdeadbeef
+CTIME t=20
+
+I ea=0x104 id=2
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x394a0100
+INSTR op=0x394a0100					asm="addi r10,r10,256"
+ITIME t=5
+C n=L1d a=miss t=read set=0 way=0 lm=0x7f ra=0x1000
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+R n=GPR i=10 d=0x00000100
+CTIME t=22
+
+I ea=0x108 id=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add r3,r2,r1"
+ITIME t=19
+R n=GPR i=3 d=0xdeaddeee
+CTIME t=24
+
+I ea=0x10c id=4
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x34a5fffe
+INSTR op=0x34a5fffe					asm="addic. r5,r5,-2"
+ITIME t=21
+R n=CR d=0x80000000
+R n=GPR i=5 d=0xfffffffe
+R n=XER d=0x00000000
+CTIME t=26
+
+I ea=0x110 id=5
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x90640000
+INSTR op=0x90640000					asm="stw r3,0(r4)"
+ITIME t=23
+D n=Mem t=write ea=0x2000 nb=4
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0xdeaddeee
+CTIME t=36
+
+I ea=0x114 id=6
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x90660000
+INSTR op=0x90660000					asm="stw r3,0(r6)"
+ITIME t=24
+D n=Mem t=write ea=0xfffffffe nb=4
+C n=L1d a=miss t=write set=31 way=0 lm=0x7f ra=0xffffff80
+M n=Mem t=write ea=0xfffffffc ra=0xfffffffc d=0x0000dead
+C n=L1d a=miss t=write set=0 way=2 lm=0x7f ra=0x0
+M n=Mem t=write ea=0x0 ra=0x0 d=0xdeee0000
+CTIME t=70
+
+I ea=0x118 id=7
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L1d a=miss t=write set=0 way=4 lm=0x7f ra=0x2000
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=26
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+CTIME t=72
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=5 d=0xfffffffe
+RD n=GPR i=10 d=0x00000100
+
+MD n=Mem ra=0x0000000000001000 d=0xdeadbeef	#	(3735928559)
+MD n=Mem ra=0x0000000000002000 d=0xdeaddeee	#	(3735936750)
+MD n=Mem ra=0x00000000fffffffc d=0x0000dead	#	(57005)
+
+TEST id=1
+
+INIT
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x80401000	# lwz r2,0x1000(0)
+MD n=Mem ra=0x00000104 d=0x394A0100	# addi r10,r10,0x100
+MD n=Mem ra=0x00000108 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x0000010c d=0x34A5FFFE	# subic. r5,r5,2
+MD n=Mem ra=0x00000110 d=0x90640000	# stw r3,0(r4)
+MD n=Mem ra=0x00000114 d=0x90660000	# stw r3,0(r6) # Note: Should wraparound on 32-bit boundary.
+# </GEN>
+
+RD n=NIA d=0x0100
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=4 d=0x2000
+RD n=GPR i=6 d=0xfffffffe
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0x00000000
+MD n=Mem ra=0xfffffffc d=0
+MD n=Mem ra=0x00000000 d=0
+
+CORE n=:P
+
+TRACE
+
+
+
+I ea=0x100 id=1
+C n=L1i a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x80401000
+INSTR op=0x80401000					asm="lwz r2,4096(r0)"
+ITIME t=89
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=2 d=0xdeadbeef
+CTIME t=106
+
+I ea=0x104 id=2
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x394a0100
+INSTR op=0x394a0100					asm="addi r10,r10,256"
+ITIME t=91
+C n=L1d a=miss t=read set=0 way=0 lm=0x7f ra=0x1000
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+R n=GPR i=10 d=0x00000100
+CTIME t=108
+
+I ea=0x108 id=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add r3,r2,r1"
+ITIME t=105
+R n=GPR i=3 d=0xdeaddeee
+CTIME t=110
+
+I ea=0x10c id=4
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x34a5fffe
+INSTR op=0x34a5fffe					asm="addic. r5,r5,-2"
+ITIME t=107
+R n=CR d=0x80000000
+R n=GPR i=5 d=0xfffffffe
+R n=XER d=0x00000000
+CTIME t=112
+
+I ea=0x110 id=5
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x90640000
+INSTR op=0x90640000					asm="stw r3,0(r4)"
+ITIME t=109
+D n=Mem t=write ea=0x2000 nb=4
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0xdeaddeee
+CTIME t=122
+
+I ea=0x114 id=6
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x90660000
+INSTR op=0x90660000					asm="stw r3,0(r6)"
+ITIME t=110
+D n=Mem t=write ea=0xfffffffe nb=4
+C n=L1d a=miss t=write set=31 way=0 lm=0x7f ra=0xffffff80
+M n=Mem t=write ea=0xfffffffc ra=0xfffffffc d=0x0000dead
+C n=L1d a=miss t=write set=0 way=2 lm=0x7f ra=0x0
+M n=Mem t=write ea=0x0 ra=0x0 d=0xdeee0000
+CTIME t=156
+
+I ea=0x118 id=7
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L1d a=miss t=write set=0 way=4 lm=0x7f ra=0x2000
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=112
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+CTIME t=158
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=5 d=0xfffffffe
+RD n=GPR i=10 d=0x00000100
+
+MD n=Mem ra=0x0000000000001000 d=0xdeadbeef	#	(3735928559)
+MD n=Mem ra=0x0000000000002000 d=0xdeaddeee	#	(3735936750)
+MD n=Mem ra=0x00000000fffffffc d=0x0000dead	#	(57005)

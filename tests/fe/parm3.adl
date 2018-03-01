@@ -1,0 +1,17 @@
+//
+// We don't allow a parameter option to be used for different parameters.
+//
+
+define (arch=a1) {
+  define (parm=p1) {
+    options=(hello,goodbye);
+    value=what;
+  }
+  define (parm=p2) {
+    options=(mode1,mode2,mode3,mode4,hello);
+  }
+}
+
+define (core=bar) {
+  archs=a1;
+}

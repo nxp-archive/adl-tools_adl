@@ -1,0 +1,220 @@
+//
+// Test explicit ordering of instructions of the same name in the assembler.
+//
+// Our heuristic prefers more enumerations first, because that's usually more
+// explicit, but sometimes it gets things wrong.  Here, we use asm_rank to manually order instructions.
+//
+
+// Default register width.
+#ifndef XLEN
+# define XLEN 32
+#endif
+
+
+define (arch = rv_test) {
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+  
+  attrs = (nia,cia,debug);
+
+  define (reloc=R_RISCV_LO12_I) {
+    value = 27;
+    abbrev = "lo";
+    field_width = 12;
+    // Turn off overflow checking, since we're just taking a low-slice of the
+    // value.  Basically, we can't truly overflow...
+    check_overflow = false;
+    instrfield = imm_i;
+  }
+  
+  define (reg=PC) {
+    """
+    Current instruction address.
+    """;
+    attrs = (cia);
+    width = XLEN;
+    reset = 0;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = (nia,debug(1));
+    width = XLEN;
+    reset = 0;    
+  }
+ 
+  define (regfile=GPR) {
+    """
+      The complete general-purpose register file.  r0 always reads as 0.
+    """;
+    size = 32;
+    width = XLEN;
+    prefix = x;
+    attrs = debug(0);
+
+    define (read) {
+      action = func (unsigned index) {
+        return (index == 0) ? 0 : ThisReg(index);
+      };
+    }
+
+    define (write) {
+      action = func (unsigned index,bits<XLEN> x) {
+        if (index != 0) {
+          ThisReg(index) = x;
+        }
+      };
+    }
+  }
+
+  define (instrfield = imm_i) {
+    """
+    Signed 12-bit immediate for I-type instructions.
+    """;
+    bits = (31,20);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield = funct3) {
+    """
+    Secondary opcode (function) field.
+    """;
+    bits = (14,12);
+  }
+
+  define (instrfield = funct7) {
+    """
+    Tertiary opcode field.
+    """;
+    bits = (31,25);
+  }
+  
+  define (instrfield = opcode) {
+    """
+    Primary opcode field.
+    """;
+    bits = (6,0);
+  }
+
+  define (instrfield = opt) {
+    """
+    Dummy flag operand for testing purposes.
+    """;
+    bits = (14,12);
+    enumerated = ("",",a",",b",",c",",d",",e",",f",",g");
+  }
+  
+  // We need to clean this up...  There should be an easier way to re-use this.
+# define XPR_LIST (("zero","x0"), /* Hard-wired to zero. */     \
+                   ("ra","x1"),   /* Return address. */         \
+                   ("sp","x2"),   /* Stack pointer. */          \
+                   ("gp","x3"),   /* Global pointer. */         \
+                   ("tp","x4"),   /* Thread pointer. */         \
+                   ("t0","x5"),   /* Temporary registers. */    \
+                   ("t1","x6"),                                 \
+                   ("t2","x7"),                                 \
+                   ("s0","x8"),   /* Callee-saved registers. */ \
+                   ("s1","x9"),                                 \
+                   ("a0","x10"),  /* Argument registers. */     \
+                   ("a1","x11"),                                \
+                   ("a2","x12"),                                \
+                   ("a3","x13"),                                \
+                   ("a4","x14"),                                \
+                   ("a5","x15"),                                \
+                   ("a6","x16"),                                \
+                   ("a7","x17"),                                \
+                   ("s2","x18"),   /* Callee-saved registers. */  \
+                   ("s3","x19"),                                  \
+                   ("s4","x20"),                                  \
+                   ("s5","x21"),                                  \
+                   ("s6","x22"),                                  \
+                   ("s7","x23"),                                  \
+                   ("s8","x24"),                                  \
+                   ("s9","x25"),                                  \
+                   ("s10","x26"),                                 \
+                   ("s11","x27"),                                 \
+                   ("t3","x28"),                                  \
+                   ("t4","x29"),                                  \
+                   ("t5","x30"),                                  \
+                   ("t6","x31")                                   \
+                   )
+  
+  define (instrfield = rd) {
+    """
+    Destination/target register field.
+    """;
+    bits = (11,7);
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;
+  }
+
+  define (instrfield = rs1) {
+    """
+    First source register field.
+    """;
+    bits = (19,15);
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;    
+  }
+
+  define (instrfield = rs2) {
+    """
+    Second source register field.
+    """;
+    bits = (24,20);
+    ref = GPR;
+    type = regfile;
+    enumerated = XPR_LIST;    
+  }
+
+  define (instr = addi) {
+    """
+    Add-immediate operation.
+    """;
+    fields = (imm_i,rs1,opt,rd,opcode(19));
+    syntax = ("add%f %f,%f,%f",opt,rd,rs1,imm_i);
+    action = {
+      GPR(rd) = GPR(rs1) + imm_i;
+    };
+  }
+
+  define (instr = addi_sp) {
+    """
+    Add-immediate operation.
+    """;
+    // We need the asm rank here in order to avoid ambiguity, since by default,
+    // addi would be selected first (since it has more enumerated fields) and it
+    // would then think that SP is a symbol.  By lowering the rank, this
+    // instruction gets tested first, and since its regex matches, it's used.
+    asm_rank = 90;
+    fields = (rs1,funct3(0),rd,opcode(20));
+    syntax = ("add %f,%f,SP",rd,rs1);
+    action = {
+      GPR(rd) = GPR(rs1) + GPR(2);
+    };
+  }
+  
+  define (instr = add) {
+    """
+    Add operation.
+    """;
+    fields = (funct7(0),rs2,rs1,funct3(0),rd,opcode(51));
+    syntax = ("%i %f,%f,%f",rd,rs1,rs2);
+    action = {
+      GPR(rd) = GPR(rs1) + GPR(rs2);
+    };
+  }  
+
+}
+
+define (core = rv) {
+  archs = rv_test;
+}

@@ -1,0 +1,67 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, slice-written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "CR"
+  Width:  32
+  Offset:  32
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RC: [31,31] 
+        Extended RC opcode.
+    
+  RT: [6,10] [regfile:  GPR]
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO_X: [21,30] 
+        Extended opcode for X Instruction Format.
+    
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Fields:  OPCD(1) RT RA RB XO_X(10) RC(1)
+  Action:  {
+     int i = RT . uint32 (  ) + 1 ;
+    GPR ( i ) ( 32 , 63 ) = GPR ( RA ) + GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007ff
+    67108885(4000015):  a
+-------------------------------
+

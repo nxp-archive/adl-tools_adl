@@ -1,0 +1,68 @@
+#
+# Basic test of an out-of-order processor.
+# 
+= asm
+
+	mulli r2,r1,20
+	add r3,r2,r1
+	addi r4,r4,1
+	addi r5,r5,1
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x1C410014	#	mulli r2,r1,20
+MD n=Mem ra=0x00000004 d=0x7C620A14	#	add r3,r2,r1
+MD n=Mem ra=0x00000008 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000000c d=0x38A50001	#	addi r5,r5,1
+# </GEN>
+
+RD n=GPR i=1 d=10
+RD n=GPR i=4 d=2
+RD n=GPR i=5 d=3
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x1c410014
+INSTR op=0x1c410014					asm="mulli r2,r1,20"
+ITIME t=1
+R n=GPR i=2 d=0x000000c8
+CTIME t=10
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add r3,r2,r1"
+ITIME t=1
+R n=GPR i=3 d=0x000000d2
+CTIME t=11
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38840001
+INSTR op=0x38840001					asm="addi r4,r4,1"
+ITIME t=2
+R n=GPR i=4 d=0x00000003
+CTIME t=11
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38a50001
+INSTR op=0x38a50001					asm="addi r5,r5,1"
+ITIME t=2
+R n=GPR i=5 d=0x00000004
+CTIME t=12
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=3
+CTIME t=12
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=200
+RD n=GPR i=3 d=210
+RD n=GPR i=4 d=3
+RD n=GPR i=5 d=4

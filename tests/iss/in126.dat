@@ -1,0 +1,165 @@
+#
+# Tests lmw/stmw (mainly used for testing the transactional ISS).
+#
+= asm
+
+  lmw  r17,0x1000(r0)
+  lis  r31,0xdead
+  ori  r31,r31,0xbeef
+  stmw r25,0(r1)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xBA201000	#	lmw  r17,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x3FE0DEAD	#	lis  r31,0xdead
+MD n=Mem ra=0x00000008 d=0x63FFBEEF	#	ori  r31,r31,0xbeef
+MD n=Mem ra=0x0000000c d=0xBF210000	#	stmw r25,0(r1)
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA     d=0x00000000
+
+RD n=GPR i=1 d=0x2000
+
+MD n=Mem ra=0x1000 d=0x10
+MD n=Mem ra=0x1004 d=0x20
+MD n=Mem ra=0x1008 d=0x30
+MD n=Mem ra=0x100c d=0x40
+MD n=Mem ra=0x1010 d=0x50
+MD n=Mem ra=0x1014 d=0x60
+MD n=Mem ra=0x1018 d=0x70
+MD n=Mem ra=0x101c d=0x80
+MD n=Mem ra=0x1020 d=0x90
+MD n=Mem ra=0x1024 d=0xA0
+MD n=Mem ra=0x1028 d=0xB0
+MD n=Mem ra=0x102c d=0xC0
+MD n=Mem ra=0x1030 d=0xD0
+MD n=Mem ra=0x1034 d=0xE0
+MD n=Mem ra=0x1038 d=0xF0
+
+MD n=Mem ra=0x0000000000002000 d=0x0
+MD n=Mem ra=0x0000000000002004 d=0x0
+MD n=Mem ra=0x0000000000002008 d=0x0
+MD n=Mem ra=0x000000000000200c d=0x0
+MD n=Mem ra=0x0000000000002010 d=0x0
+MD n=Mem ra=0x0000000000002014 d=0x0
+MD n=Mem ra=0x0000000000002018 d=0x0
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xba201000
+INSTR op=0xba201000					asm="lmw r17,4096(r0)"
+R n=NIA d=0x00000004
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000010
+R n=GPR i=17 d=0x00000010
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000020
+R n=GPR i=18 d=0x00000020
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000030
+R n=GPR i=19 d=0x00000030
+D n=Mem t=read ea=0x100c nb=4
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000040
+R n=GPR i=20 d=0x00000040
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000050
+R n=GPR i=21 d=0x00000050
+D n=Mem t=read ea=0x1014 nb=4
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0x00000060
+R n=GPR i=22 d=0x00000060
+D n=Mem t=read ea=0x1018 nb=4
+M n=Mem t=read ea=0x1018 ra=0x1018 d=0x00000070
+R n=GPR i=23 d=0x00000070
+D n=Mem t=read ea=0x101c nb=4
+M n=Mem t=read ea=0x101c ra=0x101c d=0x00000080
+R n=GPR i=24 d=0x00000080
+D n=Mem t=read ea=0x1020 nb=4
+M n=Mem t=read ea=0x1020 ra=0x1020 d=0x00000090
+R n=GPR i=25 d=0x00000090
+D n=Mem t=read ea=0x1024 nb=4
+M n=Mem t=read ea=0x1024 ra=0x1024 d=0x000000a0
+R n=GPR i=26 d=0x000000a0
+D n=Mem t=read ea=0x1028 nb=4
+M n=Mem t=read ea=0x1028 ra=0x1028 d=0x000000b0
+R n=GPR i=27 d=0x000000b0
+D n=Mem t=read ea=0x102c nb=4
+M n=Mem t=read ea=0x102c ra=0x102c d=0x000000c0
+R n=GPR i=28 d=0x000000c0
+D n=Mem t=read ea=0x1030 nb=4
+M n=Mem t=read ea=0x1030 ra=0x1030 d=0x000000d0
+R n=GPR i=29 d=0x000000d0
+D n=Mem t=read ea=0x1034 nb=4
+M n=Mem t=read ea=0x1034 ra=0x1034 d=0x000000e0
+R n=GPR i=30 d=0x000000e0
+D n=Mem t=read ea=0x1038 nb=4
+M n=Mem t=read ea=0x1038 ra=0x1038 d=0x000000f0
+R n=GPR i=31 d=0x000000f0
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3fe0dead
+INSTR op=0x3fe0dead					asm="lis r31,-8531"
+R n=NIA d=0x00000008
+R n=GPR i=31 d=0xdead0000
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x63ffbeef
+INSTR op=0x63ffbeef					asm="ori r31,r31,0xbeef"
+R n=NIA d=0x0000000c
+R n=GPR i=31 d=0xdeadbeef
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xbf210000
+INSTR op=0xbf210000					asm="stmw r25,0(r1)"
+R n=NIA d=0x00000010
+D n=Mem t=write ea=0x2000 nb=4
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x00000090
+D n=Mem t=write ea=0x2004 nb=4
+M n=Mem t=write ea=0x2004 ra=0x2004 d=0x000000a0
+D n=Mem t=write ea=0x2008 nb=4
+M n=Mem t=write ea=0x2008 ra=0x2008 d=0x000000b0
+D n=Mem t=write ea=0x200c nb=4
+M n=Mem t=write ea=0x200c ra=0x200c d=0x000000c0
+D n=Mem t=write ea=0x2010 nb=4
+M n=Mem t=write ea=0x2010 ra=0x2010 d=0x000000d0
+D n=Mem t=write ea=0x2014 nb=4
+M n=Mem t=write ea=0x2014 ra=0x2014 d=0x000000e0
+D n=Mem t=write ea=0x2018 nb=4
+M n=Mem t=write ea=0x2018 ra=0x2018 d=0xdeadbeef
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x00000014
+
+RESULTS
+
+RD n=GPR i=1  d=0x00002000
+RD n=GPR i=16 d=0x00000000
+RD n=GPR i=17 d=0x00000010
+RD n=GPR i=18 d=0x00000020
+RD n=GPR i=19 d=0x00000030
+RD n=GPR i=20 d=0x00000040
+RD n=GPR i=21 d=0x00000050
+RD n=GPR i=22 d=0x00000060
+RD n=GPR i=23 d=0x00000070
+RD n=GPR i=24 d=0x00000080
+RD n=GPR i=25 d=0x00000090
+RD n=GPR i=26 d=0x000000a0
+RD n=GPR i=27 d=0x000000b0
+RD n=GPR i=28 d=0x000000c0
+RD n=GPR i=29 d=0x000000d0
+RD n=GPR i=30 d=0x000000e0
+RD n=GPR i=31 d=0xdeadbeef
+
+MD n=Mem ra=0x0000000000002000 d=0x00000090     #       (144)
+MD n=Mem ra=0x0000000000002004 d=0x000000a0     #       (160)
+MD n=Mem ra=0x0000000000002008 d=0x000000b0     #       (176)
+MD n=Mem ra=0x000000000000200c d=0x000000c0     #       (192)
+MD n=Mem ra=0x0000000000002010 d=0x000000d0     #       (208)
+MD n=Mem ra=0x0000000000002014 d=0x000000e0     #       (224)
+MD n=Mem ra=0x0000000000002018 d=0xdeadbeef     #       (240)

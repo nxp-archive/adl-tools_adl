@@ -1,0 +1,80 @@
+#
+# <ASM>
+# mullw r1,r2,r3
+# mulhw r6,r7,r8
+# add   r5,r1,r4
+# add   r9,r6,r3
+# add   r1,r2,r3
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C2219D6	# mullw r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x7CC74096	# mulhw r6,r7,r8
+MD n=Mem ra=0x00000008 d=0x7CA12214	# add r5,r1,r4
+MD n=Mem ra=0x0000000c d=0x7D261A14	# add r9,r6,r3
+MD n=Mem ra=0x00000010 d=0x7C221A14	# add r1,r2,r3
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=1
+RD n=GPR i=6 d=1
+RD n=GPR i=7 d=0xffffffff
+RD n=GPR i=8 d=0x12345678
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 d=0x7c2219d6
+INSTR op=0x7c2219d6 asm="mullw 1,2,3"
+R n=GPR i=1 d=0x00000006
+ITIME t=0
+CTIME t=8
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 d=0x7cc74096
+INSTR op=0x7cc74096 asm="mulhw 6,7,8"
+R n=GPR i=6 d=0x12345677
+ITIME t=4
+CTIME t=12
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 d=0x7ca12214
+INSTR op=0x7ca12214 asm="add 5,1,4"
+R n=GPR i=5 d=0x00000007
+ITIME t=8
+CTIME t=9
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc d=0x7d261a14
+INSTR op=0x7d261a14 asm="add 9,6,3"
+R n=GPR i=9 d=0x1234567a
+ITIME t=12
+CTIME t=13
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10 d=0x7c221a14
+INSTR op=0x7c221a14 asm="add 1,2,3"
+R n=GPR i=1 d=0x00000005
+ITIME t=13
+CTIME t=14
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14 d=0x0
+INSTR op=0x0 asm="halt"
+ITIME t=13
+CTIME t=14
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000005
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000003
+RD n=GPR i=4 d=0x00000001
+RD n=GPR i=5 d=0x00000007
+RD n=GPR i=6 d=0x12345677
+RD n=GPR i=7 d=0xffffffff
+RD n=GPR i=8 d=0x12345678
+RD n=GPR i=9 d=0x1234567a

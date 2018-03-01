@@ -1,0 +1,21 @@
+//
+// This removes the L2 from the mod21 model.
+//
+
+#import "mod21.adl"
+
+define (core = P) {
+
+  defmod (cache L2) {
+    remove = 1;
+  }
+
+  defmod (reg HDBCR0) {
+    define (field=SB_DIS) {
+      """ Disable the L1d store buffer. """;
+      bits = 1;
+    }
+  }
+
+  archs = (MiniPPC,cache);
+}

@@ -1,0 +1,5 @@
+
+TLB-entry mismatch:  Did not find a value for (TLB4K,ep:0x6d68fb080aba7000,way:0)
+
+TLB-entry mismatch:  Did not find a value for (TLBCAM,ep:0x53468fcd9cf18000,way:2)
+Error:  Test 1:  Core bar:  TLB-entry mismatch

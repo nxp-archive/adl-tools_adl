@@ -1,0 +1,30 @@
+#
+# Tests breakpoints and execution with the jit.
+#
+
+proc check_jit {} {
+	if { [simmode] == "jit" } { 
+		puts "JIT is on" 
+	} else { 
+		puts "JIT is off" 
+	}
+}
+
+simmode jit
+simload $env(srcdir)/../iss/in4.dat
+check_jit
+setbrk 0x78
+go
+puts "r10:  [reg GPR10]"
+go
+puts "r10:  [reg GPR10]"
+go
+puts "r10:  [reg GPR10]"
+clrbrk 0x78
+setbrk 0xd8
+go
+puts "0x200c:  [mem 0x200c 4]"
+puts "0x2038:  [mem 0x2038 4]"
+puts "0x205c:  [mem 0x205c 4]"
+simmode normal
+check_jit

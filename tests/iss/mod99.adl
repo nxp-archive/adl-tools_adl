@@ -1,0 +1,534 @@
+//
+// Testing of micro instructions in a big-endian model.
+//
+// This demonstrates the idea of a packetized encoding for a serial-execution
+// machine.
+//
+
+
+define (arch = packet_ops) {
+   
+  attrs = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+    width = 64;
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+    width = 64;
+    prefix = r;
+  }
+
+
+  define (instrfield=fop) {
+    """
+    Outer 'envelope' instruction opcode.
+
+    Encodings:
+      0:  Single large 62-bit instruction.
+      1:  Two 32-bit instructions (serial execution).
+      2:  Three 20-bit instructions (serial execution).
+      3:  Two 32-bit instructions (parallel execution).
+    """;
+    bits = (0,1);
+  }
+
+  define (instrfield=opAA) {
+    """
+    Instruction field for storing a 62-bit instruction.
+    """;
+    bits = (2,63);
+    type = instr;
+    ref = instr_subinstr3;
+  }
+  
+  define(instrfield=opA) {
+    """
+    Instruction field for storing a 31-bit instruction (first slot).
+    """;
+    bits = (2,32);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+  
+  define(instrfield=opB) {
+    """
+    Instruction field for storing a 31-bit instruction (second slot).
+    """;    
+    bits = (33,63);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+
+  define(instrfield=opC) {
+    """
+    Instruction field for storing a 20-bit instruction (first slot).
+    """;    
+    bits = (2,21);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+
+  define(instrfield=opD) {
+    """
+    Instruction field for storing a 20-bit instruction (second slot).
+    """;    
+    bits = (22,41);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+
+  define(instrfield=opE) {
+    """
+    Instruction field for storing a 20-bit instruction (third slot).
+    """;    
+    bits = (42,61);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+  
+
+  define(instrfield=op) {
+    """
+    Primary opcode for sub-instrutions.
+    """;
+    bits = (0,4);
+  }
+
+  define (instrfield=bsimm) {
+    """
+    Big signed immediate field.
+    """;
+    bits = (10,61);
+    display = hex;
+    is_signed = true;    
+  }
+  
+  define(instrfield=ra) {
+    """
+    First operand source instruction field.
+    """;
+    bits = (10,14);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rb) {
+    """
+    Second operand source instruction field.
+    """;   
+    bits = (15,19);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rt) {
+    """
+    Standard target instruction field. 
+    """;
+    bits = (5,9);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rs) {
+    """
+    Standard source instruction field. 
+    """;
+    bits = (5,9);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=simm) {
+    """
+    Unsigned immediate field.
+    """;
+    bits = (15,30);
+    display = dec;
+    is_signed = true;    
+  }
+
+  define (instrfield=bdp) {
+    """
+    PC-relative branch destination-packet field.
+
+    This is used to specify the address of the instruction.
+    """;
+    bits = (10,28);
+    addr = pc;
+    is_signed = true;
+    shift = 3;
+  }
+
+  define (instrfield=bdo) {
+    """
+    Branch destination packet offset field.
+
+    This specifies the micro-op to execute within the target instruction.
+    """;
+    bits = (29,30);
+  }
+
+  define (instr = big) {
+    """
+    Contains one 62-bit instruction.
+    """;
+    width = 64;
+    fields = (fop(0),opAA);
+    dsyntax = ("%f",opAA);
+    attrs = (other);
+  }
+   
+  define (instr = serial1) {
+    """
+    Contains two 31-bit instructions.  Implies serial execution.
+    """;
+    width = 64;
+    fields = (fop(1),opA,opB);
+    dsyntax = ("%f ; %f", opA, opB );
+    attrs = (other);
+  }
+
+  define (instr = serial2) {
+    """
+    Contains three 20-bit instructions.  Implies serial execution.
+    """;
+    width = 64;
+    fields = (fop(2),opC,opD,opE);
+    dsyntax = ("%f ; %f ; %f", opC, opD, opE );
+    attrs = (other);
+  }
+  
+  define (instr = parallel) {
+    """
+    Contains two 31-bit instructions.  Implies parallel execution.
+    """;
+    width = 64;
+    fields = (fop(3),opA,opB);
+    dsyntax = ("%f = %f", opA, opB );
+    attrs = (other);
+  }  
+
+  define (instr = li) {
+    """
+    Load large immediate.
+    """;
+    width = 62;
+    attrs = (instr_subinstr3);
+    fields = ( op(1), rt, bsimm );
+    syntax = ("%i %f,%f",rt,bsimm);
+    action = {
+      GPR(rt) = signExtend(bsimm,64);
+    };
+  }
+  
+  define (instr = halt) {
+    """
+    Halt simulation.
+    """;
+    width = 62;
+    attrs = (instr_subinstr3);
+    fields = ( op(0) );  
+    action={ 
+      halt(); 
+    };
+  }   
+
+  
+  define (instr = addi) {
+    """
+    Add immediate.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(1), rt, ra, simm );
+
+    action = {
+
+      GPR(rt) = GPR(ra) + simm;
+
+    };
+  }
+
+  define (instr = addi_) {
+    syntax = ("addi %f,%f",rt,simm);
+    alias = addi(rt(rt),ra(rt),simm(simm));
+  }
+
+  define (instr = mulli) {
+    """
+    Multiply immediate.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(2), rt, ra, simm);
+
+    action = {
+
+      GPR(rt) = GPR(ra) * simm;
+
+    };
+  }
+
+  define (instr = mulli_) {
+    syntax = ("mulli %f,%f",rt,simm);
+    alias = mulli(rt(rt),ra(rt),simm(simm));
+  }
+ 
+
+  define (instr = bc) {
+    """
+    Branch conditional.
+
+    Unconditional branch if rs is 0.
+    """;
+    width = 31;
+
+    attrs = (instr_subinstr1);
+
+    fields = ( op(3), rs, bdp, bdo );
+
+    action = {
+      if ((rs == 0) || GPR(rs) != 0) {
+        setMicroOpOffset(bdo);
+        NIA = bdp;
+      }
+    };
+  }
+
+  define (instr = bcl) {
+    """
+    Branch conditional and link.
+
+    Unconditional branch if rs is 0.
+    """;
+    width = 31;
+
+    attrs = (instr_subinstr1);
+
+    fields = ( op(4), rs, bdp, bdo );
+
+    action = {
+      if ((rs == 0) || GPR(rs) != 0) {
+        // We want to return to the next instruction and we know that this is a
+        // two-instruction packet.  So, depending upon our current packet
+        // position, we either adjust the mask or bump up the return address.
+        // The micro-op offset is pre-increment, so a value of 1 means that
+        // we're in the first slot, etc.
+        if (getMicroOpOffset() > 1) {
+          GPR(31) = NIA;
+        } else {
+          GPR(31) = CIA | 1;
+        }
+        
+        setMicroOpOffset(bdo);
+        NIA = bdp;
+      }
+    };
+  }  
+
+  define (instr = nop1) {
+    """
+    Format-1 no-op.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(0) );
+
+    action = {
+
+    };
+  }
+
+
+
+  define (instr = add) {
+    """
+    Add register-register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(1), rt, ra, rb );
+
+    action = {
+
+      GPR(rt) = GPR(ra) + GPR(rb);
+
+    };
+  }
+
+  define (instr = sub) {
+    """
+    Subtract register-register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(2), rt, ra, rb );
+
+    action = {
+
+      GPR(rt) = GPR(ra) - GPR(rb);
+
+    };
+  }
+
+  define (instr = mul) {
+    """
+    Multiply register-register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(3), rt, ra, rb );
+
+    action = {
+
+      GPR(rt) = GPR(ra) * GPR(rb);
+
+    };
+  }
+
+  define (instr = blr) {
+    """
+    Branch to link register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(4) );
+
+    action = {
+
+      setMicroOpOffset(GPR(31)(62,63));
+      NIA = GPR(31) & ~0x3;
+      
+    };
+  }
+
+  define (instr = nop2) {
+    """
+    Format-2 no-op.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(0) );
+
+    action = {
+
+    };
+  }
+  
+
+  
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = ("//", "#");
+    packet_grouping = ("\n");
+    line_separators = ("\n"); // In additional to new-line separator, default is ";"
+    asm_instrtables = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+    instr_separators = (" ","=",";");
+  }
+
+  void gen_micro_op_error()
+  {
+    error(1,"No micro-instruction specified.");
+  }
+
+  // Assemble instructions into a packet.  For two-instruction packets, we
+  // decide between parallel and serial by examining the instruction separator
+  // (equals implies parallel, semicolon or space implies serial).  Instructions must be
+  // consistent, so if one instruction is format 1 (31-bit), then so must the
+  // second be.
+  post_packet_asm = func(InstrBundle b) {
+    InstrBundle newb;
+
+    if (b.size() == 1 && !b[0].instrHasAttr(instr_subinstr1) && !b[0].instrHasAttr(instr_subinstr2) && !b[0].instrHasAttr(instr_subinstr3)) {
+      // We don't have any 64-bit instructions which aren't packetized, so
+      // signal an error.  Test that we can call error() in a helper function.
+      gen_micro_op_error();
+    } else if (b[0].instrHasAttr(instr_subinstr3)) {
+      // Big instruction- use single-instruction big format.
+      newb.push_back(combineInstr("big",0));
+    } else if (b[0].instrHasAttr(instr_subinstr1)) {
+      // Two-instruction form.
+
+      if (b.size() > 2) {
+        error(1,"More than 2 instructions of format-1 type.");
+      }
+
+      if (b.size() > 1 && !b[1].instrHasAttr(instr_subinstr1)) {
+        error(1,"Second instruction of format-1 is not a format-1 instruction.");
+      }      
+
+      if (b.size() == 1) {
+        // Implicit all-zero no-op adde don.
+        newb.push_back(combineInstr("serial1",0,-1));
+      } else if (b.separators()[0] == "=") {
+        // Equal-sign implies parallel execution.
+        newb.push_back(combineInstr("parallel",0,1));
+      } else {
+        // Anything else (just whitespace) implies serial execution.
+        newb.push_back(combineInstr("serial1",0,1));
+      }
+      
+    } else if (b[0].instrHasAttr(instr_subinstr2)) {
+      // Three-instruction form.
+
+      if (b.size() == 1) {
+
+        newb.push_back(combineInstr("serial2",0,-1,-1));
+
+      } else if (b.size() == 2) {
+
+        if (!b[1].instrHasAttr(instr_subinstr2)) {
+          error(1,"Second instruction of format-2 is not a format-2 instruction.");
+        }
+
+        newb.push_back(combineInstr("serial2",0,1,-1));        
+
+      } else if (b.size() == 3) {
+
+        if (!b[1].instrHasAttr(instr_subinstr2) || !b[2].instrHasAttr(instr_subinstr2)) {
+          error(1,"Inconsistent format-2 instruction packet.");
+        }
+
+        newb.push_back(combineInstr("serial2",0,1,2));
+        
+      } else {
+        error(1,"More than 3 instructions of format-2 type.");
+      }
+      
+      
+    } else {
+      error(1,"Unknown type of instruction found.");
+    }
+    
+    b = newb;
+  };
+
+}
+
+
+define (core = packet_ops) {
+  archs = packet_ops; 
+  instrtables = (other, instr_subinstr1, instr_subinstr2, instr_subinstr3);
+}

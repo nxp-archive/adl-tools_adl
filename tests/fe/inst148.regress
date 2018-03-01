@@ -1,0 +1,95 @@
+======
+Cores:
+======
+Name:  "foo"
+Bit Order:              little endian
+Instruction Byte Order: little endian
+Data Byte Order:        little endian
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "cIA"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia
+  Documention:
+
+   Current instruction address
+   
+  -------------------------------
+  Name:  "nIA"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  nia
+  Documention:
+
+   Next instruction address
+   
+  -------------------------------
+Current-instruction-address register:  cIA
+Next-instruction-address register:  nIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  R1: [regfile:  GPR] 
+    Pseudo:  1
+    Width:   5
+  R1_imp_bits__42_38_: [42,38] 
+    Implements:  R1
+  R1_imp_bits__60_56_: [60,56] 
+    Implements:  R1
+  R2: [regfile:  GPR] 
+    Pseudo:  1
+    Width:   5
+  R2_imp_bits__37_33_: [37,33] 
+    Implements:  R2
+  R2_imp_bits__55_51_: [55,51] 
+    Implements:  R2
+  R3: [regfile:  GPR] 
+    Pseudo:  1
+    Width:   5
+  R3_imp_bits__32_28_: [32,28] 
+    Implements:  R3
+  R3_imp_bits__50_46_: [50,46] 
+    Implements:  R3
+  VarInstrOpcode_imp_bits__59_54_x_50_43_: [59,54] [50,43] 
+  VarInstrOpcode_imp_bits__5_2_: [5,2] 
+  opc: [63,61] 
+Instructions:
+  Name:  A (rank: 100)
+  Width:  64
+  Fields:  opc(3) R1_imp_bits__60_56_ R2_imp_bits__55_51_ R3_imp_bits__50_46_
+  Action:  {
+}
+  -------------------------------
+  Name:  B (rank: 100)
+  Width:  64
+  Fields:  opc(3) R1_imp_bits__60_56_ R2_imp_bits__55_51_ R3_imp_bits__50_46_ VarInstrOpcode_imp_bits__5_2_
+  Action:  {
+}
+  -------------------------------
+  Name:  C (rank: 100)
+  Width:  64
+  Fields:  opc(3) VarInstrOpcode_imp_bits__59_54_x_50_43_ R1_imp_bits__42_38_ R2_imp_bits__37_33_ R3_imp_bits__32_28_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x00000000e0000000
+    3(0000000060000000):      Mask:  0x0000003c00000000
+      15(0000003c00000000):  B
+      default:  A
+      Mask:  0x000000000fc7f800
+        22528(0000000002c00000):  C
+-------------------------------
+

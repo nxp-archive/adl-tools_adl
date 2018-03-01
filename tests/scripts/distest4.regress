@@ -1,0 +1,17 @@
+ADL-library version: 1.2.3
+
+ Encoding Succeeded
+   ADL_code[0] = 0xD
+   ADL_code[1] = 0xD600
+   ADL_code[2] = 0xC0
+
+ ADL_num_of_bits = 48
+
+ ADL_code->size() = 3
+
+ ADL_relocation_info->size() = 1
+
+ ADL_messages->size() = 0
+
+ ADL Relocation[0]:  type 11 offset 0.
+DONE

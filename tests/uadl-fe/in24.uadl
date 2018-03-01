@@ -1,0 +1,48 @@
+//
+// Error checking on missing managers.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+
+    define (pipestage mID) {}
+
+    define (pipestage mEX) {}
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = (S_ID, S_EX);
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+    };
+
+  }
+
+  define (instr_class a) {
+    instructions = (addi,add);
+
+    allow_missing_operands = true;
+
+    machine = normal;
+
+    action = {
+    S_ID: {
+      Flag.allocate();
+    }
+    };
+
+  }
+
+}

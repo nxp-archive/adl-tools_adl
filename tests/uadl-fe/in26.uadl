@@ -1,0 +1,108 @@
+//
+// Test of instruction classes with operand-value constraints.
+// Tests for basic error detection.
+//
+
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+
+    define (pipestage mID) {}
+
+    define (pipestage mEX) {}
+
+    define (pipestage mMM) {}
+
+    define (pipestage mWB) {}
+
+    // reorder buffer (assuming at most four targets per instruction)
+    define (forwarding_path reorder) {
+      size = 32;
+    }
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = (S_ID, S_EX, S_MM, S_WB);
+      
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = S_WB;
+    };
+    
+  }
+
+  define (instr_class a) {
+    instructions = (addi(1,2,3),add(RA(0)));
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+    S_INIT: { 
+      change_state(S_ID); 
+    }
+    S_ID: if (Src.can_read() && mEX.has_space()) {
+        read_ops();
+        change_state(S_EX);
+      }
+    S_EX: {
+        exec();
+        change_state(S_MM);
+      }
+    S_MM: { change_state(S_WB); }
+    S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+
+  }
+
+  define (instr_class b) {
+    instructions = (addi(FOO(20)));
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+    S_INIT: { 
+      change_state(S_ID); 
+    }
+    S_ID: if (Src.can_read() && mEX.has_space()) {
+        read_ops();
+        change_state(S_EX);
+      }
+    S_EX: {
+        exec();
+        change_state(S_MM);
+      }
+    S_MM: { change_state(S_WB); }
+    S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+
+  }
+
+}

@@ -1,0 +1,5 @@
+Watchpoint at 0x2000
+Breakpoint at 0x4c
+Simulation halted at address: 0x000000000000004c
+NIA is now 0x4c
+Simulation halted at address: 0x00000000000000e0

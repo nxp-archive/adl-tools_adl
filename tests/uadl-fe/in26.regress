@@ -1,0 +1,5 @@
+in26.uadl:47: Expected <field>(<value>) for argument 0, but found 1
+in26.uadl:77: warning: Instruction addi does not have a field named FOO
+in26.uadl:77: warning: Instruction defined in class 'b' but not ADL:  addi
+in26.uadl:7: warning: Instructions access no data memory
+Could not parse in26.uadl

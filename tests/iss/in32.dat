@@ -1,0 +1,151 @@
+= descr
+
+ Tests the use of a dynamic ea mask and a fixed ra mask.
+
+= /descr
+
+= aopts
+
+ -mregnames -mppc64
+
+= /aopts
+
+= asm
+
+  ld  r2,0x1000(r22)
+  add r3,r2,r1
+  std r3,0(r21)
+  mtmsr r20
+  ld  r4,0x1000(r22)
+  add r5,r4,r1
+  std r5,0(r21)
+  mtmsr r0
+  std r5,0(r23)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xE8561000	# ld r2,0x1000(r22)
+MD n=Mem ra=0x00000004 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00000008 d=0xF8750000	# std r3,0(r21)
+MD n=Mem ra=0x0000000c d=0x7E800124	# mtmsr r20
+MD n=Mem ra=0x00000010 d=0xE8961000	# ld r4,0x1000(r22)
+MD n=Mem ra=0x00000014 d=0x7CA40A14	# add r5,r4,r1
+MD n=Mem ra=0x00000018 d=0xF8B50000	# std r5,0(r21)
+MD n=Mem ra=0x0000001c d=0x7C000124	# mtmsr r0
+MD n=Mem ra=0x00000020 d=0xF8B70000	# std r5,0(r23)
+# </GEN>
+CORE n=:P
+RD n=GPR i=1 d=0x0000088800001fff
+
+RD n=GPR i=20 d=0x0000000008000000
+RD n=GPR i=21 d=0x00A0000000002000
+RD n=GPR i=22 d=0x0020000000000000
+RD n=GPR i=23 d=0x0AB0000000000000
+
+MD n=Mem ra=0x0000000000001000 d=0xb0f0babe
+MD n=Mem ra=0x0000000000001004 d=0x87654321
+MD n=Mem ra=0x0000000000002000 d=0x00000000
+MD n=Mem ra=0x0000000000002004 d=0x00000000
+
+MD n=Mem ra=0x0020000000001000 d=0xdeadbeef
+MD n=Mem ra=0x0020000000001004 d=0x12345678
+MD n=Mem ra=0x00A0000000002000 d=0x00000000
+MD n=Mem ra=0x00A0000000002004 d=0x00000000
+
+MD n=Mem ra=0x0AB0000000000000 d=0x00000000
+MD n=Mem ra=0x0AB0000000000004 d=0x00000000
+
+MD n=Mem ra=0x00B0000000000000 d=0x00000000
+MD n=Mem ra=0x00B0000000000004 d=0x00000000
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xe8561000
+INSTR op=0xe8561000 asm="#1 ld 2,22,1024"
+M n=Mem ea=0x20000000001000 ra=0x20000000001000 t=read d=0xdeadbeef
+M n=Mem ea=0x20000000001004 ra=0x20000000001004 t=read d=0x12345678
+R n=GPR i=2 d=0xdeadbeef12345678
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c620a14
+INSTR op=0x7c620a14 asm="#2 add 3,2,1"
+R n=GPR i=3 d=0xdeadc77712347677
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0xf8750000
+INSTR op=0xf8750000 asm="#3 std 3,21,0"
+M n=Mem ea=0xa0000000002000 ra=0xa0000000002000 t=write d=0xdeadc777
+M n=Mem ea=0xa0000000002004 ra=0xa0000000002004 t=write d=0x12347677
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7e800124
+INSTR op=0x7e800124 asm="#4 mtmsr 20"
+R n=MSR d=0x08000000
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0xe8961000
+INSTR op=0xe8961000 asm="#5 ld 4,22,1024"
+M n=Mem ea=0x1000 ra=0x1000 t=read d=0xb0f0babe
+M n=Mem ea=0x1004 ra=0x1004 t=read d=0x87654321
+R n=GPR i=4 d=0xb0f0babe87654321
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7ca40a14
+INSTR op=0x7ca40a14 asm="#6 add 5,4,1"
+R n=GPR i=5 d=0xb0f0c34687656320
+
+I id=7 ea=0x18
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0xf8b50000
+INSTR op=0xf8b50000 asm="#7 std 5,21,0"
+M n=Mem ea=0x2000 ra=0x2000 t=write d=0xb0f0c346
+M n=Mem ea=0x2004 ra=0x2004 t=write d=0x87656320
+
+I id=8 ea=0x1c
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7c000124
+INSTR op=0x7c000124 asm="#8 mtmsr 0"
+R n=MSR d=0x00000000
+
+I id=9 ea=0x20
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0xf8b70000
+INSTR op=0xf8b70000 asm="#9 std 5,23,0"
+M n=Mem ea=0xab0000000000000 ra=0xb0000000000000 t=write d=0xb0f0c346
+M n=Mem ea=0xab0000000000004 ra=0xb0000000000004 t=write d=0x87656320
+
+I id=10 ea=0x24
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x0
+INSTR op=0x0 asm="#10 halt"
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000088800001fff
+RD n=GPR i=2 d=0xdeadbeef12345678
+RD n=GPR i=3 d=0xdeadc77712347677
+RD n=GPR i=4 d=0xb0f0babe87654321
+RD n=GPR i=5 d=0xb0f0c34687656320
+
+RD n=GPR i=20 d=0x0000000008000000
+RD n=GPR i=21 d=0x00A0000000002000
+RD n=GPR i=22 d=0x0020000000000000
+RD n=GPR i=23 d=0x0AB0000000000000
+
+MD n=Mem ra=0x0020000000001000 d=0xdeadbeef
+MD n=Mem ra=0x0020000000001004 d=0x12345678
+MD n=Mem ra=0x00A0000000002000 d=0xdeadc777
+MD n=Mem ra=0x00A0000000002004 d=0x12347677
+
+MD n=Mem ra=0x0000000000001000 d=0xb0f0babe
+MD n=Mem ra=0x0000000000001004 d=0x87654321
+MD n=Mem ra=0x0000000000002000 d=0xb0f0c346
+MD n=Mem ra=0x0000000000002004 d=0x87656320
+
+MD n=Mem ra=0x0AB0000000000000 d=0x00000000
+MD n=Mem ra=0x0AB0000000000004 d=0x00000000
+
+MD n=Mem ra=0x00B0000000000000 d=0xb0f0c346
+MD n=Mem ra=0x00B0000000000004 d=0x87656320
+
+
+
+

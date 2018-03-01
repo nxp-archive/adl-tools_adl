@@ -1,0 +1,155 @@
+//
+// Tests port syntax.  This also makes sure that we can target different
+// caches (a Harvard architecture), as long as our usage is consistent, i.e.
+// we always target the same data or instruction memory.
+//
+
+define (core powerpc) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = L1i;
+      entries = 1;
+      entry_size = 4;
+      fetch_size = (4);
+    }
+
+    // pipeline stages
+    define (pipestage=(mID, mEX, mMM, mWB)) {}
+
+    // memory system
+    define (cache L1i) {
+      next_level_memory = Mem.I;
+    }
+
+    define (cache L1d) {
+      next_level_memory = Mem.D;
+    }
+
+    define (memory Mem) {
+      data_width = 32;
+      max_requests = 2;
+      define(port I) {
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+      }
+      define(port D) {
+        addr_bandwidth = 1;
+        data_bandwidth = 1;
+        read_latency = 1;
+        write_latency = 2;
+      }	
+		
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_EXp, S_MM, S_MMp, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = (S_EX,S_EXp);
+      mMM = (S_MM,S_MMp);
+      mWB = (S_WB,S_WBp);
+    };
+
+  }
+
+
+  define (instr_class load) {
+    instructions = (lbz, lhz, lwz );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      Imm = field(D);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space()) {
+        Src.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && L1d.can_request_read()) {
+        // Calc ea.
+        exec();
+        Mem.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (L1d.can_read()) { 
+        exec_and_read(Mem);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_read()) {
+        Mem.send_read_request();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_WBp);
+    }
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  };
+
+  define (instr_class cacheNop) {
+    instructions = (icbi);
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+    };
+
+    action = {
+		S_INIT: if (mID.empty() && mEX.empty() && mMM.empty() && mWB.empty()) { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && mEX.has_space()) {
+        Src.read();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && L1i.can_request_cmd()) {
+        // Calc ea.
+        exec();
+        L1i.send_cmd();
+        exec();
+        change_state(S_EXp);
+      }
+    S_EXp: if (exec_done() && mMM.has_space()) {
+        change_state(S_MM);
+      }
+      else if (L1i.can_request_cmd()) {
+        L1i.send_cmd();
+        exec();
+        if (mMM.has_space()) {
+          change_state(S_MM);
+        }
+      }
+    S_MM: {
+      change_state(S_WB);
+    }
+		S_WB: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+}

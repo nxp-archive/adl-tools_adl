@@ -1,0 +1,26 @@
+//
+// Tests prefix insertion, where the prefix comes at the end of the packet.
+//
+
+#import "mod58.adl"
+
+define (arch=Suffix) {
+
+  defmod (instr=PREFIX) {
+    syntax = ("SUFFIX, VlesSize = %f, HighReg = %f",VlesSize,HighReg);  
+  }
+
+  post_packet_asm = func(InstrBundle b) {
+    VlesSize = b.size();
+    // Sets prefix values.
+    b.set_prefix_fields();
+    // Puts prefix at end of packet.
+    b.set_prefix_index(b.size());
+  } ;
+
+}
+
+define (core = P) {
+  archs = (MiniStarCore,Suffix);
+  instrtables = (prefix,type1);
+}

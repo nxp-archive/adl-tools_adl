@@ -1,0 +1,111 @@
+//
+// Test of using allow_conflict to override what would normally be a conflict.
+//
+// Also tests the next_table hook.
+//
+define (arch=minippc) {
+  attrs = (one,two); 
+  
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+  define(instrfield=R1){
+    width = 6;
+    pseudo = true;
+  }
+  define(instrfield=R2) {
+    width = 6;
+    pseudo = true;
+  }
+  define(instrfield=R3){
+    width = 6;
+    pseudo = true;
+  }
+
+  define (instrfield=CG) {
+    width = 1;
+    pseudo = true;
+    allow_conflict = true;
+  }
+
+  define (instr = a){
+    attrs = one;
+    fields = (
+              (bits(0,7),b11001100),
+              (bits(11,16),R1),
+              (bits(17,22),R2),
+              (bits(26,31),R3)
+              );
+    action={};
+  }
+
+  // The rest will conflict with a unless CG has allow_conflict set.
+
+  define (instr = b){
+    attrs = (one,two);
+    fields = (
+              (bits(0,3),b1100),
+              (bits(4),CG),
+              (bits(5,7),b100),
+              (bits(8,10),b100),
+              (bits(11,16),R1),
+              (bits(17,22),R2),
+              (bits(26,31),R3)
+              );
+    action={};
+  }
+
+  define (instr=b1) {
+    alias = b(CG(0),R1(R1),R2(R2),R3(R3));
+    syntax = ("b %f,%f,%f",R1,R2,R3);
+  }
+
+  define (instr=b2) {
+    alias = b(CG(1),R1(R1),R2(R2),R3(R3));
+    syntax = ("b %f,%f,%f",R1,R2,R3);
+  }
+
+  define (instr = c){
+    attrs = (one,two);
+    fields = (
+              (bits(0,3),b1100),
+              (bits(4),CG),
+              (bits(5,7),b100),
+              (bits(8,10),b101),
+              (bits(11,16),R1),
+              (bits(17,22),R2),
+              (bits(26,31),R3)
+              );
+    action={};
+  }
+
+  define (instr = d){
+    attrs = (one,two);
+    fields = (
+              (bits(0,3),b1100),
+              (bits(4),CG),
+              (bits(5,7),b100),
+              (bits(8,10),b110),
+              (bits(11,16),R1),
+              (bits(17,22),R2),
+              (bits(26,31),R3)
+              );
+    action={};
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+  instrtables = (one,two);
+
+  defmod(instr=(b,c,d)) {
+    next_table = {
+      if (CG == 0) {
+        setCurrentInstrTable(two);
+      } else {
+        setCurrentInstrTable(one);
+      }
+    };
+  }
+}

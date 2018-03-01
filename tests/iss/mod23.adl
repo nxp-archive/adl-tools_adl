@@ -1,0 +1,203 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A model with just a split L1, but a custom replacement algorithm.
+//
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  void dummyHelper() {
+    info(1,"Dummy helper called.");
+  }
+
+  define (reg=DISABLED_WAY) {
+    define (field=EN) {
+      bits = 0;
+    }
+    define (field=WAY) {
+      bits = (1,3);
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=300) { reg = DISABLED_WAY; }
+  }
+  
+  bool disabled_way(unsigned way)
+  {
+    return (DISABLED_WAY.EN(0) == 1 && DISABLED_WAY.WAY == way);
+  }
+
+  define (reg=DEC) {}
+
+  pre_fetch = { 
+    if (DEC > 0) {
+      DEC = DEC - 1;
+      if (DEC == 0) {
+        raiseException(dec);
+      }
+    }
+  };
+
+  define (reg=SRR0) {}
+  define (reg=SRR1) {}
+  define (reg=IVPR) {}
+  define (reg=MSR)  {}
+  define (reg=IVOR10) {}
+
+  defmod (regfile=SPR) {
+    define (entry=22)  { reg = DEC; }
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+  }
+
+  define (exception=dec) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR10(16,31));
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = (4,8);
+
+    // Dummy function- just here to make sure that custom replacement algorithms
+    // work with multiple way definitions.
+    assoc_func = {
+      return 8;
+    };
+    
+    define (setfield=B) {
+      bits = 7;
+    }
+
+    // If we've disabled a way, then we skip it for data-accesses only.
+    hit_pred = func(CacheAccess ca,unsigned set,unsigned way) {
+      if (ca != CacheIFetch) {
+        return !disabled_way(way);
+      } else {
+        return true;
+      }
+    };
+
+    replace = func(CacheAccess,unsigned set) {
+      var b = ThisCache(set).B;
+      int way;
+      if (b(0) == 0) {
+        if (b(1) == 0) {
+          if (b(3) == 0) {
+            way = 0;
+          } else {
+            way = 1;
+          }
+        } else {
+          if (b(4) == 0) {
+            way = 2;
+          } else {
+            way = 3;
+          }
+        }
+      } else {
+        if (b(2) == 0) {
+          if (b(5) == 0) {
+            way = 4;
+          } else {
+            way = 5;
+          }
+        } else {
+          if (b(6) == 0) {
+            way = 6;
+          } else {
+            way = 7;
+          }
+        }
+      }
+      if (disabled_way(way)) {
+        way = (way + 1) % 8;
+      }
+      return way;
+    };
+
+    line_access = func(CacheAccess,unsigned set,unsigned way,addr_t) {
+      var b = ThisCache(set).B;
+      switch (way) {
+      case 0:
+        b.set(0,1);
+        b.set(1,1);
+        b.set(3,1);
+        break;
+      case 1:
+        b.set(0,1);
+        b.set(1,1);
+        b.set(3,0);
+        break;
+      case 2:
+        b.set(0,1);
+        b.set(1,0);
+        b.set(4,1);
+        break;
+      case 3:
+        b.set(0,1);
+        b.set(1,0);
+        b.set(4,0);
+        break;
+      case 4:
+        b.set(0,0);
+        b.set(2,1);
+        b.set(5,1);
+        break;
+      case 5:
+        b.set(0,0);
+        b.set(2,1);
+        b.set(5,0);
+        break;
+      case 6:
+        b.set(0,0);
+        b.set(2,0);
+        b.set(6,1);
+        break;
+      case 7:
+        b.set(0,0);
+        b.set(2,0);
+        b.set(6,0);
+        break;
+      }
+      info(1,"B:  ",hex,showbase,b);
+      ThisCache(set).B = b;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}

@@ -1,0 +1,62 @@
+//
+// Test prefix,pseudo, complementary and indexed value fields usage
+//
+
+ define (arch=minippc) {
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+ 
+ blk = (agu, dalu);
+ 
+ define(instrfield=OPCD){
+   bits =(0,5);
+ }
+ 
+ define(instrfield=F1) {
+   bits = 6;
+   blk = agu;
+ }
+
+
+ define(instrfield=F2){
+   bits = 8;
+   blk = agu;
+ }
+
+ define(instrfield=F3){
+   indexed = 2;
+   prefix = true;
+   pseudo = true;
+ }
+ define(instrfield=F4){
+   bits = 7;
+   prefix = true;
+ }
+ define(instrfield=F5){
+   width = variable;
+   pseudo = true;
+ }
+ 
+
+ define(instr=Foo) {
+   fields = (F1(1),F2);
+   pseudo = true;	
+ }
+
+ define(instr=Foo1) {
+   fields = (F1(1));
+   type = Foo;
+   blk = agu;
+   action = {} ;
+ }
+} 
+ 
+ 
+ 
+
+define (core=P) {
+  archs=minippc;
+  instrtables = (prefix,other);
+}

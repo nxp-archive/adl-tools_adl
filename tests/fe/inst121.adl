@@ -1,0 +1,71 @@
+//
+// We allow %p fields before the instruction name but not %f fields.
+//
+
+define (arch=minippc) {
+  attrs = (up,down,ff); 
+  
+  //REGISTERS
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+  define(instrfield=R1){
+    bits = (11,16);
+  }
+  define(instrfield=R2){
+    bits = (17,22);
+  }
+  define(instrfield=OPCD){
+    bits =(1,5);
+  }
+  
+  define(instrfield=F1){
+    bits = 9;
+    enumerated = (".up",".down",(".up1",".up2"),".down1",("a1","a2","a3","a4"));
+    value = ".up";
+  }
+
+  define(instrfield=F2){
+    bits = 10;
+    enumerated = (".left0",".right0",(".left1",".left2",".left3"),".right1");
+    value = ".left1";
+  }
+
+  define (instrfield=NG) {
+    bits = 6;
+    enumerated = ("", "ng");
+  }
+
+  // OK- %p can be before %i.
+  define (instr = a){
+    fields = (OPCD(1),NG,F1,F2,R1,R2);
+    syntax = ("%p %i%p%p %f %f",NG,F1,F2,R1,R2);
+    action={};
+  }
+
+  // OK- %p can be before a fixed instruction name.
+  define (instr = b){
+    fields = (OPCD(2),NG,F1,F2,R1,R2);
+    syntax = ("%p foo%p%p %f %f",NG,F1,F2,R1,R2);
+    action={};
+  }
+
+  // Not OK- %f cannot precede instruction name.
+  define (instr = c){
+    fields = (OPCD(3),NG,F1,F2,R1,R2);
+    syntax = ("%f %i%p%p %f %f",NG,F1,F2,R1,R2);
+    action={};
+  }
+
+  // Not OK- %f cannot precede instruction name.
+  define (instr = d){
+    fields = (OPCD(4),NG,F1,F2,R1,R2);
+    syntax = ("%f foo%p%p %f %f",NG,F1,F2,R1,R2);
+    action={};
+  }
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,54 @@
+Model 1:  P
+Cache Data:
+
+Model 2:  P
+Cache Data:
+<caches>
+<cache>
+<name> L1d </name>
+<shared> 0 </shared>
+<type> data </type>
+<level> 1 </level>
+<size> 32768 </size>
+<linesz> 128 </linesz>
+<sets>
+<set>64</set>
+</sets>
+<ways>
+<way>4</way>
+</ways>
+</cache>
+
+<cache>
+<name> L1i </name>
+<shared> 0 </shared>
+<type> instr </type>
+<level> 1 </level>
+<size> 32768 </size>
+<linesz> 128 </linesz>
+<sets>
+<set>64</set>
+</sets>
+<ways>
+<way>4</way>
+</ways>
+</cache>
+
+<cache>
+<name> L2 </name>
+<shared> 0 </shared>
+<type> unified </type>
+<level> 2 </level>
+<size> 65536 </size>
+<linesz> 128 </linesz>
+<sets>
+<set>64</set>
+<set>128</set>
+</sets>
+<ways>
+<way>4</way>
+<way>8</way>
+</ways>
+</cache>
+
+</caches>

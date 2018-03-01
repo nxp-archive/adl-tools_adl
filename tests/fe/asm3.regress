@@ -1,0 +1,3 @@
+asm3.adl:11: Invalid line separator '\t\t'.
+asm3.adl:21: Line separator ';' is also a comment.
+asm3.adl:21: Duplicate value used as an instruction separator and as a comment, packet-separator, or line separator.

@@ -1,0 +1,5 @@
+inst143.adl:37: You cannot mix table-mappings and nested fields.
+inst143.adl:66: Table-mapping index is larger than the size of the table entries.
+inst143.adl:47: Unkown instruction field 'DaDb'.
+inst143.adl:76: Out of range index for field 'DaDb2'.
+inst143.adl:94: Unknown instruction field DaDb

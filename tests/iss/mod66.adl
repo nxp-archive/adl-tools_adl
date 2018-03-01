@@ -1,0 +1,183 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This tests the use of register-file aliases, register attributes, and the use
+// of register-file elements tied to sparse-register-file entries.
+//
+
+#import "mod1.adl"
+
+define (arch = AliasTest) {
+
+  attrs = (read_only,privileged,log_as_reg,move_from_to);
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=MFTP) {
+      """
+      Set to 1 if the exception is caused by a m[ft]spr or m[ft]msr instruction.
+      """;
+      bits = 31;
+    }
+  }
+
+  define (reg=SRR0) {
+    attrs = privileged;
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    attrs = privileged;
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (regfile=PMC) {
+    """
+      General purpose registers.
+      """;
+    attrs = (log_as_reg,privileged);
+    size = 8;
+    prefix = p;
+    define (field=A) { bits = (16,31); };
+    define (field=B) { bits = (0,3); readonly = true; writable = true; };
+  }
+
+  define (regfile=UPMC) {
+    attrs = (log_as_reg,read_only);
+    """
+      General purpose registers.
+      """;
+    alias = PMC;
+  }
+
+  define (reg=PMCC) {
+    attrs = (privileged);
+    pseudo = true;
+    define (write) {
+      action = func (bits<32> value) {
+        for (unsigned i = 0; i != PMC.size(); ++i) {
+          PMC(i).B = value;
+        }
+      };
+    }
+    define (read) {
+      action = {
+        return PMC(0).B;
+      };
+    }
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=26) { reg=SRR0; }
+    define (entry=27) { reg=SRR1; }
+
+    define (entry=60) { reg=PMC(0); };
+    define (entry=61) { reg=PMC(1); };
+    define (entry=62) { reg=PMC(2); };
+    define (entry=63) { reg=PMC(3); };
+    define (entry=64) { reg=PMC(4); };
+    define (entry=65) { reg=PMC(5); };
+    define (entry=66) { reg=PMC(6); };
+    define (entry=67) { reg=PMC(7); };
+
+    define (entry=70) { reg=UPMC(0); };
+    define (entry=71) { reg=UPMC(1); };
+    define (entry=72) { reg=UPMC(2); };
+    define (entry=73) { reg=UPMC(3); };
+    define (entry=74) { reg=UPMC(4); };
+    define (entry=75) { reg=UPMC(5); };
+    define (entry=76) { reg=UPMC(6); };
+    define (entry=77) { reg=UPMC(7); };
+
+    define (entry=80) { reg=PMCC;    };
+  }
+
+  defmod (instr=mtspr) {
+    attrs = move_from_to;
+    define (aspect=A) {
+      instr_pre_exec = true;
+      action = {
+        if (MSR.PR == 1 && SPR.hasAttr(SPRN,privileged)) {
+          raiseException(Program);
+        }
+        if (SPR.hasAttr(SPRN,read_only)) {
+          raiseException(Program);
+        }
+      };
+    }
+  }
+
+  defmod (instr=mfspr) {
+    attrs = move_from_to;
+    define (aspect=A) {
+      instr_pre_exec = true;
+      action = {
+        if (MSR.PR == 1 && SPR.hasAttr(SPRN,privileged)) {
+          raiseException(Program);
+        }
+      };
+    }
+  }
+
+  define (instr=mtmsr) {
+    attrs = move_from_to;
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=mfmsr) {
+    fields=(OPCD(31),RT,XO(83));
+    action = {
+      GPR(RT) = MSR;
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      MSR.MFTP = (instrHasAttr(move_from_to)) ? 1 : 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+      CIA = NIA;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,AliasTest);
+}

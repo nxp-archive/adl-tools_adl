@@ -1,0 +1,73 @@
+#
+# Example with a branch in a delay slot.
+#
+# <ASM>
+#  addi r1,r1,1
+#  bc 20,0,L1
+#  bc 20,0,L2
+#  addi r1,r1,1
+#  addi r1,r1,1
+#  addi r1,r1,1
+# L1:
+#  addi r2,r2,1
+#  addi r3,r3,1
+# L2:
+#  addi r4,r4,1
+#  addi r5,r5,1
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x42800014	# bc 20,0,L1
+MD n=Mem ra=0x00000008 d=0x42800018	# bc 20,0,L2
+MD n=Mem ra=0x0000000c d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x38210001	# addi r1,r1,1
+MD n=Mem ra=0x00000018 d=0x38420001	# addi r2,r2,1
+MD n=Mem ra=0x0000001c d=0x38630001	# addi r3,r3,1
+MD n=Mem ra=0x00000020 d=0x38840001	# addi r4,r4,1
+MD n=Mem ra=0x00000024 d=0x38A50001	# addi r5,r5,1
+# </GEN>
+CORE n=:P
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001 asm="#1 addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x42800014
+INSTR op=0x42800014 asm="#2 bc 20,0,5"
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x42800018
+INSTR op=0x42800018 asm="#3 bc 20,0,6"
+R n=NIA d=0x00000018
+
+I id=4 ea=0x18
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x38420001
+INSTR op=0x38420001 asm="#4 addi 2,2,1"
+R n=GPR i=2 d=0x00000001
+R n=NIA d=0x00000020
+
+I id=5 ea=0x20
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x38840001
+INSTR op=0x38840001 asm="#5 addi 4,4,1"
+R n=GPR i=4 d=0x00000001
+
+I id=6 ea=0x24
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x38a50001
+INSTR op=0x38a50001 asm="#6 addi 5,5,1"
+R n=GPR i=5 d=0x00000001
+
+I id=7 ea=0x28
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x0
+INSTR op=0x0 asm="#7 halt"
+
+RESULTS
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=1
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=1

@@ -1,0 +1,71 @@
+#
+# Simple load/store test testing the separate imem/dmem.
+#
+= asm
+
+	addi r1,0x40
+	lw r2,0(r1)
+	addi r2,10
+	sw r2,0x4(r1)
+	addi r2,10
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1
+	nop1	
+	sw r2,0x8(r1)
+	
+= /asm
+= mdopts
+endian: little
+instr-mem: Mem
+as: ./as-mod101
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x00001115	#	lw r2,0(r1)
+MD n=Mem ra=0x00000004 d=0x00400842
+MD n=Mem ra=0x00000008 d=0x0008111D	#	sw r2,0x4(r1)
+MD n=Mem ra=0x0000000c d=0x000A1082
+MD n=Mem ra=0x00000010 d=0x00000001	#	nop1
+MD n=Mem ra=0x00000014 d=0x000A1082
+MD n=Mem ra=0x00000018 d=0x00000001	#	nop1
+MD n=Mem ra=0x0000001c d=0x00000000
+MD n=Mem ra=0x00000020 d=0x00000001	#	nop1
+MD n=Mem ra=0x00000024 d=0x00000000
+MD n=Mem ra=0x00000028 d=0x00000001	#	nop1
+MD n=Mem ra=0x0000002c d=0x00000000
+MD n=Mem ra=0x00000030 d=0x00000001	#	nop1
+MD n=Mem ra=0x00000034 d=0x00000000
+MD n=Mem ra=0x00000038 d=0x00000001	#	nop1
+MD n=Mem ra=0x0000003c d=0x00000000
+MD n=Mem ra=0x00000040 d=0x00000001	#	nop1
+MD n=Mem ra=0x00000044 d=0x00000000
+MD n=Mem ra=0x00000048 d=0x00000001	#	nop1	
+MD n=Mem ra=0x0000004c d=0x00000000
+MD n=Mem ra=0x00000050 d=0x00000001	#	
+MD n=Mem ra=0x00000054 d=0x0008088E
+# </GEN>
+
+CORE n=packet_ops
+
+MD n=DMEM ra=0x40 d=20
+MD n=DMEM ra=0x44 d=0
+MD n=DMEM ra=0x48 d=0
+
+RESULTS
+
+MD n=DMEM ra=0x40 d=20
+MD n=DMEM ra=0x44 d=30
+MD n=DMEM ra=0x48 d=40
+

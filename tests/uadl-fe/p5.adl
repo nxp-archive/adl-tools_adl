@@ -1,0 +1,29 @@
+
+//
+// A model with just a split L1.
+//
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+  }
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}

@@ -1,0 +1,5 @@
+P:thread0:  Instr 1:  Missing expected IR:  (a => load lm => 0x7f n => L1d ra => 0x1000 set => 32 t => read way => 0 )
+P:thread0:  Differences were found when checking intermediate results.
+P:thread1:  Instr 2:  Missing expected IR:  (a => load lm => 0x7f n => L1d ra => 0x2000 set => 0 t => read way => 0 )
+P:thread1:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

@@ -1,0 +1,15 @@
+//
+// This just converts the external exception to be edge-sensitive, so that we
+// can test the automatic clearing of edge-sensitive exceptions.
+//
+
+#import "mod11.adl"
+
+
+defmod (core = P) {
+
+  defmod (exception=External) {
+    sensitivity = edge;
+  }
+
+}

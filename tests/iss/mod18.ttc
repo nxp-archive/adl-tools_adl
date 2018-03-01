@@ -1,0 +1,6 @@
+
+define(core=P) {
+  define (config) {
+    dyn_caches = L2;
+  }
+}

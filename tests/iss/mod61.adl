@@ -1,0 +1,1023 @@
+//
+// This tests the use of high-register bit encodings in prefix fields,
+// but in this case, high-register encodings only go to dalu instructions, and
+// only two are allowed per packet, even though four instructions execute
+// in parallel.  Thus, the assembler must set up the high-register encodings
+// manually in the post-packet-asm hook.
+//
+// In this example, indexing into the HighReg field is done manually, which
+// means that disassembly doesn't show high-bits automatically.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+  parallel_execution = 4;
+  attrs = (prefix,type1);  
+  blk = dalu;
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 16;  prefix = r; };
+
+  define (reg=DCNT)  { serial = true; reset = 1;};
+  define (reg=VSIZE) { serial = true; reset = 1;};
+  // -------- INSTRFIELDS ----------
+
+  define (reloc=signed_imm) {
+    abbrev="s";
+    value = 10;
+    instrfield = IMM2;
+  }
+
+  define (reloc=unsigned_imm) {
+    abbrev="u";
+    value = 11;
+    instrfield = IMM3;
+  }
+  
+  define (instrfield = RT)  { width = 4; pseudo = true; ref=GPR;}
+  define (instrfield = RA)  { width = 4; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = Rt) { width = 2; pseudo = true;  };
+  define (instrfield = Ra) { width = 2; pseudo = true;  };
+  define (instrfield = Rb) { width = 2; pseudo = true; };
+  define (instrfield = RA1)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RA2)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RX) { width = 4; pseudo = true; ref=GPR;};
+  define (instrfield = Min) { width = 4; pseudo = true; };
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; reserved = true; } // Serial Grouping
+  define (instrfield = IMM)  { width = 5; pseudo = true; is_signed=true;}
+  define (instrfield = IMM2) { width = 21; pseudo = true; is_signed=true; }
+  define (instrfield = IMM3) { width = 32; pseudo = true; }
+  define (instrfield = N)   { width = 2; pseudo = true; enumerated = ("1","2","3","4"); }
+  define (instrfield = BB) { width = 3; pseudo = true; };
+  define (instrfield = Flag) { width = 2; pseudo = true; enumerated = ("-inc","-dec","-ls","-rs"); };
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+  define (instrfield = Enc1)   { width = 16;  pseudo = true; }
+  define (instrfield = Enc2)   { width = 32;  pseudo = true; }
+  define (instrfield = Enc3)   { width = 48;  pseudo = true; }
+
+  define (instrfield = HighReg)  { 
+    pseudo = true; 
+    prefix = true; 
+    width = 4; 
+    indexed = 2; 
+    value = 0; 
+
+    action = func(unsigned) {
+      unsigned pos = DCNT.uint32();
+      ThisField = bits(pos*2+1,pos*2);
+   };
+  }
+
+  define (instrfield = VlesSize)  { width = 3; prefix = true; pseudo = true; value  = 1; };
+
+  define (instrfield=VBigNest) {	 
+    width = 6; 			 // number of  input  bits 
+   	size  = 96;			 // number of  output bits
+    pseudo = true;
+    syntax = ("%f:%f:%f:%f:%f:%f:%f:%f:%f:%f:%f:%f:%f:%f:%f:%f",Da,Db,Dc,Dd,De,Df,Dg,Dh,Di,Dj,Dk,Dl,Dm,Dn,Do,Dp);
+    define(instrfield=Inner) {	 
+      bits  = (5,0);
+
+      table = ((0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0),
+               (2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1),(3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2),
+               (4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3),(5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4),
+               (6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5),(7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6),
+               (8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7),(9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8),
+               (10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9),(11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10),
+               (12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11),(13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12),
+               (14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13),(15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14),
+               (16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31),(17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,16),
+               (18,19,20,21,22,23,24,25,26,27,28,29,30,31,16,17),(19,20,21,22,23,24,25,26,27,28,29,30,31,16,17,18),
+               (20,21,22,23,24,25,26,27,28,29,30,31,16,17,18,19),(21,22,23,24,25,26,27,28,29,30,31,16,17,18,19,20),
+               (22,23,24,25,26,27,28,29,30,31,16,17,18,19,20,21),(23,24,25,26,27,28,29,30,31,16,17,18,19,20,21,22),
+               (24,25,26,27,28,29,30,31,16,17,18,19,20,21,22,23),(25,26,27,28,29,30,31,16,17,18,19,20,21,22,23,24),
+               (26,27,28,29,30,31,16,17,18,19,20,21,22,23,24,25),(27,28,29,30,31,16,17,18,19,20,21,22,23,24,25,26),
+               (28,29,30,31,16,17,18,19,20,21,22,23,24,25,26,27),(29,30,31,16,17,18,19,20,21,22,23,24,25,26,27,28),
+               (30,31,16,17,18,19,20,21,22,23,24,25,26,27,28,29),(31,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30),
+               (32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47),(33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,32),
+               (34,35,36,37,38,39,40,41,42,43,44,45,46,47,32,33),(35,36,37,38,39,40,41,42,43,44,45,46,47,32,33,34),
+               (36,37,38,39,40,41,42,43,44,45,46,47,32,33,34,35),(37,38,39,40,41,42,43,44,45,46,47,32,33,34,35,36),
+               (38,39,40,41,42,43,44,45,46,47,32,33,34,35,36,37),(39,40,41,42,43,44,45,46,47,32,33,34,35,36,37,38),
+               (40,41,42,43,44,45,46,47,32,33,34,35,36,37,38,39),(41,42,43,44,45,46,47,32,33,34,35,36,37,38,39,40),
+               (42,43,44,45,46,47,32,33,34,35,36,37,38,39,40,41),(43,44,45,46,47,32,33,34,35,36,37,38,39,40,41,42),
+               (44,45,46,47,32,33,34,35,36,37,38,39,40,41,42,43),(45,46,47,32,33,34,35,36,37,38,39,40,41,42,43,44),
+               (46,47,32,33,34,35,36,37,38,39,40,41,42,43,44,45),(47,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46),
+               (48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63),(49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,48),
+               (50,51,52,53,54,55,56,57,58,59,60,61,62,63,48,49),(51,52,53,54,55,56,57,58,59,60,61,62,63,48,49,50),
+               (52,53,54,55,56,57,58,59,60,61,62,63,48,49,50,51),(53,54,55,56,57,58,59,60,61,62,63,48,49,50,51,52),
+               (54,55,56,57,58,59,60,61,62,63,48,49,50,51,52,53),(55,56,57,58,59,60,61,62,63,48,49,50,51,52,53,54),
+               (56,57,58,59,60,61,62,63,48,49,50,51,52,53,54,55),(57,58,59,60,61,62,63,48,49,50,51,52,53,54,55,56),
+               (58,59,60,61,62,63,48,49,50,51,52,53,54,55,56,57),(59,60,61,62,63,48,49,50,51,52,53,54,55,56,57,58),
+               (60,61,62,63,48,49,50,51,52,53,54,55,56,57,58,59),(61,62,63,48,49,50,51,52,53,54,55,56,57,58,59,60),
+               (62,63,48,49,50,51,52,53,54,55,56,57,58,59,60,61),(63,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62));
+    }
+	
+    fields = (Inner(15),
+              Inner(14),
+              Inner(13),
+              Inner(12),
+              Inner(11),
+              Inner(10),
+              Inner(9),
+              Inner(8),
+              Inner(7),
+              Inner(6),
+              Inner(5),
+              Inner(4),
+              Inner(3),
+              Inner(2),
+              Inner(1),
+              Inner(0));
+	
+# define D_WIDTH 6
+
+    define(instrfield=Da) { 
+      size   = D_WIDTH;
+      fields = (5,0);  
+      display = dec;
+    }	
+    define(instrfield=Db) { 
+      size   = D_WIDTH;
+      fields = (11,6);  
+      display = dec;
+    }
+    define(instrfield=Dc) { 
+      size   = D_WIDTH;
+      fields = (17,12);  
+      display = dec;
+    }
+    define(instrfield=Dd) { 
+      size   = D_WIDTH;
+      fields = (23,18);  
+      display = dec;
+    }
+    define(instrfield=De) { 
+      size   = D_WIDTH;
+      fields = (29,24);  
+      display = dec;
+    }	
+    define(instrfield=Df) { 
+      size   = D_WIDTH;
+      fields = (35,30);  
+      display = dec;
+    }
+    define(instrfield=Dg) { 
+      size   = D_WIDTH;
+      fields = (41,36);  
+      display = dec;
+    }
+    define(instrfield=Dh) { 
+      size   = D_WIDTH;
+      fields = (47,42);  
+      display = dec;
+    }
+    define(instrfield=Di) { 
+      size   = D_WIDTH;
+      fields = (53,48);  
+      display = dec;
+    }	
+    define(instrfield=Dj) { 
+      size   = D_WIDTH;
+      fields = (59,54);  
+      display = dec;
+    }
+    define(instrfield=Dk) { 
+      size   = D_WIDTH;
+      fields = (65,60);  
+      display = dec;
+    }
+    define(instrfield=Dl) { 
+      size   = D_WIDTH;
+      fields = (71,66);  
+      display = dec;
+    }
+    define(instrfield=Dm) { 
+      size   = D_WIDTH;
+      fields = (77,72);  
+      display = dec;
+    }	
+    define(instrfield=Dn) { 
+      size   = D_WIDTH;
+      fields = (83,78);  
+      display = dec;
+    }
+    define(instrfield=Do) { 
+      size   = D_WIDTH;
+      fields = (89,84);  
+      display = dec;
+    }
+    define(instrfield=Dp) { 
+      size   = D_WIDTH;
+      fields = (95,90);  
+      display = dec;
+    }
+  }
+
+  // This tests the use of nested instruction fields which expands to a value larger than 32-bits.
+  define (instrfield=BigNest) {
+    width = 6;
+    size = 48;
+    pseudo = true;
+    syntax = ("%f:%f:%f:%f:%f:%f:%f:%f",Da,Db,Dc,Dd,De,Df,Dg,Dh);
+    define(instrfield=Inner) {
+      bits = (5,0);
+
+      table = ((0,2,4,6,9,11,13,15),(1,3,5,7,8,10,12,14),(2,4,6,8,11,13,15,17),(3,5,7,9,10,12,14,16),
+               (4,6,8,10,13,15,17,19),(5,7,9,11,12,14,16,18),(6,8,10,12,15,17,19,21),(7,9,11,13,14,16,18,20),
+               (8,10,12,14,17,19,21,23),(9,11,13,15,16,18,20,22),(10,12,14,16,19,21,23,25),(11,13,15,17,18,20,22,24),
+               (12,14,16,18,21,23,25,27),(13,15,17,19,20,22,24,26),(14,16,18,20,23,25,27,29),(15,17,19,21,22,24,26,28),
+               (16,18,20,22,25,27,29,31),(17,19,21,23,24,26,28,30),(18,20,22,24,27,29,31,33),(19,21,23,25,26,28,30,32),
+               (20,22,24,26,29,31,33,35),(21,23,25,27,28,30,32,34),(22,24,26,28,31,33,35,37),(23,25,27,29,30,32,34,36),
+               (24,26,28,30,33,35,37,39),(25,27,29,31,32,34,36,38),(26,28,30,32,35,37,39,41),(27,29,31,33,34,36,38,40),
+               (28,30,32,34,37,39,41,43),(29,31,33,35,36,38,40,42),(30,32,34,36,39,41,43,45),(31,33,35,37,38,40,42,44),
+               (32,34,36,38,41,43,45,47),(33,35,37,39,40,42,44,46),(34,36,38,40,43,45,47,49),(35,37,39,41,42,44,46,48),
+               (36,38,40,42,45,47,49,51),(37,39,41,43,44,46,48,50),(38,40,42,44,47,49,51,53),(39,41,43,45,46,48,50,52),
+               (40,42,44,46,49,51,53,55),(41,43,45,47,48,50,52,54),(42,44,46,48,51,53,55,57),(43,45,47,49,50,52,54,56),
+               (44,46,48,50,53,55,57,59),(45,47,49,51,52,54,56,58),(46,48,50,52,55,57,59,61),(47,49,51,53,54,56,58,60),
+               (48,50,52,54,57,59,61,63),(49,51,53,55,56,58,60,62));
+    }
+
+    // This constructs a 48-bit value by looking up the various entries in the
+    // table listed above.
+    fields = (Inner(7),Inner(6),Inner(5),Inner(4),Inner(3),Inner(2),Inner(1),Inner(0));
+
+    define(instrfield=Da) {
+      size = 6;
+      fields = (5,0);
+      display = dec;
+    }
+    define(instrfield=Db) {
+      size = 6;
+      fields = (11,6);
+      display = dec;
+    }
+    define(instrfield=Dc) {
+      size = 6;
+      fields = (17,12);
+      display = dec;
+    }
+    define(instrfield=Dd) {
+      size = 6;
+      fields = (23,18);
+      display = dec;
+    }
+    define(instrfield=De) {
+      size = 6;
+      fields = (29,24);
+      display = dec;
+    }
+    define(instrfield=Df) {
+      size = 6;
+      fields = (35,30);
+      display = dec;
+    }
+    define(instrfield=Dg) {
+      size = 6;
+      fields = (41,36);
+      display = dec;
+    }
+    define(instrfield=Dh) {
+      size = 6;
+      fields = (47,42);
+      display = dec;
+    }
+  }
+
+  
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+  define (instr = PREFIX) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),HighReg(0)),
+              (bits(7),HighReg(1)),
+              (bits(8),HighReg(2)),
+              (bits(9),HighReg(3)),
+              (bits(10),0),
+              (bits(11),0),
+              (bits(12),VlesSize(0)),
+              (bits(13),VlesSize(1)),
+              (bits(14),VlesSize(2)),
+              (bits(15),reserved));
+    prefix = true;
+    syntax = ("LPREFIX, VlesSize = %f, HighReg = %f",VlesSize,HighReg);  
+    attrs = prefix;
+    width  = 16;
+    action = {
+      // The +1 is for the prefix instruction itself.
+      VSIZE = VlesSize + 1;
+    };
+  }
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr = OneWord) {
+    fields = ((bits(15,0), Enc1),
+              (bits(17,16),HighReg));
+    pseudo = true;
+  }
+
+  define(instr = TwoWord) {
+    fields = ((bits(31,0), Enc2),
+              (bits(33,32),HighReg));
+    pseudo = true;
+  }
+
+  define(instr = ThreeWord) {
+    fields = ((bits(47,0), Enc3),
+              (bits(49,48),HighReg));
+    pseudo = true;
+  }
+
+  define (instr = nop) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),
+              (bits(7),0),
+              (bits(8),1),
+              (bits(9),0),
+              (bits(10),1),
+              (bits(11),1),
+              (bits(12),0),
+              (bits(13),1),
+              (bits(14),0),
+              (bits(15),reserved),
+              (bits(16),reserved),
+              (bits(17),reserved)
+              );
+    type = OneWord;
+    syntax = ("nop");  
+    attrs = (type1);
+    action = {};
+  }
+
+
+  define(instr=add) {
+    attrs = (type1);
+    type = OneWord;
+    blk = dalu;
+    fields = (
+              (bits(0),1),
+              (bits(1),0),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),0),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),RB(0)),
+              (bits(10),RB(1)),
+              (bits(11),RB(2)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),RA(3)),
+              (bits(17),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RB) + GPR(RA);
+    };
+    syntax = ("add %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=add2_premium) {
+    attrs = (type1);
+    type = OneWord;
+    blk = dalu;
+    fields = (
+              (bits(0),1),
+              (bits(1),0),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),1),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),0),
+              (bits(10),0),
+              (bits(11),0),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),RA(3)),
+              (bits(17),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RT) + GPR(RA);
+    };
+    syntax =  ("add2 %f,%f,%f",RA,RA,RT);
+  }
+
+  define(instr=add2) {
+    attrs = (type1);
+    type = TwoWord;
+    blk = dalu;
+    fields = (
+              (bits(0),1),
+              (bits(1),0),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),1),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),0),
+              (bits(10),1),
+              (bits(11),1),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),0),
+              (bits(16),0),
+              (bits(17),RB(0)),
+              (bits(18),RB(1)),
+              (bits(19),RB(2)),
+              (bits(20),1),
+      	      (bits(21),0),
+              (bits(22),1),
+              (bits(23),0),		
+              (bits(24),1),		
+              (bits(25),1),		
+              (bits(26),0),
+              (bits(27),0),
+              (bits(28),0),
+              (bits(29),0),
+              (bits(30),1),
+              (bits(31),SG),
+              (bits(32),RA(3)),
+              (bits(33),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RT) + GPR(RA);
+    };
+    syntax =  ("add2 %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=mv) {
+    attrs = (type1);
+    type = OneWord;
+    blk = dalu;
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),IMM(0)),
+              (bits(5),IMM(1)),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),IMM(2)),
+              (bits(10),IMM(3)),
+              (bits(11),IMM(4)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),RA(3)),
+              (bits(17),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM;
+    };
+    syntax = ("mv %f,%f,%f",RA,IMM,RT);
+  }
+
+  define(instr=mv_big) {
+    attrs = (type1);
+    type = TwoWord;
+    blk = dalu;
+    fields = (
+              (bits(0), IMM2(0)),
+              (bits(1), IMM2(1)),
+              (bits(2), IMM2(2)),
+              (bits(3), IMM2(3)),
+      	      (bits(4), IMM2(4)),
+              (bits(5), IMM2(5)),
+              (bits(6), RA(0)),		
+              (bits(7), RA(1)),		
+              (bits(8), RA(2)),		
+              (bits(9), IMM2(6)),
+              (bits(10),IMM2(7)),
+              (bits(11),IMM2(8)),
+              (bits(12),RT(0)),
+              (bits(13),RT(1)),
+              (bits(14),RT(2)),
+              (bits(15),SG),
+              (bits(16),1),
+              (bits(17),0),
+              (bits(18),1),
+              (bits(19),0),
+              (bits(20),IMM2(9)),
+              (bits(21),IMM2(10)),
+              (bits(22),IMM2(11)),
+              (bits(23),IMM2(12)),
+              (bits(24),IMM2(13)),
+              (bits(25),IMM2(14)),
+              (bits(26),IMM2(15)),
+              (bits(27),IMM2(16)),
+              (bits(28),IMM2(17)),
+              (bits(29),IMM2(18)),
+              (bits(30),IMM2(19)),
+              (bits(31),IMM2(20)),
+              (bits(32),RA(3)),
+              (bits(33),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM2;
+    };
+    syntax = ("mv %f,%f,%f",RA,IMM2,RT);
+  }
+
+  define(instr=mv_big2) {
+    attrs = (type1);
+    type = ThreeWord;
+    blk = dalu;
+    fields = (
+              (bits(0), IMM3(0)),
+              (bits(1), IMM3(1)),
+              (bits(2), IMM3(2)),
+              (bits(3), IMM3(3)),
+      	      (bits(4), IMM3(4)),
+              (bits(5), IMM3(5)),
+              (bits(6), RA(0)),		
+              (bits(7), RA(1)),		
+              (bits(8), RA(2)),		
+              (bits(9), IMM3(6)),
+              (bits(10),IMM3(7)),
+              (bits(11),IMM3(8)),
+              (bits(12),IMM3(9)),
+              (bits(13),IMM3(10)),
+              (bits(14),IMM3(11)),
+              (bits(15),IMM3(12)),
+              (bits(16),IMM3(13)),
+              (bits(17),IMM3(14)),
+              (bits(18),IMM3(15)),
+              (bits(19),IMM3(16)),
+              (bits(20),IMM3(17)),
+              (bits(21),IMM3(18)),
+              (bits(22),IMM3(19)),
+              (bits(23),IMM3(20)),
+              (bits(24),RT(0)),
+              (bits(25),RT(1)),
+              (bits(26),RT(2)),
+              (bits(27),SG),
+              (bits(28),1),
+              (bits(29),0),
+              (bits(30),1),
+              (bits(31),1),
+              (bits(32),1),
+              (bits(33),0),
+              (bits(34),1),
+              (bits(35),1),
+              (bits(36),IMM3(21)),
+              (bits(37),IMM3(22)),
+              (bits(38),IMM3(23)),
+              (bits(39),IMM3(24)),
+              (bits(40),IMM3(25)),
+              (bits(41),IMM3(26)),
+              (bits(42),IMM3(27)),
+              (bits(43),IMM3(28)),
+              (bits(44),IMM3(29)),
+              (bits(45),IMM3(30)),
+              (bits(46),IMM3(31)),
+              (bits(47),0),
+              (bits(48),RA(3)),
+              (bits(49),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM3;
+    };
+    syntax = ("mv2 %f,%f,%f",RA,IMM3,RT);
+  }
+
+  // This version is designed to look just like mv_big, in terms of immediate
+  // fields, but be different in terms of semantics, so that it should not be
+  // chosen as a "larger" version when using the --big-mem option with an
+  // unresolved symbol.
+  define(instr=mv_pc) {
+    attrs = (type1);
+    type = ThreeWord;
+    blk = dalu;
+    fields = (
+              (bits(0), IMM3(0)),
+              (bits(1), IMM3(1)),
+              (bits(2), IMM3(2)),
+              (bits(3), IMM3(3)),
+      	      (bits(4), IMM3(4)),
+              (bits(5), IMM3(5)),
+              (bits(6), RA(0)),		
+              (bits(7), RA(1)),		
+              (bits(8), RA(2)),		
+              (bits(9), IMM3(6)),
+              (bits(10),IMM3(7)),
+              (bits(11),IMM3(8)),
+              (bits(12),IMM3(9)),
+              (bits(13),IMM3(10)),
+              (bits(14),IMM3(11)),
+              (bits(15),IMM3(12)),
+              (bits(16),IMM3(13)),
+              (bits(17),IMM3(14)),
+              (bits(18),IMM3(15)),
+              (bits(19),IMM3(16)),
+              (bits(20),IMM3(17)),
+              (bits(21),IMM3(18)),
+              (bits(22),IMM3(19)),
+              (bits(23),IMM3(20)),
+              (bits(24),RT(0)),
+              (bits(25),RT(1)),
+              (bits(26),RT(2)),
+              (bits(27),SG),
+              (bits(28),1),
+              (bits(29),0),
+              (bits(30),1),
+              (bits(31),0),
+              (bits(32),1),
+              (bits(33),0),
+              (bits(34),1),
+              (bits(35),1),
+              (bits(36),IMM3(21)),
+              (bits(37),IMM3(22)),
+              (bits(38),IMM3(23)),
+              (bits(39),IMM3(24)),
+              (bits(40),IMM3(25)),
+              (bits(41),IMM3(26)),
+              (bits(42),IMM3(27)),
+              (bits(43),IMM3(28)),
+              (bits(44),IMM3(29)),
+              (bits(45),IMM3(30)),
+              (bits(46),IMM3(31)),
+              (bits(47),0),
+              (bits(48),RA(3)),
+              (bits(49),RT(3))
+              );
+
+    action = {
+      GPR(RT) = GPR(RA) + IMM3 + PC;
+    };
+    syntax = ("mv %f,(pc+%f),%f",RA,IMM3,RT);
+  }
+
+  define (instr=inc) {
+    attrs = (type1);
+    type = OneWord;
+    fields = (
+              (bits(0),0),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),N(0)),
+              (bits(5),N(1)),
+              (bits(6),RA(0)),		
+              (bits(7),RA(1)),		
+              (bits(8),RA(2)),		
+              (bits(9),RA(3)),
+              (bits(10),RT(0)),
+              (bits(11),RT(1)),
+              (bits(12),RT(2)),
+              (bits(13),RT(3)),
+              (bits(14),0),
+              (bits(15),SG),
+              (bits(16),reserved),
+              (bits(17),reserved)
+              );
+    action = {
+      GPR(RT) = GPR(RA) + N + 1;
+    };
+    syntax = ("inc%f %f,%f",N,RA,RT);
+  }
+
+  define (instr=foo) {
+    attrs = (type1);
+    type = OneWord;
+    fields = (
+              (bits(0),0),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),0),
+      	      (bits(4),BigNest(0)),
+              (bits(5),BigNest(1)),
+              (bits(6),BigNest(2)),		
+              (bits(7),BigNest(3)),		
+              (bits(8),BigNest(4)),		
+              (bits(9),BigNest(5)),
+              (bits(10),RT(0)),
+              (bits(11),RT(1)),
+              (bits(12),RT(2)),
+              (bits(13),RT(3)),
+              (bits(14),0),
+              (bits(15),SG),
+              (bits(16),reserved),
+              (bits(17),reserved)
+              );
+    action = {
+      int a = BigNest.Da;
+      int b = BigNest.Db;
+      int c = BigNest.Dc;
+      int d = BigNest.Dd;
+      int e = BigNest.De;
+      int f = BigNest.Df;
+      int g = BigNest.Dg;
+      int h = BigNest.Dh;
+      GPR(RT) = a + b + c + d + e + f + g + h;
+    };
+    syntax = ("foo %f,%f",RT,BigNest);
+  }
+
+  define (instr=vfoo) {
+    attrs = (type1);
+    type = OneWord;
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+      	      (bits(4),VBigNest(0)),
+              (bits(5),VBigNest(1)),
+              (bits(6),VBigNest(2)),		
+              (bits(7),VBigNest(3)),		
+              (bits(8),VBigNest(4)),		
+              (bits(9),VBigNest(5)),
+              (bits(10),RT(0)),
+              (bits(11),RT(1)),
+              (bits(12),RT(2)),
+              (bits(13),RT(3)),
+              (bits(14),0),
+              (bits(15),SG),
+              (bits(16),reserved),
+              (bits(17),reserved)
+              );
+    action = {
+      int a = VBigNest.Da;
+      int b = VBigNest.Db;
+      int c = VBigNest.Dc;
+      int d = VBigNest.Dd;
+      int e = VBigNest.De;
+      int f = VBigNest.Df;
+      int g = VBigNest.Dg;
+      int h = VBigNest.Dh;
+      int i = VBigNest.Di;
+      int j = VBigNest.Dj;
+      int k = VBigNest.Dk;
+      int l = VBigNest.Dl;
+      int m = VBigNest.Dm;
+      int n = VBigNest.Dn;
+      int o = VBigNest.Do;
+      int p = VBigNest.Dp;
+      GPR(RT) = a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p;
+    };
+    syntax = ("%i %f,%f",RT,VBigNest);
+  }
+
+  define (instr=boo) {
+    attrs = (type1);
+    type = OneWord;
+    fields = (
+              (bits(0),0),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+      	      (bits(4),RX(0)),
+              (bits(5),RX(1)),
+              (bits(6),RX(2)),		
+              (bits(7),RX(3)),		
+              (bits(8),Ra(0)),		
+              (bits(9),Ra(1)),
+              (bits(10),Rb(0)),
+              (bits(11),Rb(1)),
+              (bits(12),Rt(0)),
+              (bits(13),Rt(1)),
+              (bits(14),0),
+              (bits(15),SG),
+              (bits(16),reserved),
+              (bits(17),reserved)
+              );
+    action = {
+      int a = (RX + Ra).uint32();
+      int b = (RX + Rb).uint32();
+      int t = (RX + Rt).uint32();
+      GPR(t) = GPR(a) + GPR(b);
+    };
+    dsyntax = ("%i r%f,r%f,r%f",(RX+Rt),(RX+Ra),(RX+Rb));
+  }
+
+  unsigned find_min(unsigned a,unsigned b,unsigned c) {
+    if (a < b) {
+      if (a < c) {
+        return a;
+      } else {
+        return c;
+      }
+    } else {
+      if (b < c) {
+        return b;
+      } else {
+        return c;
+      }
+    }
+  }
+
+  define (instr=boo_alias) {
+    alias = boo(RX(find_min(RT,RA,RX)),Ra(RA-find_min(RT,RA,RX)),Rb(RX-find_min(RT,RA,RX)),Rt(RT-find_min(RT,RA,RX)));
+    asm_rules = R1;
+    syntax = ("boo %f,%f,%f",RT,RA,RX);
+  }
+
+  define (instr=bar) {
+    attrs = (type1);
+    type = OneWord;
+    fields = (
+              (bits(0),0),
+              (bits(1),1),
+              (bits(2),0),
+              (bits(3),1),
+      	      (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),		
+              (bits(7),0),		
+              (bits(8),Flag(0)),		
+              (bits(9),Flag(1)),
+              (bits(10),RT(0)),
+              (bits(11),RT(1)),
+              (bits(12),RT(2)),
+              (bits(13),RT(3)),
+              (bits(14),0),
+              (bits(15),SG),
+              (bits(16),reserved),
+              (bits(17),reserved)
+              );
+    action = {
+      switch (Flag.uint32()) {
+      case 0:
+      GPR(RT) = GPR(RT) + 1;
+      break;
+      case 1:
+      GPR(RT) = GPR(RT) - 1;
+      break;
+      case 2:
+      GPR(RT) = GPR(RT) << 1;
+      break;
+      case 3:
+      GPR(RT) = GPR(RT) >> 1;
+      break;
+      } 
+    };
+    syntax = ("%i %f %f",Flag,RT);
+  }
+
+  unsigned foozle(unsigned b)
+  {
+    return (1 << b) - 1;
+  }
+
+  define (instr=mvv) {
+    alias = mv(RA(RA),RT(RT),IMM(foozle(BB)));
+    syntax = ("%i %f,%f,%f",RA,BB,RT);
+  }
+
+  define(instr=halt)  {
+    attrs = (type1);
+    type = OneWord;
+    fields = (
+              (bits(14,0),0),
+              (bits(15),SG),
+              (bits(17,16),reserved)
+              );
+    action = { halt(); };
+    syntax = ("%i");
+  }
+
+  define (aspect=dalue_decr) {
+    if_defined = dalu;
+    instr_pre_exec = true;
+    action = {
+      DCNT = DCNT - 1;
+    };
+  }
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+    DCNT = 1;
+  };    
+
+  // This is just here to test that post-packet-commit occurs after 
+  post_packet_commit = func() {
+    if (GPR(0) == "0xdeadbeef") {
+      info(1,"Got 0xdeadbeef for GPR0!!");
+    }
+  };
+
+  post_exec = func() {
+    VSIZE = VSIZE - 1;
+    if (VSIZE == 0) {
+      setPacketPosition(0);
+      VSIZE = 1;
+    }
+  };
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  void set_high_bits(unsigned &hb,InstrInfo &ii)
+  {
+    hb <<= 1;
+    if (ii.instrHasField(RT)) {
+      hb |= (ii.RT >> 3) & 1;
+    }
+    hb <<= 1;
+    if (ii.instrHasField(RA)) {
+      hb |= (ii.RA >> 3) & 1;
+    }
+  }
+
+  post_packet_asm = func(InstrBundle b) {
+    VlesSize = b.size();
+    unsigned hb = 0;
+    unsigned dcnt = 0;    
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (b[i].instrBlk(dalu)) {
+        // DALU instruction:  Encode high-register.
+        if (++dcnt > 2) {
+          error(1,"Too many DALU instructions in packet.");
+        }
+        // For testing.
+        if (b[i].RT > 16 || b[i].RA > 16) {
+          error(1,"Range error on high-register encoding.");
+        }
+        set_high_bits(hb,b[i]);
+      }
+    }
+    HighReg = hb;
+  } ;
+ 
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (prefix,type1);
+    disasm_instrtables = (prefix,type1); 
+    explicit_regs = true;	
+
+    define(rule=R1) {
+      action = func (InstrInfo) {
+        unsigned min = find_min(RT,RA,RX);
+        if ( (RA - min) > 3) {
+          error(1,"RA larger than 2-bit window.");
+        }
+        if ( (RX - min) > 3) {
+          error(1,"RX larger than 2-bit window.");
+        }
+        if ( (RT - min) > 3) {
+          error(1,"RT larger than 2-bit window.");
+        }
+      };
+    }
+   
+  };
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

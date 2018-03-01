@@ -1,0 +1,993 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+
+
+.. _adl-internal-target-1:
+Registers
+---------
+
+
+.. _adl-internal-target-2:
+*EMR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="50%" class="field">H<table class="subfield"><tr>
+   <td class="subfieldunused" title="Reserved" width="31.25%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[31,27]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td class="subfield" width="6.25%">MEM[26]</td>
+   <td class="subfield" width="6.25%">EAP[25]</td>
+   <td class="subfield" width="6.25%">SDD[24]</td>
+   <td class="subfield" width="6.25%">GP6[23]</td>
+   <td class="subfield" width="6.25%">GP5[22]</td>
+   <td class="subfield" width="6.25%">GP4[21]</td>
+   <td class="subfield" width="6.25%">GP3[20]</td>
+   <td class="subfield" width="6.25%">GP2[19]</td>
+   <td class="subfield" width="6.25%">GP1[18]</td>
+   <td class="subfield" width="6.25%">GP0[17]</td>
+   <td class="subfield" width="6.25%">BEM[16]</td>
+   </tr></table>
+   </td>
+   <td colspan="2" width="50%" class="field">L<table class="subfield"><tr>
+   <td class="subfieldunused" title="Reserved" width="68.75%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[15,5]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td class="subfield" width="6.25%">ILPR[4]</td>
+   <td class="subfield" width="6.25%">NMID[3]</td>
+   <td class="subfield" width="6.25%">DOVF[2]</td>
+   <td class="subfield" width="6.25%">ILST[1]</td>
+   <td class="subfield" width="6.25%">ILIN[0]</td>
+   </tr></table>
+   </td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">16</td>
+   <td class="lefteven">15</td><td class="righteven">0</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Exception and Mode Register
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - L
+       -  [15,0] 
+       - 
+     * - ILIN
+       -  [0] 
+       - 
+     * - ILST
+       -  [1] 
+       - 
+     * - DOVF
+       -  [2] 
+       - 
+     * - NMID
+       -  [3] 
+       - 
+     * - ILPR
+       -  [4] 
+       - 
+     * - H
+       -  [31,16] 
+       - 
+     * - BEM (read-only)
+       -  [16] 
+       - 
+     * - GP0 (read-only)
+       -  [17] 
+       - 
+     * - GP1 (read-only)
+       -  [18] 
+       - 
+     * - GP2 (read-only)
+       -  [19] 
+       - 
+     * - GP3 (read-only)
+       -  [20] 
+       - 
+     * - GP4 (read-only)
+       -  [21] 
+       - 
+     * - GP5 (read-only)
+       -  [22] 
+       - 
+     * - GP6 (read-only)
+       -  [23] 
+       - 
+     * - SDD
+       -  [24] 
+       - 
+     * - EAP
+       -  [25] 
+       - 
+     * - MEM (read-only)
+       -  [26] 
+       - 
+
+
+.. _adl-internal-target-3:
+*LC*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">LC</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-4:
+*PC*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">PC</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-5:
+*SR*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="50%" class="field">H<table class="subfield"><tr>
+   <td class="subfield" width="6.25%">P1[31]</td>
+   <td class="subfield" width="6.25%">P2[30]</td>
+   <td class="subfield" width="6.25%">P3[29]</td>
+   <td class="subfield" width="6.25%">P4[28]</td>
+   <td class="subfield" width="6.25%">P5[27]</td>
+   <td class="subfieldunused" title="Reserved" width="6.25%">[26]</td>
+   <td class="subfield" width="31.25%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I[25,21]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td class="subfield" width="6.25%">OVE[20]</td>
+   <td class="subfield" width="6.25%">DI[19]</td>
+   <td class="subfield" width="6.25%">EXP[18]</td>
+   <td class="subfield" width="6.25%">PE[17]</td>
+   <td class="subfieldunused" title="Reserved" width="6.25%">[16]</td>
+   </tr></table>
+   </td>
+   <td colspan="2" width="50%" class="field">L<table class="subfield"><tr>
+   <td class="subfieldunused" title="Reserved" width="12.5%">&nbsp;&nbsp;&nbsp;&nbsp;[15,14]&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td class="subfield" width="6.25%">ASPA[13]</td>
+   <td class="subfield" width="6.25%">W20[12]</td>
+   <td class="subfieldunused" title="Reserved" width="25%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[11,8]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+   <td class="subfield" width="6.25%">SM2[7]</td>
+   <td class="subfield" width="6.25%">S[6]</td>
+   <td class="subfield" width="12.5%">&nbsp;&nbsp;SCM[5,4]&nbsp;&nbsp;</td>
+   <td class="subfield" width="6.25%">RM[3]</td>
+   <td class="subfield" width="6.25%">SM[2]</td>
+   <td class="subfield" width="6.25%">T[1]<table class="subfield"><tr>
+   <td class="subfield" width="100%">P0[1]</td>
+   </tr></table>
+   </td>
+   <td class="subfield" width="6.25%">C[0]</td>
+   </tr></table>
+   </td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">16</td>
+   <td class="lefteven">15</td><td class="righteven">0</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Status Register
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - L
+       -  [15,0] 
+       - 
+     * - C
+       -  [0] 
+       - 
+     * - P0
+       -  [1] 
+       - 
+     * - T
+       -  [1] 
+       - 
+     * - SM
+       -  [2] 
+       - 
+     * - RM
+       -  [3] 
+       - 
+     * - SCM
+       -  [5,4] 
+       - 
+     * - S
+       -  [6] 
+       - 
+     * - SM2
+       -  [7] 
+       - 
+     * - W20
+       -  [12] 
+       - 
+     * - ASPA
+       -  [13] 
+       - 
+     * - H
+       -  [31,16] 
+       - 
+     * - PE
+       -  [17] 
+       - 
+     * - EXP
+       -  [18] 
+       - 
+     * - DI
+       -  [19] 
+       - 
+     * - OVE
+       -  [20] 
+       - 
+     * - I
+       -  [25,21] 
+       - 
+     * - P5
+       -  [27] 
+       - 
+     * - P4
+       -  [28] 
+       - 
+     * - P3
+       -  [29] 
+       - 
+     * - P2
+       -  [30] 
+       - 
+     * - P1
+       -  [31] 
+       - 
+
+
+.. _adl-internal-target-6:
+Register Files
+--------------
+
+
+.. _adl-internal-target-7:
+*GPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">GPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  8
+
+
+.. _adl-internal-target-8:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-c">&nbsp;&nbsp;C&nbsp;&nbsp;</a> <a href="#ifield-section-e">&nbsp;&nbsp;E&nbsp;&nbsp;</a> <a href="#ifield-section-i">&nbsp;&nbsp;I&nbsp;&nbsp;</a> <a href="#ifield-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#ifield-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#ifield-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> <a href="#ifield-section-t">&nbsp;&nbsp;T&nbsp;&nbsp;</a> <a href="#ifield-section-v">&nbsp;&nbsp;V&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-c:
+
+
+.. _adl-internal-target-9:
+*CE*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+
+
+.. _adl-internal-target-10:
+*CE1*
+`````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+
+
+.. _adl-internal-target-11:
+*CondEx*
+````````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Prefix
+     - True
+   * - Index
+     - 2
+
+
+.. _adl-internal-target-12:
+*CondExec*
+``````````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Prefix
+     - True
+   * - Index
+     - 2
+
+
+.. _ifield-section-e:
+
+
+.. _adl-internal-target-13:
+*Enc1*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 16
+
+
+.. _adl-internal-target-14:
+*Enc2*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 32
+
+
+.. _ifield-section-i:
+
+
+.. _adl-internal-target-15:
+*IFT*
+`````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 2
+   * - Prefix
+     - True
+   * - Index
+     - 2
+
+
+.. _adl-internal-target-16:
+*IMM*
+`````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+   * - Signed
+     - True
+
+
+Semantics:  **SignExtend(IMM)**
+
+
+.. _ifield-section-o:
+
+
+.. _adl-internal-target-17:
+*OPCD*
+``````
+
+
+.. _ifield-section-r:
+
+
+.. _adl-internal-target-18:
+*RA*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+
+
+Reference: **`GPR <#adl-internal-target-7>`__**
+
+Permitted values:
+  r0 - r7
+
+
+.. _adl-internal-target-19:
+*RB*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+
+
+Reference: **`GPR <#adl-internal-target-7>`__**
+
+Permitted values:
+  r0 - r7
+
+
+.. _adl-internal-target-20:
+*RT*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+
+
+Reference: **`GPR <#adl-internal-target-7>`__**
+
+Permitted values:
+  r0 - r7
+
+
+.. _ifield-section-s:
+
+
+.. _adl-internal-target-21:
+*SG*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 1
+
+
+.. _adl-internal-target-22:
+*Src1*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+
+
+.. _adl-internal-target-23:
+*Src2*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+
+
+.. _ifield-section-t:
+
+
+.. _adl-internal-target-24:
+*Trg*
+`````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+
+
+.. _ifield-section-v:
+
+
+.. _adl-internal-target-25:
+*VlesSize*
+``````````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 3
+   * - Prefix
+     - True
+
+
+.. _adl-internal-target-26:
+Instructions
+------------
+
+.. raw:: html
+
+   <a href="#instr-section-a">&nbsp;&nbsp;A&nbsp;&nbsp;</a> <a href="#instr-section-h">&nbsp;&nbsp;H&nbsp;&nbsp;</a> <a href="#instr-section-i">&nbsp;&nbsp;I&nbsp;&nbsp;</a> <a href="#instr-section-l">&nbsp;&nbsp;L&nbsp;&nbsp;</a> <a href="#instr-section-m">&nbsp;&nbsp;M&nbsp;&nbsp;</a> <a href="#instr-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#instr-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> 
+
+
+.. _instr-section-a:
+
+
+.. _adl-internal-target-27:
+*add RA,RB,RT*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+        SR = 0 ;
+    }
+    
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `SR <#adl-internal-target-5>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="6.25%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="18.75%" class="field">RT</td>
+     <td colspan="2" width="18.75%" class="field">RB</td>
+     <td colspan="2" width="18.75%" class="field">RA</td>
+     <td colspan="2" width="12.5%" class="field">CE</td>
+     <td colspan="2" width="25%" class="field">1001</td>
+     </tr>
+     <tr>
+     <td class="singleodd">15</td>
+     <td class="lefteven">14</td><td class="righteven">12</td>
+     <td class="leftodd">11</td><td class="rightodd">9</td>
+     <td class="lefteven">8</td><td class="righteven">6</td>
+     <td class="leftodd">5</td><td class="rightodd">4</td>
+     <td class="lefteven">3</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+
+Operands:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `Src1 <#adl-internal-target-22>`__
+       - `RA <#adl-internal-target-18>`__
+  
+     * - `Src2 <#adl-internal-target-23>`__
+       - `RB <#adl-internal-target-19>`__
+  
+     * - `Trg <#adl-internal-target-24>`__
+       - `RT <#adl-internal-target-20>`__
+  
+
+
+Attributes:
+  first, type1
+
+
+.. _instr-section-h:
+
+
+.. _adl-internal-target-28:
+*halt CE1, SG(reserved)*
+````````````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        halt (  ) ;
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="6.25%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="93.75%" class="field">000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000</td>
+     </tr>
+     <tr>
+     <td class="singleodd">15</td>
+     <td class="lefteven">14</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  first, type1
+
+
+.. _instr-section-i:
+
+
+.. _adl-internal-target-29:
+*ift1*
+``````
+
+
+.. _adl-internal-target-30:
+*ift6*
+``````
+
+
+.. _instr-section-l:
+
+
+.. _adl-internal-target-31:
+*LPREFIX, VlesSize VlesSize, IFT => IFT*
+````````````````````````````````````````
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="6.25%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="18.75%" class="field">VlesSize</td>
+     <td colspan="2" width="37.5%" class="field">IFT</td>
+     <td colspan="2" width="37.5%" class="field">00&nbsp;/&nbsp;0011</td>
+     </tr>
+     <tr>
+     <td class="singleodd">15</td>
+     <td class="lefteven">14</td><td class="righteven">12</td>
+     <td class="leftodd">11</td><td class="rightodd">6</td>
+     <td class="lefteven">5</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  prefix
+
+
+.. _instr-section-m:
+
+
+.. _adl-internal-target-32:
+*mv  RA,IMM,RT*
+```````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = GPR ( RA ) + IMM ;
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="6.25%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="18.75%" class="field">RT</td>
+     <td colspan="2" width="18.75%" class="field">IMM</td>
+     <td colspan="2" width="18.75%" class="field">RA</td>
+     <td colspan="2" width="12.5%" class="field">CE</td>
+     <td colspan="2" width="25%" class="field">1011</td>
+     </tr>
+     <tr>
+     <td class="singleodd">15</td>
+     <td class="lefteven">14</td><td class="righteven">12</td>
+     <td class="leftodd">11</td><td class="rightodd">9</td>
+     <td class="lefteven">8</td><td class="righteven">6</td>
+     <td class="leftodd">5</td><td class="rightodd">4</td>
+     <td class="lefteven">3</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  first, type1
+
+
+.. _instr-section-o:
+
+
+.. _adl-internal-target-33:
+*OneWord CondExec, Enc1*
+````````````````````````
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="100%" class="field">Enc1</td>
+     </tr>
+     <tr>
+     <td class="leftodd">15</td><td class="rightodd">0</td>
+     </tr>
+     </table>
+     
+
+.. _instr-section-s:
+
+
+.. _adl-internal-target-34:
+*sub RA,RB,RT*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( RT ) = GPR ( RA ) - GPR ( RB ) ;
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="6.25%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="18.75%" class="field">RT</td>
+     <td colspan="2" width="18.75%" class="field">RB</td>
+     <td colspan="2" width="18.75%" class="field">RA</td>
+     <td colspan="2" width="12.5%" class="field">CE</td>
+     <td colspan="2" width="25%" class="field">1101</td>
+     </tr>
+     <tr>
+     <td class="singleodd">15</td>
+     <td class="lefteven">14</td><td class="righteven">12</td>
+     <td class="leftodd">11</td><td class="rightodd">9</td>
+     <td class="lefteven">8</td><td class="righteven">6</td>
+     <td class="leftodd">5</td><td class="rightodd">4</td>
+     <td class="lefteven">3</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  first, type1
+
+
+.. _adl-internal-target-35:
+Instructions by Attribute
+-------------------------
+
+
+.. _adl-internal-target-36:
+*first*
+```````
+
+* `add RA,RB,RT <#adl-internal-target-27>`__
+* `halt CE1, SG(reserved) <#adl-internal-target-28>`__
+* `mv  RA,IMM,RT <#adl-internal-target-32>`__
+* `sub RA,RB,RT <#adl-internal-target-34>`__
+
+.. _adl-internal-target-37:
+*prefix*
+````````
+
+* `LPREFIX, VlesSize VlesSize, IFT => IFT <#adl-internal-target-31>`__
+
+.. _adl-internal-target-38:
+*type1*
+```````
+
+* `add RA,RB,RT <#adl-internal-target-27>`__
+* `halt CE1, SG(reserved) <#adl-internal-target-28>`__
+* `mv  RA,IMM,RT <#adl-internal-target-32>`__
+* `sub RA,RB,RT <#adl-internal-target-34>`__
+
+.. _adl-internal-target-39:
+Core-level Hook Functions
+-------------------------
+
+Action taken after instruction execution:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+        if ( eop ( VlesSize ) ) {
+            icount = i0 ;
+            info ( 1 , "eop" ) ;
+            setPacketPosition ( 0 ) ;
+        } else {
+            update_icount (  ) ;
+        }
+        if ( getCurrentInstrTable (  ) == prefix ) {
+            setCurrentInstrTable ( type1 ) ;
+        }
+    }
+    
+  The code above uses the following routines (directly or indirectly): `eop <#adl-internal-target-40>`__, `update_icount <#adl-internal-target-41>`__
+  
+
+.. _adl-internal-target-42:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+
+In addition, the following helper routines are defined for P:
+
+
+.. _adl-internal-target-40:
+*eop*
+`````
+
+  
+  .. code_block:: cpp
+     :color:
+  
+     bool eop ( int n ) {
+        return ( int  ) icount == n ;
+    }
+    
+
+.. _adl-internal-target-41:
+*update\_icount*
+````````````````
+
+  
+  .. code_block:: cpp
+     :color:
+  
+     void update_icount (  ) {
+        switch ( icount ) {
+            case i0 : icount = i1 ;
+            break ;
+            case i1 : icount = i2 ;
+            break ;
+            case i2 : icount = i3 ;
+            break ;
+            case i3 : icount = i4 ;
+            break ;
+            case i4 : icount = i0 ;
+            break ;
+        }
+    }
+    

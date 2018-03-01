@@ -1,0 +1,5 @@
+dep2.adl:59: Bad resource 'Foo' for dependency item.
+dep2.adl:69: Malformed sequence number specified.
+dep2.adl:96: Bad sequence number:  First access is $1.
+dep2.adl:97: Expected an expression of the form 'trg = srcs' for a dependency-tracking item.
+dep2.adl:97: No sources were specified for this dependency expression.

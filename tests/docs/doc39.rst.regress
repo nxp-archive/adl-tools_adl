@@ -1,0 +1,299 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: rubber
+============
+
+
+.. _adl-internal-target-1:
+Registers
+---------
+
+
+.. _adl-internal-target-2:
+*cIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">cIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Current instruction address
+  
+  
+
+
+.. _adl-internal-target-3:
+*nIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">nIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Next instruction address
+  
+  
+
+
+.. _adl-internal-target-4:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-l">&nbsp;&nbsp;L&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-l:
+
+
+.. _adl-internal-target-5:
+*LI18R2*
+````````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 18
+   * - Shift
+     - 2
+   * - Addressing
+     - Absolute
+   * - Relocation Name
+     - R_PMEM_18
+   * - Relocation Value
+     - 2
+   * - Relocation Value Right Shift
+     - 2
+
+Description:
+
+  Immediate address field for jump instruction
+  
+  
+
+
+Semantics:  **LI18R2 << 2**
+
+
+.. _adl-internal-target-6:
+*LI18R3*
+````````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 18
+   * - Addressing
+     - Absolute
+   * - Relocation Name
+     - R_MEM_18
+   * - Relocation Value
+     - 3
+   * - Relocation Value Right Shift
+     - 0
+
+Description:
+
+  Immediate address field for jump instruction
+  
+  
+
+
+.. _adl-internal-target-7:
+Instructions
+------------
+
+
+.. _adl-internal-target-8:
+*done*
+``````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        halt (  ) ;
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="100%" class="field">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000</td>
+     </tr>
+     <tr>
+     <td class="leftodd">31</td><td class="rightodd">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-9:
+*jmp LI18R2*
+````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        nIA = LI18R2 ;
+    }
+    
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `nIA <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="6.25%" class="field">10</td>
+     <td colspan="2" width="34.375%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;000</td>
+     <td colspan="2" width="56.25%" class="field">LI18R2</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">31</td><td class="rightodd">30</td>
+     <td class="lefteven">29</td><td class="righteven">19</td>
+     <td class="leftodd">18</td><td class="rightodd">1</td>
+     <td class="singleeven">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-10:
+*jmp2 LI18R3*
+`````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        nIA = LI18R3 ;
+    }
+    
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `nIA <#adl-internal-target-3>`__
+       - Entire Register
+       - 
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="6.25%" class="field">11</td>
+     <td colspan="2" width="34.375%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;000</td>
+     <td colspan="2" width="56.25%" class="field">LI18R3</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">31</td><td class="rightodd">30</td>
+     <td class="lefteven">29</td><td class="righteven">19</td>
+     <td class="leftodd">18</td><td class="rightodd">1</td>
+     <td class="singleeven">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-11:
+*nop*
+`````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="100%" class="field">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;1111&nbsp;/&nbsp;1111&nbsp;/&nbsp;1111&nbsp;/&nbsp;1111</td>
+     </tr>
+     <tr>
+     <td class="leftodd">31</td><td class="rightodd">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-12:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+

@@ -1,0 +1,46 @@
+#
+# This tests to make sure that safe-mode correctly captures cache state
+# when it issues the timed requests.  It does this by executing a couple of
+# loads which target different translations with different cache-inhibited
+# states.  Since the timed loads occur after the initial execution, if
+# we haven't captured the state, then the cache behavior will be incorrect.
+#
+
+= asm
+  
+  lwz r1,0x1000(r0)
+  lwz r2,0x2000(r0)
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA     d=0
+
+RD n=CCR     d=0x80000000
+RD n=HDBCR0  d=0x80000000
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x0 SX=1 SR=1 SW=1 EPN=0x4
+
+# ea=0x2000 ra=0xB2000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x2c8 WIMG=0x4 SX=1 SR=1 SW=1 EPN=0x8
+
+MD n=Mem ra=0x000a1000 d=0xdeadbeef
+MD n=Mem ra=0x000b2000 d=0x12345678
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x80402000	#	lwz r2,0x2000(r0)
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678
+
+# We should only have one cache line allocated, since the second access is to
+# cache-inhibited space.  If we're not tracking our cache status properly, we'll
+# actually end up with no cache lines allocated, because the inhibited-status
+# will be set by the second access by the time the first timed-access is made.
+CD n=L1d set=32 way=0 ra=0x00000000000a1000 valid=1 dirty=0 locked=0 d=0xdeadbeef,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000

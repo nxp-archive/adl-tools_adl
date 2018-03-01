@@ -1,0 +1,79 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ const int RegSize = 64 ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "gprs"
+  Size:  32
+  Width:  32
+  Attributes:  foo stuff
+  -------------------------------
+  Name:  "sprs"
+  Size:  1024
+  Contained registers:
+    20:  a
+    21:  b
+    22:  c
+    50:  d
+  Width:  32
+  Attributes:  foo
+  -------------------------------
+Registers:
+  Name:  "CR"
+  Width:  32
+  -------------------------------
+  Name:  "a"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia foo
+  Documention:
+
+ This is a sample register!. 
+  -------------------------------
+  Name:  "b"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "c"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "d"
+  Usage:  read, written
+  Width:  32
+  Attributes:  stuff
+  -------------------------------
+Current-instruction-address register:  a
+Next-instruction-address register:  a
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+
+Helper Functions:
+  stuff1:
+template < typename T >  void stuff1 ( T x , T y ) {
+    a = x ;
+    b = c + y ;
+}
+    Source Registers:  c 
+    Target Registers:  a b 
+
+  stuff2:
+template < typename A , typename B >  void stuff2 ( A x , B y ) {
+     int i = 10 ;
+}
+
+User Type Declarations:
+  template < class T >  class Foo  {
+} ;
+-------------------------------
+

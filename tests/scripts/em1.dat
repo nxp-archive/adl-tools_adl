@@ -1,0 +1,93 @@
+#
+# Tests the external memory with DMI cache.  Contains some loops and
+# some repeated memory accesses so that we test hits and misses in
+# the cache.
+#
+
+= asm 
+
+	addi r1,r1,1
+    addi r1,r1,1
+	lwz r2,0x1000(r0)
+L1:
+	lwz r3,0x1004(r0)
+	add r2,r2,r3
+	stw r2,0x2000(r0)
+	addi r4,r2,1
+	stw r4,0x2004(r0)
+	bdnz L1
+	mtspr 52,r20  # Turn on the cache.
+	lwz r10,0x601e(r0)
+	lwz r11,0x600d(r0)
+	stw r10,0x701a(r0)
+	stw r11,0x700b(r0)
+	dcbf r21,r0
+	addi r21,r21,0x1000
+	dcbf r21,r0
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x80401000	#	lwz r2,0x1000(r0)
+MD n=Mem ra=0x0000000c d=0x80601004	#	lwz r3,0x1004(r0)
+MD n=Mem ra=0x00000010 d=0x7C421A14	#	add r2,r2,r3
+MD n=Mem ra=0x00000014 d=0x90402000	#	stw r2,0x2000(r0)
+MD n=Mem ra=0x00000018 d=0x38820001	#	addi r4,r2,1
+MD n=Mem ra=0x0000001c d=0x90802004	#	stw r4,0x2004(r0)
+MD n=Mem ra=0x00000020 d=0x4200FFEC	#	bdnz L1
+MD n=Mem ra=0x00000024 d=0x7E940BA6	#	mtspr 52,r20  # Turn on the cache.
+MD n=Mem ra=0x00000028 d=0x8140601E	#	lwz r10,0x601e(r0)
+MD n=Mem ra=0x0000002c d=0x8160600D	#	lwz r11,0x600d(r0)
+MD n=Mem ra=0x00000030 d=0x9140701A	#	stw r10,0x701a(r0)
+MD n=Mem ra=0x00000034 d=0x9160700B	#	stw r11,0x700b(r0)
+MD n=Mem ra=0x00000038 d=0x7C1500AC	#	dcbf r21,r0
+MD n=Mem ra=0x0000003c d=0x3AB51000	#	addi r21,r21,0x1000
+MD n=Mem ra=0x00000040 d=0x7C1500AC	#	dcbf r21,r0
+# </GEN>
+
+RD n=CTR d=10
+
+RD n=GPR i=20 d=0xc0000000
+
+RD n=GPR i=21 d=0x6000
+
+MD n=Mem ra=0x1000 d=0xabcd0010
+MD n=Mem ra=0x1004 d=0x00000010
+
+MD n=Mem ra=0x2000 d=0
+MD n=Mem ra=0x2004 d=0
+
+MD n=Mem ra=0x601c d=0x0000dead
+MD n=Mem ra=0x6020 d=0xbeef0000
+MD n=Mem ra=0x600c d=0x00123456
+MD n=Mem ra=0x6010 d=0x78000000
+MD n=Mem ra=0x7018 d=0
+MD n=Mem ra=0x701c d=0
+MD n=Mem ra=0x7008 d=0
+MD n=Mem ra=0x700c d=0
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0xabcd00b0
+RD n=GPR i=3 d=0x00000010
+RD n=GPR i=4 d=0xabcd00b1
+
+MD n=Mem ra=0x1000 d=0xabcd0010
+MD n=Mem ra=0x1004 d=0x00000010
+MD n=Mem ra=0x2000 d=0xabcd00b0
+MD n=Mem ra=0x2004 d=0xabcd00b1
+
+MD n=Mem ra=0x601c d=0x0000dead
+MD n=Mem ra=0x6020 d=0xbeef0000
+MD n=Mem ra=0x600c d=0x00123456
+MD n=Mem ra=0x6010 d=0x78000000
+
+MD n=Mem ra=0x7018 d=0x0000dead
+MD n=Mem ra=0x701c d=0xbeef0000
+MD n=Mem ra=0x7008 d=0x00000012
+MD n=Mem ra=0x700c d=0x34567800

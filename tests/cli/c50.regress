@@ -1,0 +1,26 @@
+Watchpoint at 0x2000 of 4 bytes
+Simulation halted at address: 0x000000000000000c
+r1 is 0x64
+r2 is 0x14
+Watchpoint at 0x2010 of 4 bytes (0x1e)
+Simulation halted at address: 0x0000000000000014
+r1 is 0x64
+r2 is 0x1e
+Mem[0x2010] is 0x1e
+Watchpoint at 0x2014 of 4 bytes (0x28)
+Simulation halted at address: 0x000000000000001c
+r1 is 0x64
+r2 is 0x28
+Mem[0x2014] is 0x28
+Watchpoint at 0x2018 of 4 bytes (0x32)
+Simulation halted at address: 0x0000000000000024
+r1 is 0x64
+r2 is 0x32
+Mem[0x2018] is 0x32
+Watchpoint at 0x201c of 4 bytes (0x3c)
+Simulation halted at address: 0x000000000000002c
+r1 is 0x64
+r2 is 0x3c
+Mem[0x201c] is 0x3c
+
+Instructions executed: 16

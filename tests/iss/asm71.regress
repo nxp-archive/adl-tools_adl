@@ -1,0 +1,5 @@
+asm71.s: Assembler messages:
+asm71.s: Warning: This is an micro instruction.
+asm71.s:1: Warning: This is an micro instruction.
+asm71.s:2: Warning: This is an micro instruction.
+asm71.s:3: Warning: This is not an micro instruction.

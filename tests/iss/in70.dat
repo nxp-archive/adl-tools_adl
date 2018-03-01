@@ -1,0 +1,68 @@
+#
+# Tests the use of read/write hooks on sparse register-file entries.
+#
+
+= asm
+
+  mtspr 301,r2
+  mtspr 301,r3
+  mtspr 301,r4
+  mfspr r5,301
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C4D4BA6	#	mtspr 301,r2
+MD n=Mem ra=0x00000004 d=0x7C6D4BA6	#	mtspr 301,r3
+MD n=Mem ra=0x00000008 d=0x7C8D4BA6	#	mtspr 301,r4
+MD n=Mem ra=0x0000000c d=0x7CAD4AA6	#	mfspr r5,301
+# </GEN>
+
+CORE n=:P
+
+RD n=FOO3 d=10
+RD n=FOO4 d=20
+
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=21
+RD n=GPR i=4 d=22
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c4d4ba6
+INSTR op=0x7c4d4ba6                                     asm="mtspr   2,0x12d"
+R n=FOO2 d=0x0000000000000001
+R n=FOO3 d=0x00000014
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c6d4ba6
+INSTR op=0x7c6d4ba6                                     asm="mtspr   3,0x12d"
+R n=FOO2 d=0x0000000000000002
+R n=FOO3 d=0x00000015
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c8d4ba6
+INSTR op=0x7c8d4ba6                                     asm="mtspr   4,0x12d"
+R n=FOO2 d=0x0000000000000003
+R n=FOO3 d=0x00000016
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7cad4aa6
+INSTR op=0x7cad4aa6                                     asm="mfspr   5,0x12d"
+R n=FOO2 d=0x0000000000000002
+R n=GPR i=5 d=0x00000016
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x0                                    asm="halt    "
+
+RESULTS
+
+RD n=GPR i=2 d=0x00000014
+RD n=GPR i=3 d=0x00000015
+RD n=GPR i=4 d=0x00000016
+RD n=GPR i=5 d=0x00000016
+
+RD n=FOO2 d=0x0000000000000002
+

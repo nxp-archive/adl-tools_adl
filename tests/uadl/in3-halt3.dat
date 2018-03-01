@@ -1,0 +1,88 @@
+#
+# Options:
+#   ./dlx2 in3.dat --script=haltn.cli --script-arg=0x8 --script-arg=3 -trace 
+#
+
+TEST id=0
+INIT
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=1
+R n=GPR i=2 d=0x00000082
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=1
+R n=GPR i=3 d=0x00000009
+R n=CR d=0x40000000
+R n=XER d=0x20000000
+CTIME t=5
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=2
+B taken=1 ea=0x0
+CTIME t=8
+BP ea=0x8
+
+I ea=0x0 id=4
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=7
+R n=GPR i=2 d=0x000000a0
+CTIME t=11
+
+I ea=0x4 id=5
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=7
+R n=GPR i=3 d=0x00000008
+R n=CR d=0x40000000
+R n=XER d=0x20000000
+CTIME t=11
+
+I ea=0x8 id=6
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=8
+B taken=1 ea=0x0
+CTIME t=14
+BP ea=0x8
+
+I ea=0x0 id=7
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=13
+R n=GPR i=2 d=0x000000be
+CTIME t=17
+
+I ea=0x4 id=8
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=13
+R n=GPR i=3 d=0x00000007
+R n=CR d=0x40000000
+R n=XER d=0x20000000
+CTIME t=17
+
+I ea=0x8 id=9
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=14
+B taken=1 ea=0x0
+CTIME t=20
+BP ea=0x8
+
+RESULTS
+RD n=GPR i=1 d=0x0000001e
+RD n=GPR i=2 d=0x000000be
+RD n=GPR i=3 d=0x00000007

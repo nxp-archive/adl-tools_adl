@@ -1,0 +1,121 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CR"
+  Usage:  read
+  Width:  32
+    CR[4bits x 8]  
+    EQ[2]   
+    FEX[5]   
+    FX[4]   
+    GT[1]   
+    LT[0]   
+    OX[7]   
+    SO[3]   
+    VX[6]   
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "CTR"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    The counter register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  AA: [30,30] 
+        Absolute address bit.
+    
+  BD: [16,29] 
+        Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    
+  BF: [6,8] [not used] 
+        Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    
+  BI: [11,15] 
+        Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    
+  BO: [6,10] 
+        Field used to specify options for the Branch Conditional instructions.
+    
+  LK: [31,31] 
+        LINK bit.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+Instructions:
+  Name:  bc (rank: 100)
+  Width:  32
+  Branch:  Conditional
+  Fields:  OPCD(16) BO BI BD AA(0) LK(0)
+  Action:  {
+     var foo = 1 ;
+     var bar = 2 ;
+    if ( ( BO & 0x4 ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = getBit ( BO , 2 , 5 ) || ( ( CTR != 0 ) ^ getBit ( BO , 2 , 5 ) ) ;
+     var cond_ok = getBit ( BO , 0 , 5 ) || ( getBit ( CR , BI , 32 ) == getBit ( BO , 1 , 5 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+        NIA = CIA + ( signExtend16 ( BD << 2 ) ) ;
+    }
+}
+  Source Registers:  CIA? CR CTR? 
+  Target Registers:  CTR? NIA? 
+  Helper Functions:  getBit signExtend16 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000003
+    1073741824(40000000):  bc
+
+Helper Functions:
+  getBit:
+ bool getBit ( uint32 r , int index , int width ) {
+    return ( r & ( 1 << ( width - 1 - index ) ) ) >> ( width - 1 - index ) ;
+}
+
+  signExtend16:
+ uint32 signExtend16 ( uint32 i ) {
+    if ( i & 0x8000 ) {
+        i |= 0xffff0000 ;
+    }
+    return i ;
+}
+-------------------------------
+

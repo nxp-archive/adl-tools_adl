@@ -1,0 +1,2 @@
+asm43.s: Assembler messages:
+asm43.s:1: Error: Unrecognized instruction:  'foobar d1,d3'

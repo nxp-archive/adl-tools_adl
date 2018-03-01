@@ -1,0 +1,3 @@
+microinstr7.adl:52: Field width of 25 does not match the width (32) of instructions associated with table instr_micro.
+microinstr7.adl:60: Field width of 25 does not match the width (32) of instructions associated with table instr_micro.
+microinstr7.adl:68: Field width of 25 does not match the width (32) of instructions associated with table instr_micro.

@@ -1,0 +1,61 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+    Primary opcode.
+    
+Instructions:
+  Name:  a (rank: 100)
+  Width:  8
+  Fields:  OPCD(16)
+  Action:  func (  ) {
+    GPR ( 0 ) = GPR ( 1 )[read: GPR(1)] + GPR ( 2 )[read: GPR(2)][write: GPR(0) := GPR ( 1 )[read: GPR(1)] + GPR ( 2 )[read: GPR(2)]] ;
+}
+  Source Registers:  GPR(1) GPR(2) 
+  Target Registers:  GPR(0) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    16(40000000):  a
+-------------------------------
+

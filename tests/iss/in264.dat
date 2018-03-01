@@ -1,0 +1,73 @@
+#
+# Simple MP test to check DAT multi-file mode.
+#
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	addi r3,r3,3
+	addi r4,r4,4
+	addi r5,r5,5
+	stwu r1,0x1000(r30)
+	stwu r2,0x4(r30)
+	stwu r3,0x4(r30)
+	stwu r4,0x4(r30)
+	stwu r5,0x4(r30)
+	.long 0x0
+	addi r10,r10,10
+	addi r11,r11,11
+	addi r12,r12,12
+	addi r13,r13,13
+	addi r14,r14,14
+	stwu r10,0x2000(r30)
+	stwu r11,0x4(r30)
+	stwu r12,0x4(r30)
+	stwu r13,0x4(r30)
+	stwu r14,0x4(r30)
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000000c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000010 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000014 d=0x943E1000	#	stwu r1,0x1000(r30)
+MD n=Mem ra=0x00000018 d=0x945E0004	#	stwu r2,0x4(r30)
+MD n=Mem ra=0x0000001c d=0x947E0004	#	stwu r3,0x4(r30)
+MD n=Mem ra=0x00000020 d=0x949E0004	#	stwu r4,0x4(r30)
+MD n=Mem ra=0x00000024 d=0x94BE0004	#	stwu r5,0x4(r30)
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000002c d=0x394A000A	#	addi r10,r10,10
+MD n=Mem ra=0x00000030 d=0x396B000B	#	addi r11,r11,11
+MD n=Mem ra=0x00000034 d=0x398C000C	#	addi r12,r12,12
+MD n=Mem ra=0x00000038 d=0x39AD000D	#	addi r13,r13,13
+MD n=Mem ra=0x0000003c d=0x39CE000E	#	addi r14,r14,14
+MD n=Mem ra=0x00000040 d=0x955E2000	#	stwu r10,0x2000(r30)
+MD n=Mem ra=0x00000044 d=0x957E0004	#	stwu r11,0x4(r30)
+MD n=Mem ra=0x00000048 d=0x959E0004	#	stwu r12,0x4(r30)
+MD n=Mem ra=0x0000004c d=0x95BE0004	#	stwu r13,0x4(r30)
+MD n=Mem ra=0x00000050 d=0x95DE0004	#	stwu r14,0x4(r30)
+# </GEN>
+
+CORE n=:procs:P0
+
+RD n=NIA d=0x0
+
+CORE n=:procs:P1
+
+RD n=NIA d=0x2c
+
+MD n=Mem ra=0x1000 d=0x0
+MD n=Mem ra=0x1004 d=0x0
+MD n=Mem ra=0x1008 d=0x0
+MD n=Mem ra=0x100c d=0x0
+MD n=Mem ra=0x1010 d=0x0
+
+MD n=Mem ra=0x2000 d=0x0
+MD n=Mem ra=0x2004 d=0x0
+MD n=Mem ra=0x2008 d=0x0
+MD n=Mem ra=0x200c d=0x0
+MD n=Mem ra=0x2010 d=0x0
+

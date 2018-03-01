@@ -1,0 +1,8 @@
+cache2.adl:60: No level set for cache.
+cache2.adl:44: L3i cache is split but lower-level caches are already unified.
+cache2.adl:52: Size must be a power of 2.
+cache2.adl:52: Size must be an even number of words.
+cache2.adl:52: Cache linesize must be a power of 2.
+cache2.adl:52: Cacheline size must be an even number of words.
+cache2.adl:52: Cache size must be an even number of cache lines * ways.
+cache2.adl:52: L3d cache is split but lower-level caches are already unified.

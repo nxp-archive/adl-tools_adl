@@ -1,0 +1,54 @@
+#
+# This makes sure that a full write to a register in a parallel architecture is
+# not screwed up by a prior write to a field of that register.
+#
+# Note:  Assembled using as-mod67
+#
+= asm
+
+	nop add r1,r2,r3 mtsr r4
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xB003AD07	#	nop add r1,r2,r3 mtsr r4
+MD n=Mem ra=0x00000004 d=0x3449010D
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=1 d=0x7fffffff
+RD n=GPR i=2 d=0x7fffff00
+RD n=GPR i=4 d=0x12345678
+
+TRACE
+
+
+I ea=0x0 id=1
+INSTR op=0xb003					asm="LPREFIX, VlesSize = 3, HighReg = 0"
+
+I ea=0x2 id=2
+INSTR op=0xad07344900000000					asm=".long 0xad073449"
+INSTR op=0x2b41					asm="nop"
+
+I ea=0x4 id=3
+INSTR op=0x0d12					asm="add r1,r2,r3"
+
+I ea=0x6 id=4
+INSTR op=0x0043					asm="mtsr r4"
+R n=GPR i=3 d=0xfffffeff
+R n=SR d=0x00000001
+R n=SR d=0x12345678
+
+I ea=0x8 id=5
+INSTR op=0x0000000000000000					asm=".long 0x00000000"
+INSTR op=0x0000					asm="halt"
+
+RESULTS
+
+RD n=SR      d=0x12345678
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x7fffffff
+RD n=GPR i=2 d=0x7fffff00
+RD n=GPR i=3 d=0xfffffeff
+RD n=GPR i=4 d=0x12345678

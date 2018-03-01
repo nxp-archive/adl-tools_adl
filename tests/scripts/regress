@@ -1,0 +1,689 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use strict;
+use adl_config;
+use Data::Dumper;
+use Data::Compare;
+
+use vars qw($src $jit_ok $gcc_version );
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+my $iss  = "$src/../iss";
+my $uadl = "$src/../uadl";
+
+# Add unique tests here.  We automatically construct a test list consisting
+# of all models running all assembly files, so if you're just adding a model
+# or an assembly file, add to the Models or DatFiles array instead.
+my @Tests = (
+	# Make sure that we exit with an error on a ADL input file.
+	{
+		cmd     => "../../scripts/adl2iss $src/bad.adl",
+		fail    => 127,
+	},
+	{
+		cmd     => "../../scripts/adl2asm $src/bad.adl",
+		fail    => 127,
+	},
+
+	model_test("./mod1","$iss/in4.dat"),
+	model_test("./ttmod1","$iss/tt1.dat"),
+	{
+		cmd     => "./ttmod1 -h",
+		stderr  => 1,
+		stdout  => 1,
+		checker => \&check_preamble,
+	},
+	{
+		cmd     => "./driver $iss/in4.dat in4.out.dat",
+		checker => sub { check_results("$iss/in4.dat","in4.out.dat"); },
+		temps   => [ "in4.out.dat" ],
+	},
+	# Try the scripting interface from a shared object.
+	{
+		cmd     => "./driver --script $src/c1.cli 'puts \"Hello, world!\"'",
+		checker => sub { check_results("$src/in4.dat","in4.out.dat"); },
+		diff    => "$src/c1.regress",
+		stdio   => 1,
+		stderr  => 1,
+		temps   => [ "in4.out.dat" ],
+	},
+	# This looks at callback functionality.
+	{
+		cmd     => "./driver $src/in4.dat in4.out.dat",
+		checker => sub { check_results("$src/in4.dat","in4.out.dat"); },
+		diff    => "$src/in4.regress",
+		stdio   => 1,
+		temps   => [ "in4.out.dat" ],
+	},
+	# Same as above, but we want to make sure that tracing is off.
+	{
+		cmd     => "./driver -notrace $src/in4.dat in4.out.dat",
+		checker => sub { check_results("$src/in4.dat","in4.out.dat"); },
+		diff    => "$src/in4.regress",
+		stdio   => 1,
+		temps   => [ "in4.out.dat" ],
+	},
+	# Test exception generation.
+	{
+		cmd     => "./driver7 $iss/in6.dat in6.out.dat",
+		checker => sub { check_results("$iss/in6.dat","in6.out.dat",0,0,0,["BCCNT","PCCNT"]); },
+		diff    => "$src/in6.regress",
+		stdio   => 1,
+		temps   => [ "in6.out.dat" ],
+	},
+	# Test asynchronous exception generation with UVP output.  The exception is
+	# the first item, to make sure that we can handle that case.
+	{
+		cmd     => "./driver7 -initial-exception Program $iss/in6.dat in6.out.uvp",
+		checker => sub { check_results("$src/in6.uvp","in6.out.uvp",0,0,0,["BCCNT","PCCNT"]); },
+		temps   => [ "in6.out.uvp" ],
+	},
+	# This makes sure that we can create multiple writers.
+	{
+		cmd     => "./driver $iss/in4.dat in4.out.dat in4.out.uvp",
+		checker => \&check_in4,
+		temps   => [ "in4.out.dat", "in4.out.uvp" ],
+	},
+	# This runs a barebones, standalone ISS w/o cache.
+	{
+		cmd     => "./driver2 > test1.out.dat",
+		checker => sub { check_results("$src/in1.dat","test1.out.dat",0,0,1); },
+		temps   => [ "test1.out.dat" ],
+	},
+	# This runs a barebones, standalone ISS w/o cache.  We want to make
+	# sure that we differentiate between instruction and data addresses
+	# and logging reads for both data and instructions.			 
+	{
+		cmd     => "./driver2 ",
+		checker => sub { check_mem_access($_[0],[
+																				"ir:0x100","ilr:0x100","dlr:0x1000","dr:0x1000","dlr:0x1000",
+																				"ir:0x104","ilr:0x104",
+																				"ir:0x108","ilr:0x108",
+																				"ir:0x10c","ilr:0x10c",
+																				"ir:0x110","ilr:0x110","dlr:0x2000","dw:0x2000","dlr:0x2000",
+																				"ir:0x114","ilr:0x114","dlr:0xfffffffc","dw:0xfffffffc","dlr:0xfffffffc","dlr:0x0","dw:0x0","dlr:0x0",
+																				"ir:0x118","ilr:0x118","dlr:0x1004","dr:0x1004:16","dlr:0x1004",
+																				"ir:0x11c","ilr:0x11c","dlr:0x1004","dr:0x1005:8","dlr:0x1004",
+																				"ir:0x120","ilr:0x120","dlr:0x2004","dw:0x2004:8","dlr:0x2004",
+																				"ir:0x124","ilr:0x124","dlr:0x2008","dw:0x2008:16","dlr:0x2008",
+																				"ir:0x128","ilr:0x128",
+																			]); },
+			  stdio  => 1,			  
+	},
+	# Same thing, but without tracing, so the logging reads shouldn't be present.
+	{
+		cmd     => "./driver2 -no-trace",
+		checker => sub { check_mem_access($_[0],[
+																				"ir:0x100","dr:0x1000",
+																				"ir:0x104",
+																				"ir:0x108",
+																				"ir:0x10c",
+																				"ir:0x110","dw:0x2000",
+																				"ir:0x114","dw:0xfffffffc","dw:0x0",
+																				"ir:0x118","dr:0x1004:16",
+																				"ir:0x11c","dr:0x1005:8",
+																				"ir:0x120","dw:0x2004:8",
+																				"ir:0x124","dw:0x2008:16",
+																				"ir:0x128",
+																			]); },
+			  stdio  => 1,			  
+	},
+	# This runs a barebones, standalone ISS with a cache.
+	{
+		cmd     => "./driver3 > test2.out.dat",
+		checker => sub { check_results("$iss/in104.dat","test2.out.dat",0,0,1); },
+		temps   => [ "test2.out.dat" ],
+	},
+	# This tests mid-instruction external exception generation.
+	{
+		cmd     => "./driver3 -prog 1 > test3.out.dat",
+		checker => sub { check_results("$src/in3.dat","test3.out.dat"); },
+		temps   => [ "test3.out.dat" ],
+	},
+	# Test critical-address logging.
+	{
+		cmd     => "./driver3 -prog 2 -no-trace",
+		checker => sub { check_mem_access($_[0],[
+																				"ir:0x0:32:0x10",
+																				"dr:0x1000:128:0x100c",
+																				"dr:0x2000:128:0x200c",
+																				"dw:0x3000:128:0x3008",
+																			]); },
+			  stdio   => 1,
+	},
+	# Simple test of VLE using external memory.
+	{
+		cmd     => "./driver4 > test4.out.dat",
+		checker => sub { check_results("$src/in2.dat","test4.out.dat"); },
+		temps   => [ "test4.out.dat" ],
+	},
+	# Test the use of a basic ISS which uses the logging-manager facilities.
+	{
+		cmd     => "./driver5 > test5.out.dat",
+		checker => sub { check_results("$src/in1.dat","test5.out.dat",0,0,1,[ "card:R" ],"--no-check-all-card=M"); },
+		temps   => [ "test5.out.dat" ],
+	},
+	# uadl tests
+	model_test("./dlx", "$iss/in3.dat"),
+	model_test("./dlx-lm", "$iss/in3.dat"),
+	model_test("./dlx-jobs", "$iss/in3.dat"),
+	model_test("./dlx-lm-jobs", "$iss/in3.dat"),
+	model_test("./dlx-lm-jobs-safe", "$iss/in3.dat"),
+	# Make sure that breakpoints work with uADL models compiled using separate compilation.
+	{
+		cmd     => "./dlx-lm-jobs-safe $iss/in3.dat --script=$uadl/brkpts1.cli",
+		stdio   => 1,
+		diff    => "$uadl/brkpts1.regress",
+	},
+	{
+		cmd     => "./driver6 -trace > test1.out.dat",
+		checker => sub { 
+			check_results("$src/in1.dat","test1.out.dat",0,0,1,[],"--ignore-ir"); 
+		},
+		temps   => [ "test1.out.dat" ],
+	},
+	{
+		cmd     => "./driver6 -trace -prog 2",
+		checker => \&check_driver6_callbacks,
+		stdio   => 1,
+	},
+	# Check that setProgramCounter works on a uADL model.
+	{
+		cmd     => "./driver6 -prog 3 -pctest > test6.out.dat",
+		checker => sub { check_results("$src/in6.dat","test6.out.dat"); },
+		temps   => [ "test6.out.dat" ],
+		stdio   => 1,
+	},
+	# Make sure that uADL's reset function works.
+	{
+		cmd     => "./driver6 -trace -reset-test > test1.out.dat",
+		checker => sub { 
+			check_results("$src/in1-reset.dat","test1.out.dat",0,0,1,[],"--ignore-ir"); 
+		},
+		temps   => [ "test1.out.dat" ],
+	},
+	# Simple test to make sure we can instantiate two cores from two different simulators.
+	{
+		cmd     => "./2coretest",
+		diff    => "$src/2coretest.regress",
+		stdio   => 1,
+	},
+	# This checks incremental setup/execute, similar to how a test
+	# generator might work.  This uses a model with cache, to make sure that
+	# we can poke data into the memory hierarchy.
+	{
+		cmd     => "./driver8 in5.out.dat",
+		checker => sub { check_results("$src/in5.dat","in5.out.dat"); },
+		temps   => [ "in5.out.dat" ],
+	},
+	# Make sure that our include directive made it into the generated file.
+	{
+		cmd     => "/bin/true",
+		checker => \&check_mod18_so,
+	},
+	# Test the use of a disassembler shared object.
+	{
+		cmd     => "./dtest1",
+		diff    => "$src/distest1.regress",
+		stdio   => 1,
+	},
+	# Test the use of an assembler shared object.
+	{
+		cmd     => "./dtest2 ./as-mod63.so",
+		diff    => "$src/distest2.regress",
+		stdio   => 1,
+	},
+	# Test the use of an assembler shared object with a big immediate.
+	{
+		cmd     => "./dtest2 ./as-mod61.so 'mv2 r3,3608578766,r6'",
+		diff    => "$src/distest3.regress",
+		stdio   => 1,
+	},
+	# Test error checking with an assembler shared object- we should detect a bad symbol.
+	{
+		cmd     => "./dtest2 ./as-mod61.so 'mv2 r3,foo,r6'",
+		diff    => "$src/distest4.regress",
+		stdio   => 1,
+	},
+	# Test error checking with an assembler shared object- we should detect a bad expression.
+	{
+		cmd     => "./dtest2 ./as-mod61.so 'mv2 r3,#foo,r6'",
+		diff    => "$src/distest5.regress",
+		stdio   => 1,
+		stderr  => 1,
+	},
+	# Test that we preserve relocation order even when instructions are re-ordered.
+	{
+		cmd     => "./dtest2 ./as-mod65.so 'addi r1,undef_imm,r2  mv r3,undef_imm,r4'",
+		diff    => "$src/distest6.regress",
+		stdio   => 1,
+	},
+	# Test the use of disassemble_to_struct.
+	{
+		cmd     => "./dtest3 $src/distest7.in",
+		diff    => "$src/distest7.regress",
+		stdio   => 1,
+	},
+	# Test the use of a model's disassembler function.
+	{
+		cmd     => "./adriver1 -start 0x100 -end 0x12c",
+		diff    => "$src/asm1.regress",
+		stdio   => 1,
+	},
+	{
+		cmd     => "./adriver1 -start 0x100 -end 0x12c -table other",
+		diff    => "$src/asm1.regress",
+		stdio   => 1,
+	},
+	{
+		cmd     => "./adriver1 -start 0x200 -end 0x20c -table mixed",
+		diff    => "$src/asm2.regress",
+		stdio   => 1,
+	},
+
+	# Test of the DMI external-memory handler.
+	model_test("./driver9 -has-dmi","$src/em1.dat"),
+	model_test("./driver9 -dc -dc-hot-count=0","$src/dmiload5.dat"),
+
+	model_test("./driver12 -has-dmi","$src/em2.dat"),
+
+	# Test external memory with typed accesses.
+	{
+		cmd     => "./driver13 $src/em3.dat -o=em3.out.dat -log-mem -trace",
+		checker => sub {
+			check_results("$src/em3.dat","em3.out.dat");
+			check_mem_access($_[0],[
+													 "dw:0x0",
+													 "dw:0x4",
+													 "dw:0x8",
+													 "dw:0xc",
+													 "dw:0x1000",
+													 "dw:0x1004",
+													 "dr:0x0",
+													 "dr:0x4",
+													 "dr:0x8",
+													 "dr:0xc",
+													 "dr:0x1000",
+													 "dr:0x1004",
+													 "ir:0x0","ilr:0x0",
+													 "ir:0x4","ilr:0x4",
+													 "dlr:0x1000","ot:0x1000:25:32","dlr:0x1000",
+													 "ir:0x8","ilr:0x8",
+													 "ir:0xc","ilr:0xc",
+													 "dlr:0x1004","ot:0x1004:25:32","dlr:0x1004",		 
+													 "ir:0x10","ilr:0x10",
+													 "dr:0x0",
+													 "dr:0x4",
+													 "dr:0x8",
+													 "dr:0xc",
+													 "dr:0x1000",
+													 "dr:0x1004",
+												 ]);
+		},
+		stdio   => 1,
+		temps   => [ "em3.out.dat" ],
+	},
+
+	# Test the use of the readers with a bare-bones ISS.
+	{
+		cmd     => "./driver10 -elf $iss/in118.elf -dat $src/in7.dat > in7.out.dat",
+		checker => sub { check_results("$src/in7.dat","in7.out.dat"); },
+		temps   => [ "in7.out.dat" ],
+		stdio   => 1,
+	},
+
+	# Test the use of event bus communication via the external driver.
+	{
+		cmd     => "./driver11 -dat $iss/in59.dat > in59.out.dat",
+		checker => sub { check_results("$iss/in59.dat","in59.out.dat"); },
+		temps   => [ "in59.out.dat" ],
+		stdio   => 1,
+	},			 
+
+	# Same thing as driver11, except using the --extern-event-bus option.
+	{
+		cmd     => "./driver14 $iss/in59.dat in59.out.dat",
+		checker => sub { check_results("$iss/in59.dat","in59.out.dat"); },
+		temps   => [ "in59.out.dat" ],
+	},
+
+	# This tests to make sure that we can dynamically load a uADL model.
+	ext_model_test (
+		model   => "./dyntest",
+		flags   => "-load-lib=./dlx-ext-mem.so",
+		results => "$iss/in4.dat",
+	),
+
+	# Test the use of an external memory and system calls supplied via a plugin.
+	model_test ("./mod1-em --plugin=./extern-mem.so","$iss/in4.dat"),
+	model_test ("./mod1-em --plugin=./extern-mem.so","$src/accum1.dat"),
+	model_test ("./mod1-em --plugin=./extern-mem.so","$src/dmiload1.dat"),
+	model_test ("./mod1-em --plugin=./extern-mem.so","$src/dmiload3.dat"),
+	{
+		cmd   => "./mod1-em --plugin=./extern-mem.so --syscall-enabled $iss/in261.elf -fep --no-output",
+		stdio => 1,
+		diff  => "$iss/in261.regress",
+	},
+
+	# A test of the TLM2 variant (uses address swizzling rather than byte swapping).
+	model_test ("./mod1-tlm2-em  --plugin=./tlm2-extern-mem.so","$iss/in4.dat"),
+	model_test ("./mod1-tlm2-em  --plugin=./tlm2-extern-mem.so","$src/dmiload1.dat"),
+	model_test ("./mod1-tlm2-em  --plugin=./tlm2-extern-mem.so","$src/dmiload3.dat"),
+
+	model_test ("./mod1-tlm2-em  --plugin=./tlm2-extern-mem.so --decode-cache","$src/dmiload1.dat"),
+	model_test ("./mod1-tlm2-em  --plugin=./tlm2-extern-mem.so --decode-cache","$src/dmiload3.dat"),
+
+	# A test of the TLM2 variant with a uADL iss-mem-mode safe-mode model.
+	model_test ("./dlx-tlm2-em   --plugin=./tlm2-extern-mem.so","$iss/in4.dat"),
+	model_test ("./dlx-tlm2-em   --plugin=./tlm2-extern-mem.so","$src/dmiload1.dat"),
+	model_test ("./dlx-tlm2-em   --plugin=./tlm2-extern-mem.so","$src/dmiload3.dat"),
+
+	# Test an MT, multi-job model.
+	model_test ("./mod13","$src/../iss/in24.dat"),
+
+	# TLM2 testing with caches enabled.
+	model_test ("./mod18-tlm2-em --plugin=./tlm2-extern-mem.so","$src/dmiload2.dat"),
+	model_test ("./mod18-tlm2-em --plugin=./tlm2-extern-mem.so","$src/dmiload4.dat"),
+
+	model_test ("./mod18-tlm2-em --plugin=./tlm2-extern-mem.so --decode-cache","$src/dmiload2.dat"),
+	model_test ("./mod18-tlm2-em --plugin=./tlm2-extern-mem.so --decode-cache","$src/dmiload4.dat"),
+
+	# Test the use of an external memory supplied via a plugin with uadl.
+	model_test ("./dlx-em --plugin=./uadl-extern-mem.so","$iss/in4.dat"),
+	model_test ("./dlx-em --plugin=./uadl-extern-mem.so","$src/accum1.dat"),
+
+	# A basic decode-cache test.
+	model_test("./mod1-jobs --dc","$iss/in4.dat"),
+	# Test temporal-decoupling escapes with the decode-cache.
+	{
+		cmd     => "./driver -dc -td 1 200 $iss/in4.dat in4.out.dat",
+		checker => \&check_td1,
+		stdio   => 1,
+		temps   => [ "in4.out.dat" ],
+	}, 
+
+	# Tests for rather particular exception situation with decode-caches (refer to
+	# comments in td1.dat for more info.
+	model_test ("./driver15 --test=1","$src/td1.dat"),
+
+	# Test for breakpoint detection when a time quanta also is exceeded.
+	model_test ("./driver15 --test=2","$src/td2.dat"),
+
+	# Make sure that 0-byte accesses are occurring.
+	{
+		cmd    => "./driver15 $iss/in293.dat -test=3",
+		stdio  => 1,
+		diff   => "$src/0-byte-accesses.regress",
+	},
+
+	# Test time-tagged ISSs with external memory.
+	ext_model_test (
+		model   => "./driver16",
+		flags   => "--has-dmi -trace -read-latency=4 -write-latency=4",
+		input   => "$src/em2.dat",
+		results => "$src/em2-tt.dat",
+	),
+
+	# Test SMT models with external DMI and external memory.
+	model_test ("./driver17","$src/../iss/in313.dat"),
+	model_test ("./driver17 -dc","$src/../iss/in313.dat"),
+
+	# Test the use of readers and writers with a bare model implementation.
+	{
+		cmd     => "./driver18 -dat $iss/in4.dat -trace -o in4.out.dat",
+		checker => sub { check_results("$iss/in4.dat","in4.out.dat"); },
+	},
+
+	# itrace2tarmac test 1 (fail): incorrect number of arguments
+	{
+		cmd    => "$src/itrace2tarmac.py",
+		stdio  => 1,
+		fail   => 1,
+		diff   => "$src/py_scripts/itrace2tarmac1.regress",
+	},
+    
+	# itrace2tarmac test 2 (fail): unable to read itrace input file
+	{
+		cmd    => "$src/itrace2tarmac.py aaa 1",
+		stdio  => 1,
+		fail   => 1,
+		diff   => "$src/py_scripts/itrace2tarmac2.regress",
+	},
+    
+	# itrace2tarmac test 3: read itrace file without an output file
+	{
+		cmd     => "$src/itrace2tarmac.py $src/py_scripts/itrace_example.log 1 && grep -v '^#' tarmac_itrace_example_Core_0.tarmac >tarmac_itrace_example_Core_0.tarmac.cmp ",
+		stdio   => 1,
+		checker => sub { file_diff("tarmac_itrace_example_Core_0.tarmac.cmp", "$src/py_scripts/itrace2tarmac3.tarmac"); },
+	},
+    
+	# itrace2tarmac test 4: read itrace file with an output file
+	{
+		cmd     => "$src/itrace2tarmac.py $src/py_scripts/itrace_example.log 1 itrace_tarmac_out.tarmac && grep -v '^#' itrace_tarmac_out_Core_0.tarmac > itrace_tarmac_out_Core_0.tarmac.cmp",
+		stdio   => 1,
+		checker => sub { file_diff("itrace_tarmac_out_Core_0.tarmac.cmp", "$src/py_scripts/itrace2tarmac3.tarmac"); },
+	},
+    
+	# itrace2tarmac test 5: read itrace file with an output file, but without an extension
+	{
+		cmd     => "$src/itrace2tarmac.py $src/py_scripts/itrace_example.log 1 itrace_tarmac_out1 && grep -v '^#' itrace_tarmac_out1_Core_0.tarmac > itrace_tarmac_out1_Core_0.tarmac.cmp",
+		stdio   => 1,
+		checker => sub { file_diff("itrace_tarmac_out1_Core_0.tarmac.cmp", "$src/py_scripts/itrace2tarmac3.tarmac"); },
+	},
+    
+	# itrace2tarmac test 6 (fail): read itrace file with a none existing output file directory
+	{
+		cmd     => "$src/itrace2tarmac.py $src/py_scripts/itrace_example.log 1 not_existing_dir/itrace_tarmac_out.tarmac",
+		stdio   => 1,
+		fail    => 1,
+		diff   => "$src/itrace2tarmac6.regress",
+	},
+    
+	# itrace2tarmac test 7: read a more complicated itrace file with exceptions, without an output file
+	{
+		cmd     => "$src/itrace2tarmac.py $src/py_scripts/itrace_example_3.log 1 && grep -v '^#' tarmac_itrace_example_3_Core_0.tarmac > tarmac_itrace_example_3_Core_0.tarmac.cmp",
+		stdio   => 1,
+		checker => sub { file_diff("tarmac_itrace_example_3_Core_0.tarmac.cmp", "$src/py_scripts/itrace2tarmac8.tarmac"); },
+	},
+    
+	# To add: # gui_gdb test 1: step and continue on m0
+	# {
+	# cmd     => "./gui_gdb.py $src/py_scripts/gui_gdb_m0.conf -g",
+	# stdio   => 1,
+	# diff   => "$src/py_scripts/gui_gdb_1.regress",
+	# },
+		);
+
+# Any JIT tests.  Only done if we have JIT support.
+if ( $jit_ok) {
+  push @Tests,(
+		model_test("./mod1-jobs --jit","$iss/in4.dat"),
+		# Test temporal-decoupling escapes with the JIT.
+		{
+			cmd     => "./driver -jit -td 1 200 $iss/in4.dat in4.out.dat",
+			checker => \&check_td1,
+			stdio   => 1,
+			temps   => [ "in4.out.dat" ],
+		}, 
+	);
+}
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## </HELPERS>
+##
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+sub check_driver6_callbacks {
+  my @lines = split /\n/,shift;
+
+  my %expects = (
+				 "HID0 0x3" => 0,
+				 "HID1 0x4" => 0,
+				);
+
+  for (@lines) {
+	if ( /^# Callback:  (\S+):  New value is (\S+)/ ) {
+	  my $s = "$1 $2";
+	  #print "Found callback:  $s\n";
+	  $expects{$s}++;
+	}
+  }
+
+  my $fails = 0;
+  for (keys %expects) {
+	if (!$expects{$_}) {
+	  print "Did not find a callback for item $_\n";
+	  $fails++;
+	}
+  }
+  die if $fails;
+}
+
+sub check_preamble {
+  my @lines = split /\n/,shift;
+
+  open OUT,">preamble.out" or die "Could not open preamble.out";
+  for (@lines) {
+	if ( /^INFO:/ ) {
+	  print OUT "$_\n";
+	}
+  }
+  close OUT;
+  file_diff ("preamble.out","$src/preamble.regress");
+}
+
+sub check_in4 {
+  check_results("$iss/in4.dat","in4.out.dat");
+  uvp2dat("in4.out.uvp","in4.out2.dat");
+  check_results("$iss/in4.dat","in4.out2.dat");
+  unlink "in4.out2.dat";
+}
+
+sub check_td1 {
+  check_results("$iss/in4.dat","in4.out.dat");
+
+  my $exp = 8;
+  if ((my $fnd = count_td_escapes(@_)) != $exp) {
+	die "Expected $exp td escapes, found $fnd\n";
+  }
+}
+
+##
+## </TESTS>
+##
+
+sub count_td_escapes {
+  my @lines = split /\n/,shift;
+
+  return grep /Temporal decoupling break:  \d+/, @lines;
+}
+
+
+sub check_mem_access {
+
+  my (@lines) = split /\n/,shift;
+  my $expects = shift;
+
+  my (@found_addrs,@expect_addrs);
+
+  for (@$expects) {
+	my @l = split /:/,$_;
+	if (!$l[2]) {
+	  $l[2] = 32;
+	}
+	push @expect_addrs,[$l[0],(eval $l[1]),(eval $l[2]),(eval $l[3])];
+  }
+
+  for (@lines) {
+	if (/Instruction read:\s+(0x[0-9a-fA-F]+)/) { 
+	  push @found_addrs,["ir",(eval $1),32];
+	}
+	if (/Instruction log read:\s+(0x[0-9a-fA-F]+)/) { 
+	  push @found_addrs,["ilr",(eval $1),32];
+	}
+	elsif (/Data read \((\d+) bits\):\s+(0x[0-9a-fA-F]+)/) { 
+	  push @found_addrs,["dr",(eval $2),(eval $1)];
+	}
+	elsif (/Data log read \((\d+) bits\):\s+(0x[0-9a-fA-F]+)/) { 
+	  push @found_addrs,["dlr",(eval $2),(eval $1)];
+	}
+	elsif (/Data write \((\d+) bits\):\s+(0x[0-9a-fA-F]+)/) {
+	  push @found_addrs,["dw",(eval $2),(eval $1)];
+	}
+	elsif (/Type (\d+) access \((\d+) bits\):\s+(0x[0-9a-fA-F]+)/) { 
+	  push @found_addrs,["ot",(eval $3),(eval $1),(eval $2)];
+	}
+	if (/, critical:\s+(0x[0-9a-fA-F]+)/) {
+	  push @{$found_addrs[-1]},(eval $1);
+	}
+  }
+
+  if (! @expect_addrs ) {
+	die "No expected addresses given.\n";
+  }
+
+  #print "Expected address:  ",Dumper(@expect_addrs),"\n";
+  #print "Found address:  ",Dumper(@found_addrs),"\n";
+  if ( @expect_addrs > @found_addrs ) {
+	die "There are more expected addresses (",scalar(@expect_addrs),") than found addresses (",scalar(@found_addrs),").";
+  }
+
+  if ( @found_addrs > @expect_addrs ) {
+	die "There are more found addresses (",scalar(@found_addrs),") than expected addresses (",scalar(@expect_addrs),").";
+  }
+
+  my $item = 0;
+  for (@expect_addrs) {
+	if ( !Compare($_,$found_addrs[$item]) ) {
+	  print "Item $item:  Expected ",Dumper($_)," but found ",Dumper($found_addrs[$item]),".\n";
+	  #print "Found data:",Dumper(@found_addrs),"\n\n";
+	  #print "Expect data:",Dumper(@expect_addrs),"\n\n";
+	  die;
+	}
+	++$item;
+  }
+}
+
+sub check_mod18_so {
+
+	my $file = "../mod18-so.cc";
+	open my $in,$file or die "Could not open open $file: $!";
+
+	my $gotit = 0;
+	while (<$in>) {
+		$gotit = 1 if (/^#include <array>/);
+	}
+	close $file;
+
+	if (!$gotit) {
+		die "Did not find expected include directive in source file $file.";
+	}
+	
+}
+

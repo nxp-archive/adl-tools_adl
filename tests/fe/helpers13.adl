@@ -1,0 +1,136 @@
+//
+// Tests to make sure that register-file accesses in helper functions, which 
+// index parameters, are propagated up based upon the parameters in the caller.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      int i = 20;
+      int j;
+      j = 30;
+      j = 40;
+      int k = 50;
+      {
+        // Shouldn't affect k because it shadows it.
+        int k = 30;
+        k = j + i;
+      }
+      GPR(j) = GPR(i);
+      GPR(k) = GPR(i);
+      GPR(30) = 20;
+      // Fixed value, so x's GPR usage will be fixed to a single element.
+      x(2);
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      // One level of helper function.
+      z(RT,RA,RB);
+    };
+  }
+
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    action = {
+      // Two levels of helper-functions are taken here.
+      w(RA,RB,RT);
+    };
+  }
+
+  // GPR(x) is fixed to a parm.
+  void x(int x)
+  {
+    {
+      int y = 10;
+      {
+        // Shouldn't affect the parm 'x' because it shadows it.
+        int x = y;
+      }
+      GPR(x) = 20;
+    }
+  }
+
+  void y(int x)
+  {
+    {
+      int y = 10;
+      {
+        // Should affect x- GPR will not be fixed.
+        x = y;
+      }
+      GPR(x) = 20;
+    }
+  }
+
+  void z(int t,int a,int b)
+  {
+    GPR(t) = GPR(a) + GPR(b);
+  }
+
+  void w(int a,int b,int t)
+  {
+    // Calls z, but with a different parameter ordering.
+    z(t,a,b);
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

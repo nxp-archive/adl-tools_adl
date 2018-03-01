@@ -1,0 +1,40 @@
+#
+# Simple test to exercise indexed fields in a register.
+#
+# <ASM>
+#
+#       crandc 1,1,2
+#       crandc 2,0,1
+#       crandc 3,2,0
+#       crandc 4,3,0
+#       crand  5,1,2
+#       crand  6,0,1
+#       crand  7,2,0
+#       crand  8,3,0
+# </ASM>
+# <GEN>
+CORE n=:P
+
+MD n=Mem ra=0x00000000 d=0x4C211102	# crandc 1,1,2
+MD n=Mem ra=0x00000004 d=0x4C400902	# crandc 2,0,1
+MD n=Mem ra=0x00000008 d=0x4C620102	# crandc 3,2,0
+MD n=Mem ra=0x0000000c d=0x4C830102	# crandc 4,3,0
+MD n=Mem ra=0x00000010 d=0x4CA11202	# crand 5,1,2
+MD n=Mem ra=0x00000014 d=0x4CC00A02	# crand 6,0,1
+MD n=Mem ra=0x00000018 d=0x4CE20202	# crand 7,2,0
+MD n=Mem ra=0x0000001c d=0x4D030202	# crand 8,3,0
+MD n=Mem ra=0x00000020 d=0x00000000	# halt
+# </GEN>
+
+RD n=GPR i=1 d=0x12345678
+RD n=GPR i=2 d=0x0000a5a5
+RD n=GPR i=3 d=0xffffffcc
+RD n=GPR i=4 d=0xffffffdd
+
+RESULTS
+
+RD n=FOO2 d=0xa5a5ccdd12345678
+RD n=GPR i=5 d=0x12345678
+RD n=GPR i=6 d=0x0000a5a5
+RD n=GPR i=7 d=0x000000cc
+RD n=GPR i=8 d=0x000000dd

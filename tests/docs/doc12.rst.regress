@@ -1,0 +1,689 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: P
+=======
+
+
+.. _adl-internal-target-1:
+Overview
+--------
+
+Example documentation string- place overview information here.
+
+
+
+.. _adl-internal-target-2:
+Registers
+---------
+
+
+.. _adl-internal-target-3:
+*CIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Current instruction address.
+  
+  
+
+
+.. _adl-internal-target-4:
+*CR*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-5:
+*NIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">NIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Next instruction address.
+  
+  
+
+
+.. _adl-internal-target-6:
+Register Files
+--------------
+
+
+.. _adl-internal-target-7:
+*GPR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">GPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">0</td><td class="rightodd">31</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  32
+
+Description:
+
+  General purpose registers.
+  
+  
+
+
+.. _adl-internal-target-8:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#ifield-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#ifield-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> <a href="#ifield-section-t">&nbsp;&nbsp;T&nbsp;&nbsp;</a> <a href="#ifield-section-x">&nbsp;&nbsp;X&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-o:
+
+
+.. _adl-internal-target-9:
+*OPCD*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 6
+   * - Bits
+     - [0,5] 
+
+Description:
+
+  Primary opcode.
+  
+  
+
+
+.. _ifield-section-r:
+
+
+.. _adl-internal-target-10:
+*RA*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [11,15] 
+
+Description:
+
+  Field used to specify a General Purpose Register (GPR_) to be used as a source.
+  
+  
+
+
+.. _adl-internal-target-11:
+*RB*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [16,20] 
+
+Description:
+
+  Field used to specify a General Purpose Register (GPR_) to be used as a source.
+  
+  
+
+
+.. _adl-internal-target-12:
+*RS*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify a General Purpose Register (GPR_) as a target.
+  
+  
+
+
+.. _adl-internal-target-13:
+*RT*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+   * - Bits
+     - [6,10] 
+
+Description:
+
+  Field used to specify a General Purpose Register (GPR_) to be used as a target.
+  
+  
+
+
+.. _ifield-section-s:
+
+
+.. _adl-internal-target-14:
+*Src1*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+
+
+.. _adl-internal-target-15:
+*Src2*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+
+
+.. _ifield-section-t:
+
+
+.. _adl-internal-target-16:
+*Trg*
+`````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 5
+
+
+.. _ifield-section-x:
+
+
+.. _adl-internal-target-17:
+*XO*
+````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 10
+   * - Bits
+     - [21,30] 
+
+Description:
+
+  Extended opcode.
+  
+  
+
+
+.. _adl-internal-target-18:
+Instructions
+------------
+
+.. raw:: html
+
+   <a href="#instr-section-a">&nbsp;&nbsp;A&nbsp;&nbsp;</a> <a href="#instr-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> 
+
+
+.. _instr-section-a:
+
+
+.. _adl-internal-target-19:
+*add\_family Src1, Src2, Trg*
+`````````````````````````````
+
+Description:
+  
+  This description should represent the entire family
+  and appear at the top.
+  
+  
+  **add1 RT, RA, RB**:
+    This description should be appended
+    to that of the family.
+    
+  
+  **add2 RT, RA, RB**:
+    This description should also be appended
+    to that of the family.
+    
+  
+Operation:
+
+  **add1 RT, RA, RB**:
+    
+    .. code_block:: cpp
+       :color:
+    
+        Ra + Rb -> Rt
+        
+      
+  **add2 RT, RA, RB**:
+    
+    .. code_block:: cpp
+       :color:
+    
+        Ra2 + Rb2 -> Rt2
+        
+      
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+        setCrField ( 0 , GPR ( Trg ) , 0 ) ;
+    }
+    
+  The code above uses the following routines (directly or indirectly): `setCrField <#adl-internal-target-20>`__
+  
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-4>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (Src1)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (Src2)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-4>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (Trg)
+       - Entire Register
+       - 
+  
+Aliases:
+
+.. _adl-internal-target-21:
+*add1 RT, RA, RB*
+:::::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">31&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">266&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-22:
+*add2 RT, RA, RB*
+:::::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">32&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">300&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **add_family Src1, Src2, Trg**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20 30
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+       - Applies To
+     * - `Src1 <#adl-internal-target-14>`__
+       - `RA <#adl-internal-target-10>`__
+       - ::
+          
+            add1 RT, RA, RB
+            add2 RT, RA, RB
+     * - `Src2 <#adl-internal-target-15>`__
+       - `RB <#adl-internal-target-11>`__
+       - ::
+          
+            add1 RT, RA, RB
+            add2 RT, RA, RB
+     * - `Trg <#adl-internal-target-16>`__
+       - `RT <#adl-internal-target-13>`__
+       - ::
+          
+            add1 RT, RA, RB
+            add2 RT, RA, RB
+
+
+.. _instr-section-s:
+
+
+.. _adl-internal-target-23:
+*sub\_family Src1, Src2, Trg*
+`````````````````````````````
+
+Description:
+  
+  This is the only description.
+  
+  
+Operation:
+
+  
+    
+    .. code_block:: cpp
+       :color:
+    
+        Ra - Rb -> Rt
+        
+      
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+        setCrField ( 0 , GPR ( Trg ) , 0 ) ;
+    }
+    
+  The code above uses the following routines (directly or indirectly): `setCrField <#adl-internal-target-20>`__
+  
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-4>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (Src1)
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (Src2)
+       - Entire Register
+       - 
+  
+Affected by instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `CR <#adl-internal-target-4>`__
+       - Entire Register
+       - 
+     * - `GPR <#adl-internal-target-7>`__ (Trg)
+       - Entire Register
+       - 
+  
+Aliases:
+
+.. _adl-internal-target-24:
+*sub1 RT, RA, RB*
+:::::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">33&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">266&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+.. _adl-internal-target-25:
+*sub2 RT, RA, RB*
+:::::::::::::::::
+
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="18.75%" class="field">34&nbsp;OPCD</td>
+     <td colspan="2" width="15.625%" class="field">RT</td>
+     <td colspan="2" width="15.625%" class="field">RA</td>
+     <td colspan="2" width="15.625%" class="field">RB</td>
+     <td colspan="2" width="31.25%" class="field">300&nbsp;XO</td>
+     <td width="3.125%" class="reserved" title="Reserved">0</td>
+     </tr>
+     <tr>
+     <td class="leftodd">0</td><td class="rightodd">5</td>
+     <td class="lefteven">6</td><td class="righteven">10</td>
+     <td class="leftodd">11</td><td class="rightodd">15</td>
+     <td class="lefteven">16</td><td class="righteven">20</td>
+     <td class="leftodd">21</td><td class="rightodd">30</td>
+     <td class="singleeven">31</td>
+     </tr>
+     </table>
+     
+
+
+Operands for Instruction **sub_family Src1, Src2, Trg**:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20 30
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+       - Applies To
+     * - `Src1 <#adl-internal-target-14>`__
+       - `RA <#adl-internal-target-10>`__
+       - ::
+          
+            sub1 RT, RA, RB
+            sub2 RT, RA, RB
+     * - `Src2 <#adl-internal-target-15>`__
+       - `RB <#adl-internal-target-11>`__
+       - ::
+          
+            sub1 RT, RA, RB
+            sub2 RT, RA, RB
+     * - `Trg <#adl-internal-target-16>`__
+       - `RT <#adl-internal-target-13>`__
+       - ::
+          
+            sub1 RT, RA, RB
+            sub2 RT, RA, RB
+
+
+.. _adl-internal-target-26:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+
+In addition, the following helper routines are defined for P:
+
+
+.. _adl-internal-target-20:
+*setCrField*
+````````````
+
+  
+  .. code_block:: cpp
+     :color:
+  
+     void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+         var cr = CR ;
+         bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+        cr . set ( 4 * field , 4 * field + 3 , r ) ;
+        CR = cr ;
+    }
+    

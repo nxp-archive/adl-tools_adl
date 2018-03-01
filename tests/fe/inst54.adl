@@ -1,0 +1,130 @@
+//
+// Test nested instruction fields
+//
+
+ define (arch=minippc) {
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+
+ blk = (agu,dalu);
+
+ define(instrfield=OPCD) {
+   bits =(0,5);
+   define(instrfield=A) {
+     bits = (6,7);
+   }
+ }
+
+ define(instrfield=OPCD1) {
+   bits =(0,5);
+   define(instrfield=B) {
+     prefix = true;
+   }
+ }
+  define(instrfield=OPCD2) {
+   bits =(0,5);
+   define(instrfield=C) {
+     pseudo = true;
+   }
+ }
+
+ define(instrfield=OPCD3) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+   }
+   action = {
+     ThisField = D;
+   };
+ }
+
+ define(instrfield=OPCD4) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+   }
+   fields = (0, D);
+ }
+
+
+ define(instrfield=OPCD5) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+   }
+   fields = (0, C(0,2));
+ }
+
+ define(instrfield=OPCD6) {
+   bits =(0,5);
+   blk = agu;
+   define(instrfield=C) {
+     bits = (2,3);
+     blk = agu;
+   }
+ }
+
+ define(instrfield=OPCD7) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+     table = ((0,0),(1,1),(2,2),(3,3));
+   }
+   fields = (0, C(5));
+ }
+
+
+ define(instrfield=OPCD8) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+     table = ((0,0),(1,1),(2,2),(3,3));
+   }
+   fields = (0, C(0,1));
+ }
+
+ define(instrfield=OPCD8) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+     table = ((0,0),(1,1),(2,2),(3,3));
+   }
+   action = {
+      ThisField = D;
+   };
+ }
+
+ define(instrfield=OPCD9) {
+   bits =(0,5);
+   define(instrfield=C) {
+     bits = (2,3);
+   }
+   fields = (0,(5, 6));
+ }
+
+
+
+ 
+ define(instrfield=F1){
+   bits = 6;
+ }
+
+
+ define(instrfield=F2){
+   bits = 8;
+ }
+
+
+ define(instr=Foo) {
+   fields = (F1(1),F2);
+   action = {} ;
+  } 
+} 
+
+ 
+
+define (core=P) {
+  archs=minippc;
+}

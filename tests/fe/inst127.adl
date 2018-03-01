@@ -1,0 +1,261 @@
+//
+// Tests for a tricky encoding bug.  Instructions 'a' and 'b' have the same
+// opcode in the first word as instruction 'c' and differ only in the second
+// word.  If we don't handle this correctly, then we'll have a situation in
+// which 'c' will be encoded in a non-leaf node, leading to decode errors based
+// upon instruction field value.  This test doesn't fail with the bug, but
+// instead creates a bad decode tree ('c' not in a leaf node).
+//
+
+define (arch=minippc) {
+
+  bit_endianness = little;
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+ 
+  define (instrfield=Rn) {
+    width = 5;
+    pseudo = true;
+  }
+
+
+  define (instrfield=Da) {
+    width = 6;
+    pseudo = true;
+  }
+
+  define (instrfield=PR) {
+    width = 2;
+    pseudo = true;
+    assembler = true;
+  }
+
+  define (instrfield=SG) {
+    width = 1;
+    pseudo = true;
+    value = 0;
+    reserved = true;
+  }
+
+  define (instrfield=s15) {
+    width = 15;
+    pseudo = true;
+  }
+
+  define (instrfield=s32) {
+    width = 32;
+    pseudo = true;
+  }
+
+  define (instr=a) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b0),
+
+            (bits(4),b0),
+            (bits(5),b0),
+            (bits(6),b0),
+            (bits(7),b0),
+
+            (bits(8),b0),
+            (bits(9),b0),
+            (bits(10),b0),
+            (bits(11),b0),
+
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+
+            (bits(16),Da(0)),
+            (bits(17),Da(1)),
+            (bits(18),Da(2)),
+            (bits(19),Da(3)),
+
+            (bits(20),Da(4)),
+            (bits(21),Da(5)),
+            (bits(22),b1),
+            (bits(23),b1),
+
+            (bits(24),b1),
+            (bits(25),b1),
+            (bits(26),Rn(0)),
+            (bits(27),Rn(1)),
+
+            (bits(28),Rn(2)),
+            (bits(29),Rn(3)),
+            (bits(30),Rn(4)),
+            (bits(31),b0),
+
+            (bits(32),s15(0)),
+            (bits(33),s15(1)),
+            (bits(34),s15(2)),
+            (bits(35),s15(3)),
+
+            (bits(36),s15(4)),
+            (bits(37),s15(5)),
+            (bits(38),s15(6)),
+            (bits(39),s15(7)),
+
+            (bits(40),s15(8)),
+            (bits(41),s15(9)),
+            (bits(42),s15(10)),
+            (bits(43),s15(11)),
+
+            (bits(44),s15(12)),
+            (bits(45),s15(13)),
+            (bits(46),s15(14)),
+            (bits(47),b0)
+            );    
+
+    action = {};
+  }
+
+  define (instr=b) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b0),
+            (bits(2),b1),
+            (bits(3),b1),
+
+            (bits(4),b0),
+            (bits(5),b0),
+            (bits(6),b0),
+            (bits(7),b0),
+
+            (bits(8),b0),
+            (bits(9),b0),
+            (bits(10),b0),
+            (bits(11),b0),
+
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+
+            (bits(16),Da(0)),
+            (bits(17),Da(1)),
+            (bits(18),Da(2)),
+            (bits(19),Da(3)),
+
+            (bits(20),Da(4)),
+            (bits(21),Da(5)),
+            (bits(22),b1),
+            (bits(23),b1),
+
+            (bits(24),b1),
+            (bits(25),b1),
+            (bits(26),Rn(0)),
+            (bits(27),Rn(1)),
+
+            (bits(28),Rn(2)),
+            (bits(29),Rn(3)),
+            (bits(30),Rn(4)),
+            (bits(31),b0),
+
+            (bits(32),s15(0)),
+            (bits(33),s15(1)),
+            (bits(34),s15(2)),
+            (bits(35),s15(3)),
+
+            (bits(36),s15(4)),
+            (bits(37),s15(5)),
+            (bits(38),s15(6)),
+            (bits(39),s15(7)),
+
+            (bits(40),s15(8)),
+            (bits(41),s15(9)),
+            (bits(42),s15(10)),
+            (bits(43),s15(11)),
+
+            (bits(44),s15(12)),
+            (bits(45),s15(13)),
+            (bits(46),s15(14)),
+            (bits(47),b0)
+            );    
+
+    action = {};
+  }
+
+  // Problem instruction: All opcode bits shared with 'a' and 'b' in first word,
+  // with one distinguishing bit in second word.  When building instruction
+  // table, we cannot drop this instruction from our list of sorted masks or
+  // else it will end up in a "default" node in the instruction table.
+  define (instr=c) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b0),
+
+            (bits(4),b1),
+            (bits(5),s32(0)),
+            (bits(6),s32(1)),
+            (bits(7),s32(2)),
+
+            (bits(8),s32(3)),
+            (bits(9),s32(4)),
+            (bits(10),s32(5)),
+            (bits(11),s32(6)),
+
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+
+            (bits(16),Rn(0)),
+            (bits(17),Rn(1)),
+            (bits(18),Rn(2)),
+            (bits(19),Rn(3)),
+
+            (bits(20),Rn(4)),
+            (bits(21),s32(7)),
+            (bits(22),s32(8)),
+            (bits(23),s32(9)),
+
+            (bits(24),s32(10)),
+            (bits(25),s32(11)),
+            (bits(26),s32(12)),
+            (bits(27),s32(13)),
+
+            (bits(28),s32(14)),
+            (bits(29),s32(15)),
+            (bits(30),s32(16)),
+            (bits(31),b0),
+
+            (bits(32),s32(17)),
+            (bits(33),s32(18)),
+            (bits(34),s32(19)),
+            (bits(35),s32(20)),
+
+            (bits(36),s32(21)),
+            (bits(37),s32(22)),
+            (bits(38),s32(23)),
+            (bits(39),s32(24)),
+
+            (bits(40),s32(25)),
+            (bits(41),s32(26)),
+            (bits(42),s32(27)),
+            (bits(43),s32(28)),
+
+            (bits(44),s32(29)),
+            (bits(45),s32(30)),
+            (bits(46),s32(31)),
+            (bits(47),b0)
+            );
+
+
+    action = { };
+  } 
+
+
+}
+ 
+
+define (core=P) {
+  archs=minippc;
+}

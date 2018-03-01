@@ -1,0 +1,130 @@
+#
+# Tests that a JIT model will handle a fetch exception if in one state, but will
+# execute the same code in another state, and can then execute the code if the
+# state changes.
+#
+# In this example, some code is supervisor-execute only to begin with, but then
+# is changed to be executable in user-mode.
+#
+
+= asm
+
+	addi r1,r1,1
+	bl L1            # Initial subroutine call- we're in supermode, so it's OK.
+	bl L1            # Do it again, just for fun.
+	mtspr SRR0,r20
+	mtspr SRR1,r21
+	rfi              # Change to user-mode.
+	.long 0x0
+	addi r30,r30,1   # Start of ProtectionFaul handler- called by blr, so just
+			 						 # skip past the branch by using LR.
+	mflr r25
+	mtspr SRR0,r25
+	rfi
+	.long 0x0
+	.long 0x0
+  addi r31,r31,1   # Start of SC exception handler.	
+	tlbwe            # Update the translation so that it will execute in user-mode.
+	rfi              # Return back to the failing instruction, since it should now
+									 # execute.
+	.long 0x0	
+  .long 0x0
+  .long 0x0
+  .long 0x0
+  .long 0x0
+L1:
+	addi r4,r4,4     # This code is what will initially only execute in supermode.
+	addi r5,r5,5
+	blr
+	.long 0x0
+  .long 0x0
+	.long 0x0
+  addi r2,r2,2     # Start of user-mode code.
+  addi r3,r3,3
+	bl L1            # Should fail.
+	bl L1            # Should fail.
+	sc               # Allow access.
+	bl L1            # Should pass.
+	bl L1            # Should pass.
+  addi r6,r6,6
+  .long 0x0
+
+= /asm
+
+= mdopts
+instr-offset: 0x10f94
+= /mdopts
+
+= aopts
+	-mregnames -me500
+= /aopts
+
+#
+# <GEN>
+MD n=Mem ra=0x00010f94 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010f98 d=0x48000051	#	bl L1            # Initial subroutine call- we're in supermode, so it's OK.
+MD n=Mem ra=0x00010f9c d=0x4800004D	#	bl L1            # Do it again, just for fun.
+MD n=Mem ra=0x00010fa0 d=0x7E9A03A6	#	mtspr SRR0,r20
+MD n=Mem ra=0x00010fa4 d=0x7EBB03A6	#	mtspr SRR1,r21
+MD n=Mem ra=0x00010fa8 d=0x4C000064	#	rfi              # Change to user-mode.
+MD n=Mem ra=0x00010fac d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fb0 d=0x3BDE0001	#	addi r30,r30,1   # Start of ProtectionFaul handler- called by blr, so just
+MD n=Mem ra=0x00010fb4 d=0x7F2802A6	#	mflr r25
+MD n=Mem ra=0x00010fb8 d=0x7F3A03A6	#	mtspr SRR0,r25
+MD n=Mem ra=0x00010fbc d=0x4C000064	#	rfi
+MD n=Mem ra=0x00010fc0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fc4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fc8 d=0x3BFF0001	#	addi r31,r31,1   # Start of SC exception handler.	
+MD n=Mem ra=0x00010fcc d=0x7C0007A4	#	tlbwe            # Update the translation so that it will execute in user-mode.
+MD n=Mem ra=0x00010fd0 d=0x4C000064	#	rfi              # Return back to the failing instruction, since it should now
+MD n=Mem ra=0x00010fd4 d=0x00000000	#	.long 0x0	
+MD n=Mem ra=0x00010fd8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fdc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fe0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fe4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fe8 d=0x38840004	#	addi r4,r4,4     # This code is what will initially only execute in supermode.
+MD n=Mem ra=0x00010fec d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00010ff0 d=0x4E800020	#	blr
+MD n=Mem ra=0x00010ff4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010ff8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010ffc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00011000 d=0x38420002	#	addi r2,r2,2     # Start of user-mode code.
+MD n=Mem ra=0x00011004 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00011008 d=0x4BFFFFE1	#	bl L1            # Should fail.
+MD n=Mem ra=0x0001100c d=0x4BFFFFDD	#	bl L1            # Should fail.
+MD n=Mem ra=0x00011010 d=0x44000002	#	sc               # Allow access.
+MD n=Mem ra=0x00011014 d=0x4BFFFFD5	#	bl L1            # Should pass.
+MD n=Mem ra=0x00011018 d=0x4BFFFFD1	#	bl L1            # Should pass.
+MD n=Mem ra=0x0001101c d=0x38C60006	#	addi r6,r6,6
+MD n=Mem ra=0x00011020 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x10000 ra=0x11000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x44 WIMG=0x2 SX=0 SR=1 SW=1 UX=1 EPN=0x4
+
+RD n=NIA        d=0x0f94     # Starts in supervisor mode
+RD n=IVOR7      d=0x0fb0     # Prot faul
+RD n=IVOR8      d=0x0fc8     # SC fault
+RD n=LR         d=0x0fe8     # Points to start of subroutine
+RD n=GPR   i=20 d=0x1000     # Start of user-mode code.
+RD n=GPR   i=21 d=0x00400000 # Want to execute in user-mode.
+
+RD n=MAS0 d=0x00000002       # Overwrite way=1 with user-execute OK.
+RD n=MAS1 d=0x00004004
+RD n=MAS2 d=0xf0400000       # UX=1
+
+RESULTS
+
+RD n=GPR i=1  d=0x00000001
+RD n=GPR i=2  d=0x00000002
+RD n=GPR i=3  d=0x00000003
+RD n=GPR i=4  d=0x00000010
+RD n=GPR i=5  d=0x00000014
+RD n=GPR i=6  d=0x00000006
+RD n=GPR i=30 d=0x00000002
+RD n=GPR i=31 d=0x00000001

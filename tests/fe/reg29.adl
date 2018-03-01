@@ -1,0 +1,33 @@
+//
+// splitted regfield - pass
+//
+
+define (arch = minippc) {
+
+  define (reg = a) {
+    width = 32;
+    define (field = f0) {
+      bits = ((5,14),(0,2));
+    }
+    
+    define (field = f1) {
+      bits = ((3,11),2);
+    }
+    
+  }
+  
+  define (instrfield = b) {
+    width = 32;    
+    bits = ((0,2),(5,14));    
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

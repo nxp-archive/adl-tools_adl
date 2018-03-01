@@ -1,0 +1,71 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  slice-written, field-written
+  Width:  32
+    X[16,31]   
+      Usage:  field-written
+  -------------------------------
+Registers:
+  Name:  "A"
+  Usage:  slice-written
+  Width:  32
+  -------------------------------
+  Name:  "B"
+  Usage:  field-written
+  Width:  32
+    X[8bits x 4]  
+      Usage:  field-written
+  -------------------------------
+  Name:  "C"
+  Usage:  field-written
+  Width:  32
+    Y[0,15]   
+      Usage:  field-written
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Memories:
+  Name:  MemA (1)
+  Size:   2048
+  Addressing unit: 1
+
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR]
+  RB: [16,20] [regfile:  GPR]
+  RT: [6,10] [regfile:  GPR]
+  XO: [21,30] 
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    A ( 2 , 10 ) = 10 ;
+    B . X ( 1 ) = 20 ;
+    C . Y = 30 ;
+    GPR ( RT ) ( 0 , 15 ) = 20 ;
+    GPR ( RA ) . X = 30 ;
+}
+  Target Registers:  A[mask 0x3fe00000]/p B[mask 0x00ff0000]/p C[mask 0xffff0000]/p GPR(RA)[mask 0x0000ffff]/p GPR(RT)[mask 0xffff0000]/p 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    1040187658(7c000214):  add
+-------------------------------
+

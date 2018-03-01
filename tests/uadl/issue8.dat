@@ -1,0 +1,62 @@
+#
+# This makes sure that when we deallocate a target, and there is
+# still an instruction out there that also is targeting the same
+# register, that another instruction using that target as a source
+# will not proceed.
+#
+= asm
+
+	addi r2,r1,1
+  nop
+	addi r2,r3,2
+	addi r4,r2,1
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38410001	#	addi r2,r1,1
+MD n=Mem ra=0x00000004 d=0x60000000	#	nop
+MD n=Mem ra=0x00000008 d=0x38430002	#	addi r2,r3,2
+MD n=Mem ra=0x0000000c d=0x38820001	#	addi r4,r2,1
+# </GEN>
+
+RD n=NIA     d=0x0
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x38410001					asm="addi r2,r1,1"
+ITIME t=1
+R n=GPR i=2 d=0x00000001
+CTIME t=5
+
+I ea=0x4 id=2
+INSTR op=0x60000000					asm="ori r0,r0,0x0"
+ITIME t=1
+R n=GPR i=0 d=0x00000000
+CTIME t=5
+
+I ea=0x8 id=3
+INSTR op=0x38430002					asm="addi r2,r3,2"
+ITIME t=2
+R n=GPR i=2 d=0x00000002
+CTIME t=6
+
+I ea=0xc id=4
+INSTR op=0x38820001					asm="addi r4,r2,1"
+ITIME t=2
+R n=GPR i=4 d=0x00000003
+CTIME t=9
+
+I ea=0x10 id=5
+INSTR op=0x00000000					asm="halt "
+ITIME t=3
+CTIME t=9
+
+RESULTS
+
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0x00000003

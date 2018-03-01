@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<node>
+<name> PMT </name>
+<regs>
+<reg>
+<name> HID0 </name>
+<attrs> privileged </attrs>
+<shared> 0 </shared>
+<id> 3 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> NIA0 </name>
+<shared> 0 </shared>
+<id> 11 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> NIA1 </name>
+<shared> 0 </shared>
+<id> 12 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+</regs>
+<mmu>
+<mmulookup>
+<name> TlbCam </name>
+<shared> 0 </shared>
+<id> 0 </id>
+<sets> 1 </sets>
+<ways> 16 </ways>
+<fields>
+<mmufield>
+<name> EPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> RPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> SIZE </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TID </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TS </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> V </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> WIMG </name>
+<attrs> translation_attr </attrs>
+<width> 4 </width>
+</mmufield>
+
+<mmufield>
+<name> XX1 </name>
+<attrs> unarchitected </attrs>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> XX2 </name>
+<attrs> indeterminate </attrs>
+<width> 1 </width>
+</mmufield>
+
+</fields>
+</mmulookup>
+
+</mmu>
+<children>
+
+<node>
+<name> t0 </name>
+<regs>
+<reg>
+<name> CIA </name>
+<attrs> cia </attrs>
+<shared> 0 </shared>
+<id> 0 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CR </name>
+<attrs> debug(1) </attrs>
+<shared> 0 </shared>
+<id> 1 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CTR </name>
+<attrs> debug(2) </attrs>
+<shared> 0 </shared>
+<id> 2 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> HID0 </name>
+<attrs> privileged </attrs>
+<shared> 1 </shared>
+<id> 3 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> HID1 </name>
+<attrs> privileged </attrs>
+<shared> 0 </shared>
+<id> 4 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> LR </name>
+<attrs> debug(3) </attrs>
+<shared> 0 </shared>
+<id> 5 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> MAS0 </name>
+<shared> 0 </shared>
+<id> 6 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> EPN </name>
+<start> 0 </start>
+<end> 23 </end>
+</regfield>
+
+<regfield>
+<name> TID </name>
+<start> 24 </start>
+<end> 29 </end>
+</regfield>
+
+<regfield>
+<name> TS </name>
+<start> 31 </start>
+<end> 31 </end>
+</regfield>
+
+<regfield>
+<name> V </name>
+<start> 30 </start>
+<end> 30 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> MAS1 </name>
+<shared> 0 </shared>
+<id> 7 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> RPN </name>
+<start> 0 </start>
+<end> 23 </end>
+</regfield>
+
+<regfield>
+<name> SIZE </name>
+<start> 24 </start>
+<end> 29 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> MAS2 </name>
+<shared> 0 </shared>
+<id> 8 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> Set </name>
+<start> 20 </start>
+<end> 27 </end>
+</regfield>
+
+<regfield>
+<name> WIMG </name>
+<start> 6 </start>
+<end> 9 </end>
+</regfield>
+
+<regfield>
+<name> Way </name>
+<start> 28 </start>
+<end> 31 </end>
+</regfield>
+
+<regfield>
+<name> XX1 </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+<regfield>
+<name> XX2 </name>
+<start> 1 </start>
+<end> 1 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> MSR </name>
+<shared> 0 </shared>
+<id> 9 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> DR </name>
+<attrs> trans_control data </attrs>
+<start> 11 </start>
+<end> 11 </end>
+</regfield>
+
+<regfield>
+<name> IR </name>
+<attrs> trans_control instr </attrs>
+<start> 10 </start>
+<end> 10 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> NIA </name>
+<attrs> nia </attrs>
+<shared> 0 </shared>
+<id> 10 </id>
+<pseudo> 1 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> NIA0 </name>
+<shared> 1 </shared>
+<id> 11 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> NIA1 </name>
+<shared> 1 </shared>
+<id> 12 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> PID0 </name>
+<shared> 0 </shared>
+<id> 13 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> PID1 </name>
+<shared> 0 </shared>
+<id> 14 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> XER </name>
+<attrs> debug(5) </attrs>
+<shared> 0 </shared>
+<id> 15 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> CA </name>
+<start> 2 </start>
+<end> 2 </end>
+</regfield>
+
+<regfield>
+<name> OV </name>
+<start> 1 </start>
+<end> 1 </end>
+</regfield>
+
+<regfield>
+<name> SO </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> GPR </name>
+<attrs> debug(0) </attrs>
+<shared> 0 </shared>
+<id> 16 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 32</size>
+</reg>
+
+<reg>
+<name> SPR </name>
+<shared> 0 </shared>
+<id> 17 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 1024</size>
+</reg>
+
+</regs>
+<mmu>
+<mmulookup>
+<name> TlbCam </name>
+<shared> 1 </shared>
+<id> 0 </id>
+<sets> 1 </sets>
+<ways> 16 </ways>
+<fields>
+<mmufield>
+<name> EPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> RPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> SIZE </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TID </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TS </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> V </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> WIMG </name>
+<attrs> translation_attr </attrs>
+<width> 4 </width>
+</mmufield>
+
+<mmufield>
+<name> XX1 </name>
+<attrs> unarchitected </attrs>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> XX2 </name>
+<attrs> indeterminate </attrs>
+<width> 1 </width>
+</mmufield>
+
+</fields>
+</mmulookup>
+
+</mmu>
+</node>
+
+<node>
+<name> t1 </name>
+<regs>
+<reg>
+<name> CIA </name>
+<attrs> cia </attrs>
+<shared> 0 </shared>
+<id> 0 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CR </name>
+<attrs> debug(1) </attrs>
+<shared> 0 </shared>
+<id> 1 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> CTR </name>
+<attrs> debug(2) </attrs>
+<shared> 0 </shared>
+<id> 2 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> HID0 </name>
+<attrs> privileged </attrs>
+<shared> 1 </shared>
+<id> 3 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> HID1 </name>
+<attrs> privileged </attrs>
+<shared> 0 </shared>
+<id> 4 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> LR </name>
+<attrs> debug(3) </attrs>
+<shared> 0 </shared>
+<id> 5 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> MAS0 </name>
+<shared> 0 </shared>
+<id> 6 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> EPN </name>
+<start> 0 </start>
+<end> 23 </end>
+</regfield>
+
+<regfield>
+<name> TID </name>
+<start> 24 </start>
+<end> 29 </end>
+</regfield>
+
+<regfield>
+<name> TS </name>
+<start> 31 </start>
+<end> 31 </end>
+</regfield>
+
+<regfield>
+<name> V </name>
+<start> 30 </start>
+<end> 30 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> MAS1 </name>
+<shared> 0 </shared>
+<id> 7 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> RPN </name>
+<start> 0 </start>
+<end> 23 </end>
+</regfield>
+
+<regfield>
+<name> SIZE </name>
+<start> 24 </start>
+<end> 29 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> MAS2 </name>
+<shared> 0 </shared>
+<id> 8 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> Set </name>
+<start> 20 </start>
+<end> 27 </end>
+</regfield>
+
+<regfield>
+<name> WIMG </name>
+<start> 6 </start>
+<end> 9 </end>
+</regfield>
+
+<regfield>
+<name> Way </name>
+<start> 28 </start>
+<end> 31 </end>
+</regfield>
+
+<regfield>
+<name> XX1 </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+<regfield>
+<name> XX2 </name>
+<start> 1 </start>
+<end> 1 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> MSR </name>
+<shared> 0 </shared>
+<id> 9 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> DR </name>
+<attrs> trans_control data </attrs>
+<start> 11 </start>
+<end> 11 </end>
+</regfield>
+
+<regfield>
+<name> IR </name>
+<attrs> trans_control instr </attrs>
+<start> 10 </start>
+<end> 10 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> NIA </name>
+<attrs> nia </attrs>
+<shared> 0 </shared>
+<id> 10 </id>
+<pseudo> 1 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> NIA0 </name>
+<shared> 1 </shared>
+<id> 11 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> NIA1 </name>
+<shared> 1 </shared>
+<id> 12 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> PID0 </name>
+<shared> 0 </shared>
+<id> 13 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> PID1 </name>
+<shared> 0 </shared>
+<id> 14 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> XER </name>
+<attrs> debug(5) </attrs>
+<shared> 0 </shared>
+<id> 15 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+<fields>
+<regfield>
+<name> CA </name>
+<start> 2 </start>
+<end> 2 </end>
+</regfield>
+
+<regfield>
+<name> OV </name>
+<start> 1 </start>
+<end> 1 </end>
+</regfield>
+
+<regfield>
+<name> SO </name>
+<start> 0 </start>
+<end> 0 </end>
+</regfield>
+
+</fields>
+</reg>
+
+<reg>
+<name> GPR </name>
+<attrs> debug(0) </attrs>
+<shared> 0 </shared>
+<id> 16 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 32</size>
+</reg>
+
+<reg>
+<name> SPR </name>
+<shared> 0 </shared>
+<id> 17 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 1024</size>
+</reg>
+
+</regs>
+<mmu>
+<mmulookup>
+<name> TlbCam </name>
+<shared> 1 </shared>
+<id> 0 </id>
+<sets> 1 </sets>
+<ways> 16 </ways>
+<fields>
+<mmufield>
+<name> EPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> RPN </name>
+<width> 24 </width>
+</mmufield>
+
+<mmufield>
+<name> SIZE </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TID </name>
+<width> 6 </width>
+</mmufield>
+
+<mmufield>
+<name> TS </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> V </name>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> WIMG </name>
+<attrs> translation_attr </attrs>
+<width> 4 </width>
+</mmufield>
+
+<mmufield>
+<name> XX1 </name>
+<attrs> unarchitected </attrs>
+<width> 1 </width>
+</mmufield>
+
+<mmufield>
+<name> XX2 </name>
+<attrs> indeterminate </attrs>
+<width> 1 </width>
+</mmufield>
+
+</fields>
+</mmulookup>
+
+</mmu>
+</node>
+</children>
+</node>

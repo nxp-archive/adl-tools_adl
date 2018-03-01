@@ -1,0 +1,36 @@
+// Assembler configuration test bad parm definition
+
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  
+  parallel_execution = 3;
+
+  define (assembler) {
+      define(parm=G) {
+        value = 3;
+      }
+      define(parm=L1) {
+	type = label;
+	constant = true;
+      }
+      define(parm=L2) {
+	type = label;
+	value = 3;
+      }
+      define(parm=I1) {
+	type = integer;
+      }	
+  }
+
+
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

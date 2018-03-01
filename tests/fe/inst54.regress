@@ -1,0 +1,13 @@
+inst54.adl:88: warning: Item 'OPCD8' was redefined.
+inst54.adl:79: warning:     Previous definition was here.
+inst54.adl:22: Prefix nested fields are not allowed.
+inst54.adl:28: Pseudo nested fields are not allowed.
+inst54.adl:43: Unkown instruction field 'D'.
+inst54.adl:52: Index out of field 'C' range.
+inst54.adl:63: Nested fields have no blk key.
+inst54.adl:69: Out of range index for field 'C'.
+inst54.adl:99: Index out of field 'OPCD9' range.
+inst54.adl:15: Nested instruction field bits exceeds outer field's width.
+inst54.adl:39: Unknown variable/resource found in action code:  D
+inst54.adl:95: Unknown variable/resource found in action code:  D
+Too many errors.

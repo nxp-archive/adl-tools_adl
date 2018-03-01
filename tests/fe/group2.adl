@@ -1,0 +1,67 @@
+// groups: defmods on most of objects
+
+define (arch=minippc) {
+      
+  // REGFILES
+  define (regfile=gprs) { size = 32; }
+  define (regfile=sprs) {
+    define (entry=20) { reg = a;}
+    define (entry=21) { reg = b;}
+    define (entry=22) { reg = c;}
+    define (entry=50) { reg = d;}
+  }
+  // REGS
+  define (reg=a) { width = 32; attrs = (cia,nia);}
+  define (reg=b) { width = 32;}
+  define (reg=c) { width = 32;}
+  define (reg=d) { width = 32;}
+    
+  // PARMS    
+  define (parm=p1) { options=(lie,big_lie,statistics); value=big_lie;}
+  define (parm=p2) { options=(hello,goodbye); value=hello;}
+  define (parm=p3) { options=(mode1,mode2,mode3,mode4);value=mode3;}
+  define (parm=p4) { options=(a,b,c,d);value=a;}
+  
+  // INSTRFIELDS
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,30);}
+   
+  define (group = regfile_g) {
+    items = sprs;
+  }
+  
+  defmod (regfile = (*regfile_g,gprs)) {
+    size = 128;
+  }
+  
+  define (group = reg_g) {
+    items = (d,c);  
+  }
+  
+  defmod (reg = (a, *reg_g)) {
+    width = 24;
+  }
+
+  define (group = parm_g) {
+    items = (p2,p4);  
+  }
+
+  defmod (parm = (p3,*parm_g)) {
+    watch = { "d";};
+  }
+  
+  define (group = opcd_g) {
+    items = OPCD;
+  }
+  
+  defmod (instrfield = *opcd_g) {
+    is_signed = true;
+  }
+
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

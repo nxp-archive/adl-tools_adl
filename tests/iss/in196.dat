@@ -1,0 +1,123 @@
+#
+# Tests register-files with reserved and read-only fields.
+#
+
+= asm
+
+	mtspr 60,r1
+	mtspr 61,r2
+	mtspr 62,r3
+	mtspr 63,r1
+	mtspr 80,r4
+	mtspr 64,r2
+	mtspr 65,r3
+ 	mtspr 66,r1
+ 	mtspr 67,r2
+	.long 0x0
+	mfspr r30,SRR0
+	addi r31,r31,1
+	addi r30,r30,4
+	mtspr SRR0,r30
+	rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C3C0BA6	#	mtspr 60,r1
+MD n=Mem ra=0x00000004 d=0x7C5D0BA6	#	mtspr 61,r2
+MD n=Mem ra=0x00000008 d=0x7C7E0BA6	#	mtspr 62,r3
+MD n=Mem ra=0x0000000c d=0x7C3F0BA6	#	mtspr 63,r1
+MD n=Mem ra=0x00000010 d=0x7C9013A6	#	mtspr 80,r4
+MD n=Mem ra=0x00000014 d=0x7C4013A6	#	mtspr 64,r2
+MD n=Mem ra=0x00000018 d=0x7C6113A6	#	mtspr 65,r3
+MD n=Mem ra=0x0000001c d=0x7C2213A6	#	mtspr 66,r1
+MD n=Mem ra=0x00000020 d=0x7C4313A6	#	mtspr 67,r2
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000028 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x0000002c d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x00000030 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x00000034 d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x00000038 d=0x4C000064	#	rfi
+# </GEN>
+CORE n=:P
+
+RD n=MSR     d=0x00000000
+RD n=NIA     d=0x00000000
+RD n=IVOR6   d=0x00000024
+
+RD n=GPR i=1 d=0xffffffff
+RD n=GPR i=2 d=0x12345678
+RD n=GPR i=3 d=0xdeadbeef
+RD n=GPR i=4 d=2
+
+TRACE
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c3c0ba6
+INSTR op=0x7c3c0ba6					asm="mtspr p0,r1"
+R n=PMC0 d=0x0000ffff
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c5d0ba6
+INSTR op=0x7c5d0ba6					asm="mtspr p1,r2"
+R n=PMC1 d=0x00005678
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c7e0ba6
+INSTR op=0x7c7e0ba6					asm="mtspr p2,r3"
+R n=PMC2 d=0x0000beef
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c3f0ba6
+INSTR op=0x7c3f0ba6					asm="mtspr p3,r1"
+R n=PMC3 d=0x0000ffff
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c9013a6
+INSTR op=0x7c9013a6					asm="mtspr PMCC,r4"
+R n=PMC0 d=0x2000ffff
+R n=PMC1 d=0x20005678
+R n=PMC2 d=0x2000beef
+R n=PMC3 d=0x2000ffff
+R n=PMC4 d=0x20000000
+R n=PMC5 d=0x20000000
+R n=PMC6 d=0x20000000
+R n=PMC7 d=0x20000000
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c4013a6
+INSTR op=0x7c4013a6					asm="mtspr p4,r2"
+R n=PMC4 d=0x20005678
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7c6113a6
+INSTR op=0x7c6113a6					asm="mtspr p5,r3"
+R n=PMC5 d=0x2000beef
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7c2213a6
+INSTR op=0x7c2213a6					asm="mtspr p6,r1"
+R n=PMC6 d=0x2000ffff
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x7c4313a6
+INSTR op=0x7c4313a6					asm="mtspr p7,r2"
+R n=PMC7 d=0x20005678
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=PMC0 d=0x2000ffff
+RD n=PMC1 d=0x20005678
+RD n=PMC2 d=0x2000beef
+RD n=PMC3 d=0x2000ffff
+RD n=PMC4 d=0x20005678
+RD n=PMC5 d=0x2000beef
+RD n=PMC6 d=0x2000ffff
+RD n=PMC7 d=0x20005678

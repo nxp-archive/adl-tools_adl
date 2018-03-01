@@ -1,0 +1,4 @@
+inst56.adl:80: Nested pseudo instruction.
+inst56.adl:55: Size of field 'Src1' in target of alias is smaller than field 'A'.
+inst56.adl:63: Alias, pseudo, and prefix instructions can not have action function.
+inst56.adl:69: Unknown alias target:  Foo2

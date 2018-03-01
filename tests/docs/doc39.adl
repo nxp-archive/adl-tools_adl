@@ -1,0 +1,129 @@
+// Test specifying the number of bits the relocation value is right-shifted before it is encoded
+
+define (core = rubber) {
+  archs = rubber; 
+  instrtables = ( other );
+}
+
+define (arch = rubber) {
+
+
+//##############################################################################
+// Parameters
+//##############################################################################
+
+  bit_endianness = little;
+     
+//==============================================================================
+
+//##############################################################################
+// Instruction Fields
+//##############################################################################
+
+  define (instrfield = LI18R2) {
+    """
+    Immediate address field for jump instruction
+    """;
+    display = hex;
+    pseudo = true;
+    width = 18;
+    addr = abs;
+    shift = 2;
+  }
+  
+  define (instrfield = LI18R3) {
+    """
+    Immediate address field for jump instruction
+    """;
+    display = hex;
+    pseudo = true;
+    width = 18;
+    addr = abs;
+  }  
+
+//==============================================================================
+
+//##############################################################################
+// Relocations
+//##############################################################################
+
+  define (reloc = R_PMEM_18) {
+    field_width = 18;
+    pcrel = false;
+    value = 2;
+    abbrev = "fun";
+    right_shift = 2; // Specify the number of bits the relocation value is right-shifted before it is encoded
+    instrfield = LI18R2;
+  }
+
+  define (reloc = R_MEM_18) {
+    field_width = 18;
+    pcrel = false;
+    value = 3;
+    abbrev = "fun2";
+    instrfield = LI18R3;
+  }  
+//==============================================================================
+
+//##############################################################################
+// Registers
+//##############################################################################
+
+  define (reg = cIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg = nIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+  }
+   
+  
+//============================================================================== 
+
+
+//##############################################################################
+// Instructions
+//##############################################################################
+ 
+  
+  define (instr = jmp) {  
+    width = 32;
+    fields = ((bits(31,30),b10), (bits(18,1),LI18R2));
+    syntax = ("jmp %f", LI18R2);   
+    action =  { nIA = LI18R2; };
+  }  
+
+  define (instr = jmp2) {  
+    width = 32;
+    fields = ((bits(31,30),b11), (bits(18,1),LI18R3));
+    syntax = ("jmp2 %f", LI18R3);
+    dsyntax = ("jmp %f",LI18R3);
+    action =  { nIA = LI18R3; };
+  }  
+  
+  define (instr = nop) { 
+    width = 32;  
+    fields = ((bits(31,0),0xFFFF));
+    syntax = ("nop");
+    action =  {  };
+  } 
+  
+  define (instr = done) { 
+    width = 32;  
+    fields = ((bits(31,0),0));
+    syntax = ("done");
+    action =  { halt(); };
+  }  
+   
+//============================================================================== 
+
+
+
+
+}

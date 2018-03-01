@@ -1,0 +1,73 @@
+//
+// We should be able to mix implicitly bit-numbered fields with anonymous fields
+// with explicit bit numbers.
+//
+
+define (arch = foo) {
+
+    // Least Significant Bit is number 0
+    bit_endianness = little;
+
+    // PC Program Counter Register 
+    define (reg = PC) {
+        """ 24-bit Program Counter Register """;
+
+        width = 24;
+
+        attrs = cia;
+        attrs = nia;
+     }
+
+     define (instrfield = OPC1) {
+        """ Opcode Field """;
+        
+        pseudo = 1;
+        width  = 8;
+    }
+
+    define (instrfield = OPC2) {
+        """ Opcode Field """;
+
+        pseudo = 1;
+        width  = 8;
+    }
+
+    define (instrfield = ADDR_13_8) {
+        """ XB - ADDR_13_8 """;
+
+        pseudo = 1;
+        width  = 6;
+    }
+
+    define (instrfield = X1) {
+        """ XB - Extension Byte 1 """;
+
+        pseudo = 1;
+        width  = 8;
+    }    
+
+    define (subinstr = OPR_0) {
+        fields = ((bits(15, 14), 0x0), ADDR_13_8, X1);
+        
+        action = func (bits<1> &is_reg, bits<24> &addr_or_reg_idx) {
+        };
+    }
+
+    define (instr = ADC) {
+
+        // Source
+        define (subinstrs = src) {
+            subs = (OPR_0);
+        }
+
+        fields = (OPC1(0x1B), OPC2(0x60), src);
+
+        action = {
+        };
+    }
+
+}
+
+define (core = foo) {
+    archs = foo;
+}

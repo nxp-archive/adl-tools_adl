@@ -1,0 +1,5 @@
+
+Register mismatch:
+Expected GPR2 = 0xa5a5a5a5
+Found 0x35a5a5a5
+Error:  Test 1:  Core P:  Context thread[1]:  Register mismatch

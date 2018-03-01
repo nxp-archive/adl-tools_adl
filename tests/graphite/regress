@@ -1,0 +1,95 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+ 
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use adl_config;
+use strict;
+use Data::Dumper;
+use File::Basename;
+use vars qw($src $jit_ok $graphite_pfx $serialOverride @JitArgs $timeout);
+
+# For now, I'm disabling the JIT, since it seems to have issues with MT.
+# Re-enable when we get all of that worked out.
+$jit_ok = 0;
+
+# For convenience, run in separate directories, but we **cannot** currently run
+# these in parallel due to the fact that Graphite uses a fixed port.  Bummer-
+# need to change that.
+setupForSeparateDirs();
+
+my $sim  = "./ppc-graphite-cache --plugin=./perf-model.so";
+
+my @Tests = (
+	model_test("$sim","$src/in4.dat"),
+	{
+		cmd     => "$sim $src/in4.dat",
+		stdout  => 1,
+		checker => sub {
+			checkstr($_[0],
+							 "    Total Instructions: 1716",
+							 "    Completion Time (in nanoseconds): 2802",
+							 "    num correct: 361",
+							 "    num incorrect: 66"
+					);
+		}
+	},
+	{
+		cmd     => "$sim -dc $src/in4.dat",
+		stdout  => 1,
+		checker => sub {
+			checkstr($_[0],
+							 "    Total Instructions: 1716",
+							 "    Completion Time (in nanoseconds): 2802",
+							 "    num correct: 361",
+							 "    num incorrect: 66"
+					);
+		}
+	},
+		);
+	
+
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+
+# Make sure that each string in the arguments exists in the output.  Order is
+# not important.
+#
+# arg0   :  Test output.
+# arg1..n:  Strings to check.
+sub checkstr
+{
+	my ($out,@strings) = @_;
+	my @l = split (/\n/,$out);
+	my %lines;
+	@lines{@l} = (1) x @l;
+
+	for my $s (@strings) {
+		if (!exists $lines{$s}) {
+			print "Did not find required string in output:  $s\n";
+			print "Output was:\n$out\n\n";
+			die;
+		}
+	}
+}

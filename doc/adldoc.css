@@ -1,0 +1,246 @@
+/*
+**
+** CSS file for documentation created from ADL files by the make-doc program.
+**
+*/
+
+table.field { 
+  border-collapse: collapse;
+  width: 80%;
+  text-align: center;
+}
+
+table.subfield,
+table.subfieldunused { 
+  border-collapse: collapse;
+  width: 100%;
+  text-align: center;
+}
+
+table.sparsecontents { 
+  border-collapse: collapse;
+  text-align: left;
+  font-size: small;
+  border: 1px solid black;
+  background-color:  #eee;
+  margin-left: 2em;
+}
+
+table.attributes,
+table.enumeratedfield { 
+  border-collapse: collapse;
+  text-align: center;
+  font-size: small;
+  border: 1px solid black;
+  background-color:  #eee;
+  margin-left: 2em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+table.indexmapping { 
+  border-collapse: collapse;
+  text-align: center;
+  font-size: small;
+  border: 1px solid black;
+  background-color:  #eee;
+  margin-left: 2em;
+}
+
+table.sparsecontents td, th { 
+  border: 1px solid black;
+}
+
+table.attributes td,
+table.attributes th,
+table.enumeratedfield td,
+table.enumeratedfield th {
+  border: 1px solid black;
+}
+
+table.indexmapping td, th { 
+  border: 1px solid black;
+}
+
+table.sparsecontents td a:hover { 
+  background-color: white;
+}
+
+table.indexmapping td a:hover { 
+  background-color: white;
+}
+
+table.bits {
+  width: 95%;
+  font-size: x-small;
+}
+
+td.field {
+  border: 1px solid black;
+  align: center;
+  font-family: monospace;
+  font-size: x-small;
+}
+
+td.subfield,
+td.subfieldunused {
+  border-top: 1px dashed black;
+  border-right: 1px dashed black;
+  align: center;
+  font-size: small;
+}
+
+td.subfieldunused {
+  background: #ccc;
+  color: black;
+}
+
+td.reserved {
+  border: 1px solid black;
+  align: center;
+  background-color: #cccccc;
+  font-family: monospace;
+  font-size: x-small;
+}
+
+td.singleodd,
+td.leftodd,
+td.rightodd,
+td.singleeven,
+td.lefteven,
+td.righteven {
+  color: black;
+  font-size: x-small;
+  border-style: solid;
+  border-top-width: 0;
+}
+
+td.left,
+td.leftodd,
+td.lefteven {
+  text-align: left;
+  border-left-width: 0.1em;
+  border-right-width: 0;
+  border-bottom-width: 0.1em;
+}
+
+td.right,
+td.rightodd,
+td.righteven {
+  text-align: right;
+  border-left-width: 0;
+  border-right-width: 0.1em;
+  border-bottom-width: 0.1em;
+}
+
+td.single,
+td.singleodd,
+td.singleeven {
+  text-align: center;
+  border-left-width: 0.1em;
+  border-right-width: 0.1em;
+  border-bottom-width: 0.1em;
+}
+
+td.singleodd,
+td.leftodd,
+td.rightodd {
+  background-color: #eef;
+  border-color: #dde;
+}
+
+td.singleeven,
+td.lefteven,
+td.righteven {
+  background-color: #ffe;
+  border-color: #eed;
+}
+
+div[class="contents topic"] { 
+  background-color:#eee;
+  border:1px dashed #999;
+  padding: 1em;
+  margin: 0% 10% 0% 10%;
+}
+
+div.section {
+  padding: 0.5em;
+}
+
+h1.title { 
+  margin: 0% 0% 1% 18%;
+  font-size: 40pt;
+  text-align: center;
+}
+
+h2.subtitle { 
+  margin: 0% 0% 0% 18%;
+  text-align: center;
+  font-size: 20pt;
+  padding: .25em;
+}
+
+/* This is here to implement multi-line subtitles.  These come from using
+   reStructured Text's "class" directive to create subtitle paragraphs. */
+p.subtitle { 
+  margin: 0% 0% 0% 18%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 20pt;
+  padding: .25em;
+}
+
+a {
+  color:#09C;
+  text-decoration:none;
+  font-family:verdana, arial, helvetica, sans-serif;
+}
+
+a:link {
+  color:#09c;
+}
+
+a:visited {
+  color:#07a;
+}
+
+a:hover {
+  background-color:white;
+}
+
+div.section a:hover { 
+  background-color:#eee; 
+}
+
+.literal-block {
+  text-align: left ! important;
+}
+
+/* Code classes */
+
+.keyword { color:purple }
+.comment { color: #998 }
+.reference-name { color:cornflowerblue }
+.string  { color:green }
+.variable-name  { color:blue; font-style:italic }
+.function-name { color:brown }
+.builtin { color:darkgreen }
+.type-name { color:darkgreen; font-style:italic }
+.operator { font-weight:bold; color:blue }
+.sub { font-style: italic }
+
+/*
+.keyword        { color: #789 }
+.comment        { color: #998 }
+.reference-name { color: cornflowerblue }
+.string         { color: #b84 }
+.type-name      { color: #468 }
+.variable-name  { color: #f9f }
+.function-name  { color: #900 }
+.builtin        { color: #000 }
+.operator       { font-weight:bold; color:blue }
+.sub            { font-style: italic }
+*/
+
+/* This imports the default reStructured Text stylesheet. */
+@import ("default-rst.css")

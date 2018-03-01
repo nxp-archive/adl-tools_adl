@@ -1,0 +1,187 @@
+#
+# Testing the use of event-buses to implement reservations.
+#
+= asm
+
+	.equ CoreCount,				3
+	.equ LockAddr,				0xA00
+	.equ StartAddr,				0x1000
+	.equ Accum,						0x1010
+	.equ C1Data,					0x2000
+	.equ C2Data,					0x3000
+	.equ C3Data,					0x4000
+
+Start1:
+	li r20,LockAddr
+	li r1,C1Data-4
+	b L1
+	.long 0x0
+Start2:
+	li r20,LockAddr
+	li r1,C2Data-4
+	b L1
+	.long 0x0
+Start3:
+	li r20,LockAddr
+	li r1,C3Data-4
+	b L1
+	.long 0x0
+	# Don't proceed until all cores have started.
+L1:
+	bl Lock
+	lwz r2,StartAddr(r0)
+	addi r2,r2,1
+	stw r2,StartAddr(r0)
+	bl Unlock
+Loop1:
+	lwz r2,StartAddr(r0)
+	cmpwi r2,CoreCount
+	bne Loop1
+
+	# Iterate over our array of data, adding to the accumulator.
+	# R1 should have start of array address - 4.	
+L2:
+	lwzu r2,0x4(r1)
+	cmpwi r2,0
+	beq End
+	bl Lock
+	lwz r3,Accum(r0)
+	add r3,r3,r2
+	stw r3,Accum(r0)
+	bl Unlock
+	b L2
+
+End:
+	.long 0x0
+
+	# Start of spinlock.  Uses r10, r11.  Lock address should be in r20.
+Lock:
+	li       r11,1
+S2:
+  lwarx    r10,r0,r20 	# If the lock already has a value of 1, then wait.
+	cmpwi    r10,0
+  bne-     S3
+  stwcx.   r11,r0,r20   # If we can store to this location, then we're ok, else wait.
+  bne      S3
+  blr										# And we're done.
+S3:
+  li       r0,158				# sched_yield when we don't get a lock.
+	mr       r10,r3				# Save r3 (sc return code), since we use that value elsewhere.
+	sc
+	mr			 r3,r10
+	li			 r0,0
+  b S2									# Now try again to get the lock.
+
+	# To unlock, we just write a 0 to the lock address stored in r20.
+Unlock:
+	stw r0,0x0(r20)
+	blr
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000004 d=0x38201FFC	#	li r1,C1Data-4
+MD n=Mem ra=0x00000008 d=0x48000028	#	b L1
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000014 d=0x38202FFC	#	li r1,C2Data-4
+MD n=Mem ra=0x00000018 d=0x48000018	#	b L1
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x3A800A00	#	li r20,LockAddr
+MD n=Mem ra=0x00000024 d=0x38203FFC	#	li r1,C3Data-4
+MD n=Mem ra=0x00000028 d=0x48000008	#	b L1
+MD n=Mem ra=0x0000002c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000030 d=0x48000049	#	bl Lock
+MD n=Mem ra=0x00000034 d=0x80401000	#	lwz r2,StartAddr(r0)
+MD n=Mem ra=0x00000038 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000003c d=0x90401000	#	stw r2,StartAddr(r0)
+MD n=Mem ra=0x00000040 d=0x4800006D	#	bl Unlock
+MD n=Mem ra=0x00000044 d=0x80401000	#	lwz r2,StartAddr(r0)
+MD n=Mem ra=0x00000048 d=0x2C020003	#	cmpwi r2,CoreCount
+MD n=Mem ra=0x0000004c d=0x4082FFF8	#	bne Loop1
+MD n=Mem ra=0x00000050 d=0x84410004	#	lwzu r2,0x4(r1)
+MD n=Mem ra=0x00000054 d=0x2C020000	#	cmpwi r2,0
+MD n=Mem ra=0x00000058 d=0x4182001C	#	beq End
+MD n=Mem ra=0x0000005c d=0x4800001D	#	bl Lock
+MD n=Mem ra=0x00000060 d=0x80601010	#	lwz r3,Accum(r0)
+MD n=Mem ra=0x00000064 d=0x7C631214	#	add r3,r3,r2
+MD n=Mem ra=0x00000068 d=0x90601010	#	stw r3,Accum(r0)
+MD n=Mem ra=0x0000006c d=0x48000041	#	bl Unlock
+MD n=Mem ra=0x00000070 d=0x4BFFFFE0	#	b L2
+MD n=Mem ra=0x00000074 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000078 d=0x39600001	#	li       r11,1
+MD n=Mem ra=0x0000007c d=0x7D40A028	#	lwarx    r10,r0,r20 	# If the lock already has a value of 1, then wait.
+MD n=Mem ra=0x00000080 d=0x2C0A0000	#	cmpwi    r10,0
+MD n=Mem ra=0x00000084 d=0x40820010	#	bne-     S3
+MD n=Mem ra=0x00000088 d=0x7D60A12D	#	stwcx.   r11,r0,r20   # If we can store to this location, then we're ok, else wait.
+MD n=Mem ra=0x0000008c d=0x40820008	#	bne      S3
+MD n=Mem ra=0x00000090 d=0x4E800020	#	blr										# And we're done.
+MD n=Mem ra=0x00000094 d=0x3800009E	#	li       r0,158				# sched_yield when we don't get a lock.
+MD n=Mem ra=0x00000098 d=0x7C6A1B78	#	mr       r10,r3				# Save r3 (sc return code), since we use that value elsewhere.
+MD n=Mem ra=0x0000009c d=0x44000002	#	sc
+MD n=Mem ra=0x000000a0 d=0x7D435378	#	mr			 r3,r10
+MD n=Mem ra=0x000000a4 d=0x38000000	#	li			 r0,0
+MD n=Mem ra=0x000000a8 d=0x4BFFFFD4	#	b S2									# Now try again to get the lock.
+MD n=Mem ra=0x000000ac d=0x90140000	#	stw r0,0x0(r20)
+MD n=Mem ra=0x000000b0 d=0x4E800020	#	blr
+# </GEN>
+
+CORE n=:procs:P0
+#CORE n=:P
+
+RD n=NIA d=0x0
+
+CORE n=:procs:P1
+
+RD n=NIA d=0x10
+
+CORE n=:procs:P2
+
+RD n=NIA d=0x20
+
+MD n=Mem ra=0x0a00 d=0x0
+MD n=Mem ra=0x1000 d=0x0
+MD n=Mem ra=0x1010 d=0x0
+
+# Core 1 data.
+MD n=Mem ra=0x2000 d=1
+MD n=Mem ra=0x2004 d=2
+MD n=Mem ra=0x2008 d=3
+MD n=Mem ra=0x200c d=4
+MD n=Mem ra=0x2010 d=5
+MD n=Mem ra=0x2014 d=6
+MD n=Mem ra=0x2018 d=7
+MD n=Mem ra=0x201c d=8
+MD n=Mem ra=0x2020 d=9
+
+# Core 2 data.
+MD n=Mem ra=0x3000 d=10
+MD n=Mem ra=0x3004 d=20
+MD n=Mem ra=0x3008 d=30
+MD n=Mem ra=0x300c d=40
+MD n=Mem ra=0x3010 d=50
+MD n=Mem ra=0x3014 d=60
+MD n=Mem ra=0x3018 d=70
+MD n=Mem ra=0x301c d=80
+MD n=Mem ra=0x3020 d=90
+
+# Core 3 data.
+MD n=Mem ra=0x4000 d=100
+MD n=Mem ra=0x4004 d=200
+MD n=Mem ra=0x4008 d=300
+MD n=Mem ra=0x400c d=400
+MD n=Mem ra=0x4010 d=500
+MD n=Mem ra=0x4014 d=600
+MD n=Mem ra=0x4018 d=700
+MD n=Mem ra=0x401c d=800
+MD n=Mem ra=0x4020 d=900
+
+RESULTS
+
+# This should be 3, as each core adds to this barrier before we proceed.
+MD n=Mem ra=0x1000 d=3
+
+# The main read-modify-write accumulator.
+MD n=Mem ra=0x1010 d=4995

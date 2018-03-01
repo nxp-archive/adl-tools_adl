@@ -1,0 +1,94 @@
+=======
+Systems:
+=======
+System:  S
+  Shared Resources:
+    Event buses:  msg 
+  Locally-defined Cores:
+    Name:  "P"
+    Registers:
+      Name:  "HIT"
+      Usage:  written
+      Width:  32
+      -------------------------------
+      Name:  "MSR"
+      Width:  32
+        PR[10]   
+      -------------------------------
+      Name:  "pc"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  pc
+    Next-instruction-address register:  pc
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Event buses:
+      msg
+        Fields:
+          addr:  32 bits.
+            Reset value:  0x2000
+          data:  32 bits.
+            Reset value:  5
+          flag:  default size.
+            Reset value:  0
+          type:  default size.
+            Reset value:  Read
+        Action:  func ( msg_t x ) {
+    HIT = x . data ;
+}
+Target Registers:  HIT 
+
+
+    Instruction Fields:
+      OPCD: [0,5] 
+        Primary opcode.
+    
+      RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+      RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+      XO: [21,30] 
+        Extended opcode.
+    
+    Instructions:
+      Name:  dcbf (rank: 100)
+      Width:  32
+      Fields:  OPCD(31) RA RB XO(86)
+      Action:  {
+     msg_t msg ;
+    msg . type = Read ;
+     int j = Foo ;
+    msg . send (  ) ;
+}
+      -------------------------------
+    
+Instruction Tables:
+    other:
+            Mask:  0xfc0007fe
+        1040187478(7c0000ac):  dcbf
+    
+User Type Declarations:
+       enum MsgTypes {
+    Read
+    ,
+    Write
+    ,
+    LastMsg
+} ;
+       enum  {
+    Foo = LastMsg + 1
+    ,
+    Bar
+} ;
+    -------------------------------
+  Constituent Items:
+    core0:  P
+    core1:  P
+-------------------------------
+

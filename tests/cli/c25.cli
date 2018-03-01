@@ -1,0 +1,6 @@
+
+puts "Files read:  [lindex [file split [inputlist]] end]"
+straceon dat
+step 3
+puts [straceget]
+straceoff

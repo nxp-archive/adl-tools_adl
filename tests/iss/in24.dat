@@ -1,0 +1,155 @@
+
+# <ASM>
+# addi r5,r0,0x1c
+# L1:
+# addi r6,r6,2
+# bdnz L1
+# mtspr 31,r5
+# bc 20,0,L3
+# L2:
+# addi r6,r6,1
+# bdnz L2
+# addi r10,r0,0x20
+# L3:
+# 
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38A0001C	# addi r5,r0,0x1c
+MD n=Mem ra=0x00000004 d=0x38C60002	# addi r6,r6,2
+MD n=Mem ra=0x00000008 d=0x4200FFFC	# bdnz L1
+MD n=Mem ra=0x0000000c d=0x7CBF03A6	# mtspr 31,r5
+MD n=Mem ra=0x00000010 d=0x42800010	# bc 20,0,L3
+MD n=Mem ra=0x00000014 d=0x38C60001	# addi r6,r6,1
+MD n=Mem ra=0x00000018 d=0x4200FFFC	# bdnz L2
+MD n=Mem ra=0x0000001c d=0x39400020	# addi r10,r0,0x20
+# </GEN>
+
+CORE n=PMT
+
+RD n=TEN d=0xc0000000
+
+CORE n=PMT:t0
+
+RD n=NIA0 d=0
+RD n=CTR d=2
+
+
+CORE n=PMT:t1
+
+RD n=NIA1 d=0x14
+RD n=CTR d=10
+
+TRACE
+
+
+CORE n=PMT:t0
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38a0001c
+INSTR op=0x38a0001c asm="#1 addi 5,0,28"
+R n=NIA d=0x00000004
+R n=GPR i=5 d=0x0000001c
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38c60002
+INSTR op=0x38c60002 asm="#3 addi 6,6,2"
+R n=NIA d=0x00000008
+R n=GPR i=6 d=0x00000002
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4200fffc
+INSTR op=0x4200fffc asm="#5 bc 16,0,16383"
+R n=CTR d=0x00000001
+R n=NIA d=0x00000004
+B taken=1 ea=0x4
+
+I id=4 ea=0x4
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38c60002
+INSTR op=0x38c60002 asm="#7 addi 6,6,2"
+R n=GPR i=6 d=0x00000004
+
+
+I id=5 ea=0x8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4200fffc
+INSTR op=0x4200fffc asm="#9 bc 16,0,16383"
+R n=CTR d=0x00000000
+R n=NIA d=0x0000000c
+
+I id=6 ea=0xc
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7cbf03a6
+INSTR op=0x7cbf03a6 asm="#11 mtspr 5,31"
+R n=NIA1 d=0x0000001c
+R n=NIA d=0x00000010
+
+I id=7 ea=0x10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x42800010
+INSTR op=0x42800010 asm="#13 bc 20,0,4"
+R n=NIA d=0x00000020
+B taken=1 ea=0x20
+
+
+I id=8 ea=0x20
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x0
+INSTR op=0x0 asm="#15 halt"
+
+CORE n=PMT:t1
+
+I id=9 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38c60001
+INSTR op=0x38c60001 asm="#2 addi 6,6,1"
+R n=NIA d=0x00000018
+R n=GPR i=6 d=0x00000001
+
+I id=10 ea=0x18
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x4200fffc
+INSTR op=0x4200fffc asm="#4 bc 16,0,16383"
+R n=CTR d=0x00000009
+R n=NIA d=0x00000014
+B taken=1 ea=0x14
+
+
+I id=11 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38c60001
+INSTR op=0x38c60001 asm="#6 addi 6,6,1"
+R n=NIA d=0x00000018
+R n=GPR i=6 d=0x00000002
+
+I id=12 ea=0x18
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x4200fffc
+INSTR op=0x4200fffc asm="#8 bc 16,0,16383"
+R n=CTR d=0x00000008
+R n=NIA d=0x00000014
+B taken=1 ea=0x14
+
+I id=13 ea=0x14
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38c60001
+INSTR op=0x38c60001 asm="#10 addi 6,6,1"
+R n=NIA d=0x00000018
+R n=GPR i=6 d=0x00000003
+
+I id=14 ea=0x1c
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x39400020
+INSTR op=0x39400020 asm="#12 addi 10,0,32"
+R n=NIA d=0x00000020
+R n=GPR i=10 d=0x00000020
+
+I id=15 ea=0x20
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x0
+INSTR op=0x0 asm="#14 halt"
+R n=NIA d=0x00000024
+
+RESULTS
+
+CORE n=PMT
+RD n=NIA0 d=0x00000024
+RD n=NIA1 d=0x00000024
+
+CORE n=PMT:t0
+RD n=CTR d=0x00000000
+RD n=GPR i=5 d=0x0000001c
+RD n=GPR i=6 d=0x00000004
+
+CORE n=PMT:t1
+RD n=CTR d=0x00000008
+RD n=GPR i=6 d=0x00000003
+RD n=GPR i=10 d=0x00000020

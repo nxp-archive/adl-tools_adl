@@ -1,0 +1,55 @@
+//
+// We should catch the unknown method call on a register file.
+//
+define (arch=minippc) {
+  
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (reg=MSR) {
+    define (field=EE) {
+      bits = 12;
+    }
+  }
+ 
+  define (instr=g) {
+    fields=(OPCD(7),RT,RA,RB,XO_X(10));
+    
+    action= {
+      GPR.foo();
+    };
+  }
+ 
+  define (regfile=GPR) {
+    define (field=x) {
+      bits = (0,1);
+    }
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

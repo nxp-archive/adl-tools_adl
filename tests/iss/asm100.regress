@@ -1,0 +1,54 @@
+
+asm100.o:     file format elf32-powerpc
+asm100.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000100  00000000  00000000  00000100  2**8
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000200  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000200  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000 l       .text	00000000 start
+0000003a l       .text	00000000 foo
+
+
+
+Disassembly of section .text:
+
+00000000 <start>:
+   0:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+   4:	0101003a 	move     r1,0x3a
+			6: low	.text+0x3a
+   8:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+   c:	10 40 00    	nop      
+   f:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  13:	10 40 00    	nop      
+  16:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  1a:	10 40 00    	nop      
+  1d:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  21:	10 40 00    	nop      
+  24:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  28:	10 40 00    	nop      
+  2b:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  2f:	10 40 00    	nop      
+  32:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  36:	01010000 	move     r1,0x0
+			38: low	.text
+
+0000003a <foo>:
+  3a:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  3e:	10 70 cc    	add_n    d12,d12,d12
+  41:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  45:	4510      	add_n    d2,d2,d2
+  47:	221ff000 	PREFIX,  VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  4b:	10 44 00    	add_n_al d0,d1
+	...

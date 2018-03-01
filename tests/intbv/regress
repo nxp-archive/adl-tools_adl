@@ -1,0 +1,28 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use rdriver;
+use strict;
+use regress_utils;
+
+my @Tests = (
+	bitstest ("intbvTest"),
+	bitstest ("bitsTest"),
+	bitstest ("sintbvTest"),
+	bitstest ("miscSignedTest"),
+	bitstest ("le_intbvTest"),
+	bitstest ("le_sintbvTest"),
+);
+
+doTest(\@Tests);
+
+sub bitstest {
+	my ($p) = @_;
+
+	return {
+		cmd => "./$p",
+	};
+}

@@ -1,0 +1,54 @@
+#
+# This tests to make sure that we can both assign to a field in a register
+# and assign the entire register when using a transactional ISS.
+#
+= asm
+
+  mtspr 62,r1
+  mtspr 500,r3
+  mtspr 62,r1
+  mtspr 30,r3
+  mtspr 501,r3
+  .long 0x0
+  .long 0x0
+ ## Program-interrupt handler.
+ mfspr r31,62
+ add   r30,r30,r31
+ mfspr r31,SRR0
+ addi  r31,r31,4
+ mtspr SRR0,r31
+ rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C3E0BA6	#	mtspr 62,r1
+MD n=Mem ra=0x00000004 d=0x7C747BA6	#	mtspr 500,r3
+MD n=Mem ra=0x00000008 d=0x7C3E0BA6	#	mtspr 62,r1
+MD n=Mem ra=0x0000000c d=0x7C7E03A6	#	mtspr 30,r3
+MD n=Mem ra=0x00000010 d=0x7C757BA6	#	mtspr 501,r3
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x7FFE0AA6	#	mfspr r31,62
+MD n=Mem ra=0x00000020 d=0x7FDEFA14	#	add   r30,r30,r31
+MD n=Mem ra=0x00000024 d=0x7FFA02A6	#	mfspr r31,SRR0
+MD n=Mem ra=0x00000028 d=0x3BFF0004	#	addi  r31,r31,4
+MD n=Mem ra=0x0000002c d=0x7FFA03A6	#	mtspr SRR0,r31
+MD n=Mem ra=0x00000030 d=0x4C000064	#	rfi
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA     d=0x00000000
+RD n=IVOR6   d=0x0000001c
+
+RD n=GPR i=1 d=0xffffffff
+RD n=GPR i=2 d=0xff000000
+RD n=GPR i=3 d=0x00000000
+
+RESULTS
+
+# Should be the sum of the two ESR values:  0x08000000 + 0x00f00000
+RD n=GPR i=30 d=0x08f00000
+
+

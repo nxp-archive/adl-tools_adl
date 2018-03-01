@@ -1,0 +1,68 @@
+======
+Cores:
+======
+Name:  "z6"
+Registers:
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  opcd1: [0,3] 
+  opcd2: [4,7] 
+  opcd3: [8,11] 
+  opcd4: [12,15] 
+  opcd5: [16,19] 
+  opcd6: [30,31] 
+  opcd7: [32,33] 
+Instructions:
+  Name:  foo1 (rank: 100)
+  Width:  64
+  Fields:  opcd1(10) opcd2(0) opcd3(0) opcd4(0) opcd5(11)
+  Action:  {
+}
+  -------------------------------
+  Name:  foo2 (rank: 100)
+  Width:  64
+  Fields:  opcd1(10) opcd2(0) opcd3(0) opcd4(0) opcd5(15)
+  Action:  {
+}
+  -------------------------------
+  Name:  foo3 (rank: 100)
+  Width:  64
+  Fields:  opcd1(15) opcd2(0) opcd3(0) opcd4(0) opcd5(11)
+  Action:  {
+}
+  -------------------------------
+  Name:  foo4 (rank: 100)
+  Width:  64
+  Fields:  opcd1(15) opcd2(0) opcd3(0) opcd4(0) opcd5(15)
+  Action:  {
+}
+  -------------------------------
+  Name:  foo5 (rank: 100)
+  Width:  64
+  Fields:  opcd1(15) opcd2(0) opcd3(0) opcd4(0) opcd5(10) opcd6(1) opcd7(1)
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfffff00000000000
+    655371(a000b00000000000):  foo1
+    655375(a000f00000000000):  foo2
+    983050(f000a00000000000):      Mask:  0x0000000300000000
+      1(0000000100000000):        Mask:  0x00000000c0000000
+        1(0000000040000000):  foo5
+    983051(f000b00000000000):  foo3
+    983055(f000f00000000000):  foo4
+-------------------------------
+

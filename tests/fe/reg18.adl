@@ -1,0 +1,23 @@
+//
+// Register aliasing test- should fail because "write"
+// expects an action of arity 2 for register files.
+//
+define (arch = spe) {
+
+  define (regfile = gprs) {
+    width=32;
+    size = 32;
+    define (write) {
+      action = func(unsigned index,bits<32> value,unsigned stuff) { };
+    }
+  }
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+}
+
+define (core = P) {
+  archs = spe;
+}

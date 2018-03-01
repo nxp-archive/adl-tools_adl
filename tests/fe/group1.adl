@@ -1,0 +1,61 @@
+// Tests how set operations are resolved (order is not important)
+
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+      
+  
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,30);}
+  
+  
+  define (instr = i1) { fields = (OPCD(1),A,B); action  = {};}
+  define (instr = i2) { fields = (OPCD(2),A,B); action  = {};}
+  define (instr = i3) { fields = (OPCD(3),A,B); action  = {};}  
+  define (instr = i4) { fields = (OPCD(4),A,B); action  = {}; attrs = red;}  
+  define (instr = i5) { fields = (OPCD(5),A,B); action  = {};}  
+  define (instr = i6) { fields = (OPCD(6),A,B); action  = {};}  
+
+  define (group = g6) {
+    items = (*g1,*g2);
+  }
+  
+  define (group = g5) {
+    items = (*g3 - *g4,i6);
+  }
+ 
+  define (group = g3) {
+    items = (*g1 & *g2 , i6); 
+  }
+  
+  define (group = g1) {
+    items = (i1,i2,i3);
+  }
+  
+  define (group = g2) {
+    items = (i3,i4,i5);
+  } 
+    
+  define (group = g4) {
+    items = (*g1 - *g2 , i6); 
+  }
+
+  define (group = g7) {
+    items = ((*g1 | *g2) - *g3);
+  }
+
+  define (group = g8) {
+    items = ((*g1 , i4, i5, i6) - (i1,i2) );
+  }
+     
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

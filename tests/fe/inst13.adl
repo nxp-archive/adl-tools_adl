@@ -1,0 +1,238 @@
+//
+// Simple test of instructions.
+//
+
+define (arch=minippc) {
+
+  define (mem=MemA) {
+    size = 2048;
+    addr_unit = 1;
+  }
+
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=Rc) {
+    bits = (31,31);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=RS) {
+    bits = (6,10);
+    ref = GPR;
+    type=regfile;
+  }
+
+  define (instrfield=UI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=CRM) {
+    bits = (12,19);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+    display = hex;
+  }
+
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+    display = hex;
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+    addr = pc;
+    shift = 2;
+    is_signed = true;
+  }
+
+  define (instrfield=aBD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.  This is used for
+    an absolute branch and the value is inverted before encoding.
+    """;
+    bits = (16,29);
+    addr = abs;
+    shift = 2;
+    is_signed = false;
+    is_inverted = true;
+  }
+
+  define (instrfield=Foo) {
+    bits = (19,20);
+    enumerated = ( "", "+", ".l", reserved, reserved, ".f" );
+  }
+
+  define (instrfield=Bar) {
+    bits = (11,20);
+    ref = MemA;
+    type = memory;
+  }
+
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=Y) {
+    """
+    Overlay field for setting the Y bit in a conditional branch.
+    """;
+    bits = 15;
+    overlay = true;
+    enumerated = ( "-", "+" );
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(40),RT,RA,SI);
+    action = {};
+  }
+
+  define (instr=ori) {
+    fields=(OPCD(24),RS,RA,UI);
+    action = {};
+  }
+
+  define (instr=or) {
+    fields=(OPCD(31),RS,RA,RB,XO(444),Rc(0));
+    action = {};
+  }
+
+  define (instr="or.") {
+    fields=(OPCD(31),RS,RA,RB,XO(444),Rc(1));
+    action = {};
+  }
+
+  define (instr=mtcrf) {
+    fields=(OPCD(31),RS,CRM,XO(144));
+    action = {};
+  }
+
+  define (instr=nop) {
+    alias = ori(RS(0),RA(0),UI(0));
+  }
+
+  define (instr=li) {
+    alias = addi(RT(RT),RA(0),SI(SI));
+  }
+
+  define (instr=mr) {
+    alias = or(RS(RS),RA(RA),RB(RS));
+  }
+
+  define (instr=mtcr) {
+    alias = mtcrf(CRM(0xff),RS(RS));
+  }
+
+  define (instr=my_or) {
+    width = 16;
+    fields=(OPCD(3),RT,RA);
+    alias=or(RS(RA),RA(RT),RB(RA));
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    syntax= ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=slwi) {
+    alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(0),ME(0-SH));
+    syntax= ("%i %f,%f,%f",RA,RS,SH);
+  }
+
+  define (instr=bc) {
+    fields=(OPCD(16),Y,BO,BI,BD,AA(0),LK(0));
+    syntax = ("%i%f %f,%f,%f",Y,BO,BI,BD);
+    action = func() { ;  };
+  }
+
+  define (instr=bclr) {
+    fields=(OPCD(19),Y,BO,BI,LK(0),XO(16));
+    syntax = ("%i%f %f,%f",Y,BO,BI);
+    action =  { ; };
+  }
+  
+  define (instr=blr) {
+    alias = bclr(BO(20),BI(0));
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

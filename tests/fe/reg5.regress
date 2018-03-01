@@ -1,0 +1,4 @@
+reg5.adl:23: Entry index of 2000 exceeds size of register file (1024).
+reg5.adl:26: No register/register-file specified and a read and write hook were not defined.
+reg5.adl:26: Entry index of 2001 exceeds size of register file (1024).
+reg5.adl:38: Did not find any registers identified as a current-instruction-address register (of class cia).

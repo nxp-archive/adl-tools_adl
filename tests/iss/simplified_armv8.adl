@@ -1,0 +1,1169 @@
+ define (core = Armv8) {
+    archs = Armv8;
+ }
+ 
+ define (arch = Armv8) {
+ 
+  bit_endianness = little;
+	instr_endianness = little;
+  
+	attrs = (
+          log_as_reg
+        );
+
+        
+	define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+	}
+
+	define (reg=PC) {
+    	"""
+		Next instruction address.
+		""";
+		attrs = nia;
+	}
+  
+// Processor Core registers
+        
+  define (regfile = X) {
+    """
+    General purpose registers
+    These should be 'R' and 'X' is a 64-bit alias
+    """;  
+    width = 64;
+    size = 31;
+    
+    define (read) {
+      action = func(unsigned index) {
+        if (index >=0 && index < 31) return X(index);
+        else return 0;
+      }; // action
+    } // define (read)
+
+    define (write) {
+      action = func(unsigned index, bits<64> value) {
+        if (index >=0 && index < 31) X(index) = value;
+      }; // action
+    }  // define (write) 
+    
+  }  
+
+  define (regfile = W) {
+    """
+    General purpose registers
+    """;  
+    width = 32;
+    size = 31;
+
+    pseudo = true;
+    
+    define (read) {
+      action = func(unsigned index) {
+        if (index >=0 && index < 31) return X(index)(31,0);
+        else return 0;
+      }; // action
+    } // define (read)
+
+    define (write) {
+      action = func(unsigned index, bits<32> value) {
+        if (index >=0 && index < 31) X(index) = zeroExtend(value, 64);
+      }; // action
+    }  // define (write)
+  }
+
+  define (regfile = SP_EL) {
+    """
+    Stack pointers under different exception levels
+    """;  
+    attrs = (log_as_reg);
+    width = 64;
+    size = 4;
+  }
+
+  define (reg = SP) {
+    """
+    Stack pointer
+    """;  
+    width = 64;
+    pseudo = true;
+    
+    // Which SP is accessed depends on PSTATE CurrentEL and SPSel
+    define (read) {  
+      action = {
+        if (SPSel==0) return SP_EL(0);
+        else return SP_EL(CurrentEL.EL);
+      };
+    } // define (read)
+
+    define (write) {
+      action = func(bits<64> value) {
+        if (SPSel==0) SP_EL(0) = value;
+        else SP_EL(CurrentEL.EL) = value;
+      }; // action
+    }  // define (write)  
+  }   
+
+  define (reg = WSP) {
+    """
+    Stack pointer
+    """;  
+    width = 32;
+    pseudo = true;
+    
+    define (read) {
+      action = { return SP(31,0); };
+    } // define (read)
+
+    define (write) {
+      action = func(bits<32> value) {
+        SP = zeroExtend(value, 64);
+      }; // action
+    }  // define (write)
+  }
+
+  define (reg = LR) {
+    """
+    Procedure call link register (LR)
+    The architecture does not define a special name for register 30 that 
+    reflects its special role as the link register on procedure calls. 
+    Such software names may be defined as part of the Procedure Calling Standard. 
+    """;  
+    
+    alias = X(30);
+  }  
+
+  define (reg = CurrentEL) {
+    """
+    Exception Level
+    0 = User, 1 = Supervisor, 2 = Hypervisor, 3 = Secure Monitor
+    """;
+    width = 32;
+    
+    define (field = RES0) { bits = ((31,4),(1,0)); reserved = true; };
+    define (field = EL) { bits = (3,2); };   
+  }
+
+  define (reg = SPSel) {
+    """
+    Stack Pointer Select
+    0 = SP0 (SP for EL0), 1 = SPx (Stack Pointer for current EL)
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = (31,1); reserved = true; };
+    define (field = SP) { bits = (0); };
+  }
+
+  define (reg = SCTLR_EL1) {
+    """
+    System Control Register EL1
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = ((31,30),(27,27),(21,21),(17,17),(13,13),(10,10),(6,6)); reserved = true; };
+    define (field = RES1) { bits = ((29,28),(23,23),(20,20),(11,11)); };
+    define (field = UCI ) { bits = (26,26); };
+    define (field = EE  ) { bits = (25,25); };
+    define (field = E0E ) { bits = (24,24); };
+    define (field = WXN ) { bits = (19,19); };
+    define (field = nTWE) { bits = (18,18); };
+    define (field = nTWI) { bits = (16,16); };
+    define (field = UCT ) { bits = (15,15); };
+    define (field = DZE ) { bits = (14,14); };
+    define (field = I   ) { bits = (12,12); };
+    define (field = UMA ) { bits = (9,9); };
+    define (field = SED ) { bits = (8,8); };
+    define (field = ITD ) { bits = (7,7); };
+    define (field = CP15BEN) { bits = (5,5); };
+    define (field = SA0 ) { bits = (4,4); };
+    define (field = SA  ) { bits = (3,3); };
+    define (field = C   ) { bits = (2,2); };
+    define (field = A   ) { bits = (1,1); };
+    define (field = M   ) { bits = (0,0); };
+  }
+                                              
+  define (reg = SCTLR_EL2) {
+    """
+    System Control Register EL2
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = ((31,30),(27,26),(24,24),(21,20),(17,17),(15,13),(10,6)); reserved = true; };
+    define (field = RES1) { bits = ((29,28),(23,22),(20,20),(18,18),(16,16),(11,11),(5,4)); };
+    define (field = EE  ) { bits = (25,25); };
+    define (field = WXN ) { bits = (19,19); };
+    define (field = I   ) { bits = (12,12); };
+    define (field = SA  ) { bits = (3,3); };
+    define (field = C   ) { bits = (2,2); };
+    define (field = A   ) { bits = (1,1); };
+    define (field = M   ) { bits = (0,0); };
+  }
+
+  define (reg = SCTLR_EL3) {
+    """
+    System Control Register EL3
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = ((31,30),(27,26),(24,24),(21,20),(17,17),(15,13),(10,6)); reserved = true; };
+    define (field = RES1) { bits = ((29,28),(23,22),(20,20),(18,18),(16,16),(11,11),(5,4)); };
+    define (field = EE  ) { bits = (25,25); };
+    define (field = WXN ) { bits = (19,19); };
+    define (field = I   ) { bits = (12,12); };
+    define (field = SA  ) { bits = (3,3); };
+    define (field = C   ) { bits = (2,2); };
+    define (field = A   ) { bits = (1,1); };
+    define (field = M   ) { bits = (0,0); };
+  }
+
+  // XXX remove the following after mechanizing SCTLR
+  define (reg = SA0) {
+    """
+    Stack Alignment Check Enable for EL0. When set, use of the stack pointer as the base address in a
+    load/store instruction at EL0 must be aligned to a 16-byte boundary, or a Stack Alignment Fault
+    exception will be raised.
+    """;  
+    width = 1;
+
+  }
+
+  define (reg = SA) {
+    """
+    Stack Alignment Check Enable. When set, use of the stack pointer as the base address in a load/store
+    instruction at this register's exception level must be aligned to a 16-byte boundary, or a Stack
+    Alignment Fault exception will be raised.
+    """;  
+    width = 1;
+
+  }
+
+  define (reg = ID_AA64MMFR0_EL1) {
+    """
+    AArch64 Memory Model Feature Register EL1
+    """;
+    width = 64;
+  // define (write) { ignore = true; };  // read only
+
+    define (field = RES0)      { bits = (63,32); reserved = true; };
+    define (field = TGran4)    { bits = (31,28); };
+    define (field = TGran64)   { bits = (27,24); };
+    define (field = TGran16)   { bits = (23,20); };
+    define (field = BigEndEL0) { bits = (21,16); };
+    define (field = SNSMem)    { bits = (15,12); };
+    define (field = BigEnd)    { bits = (13,8); };
+    define (field = ASIDBits)  { bits = (7,4); };
+    define (field = PARange)   { bits = (3,0); };
+  }
+
+  define (reg = ID_AA64MMFR1_EL1) {
+    """
+    AArch64 Memory Model Feature Register EL1
+    """;
+    width = 64;
+  // define (write) { ignore = true; };  // read only
+
+    define (field = RES0) { bits = (63,0); reserved = true; };
+  }
+
+  define (reg = HSTR_EL2) {
+    """
+    Hypervisor System Trap Register EL2
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = (31,0); reserved = true; };  // AArch32 is not supported
+  }
+
+  define (reg = ACTLR_EL1) {
+    """
+    Auxillary Control Register EL1
+    Implemetation Defined
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = (31,0); reserved = true; };  // Implementation defined
+  }
+
+  define (reg = CPACR_EL1) {
+    """
+    Architectural Feature Access Control Register
+    """;
+    width = 32;
+
+    define (field = RES0) { bits = ((31,29),(27,22),(19,0)); reserved = true; };
+    define (field = TTA)  { bits = (28); };
+    define (field = FPEN) { bits = (21,20); };
+  }
+
+  define (reg = CPTR_EL2) {
+    """
+    Architectural Feature Trap Register (EL2)
+    """;
+    width = 32;
+
+    define (field = RES1)  { bits = ((13,12),(9,0)); };
+    define (field = RES0)  { bits = ((30,21),(19,14),11); reserved = true; };
+    define (field = TCPAC) { bits = (31); };
+    define (field = TTA)   { bits = (20); };
+    define (field = TFP)   { bits = (10); };
+  }
+
+  define (reg = CPTR_EL3) {
+    """
+    Architectural Feature Trap Register (EL3)
+    """;
+    width = 32;
+
+    define (field = RES0)  { bits = ((30,21),(19,11),(9,0)); reserved = true; };
+    define (field = TCPAC) { bits = (31); };
+    define (field = TTA)   { bits = (20); };
+    define (field = TFP)   { bits = (10); };
+  }
+
+
+  define (reg = cpsr) {
+    """
+    Current Program Status Register - AArch32 only.
+    Should not be written directly. This only exists for ARM FAST model comparison.
+    """;
+    width = 32;
+
+    define (field = NZCV) { bits = (31,28); };
+    define (field = AIF)  { bits = (8,6); };
+  }
+
+  define (reg = SS) {
+    """
+    Software Step (PSTATE)
+    """;
+    width = 1;
+  }
+
+  define (reg = IL) {
+    """
+    Illegal Execution State (PSTATE)
+    """;
+    width = 1;
+  }
+
+  define (reg = nRW) {
+    """
+    not Register Width (PSTATE) - always 0b0 AArch64 only
+    """;
+    width = 1;
+    // reserved = true;
+  }
+
+  define (reg = PSTATE) {
+    """
+    Process State - AArch64 abstraction that replaces AArch32 CPSR
+    """;
+    width = 32;
+    pseudo = true;
+
+    define (field = NZCV) { bits = (31,28); };
+    define (field = N)    { bits = (31); };
+    define (field = Z)    { bits = (30); };
+    define (field = C)    { bits = (29); };
+    define (field = V)    { bits = (28); };
+    define (field = SS)   { bits = (21); };
+    define (field = IL)   { bits = (20); };
+    define (field = DAIF) { bits = (9,6); };
+    define (field = AIF)  { bits = (8,6); };
+    define (field = D)    { bits = (9); };
+    define (field = A)    { bits = (8); };
+    define (field = I)    { bits = (7); };
+    define (field = F)    { bits = (6); };
+    define (field = nRW)  { bits = (4); };
+    define (field = EL)   { bits = (3,2); };
+    define (field = SP)   { bits = (0); };
+
+    define (write) { action = func(bits<32> value) {
+        NZCV.NZCV    = getfield_PSTATE_NZCV(value);
+        cpsr.NZCV    = getfield_PSTATE_NZCV(value);
+        SS           = getfield_PSTATE_SS(value);
+        IL           = getfield_PSTATE_IL(value);
+        DAIF.DAIF    = getfield_PSTATE_DAIF(value);
+        cpsr.AIF     = getfield_PSTATE_AIF(value);
+        // nRW       = getfield_PSTATE_nRW(value);  // AArch64 only thus read only
+        CurrentEL.EL = getfield_PSTATE_nRW(value);
+        SPSel.SP     = getfield_PSTATE_SP(value);
+      };
+    };
+
+    define (read) { action = {
+        bits<32> pstate;
+        pstate = setfield_NZCV_NZCV(pstate,NZCV.NZCV);
+        pstate = setfield_PSTATE_SS(pstate,SS);
+        pstate = setfield_PSTATE_IL(pstate,IL);
+        pstate = setfield_DAIF_DAIF(pstate,DAIF.DAIF);
+        pstate = setfield_PSTATE_nRW(pstate,nRW);
+        pstate = setfield_CurrentEL_EL(pstate,CurrentEL.EL);
+        pstate = setfield_SPSel_SP(pstate,SPSel.SP);
+        return pstate;
+      };
+    };
+  }
+
+  define (reg = NZCV) {
+    """
+    NZCV - Arithmetic result condition register
+    Negative, Zero, Carry, Overflow
+    """;  
+    width = 32;
+
+    define (field = RES0) { bits = (27,0); reserved = true; };
+    define (field = NZCV) { bits = (31,28); };
+    define (field = N)    { bits = (31,31); };
+    define (field = Z)    { bits = (30,30); };
+    define (field = C)    { bits = (29,29); };
+    define (field = V)    { bits = (28,28); };
+
+    define (write) { action = func(bits<32> value) {
+        NZCV.NZCV    = getfield_NZCV_NZCV(value);
+        cpsr.NZCV    = getfield_NZCV_NZCV(value);
+      };
+    };
+  }  
+
+  define (reg = DAIF) {
+    """
+    Interrupt Masks
+    """;  
+    width = 32;
+
+    define (field = RES0) { bits = ((31,10),(5,0)); reserved = true; };
+    define (field = DAIF) { bits = (9,6); };
+    define (field = AIF)  { bits = (8,6); };
+    define (field = D)    { bits = (9,9); };
+    define (field = A)    { bits = (8,8); };
+    define (field = I)    { bits = (7,7); };
+    define (field = F)    { bits = (6,6); };
+  }  
+
+  define (regfile = VV) {
+    """
+    VV[] - the SIMD&FP register file
+    """;  
+    width = 128;
+    size = 32;      
+      
+    define (field = B) { indexed = 8; }
+    define (field = H) { indexed = 16; }
+    define (field = S) { indexed = 32; }
+    define (field = D) { indexed = 64; }
+  }  
+
+  define (reg = FPSR) {
+    """
+    Floating-point Status Register
+    Member of Special purpose and Floating-Point registers functional groups	
+    """;  
+    width = 32;
+    serial = true;
+
+    define (field = RES0) { bits = ((31,28),(26,8)); reserved = true; }
+    define (field = QC)   { bits = (27,27); } 
+    define (field = IDC)  { bits = (7,7); }
+    define (field = IXC)  { bits = (4,4); }
+    define (field = UFC)  { bits = (3,3); }
+    define (field = OFC)  { bits = (2,2); }
+    define (field = DZC)  { bits = (1,1); }
+    define (field = IOC)  { bits = (0,0); } 
+  }
+
+  define (reg = FPCR) {
+    """
+    Floating-point Status Register
+    Member of Special purpose and Floating-Point registers functional groups
+    """;  
+    width = 32;
+    serial = true;
+
+    define (field = RES0)   { bits = ((31,27),19,(14,13),(7,0)); reserved = true; }
+    define (field = AHP)    { bits = (26,26); }
+    define (field = DN)     { bits = (25,25); }
+    define (field = FZ)     { bits = (24,24); }
+    define (field = RMode)  { bits = (23,22); } 
+    define (field = Stride) { bits = (21,20); }
+    define (field = Len)    { bits = (18,16); } 
+    define (field = IDE)    { bits = (15,15); }
+    define (field = IXE)    { bits = (12,12); }
+    define (field = UFE)    { bits = (11,11); }
+    define (field = OFE)    { bits = (10,10); }
+    define (field = DZE)    { bits = (9,9); }
+    define (field = IOE)    { bits = (8,8); }
+  }
+
+  //##############################################################################
+  // System Registers
+  //##############################################################################
+
+  define (reg=RVBAR_EL3) {
+    """
+    Reset Vector Base Address Register
+    The address that execution starts from after reset. This register reflects a hardwired value.
+    The initial NIA for a thread upon thread enablement is taken from INIA for the thread.
+    """;
+    // attrs = rvbar;
+    width = 64;
+
+    define (field = VALID) { bits = (47,0); };
+  }
+
+  define (regfile = VBAR_EL) {
+    """
+    exception Vector Base Address Register per EL
+    if tagged addressing is used, bits(55,48) are RES0 instead of bits (63,48)
+    """;
+    size = 4;
+    width = 64;
+    attrs = (log_as_reg);
+
+    define (field = VALID) { bits = (47,11); };
+    define (field = RES0) { 
+      bits = ((63,48),(10,0));  // no address tagging for now
+      reserved = true;
+    };
+  }
+
+  define (regfile = SPSR_EL) {
+    """
+    Saved Program State Register per non-user EL
+    """;
+    size = 4;
+    width = 32;
+    attrs = (log_as_reg);
+  }
+
+  define (regfile = ELR_EL) {
+    """
+    Exception Link Register per non-user EL
+    """;
+    size = 4;
+    width = 64;
+    attrs = (log_as_reg);
+  }
+
+  define (regfile = FAR_EL) {
+    """
+    Fault Address Register per non-user EL
+    """;
+    size = 4;
+    width = 64;
+    attrs = (log_as_reg);
+  }
+
+  define (regfile = ESR_EL) {
+    """
+    Exception Syndrome Register per non-user EL
+    """;
+    size = 4;
+    width = 32;
+    attrs = (log_as_reg);
+
+    define (field = EC ) { bits = (31,26); }
+    define (field = IL ) { bits = (25,25); }
+    define (field = ISS) { bits = (24,0); }
+  }
+
+
+  define (reg = SCR_EL3) {
+    """
+    Secure Configuration Register
+    """;
+    width = 32;
+
+    define (field = RES0 ) { bits = ((31,14),6); reserved = true; }
+    define (field = TWE  ) { bits = (13); }
+    define (field = TWI  ) { bits = (12); }
+    define (field = ST   ) { bits = (11); }
+    define (field = RW   ) { bits = (10); }
+    define (field = SIF  ) { bits = (9); }
+    define (field = HCE  ) { bits = (8); }
+    define (field = SMD  ) { bits = (7); }
+    define (field = RES1 ) { bits = (5,4); }
+    define (field = EA   ) { bits = (3); }
+    define (field = FIQ  ) { bits = (2); }
+    define (field = IRQ  ) { bits = (1); }
+    define (field = NS   ) { bits = (0); }
+  }
+
+  define (reg = HCR_EL2) {
+    """
+    Hypervisor Configuration Register
+    """;
+    width = 64;
+
+    define (field = RES0 ) { bits = (63,34); reserved = true; }
+    define (field = ID   ) { bits = (33,33); } 
+    define (field = CD   ) { bits = (32,32); }
+    define (field = RW   ) { bits = (31,31); }
+    define (field = TRVM ) { bits = (30,30); }
+    define (field = HCD  ) { bits = (29,29); }
+    define (field = TDZ  ) { bits = (28,28); }
+    define (field = TGE  ) { bits = (27,27); }
+    define (field = TVM  ) { bits = (26,26); }
+    define (field = TTLB ) { bits = (25,25); }
+    define (field = TPU  ) { bits = (24,24); }
+    define (field = TPC  ) { bits = (23,23); }
+    define (field = TSW  ) { bits = (22,22); }
+    define (field = TACR ) { bits = (21,21); }
+    define (field = TIDCP) { bits = (20,20); }
+    define (field = TSC  ) { bits = (19,19); }
+    define (field = TID3 ) { bits = (18,18); }
+    define (field = TID2 ) { bits = (17,17); }
+    define (field = TID1 ) { bits = (16,16); }
+    define (field = TID0 ) { bits = (15,15); }
+    define (field = TWE  ) { bits = (14,14); }
+    define (field = TWI  ) { bits = (13,13); }
+    define (field = DC   ) { bits = (12,12); }
+    define (field = BSU  ) { bits = (11,10); }
+    define (field = FB   ) { bits = (9,9); }
+    define (field = VSE  ) { bits = (8,8); }
+    define (field = VI   ) { bits = (7,7); }
+    define (field = VF   ) { bits = (6,6); }
+    define (field = AMO  ) { bits = (5,5); }
+    define (field = IMO  ) { bits = (4,4); }
+    define (field = FMO  ) { bits = (3,3); }
+    define (field = PTW  ) { bits = (2,2); }
+    define (field = SWIO ) { bits = (1,1); }
+    define (field = VM   ) { bits = (0,0); }
+  }
+
+  define (reg = MPIDR_EL1) {
+    """
+    Multiprocessor Affinity Register
+    """;
+    width = 64;
+  }
+
+
+  define (reg = CTR_EL0) {
+    """
+    Cache Type Register
+    """;
+    width = 32;
+    
+    define (field = RES1)     { bits = (31); }
+    define (field = RES0)     { bits = ((30,28),(13,4)); reserved = true; }
+    define (field = CWG)      { bits = (27,24); }
+    define (field = ERG)      { bits = (23,20); }
+    define (field = DminLine) { bits = (19,16); }
+    define (field = L1Ip)     { bits = (15,14); }
+    define (field = IminLine) { bits = (3,0); }
+  }
+
+  define (reg = DCZID_EL0) {
+    """
+    Data Cache Zero ID register
+    """;
+    width = 32;
+    
+    // define (field = N) { bits = (31); }
+    define (field = RES0) { bits = (31,5); reserved = true; }
+    define (field = DZP)  { bits = (4); }
+    define (field = BS)   { bits = (3,0); }
+  }
+
+  define (reg = CCSIDR_EL1) {
+    """
+    Current Cache Size ID Register
+    """;
+    width = 32;
+    
+    define (field = WT)            { bits = (31); }
+    define (field = WB)            { bits = (30); }
+    define (field = RA)            { bits = (29); }
+    define (field = WA)            { bits = (28); }
+    define (field = NumSets)       { bits = (27,13); }
+    define (field = Associativity) { bits = (12,3); }
+    define (field = LineSize)      { bits = (2,0); }
+  }
+
+  define (reg = CLIDR_EL1) {
+    """
+    Cache Level ID Register
+    """;
+    width = 32;
+    
+    define (field = RES0)   { bits = (31,30); reserved = true; }
+    define (field = LoUU)   { bits = (29,27); }
+    define (field = LoC)    { bits = (26,24); }
+    define (field = LOUIS)  { bits = (23,21); }
+    define (field = Ctype7) { bits = (20,18); }
+    define (field = Ctype6) { bits = (17,15); }
+    define (field = Ctype5) { bits = (14,12); }
+    define (field = Ctype4) { bits = (11,9); }
+    define (field = Ctype3) { bits = (8,6); }
+    define (field = Ctype2) { bits = (5,3); }
+    define (field = Ctype1) { bits = (2,0); }   
+  }
+
+  define (reg = CSSELR_EL1) {
+    """
+    Cache Size Selection Register
+    """;
+    width = 32;
+    
+    define (field = RES0)  { bits = (31,4); reserved = true; }
+    define (field = Level) { bits = (3,1); }
+    define (field = InD)   { bits = (0); }  
+  }
+
+
+  //-------------------------------------------------------------------------
+  // MMU/Memory Registers
+  //-------------------------------------------------------------------------
+  define (reg = TTBR0_EL1) {
+    """
+    Translation Table Base Register 0 (EL1)
+    """;
+    width = 64;
+    
+    define (field = ASID)  { bits = (63,48); }    
+    define (field = BADDR) { bits = (47,0); }
+  }
+
+  define (reg = TTBR0_EL2) {
+    """
+    Translation Table Base Register 0 (EL2)
+    """;
+    width = 64;
+    
+    define (field = RES0)  { bits = (63,48); reserved = true; }
+    define (field = BADDR) { bits = (47,0); }  
+  }
+
+  define (reg = TTBR0_EL3) {
+    """
+    Translation Table Base Register 0 (EL3)
+    """;
+    width = 64;
+    
+    define (field = RES0)  { bits = (63,48); reserved = true; }
+    define (field = BADDR) { bits = (47,0); }  
+  }
+
+  define (reg = TTBR1_EL1) {
+    """
+    Translation Table Base Register 1 (EL1)
+    """;
+    width = 64;
+    
+    define (field = ASID)  { bits = (63,48); }
+    define (field = BADDR) { bits = (47,0); }  
+  }
+
+  define (reg = VTTBR_EL2) {
+    """
+    Virtualization Translation Table Base Register (EL2)
+    """;
+    width = 64;
+
+    define (field = RES0)  { bits = (63,56); reserved = true; }
+    define (field = VMID)  { bits = (55,48); }
+    define (field = BADDR) { bits = (47,0); }  
+  }
+
+  define (reg = TCR_EL1) {
+    """
+    Translation Control Register (EL1)
+    """;
+    width = 64;
+    
+    define (field = RES0)  { bits = ((63,39),35,6); reserved = true; }
+    define (field = TBI1)  { bits = (38); }     // Top Byte Ignored TTBR1_EL1
+    define (field = TBI0)  { bits = (37); }     // Top Byte Ignored TTBR0_EL1
+    define (field = AS)    { bits = (36); }     // ASID Size
+    define (field = IPS)   { bits = (34,32); }  // Intermediate Phys Addr Size
+    define (field = TG1)   { bits = (31,30); }  // TTBR1_EL1 Walk Granule Size
+    define (field = SH1)   { bits = (29,28); }  // TTBR1_EL1 Walk Shareability attribute
+    define (field = ORGN1) { bits = (27,26); }  // TTBR1_EL1 Walk Outer cacheability attribute
+    define (field = IRGN1) { bits = (25,24); }  // TTBR1_EL1 Walk Inner cacheability attribute
+    define (field = EPD1)  { bits = (23); }     // TTBR1_EL1 Walk Disable
+    define (field = A1)    { bits = (22); }     // ASID select TTBR0_EL1 or TTBR1_EL1
+    define (field = T1SZ)  { bits = (21,16); }  // Memory region size offset for TTBR1_EL1
+    define (field = TG0)   { bits = (15,14); }  // TTBR0_EL1 Walk Granule Size
+    define (field = SH0)   { bits = (13,12); }  // TTBR0_EL1 Walk Shareability attribute
+    define (field = ORGN0) { bits = (11,10); }  // TTBR0_EL1 Walk Outer cacheability attribute
+    define (field = IRGN0) { bits = (9,8); }    // TTBR0_EL1 Walk Inner cacheability attribute
+    define (field = EPD0)  { bits = (7); }      // TTBR0_EL1 Walk Disable
+    define (field = T0SZ)  { bits = (5,0); }    // Memory region size offset for TTBR0_EL1
+  }
+
+  define (reg = TCR_EL2) {
+    """
+    Translation Control Register (EL2)
+    """;
+    width = 32;
+    
+    define (field = RES1)  { bits = ((31,31),(23,23)); }
+    define (field = RES0)  { bits = ((30,24),(22,21),(19,19),(7,6)); reserved = true; }
+    define (field = TBI)   { bits = (20); }  
+    define (field = PS)    { bits = (18,16); }  
+    define (field = TG0)   { bits = (15,14); }
+    define (field = SH0)   { bits = (13,12); }
+    define (field = ORGN0) { bits = (11,10); }
+    define (field = IRGN0) { bits = (9,8); }
+    define (field = T0SZ)  { bits = (5,0); }
+  }
+
+  define (reg = VTCR_EL2) {
+    """
+    Virtualization Translation Control Register (EL2)
+    """;
+    width = 32;
+    
+    define (field = RES1)  { bits = (31); }
+    define (field = RES0)  { bits = (30,19); reserved = true; }
+    define (field = PS)    { bits = (18,16); }  
+    define (field = TG0)   { bits = (15,14); }
+    define (field = SH0)   { bits = (13,12); }
+    define (field = ORGN0) { bits = (11,10); }
+    define (field = IRGN0) { bits = (9,8); }
+    define (field = SL0)   { bits = (7,6); }
+    define (field = T0SZ)  { bits = (5,0); }
+  }
+
+  define (reg = TCR_EL3) {
+    """
+    Translation Control Register (EL3)
+    """;
+    width = 32;
+    
+    define (field = RES1)  { bits = ((31,31),(23,23)); }
+    define (field = RES0)  { bits = ((30,24),(22,21),(19,19),(7,6)); reserved = true; }
+    define (field = TBI)   { bits = (20,20); }
+    define (field = PS)    { bits = (18,16); }
+    define (field = TG0)   { bits = (15,14); }
+    define (field = SH0)   { bits = (13,12); }
+    define (field = ORGN0) { bits = (11,10); }
+    define (field = IRGN0) { bits = (9,8); }
+    define (field = T0SZ)  { bits = (5,0); }
+  }
+
+
+  //
+  // Debug Registers
+  //
+  define (reg = MDCR_EL3) {
+    """
+    Monitor Debug Configuration Register (EL3)
+    """;
+    width = 32;
+    
+    define (field = RES0) { bits = ((31,22),(19,18),(13,11),(5,0)); reserved = true; }
+    define (field = EPMAD){ bits = (21); }
+    define (field = EDAD) { bits = (20); }
+    define (field = SPME) { bits = (17); }
+    define (field = SDD)  { bits = (16); }
+    define (field = SPD32){ bits = (15,14); }
+    define (field = TDOSA){ bits = (10); }
+    define (field = TDA)  { bits = (9); }
+    define (field = TPM)  { bits = (6); }
+  }
+
+  define (reg = MDCR_EL2) {
+    """
+    Monitor Debug Configuration Register (EL2)
+    """;
+    width = 32;
+    
+    define (field = RES0) { bits = (31,12); reserved = true; }
+    define (field = TDRA) { bits = (11); }
+    define (field = TDOSA){ bits = (10); }
+    define (field = TDA)  { bits = (9); }
+    define (field = TDE)  { bits = (8); }
+    define (field = HPME) { bits = (7); }
+    define (field = TPM)  { bits = (6); }
+    define (field = TPMCR){ bits = (5); }
+    define (field = HPMN) { bits = (4,0); }
+  }
+
+  define (reg = MDSCR_EL1) {
+    """
+    Monitor Debug System Control Register (EL1) not a System Register
+    """;
+    width = 32;
+    
+    define (field = RES0)   { bits = (31,28,(25,24),(20,19),(11,7),(5,1)); reserved = true; }
+    define (field = RXfull) { bits = (30); }
+    define (field = TXfull) { bits = (29); }
+    define (field = RXO)    { bits = (27); }
+    define (field = TXU)    { bits = (26); }
+    define (field = INTdis) { bits = (23,22); }
+    define (field = TDA)    { bits = (21); }
+    define (field = RAZWI)  { bits = (18,16); }
+    define (field = MDE)    { bits = (15); }
+    define (field = HDE)    { bits = (14); }
+    define (field = KDE)    { bits = (13); }
+    define (field = TDCC)   { bits = (12); }
+    define (field = ERR)    { bits = (6); }
+    define (field = SS)     { bits = (0); }
+  }
+
+  // ------------------------------------------------------------
+  // Sparse Register Files
+  // ------------------------------------------------------------
+
+  define (regfile = SpecPurpReg) {
+  // indexed with Op1:CRm:Op2
+    """
+    Special Purpose (Op0==11 && CRn == 4)
+    See ARMv8 Table C5.7
+    """;
+    size = 1024;
+
+    define (entry =   0) { reg = SPSR_EL(1); } // CRm:Op2 == 0:0
+    define (entry =   1) { reg = ELR_EL(1); }  // CRm:Op2 == 0:1
+    define (entry =   8) { reg = SP_EL(0); }   // CRm:Op2 == 1:0
+    define (entry =  16) { reg = SPSel; }      // CRm:Op2 == 2:0
+    define (entry =  18) { reg = CurrentEL; }  // CRm:Op2 == 2:2
+    define (entry = 401) { reg = DAIF; }       // CRm:Op2 == 2:1
+    define (entry = 400) { reg = NZCV; }       // CRm:Op2 == 2:0
+    define (entry = 416) { reg = FPCR; }       // CRm:Op2 == 4:0
+    define (entry = 417) { reg = FPSR; }       // CRm:Op2 == 4:1
+  //  define (entry = 0x1a8) { reg = DSPSR_EL0; }  // CRm:Op2 == 5:0
+  //  define (entry = 0x1a9) { reg = DLR_EL0; }    // CRm:Op2 == 5:1
+    define (entry = 512) { reg = SPSR_EL(2); } // CRm:Op2 == 0:0
+    define (entry = 513) { reg = ELR_EL(2); }  // CRm:Op2 == 0:1
+    define (entry = 520) { reg = SP_EL(1); }   // CRm:Op2 == 1:0
+  // SPSR_irq, SPSR_abt, SPSR_und, SPSR_fiq -- AArch32
+    define (entry = 768) { reg = SPSR_EL(3); } // CRm:Op2 == 0:0
+    define (entry = 769) { reg = ELR_EL(3); }  // CRm:Op2 == 0:1
+    define (entry = 776) { reg = SP_EL(2); }   // CRm:Op2 == 1:0
+  }
+
+  define (regfile = SystemReg) {
+  // indexed with CRn:Op1:CRm:Op2 as in ARMv8 Table C5-6
+    """
+    System Registers (Op0==3)
+    See ARMv8 Table C5-6
+    """;
+    size = 16384;
+
+    //  define (entry =     0) { reg = MIDR_EL1; }  // RO
+    define (entry =     5) { reg = MPIDR_EL1; }  // RO
+    //  define (entry =     6) { reg = REVIDR_EL1; }  // RO
+    //  define (entry =     8) { reg = ID_PFR0_EL1; }  // RAZ AArch64 only
+    //  define (entry =     9) { reg = ID_PFR1_EL1; }  // RAZ
+    //  define (entry =    10) { reg = ID_DFR0_EL1; }  // RAZ
+    //  define (entry =    11) { reg = ID_AFR0_EL1; }  // RAZ
+    //  define (entry =    12) { reg = ID_MMFR0_EL1; }  // RAZ
+    //  define (entry =    13) { reg = ID_MMFR1_EL1; }  // RAZ
+    //  define (entry =    14) { reg = ID_MMFR2_EL1; }  // RAZ
+    //  define (entry =    15) { reg = ID_MMFR3_EL1; }  // RAZ
+    //  define (entry =    16) { reg = ID_ISAR0_EL1; }  // RAZ
+    //  define (entry =    17) { reg = ID_ISAR1_EL1; }  // RAZ
+    //  define (entry =    18) { reg = ID_ISAR2_EL1; }  // RAZ
+    //  define (entry =    19) { reg = ID_ISAR3_EL1; }  // RAZ
+    //  define (entry =    20) { reg = ID_ISAR4_EL1; }  // RAZ
+    //  define (entry =    21) { reg = ID_ISAR5_EL1; }  // RAZ
+    //  define (entry =    24) { reg = MVFR0_EL1; }  // RO
+    //  define (entry =    25) { reg = MVFR1_EL1; }  // RO
+    //  define (entry =    26) { reg = MVFR2_EL1; }  // RO
+    //  define (entry = 27-31) { reg = MVFRn_EL1; }  // reserved RAZ
+    //  define (entry =    32) { reg = ID_AA64PFR0_EL1; }  // RO
+    //  define (entry =    33) { reg = ID_AA64PFR1_EL1; }  // RO
+    //  define (entry = 34-39) { reg = ID_AA64PFRn_EL1; }  // reserved RAZ
+    //  define (entry =    40) { reg = ID_AA64DFR0_EL1; }  // RO
+    //  define (entry =    41) { reg = ID_AA64DFR1_EL1; }  // RO
+    //  define (entry = 42-43) { reg = ID_AA64DFRn_EL1; }  // reserved RAZ
+    //  define (entry =    44) { reg = ID_AA64AFR0_EL1; }  // RO
+    //  define (entry =    45) { reg = ID_AA64AFR1_EL1; }  // RO
+    //  define (entry = 46-47) { reg = ID_AA64AFRn_EL1; }  // reserved RAZ
+    //  define (entry =    48) { reg = ID_AA64ISAR0_EL1; }  // RO
+    //  define (entry =    49) { reg = ID_AA64ISAR1_EL1; }  // RO
+    //  define (entry = 50-55) { reg = ID_AA64ISARn_EL1; }  // reserved RAZ
+    define (entry =    56) { reg = ID_AA64MMFR0_EL1; }  // RO
+    define (entry =    57) { reg = ID_AA64MMFR1_EL1; }  // RO
+    //  define (entry = 58-63) { reg = ID_AA64MMFRn_EL1; }  // reserved RAZ
+    define (entry =   128) { reg = CCSIDR_EL1; }  // RO
+    define (entry =   129) { reg = CLIDR_EL1; }  // RO 
+    //  define (entry =   135) { reg = AIDR_EL1; }  // RO
+    define (entry =   256) { reg = CSSELR_EL1; }  // RW
+    define (entry =   385) { reg = CTR_EL0; }  // RO
+    define (entry =   391) { reg = DCZID_EL0; }  // RO
+    //  define (entry =   512) { reg = VPIDR_EL2; }  // RW
+    //  define (entry =   517) { reg = VMPIDR_EL2; }  // RW
+    define (entry =  1024) { reg = SCTLR_EL1; }  // RW
+    define (entry =  1025) { reg = ACTLR_EL1; }  // implementation defined
+    define (entry =  1026) { reg = CPACR_EL1; }  // FP & ASIMD Feature Trap
+    define (entry =  1536) { reg = SCTLR_EL2; }  // RW
+    //  define (entry =  1537) { reg = ACTLR_EL2; }  // implementation defined
+    define (entry =  1544) { reg = HCR_EL2; }  // RW
+    define (entry =  1545) { reg = MDCR_EL2; }  // RW
+    define (entry =  1546) { reg = CPTR_EL2; }  // FP & ASIMD Feature Trap
+    define (entry =  1547) { reg = HSTR_EL2; }  // RW
+    //  define (entry =  1551) { reg = HACR_EL2; }  // implementation defined
+    define (entry =  1792) { reg = SCTLR_EL3; }  // RW
+    //  define (entry =  1793) { reg = ACTLR_EL3; }  // implementation defined
+    define (entry =  1800) { reg = SCR_EL3; }  // RW
+    define (entry =  1802) { reg = CPTR_EL3; }  // FP & ASIMD Feature Trap
+    define (entry =  1817) { reg = MDCR_EL3; }  // RW
+    define (entry =  2048) { reg = TTBR0_EL1; }  // RW
+    define (entry =  2049) { reg = TTBR1_EL1; }  // RW
+    define (entry =  2050) { reg = TCR_EL1; }  // RW
+    define (entry =  2560) { reg = TTBR0_EL2; }  // RW
+    define (entry =  2562) { reg = TCR_EL2; }  // RW
+    define (entry =  2568) { reg = VTTBR_EL2; }  // RW
+    define (entry =  2570) { reg = VTCR_EL2; }  // RW
+    define (entry =  2816) { reg = TTBR0_EL3; }  // RW
+    define (entry =  2818) { reg = TCR_EL3; }  // RW
+    //  define (entry =  5128) { reg = AFSR0_EL1; }  // implementation defined
+    //  define (entry =  5129) { reg = AFSR1_EL1; }  // implementation defined
+    define (entry =  5136) { reg = ESR_EL(1); }  // RW
+    //  define (entry =  5640) { reg = AFSR0_EL2; }  // implementation defined
+    //  define (entry =  5641) { reg = AFSR1_EL2; }  // implementation defined
+    define (entry =  5648) { reg = ESR_EL(2); }  // RW
+    //  define (entry =  5896) { reg = AFSR0_EL3; }  // implementation defined
+    //  define (entry =  5897) { reg = AFSR1_EL3; }  // implementation defined
+    define (entry =  5904) { reg = ESR_EL(3); }  // RW
+    define (entry =  6144) { reg = FAR_EL(1); }  // RW
+    define (entry =  6656) { reg = FAR_EL(2); }  // RW
+    //  define (entry =  6660) { reg = HPFAR_EL2; }  // RW
+    define (entry =  6912) { reg = FAR_EL(3); }  // RW
+    define (entry =  7200) { reg = PAR_EL1; }  // RW
+    //  define (entry =   n+32) { reg = PM*; }  // Perf Mon Regs
+    define (entry = 10256) { reg = MAIR_EL1; }  // RW
+    //  define (entry = 10264) { reg = AMAIR_EL1; }  // Implementation defined
+    define (entry = 10768) { reg = MAIR_EL2; }  // RW
+    //  define (entry = 10776) { reg = AMAIR_EL2; }  // Implementation defined
+    define (entry = 11024) { reg = MAIR_EL3; }  // RW
+    //  define (entry = 11032) { reg = AMAIR_EL3; }  // Implementation defined
+    define (entry = 12288) { reg = VBAR_EL(1); }  // RW
+    //  define (entry =    NA) { reg = RVBAR_EL1; }  // not implemented (EL3 supported)
+    //  define (entry = 12290) { reg = RMR_EL1; }  // not implemented (no AArch32)
+    //  define (entry = 12296) { reg = ISR_EL1; }  // RO
+    define (entry = 12800) { reg = VBAR_EL(2); }  // RW
+    //  define (entry =    NA) { reg = RVBAR_EL2; }  // not implemented (EL3 supported)
+    //  define (entry = 12802) { reg = RMR_EL2; }  // not implemented (no AArch32)
+    define (entry = 13056) { reg = VBAR_EL(3); }  // RW
+    define (entry = 13057) { reg = RVBAR_EL3; }  // RO
+    //  define (entry = 13058) { reg = RMR_EL3; }  // not implemented (no AArch32)
+    //  define (entry = 13313) { reg = CONTEXTIDR_EL1; }  // RW
+    //  define (entry = 13316) { reg = TPIDR_EL1; }  // RW
+    //  define (entry = 13698) { reg = TPIDR_EL0; }  // RW
+    //  define (entry = 13699) { reg = TPIDRRO_EL0; }  // RW
+    //  define (entry = 13826) { reg = TPIDR_EL2; }  // RW
+    //  define (entry = 14082) { reg = TPIDR_EL3; }  // RW
+    //  define (entry =   n+16) { reg = CNT*; }  // Timer Registers
+  }
+
+  define (reg = MAIR_EL1) {
+    """
+    Memory Attribute Indirection Register (EL1)
+    """;
+    width = 64;
+    
+    define (field = Attr7) { bits = ((63,56)); }
+    define (field = Attr6) { bits = ((55,48)); }
+    define (field = Attr5) { bits = ((47,40)); }
+    define (field = Attr4) { bits = ((39,32)); }
+    define (field = Attr3) { bits = ((31,24)); }
+    define (field = Attr2) { bits = ((23,16)); }
+    define (field = Attr1) { bits = ((15,8));  }
+    define (field = Attr0) { bits = ((7,0));   }
+  }
+
+  define (reg = MAIR_EL2) {
+    """
+    Memory Attribute Indirection Register (EL2)
+    """;
+    width = 64;
+    
+    define (field = Attr7) { bits = ((63,56)); }
+    define (field = Attr6) { bits = ((55,48)); }
+    define (field = Attr5) { bits = ((47,40)); }
+    define (field = Attr4) { bits = ((39,32)); }
+    define (field = Attr3) { bits = ((31,24)); }
+    define (field = Attr2) { bits = ((23,16)); }
+    define (field = Attr1) { bits = ((15,8));  }
+    define (field = Attr0) { bits = ((7,0));   }
+  }
+
+  define (reg = MAIR_EL3) {
+    """
+    Memory Attribute Indirection Register (EL3)
+    """;
+    width = 64;
+    
+    define (field = Attr7) { bits = ((63,56)); }
+    define (field = Attr6) { bits = ((55,48)); }
+    define (field = Attr5) { bits = ((47,40)); }
+    define (field = Attr4) { bits = ((39,32)); }
+    define (field = Attr3) { bits = ((31,24)); }
+    define (field = Attr2) { bits = ((23,16)); }
+    define (field = Attr1) { bits = ((15,8));  }
+    define (field = Attr0) { bits = ((7,0));   }
+  }
+
+  define (reg = PAR_EL1) {
+    """
+    Physical Address register (when F == 0)
+    """;
+    width = 64;
+    
+    define (field = ATTR)    { bits = (63,56); }    
+    define (field = RES0)    { bits = ((55,48),(6,1)); }  
+    define (field = PA)      { bits = (47,12); }  
+    define (field = RES1)    { bits = (11); }  
+    define (field = IMP_DEF) { bits = (10); }  
+    define (field = NS)      { bits = (9); }  
+    define (field = SHA)     { bits = (8,7); }  
+    define (field = F)       { bits = (0); }  
+  }
+
+  
+  
+  // Instructions
+	
+	
+	define (instr = NOP){
+	    width = 32;
+		fields = ((bits(31, 0), b00000000000000000000000000000000));
+        syntax = ("nop");
+		action = {
+		             disp("nop                       ");
+		         };
+	}
+	
+	define (instr = END){
+	    width = 32;
+		fields = ((bits(31, 0), b00000000000000000000000000000001));
+		syntax = ("end");
+		action = {
+		             halt();
+		         };
+	}
+ }
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

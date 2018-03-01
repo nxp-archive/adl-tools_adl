@@ -1,0 +1,36 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "vprs"
+  Size:  32
+  Width:  128
+  Offset:  32
+    b[8bits x 16]  
+    h[16bits x 8]  
+    w[32bits x 4]  
+  -------------------------------
+Registers:
+  Name:  "a"
+  Width:  32
+  Offset:  32
+    f0[32,42]  (reserved)  
+      A reserved field.
+    f1[43,50]  (readonly, field-writable)  
+      A read-only field.
+    f2[53,63]   
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

@@ -1,0 +1,6 @@
+//
+// This just imports generic32.adl in order to make the build rules simpler.
+//
+
+#import "generic32.adl"
+

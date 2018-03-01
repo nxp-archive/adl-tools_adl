@@ -1,0 +1,3 @@
+P:thread0:  Instr 6:  Register TACTIVE mismatch:  Found 0x4000001, expected 0x1
+P:thread0:  Differences were found when checking intermediate results.
+Error:  Test 2:  Intermediate result mismatches were found.

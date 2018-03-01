@@ -1,0 +1,30 @@
+
+asm41.o:     file format elf32-powerpc
+asm41.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000008  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  0000003c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  0000003c  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000         *UND*	00000000 foobar
+
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	20 7b       	mv       r1,3,r2
+   2:	00 05 20 40 	mv       r1,0x0,r2
+                    2: signed_imm   foobar
+   6:	22 4b       	mv       r1,4,r2

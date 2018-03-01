@@ -1,0 +1,5 @@
+
+Register mismatch:
+Expected GPR3 = 0x87654321
+Found 0x8765432
+Error:  Test 1:  Core P:  Context thread[0]:  Register mismatch

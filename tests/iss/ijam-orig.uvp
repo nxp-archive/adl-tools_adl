@@ -1,0 +1,818 @@
+format=huvp;
+//------------------------------------------------------------------------------
+test => ijam_mt {
+  num     = 1001;
+  genseed = 0x44763055;
+
+  v65 => powerpc {
+    I : R {nm="CIR"; d=0x6e59dfbb;};
+    //   version:6e59dfbb
+    I : R {nm="HDBCR0"; d=0xe4c44400;};
+    //   ALL_GUARDED:1 DECODE1_ONLY:1 DEMAND_SIZE:0 DIS_FLASH_INVAL:0
+    //   DIS_ILFB_CANCEL:0 DWF_DIS:1 EMB_FORCE_HWSYNC:1 EN_MHD:1 FETCH4_ONLY:0
+    //   HWTW_WIMGE_IND:1 ISSUE1_ONLY:0 NOPREFETCH:0 REAL_MODE:0 SINGLE_DEALLOC:0
+    //   STASH_SIZE:2 STQ_FWD_DIS:0 STQ_IN_ORDER:1 STQ_SIZE_1:1 TLB_PERR_DIS:0
+    I : R {nm="HDBCR3"; d=0x00000000;};
+    //   reserved:0
+    I : R {nm="HDBCR4"; d=0x00000000;};
+    //   reserved:0
+    I : R {nm="HDBCR5"; d=0x00000000;};
+    //   reserved:0
+    I : R {nm="HDBCR6"; d=0x00000000;};
+    //   reserved:0
+    I : R {nm="HID0"; d=0x00000040;};
+    //   CIGLSO:0 DCFA:1 EMCP:0 EN_L2MMU_MHD:0 NOPTI:0
+    I : R {nm="IMSR0"; d=0x00000000;};
+    //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+    //   SPV:0 UCLE:0
+    I : R {nm="IMSR1"; d=0x00000000;};
+    //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+    //   SPV:0 UCLE:0
+    I : R {nm="INIA0"; d=0x0000000000000d00;};
+    //   INIA:0000000000000340
+    I : R {nm="INIA1"; d=0x0000000000000e00;};
+    //   INIA:0000000000000380
+    I : R {nm="IVOR0"; d=0x00001770;};
+    //   OFFSET:177
+    I : R {nm="IVOR1"; d=0x0000a120;};
+    //   OFFSET:a12
+    I : R {nm="IVOR10"; d=0x0000f7f0;};
+    //   OFFSET:f7f
+    I : R {nm="IVOR11"; d=0x0000fe40;};
+    //   OFFSET:fe4
+    I : R {nm="IVOR12"; d=0x0000bb80;};
+    //   OFFSET:bb8
+    I : R {nm="IVOR13"; d=0x000048f0;};
+    //   OFFSET:48f
+    I : R {nm="IVOR14"; d=0x00000db0;};
+    //   OFFSET:db
+    I : R {nm="IVOR15"; d=0x0000d260;};
+    //   OFFSET:d26
+    I : R {nm="IVOR2"; d=0x00000b80;};
+    //   OFFSET:b8
+    I : R {nm="IVOR3"; d=0x0000d670;};
+    //   OFFSET:d67
+    I : R {nm="IVOR32"; d=0x00006280;};
+    //   OFFSET:628
+    I : R {nm="IVOR33"; d=0x00004d60;};
+    //   OFFSET:4d6
+    I : R {nm="IVOR35"; d=0x0000b480;};
+    //   OFFSET:b48
+    I : R {nm="IVOR36"; d=0x0000ad00;};
+    //   OFFSET:ad0
+    I : R {nm="IVOR37"; d=0x0000b5c0;};
+    //   OFFSET:b5c
+    I : R {nm="IVOR38"; d=0x00005b10;};
+    //   VECOFF:5b1
+    I : R {nm="IVOR39"; d=0x00006410;};
+    //   VECOFF:641
+    I : R {nm="IVOR4"; d=0x00006d50;};
+    //   OFFSET:6d5
+    I : R {nm="IVOR40"; d=0x0000b990;};
+    //   VECOFF:b99
+    I : R {nm="IVOR41"; d=0x000005a0;};
+    //   VECOFF:5a
+    I : R {nm="IVOR42"; d=0x0000bfa0;};
+    //   OFFSET:bfa
+    I : R {nm="IVOR5"; d=0x0000e6e0;};
+    //   OFFSET:e6e
+    I : R {nm="IVOR6"; d=0x0000c580;};
+    //   OFFSET:c58
+    I : R {nm="IVOR7"; d=0x00008f80;};
+    //   OFFSET:8f8
+    I : R {nm="IVOR8"; d=0x000021d0;};
+    //   OFFSET:21d
+    I : R {nm="IVOR9"; d=0x00003560;};
+    //   OFFSET:356
+    I : R {nm="IVPR"; d=0x0000000000000000;};
+    //   ADDR:000000000000
+    I : R {nm="L1CSR0"; d=0x00018120;};
+    //   CEA:0 CEDT:0 CEIT:1 DCBZ32:0 DCE:0 DCFI:0 DCLFC:1 DCLO:0 DCPE:1 DCPI:1
+    I : R {nm="L1CSR1"; d=0x00059300;};
+    //   ICE:0 ICEA:1 ICECE:1 ICEDT:1 ICEI:1 ICFI:0 ICLFC:1 ICLO:1
+    I : R {nm="PVR"; d=0x80400010;};
+    //   Revision:10 Version:8040
+    I : R {nm="SVR"; d=0x6e59dfbb;};
+    //   version:6e59dfbb
+    I : R {nm="TEN"; d=0x0000000000000003;};
+    //   TEN:0000000000000000 TEN0:1 TEN1:1
+    I : R {nm="TENC"; d=0x0000000000000003;};
+    //   TD0:1 TD1:1 TENC:0000000000000000
+    I : R {nm="TENS"; d=0x0000000000000003;};
+    //   TE0:1 TE1:1 TENS:0000000000000000
+    I : R {nm="TENSR"; d=0x0000000000000003;};
+    //   TENSR:0000000000000000 TS0:1 TS1:1
+    I : R {nm="TPRI0"; d=0x00000003;};
+    //   PRI:3
+    I : R {nm="TPRI1"; d=0x00000006;};
+    //   PRI:6
+    // no initial tlb entries in memory owned by thread t0
+    // no initial tlb entries in memory owned by thread t1
+    thread => t0 {
+      I : R {nm="BUCSR0"; d=0x01000000;};
+      //   BBFI:0 BPEN:0 LS_EN:0 STAC_EN:1
+      I : R {nm="CR"; d=0x0fbaf567;};
+      //   CR0:0 CR1:f CR2:b CR3:a CR4:f CR5:5 CR6:6 CR7:7 EQ:0 GT:0 LT:0 SO:0
+      I : R {nm="CTR"; d=0x46b09e7e873f875c;};
+      I : R {nm="DAC1"; d=0xcd4b6f404deafb1a;};
+      I : R {nm="DAC2"; d=0x0c5a3eb63e11596f;};
+      I : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      I : R {nm="DBCR1"; d=0xf1806300;};
+      //   IAC12M:2 IAC1ER:3 IAC1US:3 IAC2ER:1 IAC2US:0 IAC34M:0 IAC3ER:2 IAC3US:1
+      //   IAC4ER:3 IAC4US:0
+      I : R {nm="DBCR2"; d=0x0d600000;};
+      //   DAC12M:1 DAC1ER:0 DAC1US:0 DAC2ER:1 DAC2US:3 DACLINK1:1 DACLINK2:0 DVC1BE:0
+      //   DVC1M:0 DVC2BE:0 DVC2M:0
+      I : R {nm="DBCR4"; d=0x0000a502;};
+      //   DAC1CFG:0 DAC1XM:a DAC2CFG:2 DAC2XM:5
+      I : R {nm="DBSR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      I : R {nm="DBSRWR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      I : R {nm="DEAR"; d=0x45640b02ed36b0ea;};
+      I : R {nm="EDBCR0"; d=0x40000000;};
+      //   DIS_CTH:0 DNH_EN:1 DNI_CTL:0 EDCEO:0 EDEEO:0 EDM:0 EDMEO:0 EFT:0
+      I : R {nm="EDBSR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IRPT:0 RET:0 TRAP:0 UDE:0
+      I : R {nm="EPCR"; d=0x88e00000;};
+      //   DGTMI:1 DMIUH:1 DSIGS:0 DTLBGS:0 DUVD:0 EXTGS:1 GICM:0 ICM:0 ISIGS:1
+      //   ITLBGS:0 PMGS:1
+      I : R {nm="EPLC"; d=0x80122594;};
+      //   EAS:0 EGS:0 ELPID:12 EPID:2594 EPR:1
+      I : R {nm="EPSC"; d=0xe02d187d;};
+      //   EAS:1 EGS:1 ELPID:2d EPID:187d EPR:1
+      I : R {nm="FPSCR"; d=0xad94d24d;};
+      //   C:0 FE:0 FEX:0 FG:1 FI:0 FL:1 FPCC:d FPRF:d FR:1 FU:1 FX:1 NI:1 OE:1 OX:0
+      //   RN:1 UE:0 UX:1 VE:0 VX:1 VXCVI:0 VXIDI:0 VXIMZ:1 VXISI:1 VXSNAN:1 VXSOFT:0
+      //   VXSQRT:1 VXVC:0 VXZDZ:0 XE:1 XX:0 ZE:0 ZX:1
+      I : R {nm="G10"; d=0x27ec23687e6bdaf1;};
+      I : R {nm="G15"; d=0x011728811f1c963b;};
+      I : R {nm="G19"; d=0x744e6362136bfa36;};
+      I : R {nm="G23"; d=0x6b59372a6383aef2;};
+      I : R {nm="G24"; d=0x97fa3fe34e394435;};
+      I : R {nm="G28"; d=0xed865e4f961235b5;};
+      I : R {nm="G4"; d=0xf08cdea3a5836c28;};
+      I : R {nm="GIVOR13"; d=0x00004bf0;};
+      //   VECOFF:4bf
+      I : R {nm="GIVOR14"; d=0x00005620;};
+      //   VECOFF:562
+      I : R {nm="GIVOR2"; d=0x0000ba70;};
+      //   VECOFF:ba7
+      I : R {nm="GIVOR3"; d=0x00005ef0;};
+      //   VECOFF:5ef
+      I : R {nm="GIVOR4"; d=0x000011a0;};
+      //   VECOFF:11a
+      I : R {nm="GIVOR8"; d=0x00000ad0;};
+      //   VECOFF:ad
+      I : R {nm="GIVPR"; d=0x0000000000000000;};
+      //   GVECPRE:000000000000
+      I : R {nm="IAC1"; d=0x1c021f966df4f768;};
+      //   ADDR:070087e59b7d3dda
+      I : R {nm="IAC2"; d=0x61ea561805415e00;};
+      //   ADDR:187a958601505780
+      I : R {nm="IAC3"; d=0x037895d21bc07390;};
+      //   ADDR:006f12ba43780e72
+      I : R {nm="IAC4"; d=0xea686140f97e2ed0;};
+      //   ADDR:1d4d0c281f2fc5da
+      I : R {nm="IAC5"; d=0x0f65cc71946ead18;};
+      //   ADDR:01ecb98e328dd5a3
+      I : R {nm="IAC6"; d=0x09735ce4f97f00d0;};
+      //   ADDR:012e6b9c9f2fe01a
+      I : R {nm="IAC7"; d=0x0b336ff349c97608;};
+      //   ADDR:01666dfe69392ec1
+      I : R {nm="IAC8"; d=0x289c09b0f31d8110;};
+      //   ADDR:051381361e63b022
+      I : R {nm="IAR"; d=0x0000000000000d00;};
+      I : R {nm="IJCFG"; d=0x0000831b;};
+      //   IJMODE:1 IJRA:83 IJRE:0 WIMGE:d
+      I : R {nm="IJDATA0"; d=0x64840205;};
+      I : R {nm="IJDATA1"; d=0xcb9aa704;};
+      I : R {nm="IJDATA2"; d=0x2ca9d617;};
+      I : R {nm="IJDATA3"; d=0xedba4c25;};
+      I : R {nm="LPIDR"; d=0x00000025;};
+      //   LPID:25
+      I : R {nm="MAS0"; d=0x80320001;};
+      //   ATSEL:1 ESEL:32 HES:0 NV:1 TLBSEL:0
+      I : R {nm="MAS1"; d=0xb6892d80;};
+      //   IND:1 IPROT:0 TID:3689 TS:0 TSIZE:1b V:1
+      I : R {nm="MAS2"; d=0x72465f1fcab17019;};
+      //   E:1 EPN:72465f1fcab17 G:0 I:1 M:0 W:1 X0:0 X1:0
+      I : R {nm="MAS3"; d=0x621151ff;};
+      //   RPN:62115 SR:1 SW:1 SX:1 U0:0 U1:1 U2:1 U3:1 UR:1 UW:1 UX:1
+      I : R {nm="MAS4"; d=0x00008761;};
+      //   ED:1 GD:0 ID:0 INDD:1 MD:0 TLBSELD:0 TSIZED:e WD:0 X0D:1 X1D:1
+      I : R {nm="MAS5"; d=0x00000019;};
+      //   SGS:0 SLPID:19
+      I : R {nm="MAS6"; d=0x319a0101;};
+      //   ISIZE:2 SAS:1 SIND:0 SPID:319a
+      I : R {nm="MAS7"; d=0x00000098;};
+      //   RPN:98
+      I : R {nm="MAS8"; d=0x0000003b;};
+      //   TGS:0 TLPID:3b TVF:0
+      I : R {nm="MCAR"; d=0x0000000000000000;};
+      //   MCAR:0000000000000000
+      I : R {nm="MCARU"; d=0x00000000;};
+      //   MCARU:0
+      I : R {nm="MCARUA"; d=0x00000000;};
+      //   PMCARU:0
+      I : R {nm="MSR"; d=0x00000000;};
+      //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   SPV:0 UCLE:0
+      I : R {nm="MSRP"; d=0x04000000;};
+      //   DEP:0 PMMP:0 UCLEP:1
+      I : R {nm="PID0"; d=0x00003d5f;};
+      //   PID:3d5f
+      I : R {nm="PPR32"; d=0x000c0000;};
+      //   PRI:3
+      I : R {nm="PRSR"; d=0x00000000;};
+      //   DE_HALT:0 DNHM:0 DNH_HALT:0 EDB_HALT:0 EXT_STOP:0 HALTED:0 JHALT:0
+      //   PM_HALT:0 PM_STOP:0 RUNN_HALT:0 RUNN_STOP:0 STOPPED:0 UDE_STOP:0 WAIT:0
+      I : R {nm="TCR"; d=0x674cc000;};
+      //   ARE:1 DIE:1 FIE:0 FP:3 FPEXT:6 PPC:0 WIE:0 WP:1 WPEXT:6 WRC:2
+      I : R {nm="TIR"; d=0x00000000;};
+      //   TIR:0
+      I : R {nm="TSR"; d=0x84000000;};
+      //   DIS:0 ENW:1 FIS:1 WIS:0 WRS:0
+      I : R {nm="VSCR"; d=0x00010000;};
+      //   NJ:1 SAT:0
+      I : R {nm="XER"; d=0x0000000000000019;};
+      //   CA:0 CNT:19 OV:0 SO:0
+      I : D {ea=0x0000000000005b80; ra=0x0000008000005b80; d=0x5a157b6f; ta=0x8d;};
+      E : I {asm="addis 23,19,0x846e"; c=1;
+                     ea=0x0000000000000d00; ra=0x0000008000000d00; d=0x3ef3846e; op=0x3ef3846e; ta=0x8d; op_size=32;
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"G23", d=>0x744e636197d9fa36 ],};};
+      E : I {asm="ori 24,23,0x1afc"; c=2;
+                     ea=0x0000000000000d04; ra=0x0000008000000d04; d=0x62f81afc; op=0x62f81afc; ta=0x8d; op_size=32;
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"G24", d=>0x744e636197d9fafe ],};};
+      E : I {asm="dnh 0x0,0x6"; c=3; jc=1;
+                     ea=0x0000000000000d08; ra=0x0000008000000d08; d=0x4c06018c; op=0x4c06018c; ta=0x8d; op_size=32;
+                     ir={[ t=>"reg", rn=>"EDBSR0", d=>0x00000000 ],
+                         [ t=>"reg", rn=>"PRSR", d=>0x90000000 ],
+                         [ t=>"reg", rn=>"TSR", d=>0x04000000 ],};};
+      E : A {t="ijam"; c=4; jc=1; jid=0;
+                    data=[ asm=>"mfspr 4,IAR", op=>0x7c8f8aa6];
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"G4", d=>0x0000000000000d08 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d08 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d08 ],};};
+      E : A {t="ijam"; c=5; jc=1; jid=0;
+                    data=[ asm=>"addi 4,4,0x10", op=>0x38840010];
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"G4", d=>0x0000000000000d18 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d08 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d08 ],};};
+      E : A {t="ijam"; c=6; jc=1; jid=0;
+                    data=[ asm=>"mtspr IAR,4", op=>0x7c8f8ba6];
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"IAR", d=>0x0000000000000d18 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d18 ],};};
+      E : A {t="ijam"; c=7; jc=1; jid=0;
+                    data=[ asm=>"addi 28,10,0x17d8", op=>0x3b8a17d8];
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"G28", d=>0x27ec23687e6bf2c9 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d18 ],
+                         [ t=>"reg", rn=>"IAR", d=>0x0000000000000d18 ],};};
+      E : A {t="write"; c=7; jc=1; jid=0;
+                    data=[ t=>"reg", nm=>"PRSR", d=>0xffffffff];
+                     ir={[ t=>"reg", rn=>"PRSR", d=>0x00000000 ],};};
+      E : A {t="exitHalt"; jc=1; jid=0;
+                     ir={[ t=>"reg", rn=>"PRSR", d=>0x00000000 ],
+                         [ t=>"reg", rn=>"EDBSR0", d=>0x00000000 ],
+                         [ t=>"reg", rn=>"PRSR", d=>0x00000000 ],};};
+      E : I {asm="stw 15,0,0x5b80 (EA=0x0000000000005b80,RA=0x0000008000005b80)"; c=8;
+                     ea=0x0000000000000d18; ra=0x0000008000000d18; d=0x91e05b80; op=0x91e05b80; ta=0x8d; op_size=32;
+                     tea=0x0000000000005b80; tra=0x0000008000005b80; tta=0x8d; 
+                     // core=0, thread=0
+                     // trans. hit: TLBCAM, set=0,way=1
+                     ir={[ t=>"store", ra=>0x0000008000005b80, d=>0x1f1c963b, ta=>0x8d ],};};
+      E : I {asm="ori 24,10,0x660d"; c=9;
+                     ea=0x0000000000000d1c; ra=0x0000008000000d1c; d=0x6158660d; op=0x6158660d; ta=0x8d; op_size=32;
+                     // core=0, thread=0
+                     ir={[ t=>"reg", rn=>"G24", d=>0x27ec23687e6bfefd ],};};
+      R : RES {ea=0x0000000000000d20; ra=0x0000008000000d20; ta=0x8d;};
+      R : R {nm="BUCSR0"; d=0x01000000;};
+      //   BBFI:0 BPEN:0 LS_EN:0 STAC_EN:1
+      R : R {nm="CR"; d=0x0fbaf567;};
+      //   CR0:0 CR1:f CR2:b CR3:a CR4:f CR5:5 CR6:6 CR7:7 EQ:0 GT:0 LT:0 SO:0
+      R : R {nm="CTR"; d=0x46b09e7e873f875c;};
+      R : R {nm="DAC1"; d=0xcd4b6f404deafb1a;};
+      R : R {nm="DAC2"; d=0x0c5a3eb63e11596f;};
+      R : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      R : R {nm="DBCR1"; d=0xf1806300;};
+      //   IAC12M:2 IAC1ER:3 IAC1US:3 IAC2ER:1 IAC2US:0 IAC34M:0 IAC3ER:2 IAC3US:1
+      //   IAC4ER:3 IAC4US:0
+      R : R {nm="DBCR2"; d=0x0d600000;};
+      //   DAC12M:1 DAC1ER:0 DAC1US:0 DAC2ER:1 DAC2US:3 DACLINK1:1 DACLINK2:0 DVC1BE:0
+      //   DVC1M:0 DVC2BE:0 DVC2M:0
+      R : R {nm="DBCR4"; d=0x0000a502;};
+      //   DAC1CFG:0 DAC1XM:a DAC2CFG:2 DAC2XM:5
+      R : R {nm="DBSR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      R : R {nm="DBSRWR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      R : R {nm="DEAR"; d=0x45640b02ed36b0ea;};
+      R : R {nm="EDBCR0"; d=0x40000000;};
+      //   DIS_CTH:0 DNH_EN:1 DNI_CTL:0 EDCEO:0 EDEEO:0 EDM:0 EDMEO:0 EFT:0
+      R : R {nm="EDBSR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IRPT:0 RET:0 TRAP:0 UDE:0
+      R : R {nm="EPCR"; d=0x88e00000;};
+      //   DGTMI:1 DMIUH:1 DSIGS:0 DTLBGS:0 DUVD:0 EXTGS:1 GICM:0 ICM:0 ISIGS:1
+      //   ITLBGS:0 PMGS:1
+      R : R {nm="EPLC"; d=0x80122594;};
+      //   EAS:0 EGS:0 ELPID:12 EPID:2594 EPR:1
+      R : R {nm="EPSC"; d=0xe02d187d;};
+      //   EAS:1 EGS:1 ELPID:2d EPID:187d EPR:1
+      R : R {nm="FPSCR"; d=0xad94d24d;};
+      //   C:0 FE:0 FEX:0 FG:1 FI:0 FL:1 FPCC:d FPRF:d FR:1 FU:1 FX:1 NI:1 OE:1 OX:0
+      //   RN:1 UE:0 UX:1 VE:0 VX:1 VXCVI:0 VXIDI:0 VXIMZ:1 VXISI:1 VXSNAN:1 VXSOFT:0
+      //   VXSQRT:1 VXVC:0 VXZDZ:0 XE:1 XX:0 ZE:0 ZX:1
+      R : R {nm="G10"; d=0x27ec23687e6bdaf1;};
+      R : R {nm="G15"; d=0x011728811f1c963b;};
+      R : R {nm="G19"; d=0x744e6362136bfa36;};
+      R : R {nm="G23"; d=0x744e636197d9fa36;};
+      R : R {nm="G24"; d=0x27ec23687e6bfefd;};
+      R : R {nm="G28"; d=0x27ec23687e6bf2c9;};
+      R : R {nm="G4"; d=0x0000000000000d18;};
+      R : R {nm="GIVOR13"; d=0x00004bf0;};
+      //   VECOFF:4bf
+      R : R {nm="GIVOR14"; d=0x00005620;};
+      //   VECOFF:562
+      R : R {nm="GIVOR2"; d=0x0000ba70;};
+      //   VECOFF:ba7
+      R : R {nm="GIVOR3"; d=0x00005ef0;};
+      //   VECOFF:5ef
+      R : R {nm="GIVOR4"; d=0x000011a0;};
+      //   VECOFF:11a
+      R : R {nm="GIVOR8"; d=0x00000ad0;};
+      //   VECOFF:ad
+      R : R {nm="GIVPR"; d=0x0000000000000000;};
+      //   GVECPRE:000000000000
+      R : R {nm="IAC1"; d=0x1c021f966df4f768;};
+      //   ADDR:070087e59b7d3dda
+      R : R {nm="IAC2"; d=0x61ea561805415e00;};
+      //   ADDR:187a958601505780
+      R : R {nm="IAC3"; d=0x037895d21bc07390;};
+      //   ADDR:006f12ba43780e72
+      R : R {nm="IAC4"; d=0xea686140f97e2ed0;};
+      //   ADDR:1d4d0c281f2fc5da
+      R : R {nm="IAC5"; d=0x0f65cc71946ead18;};
+      //   ADDR:01ecb98e328dd5a3
+      R : R {nm="IAC6"; d=0x09735ce4f97f00d0;};
+      //   ADDR:012e6b9c9f2fe01a
+      R : R {nm="IAC7"; d=0x0b336ff349c97608;};
+      //   ADDR:01666dfe69392ec1
+      R : R {nm="IAC8"; d=0x289c09b0f31d8110;};
+      //   ADDR:051381361e63b022
+      R : R {nm="IAR"; d=0x0000000000000d20;};
+      R : R {nm="IJCFG"; d=0x0000831b;};
+      //   IJMODE:1 IJRA:83 IJRE:0 WIMGE:d
+      R : R {nm="IJDATA0"; d=0x64840205;};
+      R : R {nm="IJDATA1"; d=0xcb9aa704;};
+      R : R {nm="IJDATA2"; d=0x2ca9d617;};
+      R : R {nm="IJDATA3"; d=0xedba4c25;};
+      R : R {nm="LPIDR"; d=0x00000025;};
+      //   LPID:25
+      R : R {nm="MAS0"; d=0x80320001;};
+      //   ATSEL:1 ESEL:32 HES:0 NV:1 TLBSEL:0
+      R : R {nm="MAS1"; d=0xb6892d80;};
+      //   IND:1 IPROT:0 TID:3689 TS:0 TSIZE:1b V:1
+      R : R {nm="MAS2"; d=0x72465f1fcab17019;};
+      //   E:1 EPN:72465f1fcab17 G:0 I:1 M:0 W:1 X0:0 X1:0
+      R : R {nm="MAS3"; d=0x621151ff;};
+      //   RPN:62115 SR:1 SW:1 SX:1 U0:0 U1:1 U2:1 U3:1 UR:1 UW:1 UX:1
+      R : R {nm="MAS4"; d=0x00008761;};
+      //   ED:1 GD:0 ID:0 INDD:1 MD:0 TLBSELD:0 TSIZED:e WD:0 X0D:1 X1D:1
+      R : R {nm="MAS5"; d=0x00000019;};
+      //   SGS:0 SLPID:19
+      R : R {nm="MAS6"; d=0x319a0101;};
+      //   ISIZE:2 SAS:1 SIND:0 SPID:319a
+      R : R {nm="MAS7"; d=0x00000098;};
+      //   RPN:98
+      R : R {nm="MAS8"; d=0x0000003b;};
+      //   TGS:0 TLPID:3b TVF:0
+      R : R {nm="MSR"; d=0x00000000;};
+      //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   SPV:0 UCLE:0
+      R : R {nm="MSRP"; d=0x04000000;};
+      //   DEP:0 PMMP:0 UCLEP:1
+      R : R {nm="PID0"; d=0x00003d5f;};
+      //   PID:3d5f
+      R : R {nm="PPR32"; d=0x000c0000;};
+      //   PRI:3
+      R : R {nm="PRSR"; d=0x00000000;};
+      //   DE_HALT:0 DNHM:0 DNH_HALT:0 EDB_HALT:0 EXT_STOP:0 HALTED:0 JHALT:0
+      //   PM_HALT:0 PM_STOP:0 RUNN_HALT:0 RUNN_STOP:0 STOPPED:0 UDE_STOP:0 WAIT:0
+      R : R {nm="TCR"; d=0x674cc000;};
+      //   ARE:1 DIE:1 FIE:0 FP:3 FPEXT:6 PPC:0 WIE:0 WP:1 WPEXT:6 WRC:2
+      R : R {nm="TSR"; d=0x04000000;};
+      //   DIS:0 ENW:0 FIS:1 WIS:0 WRS:0
+      R : R {nm="VSCR"; d=0x00010000;};
+      //   NJ:1 SAT:0
+      R : R {nm="XER"; d=0x0000000000000019;};
+      //   CA:0 CNT:19 OV:0 SO:0
+      R : D {ea=0x0000000000005b80; ra=0x0000008000005b80; d=0x1f1c963b; ta=0x8d;};
+    } // powerpc::t0
+    thread => t1 {
+      I : R {nm="BUCSR0"; d=0x00000000;};
+      //   BBFI:0 BPEN:0 LS_EN:0 STAC_EN:0
+      I : R {nm="CR"; d=0xcee68751;};
+      //   CR0:c CR1:e CR2:e CR3:6 CR4:8 CR5:7 CR6:5 CR7:1 EQ:0 GT:1 LT:1 SO:0
+      I : R {nm="CTR"; d=0x0b3bdfe48f741e86;};
+      I : R {nm="DAC1"; d=0x243a778f145d0c91;};
+      I : R {nm="DAC2"; d=0x6ca71936dc8618ed;};
+      I : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      I : R {nm="DBCR1"; d=0xdec04280;};
+      //   IAC12M:3 IAC1ER:1 IAC1US:3 IAC2ER:2 IAC2US:3 IAC34M:2 IAC3ER:0 IAC3US:1
+      //   IAC4ER:2 IAC4US:0
+      I : R {nm="DBCR2"; d=0xffa00000;};
+      //   DAC12M:2 DAC1ER:3 DAC1US:3 DAC2ER:3 DAC2US:3 DACLINK1:1 DACLINK2:0 DVC1BE:0
+      //   DVC1M:0 DVC2BE:0 DVC2M:0
+      I : R {nm="DBCR4"; d=0x00005723;};
+      //   DAC1CFG:2 DAC1XM:5 DAC2CFG:3 DAC2XM:7
+      I : R {nm="DBSR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      I : R {nm="DBSRWR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      I : R {nm="DEAR"; d=0x1192946377b08060;};
+      I : R {nm="EDBCR0"; d=0x40000000;};
+      //   DIS_CTH:0 DNH_EN:1 DNI_CTL:0 EDCEO:0 EDEEO:0 EDM:0 EDMEO:0 EFT:0
+      I : R {nm="EPCR"; d=0x5e400000;};
+      //   DGTMI:0 DMIUH:1 DSIGS:1 DTLBGS:1 DUVD:1 EXTGS:0 GICM:0 ICM:1 ISIGS:1
+      //   ITLBGS:0 PMGS:0
+      I : R {nm="EPLC"; d=0x801a388a;};
+      //   EAS:0 EGS:0 ELPID:1a EPID:388a EPR:1
+      I : R {nm="EPSC"; d=0x600d019e;};
+      //   EAS:1 EGS:1 ELPID:d EPID:19e EPR:0
+      I : R {nm="FPSCR"; d=0x2030b279;};
+      //   C:0 FE:1 FEX:0 FG:0 FI:0 FL:1 FPCC:b FPRF:b FR:0 FU:1 FX:0 NI:0 OE:1 OX:0
+      //   RN:1 UE:1 UX:0 VE:0 VX:1 VXCVI:0 VXIDI:0 VXIMZ:1 VXISI:0 VXSNAN:0 VXSOFT:0
+      //   VXSQRT:1 VXVC:0 VXZDZ:1 XE:1 XX:0 ZE:1 ZX:0
+      I : R {nm="G10"; d=0xff388399a5c81ca5;};
+      I : R {nm="G11"; d=0x65c415a1f9617ed7;};
+      I : R {nm="G12"; d=0x32d1c398bde8c018;};
+      I : R {nm="G13"; d=0xba15f356caf4f423;};
+      I : R {nm="G16"; d=0xf14ece7cb1a004f2;};
+      I : R {nm="G19"; d=0x11e6df417dce6a24;};
+      I : R {nm="G2"; d=0xd7e7ae60522f1a6e;};
+      I : R {nm="G24"; d=0x387fed7028cfc681;};
+      I : R {nm="G27"; d=0x8af0220b71830074;};
+      I : R {nm="G29"; d=0xd9135e504a52a038;};
+      I : R {nm="G30"; d=0xab3849c6b7f6c58c;};
+      I : R {nm="G31"; d=0x1e603b7e5d45e7f2;};
+      I : R {nm="G4"; d=0x14b3106b2ba5a6dd;};
+      I : R {nm="G7"; d=0x38f7cebb1cc336ef;};
+      I : R {nm="GIVOR13"; d=0x00003a00;};
+      //   VECOFF:3a0
+      I : R {nm="GIVOR14"; d=0x000062a0;};
+      //   VECOFF:62a
+      I : R {nm="GIVOR2"; d=0x00003e60;};
+      //   VECOFF:3e6
+      I : R {nm="GIVOR3"; d=0x0000bb10;};
+      //   VECOFF:bb1
+      I : R {nm="GIVOR4"; d=0x00006c70;};
+      //   VECOFF:6c7
+      I : R {nm="GIVOR8"; d=0x00003020;};
+      //   VECOFF:302
+      I : R {nm="GIVPR"; d=0x000000003ebb0000;};
+      //   GVECPRE:000000003ebb
+      I : R {nm="IAC1"; d=0x41ffe33eb627dd68;};
+      //   ADDR:107ff8cfad89f75a
+      I : R {nm="IAC2"; d=0x10496b308e6ced9c;};
+      //   ADDR:04125acc239b3b67
+      I : R {nm="IAC3"; d=0xd1987304f8937fa0;};
+      //   ADDR:1a330e609f126ff4
+      I : R {nm="IAC4"; d=0x24563048db998790;};
+      //   ADDR:048ac6091b7330f2
+      I : R {nm="IAC5"; d=0x4ff2965bc6f25f50;};
+      //   ADDR:09fe52cb78de4bea
+      I : R {nm="IAC6"; d=0xfcebfab53007a180;};
+      //   ADDR:1f9d7f56a600f430
+      I : R {nm="IAC7"; d=0xa1c2f8e6a2da4888;};
+      //   ADDR:14385f1cd45b4911
+      I : R {nm="IAC8"; d=0x3efb18d6d302d7f0;};
+      //   ADDR:07df631ada605afe
+      I : R {nm="IAR"; d=0x0000000000000e00;};
+      I : R {nm="LPIDR"; d=0x00000009;};
+      //   LPID:9
+      I : R {nm="MAS0"; d=0x802c0003;};
+      //   ATSEL:1 ESEL:2c HES:0 NV:3 TLBSEL:0
+      I : R {nm="MAS1"; d=0x3f7e3100;};
+      //   IND:1 IPROT:0 TID:3f7e TS:1 TSIZE:2 V:0
+      I : R {nm="MAS2"; d=0xd75050db0c68705d;};
+      //   E:1 EPN:d75050db0c687 G:0 I:1 M:1 W:1 X0:1 X1:0
+      I : R {nm="MAS3"; d=0x739bb12e;};
+      //   RPN:739bb SR:0 SW:1 SX:0 U0:0 U1:1 U2:0 U3:0 UR:1 UW:1 UX:1
+      I : R {nm="MAS4"; d=0x00000665;};
+      //   ED:1 GD:0 ID:0 INDD:0 MD:1 TLBSELD:0 TSIZED:c WD:0 X0D:1 X1D:1
+      I : R {nm="MAS5"; d=0x00000010;};
+      //   SGS:0 SLPID:10
+      I : R {nm="MAS6"; d=0x06980300;};
+      //   ISIZE:6 SAS:0 SIND:0 SPID:698
+      I : R {nm="MAS7"; d=0x00000005;};
+      //   RPN:5
+      I : R {nm="MAS8"; d=0x4000003c;};
+      //   TGS:0 TLPID:3c TVF:1
+      I : R {nm="MCAR"; d=0x0000000000000000;};
+      //   MCAR:0000000000000000
+      I : R {nm="MCARU"; d=0x00000000;};
+      //   MCARU:0
+      I : R {nm="MCARUA"; d=0x00000000;};
+      //   PMCARU:0
+      I : R {nm="MSR"; d=0x00000000;};
+      //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   SPV:0 UCLE:0
+      I : R {nm="MSRP"; d=0x00000204;};
+      //   DEP:1 PMMP:1 UCLEP:0
+      I : R {nm="PID0"; d=0x00001c3f;};
+      //   PID:1c3f
+      I : R {nm="PPR32"; d=0x00180000;};
+      //   PRI:6
+      I : R {nm="PRSR"; d=0x00000000;};
+      //   DE_HALT:0 DNHM:0 DNH_HALT:0 EDB_HALT:0 EXT_STOP:0 HALTED:0 JHALT:0
+      //   PM_HALT:0 PM_STOP:0 RUNN_HALT:0 RUNN_STOP:0 STOPPED:0 UDE_STOP:0 WAIT:0
+      I : R {nm="TCR"; d=0x71fd2000;};
+      //   ARE:1 DIE:0 FIE:1 FP:1 FPEXT:9 PPC:1 WIE:0 WP:1 WPEXT:e WRC:3
+      I : R {nm="TIR"; d=0x00000001;};
+      //   TIR:1
+      I : R {nm="TSR"; d=0x10000000;};
+      //   DIS:0 ENW:0 FIS:0 WIS:0 WRS:1
+      I : R {nm="VSCR"; d=0x00000001;};
+      //   NJ:0 SAT:1
+      I : R {nm="XER"; d=0x000000006000000f;};
+      //   CA:1 CNT:f OV:1 SO:0
+      E : I {asm="addi 30,0,0x9516"; c=1;
+                     ea=0x0000000000000e00; ra=0x0000008000000e00; d=0x3bc09516; op=0x3bc09516; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G30", d=>0xffffffffffff9516 ],};};
+      E : I {asm="addi 30,0,0x3660"; c=2;
+                     ea=0x0000000000000e04; ra=0x0000008000000e04; d=0x3bc03660; op=0x3bc03660; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G30", d=>0x0000000000003660 ],};};
+      E : I {asm="addi 19,12,0x7926"; c=3;
+                     ea=0x0000000000000e08; ra=0x0000008000000e08; d=0x3a6c7926; op=0x3a6c7926; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G19", d=>0x32d1c398bde9393e ],};};
+      E : I {asm="addi 31,16,0x63aa"; c=4;
+                     ea=0x0000000000000e0c; ra=0x0000008000000e0c; d=0x3bf063aa; op=0x3bf063aa; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G31", d=>0xf14ece7cb1a0689c ],};};
+      E : I {asm="addi 29,10,0x19a9"; c=5;
+                     ea=0x0000000000000e10; ra=0x0000008000000e10; d=0x3baa19a9; op=0x3baa19a9; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G29", d=>0xff388399a5c8364e ],};};
+      E : I {asm="addi 4,4,0x4ec8"; c=6;
+                     ea=0x0000000000000e14; ra=0x0000008000000e14; d=0x38844ec8; op=0x38844ec8; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G4", d=>0x14b3106b2ba5f5a5 ],};};
+      E : I {asm="addi 27,4,0x97c6"; c=7;
+                     ea=0x0000000000000e18; ra=0x0000008000000e18; d=0x3b6497c6; op=0x3b6497c6; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G27", d=>0x14b3106b2ba58d6b ],};};
+      E : I {asm="addi 2,13,0xf051"; c=8;
+                     ea=0x0000000000000e1c; ra=0x0000008000000e1c; d=0x384df051; op=0x384df051; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G2", d=>0xba15f356caf4e474 ],};};
+      E : I {asm="addi 24,7,0x15b4"; c=9;
+                     ea=0x0000000000000e20; ra=0x0000008000000e20; d=0x3b0715b4; op=0x3b0715b4; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G24", d=>0x38f7cebb1cc34ca3 ],};};
+      E : I {asm="addi 11,2,0x2ad0"; c=10;
+                     ea=0x0000000000000e24; ra=0x0000008000000e24; d=0x39622ad0; op=0x39622ad0; ta=0x8d; op_size=32;
+                     // core=0, thread=1
+                     ir={[ t=>"reg", rn=>"G11", d=>0xba15f356caf50f44 ],};};
+      R : RES {ea=0x0000000000000e28; ra=0x0000008000000e28; ta=0x8d;};
+      R : R {nm="BUCSR0"; d=0x00000000;};
+      //   BBFI:0 BPEN:0 LS_EN:0 STAC_EN:0
+      R : R {nm="CR"; d=0xcee68751;};
+      //   CR0:c CR1:e CR2:e CR3:6 CR4:8 CR5:7 CR6:5 CR7:1 EQ:0 GT:1 LT:1 SO:0
+      R : R {nm="CTR"; d=0x0b3bdfe48f741e86;};
+      R : R {nm="DAC1"; d=0x243a778f145d0c91;};
+      R : R {nm="DAC2"; d=0x6ca71936dc8618ed;};
+      R : R {nm="DBCR0"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+      //   IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+      R : R {nm="DBCR1"; d=0xdec04280;};
+      //   IAC12M:3 IAC1ER:1 IAC1US:3 IAC2ER:2 IAC2US:3 IAC34M:2 IAC3ER:0 IAC3US:1
+      //   IAC4ER:2 IAC4US:0
+      R : R {nm="DBCR2"; d=0xffa00000;};
+      //   DAC12M:2 DAC1ER:3 DAC1US:3 DAC2ER:3 DAC2US:3 DACLINK1:1 DACLINK2:0 DVC1BE:0
+      //   DVC1M:0 DVC2BE:0 DVC2M:0
+      R : R {nm="DBCR4"; d=0x00005723;};
+      //   DAC1CFG:2 DAC1XM:5 DAC2CFG:3 DAC2XM:7
+      R : R {nm="DBSR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      R : R {nm="DBSRWR"; d=0x00000000;};
+      //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DNI:0 IAC1:0 IAC2:0
+      //   IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0
+      //   TRAP:0 UDE:0
+      R : R {nm="DEAR"; d=0x1192946377b08060;};
+      R : R {nm="EDBCR0"; d=0x40000000;};
+      //   DIS_CTH:0 DNH_EN:1 DNI_CTL:0 EDCEO:0 EDEEO:0 EDM:0 EDMEO:0 EFT:0
+      R : R {nm="EPCR"; d=0x5e400000;};
+      //   DGTMI:0 DMIUH:1 DSIGS:1 DTLBGS:1 DUVD:1 EXTGS:0 GICM:0 ICM:1 ISIGS:1
+      //   ITLBGS:0 PMGS:0
+      R : R {nm="EPLC"; d=0x801a388a;};
+      //   EAS:0 EGS:0 ELPID:1a EPID:388a EPR:1
+      R : R {nm="EPSC"; d=0x600d019e;};
+      //   EAS:1 EGS:1 ELPID:d EPID:19e EPR:0
+      R : R {nm="FPSCR"; d=0x2030b279;};
+      //   C:0 FE:1 FEX:0 FG:0 FI:0 FL:1 FPCC:b FPRF:b FR:0 FU:1 FX:0 NI:0 OE:1 OX:0
+      //   RN:1 UE:1 UX:0 VE:0 VX:1 VXCVI:0 VXIDI:0 VXIMZ:1 VXISI:0 VXSNAN:0 VXSOFT:0
+      //   VXSQRT:1 VXVC:0 VXZDZ:1 XE:1 XX:0 ZE:1 ZX:0
+      R : R {nm="G10"; d=0xff388399a5c81ca5;};
+      R : R {nm="G11"; d=0xba15f356caf50f44;};
+      R : R {nm="G12"; d=0x32d1c398bde8c018;};
+      R : R {nm="G13"; d=0xba15f356caf4f423;};
+      R : R {nm="G16"; d=0xf14ece7cb1a004f2;};
+      R : R {nm="G19"; d=0x32d1c398bde9393e;};
+      R : R {nm="G2"; d=0xba15f356caf4e474;};
+      R : R {nm="G24"; d=0x38f7cebb1cc34ca3;};
+      R : R {nm="G27"; d=0x14b3106b2ba58d6b;};
+      R : R {nm="G29"; d=0xff388399a5c8364e;};
+      R : R {nm="G30"; d=0x0000000000003660;};
+      R : R {nm="G31"; d=0xf14ece7cb1a0689c;};
+      R : R {nm="G4"; d=0x14b3106b2ba5f5a5;};
+      R : R {nm="G7"; d=0x38f7cebb1cc336ef;};
+      R : R {nm="GIVOR13"; d=0x00003a00;};
+      //   VECOFF:3a0
+      R : R {nm="GIVOR14"; d=0x000062a0;};
+      //   VECOFF:62a
+      R : R {nm="GIVOR2"; d=0x00003e60;};
+      //   VECOFF:3e6
+      R : R {nm="GIVOR3"; d=0x0000bb10;};
+      //   VECOFF:bb1
+      R : R {nm="GIVOR4"; d=0x00006c70;};
+      //   VECOFF:6c7
+      R : R {nm="GIVOR8"; d=0x00003020;};
+      //   VECOFF:302
+      R : R {nm="GIVPR"; d=0x000000003ebb0000;};
+      //   GVECPRE:000000003ebb
+      R : R {nm="IAC1"; d=0x41ffe33eb627dd68;};
+      //   ADDR:107ff8cfad89f75a
+      R : R {nm="IAC2"; d=0x10496b308e6ced9c;};
+      //   ADDR:04125acc239b3b67
+      R : R {nm="IAC3"; d=0xd1987304f8937fa0;};
+      //   ADDR:1a330e609f126ff4
+      R : R {nm="IAC4"; d=0x24563048db998790;};
+      //   ADDR:048ac6091b7330f2
+      R : R {nm="IAC5"; d=0x4ff2965bc6f25f50;};
+      //   ADDR:09fe52cb78de4bea
+      R : R {nm="IAC6"; d=0xfcebfab53007a180;};
+      //   ADDR:1f9d7f56a600f430
+      R : R {nm="IAC7"; d=0xa1c2f8e6a2da4888;};
+      //   ADDR:14385f1cd45b4911
+      R : R {nm="IAC8"; d=0x3efb18d6d302d7f0;};
+      //   ADDR:07df631ada605afe
+      R : R {nm="IAR"; d=0x0000000000000e28;};
+      R : R {nm="LPIDR"; d=0x00000009;};
+      //   LPID:9
+      R : R {nm="MAS0"; d=0x802c0003;};
+      //   ATSEL:1 ESEL:2c HES:0 NV:3 TLBSEL:0
+      R : R {nm="MAS1"; d=0x3f7e3100;};
+      //   IND:1 IPROT:0 TID:3f7e TS:1 TSIZE:2 V:0
+      R : R {nm="MAS2"; d=0xd75050db0c68705d;};
+      //   E:1 EPN:d75050db0c687 G:0 I:1 M:1 W:1 X0:1 X1:0
+      R : R {nm="MAS3"; d=0x739bb12e;};
+      //   RPN:739bb SR:0 SW:1 SX:0 U0:0 U1:1 U2:0 U3:0 UR:1 UW:1 UX:1
+      R : R {nm="MAS4"; d=0x00000665;};
+      //   ED:1 GD:0 ID:0 INDD:0 MD:1 TLBSELD:0 TSIZED:c WD:0 X0D:1 X1D:1
+      R : R {nm="MAS5"; d=0x00000010;};
+      //   SGS:0 SLPID:10
+      R : R {nm="MAS6"; d=0x06980300;};
+      //   ISIZE:6 SAS:0 SIND:0 SPID:698
+      R : R {nm="MAS7"; d=0x00000005;};
+      //   RPN:5
+      R : R {nm="MAS8"; d=0x4000003c;};
+      //   TGS:0 TLPID:3c TVF:1
+      R : R {nm="MSR"; d=0x00000000;};
+      //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+      //   SPV:0 UCLE:0
+      R : R {nm="MSRP"; d=0x00000204;};
+      //   DEP:1 PMMP:1 UCLEP:0
+      R : R {nm="PID0"; d=0x00001c3f;};
+      //   PID:1c3f
+      R : R {nm="PPR32"; d=0x00180000;};
+      //   PRI:6
+      R : R {nm="PRSR"; d=0x00000000;};
+      //   DE_HALT:0 DNHM:0 DNH_HALT:0 EDB_HALT:0 EXT_STOP:0 HALTED:0 JHALT:0
+      //   PM_HALT:0 PM_STOP:0 RUNN_HALT:0 RUNN_STOP:0 STOPPED:0 UDE_STOP:0 WAIT:0
+      R : R {nm="TCR"; d=0x71fd2000;};
+      //   ARE:1 DIE:0 FIE:1 FP:1 FPEXT:9 PPC:1 WIE:0 WP:1 WPEXT:e WRC:3
+      R : R {nm="TSR"; d=0x10000000;};
+      //   DIS:0 ENW:0 FIS:0 WIS:0 WRS:1
+      R : R {nm="VSCR"; d=0x00000001;};
+      //   NJ:0 SAT:1
+      R : R {nm="XER"; d=0x000000006000000f;};
+      //   CA:1 CNT:f OV:1 SO:0
+    } // powerpc::t1
+    R : R {nm="HDBCR0"; d=0xe4c44400;};
+    //   ALL_GUARDED:1 DECODE1_ONLY:1 DEMAND_SIZE:0 DIS_FLASH_INVAL:0
+    //   DIS_ILFB_CANCEL:0 DWF_DIS:1 EMB_FORCE_HWSYNC:1 EN_MHD:1 FETCH4_ONLY:0
+    //   HWTW_WIMGE_IND:1 ISSUE1_ONLY:0 NOPREFETCH:0 REAL_MODE:0 SINGLE_DEALLOC:0
+    //   STASH_SIZE:2 STQ_FWD_DIS:0 STQ_IN_ORDER:1 STQ_SIZE_1:1 TLB_PERR_DIS:0
+    R : R {nm="HID0"; d=0x00000040;};
+    //   CIGLSO:0 DCFA:1 EMCP:0 EN_L2MMU_MHD:0 NOPTI:0
+    R : R {nm="IMSR0"; d=0x00000000;};
+    //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+    //   SPV:0 UCLE:0
+    R : R {nm="IMSR1"; d=0x00000000;};
+    //   CE:0 CM:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:0 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0
+    //   SPV:0 UCLE:0
+    R : R {nm="INIA0"; d=0x0000000000000d20;};
+    //   INIA:0000000000000348
+    R : R {nm="INIA1"; d=0x0000000000000e28;};
+    //   INIA:000000000000038a
+    R : R {nm="IVOR0"; d=0x00001770;};
+    //   OFFSET:177
+    R : R {nm="IVOR1"; d=0x0000a120;};
+    //   OFFSET:a12
+    R : R {nm="IVOR10"; d=0x0000f7f0;};
+    //   OFFSET:f7f
+    R : R {nm="IVOR11"; d=0x0000fe40;};
+    //   OFFSET:fe4
+    R : R {nm="IVOR12"; d=0x0000bb80;};
+    //   OFFSET:bb8
+    R : R {nm="IVOR13"; d=0x000048f0;};
+    //   OFFSET:48f
+    R : R {nm="IVOR14"; d=0x00000db0;};
+    //   OFFSET:db
+    R : R {nm="IVOR15"; d=0x0000d260;};
+    //   OFFSET:d26
+    R : R {nm="IVOR2"; d=0x00000b80;};
+    //   OFFSET:b8
+    R : R {nm="IVOR3"; d=0x0000d670;};
+    //   OFFSET:d67
+    R : R {nm="IVOR32"; d=0x00006280;};
+    //   OFFSET:628
+    R : R {nm="IVOR33"; d=0x00004d60;};
+    //   OFFSET:4d6
+    R : R {nm="IVOR35"; d=0x0000b480;};
+    //   OFFSET:b48
+    R : R {nm="IVOR36"; d=0x0000ad00;};
+    //   OFFSET:ad0
+    R : R {nm="IVOR37"; d=0x0000b5c0;};
+    //   OFFSET:b5c
+    R : R {nm="IVOR38"; d=0x00005b10;};
+    //   VECOFF:5b1
+    R : R {nm="IVOR39"; d=0x00006410;};
+    //   VECOFF:641
+    R : R {nm="IVOR4"; d=0x00006d50;};
+    //   OFFSET:6d5
+    R : R {nm="IVOR40"; d=0x0000b990;};
+    //   VECOFF:b99
+    R : R {nm="IVOR41"; d=0x000005a0;};
+    //   VECOFF:5a
+    R : R {nm="IVOR42"; d=0x0000bfa0;};
+    //   OFFSET:bfa
+    R : R {nm="IVOR5"; d=0x0000e6e0;};
+    //   OFFSET:e6e
+    R : R {nm="IVOR6"; d=0x0000c580;};
+    //   OFFSET:c58
+    R : R {nm="IVOR7"; d=0x00008f80;};
+    //   OFFSET:8f8
+    R : R {nm="IVOR8"; d=0x000021d0;};
+    //   OFFSET:21d
+    R : R {nm="IVOR9"; d=0x00003560;};
+    //   OFFSET:356
+    R : R {nm="IVPR"; d=0x0000000000000000;};
+    //   ADDR:000000000000
+    R : R {nm="L1CSR0"; d=0x00018120;};
+    //   CEA:0 CEDT:0 CEIT:1 DCBZ32:0 DCE:0 DCFI:0 DCLFC:1 DCLO:0 DCPE:1 DCPI:1
+    R : R {nm="L1CSR1"; d=0x00059300;};
+    //   ICE:0 ICEA:1 ICECE:1 ICEDT:1 ICEI:1 ICFI:0 ICLFC:1 ICLO:1
+    R : R {nm="TEN"; d=0x0000000000000003;};
+    //   TEN:0000000000000000 TEN0:1 TEN1:1
+    R : R {nm="TENC"; d=0x0000000000000003;};
+    //   TD0:1 TD1:1 TENC:0000000000000000
+    R : R {nm="TENS"; d=0x0000000000000003;};
+    //   TE0:1 TE1:1 TENS:0000000000000000
+    R : R {nm="TPRI0"; d=0x00000003;};
+    //   PRI:3
+    R : R {nm="TPRI1"; d=0x00000006;};
+    //   PRI:6
+  } // powerpc
+} // ijam_mt

@@ -1,0 +1,51 @@
+#
+# Test of a trap instruction, done to make sure that a large set of
+# translation-time condtionals can be handled.
+#
+= asm
+
+  addi r1,0,100 
+  addi r2,0,200 
+  tw 0x08,1,2
+  tw 0x10,1,2
+  addi r1,r1,100 
+  tw 0x04,1,2
+  tw 0x10,3,4  
+  .long 0
+  addi  r31,r31,1
+  mfspr r30,SRR0
+  addi r30,r30,4
+  mtspr SRR0,r30
+  rfi  
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38200064	#	addi r1,0,100 
+MD n=Mem ra=0x00000004 d=0x384000C8	#	addi r2,0,200 
+MD n=Mem ra=0x00000008 d=0x7D011008	#	tw 0x08,1,2
+MD n=Mem ra=0x0000000c d=0x7E011008	#	tw 0x10,1,2
+MD n=Mem ra=0x00000010 d=0x38210064	#	addi r1,r1,100 
+MD n=Mem ra=0x00000014 d=0x7C811008	#	tw 0x04,1,2
+MD n=Mem ra=0x00000018 d=0x7E032008	#	tw 0x10,3,4  
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000020 d=0x3BFF0001	#	addi  r31,r31,1
+MD n=Mem ra=0x00000024 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x00000028 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x0000002c d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x00000030 d=0x4C000064	#	rfi  
+# </GEN>
+
+RD n=NIA   d=0x0
+RD n=IVOR6 d=0x20
+
+RD n=GPR i=3  d=0xfffffff0
+RD n=GPR i=4  d=0xffffffff
+
+RESULTS
+
+RD n=GPR i=1  d=200
+RD n=GPR i=2  d=200
+RD n=GPR i=31 d=3

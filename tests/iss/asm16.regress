@@ -1,0 +1,85 @@
+
+asm16.o:     file format elf32-powerpc
+asm16.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000100  00000000  00000000  00000100  2**8
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000200  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000200  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000010 l       .text	00000000 l4
+00000050 l       .text	00000000 l5
+
+
+
+Disassembly of section .text:
+
+00000000 <l4-0x10>:
+   0:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+   4:	07 00 00 03 	skipls    10 <l4>
+   8:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+   c:	01 01 00 01 	move      r1,0x1
+
+00000010 <l4>:
+  10:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  14:	01 02 00 02 	move      r2,0x2
+  18:	22 9f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 1
+  1c:	03 01 01 00 	cmpeq     r1,r1
+  20:	22 20 1f 00 	PREFIX,   VlesSize 2, IFA => 15, IFT => 0, IFF => 1, LPMARKA => 0 LPMARKB => 0
+  24:	02 01 02 0d 	add       r1,r2,r13
+  28:	02 01 02 03 	add       r1,r2,r3
+  2c:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  30:	07 00 00 08 	skipls    50 <l5>
+  34:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  38:	03 01 02 00 	cmpeq     r1,r2
+  3c:	22 20 1f 00 	PREFIX,   VlesSize 2, IFA => 15, IFT => 0, IFF => 1, LPMARKA => 0 LPMARKB => 0
+  40:	02 01 02 0d 	add       r1,r2,r13
+  44:	02 01 02 03 	add       r1,r2,r3
+  48:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  4c:	03 01 02 00 	cmpeq     r1,r2
+
+00000050 <l5>:
+  50:	22 a0 1f 00 	PREFIX,   VlesSize 2, IFA => 15, IFT => 0, IFF => 1, LPMARKA => 0 LPMARKB => 1
+  54:	02 01 02 0d 	add       r1,r2,r13
+  58:	02 01 02 03 	add       r1,r2,r3
+  5c:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  60:	04 01 00 00 	cmpeq     r1+btr0
+  64:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  68:	09 f1       	move.l    (sp+r15),r1
+  6a:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  6e:	08 10 01    	move.l    (sp+r16),r1
+  71:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  75:	08 0f 10    	move.l    (sp+r15),r16
+  78:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  7c:	0b f1       	move.l    (r15),r1
+  7e:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  82:	0a 10 03    	move.l    (r16),r3
+  85:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  89:	0c 01 03 22 	move.l    (r1+r3),r34
+  8d:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  91:	0d 00 34    	move.l    (0x34),r14
+  94:	23 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 1 LPMARKB => 0
+  98:	0f 00       	doensh0   
+  9a:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  9e:	0c 01 03 22 	move.l    (r1+r3),r34
+  a2:	22 9f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 1
+  a6:	0e 00       	doen0     
+  a8:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  ac:	0c 01 03 22 	move.l    (r1+r3),r34
+  b0:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  b4:	10 70 cc    	add_n     d12,d12,d12
+  b7:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  bb:	45 10       	add_n     d2,d2,d2
+  bd:	22 1f f0 00 	PREFIX,   VlesSize 1, IFA => 0, IFT => 15, IFF => 15, LPMARKA => 0 LPMARKB => 0
+  c1:	10 44 00    	add_n_al  d0,d1
+	...

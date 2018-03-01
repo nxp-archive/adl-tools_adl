@@ -1,0 +1,11 @@
+inst111.adl:58: Pseudo instruction field width is undefined.
+inst111.adl:104: Inverted is not defined for parm field.
+inst111.adl:62: Assembler is not defined for parm field.
+inst111.adl:68: Valid ranges are not defined for parm field.
+inst111.adl:73: Valid masks are not defined for parm field.
+inst111.adl:78: Table is not defined for parm field.
+inst111.adl:83: Blks are not defined for parm field.
+inst111.adl:88: Parm field can not be a prefix field.
+inst111.adl:99: Overlay is not defined for parm field.
+inst111.adl:54: Parm instruction fields have no bits.
+Too many errors.

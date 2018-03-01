@@ -1,0 +1,5 @@
+mem3.adl:72: Addressing unit must be a power of 2.
+mem3.adl:78: Offset must be divisible by address unit.
+mem3.adl:84: Size out of parent range.
+mem3.adl:57: Size not set for memory.
+mem3.adl:62: Addressinng unit not set for memory.

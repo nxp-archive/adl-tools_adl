@@ -1,0 +1,13 @@
+
+define (config) {
+  extern_mem = true;
+}
+
+define (core = packet_ops) {
+  define (mem = DMEM) {
+    extern_mem = true;
+  }
+  define (mem = OMEM) {
+    extern_mem = true;
+  }  
+}

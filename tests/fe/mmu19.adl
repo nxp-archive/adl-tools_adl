@@ -1,0 +1,261 @@
+//
+// Example MMU- this should parse correctly.
+//
+// Demonstrates the use of the Bounded test.
+//
+define (arch=foo) {
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=DEAR) {}
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register for protection faults.
+    """;
+  }
+
+  define (reg=IVOR13) {
+    """
+    Interrupt-vector offset register for dtlb misses.
+    """;
+  }
+
+  define (reg=IVOR14) {
+    """
+    Interrupt-vector offset register for itlb misses.
+    """;
+  }
+
+  define (reg=MAS0) {
+    """
+    Memory assist register 0.
+    """;
+    define (field=LB) {
+      bits=(0,31);
+    }
+  }
+
+  define (reg=MAS1) {
+    """
+    Memory assist register 1.
+    """;
+    define (field=UB) {
+      bits=(0,31);
+    }
+  }
+
+  define (reg=MAS2) {
+    """
+    Memory assist register 2.
+    """;
+    define (field=SX) {
+      bits=0;
+    }
+    define (field=SW) {
+      bits=1;
+    }
+    define (field=SR) {
+      bits=2;
+    }
+    define (field=UX) {
+      bits=3;
+    }
+    define (field=UW) {
+      bits=4;
+    }
+    define (field=UR) {
+      bits=5;
+    }
+    define (field=V) {
+      bits=(6);
+    }
+    define (field=Way) {
+      bits=(28,31);
+    }
+  }
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+      CIA = NIA;    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (exception=ITlb) {
+    define (field=DEAR) { bits = 32; }
+    action = func (ITlb_t info) {
+      DEAR = info.DEAR;
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR14(16,31));
+    };
+  }
+
+  define (exception=DTlb) {
+    define (field=DEAR) { bits = 32; }
+    action = func (DTlb_t info) {
+      DEAR = info.DEAR;
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR13(16,31));
+    };
+  }
+
+  define (mmu) {
+
+    define(lookup=MpuCam) {
+
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=LB) {
+        bits = 32;
+      }
+      define (wayfield=UB) {
+        bits = 32;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Bounded(LB,UB);
+
+      valid = { return (V != 0); };
+
+      exec_perm = func(MpuCam_t t,addr_t ea,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SX : t.UX) == 0) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      load_perm = func (MpuCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SR : t.UR) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      store_perm = func (MpuCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SW : t.UW) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      reset = {
+        // Reset state: One 4k access at bottom of memory.
+        MpuCam_t t;
+      
+        t.LB   = 0;
+        t.UB   = 0xfff;
+        t.V    = 1;
+                      
+        t.SX   = 1;
+        t.SW   = 1;
+        t.SR   = 1;
+
+        t.UX   = 1;
+        t.UW   = 1;
+        t.UR   = 1;
+            
+        MpuCam(0,0) = t;
+      };
+
+    }
+
+    instr_miss = func(addr_t ea,unsigned) {
+      ITlb_t itlb;
+      itlb.DEAR = ea;
+      raiseException(itlb);
+    };
+    
+    data_miss = func(addr_t ea,unsigned) {
+      DTlb_t dtlb;
+      dtlb.DEAR = ea;
+      raiseException(dtlb);
+    };
+    
+  }
+
+}
+
+define (core=P) {
+  archs=foo;
+}

@@ -1,0 +1,81 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+ 
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use adl_config;
+use strict;
+use Data::Dumper;
+use File::Basename;
+use vars qw($src $designs $is_external_release $jit_ok $runsim_path $dtasm_path);
+
+my $runsim = ($runsim_path) ? "$runsim_path/runsim" : "";
+
+my $dtasm = ($dtasm_path) ? "$dtasm_path/scasm" : "";
+ 
+#
+# IMPORTANT: Add to this list only the tests which reference models which may be
+# released as open source.
+#
+my @Tests = ( 
+			);
+
+#
+# IMPORTANT: Add any tests here which use models which are considered
+# proprietary/confidential.
+#
+if (! $is_external_release and $runsim) {
+  my @ProprietaryTests = (
+		{
+			cmd     => "LD_LIBRARY_PATH=../../adlapi2simapi/src $runsim -d sc3400adl -fstcfg '-script $src/c1.cli print_stat foo bar -escript' $src/simple.eld",
+			stdio   => 1,
+			diff    => "$src/c1.regress",
+		},
+			);
+  @Tests = (@Tests,@ProprietaryTests);
+}
+
+# Commented out for now b/c output seems to change frequently from DevTech
+# assembler.
+if (0) {
+	if (! $is_external_release and $dtasm) {
+		my @ProprietaryTests = (
+			# Test basic functionality- can we run at all?
+			{
+				cmd     => "LD_LIBRARY_PATH=. $dtasm -oelf -g -q -oil -uall -veri -onopp -onocl -onodxl -onohdr -onomc -onomd -onow -onointr -obe -arch sc5000 -b'asm1.eln' '$src/asm1.s' -l'asm1.lst'",
+				checker => sub {
+					`tail -n +3 asm1.lst > asm1.cmp`;
+					file_diff("asm1.cmp","$src/asm1.regress"); 
+				},
+				temps   => [ "asm1.deb", "asm1.eln", "asm1.lst", "asm1.cmp" ],
+			},
+			# Make sure that error messages use the proper error-handling mechanism.
+			{
+				cmd     => "LD_LIBRARY_PATH=. $dtasm -oelf -g -q -oil -uall -veri -onopp -onocl -onodxl -onohdr -onomc -onomd -onow -onointr -obe -arch sc5000 -b'asm2.eln' '$src/asm2.s' -l'asm2.lst'",
+				stdio   => 1,
+				fail    => 2,
+				diff    => "$src/asm2.regress",
+				temps   => [ "asm2.deb", "asm2.eln", "asm2.lst" ],
+			},
+				);
+		
+		@Tests = (@Tests,@ProprietaryTests);
+	}
+}
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests,1);

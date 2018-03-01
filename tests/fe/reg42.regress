@@ -1,0 +1,2 @@
+reg42.adl:26: The register-file hasAttr method expects two arguments.
+reg42.adl:34: Unknown attribute 'foobar' in register-file hasAttr call.

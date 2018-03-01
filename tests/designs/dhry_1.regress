@@ -1,0 +1,452 @@
+
+dhry_1.o:     file format elf32-powerpc
+dhry_1.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000004c0  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  000004f4  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  000004f4  2**0
+                  ALLOC
+  3 .sbss         00000004  00000000  00000000  000004f4  2**2
+                  ALLOC
+  4 .rodata.str1.4 00000080  00000000  00000000  000004f4  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  5 .comment      00000012  00000000  00000000  00000574  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+00000000 l    df *ABS*	00000000 dhry_1.c
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000 l    d  .sbss	00000000 .sbss
+00000000 l    d  .rodata.str1.4	00000000 .rodata.str1.4
+00000000 l    d  .comment	00000000 .comment
+00000000 g     O .sbss	00000004 Reg
+00000000 g     F .text	00000314 main
+00000000         *UND*	00000000 Next_ptr_Glob
+00000004       O *COM*	00000004 Next_Ptr_Glob
+00000004       O *COM*	00000004 Ptr_Glob
+00002710       O *COM*	00000004 Arr_2_Glob
+00000004       O *COM*	00000004 Bool_Glob
+00000490 g     F .text	0000001c Proc_5
+0000045c g     F .text	00000034 Proc_4
+00000000         *UND*	00000000 Func_2
+00000000         *UND*	00000000 Proc_7
+000000c8       O *COM*	00000004 Arr_1_Glob
+00000000         *UND*	00000000 Proc_8
+00000314 g     F .text	000000bc Proc_1
+00000001       O *COM*	00000001 Ch_2_Glob
+00000000         *UND*	00000000 Func_1
+00000000         *UND*	00000000 Proc_6
+00000004       O *COM*	00000004 Int_Glob
+000003d0 g     F .text	0000003c Proc_2
+00000000         *UND*	00000000 memcpy
+0000040c g     F .text	00000050 Proc_3
+00000001       O *COM*	00000001 Ch_1_Glob
+000004ac g     F .text	00000014 exit
+00000000         *UND*	00000000 abort
+00000004       O *COM*	00000004 Begin_Time
+00000004       O *COM*	00000004 End_Time
+00000004       O *COM*	00000004 User_Time
+00000004       O *COM*	00000004 Microseconds
+00000004       O *COM*	00000004 Dhrystones_Per_Second
+
+
+
+Disassembly of section .text:
+
+00000000 <main>:
+   0:	94 21 ff 10 	stwu	r1,-240(r1)
+   4:	7c 08 02 a6 	mflr	r0
+   8:	92 e1 00 cc 	stw	r23,204(r1)
+   c:	93 01 00 d0 	stw	r24,208(r1)
+  10:	93 21 00 d4 	stw	r25,212(r1)
+  14:	93 41 00 d8 	stw	r26,216(r1)
+  18:	93 61 00 dc 	stw	r27,220(r1)
+  1c:	93 81 00 e0 	stw	r28,224(r1)
+  20:	93 a1 00 e4 	stw	r29,228(r1)
+  24:	93 c1 00 e8 	stw	r30,232(r1)
+  28:	93 e1 00 ec 	stw	r31,236(r1)
+  2c:	90 01 00 f4 	stw	r0,244(r1)
+  30:	39 61 00 48 	addi	r11,r1,72
+  34:	3d 20 00 00 	lis	r9,0
+			36: RELOC_HI16	Next_ptr_Glob
+  38:	91 69 00 00 	stw	r11,0(r9)
+			3a: RELOC_LO16	Next_Ptr_Glob
+  3c:	38 01 00 78 	addi	r0,r1,120
+  40:	3d 20 00 00 	lis	r9,0
+			42: RELOC_HI16	Ptr_Glob
+  44:	90 09 00 00 	stw	r0,0(r9)
+			46: RELOC_LO16	Ptr_Glob
+  48:	91 61 00 78 	stw	r11,120(r1)
+  4c:	38 00 00 00 	li	r0,0
+  50:	90 01 00 7c 	stw	r0,124(r1)
+  54:	38 00 00 02 	li	r0,2
+  58:	90 01 00 80 	stw	r0,128(r1)
+  5c:	38 00 00 28 	li	r0,40
+  60:	90 01 00 84 	stw	r0,132(r1)
+  64:	3d 60 00 00 	lis	r11,0
+			66: RELOC_HI16	.rodata.str1.4
+  68:	39 2b 00 00 	addi	r9,r11,0
+			6a: RELOC_LO16	.rodata.str1.4
+  6c:	80 0b 00 00 	lwz	r0,0(r11)
+			6e: RELOC_LO16	.rodata.str1.4
+  70:	81 69 00 04 	lwz	r11,4(r9)
+  74:	81 49 00 08 	lwz	r10,8(r9)
+  78:	81 09 00 0c 	lwz	r8,12(r9)
+  7c:	90 01 00 88 	stw	r0,136(r1)
+  80:	91 61 00 8c 	stw	r11,140(r1)
+  84:	91 41 00 90 	stw	r10,144(r1)
+  88:	91 01 00 94 	stw	r8,148(r1)
+  8c:	80 09 00 10 	lwz	r0,16(r9)
+  90:	81 69 00 14 	lwz	r11,20(r9)
+  94:	81 49 00 18 	lwz	r10,24(r9)
+  98:	a1 09 00 1c 	lhz	r8,28(r9)
+  9c:	90 01 00 98 	stw	r0,152(r1)
+  a0:	91 61 00 9c 	stw	r11,156(r1)
+  a4:	91 41 00 a0 	stw	r10,160(r1)
+  a8:	b1 01 00 a4 	sth	r8,164(r1)
+  ac:	88 09 00 1e 	lbz	r0,30(r9)
+  b0:	98 01 00 a6 	stb	r0,166(r1)
+  b4:	3d 60 00 00 	lis	r11,0
+			b6: RELOC_HI16	.rodata.str1.4+0x20
+  b8:	39 2b 00 20 	addi	r9,r11,32
+			ba: RELOC_LO16	.rodata.str1.4+0x20
+  bc:	80 0b 00 20 	lwz	r0,32(r11)
+			be: RELOC_LO16	.rodata.str1.4+0x20
+  c0:	81 69 00 04 	lwz	r11,4(r9)
+  c4:	81 49 00 08 	lwz	r10,8(r9)
+  c8:	81 09 00 0c 	lwz	r8,12(r9)
+  cc:	90 01 00 08 	stw	r0,8(r1)
+  d0:	91 61 00 0c 	stw	r11,12(r1)
+  d4:	91 41 00 10 	stw	r10,16(r1)
+  d8:	91 01 00 14 	stw	r8,20(r1)
+  dc:	80 09 00 10 	lwz	r0,16(r9)
+  e0:	81 69 00 14 	lwz	r11,20(r9)
+  e4:	81 49 00 18 	lwz	r10,24(r9)
+  e8:	a1 09 00 1c 	lhz	r8,28(r9)
+  ec:	90 01 00 18 	stw	r0,24(r1)
+  f0:	91 61 00 1c 	stw	r11,28(r1)
+  f4:	91 41 00 20 	stw	r10,32(r1)
+  f8:	b1 01 00 24 	sth	r8,36(r1)
+  fc:	88 09 00 1e 	lbz	r0,30(r9)
+ 100:	98 01 00 26 	stb	r0,38(r1)
+ 104:	3d 20 00 00 	lis	r9,0
+			106: RELOC_HI16	Arr_2_Glob+0x65c
+ 108:	38 00 00 0a 	li	r0,10
+ 10c:	90 09 06 5c 	stw	r0,1628(r9)
+			10e: RELOC_LO16	Arr_2_Glob+0x65c
+ 110:	3a e0 03 e8 	li	r23,1000
+ 114:	3b 40 00 01 	li	r26,1
+ 118:	3d 20 00 00 	lis	r9,0
+			11a: RELOC_HI16	.rodata.str1.4+0x40
+ 11c:	3b 89 00 40 	addi	r28,r9,64
+			11e: RELOC_LO16	.rodata.str1.4+0x40
+ 120:	83 29 00 40 	lwz	r25,64(r9)
+			122: RELOC_LO16	.rodata.str1.4+0x40
+ 124:	3f 00 00 00 	lis	r24,0
+			126: RELOC_HI16	Bool_Glob
+ 128:	48 00 00 01 	bl	128 <main+0x128>
+			128: RELOC_REL24	Proc_5
+ 12c:	48 00 00 01 	bl	12c <main+0x12c>
+			12c: RELOC_REL24	Proc_4
+ 130:	38 00 00 02 	li	r0,2
+ 134:	90 01 00 b0 	stw	r0,176(r1)
+ 138:	3b a0 00 03 	li	r29,3
+ 13c:	80 1c 00 04 	lwz	r0,4(r28)
+ 140:	81 3c 00 08 	lwz	r9,8(r28)
+ 144:	81 7c 00 0c 	lwz	r11,12(r28)
+ 148:	93 21 00 28 	stw	r25,40(r1)
+ 14c:	90 01 00 2c 	stw	r0,44(r1)
+ 150:	91 21 00 30 	stw	r9,48(r1)
+ 154:	91 61 00 34 	stw	r11,52(r1)
+ 158:	80 1c 00 10 	lwz	r0,16(r28)
+ 15c:	81 3c 00 14 	lwz	r9,20(r28)
+ 160:	81 7c 00 18 	lwz	r11,24(r28)
+ 164:	a1 5c 00 1c 	lhz	r10,28(r28)
+ 168:	90 01 00 38 	stw	r0,56(r1)
+ 16c:	91 21 00 3c 	stw	r9,60(r1)
+ 170:	91 61 00 40 	stw	r11,64(r1)
+ 174:	b1 41 00 44 	sth	r10,68(r1)
+ 178:	88 1c 00 1e 	lbz	r0,30(r28)
+ 17c:	98 01 00 46 	stb	r0,70(r1)
+ 180:	38 00 00 01 	li	r0,1
+ 184:	90 01 00 ac 	stw	r0,172(r1)
+ 188:	38 61 00 08 	addi	r3,r1,8
+ 18c:	38 81 00 28 	addi	r4,r1,40
+ 190:	48 00 00 01 	bl	190 <main+0x190>
+			190: RELOC_REL24	Func_2
+ 194:	20 03 00 00 	subfic	r0,r3,0
+ 198:	7c 60 19 14 	adde	r3,r0,r3
+ 19c:	90 78 00 00 	stw	r3,0(r24)
+			19e: RELOC_LO16	Bool_Glob
+ 1a0:	80 01 00 b0 	lwz	r0,176(r1)
+ 1a4:	7c 03 03 78 	mr	r3,r0
+ 1a8:	2c 00 00 03 	cmpwi	r0,3
+ 1ac:	40 a0 00 38 	bge+	1e4 <main+0x1e4>
+ 1b0:	54 60 10 3a 	rlwinm	r0,r3,2,0,29
+ 1b4:	7c 00 1a 14 	add	r0,r0,r3
+ 1b8:	7c 1d 00 50 	subf	r0,r29,r0
+ 1bc:	90 01 00 a8 	stw	r0,168(r1)
+ 1c0:	7f a4 eb 78 	mr	r4,r29
+ 1c4:	38 a1 00 a8 	addi	r5,r1,168
+ 1c8:	48 00 00 01 	bl	1c8 <main+0x1c8>
+			1c8: RELOC_REL24	Proc_7
+ 1cc:	81 21 00 b0 	lwz	r9,176(r1)
+ 1d0:	39 29 00 01 	addi	r9,r9,1
+ 1d4:	91 21 00 b0 	stw	r9,176(r1)
+ 1d8:	7d 23 4b 78 	mr	r3,r9
+ 1dc:	7c 09 e8 00 	cmpw	r9,r29
+ 1e0:	41 80 ff d0 	blt+	1b0 <main+0x1b0>
+ 1e4:	3c 60 00 00 	lis	r3,0
+			1e6: RELOC_HI16	Arr_1_Glob
+ 1e8:	38 63 00 00 	addi	r3,r3,0
+			1ea: RELOC_LO16	Arr_1_Glob
+ 1ec:	3c 80 00 00 	lis	r4,0
+			1ee: RELOC_HI16	Arr_2_Glob
+ 1f0:	38 84 00 00 	addi	r4,r4,0
+			1f2: RELOC_LO16	Arr_2_Glob
+ 1f4:	80 a1 00 b0 	lwz	r5,176(r1)
+ 1f8:	80 c1 00 a8 	lwz	r6,168(r1)
+ 1fc:	48 00 00 01 	bl	1fc <main+0x1fc>
+			1fc: RELOC_REL24	Proc_8
+ 200:	3d 20 00 00 	lis	r9,0
+			202: RELOC_HI16	Ptr_Glob
+ 204:	80 69 00 00 	lwz	r3,0(r9)
+			206: RELOC_LO16	Ptr_Glob
+ 208:	48 00 00 01 	bl	208 <main+0x208>
+			208: RELOC_REL24	Proc_1
+ 20c:	3b e0 00 41 	li	r31,65
+ 210:	3d 20 00 00 	lis	r9,0
+			212: RELOC_HI16	Ch_2_Glob
+ 214:	88 09 00 00 	lbz	r0,0(r9)
+			216: RELOC_LO16	Ch_2_Glob
+ 218:	28 00 00 41 	cmplwi	r0,65
+ 21c:	41 80 00 9c 	blt-	2b8 <main+0x2b8>
+ 220:	3d 20 00 00 	lis	r9,0
+			222: RELOC_HI16	.rodata.str1.4+0x60
+ 224:	3b c9 00 60 	addi	r30,r9,96
+			226: RELOC_LO16	.rodata.str1.4+0x60
+ 228:	83 69 00 60 	lwz	r27,96(r9)
+			22a: RELOC_LO16	.rodata.str1.4+0x60
+ 22c:	7f e3 fb 78 	mr	r3,r31
+ 230:	38 80 00 43 	li	r4,67
+ 234:	48 00 00 01 	bl	234 <main+0x234>
+			234: RELOC_REL24	Func_1
+ 238:	80 01 00 ac 	lwz	r0,172(r1)
+ 23c:	7c 00 18 00 	cmpw	r0,r3
+ 240:	40 a2 00 60 	bne+	2a0 <main+0x2a0>
+ 244:	38 60 00 00 	li	r3,0
+ 248:	38 81 00 ac 	addi	r4,r1,172
+ 24c:	48 00 00 01 	bl	24c <main+0x24c>
+			24c: RELOC_REL24	Proc_6
+ 250:	80 1e 00 04 	lwz	r0,4(r30)
+ 254:	81 3e 00 08 	lwz	r9,8(r30)
+ 258:	81 7e 00 0c 	lwz	r11,12(r30)
+ 25c:	93 61 00 28 	stw	r27,40(r1)
+ 260:	90 01 00 2c 	stw	r0,44(r1)
+ 264:	91 21 00 30 	stw	r9,48(r1)
+ 268:	91 61 00 34 	stw	r11,52(r1)
+ 26c:	80 1e 00 10 	lwz	r0,16(r30)
+ 270:	81 3e 00 14 	lwz	r9,20(r30)
+ 274:	81 7e 00 18 	lwz	r11,24(r30)
+ 278:	a1 5e 00 1c 	lhz	r10,28(r30)
+ 27c:	90 01 00 38 	stw	r0,56(r1)
+ 280:	91 21 00 3c 	stw	r9,60(r1)
+ 284:	91 61 00 40 	stw	r11,64(r1)
+ 288:	b1 41 00 44 	sth	r10,68(r1)
+ 28c:	88 1e 00 1e 	lbz	r0,30(r30)
+ 290:	98 01 00 46 	stb	r0,70(r1)
+ 294:	7f 5d d3 78 	mr	r29,r26
+ 298:	3d 20 00 00 	lis	r9,0
+			29a: RELOC_HI16	Int_Glob
+ 29c:	93 49 00 00 	stw	r26,0(r9)
+			29e: RELOC_LO16	Int_Glob
+ 2a0:	38 1f 00 01 	addi	r0,r31,1
+ 2a4:	54 1f 06 3e 	clrlwi	r31,r0,24
+ 2a8:	3d 20 00 00 	lis	r9,0
+			2aa: RELOC_HI16	Ch_2_Glob
+ 2ac:	88 09 00 00 	lbz	r0,0(r9)
+			2ae: RELOC_LO16	Ch_2_Glob
+ 2b0:	7c 00 f8 40 	cmplw	r0,r31
+ 2b4:	40 80 ff 78 	bge+	22c <main+0x22c>
+ 2b8:	80 01 00 b0 	lwz	r0,176(r1)
+ 2bc:	7f bd 01 d6 	mullw	r29,r29,r0
+ 2c0:	80 01 00 a8 	lwz	r0,168(r1)
+ 2c4:	7c 1d 03 d6 	divw	r0,r29,r0
+ 2c8:	90 01 00 b0 	stw	r0,176(r1)
+ 2cc:	38 61 00 b0 	addi	r3,r1,176
+ 2d0:	48 00 00 01 	bl	2d0 <main+0x2d0>
+			2d0: RELOC_REL24	Proc_2
+ 2d4:	3b 5a 00 01 	addi	r26,r26,1
+ 2d8:	7c 1a b8 00 	cmpw	r26,r23
+ 2dc:	40 81 fe 4c 	ble+	128 <main+0x128>
+ 2e0:	80 01 00 f4 	lwz	r0,244(r1)
+ 2e4:	7c 08 03 a6 	mtlr	r0
+ 2e8:	82 e1 00 cc 	lwz	r23,204(r1)
+ 2ec:	83 01 00 d0 	lwz	r24,208(r1)
+ 2f0:	83 21 00 d4 	lwz	r25,212(r1)
+ 2f4:	83 41 00 d8 	lwz	r26,216(r1)
+ 2f8:	83 61 00 dc 	lwz	r27,220(r1)
+ 2fc:	83 81 00 e0 	lwz	r28,224(r1)
+ 300:	83 a1 00 e4 	lwz	r29,228(r1)
+ 304:	83 c1 00 e8 	lwz	r30,232(r1)
+ 308:	83 e1 00 ec 	lwz	r31,236(r1)
+ 30c:	38 21 00 f0 	addi	r1,r1,240
+ 310:	4e 80 00 20 	blr
+
+00000314 <Proc_1>:
+ 314:	94 21 ff e0 	stwu	r1,-32(r1)
+ 318:	7c 08 02 a6 	mflr	r0
+ 31c:	93 a1 00 14 	stw	r29,20(r1)
+ 320:	93 c1 00 18 	stw	r30,24(r1)
+ 324:	93 e1 00 1c 	stw	r31,28(r1)
+ 328:	90 01 00 24 	stw	r0,36(r1)
+ 32c:	7c 7e 1b 78 	mr	r30,r3
+ 330:	83 e3 00 00 	lwz	r31,0(r3)
+ 334:	3f a0 00 00 	lis	r29,0
+			336: RELOC_HI16	Ptr_Glob
+ 338:	80 9d 00 00 	lwz	r4,0(r29)
+			33a: RELOC_LO16	Ptr_Glob
+ 33c:	7f e3 fb 78 	mr	r3,r31
+ 340:	38 a0 00 30 	li	r5,48
+ 344:	48 00 00 01 	bl	344 <Proc_1+0x30>
+			344: RELOC_REL24	memcpy
+ 348:	38 00 00 05 	li	r0,5
+ 34c:	90 1e 00 0c 	stw	r0,12(r30)
+ 350:	90 1f 00 0c 	stw	r0,12(r31)
+ 354:	80 1e 00 00 	lwz	r0,0(r30)
+ 358:	90 1f 00 00 	stw	r0,0(r31)
+ 35c:	7f e3 fb 78 	mr	r3,r31
+ 360:	48 00 00 01 	bl	360 <Proc_1+0x4c>
+			360: RELOC_REL24	Proc_3
+ 364:	80 1f 00 04 	lwz	r0,4(r31)
+ 368:	2c 00 00 00 	cmpwi	r0,0
+ 36c:	40 82 00 38 	bne-	3a4 <Proc_1+0x90>
+ 370:	38 00 00 06 	li	r0,6
+ 374:	90 1f 00 0c 	stw	r0,12(r31)
+ 378:	38 9f 00 08 	addi	r4,r31,8
+ 37c:	80 7e 00 08 	lwz	r3,8(r30)
+ 380:	48 00 00 01 	bl	380 <Proc_1+0x6c>
+			380: RELOC_REL24	Proc_6
+ 384:	81 3d 00 00 	lwz	r9,0(r29)
+			386: RELOC_LO16	Ptr_Glob
+ 388:	80 09 00 00 	lwz	r0,0(r9)
+ 38c:	90 1f 00 00 	stw	r0,0(r31)
+ 390:	38 bf 00 0c 	addi	r5,r31,12
+ 394:	80 7f 00 0c 	lwz	r3,12(r31)
+ 398:	38 80 00 0a 	li	r4,10
+ 39c:	48 00 00 01 	bl	39c <Proc_1+0x88>
+			39c: RELOC_REL24	Proc_7
+ 3a0:	48 00 00 14 	b	3b4 <Proc_1+0xa0>
+ 3a4:	80 9e 00 00 	lwz	r4,0(r30)
+ 3a8:	7f c3 f3 78 	mr	r3,r30
+ 3ac:	38 a0 00 30 	li	r5,48
+ 3b0:	48 00 00 01 	bl	3b0 <Proc_1+0x9c>
+			3b0: RELOC_REL24	memcpy
+ 3b4:	80 01 00 24 	lwz	r0,36(r1)
+ 3b8:	7c 08 03 a6 	mtlr	r0
+ 3bc:	83 a1 00 14 	lwz	r29,20(r1)
+ 3c0:	83 c1 00 18 	lwz	r30,24(r1)
+ 3c4:	83 e1 00 1c 	lwz	r31,28(r1)
+ 3c8:	38 21 00 20 	addi	r1,r1,32
+ 3cc:	4e 80 00 20 	blr
+
+000003d0 <Proc_2>:
+ 3d0:	81 23 00 00 	lwz	r9,0(r3)
+ 3d4:	39 29 00 0a 	addi	r9,r9,10
+ 3d8:	3d 40 00 00 	lis	r10,0
+			3da: RELOC_HI16	Ch_1_Glob
+ 3dc:	3d 00 00 00 	lis	r8,0
+			3de: RELOC_HI16	Int_Glob
+ 3e0:	88 0a 00 00 	lbz	r0,0(r10)
+			3e2: RELOC_LO16	Ch_1_Glob
+ 3e4:	2c 00 00 41 	cmpwi	r0,65
+ 3e8:	40 a2 00 18 	bne+	400 <Proc_2+0x30>
+ 3ec:	39 29 ff ff 	addi	r9,r9,-1
+ 3f0:	80 08 00 00 	lwz	r0,0(r8)
+			3f2: RELOC_LO16	Int_Glob
+ 3f4:	7c 00 48 50 	subf	r0,r0,r9
+ 3f8:	90 03 00 00 	stw	r0,0(r3)
+ 3fc:	39 60 00 00 	li	r11,0
+ 400:	2c 0b 00 00 	cmpwi	r11,0
+ 404:	40 82 ff dc 	bne+	3e0 <Proc_2+0x10>
+ 408:	4e 80 00 20 	blr
+
+0000040c <Proc_3>:
+ 40c:	94 21 ff f0 	stwu	r1,-16(r1)
+ 410:	7c 08 02 a6 	mflr	r0
+ 414:	90 01 00 14 	stw	r0,20(r1)
+ 418:	3d 20 00 00 	lis	r9,0
+			41a: RELOC_HI16	Ptr_Glob
+ 41c:	81 29 00 00 	lwz	r9,0(r9)
+			41e: RELOC_LO16	Ptr_Glob
+ 420:	2c 09 00 00 	cmpwi	r9,0
+ 424:	41 82 00 0c 	beq-	430 <Proc_3+0x24>
+ 428:	80 09 00 00 	lwz	r0,0(r9)
+ 42c:	90 03 00 00 	stw	r0,0(r3)
+ 430:	3d 20 00 00 	lis	r9,0
+			432: RELOC_HI16	Ptr_Glob
+ 434:	80 a9 00 00 	lwz	r5,0(r9)
+			436: RELOC_LO16	Ptr_Glob
+ 438:	38 a5 00 0c 	addi	r5,r5,12
+ 43c:	38 60 00 0a 	li	r3,10
+ 440:	3d 20 00 00 	lis	r9,0
+			442: RELOC_HI16	Int_Glob
+ 444:	80 89 00 00 	lwz	r4,0(r9)
+			446: RELOC_LO16	Int_Glob
+ 448:	48 00 00 01 	bl	448 <Proc_3+0x3c>
+			448: RELOC_REL24	Proc_7
+ 44c:	80 01 00 14 	lwz	r0,20(r1)
+ 450:	7c 08 03 a6 	mtlr	r0
+ 454:	38 21 00 10 	addi	r1,r1,16
+ 458:	4e 80 00 20 	blr
+
+0000045c <Proc_4>:
+ 45c:	3d 20 00 00 	lis	r9,0
+			45e: RELOC_HI16	Ch_1_Glob
+ 460:	88 09 00 00 	lbz	r0,0(r9)
+			462: RELOC_LO16	Ch_1_Glob
+ 464:	68 00 00 41 	xori	r0,r0,65
+ 468:	21 20 00 00 	subfic	r9,r0,0
+ 46c:	7c 09 01 14 	adde	r0,r9,r0
+ 470:	3d 60 00 00 	lis	r11,0
+			472: RELOC_HI16	Bool_Glob
+ 474:	81 2b 00 00 	lwz	r9,0(r11)
+			476: RELOC_LO16	Bool_Glob
+ 478:	7c 00 4b 78 	or	r0,r0,r9
+ 47c:	90 0b 00 00 	stw	r0,0(r11)
+			47e: RELOC_LO16	Bool_Glob
+ 480:	38 00 00 42 	li	r0,66
+ 484:	3d 20 00 00 	lis	r9,0
+			486: RELOC_HI16	Ch_2_Glob
+ 488:	98 09 00 00 	stb	r0,0(r9)
+			48a: RELOC_LO16	Ch_2_Glob
+ 48c:	4e 80 00 20 	blr
+
+00000490 <Proc_5>:
+ 490:	38 00 00 41 	li	r0,65
+ 494:	3d 20 00 00 	lis	r9,0
+			496: RELOC_HI16	Ch_1_Glob
+ 498:	98 09 00 00 	stb	r0,0(r9)
+			49a: RELOC_LO16	Ch_1_Glob
+ 49c:	38 00 00 00 	li	r0,0
+ 4a0:	3d 20 00 00 	lis	r9,0
+			4a2: RELOC_HI16	Bool_Glob
+ 4a4:	90 09 00 00 	stw	r0,0(r9)
+			4a6: RELOC_LO16	Bool_Glob
+ 4a8:	4e 80 00 20 	blr
+
+000004ac <exit>:
+ 4ac:	94 21 ff f0 	stwu	r1,-16(r1)
+ 4b0:	7c 08 02 a6 	mflr	r0
+ 4b4:	90 01 00 14 	stw	r0,20(r1)
+ 4b8:	00 00 00 00 	halt
+ 4bc:	48 00 00 01 	bl	4bc <exit+0x10>
+			4bc: RELOC_REL24	abort

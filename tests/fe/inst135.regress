@@ -1,0 +1,55 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RT: [6,10] 
+  SI: [16,31] 
+  XO: [21,30] [not used] 
+Instructions:
+  Name:  add1 (rank: 100)
+  Width:  32
+  Attributes:  fxu base
+  Fields:  OPCD(40) RT RA SI
+  Action:  {
+}
+  Reserved bits value:  1
+  -------------------------------
+  Name:  add2 (rank: 100)
+  Width:  32
+  Attributes:  fxu base
+  Fields:  OPCD(41) RT RA SI
+  Action:  {
+}
+  -------------------------------
+  Name:  add3 (rank: 100)
+  Width:  32
+  Attributes:  fxu base
+  Fields:  OPCD(42) RT RA SI
+  Action:  {
+}
+  Reserved bits value:  1
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    40(a0000000):  add1
+    41(a4000000):  add2
+    42(a8000000):  add3
+-------------------------------
+

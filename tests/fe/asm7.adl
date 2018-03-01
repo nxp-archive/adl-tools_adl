@@ -1,0 +1,38 @@
+// Assembler pre_asm/post_asm/post_packet_asm 
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  define (instrfield = SG)  {  bits = (0,1); }
+  attrs = mini;  	  
+
+  parallel_execution = 3;
+
+  pre_asm = { 
+    if (instrHasAttr(mini)) {
+    }
+  };	
+
+  post_asm = func(unsigned i) {
+    SG = 1;
+  };
+  post_packet_asm = func(InstrBundle b) {
+    foo(b[0]);
+  };
+
+  // Called by an assembler hook, so use of instruction field is OK.
+  void foo(InstrInfo &ii) {
+    if (ii.RT > 0) {
+      ii.RA = 0;
+    }
+  }
+
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

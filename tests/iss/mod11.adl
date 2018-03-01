@@ -1,0 +1,1086 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A model with a simple MMU.
+//
+
+#import "mod1.adl"
+
+define (arch = ppc_mmu) {
+
+  // We want to make sure that we can handle > 32 instruction attributes.
+  attrs = (translation_attr,load,store,no_mmu_control,unarchitected,external_pid,decorated,is_protected,
+           ia1,ia2,ia3,ia4,ia5,ia6,ia7,ia8,ia9,ia10,ia11,
+           ia12,ia13,ia14,ia15,ia16,ia17,ia18,ia19,ia20,ia21,
+           ia22,ia23,ia24,ia25,ia26,ia27,ia28,ia29,ia30,ia31,ia32);
+
+  // Exceptions will not be considered branches.
+  exception_is_branch = false;
+
+  // On reset, we start at top of memory.
+  defmod (reg=NIA) {
+    reset = 0xfffffffc;
+  }
+
+  define (reg=RESRV) {
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=PID1) {
+  }
+
+  define (reg=Decoration) {
+    """
+    Unarchitected register for storing decoration information for decorated loads and stores.
+    """;
+  }
+
+  define (reg=ELPC) {
+    """
+    External PID Load Context Register.
+    """;
+    define (field=EPR) {
+      """
+      Replaces the MSR.PR bit for external-PID translations.
+      """;
+      bits = 0;
+    }
+    define (field=EAS) {
+      """
+      Replaces the MSR.IS/MSR.DS bit for external-PID translations.
+      """;
+      bits = 1;
+    }
+    define (field=EPID) {
+      """
+      Replaces the PID registers for external-PID translations.
+      """;
+      bits = (2,31);
+    }
+  }
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=HDBCR0) {
+    """
+    Hardware debug control register 0.
+    """;
+    attrs = is_protected;
+    define (field=REALMODE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=FOO) {
+    reset = 0xdeadbeef;
+    define (field=X) {
+      bits = 11;
+    }
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+    define (field=AS) {
+      bits = 12;
+    }
+    define (field=EE) {
+      bits = 13;
+    }
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=CSRR0) {
+    """
+    Critical save-restore register 0.
+    """;
+  }
+
+  define (reg=CSRR1) {
+    """
+    Critical save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR4) {
+    """
+    Interrupt-vector offset register 4 (External Interrupt).
+    """;
+  }
+
+  define (reg=IVOR5) {
+    """
+    Interrupt-vector offset register 5.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7.
+    """;
+  }
+
+  define (reg=IVOR8) {
+    """
+    Interrupt-vector offset register 8.
+    """;
+  }
+
+  define (reg=IVOR15) {
+    """
+    Interrupt-vector offset register 15.
+    """;
+  }
+
+  define (reg=HitReg) {
+    """
+    Tracks MMU TlbCam hits.
+    """;
+  }
+
+  define (reg=MAS0) {
+    """
+    Memory assist register 0.
+    """;
+    define (field=EPN) {
+      bits=(0,23);
+    }
+    define (field=TID) {
+      bits=(24,29);
+    }
+    define (field=V) {
+      bits=30;
+    }
+    define (field=TS) {
+      bits=31;
+    }
+  }
+
+  define (reg=MAS1) {
+    """
+    Memory assist register 1.
+    """;
+    define (field=RPN) {
+      bits=(0,23);
+    }
+    define (field=SIZE) {
+      bits=(24,29);
+    }
+  }
+
+  define (reg=MAS2) {
+    """
+    Memory assist register 2.
+    """;
+    define (field=SX) {
+      bits=0;
+    }
+    define (field=SW) {
+      bits=1;
+    }
+    define (field=SR) {
+      bits=2;
+    }
+    define (field=UX) {
+      bits=3;
+    }
+    define (field=UW) {
+      bits=4;
+    }
+    define (field=UR) {
+      bits=5;
+    }
+    define (field=WIMGE) {
+      bits=(6,10);
+    }
+    define (field=Set) {
+      bits=(20,27);
+    }
+    define (field=Way) {
+      bits=(28,31);
+    }
+  }
+
+  define (reg=WatchDogTrigger) {
+    define (write) {
+      action = func(bits<32> x) {
+        raiseException(Watchdog);
+      };
+    }
+    define (read) {
+      action = {
+        return 0;
+      };
+    }
+  }
+
+  define (reg=ProgFault) {
+    """
+    For testing purposes:  A write to this register causes a program exception.
+    """;
+    define (write) {
+      action = func(bits<32> x) {
+        raiseException(Program);
+      };
+    }
+    define (read) {
+      action = {
+        return 0;
+      };
+    }
+  }
+
+  define (reg=dsESR) {
+    // Note: The dsESR register is used soley for communicating with the MMU, so
+    // we don't want it to cause the MMU cache to be flushed on a write.
+    attrs = (no_mmu_control,unarchitected);
+  }
+
+  define (reg=dsFoo) {
+    attrs = (no_mmu_control,unarchitected);
+    define (field=x) {
+      bits = (0,7);
+    }
+  }
+
+  define (reg=DAC) {}
+  define (reg=DCTRL) {
+    define (field=MEM)  { bits = 0; };
+    define (field=PROG) { bits = 1;};
+  }
+
+  define (reg=DSR) {
+    define (field=LOAD) { bits = 31; };
+    define (field=PROG) { bits = 30; };
+  }
+
+  define (reg=PFAULT) {}
+
+  defmod (regfile=SPR) {
+    define (entry=62) { reg=ESR; }
+    define (entry=63) { reg=DAC; }
+    define (entry=64) { reg=DSR; }
+    define (entry=65) { reg=DCTRL; }
+    define (entry=100) { reg=HDBCR0; }
+    define (entry=26) { reg=SRR0; }
+    define (entry=27) { reg=SRR1; }
+    define (entry=58) { reg=CSRR0; }
+    define (entry=59) { reg=CSRR1; }
+    define (entry=200) { reg=MAS0; }
+    define (entry=201) { reg=MAS1; }
+    define (entry=202) { reg=MAS2; }
+    define (entry=302) { reg = WatchDogTrigger; }
+    define (entry=303) { reg = ProgFault; }
+    define (entry=400) { reg = FOO; }
+  }
+
+  // Example of a data-address-compare debug exception.
+  addr_check = func(addr_t ea,addr_t ra,TransType tt,int id,int set,int way) {
+  AddrCheck:
+    info (1,"Translated using tlb ",id," at ",set,",",way);
+    if (tt != InstrTrans && (DCTRL.MEM != 0) && (ea == DAC.uint32())) {
+      Debug_t dbg;
+      dbg.Load = (tt == LoadTrans) ? 1 : 0;
+      raiseException(dbg);
+    }
+  };
+
+  //
+  // Instructions.
+  //
+
+  define (instrfield=UIMM) {
+    bits = (16,20);
+  }
+
+  define (instrfield=XO_EV) {
+    bits = (21,31);
+  }
+
+  define (instrfield=E_WRTEEI) {
+    """
+    Immediate field used to specify the value of the MSR.EE bit by wrteei.
+    """;
+    bits = (16,16);
+  }
+
+  define (instrfield=TO) {
+    """
+Field used to specify a trap condition.
+    """;
+    bits = (6,10);
+    display = dec;
+  }
+
+  define (instr=lwarx) {
+    fields=(OPCD(31),RT,RA,RB,XO(20));
+    attrs = load;
+    action = {
+      dsFoo = 0;
+      dsESR = 1;
+      // This is just for testing: This makes sure that the FOO register is
+      // virtualized.
+      FOO.X = 0;
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+      RESRV = lastRealAddr();
+    };
+  }
+
+  // Example external-pid instruction.
+  define (instr=lwepx) {
+    fields=(OPCD(31),RT,RA,RB,XO(31));
+    attrs = (load, external_pid);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  // External-pid instruction w/exception squashing.  Make sure we can handle a
+  // large number of instruction attributes.
+  define (instr=dcbtep) {
+    fields=(OPCD(31),XO(319),RT,RA,RB);
+    attrs = (external_pid,load,ia1,ia2,ia3,ia4,ia5,ia6,ia7,
+             ia8,ia9,ia10,ia11,ia12,ia13,ia14,ia15,ia16,
+             ia17,ia18,ia19,ia20,ia21,ia22,ia23,ia24,ia25,
+             ia26,ia27,ia28,ia29,ia30,ia31,ia32);
+     action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      try {
+        var ra = dataReadTranslate(addr);
+      }
+      catch (Exception excep) {
+      }
+     };
+  }
+
+  // Example decorated load and store instructions.
+  define (instr=lwdx) {
+    fields=(OPCD(31),RT,RA,RB,XO(579));
+    attrs = (load, decorated);
+    action = {
+      var addr = GPR(RB);
+      Decoration = GPR(RA);
+      GPR(RT) = Mem(addr,4);
+      Decoration = 0;
+    };
+  }
+
+  define (instr=stwdx) {
+    fields=(OPCD(31),RT,RA,RB,XO(707));
+    attrs = (load, decorated);
+    action = {
+      var addr = GPR(RB);
+      Decoration = GPR(RA);
+      Mem(addr,4) = GPR(RT);
+      Decoration = 0;
+    };
+  }
+
+  // Notify instruction.  Test that we can do a 0-byte write.  We also throw in
+  // a 0-byte read just to make sure it works.
+  define (instr=dsn) {
+    fields=(OPCD(31),XO(483),RA,RB);
+    action = {
+      var addr = GPR(RB);
+      Decoration = GPR(RA);
+      Mem(addr,0) = 0;
+      Mem(addr,0);
+      Decoration = 0;
+    };
+  }
+
+
+  // Just for testing the logging of critical addresses.
+  define (instr=lvx) {
+    fields=(OPCD(31),RT,RA,RB,XO(103));
+    action = {
+      var a = (RA == 0) ? 0 : GPR(RA);
+      var ea = a + GPR(RB);
+      var orig_ea = ea;
+      ea = ea &~ 0xfULL;
+      var tmp = Mem(ea,16,CacheRead,true,orig_ea);
+      GPR(RT+0) = tmp(0,31);
+      GPR(RT+1) = tmp(32,63);
+      GPR(RT+2) = tmp(64,95);
+      GPR(RT+3) = tmp(96,127);
+    };
+  }
+
+  define (instr=stvx) {
+    fields=(OPCD(31),RS,RA,RB,XO(231));
+    action = {
+      var a = (RA == 0) ? 0 : GPR(RA);
+      var ea = a + GPR(RB);
+      var orig_ea = ea;
+      ea = ea &~ 0xfULL;
+
+      var tmp = concat(GPR(RS),GPR(RS+1),GPR(RS+2),GPR(RS+3));
+      Mem(ea,16,CacheWrite,true,orig_ea) = tmp;
+    };
+  }
+
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    syntax = ("%i %f,%f",SPRN,RS);
+    action = {
+      if (MSR.PR == 1 && SPR.hasAttr(SPRN,is_protected)) {
+        raiseException(Program);
+      }
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  define (instr=wrteei) {
+    fields=(OPCD(31),RS,E_WRTEEI,XO(163));
+    action = {
+      if (MSR.PR == 1) {
+        raiseException(Program);
+      } else {
+        MSR.EE = E_WRTEEI;
+      }
+    };
+  }
+
+  define (instr=mfmsr) {
+    fields=(OPCD(31),RT,XO(83));
+    action = {
+      GPR(RT) = MSR;
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (instr=rfci) {
+    fields=(OPCD(19),RS,RA,RB,XO(51));
+    action = {
+      MSR = CSRR1;
+      NIA = CSRR0;
+    };
+  }
+
+  define (instr=sc) {
+    fields=(OPCD(17),XO(1));
+    action = {
+      // System call support: This needs to come out when we have the library
+      if (syscall_enabled()) {
+        syscall_add_arg(GPR(1));        // stack pointer (brk needs it)
+        syscall_add_arg(GPR(3));        // arg0
+        syscall_add_arg(GPR(4));        // arg1
+        syscall_add_arg(GPR(5));        // arg2
+        syscall_trigger(GPR(0));        // syscode - 32 bit mode
+        GPR(3) = syscall_return_code(); // the return value
+      } else {      
+        raiseException(sc);
+      }
+    };
+  }
+
+  // This is a modification of the default action: We do not clear the lower
+  // bits of the LR.  This lets us test the check_instr_perms function by
+  // allowing us to branch to a target on the same page that's misaligned.  The
+  // misalignment check is done in the exec_perm hook.  So, this normally
+  // wouldn't be called on a branch to the same page, since it would be cached.
+  defmod (instr=bclr) {
+    action =  {
+      if (BO(2) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = (BO(2)!=0) || (( (CTR!=0) ^ BO(3)) != 0);
+      var cond_ok = (BO(0)!=0) || (CR(BI) == BO(1));
+      if (ctr_ok && cond_ok) {
+        NIA = LR;
+        checkInstrPerms();
+      }
+    };
+  }
+
+  define (instr=evstdd) {
+    fields=(OPCD(4),RS,RA,UIMM,XO_EV(801));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + (UIMM * 8);
+      Mem(addr,8) = concat(GPR(RS),GPR(RS+1));
+    };
+  }
+
+# ifndef __NO_MMU__
+  void populateMasRegs(int set,int way) {
+    var t = TlbCam(set,way);
+      
+    MAS0.EPN  = t.EPN;
+    MAS0.TID  = t.TID;
+    MAS0.V    = t.V;
+    MAS0.TS   = t.TS;
+
+    MAS1.RPN  = t.RPN;
+    MAS1.SIZE = t.SIZE;
+
+    MAS2.SX   = t.SX;
+    MAS2.SW   = t.SW;
+    MAS2.SR   = t.SR;
+    MAS2.UX   = t.UX;
+    MAS2.UW   = t.UW;
+    MAS2.UR   = t.UR;
+    MAS2.WIMGE= concat(t.WIMG,t.E);
+  }
+# endif
+
+  define (instr=tlbre) {
+    fields=(OPCD(31),XO(946));
+    action = {
+#     ifndef __NO_MMU__
+      var set = MAS2.Set;
+      var way = MAS2.Way;
+      populateMasRegs(set.uint32(),way.uint32());
+#     endif
+    };
+  }
+
+# ifndef __NO_MMU__
+  template <class MpuType> MpuType populateFromMasRegs()
+  {
+    MpuType t;
+
+    t.EPN  = MAS0.EPN;
+    t.TID  = MAS0.TID;
+    t.V    = MAS0.V; 
+    t.TS   = MAS0.TS;
+    
+    t.RPN  = MAS1.RPN;
+    t.SIZE = MAS1.SIZE;
+                      
+    t.SX   = MAS2.SX;
+    t.SW   = MAS2.SW;
+    t.SR   = MAS2.SR;
+    t.UX   = MAS2.UX;
+    t.UW   = MAS2.UW;
+    t.UR   = MAS2.UR;
+    t.WIMG = MAS2.WIMGE(0,3);
+    t.E    = MAS2.WIMGE(4);
+
+    return t;
+  }
+# endif
+
+  define (instr=tlbwe) {
+    fields=(OPCD(31),XO(978));
+    action = {
+#     ifndef __NO_MMU__
+      var set = MAS2.Set;
+      var way = MAS2.Way;
+                  
+      TlbCam(set,way) = populateFromMasRegs<TlbCam_t>();
+#     endif
+    };
+  }
+
+  define (instr=tlbsx) {
+    fields=(OPCD(31),RA,RB,XO(914));
+    action = {
+#     ifndef __NO_MMU__
+      unsigned set,way;
+      var tt = (MSR.AS == 0) ? InstrTrans : LoadTrans;
+      var ea = ((RA == 0) ? 0 : GPR(RA)) + GPR(RB);
+      if (TlbCam.search(set,way,ea,tt)) {
+        populateMasRegs(set,way);
+      } else {
+        MAS0.V = 0;
+      }
+#     endif
+    };
+  }
+
+  define (instr=tw) {
+    fields=(OPCD(31),TO,RA,RB,XO(4));
+    action = {
+      var a = GPR(RA);
+      var b = GPR(RB);
+      if ( TO(0)==1 ) {
+        if (a.signedLT(b)) {
+          raiseException(Program);
+        }
+      }
+      if ( TO(1)==1 ) {
+        if (a.signedGT(b)) {
+          raiseException(Program);
+        }
+      }
+      if ( TO(2)==1 ) {
+        if (a == b) {
+          raiseException(Program);
+        }
+      }
+      if ( TO(3)==1 ) {
+        if (a < b) {
+          raiseException(Program);
+        }
+      }
+      if ( TO(4)==1 ) {
+        if (a > b) {
+          raiseException(Program);
+        }
+      }
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    width = 32;
+    action = {
+      halt();
+    };
+  }
+
+  // Alternative halt; used for testing special UVP halting, etc.  Note: This is
+  // equivalent in big-endian and little-endian.
+  define (instr=wait) {
+    fields=(OPCD(31),XO(62));
+    action = {
+      halt();
+    };
+  }
+
+  // No behavior in just an ADL model.  dlx2 uses this for various tests.
+  define (instr="isync") {
+    fields=(OPCD(19),XO(150));
+    action = {
+    };
+  }
+  
+  //
+  // Decode miss handler.
+  // 
+  decode_miss = func (addr_t ea,unsigned) {
+    ESR.set(4);
+    raiseException(Program);
+  };
+
+  // Clear this flag so that other instructions don't have an issue.
+  pre_fetch = {
+    dsESR = 0;
+  };
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR6(16,31));
+      CIA = NIA;
+      if (DCTRL.PROG != 0) {
+        Debug_t dbg;
+        dbg.Program = 1;
+        raiseException(dbg);
+      }
+    };
+  }
+
+  // System exception
+  define (exception=sc) {
+    action = {
+      SRR0 = NIA;
+      SRR1 = MSR;
+      MSR =  0;
+      NIA = concat(IVPR(0,15),IVOR8(16,31));
+    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      ESR(0,0) = (instrHasAttr(store)) ? 1 : 0;
+      PFAULT = PFAULT + 1;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (exception=AlignmentFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR5(16,31));
+    };
+  }
+
+  define (exception=ResrvFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR8(16,31));
+    };
+  }
+
+  define (exception=Debug) {
+    define (field=Load) {}
+    define (field=Program) {}
+    action = func (Debug_t dbg) {
+      CSRR0 = CIA;
+      CSRR1 = MSR;
+      MSR = 0;
+      DSR.LOAD = dbg.Load;
+      DSR.PROG = dbg.Program;
+      NIA = concat(IVPR(0,15),IVOR15(16,31));
+    };
+  }
+
+  //
+  // External interrupt.
+  //
+  define (exception=External) {
+    sensitivity = level;
+    // We guard this with an enable so that we can generate an exception
+    // externally without going into an infinite loop.
+    enable = { return (MSR.EE == 1); };
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR4(16,31));
+      // This allows us to properly handle a critical interrupt which occurs at
+      // the same time as a non-critical interrupt.
+      CIA = NIA;
+    };
+  }
+
+  define (parm=InstrEndianness) {
+    options = (InstrBigEndian,InstrLittleEndian);
+    value = InstrBigEndian;
+  }
+
+  define (parm=DataEndianness) {
+    options = (DataBigEndian,DataLittleEndian);
+    value = DataBigEndian;
+  }
+
+  define (mmu) {
+
+    // Both reads and fetches are non-interleaved.
+    interleaved_fetch = false;
+    interleaved_reads = false;
+
+    // Writes *are* interleaved so that writes can partially complete.
+    interleaved_writes = true;
+
+    both_enable = { return (HDBCR0.REALMODE == 0); };
+
+    define(lookup=TlbCam) {
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=E) {
+        bits = 1;
+        attrs = translation_attr;
+      }
+      // This should essentially be a hidden field.
+      define (wayfield=XXX) {
+        bits = 1;
+        attrs = unarchitected;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test_order = (External,Normal);
+
+      define (tests=Normal) {
+        test = Compare(V,1);
+        test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+        test = Compare(TID,0,PID0,PID1);      
+        test = AddrComp(EPN);
+      }
+
+      define (tests=External) {
+        enable = func(TransType) { return instrHasAttr(external_pid); };
+        test = Compare(V,1);
+        test = Compare(TS, ELPC.EAS );
+        test = Compare(TID,ELPC.EPID);      
+        test = AddrComp(EPN);
+      }
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+
+      exec_perm = func(TlbCam_t t,addr_t ea,unsigned seq) {
+        // Just for testing purposes- make sure that we guard instruction packet
+        // accesses.  This register should be virtualized because it's set by
+        // lwarx.
+        if (FOO.X != 0) {
+          int i = 10;
+        }
+        // Just for testing: Query a large number of instruction attributes to
+        // make sure that we can handle it.  Actually, we can't handle that
+        // many- just as many as we have offset bits in the translation.
+        if (instrHasAttr(ia1) || instrHasAttr(ia2) || instrHasAttr(ia3) || instrHasAttr(ia4) || instrHasAttr(ia5) || 
+            instrHasAttr(ia6) || instrHasAttr(ia7) || instrHasAttr(ia8) || instrHasAttr(ia9)) {
+          int i = 11;
+        }
+        if ( ((MSR.PR == 0) ? t.SX : t.UX) == 0) {
+          raiseException(ProtectionFault);
+        }
+        if (ea & 0x3) {
+          raiseException(AlignmentFault);
+        }
+      };
+
+      load_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SR : t.UR) == 0 ) {
+          // Make sure that we can write to a field in a comm register.
+          dsFoo.x = 1;
+          if (dsFoo.x == 0) {
+            int i = 10;
+          }
+          // This is here to test the fact that we can communicate between
+          // instructions and the memory hierarchy.  This is really only an
+          // issue with the transactional ISS, which virtualizes some of these
+          // registers.
+          if (dsESR == 1) {
+            raiseException(ResrvFault);
+          } else {
+            raiseException(ProtectionFault);
+          }
+        }
+      };
+
+      store_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SW : t.UW) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      hit = func(TransType tt,TlbCam_t t,addr_t a,unsigned seq) {
+        if (tt == InstrTrans) {
+          InstrEndianness = ( t.E == 0 ) ? InstrBigEndian : InstrLittleEndian;
+        } else {
+          DataEndianness = ( t.E == 0 ) ? DataBigEndian : DataLittleEndian;
+        }
+        HitReg = HitReg + 1;
+      };
+
+      miss = func(TransType tt,addr_t a,unsigned seq) {
+        TlbCam_t t;
+        t.RPN = a >> 10;
+        t.SIZE = 1;
+        // This is redundant, but tests the ability to explicitly log a
+        // translation, which can be useful for something like hardware
+        // tablewalk.
+        info (0,"TlbCam miss.");
+        logMmuTranslation(t,tt,seq,a,a);
+        return t;
+      };
+
+      reset = {
+        // Reset state: One 4k translation at top of memory.  In this case,
+        // it maps the top 4k to the bottom 4k.
+        TlbCam_t t;
+      
+        t.EPN  = 0x3fffff;
+        t.TID  = 0;
+        t.V    = 1;
+        t.TS   = 0;
+                      
+        t.RPN  = 0;
+        t.SIZE = 1;
+                      
+        t.SX   = 1;
+        t.SW   = 1;
+        t.SR   = 1;
+
+        t.UX   = 0;
+        t.UW   = 0;
+        t.UR   = 0;
+        t.WIMG = 0;
+        t.E    = 0;
+            
+        TlbCam(0,0) = t;
+      };
+
+    }
+
+    aligned_write = func (addr_t ea,addr_t ra) {
+      info(0,"Aligned write to 0x",hex,ra);
+    };
+
+    // Called between misaligned writes in order to model stores which can
+    // partially complete.
+    misaligned_write = func (addr_t ea,addr_t ra) {
+      info(0,"Misaligned write to 0x",hex,ra);
+    };
+
+    misaligned_read = func (addr_t ea,addr_t ra) {
+      info(0,"Misaligned read to 0x",hex,ra);
+    };
+
+    pre_read = func (addr_t ea,addr_t ra) {
+      info (0,"Pre-read to 0x",hex,ra);
+    };
+
+    post_read = func (addr_t ea,addr_t ra) {
+      info (0,"Post-read to 0x",hex,ra);
+    };
+
+    post_write = func (addr_t ea,addr_t ra) {
+      info (0,"Post-write to 0x",hex,ra);
+    };
+
+  }
+
+  define (mem=Mem) {
+    read = func(unsigned s,bits<s> v) {
+      if (DataEndianness == DataLittleEndian) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    } ;
+    instr_read = func(unsigned s,bits<s> v) {
+      if (InstrEndianness == InstrLittleEndian) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    } ;
+    write = func(unsigned s, bits<s> v) {
+      if (DataEndianness == DataLittleEndian) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    };
+  }
+
+  //
+  // Watchdog interrupt.
+  //
+  define (exception=Watchdog) {
+    priority = 1;
+    action = {
+      // This causes a reset of the part.
+      resetCore();
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,ppc_mmu);
+}

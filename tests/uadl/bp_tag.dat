@@ -1,0 +1,110 @@
+#
+#
+
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,1
+  b L1
+  addi r2,r2,1
+  addi r2,r2,1
+L1:
+  addi r3,r3,1
+  addi r3,r3,1
+  rfi
+  
+= /asm
+
+= mdopts
+
+instr-offset: 0x10000
+
+= /mdopts
+
+CORE n=:P
+
+RD n=NIA      d=0x00000000
+RD n=MSR      d=0x00000000
+
+RD n=SRR0     d=0x00000000
+RD n=SRR1     d=0x00200000
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x0000 ra=0x20000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=1 RPN=0x80 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010008 d=0x4800000C	#	b L1
+MD n=Mem ra=0x0001000c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010010 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010014 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x00010018 d=0x38630001	#	addi r3,r3,1
+MD n=Mem ra=0x0001001c d=0x4C000064	#	rfi
+# </GEN>
+
+# The code which will execute after the RFI (matches way 1 due to change in MSR.IR).
+MD n=Mem ra=0x00020000 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00020004 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00020008 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0002000c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00020020 d=0x00000000	#	.long 0
+
+# Note: NIA updates are relevant to uADL only- they reflect the prefetching
+# that's being done.
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x4 id=2
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0x8 id=3
+INSTR op=0x4800000c					asm="b 0x0000000000000014"
+
+I ea=0x14 id=4
+INSTR op=0x38630001					asm="addi r3,r3,1"
+R n=GPR i=3 d=0x00000001
+
+I ea=0x18 id=5
+INSTR op=0x38630001					asm="addi r3,r3,1"
+R n=GPR i=3 d=0x00000002
+
+I ea=0x1c id=6
+INSTR op=0x4c000064					asm="rfi r0,r0,r0"
+R n=MSR d=0x00200000
+
+I ea=0x0 id=7
+INSTR op=0x38840001					asm="addi r4,r4,1"
+R n=GPR i=4 d=0x00000001
+
+I ea=0x4 id=8
+INSTR op=0x38840001					asm="addi r4,r4,1"
+R n=GPR i=4 d=0x00000002
+
+I ea=0x8 id=9
+INSTR op=0x38840001					asm="addi r4,r4,1"
+# Key difference here:  If the branch predictor doesn't look at MSR.IR, then
+# it will think that this is a branch and make a "taken" prediction.
+R n=GPR i=4 d=0x00000003
+
+I ea=0xc id=10
+INSTR op=0x38840001					asm="addi r4,r4,1"
+R n=GPR i=4 d=0x00000004
+
+I ea=0x10 id=11
+INSTR op=0x00					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0x00000002
+RD n=GPR i=4 d=0x00000004
+RD n=MSR     d=0x00200000

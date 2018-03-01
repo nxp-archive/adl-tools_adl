@@ -1,0 +1,56 @@
+#
+# Test to make sure that a timer interrupt, implemented in the pre_fetch hook,
+# works correctly.  We want to make sure that the behavior is the same between
+# decode-cache and interpreter-based models.
+#
+= asm
+
+  addi r1,r0,100
+  mtspr DEC,r1
+	# Infinite loop, only escaped by the decrementer.
+L1:
+	addi r2,r2,1
+	b L1
+	# Post infinite loop, to make sure we got here.
+	addi r30,r30,10
+  .long 0x0
+  # Program interrupt handler.  This will bump up the return address to break
+	# out of the infinite loop.
+ISR:
+	addi r31,r31,1
+  mfspr r10,SRR0
+  addi r10,r10,4
+  mtspr SRR0,r10
+  rfi
+  .long 0x0
+
+= /asm
+
+= aopts
+
+  -mregnames -mbooke
+
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38200064	#	addi r1,r0,100
+MD n=Mem ra=0x00000004 d=0x7C3603A6	#	mtspr DEC,r1
+MD n=Mem ra=0x00000008 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000000c d=0x4BFFFFFC	#	b L1
+MD n=Mem ra=0x00000010 d=0x3BDE000A	#	addi r30,r30,10
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x0000001c d=0x7D5A02A6	#	mfspr r10,SRR0
+MD n=Mem ra=0x00000020 d=0x394A0004	#	addi r10,r10,4
+MD n=Mem ra=0x00000024 d=0x7D5A03A6	#	mtspr SRR0,r10
+MD n=Mem ra=0x00000028 d=0x4C000064	#	rfi
+MD n=Mem ra=0x0000002c d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+RD n=IVOR10 d=0x00000018
+
+RESULTS
+
+RD n=GPR i=30 d=10
+RD n=GPR i=31 d=1

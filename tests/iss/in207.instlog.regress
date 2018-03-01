@@ -1,0 +1,10 @@
+Model:  P
+
+Instr:  vadduwm 0,2,3 [ ICNT=(written read)  VPR[2]=(read(mask=0xffffffffffffffffffffffffffffffff))  VPR[3]=(read(mask=0xffffffffffffffffffffffffffffffff))  VPR[0]=(written(mask=0xffffffffffffffffffffffffffffffff) read(mask=0xffffffffffffffffffffffffffffffff))  ]
+  Fields:  RA RB RT
+Instr:  mfspr 1,0x12f [ ICNT=(written read)  GPR[1]=(written )  VPR[0]=( read (mask=0xffffffff0000000000000000ffffffff))  ]
+  Fields:  RT SPRN
+Instr:  halt  [ ICNT=(written read)  ]
+  Fields:
+Instructions issued:  3
+

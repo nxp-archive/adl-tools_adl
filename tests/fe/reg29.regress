@@ -1,0 +1,25 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "a"
+  Width:  32
+    f0: [5,14] [0,2]   
+    f1: [3,11] [2]   
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  b: [0,2] [5,14] [not used]
+-------------------------------
+

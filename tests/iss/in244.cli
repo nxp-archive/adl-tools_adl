@@ -1,0 +1,11 @@
+#
+# Injects an external exception so that we can make sure that instruction
+# attributes are cleared after instruction execution.
+#
+setbrk 0x14
+go
+triggerexcpt Program
+step
+clrbrk 0x14
+go
+quit

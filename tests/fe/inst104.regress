@@ -1,0 +1,63 @@
+======
+Cores:
+======
+Name:  "foo"
+Bit Order:              little endian
+Registers:
+  Name:  "PC"
+  Usage:  read, written
+  Width:  24
+  Attributes:  cia nia
+  Documention:
+
+ 24-bit Program Counter Register 
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffff (constant)
+Instruction Fields:
+  ADDR_13_8: 
+    Pseudo:  1
+    Width:   6
+     XB - ADDR_13_8 
+  ADDR_13_8_imp_bits__13_8_: [13,8] 
+    Implements:  ADDR_13_8
+  OPC1: [not used] 
+    Pseudo:  1
+    Width:   8
+     Opcode Field 
+  OPC2: [not used] 
+    Pseudo:  1
+    Width:   8
+     Opcode Field 
+  VarInstrOpcode_imp_bits__15_8_x_7_0_: [15,0] [not used] 
+  VarInstrOpcode_imp_bits__31_24_x_23_16_x_15_14_: [31,14] 
+  X1: 
+    Pseudo:  1
+    Width:   8
+     XB - Extension Byte 1 
+  X1_imp_bits__7_0_: [7,0] 
+    Implements:  X1
+Subinstructions:
+Name:  OPR_0
+Fields:  ADDR_13_8 X1
+Action:  func ( bits < 1 > & is_reg , bits < 24 > & addr_or_reg_idx ) {
+}
+-------------------------------
+Instructions:
+  Name:  ADC_OPR_0 (rank: 0)
+  Width:  32
+  Fields:  VarInstrOpcode_imp_bits__31_24_x_23_16_x_15_14_ ADDR_13_8_imp_bits__13_8_ X1_imp_bits__7_0_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xffffc000
+    28032(1b600000):  ADC_OPR_0
+-------------------------------
+

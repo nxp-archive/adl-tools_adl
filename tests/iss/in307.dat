@@ -1,0 +1,44 @@
+#
+# Test load/store of a full 64-bit value in order to make sure that external DMI works.
+#
+= asm
+
+	addis r1,r1,0xdead
+	ori		r1,r1,0xbeef
+	rldicr r1,r1,32,31
+	addis r2,r2,0xdead
+	ori		r2,r2,0xbee0
+	or		r1,r1,r2
+	lwz   r3,0x1000(r1)
+	stw   r3,0x1004(r1)
+
+= /asm
+
+= aopts 
+	-me500mc64 -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3C21DEAD	#	addis r1,r1,0xdead
+MD n=Mem ra=0x00000004 d=0x6021BEEF	#	ori		r1,r1,0xbeef
+MD n=Mem ra=0x00000008 d=0x782107C6	#	rldicr r1,r1,32,31
+MD n=Mem ra=0x0000000c d=0x3C42DEAD	#	addis r2,r2,0xdead
+MD n=Mem ra=0x00000010 d=0x6042BEE0	#	ori		r2,r2,0xbee0
+MD n=Mem ra=0x00000014 d=0x7C211378	#	or		r1,r1,r2
+MD n=Mem ra=0x00000018 d=0x80611000	#	lwz   r3,0x1000(r1)
+MD n=Mem ra=0x0000001c d=0x90611004	#	stw   r3,0x1004(r1)
+# </GEN>
+
+MD n=Mem ra=0xdeadbeefdeadcee0 d=0x12345678
+MD n=Mem ra=0xdeadbeefdeadcee4 d=0
+
+RESULTS
+
+CORE n=:P
+
+RD n=GPR i=3 d=0x12345678
+
+MD n=Mem ra=0xdeadbeefdeadcee0 d=0x12345678
+MD n=Mem ra=0xdeadbeefdeadcee4 d=0x12345678
+
+

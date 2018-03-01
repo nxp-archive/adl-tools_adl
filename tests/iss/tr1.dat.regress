@@ -1,0 +1,3 @@
+P:thread1:  Instr 2 'lwz    r1,8192(r0)':  Register TACTIVE mismatch:  Found 0x003000000, expected 0x0
+P:thread1:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

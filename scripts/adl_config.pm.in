@@ -1,0 +1,48 @@
+#!@PERL@ 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+#
+# Autoconf generated configuration package for configuring Perl scripts used within ADL.
+#
+
+package adl_config;
+
+require Exporter;
+
+our @ISA = ("Exporter"); 
+our @EXPORT = qw( 
+                 $jit_ok
+                 $jit_flags
+                 $gdb_ok
+                 $lz4
+                 $lz4_ok
+        				 $adl_version
+				         $gcc_version
+         				 $runsim_path
+				         $dtasm_path
+				         $lang_frontend
+                 $prest
+                 $llvm_bindir
+                 $graphite_pfx
+                );
+
+$jit_ok        = @JIT_OK@;
+$jit_flags     = "@JITFLAGS@";
+$gdb_ok        = @GDB_TESTS@;
+$lz4           = "@LZ4@";
+$lz4_ok        = ("@LZ4_EXISTS@" eq "true") ? 1 : 0;
+$adl_version   = "@PACKAGE_VERSION@";
+$gcc_version   = "@GCC_VERSION@";
+$runsim_path   = "@RUNSIM_PATH@";
+$dtasm_path    = "@DTASM_PATH@";
+$lang_frontend = "@LANG_FRONTEND@";
+$prest         = "@PREST@";
+$llvm_bindir   = "@LLVM_BINDIR@";
+$graphite_pfx  = "@GRAPHITE_PREFIX@";
+
+1;

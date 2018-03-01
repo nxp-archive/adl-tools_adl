@@ -1,0 +1,108 @@
+     <html>
+     <big>
+     <head>
+     <title>ADL Database Report</title>
+     </head>
+     <body>
+     <table border="10">
+     <tr bgcolor="lightblue">
+
+<tr bgcolor="lightblue">
+<td>
+<big><b>NAME</big></b></td>
+<td>
+<big><b>BLOCK</big></b></td>
+<td>
+<big><b>PREFIX</big></b></td>
+<td>
+<big><b>PSEUDO</big></b></td>
+<td>
+<big><b>TYPE</big></b></td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+I2</td>
+<td>
+</td>
+<td>
+1</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+I3</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+1</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+I4</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+I3</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+I5</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+I3</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mac</td>
+<td>
+dalu</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mac_pDa_Da_Dn</td>
+<td>
+dalu</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mac_pDa_Db_Dn</td>
+<td>
+dalu</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+</table>
+</body>
+</html>

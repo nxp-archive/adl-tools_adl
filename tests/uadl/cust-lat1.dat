@@ -1,0 +1,61 @@
+#
+# Simple test of custom latency functions.
+#
+
+= asm
+
+  addi r1,r1,10
+  addi r2,r2,20
+  mullw r3,r2,r1  # Should have a latency of 10.
+  mullw r5,r4,r1  # Should have a latency of 1.
+  .long 0x0    
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA     d=0
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x38420014	#	addi r2,r2,20
+MD n=Mem ra=0x00000008 d=0x7C6209D6	#	mullw r3,r2,r1  # Should have a latency of 10.
+MD n=Mem ra=0x0000000c d=0x7CA409D6	#	mullw r5,r4,r1  # Should have a latency of 1.
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0    
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x3821000a                                     asm="addi 1,1,10"
+ITIME t=1
+R n=GPR i=1 d=0x0000000a
+CTIME t=4
+
+I ea=0x4 id=2
+INSTR op=0x38420014                                     asm="addi 2,2,20"
+ITIME t=2
+R n=GPR i=2 d=0x00000014
+CTIME t=5
+
+I ea=0x8 id=3
+INSTR op=0x7c6209d6                                     asm="mullw 3,2,1"
+ITIME t=3
+R n=GPR i=3 d=0x000000c8
+CTIME t=15
+
+I ea=0xc id=4
+INSTR op=0x7ca409d6                                     asm="mullw 5,4,1"
+ITIME t=4
+R n=GPR i=5 d=0x00000000
+CTIME t=16
+
+I ea=0x10 id=5
+INSTR op=0x00000000                                     asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=200
+RD n=GPR i=5 d=0

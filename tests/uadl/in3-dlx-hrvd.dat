@@ -1,0 +1,281 @@
+#
+# Options:
+#   ./dlx-hrvd ../iss/in3.dat -trace 
+#
+
+TEST id=0
+
+CORE n=:P
+
+TRACE
+
+
+I ea=0x0 id=1
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=3
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x00000082
+CTIME t=7
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=5
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000009
+R n=XER d=0x20000000
+CTIME t=9
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=7
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+B taken=1 ea=0x0
+CTIME t=11
+
+I ea=0x0 id=4
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=10
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x000000a0
+CTIME t=14
+
+I ea=0x4 id=5
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=12
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000008
+R n=XER d=0x20000000
+CTIME t=16
+
+I ea=0x8 id=6
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=14
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=18
+
+I ea=0x0 id=7
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=16
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x000000be
+CTIME t=20
+
+I ea=0x4 id=8
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=18
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000007
+R n=XER d=0x20000000
+CTIME t=22
+
+I ea=0x8 id=9
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=20
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=24
+
+I ea=0x0 id=10
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=22
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x000000dc
+CTIME t=26
+
+I ea=0x4 id=11
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=24
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000006
+R n=XER d=0x20000000
+CTIME t=28
+
+I ea=0x8 id=12
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=26
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=30
+
+I ea=0x0 id=13
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=28
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x000000fa
+CTIME t=32
+
+I ea=0x4 id=14
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=30
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000005
+R n=XER d=0x20000000
+CTIME t=34
+
+I ea=0x8 id=15
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=32
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=36
+
+I ea=0x0 id=16
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=34
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x00000118
+CTIME t=38
+
+I ea=0x4 id=17
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=36
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000004
+R n=XER d=0x20000000
+CTIME t=40
+
+I ea=0x8 id=18
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=38
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=42
+
+I ea=0x0 id=19
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=40
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x00000136
+CTIME t=44
+
+I ea=0x4 id=20
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=42
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000003
+R n=XER d=0x20000000
+CTIME t=46
+
+I ea=0x8 id=21
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=44
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=48
+
+I ea=0x0 id=22
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=46
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x00000154
+CTIME t=50
+
+I ea=0x4 id=23
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=48
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000002
+R n=XER d=0x20000000
+CTIME t=52
+
+I ea=0x8 id=24
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=50
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=54
+
+I ea=0x0 id=25
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=52
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x00000172
+CTIME t=56
+
+I ea=0x4 id=26
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=54
+R n=CR d=0x40000000
+R n=GPR i=3 d=0x00000001
+R n=XER d=0x20000000
+CTIME t=58
+
+I ea=0x8 id=27
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=56
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=60
+
+I ea=0x0 id=28
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c420a14
+INSTR op=0x7c420a14					asm="add r2,r2,r1"
+ITIME t=58
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+R n=GPR i=2 d=0x00000190
+CTIME t=62
+
+I ea=0x4 id=29
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3463ffff
+INSTR op=0x3463ffff					asm="addic. r3,r3,-1"
+ITIME t=60
+R n=CR d=0x20000000
+R n=GPR i=3 d=0x00000000
+R n=XER d=0x20000000
+CTIME t=64
+
+I ea=0x8 id=30
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x4082fff8
+INSTR op=0x4082fff8					asm="bne+ 0x0000000000000000"
+ITIME t=62
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=66
+
+I ea=0xc id=31
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=65
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+CTIME t=69
+
+RESULTS
+
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+
+RD n=XER     d=0x20000000

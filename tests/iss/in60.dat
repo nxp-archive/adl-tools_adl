@@ -1,0 +1,177 @@
+#
+# Tests a shared event buses.
+#
+
+CORE n=MP:sys0:core0
+
+= asm
+
+  # Core0 program.
+  mtspr 200,r1
+  mtspr 200,r2
+  mtspr 200,r3
+  .long 0
+  nop
+  nop
+  nop
+  nop
+  mtspr 200,r1
+  mtspr 200,r2
+  mtspr 200,r3  
+
+= /asm
+
+= mdopts
+  instr-offset: 0x100
+= /mdopts
+
+= aopts
+ -mregnames
+= /aopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x7C2833A6	#	mtspr 200,r1
+MD n=Mem ra=0x00000104 d=0x7C4833A6	#	mtspr 200,r2
+MD n=Mem ra=0x00000108 d=0x7C6833A6	#	mtspr 200,r3
+MD n=Mem ra=0x0000010c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000110 d=0x60000000	#	nop
+MD n=Mem ra=0x00000114 d=0x60000000	#	nop
+MD n=Mem ra=0x00000118 d=0x60000000	#	nop
+MD n=Mem ra=0x0000011c d=0x60000000	#	nop
+MD n=Mem ra=0x00000120 d=0x7C2833A6	#	mtspr 200,r1
+MD n=Mem ra=0x00000124 d=0x7C4833A6	#	mtspr 200,r2
+MD n=Mem ra=0x00000128 d=0x7C6833A6	#	mtspr 200,r3  
+# </GEN>
+
+CORE n=MP:sys0:core0
+
+RD n=CID d=1
+RD n=NIA d=0x100
+RD n=GPR i=1 d=0x100
+RD n=GPR i=2 d=0x200
+RD n=GPR i=3 d=0x300
+
+CORE n=MP:sys0:core1
+
+RD n=CID d=2
+
+CORE n=MP:sys1:core0
+
+RD n=CID d=3
+
+CORE n=MP:sys1:core1
+
+RD n=CID d=4
+RD n=NIA d=0x110
+RD n=GPR i=1 d=0xa00
+RD n=GPR i=2 d=0xb00
+RD n=GPR i=3 d=0xc00
+
+TRACE
+
+
+CORE n=MP:sys0:core0
+
+I ea=0x100 id=1
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x7c2833a6
+INSTR op=0x7c2833a6 asm="mtspr  r1,200"
+A l=1 m="Received message:  00000100 from core 1" cn=MP:sys1:core0
+R n=M d=0x00000100
+
+CORE n=MP:sys0:core1
+
+I ea=0x0 id=2
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x0
+INSTR op=0x0 asm="halt   "
+
+CORE n=MP:sys1:core0
+
+I ea=0x0 id=3
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x0
+INSTR op=0x0 asm="halt   "
+
+CORE n=MP:sys1:core1
+
+I ea=0x110 id=4
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:sys0:core0
+
+I ea=0x104 id=5
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x7c4833a6
+INSTR op=0x7c4833a6 asm="mtspr  r2,200"
+A l=1 m="Received message:  00000200 from core 1" cn=MP:sys1:core0
+R n=M d=0x00000200
+
+CORE n=MP:sys1:core1
+
+I ea=0x114 id=6
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:sys0:core0
+
+I ea=0x108 id=7
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x7c6833a6
+INSTR op=0x7c6833a6 asm="mtspr  r3,200"
+A l=1 m="Received message:  00000300 from core 1" cn=MP:sys1:core0
+R n=M d=0x00000300
+
+CORE n=MP:sys1:core1
+
+I ea=0x118 id=8
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+CORE n=MP:sys0:core0
+
+I ea=0x10c id=9
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x0
+INSTR op=0x0 asm="halt   "
+
+CORE n=MP:sys1:core1
+
+I ea=0x11c id=10
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0x60000000
+INSTR op=0x60000000 asm="ori    r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+I ea=0x120 id=11
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x7c2833a6
+INSTR op=0x7c2833a6 asm="mtspr  r1,200"
+A l=1 m="Received message:  00000a00 from core 4" cn=MP:sys0:core0
+R n=M d=0x00000a00
+
+I ea=0x124 id=12
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x7c4833a6
+INSTR op=0x7c4833a6 asm="mtspr  r2,200"
+A l=1 m="Received message:  00000b00 from core 4" cn=MP:sys0:core0
+R n=M d=0x00000b00
+
+I ea=0x128 id=13
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0x7c6833a6
+INSTR op=0x7c6833a6 asm="mtspr  r3,200"
+A l=1 m="Received message:  00000c00 from core 4" cn=MP:sys0:core0
+R n=M d=0x00000c00
+
+I ea=0x12c id=14
+M n=Mem t=ifetch ea=0x12c ra=0x12c d=0x0
+INSTR op=0x0 asm="halt   "
+
+RESULTS
+
+CORE n=MP:sys0:core0
+
+RD n=GPR i=1 d=0x00000100
+RD n=GPR i=2 d=0x00000200
+RD n=GPR i=3 d=0x00000300
+
+CORE n=MP:sys1:core1
+
+RD n=GPR i=1 d=0x00000a00
+RD n=GPR i=2 d=0x00000b00
+RD n=GPR i=3 d=0x00000c00

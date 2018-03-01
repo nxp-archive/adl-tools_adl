@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+<node>
+<name> P </name>
+<regs>
+<reg>
+<name> pc </name>
+<attrs> cia nia </attrs>
+<shared> 0 </shared>
+<id> 0 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 0</size>
+</reg>
+
+<reg>
+<name> RF1 </name>
+<attrs> simple1 intlist(1,3,6,45) </attrs>
+<shared> 0 </shared>
+<id> 1 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 32</size>
+</reg>
+
+<reg>
+<name> RF2 </name>
+<attrs> str1 str2 int1 int2 intlist(12,13,26,45) </attrs>
+<shared> 0 </shared>
+<id> 2 </id>
+<pseudo> 0 </pseudo>
+<width> 32 </width>
+<size> 32</size>
+</reg>
+
+</regs>
+<mmu>
+<mmulookup>
+<name> TlbCam </name>
+<attrs> str2('d') int1 int2(33) strlist('d','a') </attrs>
+<shared> 0 </shared>
+<id> 0 </id>
+<sets> 1 </sets>
+<ways> 16 </ways>
+<fields>
+<mmufield>
+<name> x </name>
+<width> 2 </width>
+</mmufield>
+
+</fields>
+</mmulookup>
+
+</mmu>
+<caches>
+<cache>
+<name> L1i </name>
+<attrs> str1 str2('d') int1 int2(33) strlist('d','dd') intlist(12,13,26,45) </attrs>
+<shared> 0 </shared>
+<type> unified </type>
+<level> 1 </level>
+<size> 32768 </size>
+<linesz> 256 </linesz>
+<sets>
+<set>32</set>
+</sets>
+<ways>
+<way>4</way>
+</ways>
+</cache>
+
+</caches>
+</node>

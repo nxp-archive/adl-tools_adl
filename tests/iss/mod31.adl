@@ -1,0 +1,221 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A simple test of course-grained MT.  The active thread is identified by
+// the TACTIVE register, so only one thread can be active at a time.
+//
+// The model also has a data cache which will cause a thread-swap on a miss
+// if the cache is enabled.  The exception is marked as instruction-squashing,
+// so the UVP writer will not print the instruction.
+//
+
+#import "mod1.adl"
+
+define (arch=mt) {
+
+  attrs = (thread,uvp_full_name);
+
+  // Test printing of full register-file names.
+  defmod (regfile=GPR) {
+    attrs = uvp_full_name;
+  }
+
+  define (reg=TEN) {}
+
+  define (reg=DEC) {}
+
+  define (reg=VPIR) {
+    reset = func (unsigned i) {
+      VPIR = i;
+    };
+  }
+
+  define (reg=FOO) {}
+
+  define (reg=XX) {
+    define (read) {
+      action = func() {
+        FOO = NIA;
+        return XX;
+      };
+    }
+    define (write) {
+      action = func(bits<32> x) {
+        FOO = NIA;
+        XX = x;
+      };
+    }
+  }
+
+  define (regfile=XPR) {
+    size = 8;
+    reset = func (unsigned index) {
+      for (unsigned i = 0; i != XPR.size(); ++i) {
+        XPR(i) = index*0x100 + i;
+      }
+    };
+  }
+
+  post_exec = {
+    for (unsigned i = 0; i != thread.num_contexts(); ++i) {
+      if ( thread(i).DEC > 0 ) {
+        thread(i).DEC = thread(i).DEC - 1;
+        if (thread(i).DEC == 0) {
+          TACTIVE = i;
+        }
+      }
+    }
+  };
+
+  define (context=thread) {
+    attrs = thread;
+    regfiles = (GPR,XPR);
+    regs = (NIA,TEN,CIA,CR,LR,CTR,XER,VPIR,DEC,XX);
+    num_contexts = 2;
+
+    mem_layout = (NIA,GPR,CR,LR,CTR,XER,VPIR,DEC,XX,XPR);
+
+    mem_omit = (CIA,TEN);
+
+    active = { return TACTIVE.uint32(); };
+  }
+
+  define (reg=NIA0) { 
+    alias = thread(0).NIA;
+  }
+
+  define (reg=NIA1) { 
+    alias = thread(1).NIA;
+  }
+
+  define (reg=XX0) { 
+    alias = thread(0).XX;
+  }
+
+  define (reg=XX1) { 
+    alias = thread(1).XX;
+  }
+
+  define (reg=TEN0) { 
+    alias = thread(0).TEN;
+    reset = 1;
+  }
+
+  define (reg=TEN1) { 
+    alias = thread(1).TEN;
+  }
+
+  define (reg=TACTIVE) { 
+    define(write) {
+      action = func (bits<32> x) {
+        TEN0 = 0;
+        TEN1 = 0;
+        switch (x.uint32()) {
+        case 0:
+          TEN0 = 1;
+          break;
+        case 1:
+          TEN1 = 1;
+          break;
+        }
+        ThisReg = x;
+      };
+    }
+  }
+
+  define (reg=SWAP) {
+    define (write) {
+      action = func (bits<32>) {
+        TACTIVE = TACTIVE ^ 1;
+      };
+    }
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=30) { reg = NIA0; }
+    define (entry=31) { reg = NIA1; }
+    define (entry=50) { reg = TACTIVE; }
+    define (entry=51) { reg = SWAP; }
+    define (entry=60) { reg = XX0; }
+    define (entry=61) { reg = XX1; }
+    define (entry=62) { reg = FOO; }
+  }
+
+  define (reg=CCR) {
+    define (field=L1E) { bits = 0; }
+  }
+
+  attrs = (squash_instr);
+
+  define (exception=ThreadSwap) {
+    attrs = (squash_instr);
+    action = {
+      NIA = NIA - 4;
+      TACTIVE = TACTIVE ^ 1;
+    };
+  }
+
+  define (instr=trload) {
+    """
+Load the other context from memory and swap to it.
+""";
+    fields=(OPCD(50),RA,D);
+    syntax = ("%i %f(%f)",D,RA);
+    action = {
+      unsigned new_ctx = (TACTIVE ^ 1).uint32();
+      var ea = GPR(RA) + D;
+
+      thread.read(new_ctx,ea.uint64());
+
+      TACTIVE = new_ctx;
+    };
+  }
+
+  define (instr=trsave) {
+    """
+Save the other context to memory.
+""";
+    fields=(OPCD(51),RA,D);
+    syntax = ("%i %f(%f)",D,RA);
+    action = {
+      unsigned other_ctx = (TACTIVE ^ 1).uint32();
+      var ea = GPR(RA) + D;
+
+      thread.write(other_ctx,ea.uint64());
+    };
+  }
+
+  define (instr=trclear) {
+    """
+clear the other context.
+""";
+    fields=(OPCD(52));
+    action = {
+      unsigned other_ctx = (TACTIVE ^ 1).uint32();
+
+      thread.clear(other_ctx);
+    };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+    miss      = func (CacheAccess ca,addr_t a) {
+      raiseException(ThreadSwap);
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,mt);
+}

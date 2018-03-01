@@ -1,0 +1,105 @@
+======
+Cores:
+======
+Name:  "rubber"
+Bit Order:              little endian
+Instruction Byte Order: little endian
+Data Byte Order:        little endian
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_: [30,0] 
+Instructions:
+  Name:  instr31 (rank: 100)
+  Width:  31
+  Syntax:  "instr31":  
+  Attributes:  instrs_31_33
+  Fields:  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  instr33 (rank: 100)
+  Width:  33
+  Syntax:  "instr33":  
+  Attributes:  instrs_31_33
+  Fields:  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  instrs311 (rank: 100)
+  Width:  31
+  Syntax:  "instrs311":  
+  Attributes:  instrs_31
+  Fields:  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  instrs312 (rank: 100)
+  Width:  31
+  Syntax:  "instrs312":  
+  Attributes:  instrs_31
+  Fields:  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  instrs331 (rank: 100)
+  Width:  33
+  Syntax:  "instrs331":  
+  Attributes:  instrs_33
+  Fields:  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_
+  Action:  {
+}
+  -------------------------------
+  Name:  instrs332 (rank: 100)
+  Width:  33
+  Syntax:  "instrs332":  
+  Attributes:  instrs_33
+  Fields:  VarInstrOpcode_imp_bits__30_28_x_27_8_x_7_0_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+instrs_31_33:
+    Mask:  0x7fffffff00000000
+    1610612785(6000003100000000):  instr31
+    1879048241(7000003100000000):  instr33
+instrs_31:
+    Mask:  0x7fffffff
+    1610612785(60000031):  instrs312
+    1879048241(70000031):  instrs311
+instrs_33:
+    Mask:  0x7fffffff00000000
+    1610612785(6000003100000000):  instrs332
+    1879048241(7000003100000000):  instrs331
+
+Assember configuration:
+  Comment strings: '//' '#' 
+  Line comment strings: '.' '//' '#' 
+  Line separators: ';' 
+  Explicit regnames: 0
+-------------------------------
+

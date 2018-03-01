@@ -1,0 +1,4 @@
+powerpc:t0:  Instr 5 (local count 5):  Register IAR mismatch:  Found 0x0000000000000d0c, expected 0x0000000000000d08
+powerpc:t0:  Instr 8 (local count 8):  Register PRSR mismatch:  Found 0xa000, expected 0x0
+powerpc:t0:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

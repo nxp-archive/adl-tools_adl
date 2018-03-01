@@ -1,0 +1,29 @@
+//
+// Tests of helper code.  Should fail b/c we have a non-constant outer declaration.
+//
+// NOTE:  This test has been removed because we now *do* allow
+//        outer-level stuff.  This test may be added back if
+//        we ever disallow it again.
+
+
+// A sample declaration
+int RegSize = 64;
+
+define (arch=Base) {
+
+  void foo (int a,int b) { return 20; }
+
+  void  bar (int a,int b) { int i; }
+
+  attrs = (foo,stuff);
+
+  define (regfile=sprs) {
+    size = 1024;
+    attrs = foo;
+  }
+}
+
+define (core=P) {
+  archs = (Base);
+}
+

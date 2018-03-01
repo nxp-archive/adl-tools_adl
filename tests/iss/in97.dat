@@ -1,0 +1,40 @@
+#
+# This makes sure that misaligned instructions which cross the top
+# of memory are still printed using the proper list syntax.
+#
+= asm
+
+      .section .text_vle,"arx"
+      .switch  -mvle
+ loop:
+      se_add  r2,r1
+      subf.   r3,r4,r3
+      subf.   r3,r4,r3
+      subf.   r3,r4,r3
+      subf.   r3,r4,r3
+
+= /asm
+= mdopts
+
+  instr-offset: 0xfffffff8
+
+= /mdopts
+# <GEN>
+MD n=Mem ra=0xfffffff8 d=0x0412 s=2	#	se_add  r2,r1
+MD n=Mem ra=0xfffffffa d=0x7C641851	#	subf.   r3,r4,r3
+MD n=Mem ra=0xfffffffe d=0x7C64 s=2 
+MD n=Mem ra=0x00000000 d=0x1851	s=2 #	subf.   r3,r4,r3
+MD n=Mem ra=0x00000002 d=0x7C641851	#	subf.   r3,r4,r3
+MD n=Mem ra=0x00000006 d=0x7C641851	#	subf.   r3,r4,r3
+# </GEN>
+CORE n=:P
+
+RD n=NIA d=0xfffffff8
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=100
+RD n=GPR i=4 d=10
+
+
+

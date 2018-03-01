@@ -1,0 +1,26 @@
+#
+# Used to test the UVP register suppression mechanism.
+#
+
+= asm
+
+	mtspr 30,r1
+	mtspr 201,r1
+	mtspr 9,r1
+	mtspr 30,r1
+	mtspr 201,r1
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C3E03A6	#	mtspr 30,r1
+MD n=Mem ra=0x00000004 d=0x7C2933A6	#	mtspr 201,r1
+MD n=Mem ra=0x00000008 d=0x7C2903A6	#	mtspr 9,r1
+MD n=Mem ra=0x0000000c d=0x7C3E03A6	#	mtspr 30,r1
+MD n=Mem ra=0x00000010 d=0x7C2933A6	#	mtspr 201,r1
+# </GEN>
+
+RD n=GPR i=1 d=0x0f00babe
+

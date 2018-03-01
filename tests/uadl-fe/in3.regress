@@ -1,0 +1,11 @@
+in3.uadl:30: pipestage defined without a name.
+in3.uadl:17: Unknown scheduling type '"hello"'.
+in3.uadl:36: Memory hierarchy inconsistant between ADL and uADL:  Unknown next-memory specified:  Foo
+in3.uadl:36: No next-level memory/cache defined for cache L1i
+in3.uadl:41: Cache 'L2' is not defined by ADL.
+in3.uadl:9: No fetch sizes specified for fetch unit.
+in3.uadl:9: Unknown fetch memory/cache:  Foo
+in3.uadl:25: More than one issue stage defined.
+in3.uadl:15:   First issue stage defined here.
+in3.uadl:5: warning: Instructions access no data memory
+Could not parse in3.uadl

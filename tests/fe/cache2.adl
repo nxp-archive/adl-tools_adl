@@ -1,0 +1,69 @@
+
+//
+// Example cache- checks for split/unified requirements.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (cache=L1i) {
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L1d) {
+    level     = 1;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+  }
+
+  define (cache=L3i) {
+    type      = instr;
+    level     = 3;
+    size      = 32768;
+    linesize  = 256;
+    set_assoc = 4;
+  }
+
+  define (cache=L3d) {
+    type      = data;
+    level     = 3;
+    size      = 32763;
+    linesize  = 254;
+    set_assoc = 4;
+  }
+
+  define (cache=Foo) {
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+  }
+}
+
+define (core=P) {
+  archs=(foo);
+}

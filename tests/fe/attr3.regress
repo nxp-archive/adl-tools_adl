@@ -1,0 +1,107 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "RF1"
+  Size:  32
+  Width:  32
+  Attributes:  simple1 intlist(1, 3, 6, 45)
+  -------------------------------
+  Name:  "RF2"
+  Size:  32
+  Width:  32
+  Attributes:  str1 str2 int1 int2 intlist(12, 13, 26, 45)
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+MMU:
+  Attributes:  intlist(12, 13, 26, 45)
+
+  Interleaved fetch :  1
+  Interleaved reads :  1
+  Interleaved writes:  1
+
+  Enable:  {
+    return true ;
+}
+
+  Lookup:  TlbCam
+    Type:  both
+    Attributes:  str2('d')  int1 int2(33) strlist('d', 'a')
+    Priority:  0
+    Size:  1 bytes.
+    Page Number Shift:  0
+    Real-page Field:  x
+    Min Page Size:  1 (bytes)
+    Array:  16 entries, fully associative.
+    Way Fields:
+      x:  2 bits.
+        Reset value:  2
+
+    Tests:
+
+      AddrComp ( x )
+  -------------------------------
+-------------------------------
+Caches:
+  L1i (level 1, unified)
+    Size    :  32768 bytes
+    Linesize:  256 bytes
+    Sets    :  32 
+    Ways    :  4 
+    Attributes:  str1 str2('d')  int1 int2(33) strlist('d', 'dd') intlist(12, 13, 26, 45)
+Instruction Fields:
+  OPCD: [0,5] 
+    Attributes:  str1 str2 int1 int2 intlist(0, 1, 2, 3)
+  RA: [11,15] 
+  RT: [6,10] 
+Instructions:
+  Name:  a (rank: 100)
+  Width:  16
+  Attributes:  simple1 str1('d')  int1(6) strlist('dd', 'aa', 'gg')
+  Fields:  OPCD(14) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  16
+  Attributes:  simple2 str1('ad')  int1(45)
+  Fields:  OPCD(31) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  16
+  Attributes:  simple1 str1('d')  int1 strlist
+  Fields:  OPCD(32) RT RA
+  Action:  {
+}
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  16
+  Attributes:  simple2 str1 str2('d')  int1(6) strlist('add', 'aa3', 'gg3')
+  Fields:  OPCD(33) RT RA
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    14(38000000):  a
+    31(7c000000):  b
+    32(80000000):  c
+    33(84000000):  d
+-------------------------------
+

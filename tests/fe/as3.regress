@@ -1,0 +1,167 @@
+======
+Cores:
+======
+Name:  "P"
+Architectural Parameters:
+  Name:  Mode
+  Options:  Mode32 Mode64 
+  Value:  Mode32
+  Const:  0
+  Boolean:  0
+  -------------------------------
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "BAR"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "FOO"
+  Width:  32
+  -------------------------------
+  Name:  "XER"
+  Width:  32
+  Offset:  32
+    CA[34]   
+    OV[33]   
+    SO[32]   
+  Documention:
+
+    The overflow and carry register.
+    
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [not used] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] [not used] 
+        Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SI: [16,31] 
+    Display:  signed-dec
+    Signed:  1 (unsigned upper-bound)
+    Signed immediate field for arithmetic operations.
+    
+  XO: [21,30] [not used] 
+        Extended opcode.
+    
+Instructions:
+  Name:  add1 (rank: 100)
+  Width:  32
+  Aspects:
+    Name:  A
+    Labels:  Update 
+    Action:  {
+    GPR ( RA ) = 0 ;
+}
+  Fields:  OPCD(12) RT RA SI
+  Action:  {
+     var carry = Carry ( GPR ( RA )[read: GPR(RA)] , SI , 0 ) ;
+    Update : {
+            GPR ( RA ) = 0[write: GPR(RA) := 0] ;
+        }{
+            BAR = 2[write: BAR := 2] ;
+        }GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + SI[write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + SI] ;
+    
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  BAR GPR(RA) GPR(RT) 
+  -------------------------------
+  Name:  add2 (rank: 100)
+  Width:  32
+  Aspects:
+    Name:  A
+    Labels:  Update 
+    Action:  {
+    GPR ( RA ) = 0 ;
+}
+  Fields:  OPCD(13) RT RA SI
+  Action:  {
+     var carry = Carry ( GPR ( RA )[read: GPR(RA)] , SI , 0 ) ;
+    Update : {
+            GPR ( RA ) = 0[write: GPR(RA) := 0] ;
+        }{
+            BAR = 2[write: BAR := 2] ;
+        }GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + SI[write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + SI] ;
+    
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  BAR GPR(RA) GPR(RT) 
+  -------------------------------
+  Name:  add3 (rank: 100)
+  Width:  32
+  Fields:  OPCD(14) RT RA SI
+  Action:  {
+     var carry = Carry ( GPR ( RA )[read: GPR(RA)] , SI , 0 ) ;
+    Update : {
+            BAR = 2[write: BAR := 2] ;
+        }GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + SI[write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + SI] ;
+    
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  BAR GPR(RT) 
+  -------------------------------
+  Name:  add4 (rank: 100)
+  Width:  32
+  Aspects:
+    Name:  A (exclusive)
+    Labels:  Update 
+    Action:  {
+    GPR ( RA ) = 1 ;
+}
+  Fields:  OPCD(15) RT RA SI
+  Action:  {
+     var carry = Carry ( GPR ( RA )[read: GPR(RA)] , SI , 0 ) ;
+    Update : {
+            GPR ( RA ) = 1[write: GPR(RA) := 1] ;
+        }GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + SI[write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + SI] ;
+    
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RA) GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    12(30000000):  add1
+    13(34000000):  add2
+    14(38000000):  add3
+    15(3c000000):  add4
+Aspects:
+  Name:  B
+  Labels:  Update 
+  Action:  {
+    BAR = 2 ;
+}
+-------------------------------
+

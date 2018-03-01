@@ -1,0 +1,62 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "CCR"
+  Usage:  field-read
+  Width:  32
+    L1E[0]   
+    L1dHitCnt[4,7]   
+    L1dMissCnt[8,11]   
+    L2E[1]   
+    L2dMissCnt[16,19]   
+    L2iMissCnt[12,15]   
+    WAY8[2]   
+      Usage:  field-read
+  Documention:
+
+Cache control register.
+    
+  -------------------------------
+  Name:  "MSR"
+  Width:  32
+    PR[10]   
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Caches:
+  L1i (level 1, instr)
+    Size    :  32768 bytes
+    Linesize:  256 bytes
+    Sets    :  32 
+    Ways    :  4 
+  L1d (level 1, data)
+    Size    :  32768 bytes
+    Linesize:  256 bytes
+    Sets    :  32 
+    Ways    :  4 
+  L2 (level 2, unified)
+    Size    :  131072 bytes
+    Linesize:  128 bytes
+    Sets    :  128 256 
+    Ways    :  4 8 
+    Number-of-sets:  {
+    return ( CCR . WAY8 == 0 ) ? 128 : 64 ;
+}
+
+    Number-of-ways:  {
+    return ( CCR . WAY8 == 0 ) ? 4 : 8 ;
+}
+
+-------------------------------
+

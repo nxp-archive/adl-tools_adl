@@ -1,0 +1,7 @@
+inst4.adl:25: The instruction field's name conflicts with another resource defined in this core.
+inst4.adl:29: Unknown instruction field RT
+inst4.adl:39: Argument 3: Expected an annotation (key,value) pair after the AdlDataStart symbol.
+inst4.adl:47: Argument 3: Expected a string key for (key,value) pair after theAdlDataStart symbol.
+inst4.adl:55: Message function 'info' requires at least two parameters:  A message level and a message.
+inst4.adl:63: Message function 'warning' requires at least two parameters:  A message level and a message.
+inst4.adl:71: Message function 'error' requires at least two parameters:  A message level and a message.

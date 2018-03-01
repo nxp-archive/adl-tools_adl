@@ -1,0 +1,139 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests instruction sorting for an assembler.  We want instructions with
+// immediate fields to come first, since we don't require that register operands
+// have register prefixes.  All else being equal, prefer shorter instructions
+// over longer instructions for better code density.
+//
+
+define (core = q) {
+
+  define (reg=CIA) {
+    attrs = cia;
+    width = 32;
+  }
+ 
+  define (reg=NIA) {
+    attrs = nia;
+    width = 32;
+    reset = 0;
+  }
+
+  define (regfile=GPR) {
+    size = 16;
+    width = 32;
+    prefix = r;
+  }
+
+  define (instrfield = fmt) {
+    bits = (0, 3);
+  }
+
+  define (instrfield = op3) {
+    bits = (4, 8, 12);
+  }
+
+  define (instrfield = op4) {
+    bits = (8,11);
+  }
+
+  define (instrfield = zop4) {
+    bits = (12, 15);
+  }
+  
+  define (instrfield = top3) {
+    bits = (13,15);
+  }
+
+  define (instrfield = top4) {
+    bits = (12,15);
+  }
+
+  define (instrfield = t4) {
+    bits = (20, 23);
+  }
+
+	define (instrfield = size3) {
+		bits = (17, 19);
+  }
+
+  define (instrfield = size4) {
+    bits = (16,19);
+  }
+
+	define (instrfield = su) {
+		bits = (16,16);
+  }
+
+  
+  define (instrfield = Rd) {
+    bits = (4, 7);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield = Rb) {
+    bits = (12, 15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield = rd) {
+    bits = (5,7);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield = ra) {
+    bits = (9, 11);
+    ref = GPR;
+    type = regfile;
+  }
+
+ 	define (instrfield = SV12) {
+		bits = (20, 31);
+		is_signed = true;
+    display = dec;
+  }
+  
+ 	define (instrfield = V12) {
+		bits = (20, 31);
+  }
+
+
+	define (instr = stest16gt32) {
+		fields = (fmt(0), op4(7), Rd, zop4(5));
+		syntax = ( "stestgt32 %f", Rd);
+		action = {
+    };
+  }                 
+
+	define (instr = stestrrgt32) {
+ 		fields = (fmt(2), op3(0), rd, ra, top3(5));
+		syntax = ( "stestgt32 %f,%f",rd,ra);
+		action = {
+    };
+  }
+
+	define (instr = stest24gt32) {
+		fields = (fmt(9), op4(9), Rd, t4(1), size4(1), Rb);
+		syntax = ( "stestgt32 %f,%f",Rd,Rb);
+		action = {
+    };
+  }
+
+	define (instr = stest32igt64) {
+		fields = (fmt(13), op4(7), Rd, top4(1), su(0), size3(1), SV12);
+		syntax = ( "stestgt32 %f,%f",Rd,SV12);
+		action = {
+    };
+  }
+
+}
+

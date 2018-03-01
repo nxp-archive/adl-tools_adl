@@ -1,0 +1,679 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Architectural Parameters:
+  Name:  icount
+  Options:  i0 i1 i2 i3 i4 
+  Value:  i0
+  Const:  0
+  Boolean:  0
+  -------------------------------
+Blocks:
+dalu ipu lsu 
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "ArithInstr"
+  Usage:  read, written
+  Width:  2
+  Serial: 1
+  Reset:  0
+  Enums:  'False' 'True' 
+  -------------------------------
+  Name:  "LC"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia nia
+  -------------------------------
+  Name:  "SP"
+  Read alias/hook:
+    {
+    if ( SR . T1 == 0 ) {
+        return GPR ( 0 ) ;
+    } else if ( SR . T1 == 1 ) {
+        return GPR ( 1 ) ;
+    }
+}
+    Source Registers:  GPR(0)? GPR(1)? SR[mask 0x00000001]/p 
+
+  Write alias/hook:
+    func ( bits < 32 > x ) {
+    if ( SR . T1 == 0 ) {
+        LC = x ;
+    } else if ( SR . T1 == 1 ) {
+        PC = x ;
+    }
+}
+    Source Registers:  SR[mask 0x00000001]/p 
+    Target Registers:  LC? PC? 
+
+  Usage:  read
+  Width:  32
+  Attributes:  doc_hidden
+  Documention:
+
+ Stack Pointer
+ 
+  -------------------------------
+  Name:  "SR"
+  Usage:  field-read
+  Width:  32
+    T1[0]   
+      Usage:  field-read
+       SR.T1 field
+    T6[1]   
+      Usage:  field-read
+  -------------------------------
+  Name:  "SubInstr"
+  Usage:  read, written
+  Width:  2
+  Serial: 1
+  Reset:  0
+  Enums:  'not_sub' 'regular' 'regular_2nd_cycle' 'delayed' 
+  -------------------------------
+Parallel execution packet size: 3
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CE: 
+    Pseudo:  1
+    Width:   4
+    Assembler:  1
+    Default value :'0'
+  CE1: 
+    Pseudo:  1
+    Width:   2
+    Assembler:  1
+    Default value :'0'
+  CE1_imp_bits__17_16_: [17,16] 
+    Implements:  CE1
+  CE_imp_bits__17_17_x_16_16_x_13_13_x_12_12_: [17,16] [13,12] 
+    Implements:  CE
+  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_: [17,16] [5,4] 
+    Implements:  CE
+  CE_imp_bits__33_33_x_32_32_x_5_5_x_4_4_: [33,32] [5,4] 
+    Implements:  CE
+  CondEx: [instrfield: CondExec] [not used]
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  CondExec: 
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  CondExec_imp_bits__17_16_: [17,16] 
+    Implements:  CondExec
+  CondExec_imp_bits__33_32_: [33,32] 
+    Implements:  CondExec
+  Enc1: 
+    Pseudo:  1
+    Width:   16
+  Enc1_imp_bits__15_0_: [15,0] 
+    Implements:  Enc1
+  Enc2: 
+    Pseudo:  1
+    Width:   32
+  Enc2_imp_bits__31_0_: [31,0] 
+    Implements:  Enc2
+  FIDD11: 
+    Pseudo:  1
+    Width:   4
+    Assembler:  1
+    Default value :'11'
+  FIDD11_imp_bits__3_3_x_2_2_x_1_1_x_0_0_: [3,0] 
+    Implements:  FIDD11
+  IFT: [instrfield: CondExec]
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_: [11,6] 
+    Implements:  IFT
+  IMM: [not used] 
+    Signed:  1
+    Pseudo:  1
+    Width:   3
+  NonScale: 
+    Pseudo:  1
+    Width:   2
+    Parm:  1
+  OP1: 
+    Pseudo:  1
+    Width:   2
+  OP1_imp_bits__7_7_x_6_6_: [7,6] 
+    Implements:  OP1
+  OP2: 
+    Pseudo:  1
+    Width:   2
+  OP2_imp_bits__13_13_x_8_8_: [13,13] [8,8] 
+    Implements:  OP2
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  RA: [regfile:  GPR]
+    Pseudo:  1
+    Width:   3
+  RA2_tmp: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   5
+  RA_imp_bits__11_11_x_10_10_x_9_9_: [11,9] 
+    Implements:  RA
+  RA_imp_bits__6_6_x_7_7_x_8_8_: [6,6] [7,7] [8,8] 
+    Implements:  RA
+  RA_imp_bits__8_8_x_7_7_x_6_6_: [8,6] 
+    Implements:  RA
+  RA_tmp: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   5
+  RB: [regfile:  GPR]
+    Pseudo:  1
+    Width:   3
+  RB_imp_bits__11_11_x_10_10_x_9_9_: [11,9] 
+    Implements:  RB
+  RT: [regfile:  GPR]
+    Pseudo:  1
+    Width:   2
+  RT_imp_bits__13_13_x_12_12_: [13,12] 
+    Implements:  RT
+  Res1: 
+    Pseudo:  1
+    Width:   5
+  Rk: [regfile:  GPR]
+    Pseudo:  1
+    Width:   4
+    Enums:  'r0::r7' 'r1::r8' 'r2::r10' 'r3::r11' 'r4::r12' 'r5::r13' 'r6::r14' 'r7::r15' 
+  Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_: [12,12] [8,6] 
+    Implements:  Rk
+  SG: 
+    Pseudo:  1
+    Width:   1
+    Reserved:  1
+    Assembler:  1
+    Default value :'0'
+  SG_imp_bits__15_15_: [15,15] 
+    Implements:  SG
+  Src1: 
+    Pseudo:  1
+    Width:   3
+  Src2: 
+    Pseudo:  1
+    Width:   3
+  VarInstrOpcode_imp_bits__14_0_: [14,0] 
+  VarInstrOpcode_imp_bits__14_14_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [14,14] [11,0] 
+  VarInstrOpcode_imp_bits__14_14_x_12_12_x_3_3_x_2_2_x_1_1_x_0_0_: [14,14] [12,12] [3,0] 
+  VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_: [14,13] [11,10] 
+  VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_x_3_3_x_2_2_x_1_1_x_0_0_: [14,13] [11,10] [3,0] 
+  VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_: [14,14] [3,0] 
+  VarInstrOpcode_imp_bits__31_16_x_3_3_x_2_2_x_1_1_x_0_0_: [31,16] [3,0] 
+  VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [15,12] [5,0] 
+    Prefix:  1
+  VlesSize: [not used] 
+    Pseudo:  1
+    Width:   3
+    Prefix:  1
+    Default value :'0'
+  flag: 
+    Pseudo:  1
+    Width:   1
+    Enums:  ( '' '-aab' ) '-aad' 
+  flag2: [not used] 
+    Pseudo:  1
+    Width:   1
+    Enums:  ( '' '-b' ) '-d' 
+  flag_imp_bits__9_9_: [9,9] 
+    Implements:  flag
+  n: [not used] 
+    Pseudo:  1
+    Width:   2
+    Enums:  '0' '1' '2' '3' 
+  reserved_imp_bits__14_14_: [14,14] 
+    Reserved:  1
+Instructions:
+  Name:  IFT1 (rank: 100) (not used by core)
+  Width:  0
+  Syntax:  "ift1":  
+  Fields: 
+  Assembler:  {
+    CndExec = 1 ;
+}
+  -------------------------------
+  Name:  IFT6 (rank: 100) (not used by core)
+  Width:  0
+  Syntax:  "ift6":  
+  Fields: 
+  Assembler:  {
+    CndExec = 6 ;
+}
+  -------------------------------
+  Name:  LPREFIX (rank: 100)
+  Width:  16
+  Syntax:  "LPREFIX,  IFT => %f":   IFT
+  Attributes:  prefix
+  Fields:  VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_
+  Prefix:  1
+  -------------------------------
+  Name:  OneWord (rank: 100)
+  Width:  18
+  Fetch width:  16
+  Fields:  CondExec_imp_bits__17_16_ Enc1_imp_bits__15_0_
+  Pseudo:  1
+  -------------------------------
+  Name:  TwoWord (rank: 100)
+  Width:  34
+  Fetch width:  32
+  Fields:  CondExec_imp_bits__33_32_ Enc2_imp_bits__31_0_
+  Pseudo:  1
+  -------------------------------
+  Name:  add_family (rank: 100)
+  Blocks:  dalu ipu
+  Attributes:  arithmetic
+  Aspects:
+    Name:  ArithmeticInstr (priority 2)
+    Trigger on instruction post-exec.
+    Action:  {
+    ArithInstr = ArithInstr :: True ;
+    info ( 4 , "ArithmeticInstr aspect; ArithInstr = " << ArithInstr ) ;
+}
+  Fields:  OPCD Src1 Src2 Res1 CE NonScale
+  Action:  {
+    {
+        info ( 1 , "CE= " << CE , ", Src1= " << Src1 , ", Src2= " << Src2 , ", Res1= " << Res1 ) ;
+        GPR ( Res1 ) = GPR ( Src2 ) + add_func ( Src1 , NonScale ) ;
+    }
+    {
+        SubInstr = SubInstr :: regular ;
+        info ( 4 , "CofIndSbr aspect; SubInstr = " << SubInstr ) ;
+    }
+    {
+        ArithInstr = ArithInstr :: True ;
+        info ( 4 , "ArithmeticInstr aspect; ArithInstr = " << ArithInstr ) ;
+    }
+}
+  Source Registers:  GPR(0)? GPR(2)? GPR(Src1)? GPR(Src2) SR[mask 0x00000003]/p? 
+  Target Registers:  ArithInstr GPR(Res1) SubInstr 
+  Helper Functions:  add_func find_option 
+  Documentation Name:  add Ra,Rb,Rt
+  Nested insructions:  
+    Name:  add (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Block:  dalu
+    Attributes:  type1 first arithmetic
+    Aspects:
+      Name:  CofIndSbr (priority 1)
+      Trigger on instruction post-exec.
+      Action:  {
+    SubInstr = SubInstr :: regular ;
+    info ( 4 , "CofIndSbr aspect; SubInstr = " << SubInstr ) ;
+}
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_ RT_imp_bits__13_13_x_12_12_ RB_imp_bits__11_11_x_10_10_x_9_9_ RA_imp_bits__8_8_x_7_7_x_6_6_
+    Alias:  add_family OPCD(9) Src1(RA) Src2(RB) Res1(RT) CE(CE) NonScale(2) 
+    Source Registers:  GPR(2) GPR(Src1) GPR(Src2) SR[mask 0x00000002]/p 
+    Target Registers:  ArithInstr GPR(Res1) SubInstr 
+    Helper Functions:  add_func find_option 
+    Type:  OneWord
+    -------------------------------
+    Name:  add2 (rank: 90)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Block:  dalu
+    Attributes:  type1 first('add')  arithmetic
+    Aspects:
+      Name:  CofIndSbr (priority 1)
+      Trigger on instruction post-exec.
+      Action:  {
+    SubInstr = SubInstr :: regular ;
+    info ( 4 , "CofIndSbr aspect; SubInstr = " << SubInstr ) ;
+}
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_3_3_x_2_2_x_1_1_x_0_0_ RT_imp_bits__13_13_x_12_12_ RB_imp_bits__11_11_x_10_10_x_9_9_ RA_imp_bits__6_6_x_7_7_x_8_8_
+    Alias:  add_family OPCD(11) Src1(RA) Src2(RB) Res1(RT) CE(CE) NonScale(0) 
+    Source Registers:  GPR(0) GPR(Src1) GPR(Src2) SR[mask 0x00000001]/p 
+    Target Registers:  ArithInstr GPR(Res1) SubInstr 
+    Helper Functions:  add_func find_option 
+    Type:  OneWord
+    -------------------------------
+  -------------------------------
+  Name:  dec (rank: 100) (shorthand)
+  Width:  34
+  Fetch width:  32
+  Syntax:  "dec %f,%f":   RA RT
+  Block:  dalu
+  Attributes:  type2 second arithmetic
+  Fields:  RA RT CE SG
+  Alias:  sub CE_imp_bits__33_33_x_32_32_x_5_5_x_4_4_(CE) CE_imp_bits__33_33_x_32_32_x_5_5_x_4_4_(CE) SG_imp_bits__15_15_(SG) RT_imp_bits__13_13_x_12_12_(RT) RB_imp_bits__11_11_x_10_10_x_9_9_(1) RA_imp_bits__8_8_x_7_7_x_6_6_(RA) 
+  Source Registers:  GPR(Src1) GPR(Src2) 
+  Target Registers:  ArithInstr GPR(Res1) SubInstr 
+  Type:  
+  Assembler rules:  R1 
+  -------------------------------
+  Name:  halt (rank: 100)
+  Width:  18
+  Fetch width:  16
+  Attributes:  type1 first
+  Fields:  CE1_imp_bits__17_16_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_0_
+  Action:  {
+    halt (  ) ;
+}
+  Type:  OneWord
+  -------------------------------
+  Name:  move_family (rank: 100)
+  Block:  dalu
+  Fields:  OPCD RA OP1 OP2 CE
+  Action:  {
+    info ( 1 , "CE= " << CE , ", RA= " << RA , ", OP1= " << OP1 , ", OP2= " << OP2 ) ;
+    GPR ( RA + OP1 ) = 1 ;
+    GPR ( RA + OP2 ) = 2 ;
+}
+  Target Registers:  GPR(RA + OP1) GPR(RA + OP2) 
+  Nested insructions:  
+    Name:  move (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "move %f":   RA
+    Block:  dalu
+    Attributes:  type1 first
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_12_12_x_3_3_x_2_2_x_1_1_x_0_0_ OP2_imp_bits__13_13_x_8_8_ RA_imp_bits__11_11_x_10_10_x_9_9_ OP1_imp_bits__7_7_x_6_6_
+    Alias:  move_family OPCD(31) RA(RA) OP1(OP1) OP2(OP2) CE(CE) 
+    Target Registers:  GPR(RA + OP1) GPR(RA + OP2) 
+    Type:  OneWord
+    -------------------------------
+  -------------------------------
+  Name:  mv_family (rank: 100)
+  Block:  dalu
+  Fields:  OPCD flag Src1 Res1 CE
+  Action:  {
+    info ( 1 , "CE= " << CE , ", Res1= " << Res1 , ", Src1= " << Src1 , "flag = " << flag ) ;
+    GPR ( Res1 ) = Mem ( SP , 1 ) ;
+    GPR ( Res1 + 1 ) = Mem ( SP + 1 , 1 ) ;
+    GPR ( Res1 + 2 ) = Mem ( SP + 2 , 1 ) ;
+    GPR ( Res1 + 3 ) = Mem ( SP + 3 , 1 ) ;
+}
+  Source Registers:  SP 
+  Target Registers:  GPR(Res1) GPR(Res1 + 1) GPR(Res1 + 2) GPR(Res1 + 3) 
+  Source Memories:  Mem 
+  Nested insructions:  
+    Name:  mv (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "mv %f %f":   flag Rk
+    Block:  dalu
+    Attributes:  type1 first
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_ Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_ flag_imp_bits__9_9_ FIDD11_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  mv_family OPCD(14) flag(flag) Src1(Rk) Res1(Rk + 7) CE(CE) 
+    Source Registers:  SP 
+    Target Registers:  GPR(Res1) GPR(Res1 + 1) GPR(Res1 + 2) GPR(Res1 + 3) 
+    Source Memories:  Mem 
+    Documention:
+
+ Move
+  Instr 
+    Operation:  PC = {AbsAdd31,0} 
+Mem(SP,8) = {return PC,SR} SP = SP + 8
+    Type:  OneWord
+    -------------------------------
+  -------------------------------
+  Name:  nop (rank: 100)
+  Width:  18
+  Fetch width:  16
+  Syntax:  "nop":  
+  Attributes:  type1 first('nop') 
+  Fields:  CE_imp_bits__17_17_x_16_16_x_13_13_x_12_12_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_
+  Action:  {
+}
+  Type:  OneWord
+  -------------------------------
+  Name:  st_family (rank: 100)
+  Block:  dalu
+  Fields:  OPCD flag Src1 Res1 CE
+  Action:  {
+    info ( 1 , "CE= " << CE , ", Res1= " << Res1 , ", Src1= " << Src1 , "flag = " << flag ) ;
+     bits < 32 > tmp = 0x12345678 ;
+    Mem ( 200 , 4 ) = tmp ;
+}
+  Target Memories:  Mem 
+  Nested insructions:  
+    Name:  st (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "st %f %f":   flag Rk
+    Block:  dalu
+    Attributes:  type1 first
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_x_3_3_x_2_2_x_1_1_x_0_0_ Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_ flag_imp_bits__9_9_
+    Alias:  st_family OPCD(35) flag(flag) Src1(Rk) Res1(Rk + 7) CE(CE) 
+    Target Memories:  Mem 
+    Type:  OneWord
+    -------------------------------
+  -------------------------------
+  Name:  sub_family (rank: 100)
+  Block:  dalu
+  Fields:  OPCD Src1 Src2 Res1 CE
+  Action:  {
+    {
+        info ( 1 , "CE= " << CE , ", Src1= " << Src1 , ", Src2= " << Src2 , ", Res1= " << Res1 ) ;
+         bits < 32 > tmp = 12 ;
+        doc_op : {
+            tmp = GPR ( Src2 ) - GPR ( Src1 ) ;
+            GPR ( Res1 ) = tmp ;
+        }
+        tmp += 11 ;
+    }
+    {
+        SubInstr = SubInstr :: regular ;
+        info ( 4 , "CofIndSbr aspect; SubInstr = " << SubInstr ) ;
+    }
+    {
+        ArithInstr = ArithInstr :: True ;
+        info ( 4 , "ArithmeticInstr aspect; ArithInstr = " << ArithInstr ) ;
+    }
+}
+  Source Registers:  GPR(Src1) GPR(Src2) 
+  Target Registers:  ArithInstr GPR(Res1) SubInstr 
+  Nested insructions:  
+    Name:  sub (rank: 100)
+    Width:  34
+    Fetch width:  32
+    Syntax:  "sub %f,%f,%f":   RA RB RT
+    Block:  dalu
+    Attributes:  type2 second arithmetic
+    Aspects:
+      Name:  ArithmeticInstr (priority 2)
+      Trigger on instruction post-exec.
+      Action:  {
+    ArithInstr = ArithInstr :: True ;
+    info ( 4 , "ArithmeticInstr aspect; ArithInstr = " << ArithInstr ) ;
+}
+      Name:  CofIndSbr (priority 1)
+      Trigger on instruction post-exec.
+      Action:  {
+    SubInstr = SubInstr :: regular ;
+    info ( 4 , "CofIndSbr aspect; SubInstr = " << SubInstr ) ;
+}
+    Fields:  CE_imp_bits__33_33_x_32_32_x_5_5_x_4_4_ VarInstrOpcode_imp_bits__31_16_x_3_3_x_2_2_x_1_1_x_0_0_ SG_imp_bits__15_15_(reserved) reserved_imp_bits__14_14_(reserved) RT_imp_bits__13_13_x_12_12_ RB_imp_bits__11_11_x_10_10_x_9_9_ RA_imp_bits__8_8_x_7_7_x_6_6_
+    Alias:  sub_family OPCD(74569) Src1(RA) Src2(RB) Res1(RT) CE(CE) 
+    Source Registers:  GPR(Src1) GPR(Src2) 
+    Target Registers:  ArithInstr GPR(Res1) SubInstr 
+    Type:  TwoWord
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0xf03f0000
+    3(30000):  LPREFIX
+type1:
+    Mask:  0x10000000
+    0(0):      Mask:  0x3c000
+      0(0):        Mask:  0xffc0000
+        0(0):  halt
+      3(c000):        Mask:  0xb000000
+        2(2000000):  st
+      7(1c000):        Mask:  0x3fc0000
+        208(3400000):  nop
+      9(24000):  add
+      11(2c000):  add2
+      15(3c000):        Mask:  0xc700000
+        197(c500000):  move
+    1(10000000):      Mask:  0xb000000
+      10(a000000):  mv
+type2:
+    Mask:  0x3fffc00300000000
+    76349442(048d000200000000):      Mask:  0x00000000c0000000
+      1(0000000040000000):  sub
+        Shorthand:  dec: sub CE_imp_bits__33_33_x_32_32_x_5_5_x_4_4_(CE) CE_imp_bits__33_33_x_32_32_x_5_5_x_4_4_(CE) SG_imp_bits__15_15_(SG) RT_imp_bits__13_13_x_12_12_(RT) RB_imp_bits__11_11_x_10_10_x_9_9_(1) RA_imp_bits__8_8_x_7_7_x_6_6_(RA) 
+
+Pre-Fetch Handler:  func (  ) {
+    if ( getCurrentInstrTable (  ) == prefix ) {
+        setCurrentInstrTable ( prefix ) ;
+    }
+     unsigned instr_size = calc_instr_size ( PC . uint32 (  ) ) ;
+    switch ( instr_size ) {
+        case 1 : setCurrentInstrTable ( type1 ) ;
+        break ;
+        case 2 : setCurrentInstrTable ( type2 ) ;
+        break ;
+        default : error ( 1 , "Illegal instr_size" ) ;
+    }
+}
+  Source Registers:  PC 
+  Source Memories:  Mem 
+  Helper Functions:  calc_instr_size 
+
+Post-Exec Handler:  func (  ) {
+    if ( getCurrentInstrTable (  ) != prefix ) {
+         int num_bytes ;
+         uint32_t * x = getCurrentInstr ( num_bytes ) ;
+        info ( 1 , "encode is: " << hex << x [ 0 ] ) ;
+        if ( ( x [ 0 ] & 0x20000000 ) != 0 ) {
+            setPacketPosition ( 0 ) ;
+        } else {
+            update_icount (  ) ;
+        }
+    }
+}
+  Helper Functions:  update_icount 
+
+Post-Asm Handler:  func ( unsigned instr_width ) {
+}
+
+Post-Packet-Asm Handler:  func ( InstrBundle b ) {
+    SG = 1 ;
+}
+
+Post-Packet Handler:  func (  ) {
+    info ( 1 , "------------------------- eop ----------------------" ) ;
+    setCurrentInstrTable ( prefix ) ;
+}
+
+Helper Functions:
+  add_func:
+ bits < 32 > add_func ( bits < 3 > src , bits < 2 > option ) {
+     bits < 1 > op = find_option ( option ) ;
+     bits < 32 > tmp = 0 ;
+    if ( option == 0 || option == 1 ) {
+        tmp = ( GPR ( src ) + GPR ( 0 ) ) ;
+    } else if ( option == 2 || option == 3 ) {
+        tmp = ( GPR ( src ) + GPR ( 2 ) ) ;
+    }
+    return ( tmp ) ;
+}
+    Source Registers:  GPR(0)? GPR(2)? GPR(src [parm #0])? SR[mask 0x00000003]/p? 
+    Helper Functions:  find_option 
+
+  calc_instr_size:
+ unsigned calc_instr_size ( uint32_t pc ) {
+     bits < 16 > a = Mem ( pc , 2 , CacheIFetch ) ;
+     bits < 16 > b = Mem ( pc + 2 , 2 , CacheIFetch ) ;
+    if ( a ( 15 ) == 1 ) {
+        return 1 ;
+    } else if ( b ( 15 ) == 1 ) {
+        return 2 ;
+    }
+}
+    Source Memories:  Mem 
+
+  eop:
+ bool eop ( int n ) {
+    return ( int  ) icount == n ;
+}
+
+  find_option:
+ bits < 1 > find_option ( bits < 1 > opt ) {
+    switch ( opt . uint32 (  ) ) {
+        case 0 : return SR . T1 ;
+        break ;
+        case 2 : return SR . T6 ;
+        break ;
+        default : break ;
+    }
+}
+    Source Registers:  SR[mask 0x00000003]/p? 
+
+  update_icount:
+ void update_icount (  ) {
+    switch ( icount ) {
+        case i0 : icount = i1 ;
+        break ;
+        case i1 : icount = i2 ;
+        break ;
+        case i2 : icount = i3 ;
+        break ;
+        case i3 : icount = i4 ;
+        break ;
+        case i4 : icount = i0 ;
+        break ;
+    }
+}
+
+Groups:
+  Name:  gArithmeticInstr
+  Type:  instr
+  Items: add_family sub 
+  -------------------------------
+
+Assember configuration:
+  Comment strings: ';' 
+  Line comment strings: ';' 
+  Line separators: '\n' 
+  Explicit regnames: 1
+  Packet grouping: ('[',']') '\n' 
+  Assembler instruction tables: prefix type2 type1
+	Disassembler instruction tables: prefix type2 type1 	
+  Parms:   Name :  CndExec
+  Value:  0
+  Const:  0
+Assembler rules:
+  Name :  R1
+  Type  : instruction
+  func ( InstrInfo  ) {
+    if ( RA <= RT ) {
+        error ( 1 , "RA violates rule..." ) ;
+    }
+}
+-------------------------------
+

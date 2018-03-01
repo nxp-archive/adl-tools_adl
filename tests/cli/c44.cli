@@ -1,0 +1,23 @@
+
+proc stop_core {id ea} { 
+		puts [format "Stopping %s at 0x%x" [path] $ea]
+		setactive 0
+}
+
+simload $env(srcdir)/setup-loops.dat
+simload $env(srcdir)/loops.elf
+
+setpath procs:P0
+setbreakcmd e1 stop_core
+setreg NIA [symbol p1]
+
+setpath procs:P1
+setbreakcmd e2 stop_core
+setreg NIA [symbol p2]
+
+go
+
+puts [mem 0x1004 16]
+
+quit
+

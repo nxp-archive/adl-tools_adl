@@ -1,0 +1,24 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+//
+// Trivial architecture block for doing some contrived statistics collection.
+//
+
+define (arch=stat) {
+
+  define (reg=FCNT) {}
+  define (reg=ICNT) {}
+
+  void register_fetch() {
+    FCNT = FCNT + 1;
+  }
+
+  void register_commit() {
+    ICNT = ICNT + 1;
+  }
+
+}

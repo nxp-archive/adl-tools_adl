@@ -1,0 +1,57 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,7] 
+  RA: [8,11] 
+  XO: [12,15] 
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Fields:  OPCD(17)
+  Action:  {
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  32
+  Fields:  OPCD(17) RA(2)
+  Action:  {
+}
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  16
+  Fields:  OPCD(17) RA(1)
+  Action:  {
+}
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  16
+  Fields:  OPCD(17) RA(1) XO(1)
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xff000000
+    17(11000000):  a
+    Mask:  0xf00000
+      1(100000):  c
+      Mask:  0xf0000
+        1(10000):  d
+      2(200000):  b
+-------------------------------
+

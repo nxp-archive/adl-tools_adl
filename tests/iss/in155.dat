@@ -1,0 +1,79 @@
+#
+# Test of variable-length instructions defined with sub-instructions.
+#
+
+MD n=Mem ra=0x0      d=0x1e010000  # mov_a1_b1 0x1000,0x2000
+MD n=Mem ra=0x4  s=2 d=0x2000
+MD n=Mem ra=0x6      d=0x1e10a300  # mov_a2_b1 0xa3000,0x2000
+MD n=Mem ra=0xa      d=0x00200000
+MD n=Mem ra=0xd      d=0x2e801010  # ld_a1 8,0x1010
+MD n=Mem ra=0x11     d=0x4ec81234  # addi 12,8,0x1234
+MD n=Mem ra=0x15     d=0x3ec1a310  # st_a2 12,0xa31000
+MD n=Mem ra=0x19 s=1 d=0x00
+MD n=Mem ra=0x1a s=1 d=0x20        # halt
+
+MD n=Mem ra=0x1010  d=0x00000020
+MD n=Mem ra=0x2000  d=0xdeadbeef
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x1e010000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x20001e10
+INSTR op=0x1e0100002000					asm="mov_a1_b1 0x1000,0x2000"
+D n=Mem t=read ea=0x2000 nb=4
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0xdeadbeef
+D n=Mem t=write ea=0x1000 nb=4
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0xdeadbeef
+
+I ea=0x6 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x20001e10
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0xa3000020
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0xa3000020
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x002e8010
+INSTR op=0x1e10a300002000					asm="mov_a2_b1 0xa3000,0x2000"
+D n=Mem t=read ea=0x2000 nb=4
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0xdeadbeef
+D n=Mem t=write ea=0xa3000 nb=4
+M n=Mem t=write ea=0xa3000 ra=0xa3000 d=0xdeadbeef
+
+I ea=0xd id=3
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x002e8010
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x104ec812
+INSTR op=0x2e801010					asm="ld_a1 8,0x1010"
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000020
+R n=GPR i=8 d=0x00000020
+
+I ea=0x11 id=4
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x104ec812
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x343ec1a3
+INSTR op=0x4ec81234					asm="addi 12,8,0x1234"
+R n=GPR i=12 d=0x00001254
+
+I ea=0x15 id=5
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x343ec1a3
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x10002000
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x10002000
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+INSTR op=0x3ec1a31000					asm="st_a2 12,0xa31000"
+D n=Mem t=write ea=0xa31000 nb=4
+M n=Mem t=write ea=0xa31000 ra=0xa31000 d=0x00001254
+
+I ea=0x1a id=6
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x10002000
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+INSTR op=0x20					asm="halt "
+
+RESULTS
+
+RD n=GPR i=8  d=0x00000020
+RD n=GPR i=12 d=0x00001254
+
+MD n=Mem ra=0x0000000000001000 d=0xdeadbeef     #       (3735928559)
+MD n=Mem ra=0x0000000000001010 d=0x00000020     #       (32)
+MD n=Mem ra=0x0000000000002000 d=0xdeadbeef     #       (3735928559)
+MD n=Mem ra=0x00000000000a3000 d=0xdeadbeef     #       (3735928559)
+MD n=Mem ra=0x0000000000a31000 d=0x00001254     #       (4692)

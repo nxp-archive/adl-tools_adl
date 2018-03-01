@@ -1,0 +1,132 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  F1: [6,7] 
+  F2: [8,9] 
+  OPCD: [0,5] 
+    Primary opcode.
+    
+  RA: [11,15] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  XO: [21,30] [not used] 
+    Extended opcode.
+    
+Subinstructions:
+Name:  a1
+Fields:  F1(0) RA
+Action:  {
+}
+-------------------------------
+Name:  a2
+Fields:  F1(1) RA
+Action:  {
+}
+-------------------------------
+Name:  a3
+Fields:  F1(2) RA
+Action:  {
+}
+-------------------------------
+Name:  b1
+Fields:  F2(0) RB
+Action:  {
+}
+-------------------------------
+Name:  b2
+Fields:  F2(1) RB
+Action:  {
+}
+-------------------------------
+Name:  b3
+Fields:  F2(3) RB
+Action:  {
+}
+-------------------------------
+Instructions:
+  Name:  foo_a1_b1 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(0) F2(0) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b2 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(0) F2(1) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a1_b3 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(0) F2(3) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b1 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(1) F2(0) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b2 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(1) F2(1) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a2_b3 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(1) F2(3) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b1 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(2) F2(0) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b2 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(2) F2(1) RA RB
+  Action:  {
+}
+  -------------------------------
+  Name:  foo_a3_b3 (rank: 0)
+  Width:  24
+  Fields:  OPCD(1) F1(2) F2(3) RA RB
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xffc00000
+    16(4000000):  foo_a1_b1
+    17(4400000):  foo_a1_b2
+    19(4c00000):  foo_a1_b3
+    20(5000000):  foo_a2_b1
+    21(5400000):  foo_a2_b2
+    23(5c00000):  foo_a2_b3
+    24(6000000):  foo_a3_b1
+    25(6400000):  foo_a3_b2
+    27(6c00000):  foo_a3_b3
+-------------------------------
+

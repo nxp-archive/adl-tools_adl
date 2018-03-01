@@ -1,0 +1,20 @@
+//
+// Defines a dual-issue machine.
+//
+define(core=P) {
+
+  define (config) {
+    issue_width = 2;
+  }
+
+  define (group=multiplies) {
+    items = mullw;
+    latency = 8;
+    stages = (Fetch,Decode,Exec,Mem = exec,Writeback = compl);
+  }
+
+  define (group=general) {
+    items = default_instruction;
+    stages = (Fetch,Decode,Exec,Mem,Writeback = compl);
+  }
+}

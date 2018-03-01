@@ -1,0 +1,40 @@
+// Assembler rule checks - fail
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  define (reg = R ) { };
+  define (instrfield = SG)  {  bits = (0,1); }
+  blk  = (red,blue);
+  attrs = mini;  	  
+
+  parallel_execution = 3;
+
+  define(assembler) {
+
+    define(rule = R1) {
+      action = func (InstrInfo) {
+        if (instrHasAttr(mini) && SG == 1) {
+          error(1,"Illegal");
+        }
+      };
+    }	       
+
+    define(rule = R2) {
+      action = func(InstrBundle b) {
+        if (b.size() > 3 && instrHasAttr(mini) || instrBlk(blue)) {
+          error(1,"Illegal");
+        }
+      };
+    } 
+  }	
+
+
+  // --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

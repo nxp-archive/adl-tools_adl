@@ -1,0 +1,180 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Register Files:
+  Name:  "D"
+  Size:  256
+  Prefix:  d
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  A: [22,10] 
+  B: [9,0] 
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  OPCD1: [31,23] 
+  RA: [regfile:  D]
+    Pseudo:  1
+    Width:   6
+  RA1: [regfile:  D] [not used] 
+    Pseudo:  1
+    Width:   6
+  RA_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_: [11,6] 
+    Implements:  RA
+  RB: [regfile:  D]
+    Pseudo:  1
+    Width:   2
+  RB_imp_bits__5_5_x_4_4_: [5,4] 
+    Implements:  RB
+  RT: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+  RT_imp_bits__3_3_x_2_2_x_1_1_x_0_0_: [3,0] 
+    Implements:  RT
+  Res: 
+    Pseudo:  1
+    Width:   4
+  Src1: 
+    Pseudo:  1
+    Width:   6
+  Src2: 
+    Pseudo:  1
+    Width:   2
+  VarInstrOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_: [15,12] 
+Instructions:
+  Name:  add_outer (rank: 100)
+  Attributes:  type2
+  Fields:  OPCD Src1 Src2 Res
+  Action:  {
+    D ( Res ) = D ( Src1 ) + D ( Src2 ) ;
+}
+  Source Registers:  D(Src1) D(Src2) 
+  Target Registers:  D(Res) 
+  Nested insructions:  
+    Name:  add_nested1 (rank: 100)
+    Width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Attributes:  type2
+    Fields:  VarInstrOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_ RA_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_ RB_imp_bits__5_5_x_4_4_ RT_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  add_outer OPCD(1) Src1(RA >> 1) Src2(RB) Res(RT) 
+    Source Registers:  D(Src1) D(Src2) 
+    Target Registers:  D(Res) 
+    -------------------------------
+    Name:  add_nested2 (rank: 100)
+    Width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Attributes:  type2
+    Fields:  VarInstrOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_ RA_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_ RB_imp_bits__5_5_x_4_4_ RT_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  add_outer OPCD(0) Src1(RA) Src2(RB) Res(RT) 
+    Source Registers:  D(Src1) D(Src2) 
+    Target Registers:  D(Res) 
+    -------------------------------
+  -------------------------------
+  Name:  i1 (rank: 100)
+  Width:  32
+  Fields:  OPCD1(11) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i2 (rank: 100)
+  Width:  32
+  Fields:  OPCD1(12) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i3 (rank: 100)
+  Width:  32
+  Fields:  OPCD1(13) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i4 (rank: 100)
+  Width:  32
+  Fields:  OPCD1(14) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i5 (rank: 100)
+  Width:  32
+  Fields:  OPCD1(15) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  i6 (rank: 100)
+  Width:  32
+  Fields:  OPCD1(31) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  sub_outer (rank: 100)
+  Fields:  OPCD Src1 Src2 Res
+  Action:  {
+    D ( Res ) = D ( Src1 ) - D ( Src2 ) ;
+}
+  Source Registers:  D(Src1) D(Src2) 
+  Target Registers:  D(Res) 
+  Nested insructions:  
+    Name:  sub_nested1 (rank: 100)
+    Width:  16
+    Syntax:  "sub %f,%f,%f":   RA RB RT
+    Fields:  VarInstrOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_ RA_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_ RB_imp_bits__5_5_x_4_4_ RT_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  sub_outer OPCD(4) Src1(RA >> 1) Src2(RB) Res(RT) 
+    Source Registers:  D(Src1) D(Src2) 
+    Target Registers:  D(Res) 
+    -------------------------------
+    Name:  sub_nested2 (rank: 100)
+    Width:  16
+    Syntax:  "sub %f,%f,%f":   RA RB RT
+    Fields:  VarInstrOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_ RA_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_ RB_imp_bits__5_5_x_4_4_ RT_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  sub_outer OPCD(5) Src1(RA) Src2(RB) Res(RT) 
+    Source Registers:  D(Src1) D(Src2) 
+    Target Registers:  D(Res) 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xf0000000
+    0(0):  add_nested2
+    Mask:  0xf800000
+      11(5800000):  i1
+      12(6000000):  i2
+      13(6800000):  i3
+      14(7000000):  i4
+      15(7800000):  i5
+      31(f800000):  i6
+    1(10000000):  add_nested1
+    4(40000000):  sub_nested1
+    5(50000000):  sub_nested2
+
+Groups:
+  Name:  a
+  Type:  instr
+  Items: add_nested2 add_outer 
+  -------------------------------
+  Name:  b
+  Type:  instr
+  Items: add_outer sub_outer 
+  -------------------------------
+  Name:  c
+  Type:  instr
+  Items: add_outer 
+  -------------------------------
+-------------------------------
+

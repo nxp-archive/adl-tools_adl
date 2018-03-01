@@ -1,0 +1,36 @@
+#
+# Test of parsing a dat file.
+#
+
+CORE n=:P
+
+RD n=NIA d=0x100
+
+RD n=GPR i=00 d=0xdeadbeef
+RD n=GPR i=20 d=0x01234567
+
+MD n=Mem ra=0x1fc d=0x00000000
+MD n=Mem ra=0x200 d=0x00000000
+MD n=Mem ra=0xfffffffffffffffc d=0x00000000
+MD n=Mem ra=0x00000000 d=0x00000000
+
+MD n=Mem ra=0x1ff d=0xdeadbeef
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0xfffffffffffffffd d=0x12345678
+MD n=Mem ra=0x0000fffc d=0xa5a5a5a5
+MD n=Mem ra=0x00010000 d=0xa5a5a5a5
+MD n=Mem ra=0x0000fffe d=0x12345678
+
+RESULTS
+
+RD n=NIA d=0x104
+RD n=GPR i=00 d=0xdeadbeef
+RD n=GPR i=20 d=0x01234567
+
+MD n=Mem ra=0x1fc d=0x000000de
+MD n=Mem ra=0x200 d=0xadbeef00
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x10000 d=0x5678a5a5
+MD n=Mem ra=0x0fffc d=0xa5a51234
+MD n=Mem ra=0xfffffffffffffffc d=0x00123456
+MD n=Mem ra=0x00000000 d=0x78000000

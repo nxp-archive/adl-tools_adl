@@ -1,0 +1,37 @@
+#
+# Expected results for driver6 -prog 3 -pctest
+#
+# Tests that we can call setProgramCounter on a uADL model and have it change
+# the stream of control.
+#
+CORE n=:P
+
+TRACE
+
+
+I ea=0x100
+INSTR op=0x38210001 asm="addi r1,r1,1"
+
+I ea=0x104
+INSTR op=0x38210001 asm="addi r1,r1,1"
+
+I ea=0x108
+INSTR op=0x80401000 asm="lwz r2,4096(r0)"
+
+I ea=0x11c
+INSTR op=0x80601003 asm="lwz r3,4099(r0)"
+
+I ea=0x120
+INSTR op=0x38210001 asm="addi r1,r1,1"
+
+I ea=0x124
+INSTR op=0x38210001 asm="addi r1,r1,1"
+
+I ea=0x128
+INSTR op=0x00000000 asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000004
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xef123456

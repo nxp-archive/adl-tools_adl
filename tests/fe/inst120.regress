@@ -1,0 +1,81 @@
+======
+Cores:
+======
+Name:  "foo"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO: [21,30] 
+    Documentation Name:  OPCD
+        Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    try {
+        GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+    } catch (  Exception e ) {
+        if ( e ) {
+            1 ;
+        }
+         ;
+    }
+     ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    1040187658(7c000214):  add
+-------------------------------
+

@@ -1,0 +1,134 @@
+//
+//
+
+define (arch=minippc) {
+  attrs = (up,down,ff); 
+  
+  //REGISTERS
+
+  define (reg=A) {}
+  define (reg=B) {}
+  define (reg=C) {}
+  define (reg=D) {}
+  define (reg=E) {}
+
+  define (regfile=S) {
+    size=1024;
+    define (entry=8)  { reg = A; }
+    define (entry=9)  { reg = B; }
+    define (entry=1)  { reg = C; }
+    define (entry=50) { reg = D; }
+    define (entry=51) { reg = E; }    
+  }
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+  define(instrfield=R1){
+    display = dec;
+    bits = (13,17);
+  }
+  define(instrfield=R2){
+    display = dec;
+    bits = (18,22);
+  }
+  
+  define (instrfield=X) {
+    pseudo = true;
+    width = 4;
+  }
+
+  define (instrfield=Y) {
+    pseudo = true;
+    width = 4;
+  }
+
+  define (instrfield=R3) {
+    bits = (18,27);
+    ref=S;
+  }
+
+  define(instrfield=OPCD){
+    bits =(1,5);
+  }
+  
+  define(instrfield=F1){
+    bits = (9,10);
+    enumerated = (("",".up"),".down",(".up1",".up2"),(".a1",".a2",".a3",".a4"));
+  }
+
+  define(instrfield=F2){
+    bits = (11,12);
+    enumerated = (("",".left0"),".right0",(".left1",".left2",".left3"),".right1");
+  }
+
+  define(instrfield=F3){
+    bits = (11,12);
+    enumerated = ("0","1","2","3");
+  }
+
+  define (instrfield=NG) {
+    bits = 6;
+    enumerated = ("", "ng");
+  }
+
+  define (instrfield=PR) {
+    bits = (7,8);
+    enumerated = (("","if0"),"if1","if2","if3");
+  }
+
+  // Dummy field: Here only to make sure that this unused set of enumerations
+  // doesn't confuse our calculation of terminating characters for the
+  // assembler.
+  define (instrfield=n) {
+    width  = 2;
+    pseudo = true;
+    enumerated = ("0", "1", "2", "3");
+  }
+
+  // OK- %p can be before %i.
+  define (instr = foo){
+    fields = (OPCD(1),NG,PR,F1,F2,R1,R2);
+    syntax = ("%p %p %i%p%p %f,%f",NG,PR,F1,F2,R1,R2);
+    action={};
+  }
+
+  define (instr=foo2) {
+    alias = foo(NG(NG),PR(PR),F1(0),F2(0),R2(X<<1),R1(Y));
+    syntax = ("%p %p foo %f(%f)",NG,PR,X,Y);
+  }
+
+  define (instr = bar){
+    fields = (OPCD(2),NG,PR,R3);
+    syntax = ("%p %p %i %f",NG,PR,R3);
+    action={};    
+  }
+
+  define (instr=stuff) {
+    fields = (OPCD(3),F3,R1,R2);
+    syntax = ("%i%p %f,%f",F3,R1,R2);
+    action={};
+  }
+
+  // Special case.  Test that we can handle abutting fields, even though another
+  // version might not have an abutting field, but might have a conflict b/c it
+  // uses a character from the abutting field's enumerations.
+  define (instr=stuff1) {
+    alias = stuff(F3(1),R1(R1),R2(R1));
+    syntax = ("%i #%f",R1);
+  }
+
+  define (instr=stuff2) {
+    alias = stuff(F3(2),R1(R1),R2(R1));
+    syntax = ("%i #%f",R1);
+  }
+
+  define (assembler) {
+    comments = "//";
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

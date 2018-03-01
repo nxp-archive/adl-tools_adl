@@ -1,0 +1,84 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  OPCD1: 
+    Pseudo:  1
+    Width:   8
+  OPCD1_imp_bits__15_15_x_14_14_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [15,14] [5,0] 
+    Implements:  OPCD1
+  RA: [regfile:  GPR]
+    Pseudo:  1
+    Width:   3
+  RA_imp_bits__8_8_x_7_7_x_6_6_: [8,6] 
+    Implements:  RA
+  RB: [regfile:  GPR]
+    Pseudo:  1
+    Width:   3
+  RB_imp_bits__11_11_x_10_10_x_9_9_: [11,9] 
+    Implements:  RB
+  RT: [regfile:  GPR]
+    Pseudo:  1
+    Width:   2
+  RT_imp_bits__13_13_x_12_12_: [13,12] 
+    Implements:  RT
+  Res1: 
+    Pseudo:  1
+    Width:   5
+  Src1: 
+    Pseudo:  1
+    Width:   3
+  Src2: 
+    Pseudo:  1
+    Width:   3
+Instructions:
+  Name:  add_family (rank: 100)
+  Fields:  OPCD Src1 Src2 Res1
+  Action:  {
+    GPR ( Res1 ) = GPR ( Src2 ) + GPR ( Src1 ) ;
+}
+  Source Registers:  GPR(Src1) GPR(Src2) 
+  Target Registers:  GPR(Res1) 
+  Nested insructions:  
+    Name:  add (rank: 100)
+    Width:  16
+    Syntax:  "add %f,%f,%f":   RA RB RT
+    Attributes:  type1
+    Fields:  OPCD1_imp_bits__15_15_x_14_14_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ RT_imp_bits__13_13_x_12_12_ RB_imp_bits__11_11_x_10_10_x_9_9_ RA_imp_bits__8_8_x_7_7_x_6_6_
+    Alias:  add_family OPCD(OPCD1) Src1(RA) Src2(RB) Res1(RT) 
+    Source Registers:  GPR(Src1) GPR(Src2) 
+    Target Registers:  GPR(Res1) 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+type1:
+    Mask:  0xc03f0000
+    9(90000):  add
+-------------------------------
+

@@ -1,0 +1,12 @@
+
+setdynparm fetch-num-entries 16
+setdynparm bp-size 16
+
+puts "Fetch entries :  [getdynparm fetch-num-entries]"
+puts "Predictor size:  [getdynparm bp-size]"
+
+simload $env(srcdir)/../iss/in2.dat
+setreg HDBCR0 0x80000000
+traceon dynparm1.out.dat
+go
+quit

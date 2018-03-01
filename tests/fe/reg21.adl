@@ -1,0 +1,45 @@
+
+define (arch = minippc) {
+
+  define (reg = A) {
+    width = 32;
+    reset = 0xdeadbeaf;
+    attrs = (nia,cia);
+  }
+
+  define (reg = B) {
+    width = 32;
+    reset = {
+      B = portRead(10);
+    };
+  }
+
+  define (reg = C) {
+    width = 128;
+    reset = 0x12345678123456781234567812345678;
+  }
+
+  define (regfile = AA) {
+    width = 32;
+    size = 32;
+    reset = 0x1234567;
+  }
+
+  define (regfile = BB) {
+    size = 32;
+    reset = func() {
+      for (int i = 0; i != BB.size(); ++i) {
+        BB(i) = i;
+      }
+    };
+
+    external_write = func(unsigned index,bits<32> v) {
+      ThisReg(index) = ThisReg(index) & ~v;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

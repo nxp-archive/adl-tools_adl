@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<data>
+<cores>
+<core name="P">
+<RaMask>
+<initial>
+<str>0xffffffff</str>
+</initial>
+<constant>
+<true />
+</constant>
+</RaMask>
+<EaMask>
+<initial>
+<str>0xffffffff</str>
+</initial>
+<constant>
+<true />
+</constant>
+</EaMask>
+<regs>
+<register name="BAR">
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="FOO">
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="XER">
+<doc>
+<str><![CDATA[
+    The overflow and carry register.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<offset>
+<int>32</int>
+</offset>
+<fields>
+<field name="CA">
+<bits>
+<range>
+<int>34</int>
+<int>34</int>
+</range>
+</bits>
+</field>
+<field name="OV">
+<bits>
+<range>
+<int>33</int>
+<int>33</int>
+</range>
+</bits>
+</field>
+<field name="SO">
+<bits>
+<range>
+<int>32</int>
+<int>32</int>
+</range>
+</bits>
+</field>
+</fields>
+<reserved_mask>
+<str>0b00011111111111111111111111111111</str>
+</reserved_mask>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="pc">
+<width>
+<int>32</int>
+</width>
+<attributes>
+<attribute name="cia">
+<str></str>
+</attribute>
+<attribute name="nia">
+<str></str>
+</attribute>
+</attributes>
+<shared>
+<int>0</int>
+</shared>
+</register>
+</regs>
+<regfiles>
+<regfile name="GPR">
+<doc>
+<str><![CDATA[
+    General purpose registers.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<size>
+<int>32</int>
+</size>
+<prefix>
+<str>r</str>
+</prefix>
+<shared>
+<int>0</int>
+</shared>
+</regfile>
+</regfiles>
+<instrfields>
+<instrfield name="OPCD">
+<doc>
+<str><![CDATA[
+    Primary opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>0</int>
+<int>5</int>
+</range>
+</bits>
+<width>
+<int>6</int>
+</width>
+<size>
+<int>6</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xfc000000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RA">
+<doc>
+<str><![CDATA[
+    Field used to specify a General Purpose Register to be used as a source.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>11</int>
+<int>15</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x1f0000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RB">
+<doc>
+<str><![CDATA[
+    Field used to specify a General Purpose Register to be used as a source.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>20</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xf800</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RS">
+<doc>
+<str><![CDATA[
+    Field used to specify a General Purpose Register as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RT">
+<doc>
+<str><![CDATA[
+    Field used to specify a General Purpose Register to be used as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="SI">
+<doc>
+<str><![CDATA[
+    Signed immediate field for arithmetic operations.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>31</int>
+</range>
+</bits>
+<width>
+<int>16</int>
+</width>
+<size>
+<int>16</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xffff</str>
+</mask>
+<display>
+<str>dec</str>
+</display>
+<type>
+<str>imm</str>
+</type>
+<signed>
+<true />
+</signed>
+<unsigned_upper_bound>
+<true />
+</unsigned_upper_bound>
+</instrfield>
+<instrfield name="XO">
+<doc>
+<str><![CDATA[
+    Extended opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>21</int>
+<int>30</int>
+</range>
+</bits>
+<width>
+<int>10</int>
+</width>
+<size>
+<int>10</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x7fe</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+</instrfields>
+<instrs>
+<instruction name="add1">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>add1 RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>add1 ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>12</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+    Update : {
+            GPR ( RA ) = 0 ;
+        }{
+            BAR = 2 ;
+        }GPR ( RT ) = GPR ( RA ) + SI ;
+    
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>BAR</str>
+<str>GPR(RA)</str>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="add2">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>add2 RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>add2 ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>13</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+    Update : {
+            GPR ( RA ) = 0 ;
+        }{
+            BAR = 2 ;
+        }GPR ( RT ) = GPR ( RA ) + SI ;
+    
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>BAR</str>
+<str>GPR(RA)</str>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="add3">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>add3 RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>add3 ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>14</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+    Update : {
+            BAR = 2 ;
+        }GPR ( RT ) = GPR ( RA ) + SI ;
+    
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>BAR</str>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="add4">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>add4 RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>add4 ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>15</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var carry = Carry ( GPR ( RA ) , SI , 0 ) ;
+    Update : {
+            GPR ( RA ) = 1 ;
+        }GPR ( RT ) = GPR ( RA ) + SI ;
+    
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>GPR(RA)</str>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+</instrs>
+<core-level-hooks>
+<decode-miss>
+<str><![CDATA[
+
+]]></str>
+</decode-miss>
+<pre-cycle>
+<str><![CDATA[
+
+]]></str>
+</pre-cycle>
+<post-cycle>
+<str><![CDATA[
+
+]]></str>
+</post-cycle>
+<pre-fetch>
+<str><![CDATA[
+
+]]></str>
+</pre-fetch>
+<post-fetch>
+<str><![CDATA[
+
+]]></str>
+</post-fetch>
+<post-exec>
+<str><![CDATA[
+
+]]></str>
+</post-exec>
+<post-asm>
+<str><![CDATA[
+
+]]></str>
+</post-asm>
+<post-packet-asm>
+<str><![CDATA[
+
+]]></str>
+</post-packet-asm>
+<post-packet>
+<str><![CDATA[
+
+]]></str>
+</post-packet>
+<active-watch>
+<str><![CDATA[
+
+]]></str>
+</active-watch>
+<instr-table-watch>
+<str><![CDATA[
+
+]]></str>
+</instr-table-watch>
+</core-level-hooks>
+<parms>
+<parm name="Mode">
+<value>
+<str>Mode32</str>
+</value>
+<options>
+<str>Mode32</str>
+<str>Mode64</str>
+</options>
+</parm>
+</parms>
+<asm_config>
+<comments>
+<str>#</str>
+</comments>
+<line_comments>
+<str>#</str>
+</line_comments>
+</asm_config>
+</core>
+</cores>
+<systems>
+</systems>
+</data>

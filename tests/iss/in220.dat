@@ -1,0 +1,37 @@
+#
+# Tests the use of instruction jamming via exec_from_buffer.  The results are
+# only valid if executed with in220.cli, which jams in instructions using the
+# 'ijam' function.  
+#
+# In this situation, we're making sure that we can catch an exception and not
+# abort because of it.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+# </GEN>
+
+RD n=NIA     d=0
+RD n=MSR     d=0x00400000
+RD n=GPR i=1 d=10
+RD n=IVOR6   d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR  i=1 d=0x0000000d
+# These results are only valid b/c the script injects instructions
+# to modify these registers.
+RD n=GPR  i=2 d=0x00000002
+RD n=GPR  i=3 d=0x00000006
+RD n=SRR0     d=0xc
+

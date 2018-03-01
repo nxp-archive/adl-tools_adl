@@ -1,0 +1,163 @@
+//
+// Test to make sure that if we have a conflict, where we have to manually
+// specify a conflict field in order to proceed, then make sure that we
+// correctly partition.
+//
+
+define (core = foo) {
+  archs = foo; 
+}
+
+define (arch = foo) {
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+	define (instrfield = opc)
+    {
+      bits = (63, 61);
+    }
+
+	define (reg=cIA) {
+	  """
+	  Current instruction address
+	  """;
+	  attrs = cia;
+	  serial = true;
+	}
+
+	define (reg=nIA) {
+	  """
+	  Next instruction address
+	  """;
+	  attrs = nia;
+	  serial = true;
+	}
+
+  define (regfile=GPR) {
+    width = 32;
+    size = 32;
+    prefix = r;
+  }
+  
+  define (instrfield = COND) {
+    pseudo = true;
+    width = 4; 
+    enumerated = (("",".al"), (".cs",".lo"), ".vs", ".hi", 
+                  (".eq",".clr"), ".ge", ".gt", ".pl", 
+                  ".mi", ".le", ".lt", (".ne",".set"), 
+                  ".ls", ".vc", (".cc",".hs"), (".nv",".xc"));
+  }
+
+  define (instrfield = GX)
+    {
+      display = dec;
+      pseudo = true;
+      width = 4; 
+      ref = GPR;
+      type = regfile;
+      allow_conflict = true;
+      enumerated = ("g0","g1","g2","g3",
+                    "g4","g5","g6","g7",
+                    "g8","g9","g10","g11",
+                    reserved, reserved, reserved, reserved);
+    }
+ 
+  define (instrfield = GY)
+    {
+      display = dec;
+      pseudo = true;
+      width = 4; 
+      ref = GPR;
+      type = regfile;
+      enumerated = ("g0","g1","g2","g3",
+                    "g4","g5","g6","g7",
+                    "g8","g9","g10","g11",
+                    reserved, reserved, reserved, reserved);
+    }
+
+ 
+  define (instrfield = GZ)
+    {
+      display = dec;
+      pseudo = true;
+      width = 4; 
+      ref = GPR;
+      type = regfile;
+      enumerated = ("g0","g1","g2","g3",
+                    "g4","g5","g6","g7",
+                    "g8","g9","g10","g11",
+                    reserved, reserved, reserved, reserved);
+    }
+
+  define (instrfield = VPRegPair)
+    {
+      """
+  0: VP[1:0]  
+  1: VP[3:2]  
+  """;
+      display = dec;
+      pseudo = true;
+      width = 1; 
+      enumerated = (("VP[1:0]"),("VP[3:2]"));
+    }
+   
+  define (instr = mv) {
+    width = 32;
+    fields = ((bits(28,20),b001110110),(bits(19,16),b0000),(bits(15),b0),
+              (bits(14,8),reserved),(bits(7,4),b1101),(bits(3,0),GZ)
+              );
+    syntax = ("mv %f,cc",GZ);
+
+    action = {
+      GPR(GZ) = 1;
+    };
+  }
+
+  define (instr = mv_h_VPX_Iu1)
+    {
+      width = 29;
+      fields =
+        (
+         (bits(28,20),b001110110),
+         (bits(19,16),reserved),
+         (bits(15,13),b001),
+         (bits(12,8),reserved),
+         (bits(7,5),b000),
+         (bits(4),VPRegPair),
+         (bits(3,0),b1100)
+         );
+      syntax = ("mv h,%p", VPRegPair);
+      action =
+        {
+        };
+    }
+
+  
+  define (instr = exg_cc_gZ_gX)
+    {
+      width = 32;
+      fields =
+        (
+         (bits(28,20),b001110110),
+         (bits(19,16),COND),
+         (bits(15,13),b000),
+         (bits(12),b1),
+         (bits(11,10),reserved),
+         (bits(9,8),b00),
+         (bits(7,4),GX),
+         (bits(3,0),GZ)
+         );
+      syntax = ("exg%p %f,%f",COND,GZ,GX);
+      action =
+        {
+        };
+
+    }
+
+  
+  
+}
+
+

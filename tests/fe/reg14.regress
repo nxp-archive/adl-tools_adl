@@ -1,0 +1,102 @@
+reg14.adl:54: warning: Item 'gprs' was redefined.
+reg14.adl:10: warning:     Previous definition was here.
+reg14.adl:81: warning: Target of alias is smaller than the alias.  This will result in 0-padding in the higher-order bits.
+reg14.adl:81: warning: Target of alias is smaller than the alias.  This will result in 0-padding in the higher-order bits.
+reg14.adl:87: warning: Target of alias is smaller than the alias.  This will result in 0-padding in the higher-order bits.
+reg14.adl:91: warning: Target of alias is smaller than the alias.  This will result in 0-padding in the higher-order bits.
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "gprs"
+  Size:  32
+  Read alias/hook:
+    spe_gprs[32:63]
+
+  Write alias/hook:
+    spe_gprs[32:63]
+
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "spe_gprs"
+  Size:  32
+  Usage:  slice-read, slice-written
+  Width:  64
+  -------------------------------
+Registers:
+  Name:  "SPRG0"
+  Usage:  slice-read, slice-written
+  Width:  64
+  -------------------------------
+  Name:  "SPRG1"
+  Usage:  slice-read, slice-written
+  Width:  64
+  -------------------------------
+  Name:  "TBR1"
+  Read alias/hook:
+    {
+    return TBR2 ;
+}
+    Source Registers:  TBR2 
+
+  Write alias/hook:
+    func ( bits < 32 > v , unsigned start , unsigned stop ) {
+    ThisReg ( start , stop ) = v ( start , stop ) | ThisReg ( start , stop ) ;
+    TBR2 = v ;
+}
+    Target Registers:  TBR2 
+
+  Usage:  slice-read, slice-written
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "TBR2"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "USPRG0"
+  Read alias/hook:
+    SPRG0[32:63]
+
+  Write alias/hook:
+    func ( bits < 32 >  ) {
+}
+
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "USPRG1"
+  Read alias/hook:
+    SPRG1[8:15 << 12]
+
+  Write alias/hook:
+    SPRG1[8:15 << 12]
+
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "USPRG2"
+  Read alias/hook:
+    SPRG1[24:31 << 16]
+
+  Write alias/hook:
+    SPRG1[24:31 << 22]
+
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

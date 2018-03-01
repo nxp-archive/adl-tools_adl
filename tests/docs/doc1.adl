@@ -1,0 +1,838 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+    var cr = CR;
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  void setcrfield(bits<3> field,bits<32> x,bits<32> y) {
+    // Same thing as above.  Here just to test case issues.
+    var cr = CR;
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {
+    """
+The condition register.
+    """;
+    define (field=CR) {
+      attrs = one;
+      indexed=4;
+    }
+    define (field=LT) {
+      """
+Negative (LT)- This bit is set when the result is negative.
+""";
+      bits = 0;
+    }
+    define (field=GT) {
+      attrs = two;
+      """
+Positive (GT)- This bit is set when the result is positive (and not zero).
+""";
+      bits = 1;
+    }
+    define (field=EQ) {
+      attrs = three;
+      """
+Zero (EQ)- This bit is set when the result is zero.
+""";
+      bits = 2;
+    }
+    define (field=SO) {
+      """
+Summary overflow (SO)- This is a copy of the final state of XER(SO) at the
+completion of the instruction.
+""";
+      bits = 3;
+    }
+    define (field=FX) {
+      """
+Floating point exception (FX).  Copy of the final state of FPSCR(FX) at the
+completion of the instruction.
+""";
+      bits = 4;
+    }
+    define (field=FEX) {
+      """
+Floating-point enabled exception (FEX).  Copy of the final state of FPSCR(FEX)
+at the completion of the instruction.
+""";
+      bits = 5;
+    }
+    define (field=VX) {
+      """
+Floating-point invalid exception (VX).  Copy of the final state of FPSCR(CX) at
+the completion of the instruction.
+""";
+      bits = 6;
+    }
+    define (field=OX) {
+      """
+Floating-point overflow exception (OX).  Copy of the final state of FPSCR(OX) at
+the completion of the instruction.
+""";
+      bits = 7;
+    }
+  }
+
+
+  define (reg=CTR) {
+    """
+The counter register.
+    """;
+    define (read) {
+      action = { return CTR/2; };
+    }
+    define (write) {
+      action = func (bits<32> x) { CTR = x * 2; };
+    }
+  }
+
+  define (reg=ESR) {
+    """
+Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+Machine state register.
+    """;
+  }
+
+  define (reg=SRR0) {
+    """
+Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=FOO1) {
+    define (field=A) {
+      attrs = (one,two,three);
+      bits=(0,7);
+    }
+    define (field=B) {
+      bits=(8,15);
+      readonly=true;
+    }
+    define (field=C) {
+      bits=(16,23);
+    }
+    reset = 0xdead1100;
+  }
+
+  define (reg=FOO2) {
+    width = 64;
+
+    define (field=X) {
+      indexed = 8;
+    }
+    define (field=Y) {
+      indexed = 16;
+    }
+    define (field=Z) {
+      indexed = 32;
+    }
+    reset = {
+      FOO2 = 0xdeadbeef;
+    };
+  }
+
+  define (reg=FOO) {
+  }
+
+  define (reg=aFOO) {
+    define (read) {
+      alias = FOO;
+    }
+    define (write) {
+      alias = FOO;
+    }
+  }
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (regfile=rGPR) {
+    """
+Upper and lower halves of GPR for use by VLE instructions.
+    """;
+    size = 16;
+    define (read) {
+      alias = GPR;
+      regs = ((0,7),(24,31));
+    }
+    define (write) {
+      alias = GPR;
+      regs = ((0,7),(24,31));
+    }
+  }
+
+  define (regfile=aGPR) {
+    """
+Alternate GPRs for VLE:  Middle block of 16 registers.
+    """;
+    size = 16;
+    define (read) {
+      alias = GPR;
+      regs = ((8,23));
+    }
+    define (write) {
+      alias = GPR;
+      regs = ((8,23));
+    }
+  }
+
+  define (regfile=VPR) {
+    """
+Vector registers.
+    """;
+    width=128;
+    size = 32;
+
+    define (field=B) {
+      indexed = 8;
+    }
+    define (field=H) {
+      indexed = 16;
+    }
+    define (field=W) {
+      indexed = 32;
+    }
+  }
+
+  define (regfile=SPR) {
+    size=1024;
+
+    define (entry=9)  { reg = CTR; }
+    define (entry=62) { reg = ESR; }
+    define (entry=26)  { reg = SRR0; }
+    define (entry=27)  { reg = SRR1; }
+    define (entry=30)  { reg = FOO1; }
+    define (entry=31)  { reg = FOO2; }
+    define (entry=32)  { 
+      define(write) {
+        action = func (bits<regSize> value) {
+          ESR = 0x00040020;  // unimplemented instruction
+        };
+
+
+      }
+
+      define(read) {
+        action = {
+          ESR = 0x00040020;  // unimplemented instruction
+          return 0;  // just to avoid the compiler warning
+        };
+      }
+
+    }
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=OPCD7) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,6);
+  }
+  
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=BO) {
+    """
+Field used to specify options for the Branch Conditional (`bc BO, BI, BD`_) instruction.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=BI) {
+    """
+Field used to specify a bit in the Condition Register (CR_) to be used
+as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield = F1) {
+    """
+An example enumerated field.
+    """;
+    bits = (28,31);
+    enumerated = ( "", (",1",",bark"), (",2"), (",3",",woof"), reserved, reserved, ",foo" );
+  };
+
+  define (instrfield=BD) {
+    """
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+  }
+
+  define (instrfield=BF) {
+    """
+Field used to specify one of the Condition Register (CR_) fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+
+  define (instrfield=AA) {
+    """
+Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=LK) {
+    """
+LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=SPRN) {
+    """
+Field used to specify a Special Purpose Register (SPR_) for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register (GPR_) as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield = SI32) {
+    pseudo = true;
+    width = 32;
+  }
+
+  
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instrfield=SH) {
+    bits = (16,20);
+  }
+  define (instrfield=MB) {
+    bits = (21,25);
+  }
+  define (instrfield=ME) {
+    bits = (26,30);
+  }
+   // For short instructions
+  define (instrfield=RY) {
+    bits = (8,11);
+  }
+  define (instrfield=RX) {
+    bits = (12,15);
+  }
+
+  define (instrfield = OIM5) {
+    """
+    Offset Immediate field used to specify a 5-bit unsigned integer in the 
+    range [1:32] encoded as [0:31].
+    """;
+    bits = (7,11);
+    offset = 1;
+  }
+ 
+
+  //
+  // Instructions.
+  //
+
+  // Dummy instruction to test enumerated fields.
+  define (instr=dum1) {
+    """
+Dummy field to test enumerated fields.
+    """;
+    fields = ( OPCD(69), F1,RA,RS );
+    syntax = ("dum1%p %f,%f",F1,RA,RS);
+    action = { ; };
+  }
+
+ 
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  define (instr = se_addi) {
+    width = 16;
+    fields = (OPCD7(0x10),OIM5,RX);
+    syntax = ("%i %f,%f", RX,OIM5);
+    action = {
+      rGPR(RX) = rGPR(RX) + OIM5;
+    };
+  }
+
+  
+  // For this alias fields should be reported.
+  define (instr=se_add) {
+    width = 16;
+    fields=(OPCD(1),RY,RX);
+    alias = add(RT(RX),RA(RX),RB(RY));
+  }
+  // For this alias fields should not be reported (it does not change opcode).
+  define (instr=add2) {
+    fields=(OPCD(31),RT(0),RA(0),RB(0),XO(266));
+    alias = add(RT(0),RA(0),RB(0));
+  }
+
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      if (RA == 0) {
+        GPR(RT) = si;
+      } else {
+        GPR(RT) = GPR(RA) + si;
+      }
+    };
+  }
+
+  define (instr="addic.") {
+    fields=(OPCD(13),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,32);
+      GPR(RT) = GPR(RA) + si;
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr=addis) {
+    fields=(OPCD(15),RT,RA,SI);
+    action = {
+      bits<32> si = SI;
+      if (RA == 0) {
+        GPR(RT) = si << 16;
+      } else {
+        GPR(RT) = GPR(RA) + (si << 16);
+      }
+    };
+  }
+
+  // Example helper used by alias action code.
+  void create_constant_loader(InstrBundle &b,unsigned r,uint64_t c)
+  {
+    unsigned upper = ( c >> 16 ) + ( (c & 0x8000) ? 1 : 0);
+    b.push_back(createInstr("addis",r,0,upper));
+    b.push_back(createInstr("addi",r,r, (c & 0xffff) ));
+  }
+  
+  // An example of a complex alias.  In this case, we'll eliminate the addi if
+  // the constant will fit within the upper bits (just the addis).
+  define (instr = li) {
+    fields = (RT,SI32);
+    syntax = ("li %f,%f",RT,SI32);
+    alias_action = func(const InstrArgs &args) {
+      unsigned r = args[0];
+      uint64_t c = args[1];
+      InstrBundle b;
+      if ( (c & 0xffff) == 0) {
+        // Only an upper constant.
+        b.push_back(createInstr("addis",r,0,(c >> 16)));
+      } else if ( (c & 0xffff) == c) {
+        // Only a lower constant.
+        b.push_back(createInstr("ori",r,0,c));
+      } else {
+        // Need an instruction pair.
+        create_constant_loader(b,r,c);
+      }
+      return b;
+    };
+  }
+  
+
+  define (instr=bc) {
+    fields=(OPCD(16),BO,BI,BD,AA(0),LK(0));
+    action = func() {
+      if ( (BO(2) ) == 0) {
+        CTR = CTR - 1;
+      }
+      var ctr_ok = BO(2) || ( (CTR!=0) ^ BO(3));
+      var cond_ok = BO(0) || ( CR(BI) == BO(1));
+      if ( ctr_ok && cond_ok ) {
+        var ea = signExtend(concat(BD,zero(2)),32);
+        NIA = CIA + ea;
+      }
+    };
+  }
+
+  define (instr=cmpi) {
+    fields=(OPCD(11),BF,RA,SI);
+    action = func () {
+      var si = signExtend(SI,32);
+      // Just to test that we can have helper functions which differ only by case.
+      setcrfield(BF,GPR(RA),si);
+    };
+  }
+
+  define (instr=cmp) {
+    fields=(OPCD(31),BF,RA,RB,XO(0));
+    action = {
+      setCrField(BF,GPR(RA),GPR(RB));
+    };
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    action = {
+      var d = signExtend(D,32);
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + d;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=lwzx) {
+    fields=(OPCD(31),RT,RA,RB,XO(23));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      if (!SPR.validIndex(SPRN)) {
+        ESR.set(4);
+        raiseException(Program);
+      }
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  define (instr=mfspr) {
+    fields=(OPCD(31),RT,SPRN,XO(339));
+    action = {
+      if (!SPR.validIndex(SPRN)) {
+        ESR.set(4);
+        raiseException(Program);
+      }
+      GPR(RT) = SPR(SPRN);
+    };
+  }
+
+  define (instr=mr) {
+    alias=or(RS(RS),RA(RA),RB(RS));
+    syntax = ("%i %f,%f",RA,RS);
+  }
+
+  define (instr=mullw) {
+    fields=(OPCD(31),RT,RA,RB,XO(235));
+    action = {
+      GPR(RT) = GPR(RA) * GPR(RB);
+    };
+  }
+
+
+  define (instr=or) {
+    """
+The contents of **rS** are ORed with the contents of **rB** and the result is placed into **rA**.
+
+The simplified mnemonic **`mr RA,RS`_** demonstrates the use of the **or** instruction
+to move register contents.
+""";
+    doc_title = "or - bitwise OR of 2 registers";
+    fields=(OPCD(31),RS,RA,RB,XO(444));
+    action = {
+      GPR(RA) = GPR(RS) | GPR(RB);
+    };
+  }
+
+  define (instr=ori) {
+    fields=(OPCD(24),RS,RA,UI);
+    action = {
+      GPR(RA) = GPR(RS) | UI;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define(instr=rlwinm) {
+    fields=(OPCD(21),RS,RA,SH,MB,ME);
+    action = {
+      var r = GPR(RS).left_rotate(SH);
+      bits<32> m;
+      m.mask(MB,ME);
+      GPR(RA) = r & m;
+    };
+  }
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var d = signExtend(D,32);
+      var addr = b + d;
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  define (instr=stwu) {
+    fields=(OPCD(37),RS,RA,D);
+    action = {
+      var d = signExtend(D,32);
+      var addr = GPR(RA) + d;
+      Mem(addr,4) = GPR(RS);
+      GPR(RA) = addr;
+    };
+  }
+
+  define (instr=stwx) {
+    fields=(OPCD(31),RS,RA,RB,XO(151));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + GPR(RB);
+      Mem(addr,4) = GPR(RS);
+    };
+  }
+
+  // This is just for experimenting with register fields.
+  define (instr=tw) {
+    fields=(OPCD(31),RA,RB,XO(4));
+    action = {
+      // This should respect read-only and reserved bits.
+      FOO1 = GPR(RA);
+      // Test reading from a field.
+      GPR(RB) = FOO1.A + 1;
+      // Test writing to a field.
+      FOO1.C = GPR(RB+1);
+    };
+  }
+
+  // Again, just for experimenting with register fields.
+  define (instr=crand) {
+    fields=(OPCD(19),RT,RA,RB,XO(257));
+    action = {
+      if (RB == 0) {
+        GPR(RT) = FOO2.X(RA);
+      } else if (RB == 1) {
+        GPR(RT) = FOO2.Y(RA);
+      } else {
+        GPR(RT) = FOO2.Z(RA);
+      }
+    };
+  }
+  define (instr=crandc) {
+    fields=(OPCD(19),RS,RA,RB,XO(129));
+    action = {
+      if (RB == 0) {
+        FOO2.X(RA) = GPR(RS);
+      } else if (RB == 1) {
+        FOO2.Y(RA) = GPR(RS);
+      } else {
+        FOO2.Z(RA) = GPR(RS);
+      }      
+    };
+  }
+
+  define (instr=vaddubm) {
+    fields=(OPCD(4),RT,RA,RB,XO(0));
+    action = {
+      for (unsigned i = 0; i != VPR(RT).size()/8; ++i) {
+        VPR(RT).B(i) = VPR(RA).B(i) + VPR(RB).B(i);
+      }
+    };
+  }
+
+  define (instr=vadduhm) {
+    fields=(OPCD(4),RT,RA,RB,XO(32));
+    action = {
+      for (unsigned i = 0; i != VPR(RT).size()/16; ++i) {
+        VPR(RT).H(i) = VPR(RA).H(i) + VPR(RB).H(i);
+      }
+    };
+  }
+
+  define (instr=vadduwm) {
+    fields=(OPCD(4),RT,RA,RB,XO(64));
+    action = {
+      for (unsigned i = 0; i != VPR(RT).size()/32; ++i) {
+        VPR(RT).W(i) = VPR(RA).W(i) + VPR(RB).W(i);
+      }
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    width=32;	
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+  //
+  // Decode miss handler.
+  // 
+  decode_miss = func (addr_t ea,unsigned) {
+    ESR.set(4);
+    raiseException(Program);
+  };
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    """
+The program interrupt occurs for various reasons, such as when an illegal
+instruction is encountered.
+""";
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR.get<16>(0,15),IVOR6.get<16>(16,31));
+    };
+  }
+
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

@@ -1,0 +1,85 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "DEAR"
+  Width:  32
+  -------------------------------
+  Name:  "HDBCR0"
+  Width:  32
+    MMU_ENABLE[0]   
+  -------------------------------
+  Name:  "IVOR6"
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 6.
+    
+  -------------------------------
+  Name:  "IVOR7"
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 7.
+    
+  -------------------------------
+  Name:  "IVPR"
+  Width:  32
+  Documention:
+
+    Interrupt-vector prefix register.
+    
+  -------------------------------
+  Name:  "MSR"
+  Usage:  field-read
+  Width:  32
+    CM[0]   
+      Usage:  field-read
+    PR[10]   
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+  Name:  "PID0"
+  Width:  32
+  -------------------------------
+  Name:  "PID1"
+  Width:  32
+  -------------------------------
+  Name:  "SRR0"
+  Width:  32
+  -------------------------------
+  Name:  "SRR1"
+  Width:  32
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xfffffffffff (non-constant)
+  Watch Expr:  {
+    if ( MSR . CM == 1 ) {
+        EaMask = 0xffffffffULL ;
+    } else {
+        EaMask = 0xffffffffffffffffULL ;
+    }
+}
+-------------------------------
+

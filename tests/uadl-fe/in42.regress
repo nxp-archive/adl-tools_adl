@@ -1,0 +1,6 @@
+in42.uadl:45: warning: Instruction defined in class 'sfx' but not ADL:  halt
+in42.uadl:45: Interface function delay not defined for instruction add.
+in42.uadl:4: warning: Instructions access no data memory
+in42.uadl:43: Unknown variable/resource found in action code:  tFoo
+in42.uadl:43: Unknown variable/resource found in action code:  tFoo
+Could not parse in42.uadl

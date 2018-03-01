@@ -1,0 +1,38 @@
+//
+// Simple configuration demonstrating grouping.
+//
+
+define (config) {
+  debug_mode = true;
+}
+
+define(core=P) {
+
+  define(group=multiplies) {
+    items = mullw;
+    latency = 8;
+    stages = (Fetch,Decode,ExecMul = exec,Writeback = compl);
+  }
+
+  // Latency will be set externally.
+  define(group=loadstores) {
+    items = (load,store);
+    stages = (Fetch,Decode,Exec,Mem = exec,Writeback = compl);
+  }
+
+  define (group=grp1) {
+    items = cmp;
+    stages = (Fetch,Decode,Exec = exec,Writeback = compl);
+  }
+
+  defmod (group=grp1) {
+    items = (srw,or,default_instruction);
+  }
+
+  define (group=grp2) {
+    items = stwx;
+    latency = 3;
+    stages = (Fetch,Decode,Exec,Mem = exec,Writeback = compl);
+  }
+
+}

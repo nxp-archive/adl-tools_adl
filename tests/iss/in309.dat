@@ -1,0 +1,44 @@
+#
+# Make sure that a split-branch defaults back to being a computed branch if a
+# relevant instruction is executed first.  In this case, a mtctr updates CTR,
+# changing what the prepare-to-branch instruction had set up.
+#
+= asm
+
+L0:
+	ptb L1
+	addi r1,r1,1
+	li r2,L2@l
+	mtctr r2
+	bctr
+	addi r3,r3,3
+L1:
+	addi r4,r4,4
+L2:
+	addi r5,r5,5
+	cmpwi r5,20
+	bne L0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x50000018	#	ptb L1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x3840001C	#	li r2,L2@l
+MD n=Mem ra=0x0000000c d=0x7C4903A6	#	mtctr r2
+MD n=Mem ra=0x00000010 d=0x4C000420	#	bctr
+MD n=Mem ra=0x00000014 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000018 d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x0000001c d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000020 d=0x2C050014	#	cmpwi r5,20
+MD n=Mem ra=0x00000024 d=0x4082FFDC	#	bne L0
+# </GEN>
+
+RESULTS
+
+CORE n=:P
+
+RD n=GPR i=1 d=4
+RD n=GPR i=3 d=0
+RD n=GPR i=4 d=0
+RD n=GPR i=5 d=20

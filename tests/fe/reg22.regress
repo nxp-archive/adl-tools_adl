@@ -1,0 +1,2 @@
+reg22.adl:29: The size of the list of aliased registers (15) != the size of the register file (16).
+reg22.adl:29: warning: Target of alias is larger than the alias.  This will result in truncation.

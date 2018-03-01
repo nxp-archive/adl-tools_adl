@@ -1,0 +1,149 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ enum  {
+    RegWidth = 32
+    ,
+} ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Attributes:  debug(0)
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia debug(4)
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  D: [16,31] 
+    Display:  dec
+    Signed:  1
+    Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+  OPCD: [0,5] 
+    Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR] 
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  XO: [21,30] [not used] 
+    Extended opcode.
+    
+Instructions:
+  Name:  lmw1 (rank: 100)
+  Width:  32
+  Syntax:  "lmw1 %f,%f(%f)":   RT D RA
+  Attributes:  load
+  Fields:  OPCD(46) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+     int r = 10 ;
+     int e = get_upper_bound ( RT ) ;
+    load_regs ( r , get_upper_bound ( RT ) , addr ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(10,get_upper_bound ( RT )) 
+  Source Memories:  Mem 
+  Helper Functions:  get_upper_bound load_regs 
+  -------------------------------
+  Name:  lmw2 (rank: 100)
+  Width:  32
+  Syntax:  "lmw2 %f,%f(%f)":   RT D RA
+  Attributes:  load
+  Fields:  OPCD(47) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+     int r = RT . uint32 (  ) ;
+     int e = 32 ;
+    load_regs ( r , e , addr ) ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT . uint32 (  ),31) 
+  Source Memories:  Mem 
+  Helper Functions:  load_regs 
+  -------------------------------
+  Name:  lmw3 (rank: 100)
+  Width:  32
+  Syntax:  "lmw3 %f,%f(%f)":   RT D RA
+  Attributes:  load
+  Fields:  OPCD(48) RT RA D
+  Action:  {
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    load_regs ( 0 , 0 , addr ) ;
+}
+  Source Registers:  GPR(RA) 
+  Source Memories:  Mem 
+  Helper Functions:  load_regs 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    46(b8000000):  lmw1
+    47(bc000000):  lmw2
+    48(c0000000):  lmw3
+
+Helper Functions:
+  get_recv_upper_bound:
+ unsigned get_recv_upper_bound ( unsigned s , unsigned e ) {
+    return s + e + 1 ;
+}
+
+  get_upper_bound:
+ unsigned get_upper_bound ( const bits < 5 > & rt ) {
+    return rt . uint32 (  ) ;
+}
+
+  load_regs:
+ void load_regs ( unsigned r , unsigned e , unsigned addr ) {
+    for (  ; r != e ; ++ r ) {
+        GPR ( r ) = Mem ( addr , 4 ) ;
+    }
+}
+    Target Registers:  GPR(r,e [parm #0]) 
+    Source Memories:  Mem 
+-------------------------------
+

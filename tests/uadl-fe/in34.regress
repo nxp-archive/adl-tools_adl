@@ -1,0 +1,346 @@
+in34.uadl:5: warning: Core powerpc is not defined by ADL, using core P instead.
+in34.uadl:119: warning: Instruction defined in class 'cacheNop' but not ADL:  icbi
+powerpc (for architecture P):
+  First-level instruction memory:  L1i
+
+  First-level data memory:  L1d
+
+  Fetch Unit:  Fetcher
+    Fetch Memory:  L1i
+    Entries     :  1
+    Entry Size  :  4
+    Fetch Sizes :  4 
+
+  Pipeline Stage:  mEX
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+  Pipeline Stage:  mID
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+  Pipeline Stage:  mMM
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+  Pipeline Stage:  mWB
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler        :  dependent
+    Is issue stage:  0
+		Shared           :  0
+
+  Register:  CIA
+    ID        :  0
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CR
+    ID        :  1
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CTR
+    ID        :  2
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  GPR
+    ID        :  8
+    Size      :  32
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  HID0
+    ID        :  3
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  HID1
+    ID        :  4
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  LR
+    ID        :  5
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  NIA
+    ID        :  6
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  SPR
+    ID        :  9
+    Size      :  1024
+    Width     :  32
+    Latency   :  0
+    Is aliased:  1
+  Register:  XER
+    ID        :  7
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+
+  Memory:  Mem
+    Total address bandwidth: 2
+    Total data bandwidth:    2
+    Data width:              32
+    Max requests:            2
+    Port:  D
+      address bandwidth: 1
+      data bandwidth:    1
+      read latency:      1
+      write latency:     2
+		  max requests:      2
+      allow bus-wait:    1
+    Port:  I
+      address bandwidth: 1
+      data bandwidth:    1
+      read latency:      0
+      write latency:     0
+		  max requests:      1
+      allow bus-wait:    1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Cache:  L1d
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Custom model               :  MyCache, MyCache.h
+    Next-level memory          :  Mem.D
+    critical_word_first        :  1
+    foobar                     :  true
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+  Cache:  L1i
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory             :  Mem.I
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+
+  Pipeline Scheduling Order:   mWB mMM mEX mID 
+
+  Machine:  normal
+    Initial state:  S_INIT
+    States       :  S_EX S_EXp S_ID S_MM S_MMp S_WB S_WBp
+    Default State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_WB = mWB
+      S_WBp = mWB
+
+  Memory Aliases:
+    DataMem = Mem . D
+    InstrMem = L1i
+    Mem = L1d
+
+  Instruction Class:  cacheNop
+    Instructions:
+
+    Commit On Exception:  1
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_WB = mWB
+      S_WBp = mWB
+    State actions:
+      S_EX:
+        To-States:  S_EXp 
+        From-States:  S_ID S_INIT 
+        Action:
+if ( mMM . has_space (  ) && L1d . can_request_cmd (  ) && L1d . is_inactive (  ) && L1i . is_inactive (  ) ) {
+    exec (  ) ;
+    L1d . send_cmd (  ) ;
+    exec (  ) ;
+    change_state ( S_EXp ) ;
+}
+
+      S_EXp:
+        To-States:  S_MM 
+        From-States:  S_EX S_ID S_INIT 
+        Action:
+if ( exec_done (  ) && mMM . has_space (  ) ) {
+    change_state ( S_MM ) ;
+} else if ( L1d . can_request_cmd (  ) ) {
+    L1d . send_cmd (  ) ;
+    exec (  ) ;
+    if ( mMM . has_space (  ) ) {
+        change_state ( S_MM ) ;
+    }
+}
+
+      S_ID:
+        To-States:  S_EX 
+        From-States:  S_INIT 
+        Action:
+if ( Src . can_read (  ) && mEX . has_space (  ) ) {
+    Src . read (  ) ;
+    change_state ( S_EX ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID . empty (  ) && mEX . empty (  ) && mMM . empty (  ) && mWB . empty (  ) ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MM:
+        To-States:  S_WB 
+        From-States:  S_EX S_EXp S_ID S_INIT 
+        Action:
+if ( mWB . has_space (  ) ) {
+    change_state ( S_WB ) ;
+}
+
+      S_WB:
+        To-States:  S_INIT 
+        From-States:  S_EX S_EXp S_ID S_INIT S_MM 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+  Instruction Class:  load
+    Instructions:
+      lbz
+        Imm = (imm: D), 
+        Src = (src: GPR(RA)), 
+        Trg = (trg: GPR(RT)), 
+      lhz
+        Imm = (imm: D), 
+        Src = (src: GPR(RA)), 
+        Trg = (trg: GPR(RT)), 
+      lwz
+        Imm = (imm: D), 
+        Src = (src: GPR(RA)), 
+        Trg = (trg: GPR(RT)), 
+
+    Commit On Exception:  1
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_EXp = mEX
+      S_MM = mMM
+      S_MMp = mMM
+      S_WB = mWB
+      S_WBp = mWB
+    State actions:
+      S_EX:
+        To-States:  S_MM 
+        From-States:  S_ID S_INIT 
+        Action:
+if ( mMM . has_space (  ) && L1d . can_request_read (  ) ) {
+    exec (  ) ;
+    L1d . send_read_request (  ) ;
+    change_state ( S_MM ) ;
+}
+
+      S_ID:
+        To-States:  S_EX 
+        From-States:  S_INIT 
+        Action:
+if ( Src . can_read (  ) && Trg . can_write (  ) && mEX . has_space (  ) ) {
+    Src . read (  ) ;
+    Trg . allocate (  ) ;
+    change_state ( S_EX ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID . has_space (  ) ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MM:
+        To-States:  S_MMp 
+        From-States:  S_EX S_ID S_INIT 
+        Action:
+if ( L1d . can_read (  ) ) {
+    exec_and_read ( L1d ) ;
+    change_state ( S_MMp ) ;
+}
+
+      S_MMp:
+        To-States:  S_MM S_WB 
+        From-States:  S_EX S_ID S_INIT S_MM 
+        Action:
+if ( exec_done (  ) && mWB . has_space (  ) ) {
+    change_state ( S_WB ) ;
+} else if ( L1d . can_request_read (  ) ) {
+    L1d . send_read_request (  ) ;
+    change_state ( S_MM ) ;
+}
+
+      S_WB:
+        To-States:  S_WBp 
+        From-States:  S_EX S_ID S_INIT S_MM S_MMp 
+        Action:
+{
+    write_ops (  ) ;
+    change_state ( S_WBp ) ;
+}
+
+      S_WBp:
+        To-States:  S_INIT 
+        From-States:  S_EX S_ID S_INIT S_MM S_MMp S_WB 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+

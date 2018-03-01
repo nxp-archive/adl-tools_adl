@@ -1,0 +1,28 @@
+#
+# Test to make sure that we can set breakpoints after a basic block has been
+# compiled (decode-cache or jit), where direct-threading means that we have
+# pointers to that block.
+#
+# If it doesn't make it, we won't get the expected puts strings.
+#
+simload $env(srcdir)/in280.elf setpc
+
+puts "At first phase."
+
+settd threshold 100000
+settd count 0
+simmode $argv
+go
+
+puts "At second phase."
+
+setbrk bp
+
+settd threshold 100000
+settd count 0
+
+go
+
+puts "At third phase."
+
+quit

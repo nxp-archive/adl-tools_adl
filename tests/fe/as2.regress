@@ -1,0 +1,224 @@
+======
+Cores:
+======
+Name:  "foo"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+Exceptions:
+  Name:  Program
+  Action:  {
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR ( 0 , 15 ) , IVOR6 ( 16 , 31 ) ) ;
+}
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CR"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "ESR"
+  Width:  32
+  Documention:
+
+    Exception syndrome register.
+    
+  -------------------------------
+  Name:  "IVOR6"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 6.
+    
+  -------------------------------
+  Name:  "IVPR"
+  Usage:  slice-read
+  Width:  32
+  Documention:
+
+    Interrupt-vector prefix register.
+    
+  -------------------------------
+  Name:  "MSR"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    Machine state register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+  Name:  "SRR0"
+  Usage:  written
+  Width:  32
+  Documention:
+
+    Save-restore register 0.
+    
+  -------------------------------
+  Name:  "SRR1"
+  Usage:  written
+  Width:  32
+  Documention:
+
+    Save-restore register 1.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] [not used] 
+        Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SI: [16,31] 
+        Signed immediate field for arithmetic operations.
+    
+  XO: [21,30] 
+        Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  addi (rank: 100)
+  Width:  32
+  Aspects:
+    Name:  A
+    Labels:  Start 
+    Action:  {
+    raiseException ( Program ) ;
+}
+  Fields:  OPCD(14) RT RA SI
+  Action:  {
+    Start : {
+            raiseException ( Program ) ;
+        }if ( RA == 0 ) {
+            GPR ( RT ) = signExtend ( SI , 32 ) ;
+        } else {
+            GPR ( RT ) = GPR ( RA ) + signExtend ( SI , 32 ) ;
+        }
+    
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  Does raise exceptions.
+  Documention:
+
+    If RA=0, the sign extended value of the SI field is placed into GPR(RT)
+    
+  -------------------------------
+  Name:  addic. (rank: 100)
+  Width:  32
+  Aspects:
+    Name:  A
+    Labels:  Start 
+    Action:  {
+    raiseException ( Program ) ;
+}
+  Fields:  OPCD(13) RT RA SI
+  Action:  {
+    Start : {
+            raiseException ( Program ) ;
+        }GPR ( RT ) = GPR ( RA ) + signExtend ( SI , 32 ) ;
+    
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+  Source Registers:  CR GPR(RA) 
+  Target Registers:  CR GPR(RT) 
+  Helper Functions:  setCrField 
+  Does raise exceptions.
+  -------------------------------
+  Name:  addis (rank: 100)
+  Width:  32
+  Fields:  OPCD(15) RT RA SI
+  Action:  {
+    Start : if ( RA == 0 ) {
+        GPR ( RT ) = signExtend ( concat ( SI , zero ( 16 ) ) , 32 ) ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + signExtend ( concat ( SI , zero ( 16 ) ) , 32 ) ;
+    }
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    13(34000000):  addic.
+    14(38000000):  addi
+    15(3c000000):  addis
+    31(7c000000):      Mask:  0x7fe
+      266(214):  add
+
+Helper Functions:
+  clearCR:
+ void clearCR (  ) {
+    CR = 0 ;
+}
+    Target Registers:  CR 
+
+  setCrField:
+ void setCrField ( int field , int x , int y ) {
+     unsigned r = ( ( x < y ) ? 0x8 : 0 ) | ( ( x > y ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+     unsigned mask = 0xf << ( ( 7 - field ) * 4 ) ;
+    r = r << ( ( 7 - field ) * 4 ) ;
+    CR = ( CR & ~ mask ) | r ;
+}
+    Source Registers:  CR 
+    Target Registers:  CR 
+-------------------------------
+

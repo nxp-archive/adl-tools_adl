@@ -1,0 +1,467 @@
+#import "mod1.adl"
+
+define (arch = PPC_parallel) {
+
+  parallel_execution = 2;
+
+  attrs = branch_target;
+  
+  //
+  // params
+  //
+  
+  define (parm = last_in_packet) {
+    options = (true,false);
+    value = false;
+  }
+  define (parm = skip_instr) {
+    options = (first,second,third,skip);
+    value = first;	
+  }	
+
+   
+  // 
+  // hooks
+  //
+  post_fetch = func(unsigned sz) {
+    if (SCR.SKIP == 0) {
+      if (last_in_packet) {
+        setPacketPosition(0);
+      }
+      
+      switch(skip_instr) {
+      case first:  skip_instr = second; break;
+      case second: skip_instr = third ; break;
+      case third:  skip_instr = skip;   break;
+      case skip:   skip_instr = first; 
+      skip_instruction(); break;
+      }	
+      last_in_packet = !last_in_packet;
+    }
+    NIA = CIA + sz;
+  };
+
+  post_packet = func() {
+    if (Fetch == Fetch::Normal) {
+    } else if (Fetch == Fetch::DelaySlot) {
+      Fetch = Fetch::Jump;
+    } else if (Fetch == Fetch::Jump) {
+      NIA = DSIA;
+      Fetch = Fetch::Normal;
+    }
+  };
+
+  //
+  // regs
+  // 
+  
+  define (reg=SCR) {
+    define (field=SKIP) {
+      bits = 0;
+    }
+  }
+
+  defmod(reg = (CIA,NIA)) {
+    serial = true;
+  }
+
+  define(reg = DSIA) {
+    serial = true;
+    attrs = branch_target;
+  }
+ 
+  define (reg = Fetch) {
+    width = 2;
+    enumerated = (Normal,DelaySlot,Jump);
+    reset = Normal;
+    serial = true;
+  }
+
+
+  // Registers with ValueBundle write hook
+  define(reg=BReg) {
+    // a bundle register file
+    width = 32;	
+    define(field=A) { bits = 0;	};
+    define(field=B) { bits = 3;	};
+    define(field=I) { indexed = 8; };	
+
+    define(write) {
+      action = func(ValueBundle v) {
+        unsigned s = v.size();
+        bits<32> val = 0;
+        for(unsigned i=0; i !=s ; ++i) {
+          if (v[i].mask().uint32() & 0x00000001) {
+            val +=  v[i].value();
+          } else if (v[i].mask().uint32() & 0x00000008) {
+            val += 8;
+          } else if (v[i].mask().uint32() & 0x00000080) {
+            val += 0x80;
+          } else {
+            val += v[i].value();
+          }
+        }
+        BReg = val;	   
+      }; 
+    }
+  } 
+
+  // A wite hook which uses updateReg to perform the actual updates.  The write
+  // hook also maintains a summary bit.
+  define(reg=CReg) {
+    // a bundle register file
+    width = 32;	
+    define(field=A) { bits = (0,3);	};
+    define(field=B) { bits = (4,7);	};
+    define(field=C) { bits = (8,11);	};
+    define(field=S) { bits = (28,31);	};
+
+    define(write) {
+      action = func(ValueBundle v) {
+        // Sum A, B, and C across all values written and place the result in S.
+        unsigned s = 0;
+        for (unsigned i = 0; i != v.size(); ++i) {
+          s += ((getfield_CReg_A(v[i].value() & v[i].mask())) +
+                (getfield_CReg_B(v[i].value() & v[i].mask())) +
+                (getfield_CReg_C(v[i].value() & v[i].mask()))).uint32();
+        }
+        ThisReg.S = s;
+        // Perform the actual updates.
+        updateReg(v);
+      }; 
+    }
+  } 
+
+  define(reg=DReg) {
+    // a bundle register file
+    width = 32;	
+    define(field=A) { bits = 0;	};
+    define(field=B) { bits = 3;	};
+    define(field=I) { indexed = 8; };	
+
+    define(write) {
+      action = func(bits<32> v) {
+        DReg = v & 0x01;	   
+      }; 
+    }
+  } 
+
+  // This register has the 'immediate' flag set, so that the write-hook
+  // evaluates immediately, but the actual write is delayed.
+  define (reg=EReg) {
+    define (field=X) { bits = 0; };
+    define (field=Y) { bits = (1,31); };
+    define (write) {
+      immediate = true;
+      action = func(bits<32> v) {
+        if (CReg.S != 0) {
+          ThisReg.X = 1;
+        } else {
+          ThisReg.X = 0;
+        }
+        ThisReg.Y = v;
+      };
+    }
+  }
+
+  // This register has the 'immediate' flag set, so that the write-hook
+  // evaluates immediately, but the actual write is delayed.
+  define (regfile=ERegfile) {
+    size = 4;
+    define (field=X) { bits = 0; };
+    define (field=Y) { bits = (1,31); };
+    define (write) {
+      immediate = true;
+      action = func(unsigned i,bits<32> v) {
+        if (CReg.S != 0) {
+          ThisReg(i).X = 1;
+        } else {
+          ThisReg(i).X = 0;
+        }
+        ThisReg(i).Y = v;
+      };
+    }
+  }
+
+
+  define(regfile=BRegfile) {
+    // a bundle register file
+    width = 32;	
+    size = 16;
+    define(field=A) { bits = 0;	};
+    define(field=B) { bits = 3;	};
+    define(field=I) { indexed = 8; };	
+
+    define(write) {
+      action = func(unsigned i, ValueBundle v) {
+        unsigned s = v.size();
+        bits<32> val = 0;
+        for(unsigned i=0; i !=s ; ++i) {
+          if (v[i].index() == 0) {
+            if (v[i].mask().uint32() & 0x00000001) {
+              val +=  v[i].value();
+            } else if (v[i].mask().uint32() & 0x00000008) {
+              val += 8;
+            } else if (v[i].mask().uint32() & 0x00000080) {
+              val += 0x80;
+            }
+          }	else {
+            BRegfile(v[i].index()) = v[i].value();	   
+          } 
+        }
+        BRegfile(0) = val;
+      }; 
+    }
+  }
+
+  // A wite hook which uses updateReg to perform the actual updates.  The write
+  // hook also maintains a summary bit.
+  define(regfile=CRegfile) {
+    // a bundle register file
+    width = 32;	
+    size = 16;
+    define(field=A) { bits = (0,3);	};
+    define(field=B) { bits = (4,7);	};
+    define(field=C) { bits = (8,11);	};
+    define(field=S) { bits = (28,31);	};
+
+    define(write) {
+      action = func(unsigned index,ValueBundle v) {
+        // Sum A, B, and C across all values written and place the result in S.
+        unsigned s = 0;
+        for (unsigned i = 0; i != v.size(); ++i) {
+          s += ((getfield_CRegfile_A(v[i].value() & v[i].mask())) +
+                (getfield_CRegfile_B(v[i].value() & v[i].mask())) +
+                (getfield_CRegfile_C(v[i].value() & v[i].mask()))).uint32();
+        }
+        ThisReg(index).S = s;
+        // Perform the actual updates.
+        updateReg(index,v);
+      }; 
+    }
+  } 
+
+  //
+  // instrfields
+  //
+  define (instrfield = (R1,R2,R3)) {
+    pseudo = true;
+    width = 5;
+  }
+
+
+  // 
+  // new instrs
+  //
+  
+  define (instr = nop) {
+    fields=(OPCD(1));
+    width = 32;
+    action = {};
+  }
+ 
+
+  define (instr = sync) {
+    fields=(OPCD(2),(bits(11,15),R1),(bits(16,20),R2),(bits(6,10),R3));
+    width = 32;
+    action = {
+      GPR(R3) = GPR(R1+R2);
+    };
+  }
+ 
+  define (instr = b_impl) {
+    fields=(OPCD(3),LI,AA(0),LK(0));
+    width = 32;
+    action = {
+      if (GPR(0) == 1) {
+        Fetch = Fetch::Jump;
+        DSIA = LI;
+      }
+    };
+  }
+ 
+  define (instr = bd) {
+    fields=(OPCD(3),LI,AA(0),LK(1));
+    width = 32;
+    action = {
+      DSIA = LI;
+      Fetch = Fetch::DelaySlot;
+    };
+  }
+ 
+  define (instrfield = big_field) {
+    bits = (32,63);
+  }
+  
+  // to test instruction larger than 32 bit
+  define (instr = big_instr) {
+    fields=(OPCD(3),LI(0),AA(1),LK(0),big_field);
+    width = 64;
+    action = {
+      GPR(14) = big_field;
+    };
+  }
+
+  // 
+  // modified instrs
+  //
+
+  defmod (instr=bl) {
+    syntax = ("bt %f",LI);
+    action = func() {
+      if (GPR(0) == 1) {
+        NIA = LI;
+      }
+    };
+  }
+
+  // For experimenting with rollback.  This instruction turns it on and off.
+  // Note: It's not clear if we really want to export this interface for real
+  // models, but it's at least useful for testing.
+  //
+  // Usage:  RT = 0:  Toggle rollback.  Enable is RA.
+  // Usage:  RT = 1:  Commit rollback.
+  // Usage:  RT = 2:  Flush rollback.
+  define (instr=crorc) {
+    fields=(OPCD(19),RT,RA,RB,XO(417));
+    action = {
+      if (RT == 0) {
+        enable_rollback(RA.uint32());
+      }
+      else if (RT == 1) {
+        // We want to continue to make forward progress, so we have to preserve the NIA.
+        var nia = NIA;
+        commit_rollback();
+        NIA = nia;
+      } 
+      else if (RT == 2) {
+        flush_rollback();
+      }
+    };
+  }
+
+
+  define (instr=badd) {
+    fields=(OPCD(45),BI,SI);
+    action = {
+      if (BI == 0) {
+        BReg = BReg.A + SI;	
+      } else {
+        BReg = BReg + (SI << 7);
+      }
+	
+    };
+  }
+
+  define (instr=cadd) {
+    fields=(OPCD(48),BO,BI);
+    width = 32;
+    action = {
+      switch (BO.uint32()) {
+      case 0:
+      CReg.A = BI;
+      break;
+      case 1:
+      CReg.B = BI;
+      break;
+      case 2:
+      CReg.C = BI;
+      break;
+      }
+    };
+  }
+
+  define (instr=baddb) {
+    fields=(OPCD(49),BI,SI);
+    action = {
+      if (BI == 0) {
+        BReg.B  = BReg.B & SI;	
+      } else {
+        BReg.I(1) = BReg.I(1) + SI;
+      }
+	
+    };
+  }
+
+  define (instr=bradd) {
+    fields=(OPCD(51),BO,BI,SI);
+    action = {
+      if (BI == 0) {
+        BRegfile(BO) = BRegfile(BO).A + SI;	
+      } else {
+        BRegfile(BO) = BRegfile(BO) + (SI << 7);
+      }
+	
+    };
+  }
+
+  define (instr=braddb) {
+    fields=(OPCD(52),BO,BI,SI);
+    action = {
+      if (BI == 0) {
+        BRegfile(BO).B  = BRegfile(BO).B & SI;	
+      } else {
+        BRegfile(BO).I(1) = BRegfile(BO).I(1) + SI;
+      }
+	
+    };
+  }
+
+  void update_breg(const bits<5> &v)
+  {
+    delayed_write(BReg,1)  = BReg + v;	
+  }
+
+  void dummy_update(bool d,const bits<5> &v)
+  {
+    if (d) {
+      delayed_write(SCR,1) = v;
+    }
+  }
+  
+  define (instr=dbadd) {
+    fields=(OPCD(53),BI);
+    action = {
+      update_breg(BI);
+      dummy_update(false,BI);
+    };
+  }
+
+  define (instr=eadd) {
+    fields=(OPCD(54),BO,BI);
+    width = 32;
+    action = {
+      switch (BO.uint32()) {
+      case 0:
+      EReg = EReg + BI;
+      break;
+      case 1:
+      EReg.Y = EReg.Y + BI;
+      break;
+      }
+    };
+  }
+
+  define (instr=efadd) {
+    fields=(OPCD(55),BO,BI);
+    width = 32;
+    action = {
+      switch (BO.uint32()) {
+      case 0:
+      ERegfile(BO).X = ERegfile(BO).X + BI;
+      ERegfile(BO).Y = ERegfile(BO).Y + BI;
+      break;
+      case 1:
+      ERegfile(BO).X = ERegfile(BO).X + BI;
+      ERegfile(BO).Y = ERegfile(BO).Y + BI;
+      break;
+      }
+    };
+  }
+    
+}
+
+define (core = P) {
+  archs = (MiniPPC,PPC_parallel);
+}
+

@@ -1,0 +1,98 @@
+======
+Cores:
+======
+Name:  "P"
+Blocks:
+agu 
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Relocations:
+  R1 3
+    Field width:  0
+    PC-relative:  0
+		Right-shift:  0
+		Check Overflow:  True
+    Attributes:  a1
+    Documention:
+
+      A relocation defined in ADL.
+    
+  R2 4
+    Field width:  0
+    PC-relative:  0
+		Right-shift:  0
+		Check Overflow:  True
+    Attributes:  a2
+  R3 5
+    Field width:  0
+    PC-relative:  0
+		Right-shift:  0
+    Offset: 1
+		Check Overflow:  True
+Instruction Fields:
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  VarInstrOpcode_imp_bits__0_10_: [0,10] 
+  XO: 
+    Pseudo:  1
+    Width:   10
+  XO_imp_bits__11_20_: [11,20] 
+    Implements:  XO
+  XP: 
+    Pseudo:  1
+    Width:   3
+    Parm:  1
+Instructions:
+  Name:  sub (rank: 100)
+  Fields:  OPCD XO XP
+  Action:  {
+}
+  Nested insructions:  
+    Name:  sub1 (rank: 100)
+    Width:  24
+    Syntax:  "sub %f":   XO
+    Fields:  VarInstrOpcode_imp_bits__0_10_ XO_imp_bits__11_20_
+    Alias:  sub OPCD(247) XO(XO) XP(7) 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xffe00000
+    247(1ee00000):  sub1
+-------------------------------
+

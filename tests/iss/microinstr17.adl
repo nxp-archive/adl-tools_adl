@@ -1,0 +1,285 @@
+// Check combineInstr() with no-operand instructions
+
+define (core = rubber) {
+  archs = rubber; 
+  instrtables = (
+                 other,
+                 instr_opA, instr_opB
+                );
+}
+
+
+define (arch = rubber) {
+
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+  attrs = (
+            log_as_reg, 
+            instr_macro,
+            instr_opA, instr_opB
+          );
+        
+//##############################################################################
+// Instruction Fields
+//##############################################################################
+
+define (instrfield = AX)
+{
+    display = dec;
+    pseudo = true;
+    width = 5; 
+    ref = a;
+    type = regfile;
+    enumerated = (reserved,reserved,reserved,reserved,
+                  reserved,reserved,reserved,reserved,
+                  reserved,reserved,reserved,reserved,
+                  "a0","a1","a2","a3",
+                  "a4","a5","a6","a7",
+                  "a8","a9","a10","a11",
+                  "a12","a13","a14","a15",
+                  "a16","a17","a18","a19");
+}
+
+define (instrfield = AY)
+{
+    display = dec;
+    pseudo = true;
+    width = 5; 
+    ref = a;
+    type = regfile;
+    enumerated = (reserved,reserved,reserved,reserved,
+                  reserved,reserved,reserved,reserved,
+                  reserved,reserved,reserved,reserved,
+                  "a0","a1","a2","a3",
+                  "a4","a5","a6","a7",
+                  "a8","a9","a10","a11",
+                  "a12","a13","a14","a15",
+                  "a16","a17","a18","a19");
+}
+
+define (instrfield = AZ)
+{
+    display = dec;
+    pseudo = true;
+    width = 5; 
+    ref = a;
+    type = regfile;
+    enumerated = (reserved,reserved,reserved,reserved,
+                  reserved,reserved,reserved,reserved,
+                  reserved,reserved,reserved,reserved,
+                  "a0","a1","a2","a3",
+                  "a4","a5","a6","a7",
+                  "a8","a9","a10","a11",
+                  "a12","a13","a14","a15",
+                  "a16","a17","a18","a19");
+}
+
+define(instrfield=opA) {
+  display = hex;
+  pseudo = true;
+  width = 19;
+  type = instr;
+  ref = instr_opA;
+}
+
+define(instrfield=opB) {
+  display = hex;
+  pseudo = true;
+  width = 19;
+  type = instr;
+  ref = instr_opB;
+}  
+
+//==============================================================================
+	
+//##############################################################################
+// Registers
+//##############################################################################
+
+define (reg = CIA) {
+  """
+  Current instruction address
+  """;
+  attrs = cia;
+}
+
+define (reg = NIA) {
+  """
+  Next instruction address
+  """;
+  attrs = nia;
+}
+
+define (regfile = a) {
+  attrs = (log_as_reg);
+  width = 32;
+  size = 20;
+  define (write) {
+    action = func(unsigned index, bits<32> value) {
+      a(index-12) = value;
+    }; // action
+  }  // define (write)   
+  define (read) {
+    action = func(unsigned index) {
+      return a(index-12);
+    }; // action
+  }  // define (read)   
+}   
+
+//============================================================================== 
+
+//##############################################################################
+// Instructions
+//##############################################################################
+
+define (instr = done) { 
+  width = 64;
+  fields = (
+           (bits(63,0),0)
+           );
+  syntax = ("done");
+  attrs = (instr_macro);  
+  action =  { 
+              halt();
+            };    
+}
+
+define (instr = opBA) { 
+  width = 64;
+  fields = (
+           (bits(63,62),b11), 
+           (bits(61,43),opB), (bits(42,24),opA), 
+           (bits(23,0),0)
+           );
+  syntax = ("opBA %f,%f", opB, opA);
+  attrs = (instr_macro);  
+  action =  { 
+              run(opB, opA);
+            };    
+}
+
+define (instr = add_aX_aY_aZ)
+{
+    width = 19;
+    fields = ((bits(18,15),b1000), (bits(14,10),AX), (bits(9,5),AY), (bits(4,0),AZ));
+    syntax = ("add %f,%f,%f", AX, AY, AZ);
+    attrs = (instr_opA);
+    action =  { 
+                a(AX) = a(AY) + a(AZ);
+              };   
+}
+
+define (instr = nop_b)
+{
+    width = 19;
+    fields = ((bits(18),0), (bits(17,0),0));
+    syntax = ("nop");
+    attrs = (instr_opB);
+    action =  { 
+              };
+}
+
+
+//============================================================================== 
+
+//##############################################################################
+// Assembler
+//##############################################################################
+  
+parallel_execution = 1;
+define (assembler) {
+  comments = ("//", "#");
+  line_comments = ("//", "#");
+  packet_grouping = (("{","}"),"\n");
+  instr_separators = (";");
+  line_separators = ("\n");
+  symbol_chars = ("[","]");
+  asm_instrtables = (other);
+  disasm_instrtables = (other);
+}
+  
+//============================================================================== 
+
+//##############################################################################
+// Post-packet Assembly Hooks
+//##############################################################################
+
+post_packet_asm = func(InstrBundle b) {
+    
+  InstrBundle bb;
+  InstrInfo ii;
+  
+  bool extA = false, extB = false;
+  int posA, posB; 
+  
+  int Size = b.size();
+    
+  bool extFlag, formatFlag = true;
+
+
+  if ((Size < 1) || (Size > 2)) {
+    formatFlag = false;
+    error(1,"Invalid instruction formation size: ", Size);
+  } 
+  else {
+ 
+    // Check instruction types
+    for (int i = 0; i < Size; ++i) {  
+    
+      extFlag = false;
+        
+      if (b[i].instrHasAttr(instr_opA)) {
+        extA = true;
+        posA = i;
+        extFlag = true;
+      }
+        
+      if (b[i].instrHasAttr(instr_opB)) {
+        extB = true;
+        posB = i;
+        extFlag = true;
+      }      
+        
+      if (!extFlag) { error(1,"Invalid instruction at the position of ", i+1); }
+      
+    } // End of instruction type scan for the packet
+
+    // Build the macro instruction frame
+    formatFlag = false;
+
+    if (extA && extB)  {
+      ii = combineInstr("opBA", posB, posA);
+      formatFlag = true;        
+    }
+
+    if (extA && !extB)  {
+      ii = combineInstr("opBA", -1, posA);
+      formatFlag = true;
+    } 
+
+    if (!extA && extB) {
+      ii = combineInstr("opBA", posB, -1);
+      formatFlag = true;
+    }   
+    
+    if (!formatFlag) { 
+      error(1,"Invalid instruction format"); 
+    }
+    
+  }
+  
+  if (formatFlag) {  
+    bb.push_back(ii);
+  }
+
+  b = bb;
+
+};
+
+  
+//==============================================================================
+
+
+}

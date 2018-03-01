@@ -1,0 +1,182 @@
+in12.uadl:7: warning: Instructions access no data memory
+P (for architecture P):
+  First-level instruction memory:  mMEM
+
+  Fetch Unit:  fetcher
+    Fetch Memory:  mMEM
+    Entries     :  6
+    Entry Size  :  1
+    Fetch Sizes :  4 
+
+  Pipeline Stage:  mEX
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mID
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  1
+		Shared           :  0
+  Pipeline Stage:  mMM
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mWB
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+
+  Register:  CIA
+    ID        :  0
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  CR
+    ID        :  1
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  GPR
+    ID        :  4
+    Size      :  32
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  NIA
+    ID        :  2
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  XER
+    ID        :  3
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+
+  Memory:  mMEM
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Custom Resource:  foo
+		Type     :  Foo
+    Header   :  Foo.h
+    PreCycle :  1
+    PostCycle:  0
+    PostSim  :  0
+    Parm     :  N1 = 1
+    Parm     :  N2 = 2
+    Parm     :  parm1 = 3
+    Parm     :  parm2 = 4
+    Args     :  template args:  ModelType (built-in), InstrType (built-in), N1, N2 (has default), , constr args:  model, parm1, parm2 (has default),
+
+  Pipeline Scheduling Order:   mWB mMM mEX mID 
+
+  Machine:  normal
+    Initial state:  S_INIT
+    States       :  S_EX S_ID S_MM S_WB S_WBp
+    Default State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_MM = mMM
+      S_WB = mWB
+      S_WBp = mWB
+
+  Instruction Class:  sfx
+    Instructions:
+      add
+        Src1 = (src: GPR(RA), mask: 0xffffffff), 
+        Src2 = (src: GPR(RA), mask: 0xffff), (src: GPR(RB), mask: 0xffff), (trg: GPR(RT), mask: 0xffff), 
+        Trg = (trg: GPR(RT)), 
+      addi
+        Src1 = (src: GPR(RA)?, mask: 0xffffffff), 
+        Src2 = (src: GPR(RA)?, mask: 0xffff), (trg: GPR(RT), mask: 0xffff), 
+        Trg = (trg: GPR(RT)), 
+      addic.
+        Src1 = (src: GPR(RA), mask: 0xffffffff), 
+        Src2 = (src: GPR(RA), mask: 0xffff), (trg: GPR(RT), mask: 0xffff), 
+        Src3 = (trg: CR[mask 0xf0000000]/p, mask: 0xf0000000), (src: XER[mask 0x80000000]/p, trg: XER[mask 0x20000000]/p),
+        Trg = (trg: GPR(RT)), 
+      halt
+
+		Commit On Exception:  1
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_MM = mMM
+      S_WB = mWB
+      S_WBp = mWB
+    State actions:
+      S_EX:
+        To-States:  S_MM 
+        From-States:  S_ID S_INIT
+        Action:
+if ( mMM.has_space() ) {
+    exec (  ) ;
+    change_state ( S_MM ) ;
+}
+
+      S_ID:
+        To-States:  S_EX 
+        From-States:  S_INIT
+        Action:
+if ( Src1 . can_read (  ) && Src2 . can_read (  ) && Trg . can_allocate (  ) && mEX . has_space (  ) ) {
+    Src1 . read (  ) ;
+    Src2 . read (  ) ;
+    Trg . allocate (  ) ;
+    change_state ( S_EX ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID.has_space() ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MM:
+        To-States:  S_WB 
+        From-States:  S_EX S_ID S_INIT
+        Action:
+if ( mWB.has_space() ) {
+    change_state ( S_WB ) ;
+}
+
+      S_WB:
+        To-States:  S_WBp 
+        From-States:  S_EX S_ID S_INIT S_MM
+        Action:
+if ( Trg . can_write (  ) ) {
+    write_ops (  ) ;
+    change_state ( S_WBp ) ;
+}
+
+      S_WBp:
+        To-States:  S_INIT 
+        From-States:  S_EX S_ID S_INIT S_MM S_WB
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+

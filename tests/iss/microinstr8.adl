@@ -1,0 +1,110 @@
+// Check if ¡°No version of instruction matched the given arguments¡± errors are thrown 
+// when there is white space between control codes in the instruction syntax format string
+
+define (core = rubber) {
+  archs = rubber; 
+  instrtables = (other);
+}
+
+define (arch = rubber) {
+
+//##############################################################################
+// Parameters
+//##############################################################################
+
+  bit_endianness = little;
+     
+//==============================================================================
+
+//##############################################################################
+// Attributes
+//##############################################################################
+   
+    attrs = (log_as_reg); 
+
+//============================================================================== 
+
+
+//##############################################################################
+// Registers
+//##############################################################################
+
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+  }
+
+  define (regfile = a) {
+    attrs = (log_as_reg);
+    width = 17;
+    size = 4;
+  }  
+
+//============================================================================== 
+
+
+//##############################################################################
+// Instruction Fields
+//##############################################################################
+
+  define(instrfield=Imme17){
+    display = dec;
+    pseudo = true;
+    width = 17; 
+  }
+
+  define(instrfield=AA){
+    display = dec;
+    pseudo = true;
+    width = 2;    
+  }
+
+//============================================================================== 
+
+//##############################################################################
+// Instructions
+//##############################################################################
+
+
+  define (instr = mv_aX_I17){ 
+    width = 64;
+    fields = ((bits(51,46),b100000), (bits(44,43),AA), 
+              (bits(42,41),b00), (bits(36,20),Imme17)); 
+    syntax = ("mv a%f , %f", AA, Imme17);
+    action={ a(AA) = Imme17; };
+  }
+
+  define (instr = done){  //3
+    width = 64;
+    fields = ((bits(55,46),0), (bits(45,0),reserved));  
+    syntax = ("done");
+    action={ halt(); };
+  }  
+
+//##############################################################################
+// Assembler
+//##############################################################################
+  
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = (".", "//", "#");
+    line_separators = (";"); // In additional to new-line separator
+    asm_instrtables = (other);
+    disasm_instrtables = (other);
+  }
+
+//============================================================================== 
+
+}
+
+
+

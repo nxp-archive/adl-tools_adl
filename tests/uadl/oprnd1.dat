@@ -1,0 +1,33 @@
+#
+# Tests that we can change behavior based upon the value of an operand.
+# In this case, the mtspr to HID0 will cause a pipeline flush.
+#
+
+= asm
+  
+  addi r1,r1,1
+  mtspr 50,r1
+  addi r2,r2,1
+  addi r2,r2,1
+  addi r2,r2,1
+  addi r2,r2,1
+  addi r2,r2,1
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA     d=0
+
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x7C320BA6	#	mtspr 50,r1
+MD n=Mem ra=0x00000008 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000000c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000010 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000014 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000018 d=0x38420001	#	addi r2,r2,1
+# </GEN>
+
+

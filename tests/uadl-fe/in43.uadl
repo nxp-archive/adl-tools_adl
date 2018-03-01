@@ -1,0 +1,92 @@
+//
+// An operand which just lists a register file should match against an
+// instruction's operand which contains a range, e.g. stmw.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mWB)) { }
+
+  }
+
+  define (machine sfx) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_EX0, S_EX1, S_WB  );
+
+    define (mapping) {
+      mID = S_ID;
+			mEX = (S_EX,S_EX0,S_EX1);
+			mWB = S_WB;
+    };
+	}
+
+  define (instr_class storemulti) {
+    instructions = ( stmw );
+
+    machine = sfx;
+    
+    define (operands) {
+      Src = sources;
+      // This should match against the GPR(RS) range, as well as GPR(RA), so
+      // that the source is listed as being a partial access with a full mask.
+      Src = (GPR,source,0xffffffff);
+
+      // Test of a false dependency using false_source.
+      SrcCr = (CR,force_source,0xffffffff);
+      
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { change_state(S_ID); }
+		S_ID:   { change_state(S_EX); }
+		S_EX:   { 
+      exec();
+      change_state(S_WB); 
+    }
+		S_WB:   { change_state(S_INIT); }
+    };
+  }
+
+  define (instr_class sfx) {
+    instructions = ( add );
+
+    machine = sfx;
+    
+    define (operands) {
+      Src = sources;
+      // Another test of a false dependency, this time w/o a mask.
+      SrcCr = (CR,force_source);
+      Trg = targets;      
+    };
+
+    action = {
+		S_INIT: { change_state(S_ID); }
+		S_ID:   { change_state(S_EX); }
+		S_EX:   { 
+      exec();
+      change_state(S_WB); 
+    }
+		S_WB:   { change_state(S_INIT); }
+    };
+  }
+ 
+}

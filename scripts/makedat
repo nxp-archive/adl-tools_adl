@@ -1,0 +1,830 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+makedat
+
+=head1 SYNOPSIS
+
+makedat [options] <input-file>
+
+This script has several uses:
+
+1.  Takes an assembly file (.s), assembles it, then writes the output
+    in the form of a .dat file.  By default, the output is written to
+    standard-out.
+
+2.  Reads a .dat file and scans the file for a comment block with an B<asm> tag.
+    The contents of the block are assembled, and inserted between comments "<GEN>" and  "</GEN>"
+    The original file is copied to a file with a .bak extension.
+
+3.  Performs the same function as above, except on C code.  We look for a B<ccode>
+    comment block.  Assembly is written into an B<asm> block and the assembled code
+    into a block surrounded by <GEN> </GEN> comments.  We only handle C code if it
+    is contained within a DAT file.
+
+4.  The script also handles string data creation.  We look for tags of B<str>.
+		Inside that block, blank lines and comment lines are ignored, but otherwise
+		strings are converted over to DAT MD commands.  Commands for modifying
+		string creation take the form of B<*cmd: dat>.  Current commands are:
+
+	  addr: Specify the start address for the string block.  This address must be
+	        word-aligned.
+
+		Strings are null terminated and the end of the block is terminated with an
+		additional null.
+
+		String output data is placed in the DAT file between comments "<STR>" and
+		"</STR>".
+
+Other tags that are recognized within the source:
+
+    aopt:   Assembler options.
+
+    copt:   Compiler options.
+
+    mdopt:  Key/value pairs for configuring the makedat program.
+
+            The format for this is very simplistic:  One key/value per
+            line in the form of key: value.
+
+            Currently supported options:
+
+		        as          : <path-to-assembler>
+            instr-offset: <offset value>
+            add-halt    : <1|0>
+		        endian      : <little|big>
+		        instr-mem   : <instruction-memory name>
+
+These tags are case-insensitive.
+
+When procesing assembly, including assembly generated from a comilation, we perform
+a substitution path that can be used to handle relocations.  Substitutions are specified
+using the <SUBST> comment block and tage the form of:
+
+  /<regex>/<replacement>/
+
+In other words, it's just a Perl substitition operation without the leading 's'.
+For example:
+
+  = subst
+
+    /\w+@ha/0x0/
+    /results@l/0x1000/
+
+  = /subst
+
+Comments within the substitution block are allowed (lines starting with #) and
+are ignored.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help.
+
+=item B<--man, --m>
+
+Display in-depth help using the man format.
+
+=item B<--output, -o>
+
+Send output to the specified file.  If no file is specified, data is sent to
+standard-out.
+
+=item B<--include=s>
+
+Include an additional dat file.  This option may be repeated.
+
+=item B<--as=path>
+
+Specify the path to the assembler.  The default is to use ./as, if it exists.
+Otherwise, we call as with no path.
+
+=item B<--cc=path>
+
+Specify the path to the compiler.  The default is to use ./cc, if it exists.
+Otherwise, we call cc with no path.
+
+=item B<--afile=path>
+
+Specify the temporary assembly file, if an assembler will be invoked.  If not
+specified, a temporary file is created.
+
+=item B<--cfile=path>
+
+Specify the temporary C file, if a C compiler will be invoked.  If not
+specified, a temporary file is created.
+
+=item B<--aopts>
+
+Specify additional assembler options. 
+
+=item B<--copts>
+
+Specify additional C compiler options. 
+
+=item B<--c-only>
+
+Only perform the compile pass.
+
+=item B<--verbose>
+
+Print extra information.  These messages are prefixed with "MSG:" to enable easy
+filtering.
+
+=item B<--addhalt, --ah>
+
+Add a halt instruction after the highest address.  The halt instruction is specific
+to the adl framework and is not a standard instruction.
+
+=item B<--instr-offset=i, --io=i>
+
+Specify an offset to add to each instruction's address.
+
+=item B<--instr-mem=s>
+
+Specify the name of the instruction memory (for MD card instruction data).
+
+=cut
+
+use strict;
+use Getopt::Long qw(:config permute);
+use Pod::Usage;
+use File::Basename;
+use Data::Dumper;
+
+my $aopts_default = "-mregnames";
+
+my $copts_default = "";
+
+my $endian = "big";
+
+my ($input,$help,$man,$as,$cc,$asmfn,$cfn,$aopts,$aopts_new,$copts,$copts_new,$compile_only,
+		$verbose,$addhalt,$keepoutput,$output,@includes,$instroffset);
+
+my $instrmem = "Mem";
+
+sub vprint {
+  print @_ if ($verbose);
+}
+
+if (!&GetOptions
+	(
+	 "h|help"            => \$help,
+	 "m|man"             => \$man,
+	 "as=s"              => \$as,
+	 "cc=s"              => \$cc,
+	 "aopts=s"           => \$aopts_new,
+	 "copts=s"           => \$copts_new,
+	 "c-only"            => \$compile_only,
+	 "verbose"           => \$verbose,
+	 "ah|addhalt"        => \$addhalt,
+	 "o|output=s"        => \$output,
+	 "include=s@"        => \@includes,
+	 "ko|keepoutput"     => \$keepoutput,
+	 "afile=s"           => \$asmfn,
+	 "cfile=s"           => \$cfn,
+	 "instr-offset|io=s" => \$instroffset,
+	 "instr-mem=s"       => \$instrmem,
+	 "<>"                => \&plusargs,
+	)) {
+  printhelp(1,1);
+}
+
+# Lame:  GetOptions doesn't recognize hex integer arguments.
+# So, we have to do it manually.
+if ($instroffset) {
+  $instroffset = (eval $instroffset);
+}
+
+sub plusargs {
+  $input = shift;
+}
+
+sub printhelp($$) {
+  my ($eval,$verbose) = (shift,shift);
+  pod2usage(-exitval => $eval, -verbose=>$verbose);
+  exit 0;
+}
+
+# Print help if requested to do so.
+printhelp(0,1) if $help;
+
+printhelp(0,2) if $man;
+
+if (!$input) {
+  print "Error:  No input file specified.\n";
+  printhelp(1,1);
+}
+
+if (! -f $input) {
+  print "Error:  File $input does not exist or could not be opened.\n";
+  printhelp(1,1);
+}
+
+vprint "Input File   : $input\n";
+
+my ($base,$path,$type) = fileparse($input,qr/\.(dat|s)/);
+
+my ($datfn);
+if ($type eq ".dat") {
+  $datfn = $input;
+  if (!$asmfn) {
+		$asmfn = tmpnam();
+  } else {
+		$keepoutput = 1;
+	}
+  if (!$cfn) {
+		$cfn = tmpnam();
+		$cfn .= ".c";
+  } else {
+		$keepoutput = 1;
+	}
+} elsif ($type eq ".s") {
+  $asmfn = $input;
+} else {
+  print "You must supply a .dat or .s file.  The file type '$type' is not recognized.\n";
+  exit 1;
+}
+
+# First, try to handle any C code.
+compile();
+
+if ($compile_only) {
+  exit 0;
+}
+
+# Then process any assembly.
+assemble();
+
+# Then process any strings.
+strings();
+
+# End of program.
+1;
+
+
+
+
+
+
+
+# This handles any C in the input file.
+sub compile {
+
+  # If we don't have a DAT source, then exit.  We only handle C code that's
+  # contained within a DAT file.
+  if (!$datfn) {
+	return;
+  }
+
+  my ($clines,@predata,@postdata,@data);
+
+  # If we have a dat file, then we need to read in the assembly.
+  # States:
+  #   0:  Initial: output goes to @predata.
+  #   1:  C record: output goes to C file and to @predata
+  #   2:  Post C record: output goes to @predata.
+  #   3:  Generated assembly: ignore.
+  #   4:  Post assembly record: output goes to @postdata.
+  #   5:  Temporary state- append output to $aopts.
+  my (@state);
+  push @state,0;
+
+  open DAT,$datfn or die "Could not open DAT file '$datfn'.\n";
+  open COUT,">$cfn" or die "Could not open temporary C file '$cfn'.\n";
+  while (<DAT>) {
+	if ( /^=\s+ccode/i ) {
+	  push @predata,$_;
+	  $state[0] = 1;
+	} elsif ( /^=\s\/ccode/i ) {
+	  push @predata,$_;
+	  $state[0] = 2;
+	} elsif ( /^=\s+copts/i ) {
+	  unshift @state,5;
+	  push @predata,$_;
+	} elsif ( /^=\s+\/copts/i ) {
+	  shift @state;
+	  push @predata,$_;
+	} elsif (  /^=\s+asm/i ) {
+	  $state[0] = 3;
+	} elsif ( /^=\s+\/asm/i ) {
+	  $state[0] = 4;
+	} else {
+	  if ($state[0] == 0) {
+		push @predata,$_;
+	  } elsif ( $state[0] == 1 ) {
+		print COUT $_;
+		push @predata,$_;
+		++$clines;
+	  } elsif ( $state[0] == 5 ) {
+		push @predata,$_;
+		chomp $_;
+		$copts_new .= $_;
+	  } elsif ($state[0] == 2) {
+		push @predata,$_;
+	  } elsif ($state[0] == 4) {
+		push @postdata,$_;
+	  }
+	}
+  }
+  close COUT;
+  close DAT;
+
+  if (!$clines) {
+	# Exit if there's no C code.
+	return;
+  }
+
+  # No compiler specified- see if it exists in the current directory.
+  if (!$cc) {
+	if ( -x "./cc" || -s "./cc") {
+	  # Yes- use it.
+	  $cc = "./cc";
+	} else {
+	  # No- use path to find it.
+	  $cc = "cc";
+	}
+  }
+
+  # Add on any supplied options.
+  $copts = $copts_default;
+  if ($copts_new) {
+	$copts = $copts_new;
+  }
+
+  vprint "C File       :  $cfn\n";
+  vprint "Compiler     :  $cc $copts\n";
+
+  my $out;
+  # We're processing a datfile, so by default we overwrite it,
+  # copying the original to a .bak extension.
+  system "cp $datfn $datfn.c.bak" 
+	and die "Could not copy original ($datfn) to backup ($datfn.c.bak).\n";
+  $output = $datfn;
+
+  use POSIX;
+  my $outfile = tmpnam();
+  vprint "Output File  :  $outfile\n";
+
+  # Run the compiler- if we get an error, exit and display error output.
+  system ("$cc $copts -S -o $outfile $cfn") and die "Compile error.\n";
+
+  # The compile succeeded, so copy the output back to the DAT file for further processing.
+  open CDATA,$outfile or die "Could not open compiler output file $outfile.\n";
+  @data = (<CDATA>);
+  close CDATA;
+
+  # Now write the new file.
+  open $out,">$datfn" or die "Could not open output file $output\n";
+
+  print $out
+	@predata,
+    "= asm\n\n",
+	@data,
+	"\n= /asm\n",
+	@postdata;
+  close $out;
+
+  # Remove the compiler input and output unless told to keep all output files.
+  unlink $cfn if ($datfn && !$keepoutput);
+  unlink $outfile if (!$keepoutput);
+}
+
+# Listings are always big-endian, so swap if we were told to use little-endian.
+sub handle_endianness {
+	my ($data) = @_;
+
+	return $data if ($endian eq "big");
+
+	#print "Input data: $data\n";
+	my @bytes = ( $data =~ /([0-9a-fA-F]{2})/g );
+	#print "Bytes: @bytes\n";
+
+	$data = "";
+	for my $b (@bytes) {
+		$data = $b . $data;
+	}
+
+	#print "Result data: $data\n";
+	return $data;
+}
+
+# This function handles all of the assembly stuff- reading in a file, grabbing
+# any assembly code, invoking the assembler, etc.  This produces the final
+# output file.
+sub assemble {
+
+  my ($asmlines,@predata,@postdata,@substs,@data);
+
+  # If we have a dat file, then we need to read in the assembly.
+  # States:
+  #   0:  Initial: output goes to @predata.
+  #   1:  Assembly record: output goes to assembly file.
+  #   2:  Post assembly record: output goes to @predata.
+  #   3:  Generated data: ignore data.
+  #   4:  Post gen record: output goes to @postdata.
+  #   5:  Temporary state- append output to $aopts.
+  #   6:  Temporary state- handle makedat options.
+  #   7:  Substition block- append to predata.
+  my (@state);
+  push @state,0;
+  if ($datfn) {
+		open DAT,$datfn or die "Could not open DAT file '$datfn'.\n";
+		open ASM,">$asmfn" or die "Could not open temporary assembly file '$asmfn'.\n";
+		while (<DAT>) {
+			if ( /^#\s+<ASM>/i || /^=\s+asm/i ) {
+				push @predata,$_;
+				$state[0] = 1;
+			} elsif ( /^#\s+<\/ASM>/i || /^=\s\/asm/i ) {
+				push @predata,$_;
+				$state[0] = 2;
+			} elsif ( /^#\s+<AOPTS>/i || /^=\s+aopts/i ) {
+				unshift @state,5;
+				push @predata,$_;
+			} elsif ( /^#\s+<\/AOPTS>/i || /^=\s+\/aopts/i ) {
+				shift @state;
+				push @predata,$_;
+			} elsif ( /^#\s+<MDOPTS>/i || /^=\s+mdopts/i ) {
+				unshift @state,6;
+				push @predata,$_;
+			} elsif ( /^#\s+<\/MDOPTS>/i || /^=\s+\/mdopts/i ) {
+				shift @state;
+				push @predata,$_;
+			}elsif ( /^=\s+subst/i ) {
+				unshift @state,7;
+				push @predata,$_;
+			} elsif ( /^=\s+\/subst/i ) {
+				shift @state;
+				push @predata,$_;
+			} elsif ( /^#\s+<GEN>/i ) {
+				$state[0] = 3;
+			} elsif ( /^#\s+<\/GEN>/i ) {
+				$state[0] = 4;
+			} else {
+				if ($state[0] == 0) {
+					push @predata,$_;
+				} elsif ( $state[0] == 1 ) {
+					if (/^#(.*)/) {
+						push @data,"$1\n";
+					} else {
+						push @data,$_;
+					}
+					++$asmlines;
+					push @predata,$_;
+				} elsif ( $state[0] == 5 ) {
+					push @predata,$_;
+					if ( /^#(.*)/ ) {
+						$aopts_new .= $1;
+					} else {
+						chomp $_;
+						$aopts_new .= $_;
+					}
+				} elsif ( $state[0] == 6 ) {
+					push @predata,$_;
+					my $data;
+					if ( /^#(.*)/ ) {
+						$data = $1;
+					} else {
+						chomp $_;
+						next if (!$_);
+						$data = $_;
+					}
+
+					if ( $data =~ /\s*(.*):\s*(.*)/ ) {
+						if ($1 eq "as") {
+							$as = $2;
+						} elsif ($1 eq "instr-offset") {
+							$instroffset = (eval $2);
+						} elsif ($1 eq "instr-mem") {
+							$instrmem = $2;							
+						} elsif ($1 eq "add-halt") {
+							$addhalt = $2;
+						} elsif ($1 eq "endian") {
+							if ($2 =~ /little|big/ ) {
+								$endian = $2;
+							} else {
+								die "Unknown endianness specified: $2\n";
+							}
+						} else {
+							die "Unknown makedat option:  $1\n";
+						}
+					} else {
+						die "Invalid makedat option:  $data";
+					}
+				} elsif ($state[0] == 7) {
+					# We have a substition item.  Record it unless it's a blank line or a comment.
+					if ( !(/^\s*#.*$/ || /^\s*$/) ) {
+						#print "Got substitution:  $_\n";
+						if ( /^\s*(\/.*)/ ) {
+							push @substs,"s$1";
+						} else {
+							die "Bad substition line:  Expected '/regex/replacement/' but got '$_'";
+						}
+					}
+					push @predata,$_;
+				} elsif ($state[0] == 2) {
+					push @predata,$_;
+				} elsif ($state[0] == 4) {
+					push @postdata,$_;
+				}
+			}
+		}
+
+		# Perform any substitutions.
+		for my $d (@data) {
+			for my $s (@substs) {
+				eval "\$d =~ $s;";
+			}
+		}
+		
+		for (@data) {
+			print ASM;
+		}
+		
+		@data = ();
+		
+		close ASM;
+		close DAT;
+		if (!$asmlines) {
+			print "Error:  No assembly data was read.  Make sure that the <ASM> tags exist.\n";
+			printhelp (1,1);
+		}
+  }
+
+  # No assembler specified- see if it exists in the current directory.
+  if (!$as) {
+		if ( -x "./as" || -s "./as") {
+			# Yes- use it.
+			$as = "./as";
+		} else {
+			# No- use path to find it.
+			$as = "as";
+		}
+  }
+
+  # Add on any supplied assembler options.
+  $aopts = $aopts_default;
+  if ($aopts_new) {
+		$aopts = $aopts_new;
+  }
+
+  vprint "Assembly File:  $asmfn\n";
+  vprint "Assembler    :  $as $aopts\n";
+
+  my $out;
+  if (!$output) {
+		if ($datfn) {
+			# We're processing a datfile, so by default we overwrite it,
+			# copying the original to a .bak extension.
+			system "cp $datfn $datfn.bak" 
+					and die "Could not copy original ($datfn) to backup ($datfn.bak).\n";
+			$output = $datfn;
+		} else {
+			# No output specified- default to standard out.
+			$out = \*STDOUT;
+			vprint "Output File  :  Standard Out\n";
+		}
+  }
+
+  if (!$datfn) {
+		# Open the assembly file and store it as comments if we're getting
+		# our input from an assembly file.
+		open ASM,$asmfn or die "Could not open assembly file $input\n";
+		push @predata,"# <ASM>\n";
+		while (<ASM>) {
+			push @predata,"# $_";
+		}
+		push @predata,"# </ASM>\n";
+  }
+
+  use POSIX;
+  my $outfile = tmpnam();
+
+  # Run the assembler- if we get an error, exit and display error output.
+  my $asout = `$as $aopts -al -o $outfile $asmfn`;
+  unlink $outfile;
+  unlink $asmfn if ($datfn && !$keepoutput);
+
+  if ($?) {
+		die "Error from assembler- exiting without completing.\n";  
+  }
+
+  if (!$out) {
+		open $out,">$output" or die "Could not open output file $output\n";
+		vprint "Output File  :  $output\n";
+  }
+
+  # Parse the output.  Each line with an address/data pair is added to the list of
+  # final data cards.
+  my @listing = split /\n/,$asout;
+
+	vprint "Assembly out:  $asout\n";
+
+  my ($addr,$maxaddr,$last_linenum) = (0,0,0);
+
+  for (@listing) {
+		#print "Line:  $_\n";
+		if ( /^\s+(\d+)(.*)/ ) {
+			my $linenum = $1;
+			my $remainder = $2;
+			# This is a listing line.
+			if ( $remainder =~ /^\s+([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+(.*)/) {
+				# This is a data line.
+				$addr = (eval "0x$1") + $instroffset;
+				my $data = handle_endianness($2);
+				my $asm  = $3;
+				my $l = length($data)/2;
+				my $length;
+				if ($l != 4) {
+					$length = " s=$l";
+				}
+				#print "Adding data:  $data\n";
+				push @data,(sprintf "MD n=$instrmem ra=0x%08x d=0x$data$length\t#\t$asm\n",$addr);
+				$maxaddr = $addr if ($addr > $maxaddr);
+				# Set up the address for a continuation line...
+				$addr = $addr + $l;
+			}
+			elsif ( ($linenum == $last_linenum) && $remainder =~ /^\s+([0-9a-fA-F]+)/) {
+				# This is a data line that continues a previous instruction, e.g. a 64-bit instruction.
+				# This always follows an address line, so that we can just re-use that address, with
+				# the appropriate adjustment.
+				#print "Continuation:  $remainder\n";
+				my $data = handle_endianness($1);			
+				my $l = length($data)/2;
+				my $length;
+				if ($l != 4) {
+					$length = " s=$l";
+				}
+				#print "Adding continuation:  $data\n";
+				push @data,(sprintf "MD n=$instrmem ra=0x%08x d=0x$data$length\n",$addr);
+				$addr = $addr + $l;
+				$maxaddr = $addr if ($addr > $maxaddr);
+			}
+			$last_linenum = $linenum;
+		}
+  }
+  
+  if ($addhalt) {
+		push @data,(sprintf "MD n=$instrmem ra=0x%08x d=0x00000000\t#\thalt\n",$maxaddr+4);
+  }
+
+  # Now print everything out.
+  print $out
+			@predata,
+			"# <GEN>\n",
+			@data,
+			"# </GEN>\n",
+			@postdata;
+
+  # Add any additional include files.
+  for my $i (@includes) {
+		open IN,$i or die "Could not open include file $i.\n";
+		my @data = (<IN>);
+		print $out @data;
+		close IN;
+  }
+
+  close $out;
+
+}
+
+
+
+# This function handles all of the string stuff- reading in a file, grabbing
+# any string data, then converting this to memory cards.
+sub strings {
+
+  my ($strlines,@predata,@postdata,@substs,%data);
+
+  # If we have a dat file, then we need to read in the assembly.
+  # States:
+  #   0:  Initial: output goes to @predata.
+  #   1:  String record: Store strings in a string block.
+  #   2:  Post string record: output goes to @predata.
+  #   3:  Generated data: ignore data.
+  #   4:  Post gen record: output goes to @postdata.
+  my @state;
+  push @state,0;
+
+	my $addr;
+	my $strcnt = 1;
+
+	return if (!$datfn);
+
+	open DAT,$datfn or die "Could not open DAT file '$datfn'.\n";
+	while (<DAT>) {
+		if ( /^=\s+str/i ) {
+			push @predata,$_;
+			$state[0] = 1;
+			$addr = undef;
+		} elsif ( /^=\s+\/str/i ) {
+			push @predata,$_;
+			$state[0] = 2;
+		} elsif ( /^#\s+<STR>/i ) {
+			$state[0] = 3;
+		} elsif ( /^#\s+<\/STR>/i ) {
+			$state[0] = 4;
+		} else {
+			if ($state[0] == 0) {
+				push @predata,$_;
+			} elsif ( $state[0] == 1 ) {
+				if (/^\s*#.*/ || /^\s*\n/ ) {
+					# Skip comments and blank lines.
+				} elsif ( /\s*\*\s*addr:\s*(.*)/ ) {
+					$addr = eval $1;
+				} else {
+					# Otherwise, record the line.  We must have an address to record,
+					# otherwise it's an error.
+					if (!defined $addr) {
+						die "No address specified for string block $strcnt";
+					}
+					# Add an entry for this address if it doesn't exist and append the
+					# string with a null terminator.
+					my $newstr = $_;
+					chomp $newstr;
+					$data{$addr} .= "${newstr}\x00";
+				}
+				push @predata,$_;
+			} elsif ($state[0] == 2) {
+				push @predata,$_;
+			} elsif ($state[0] == 4) {
+				push @postdata,$_;
+			}
+		}
+	}
+
+	#print "strings predata:\n@predata\n";
+	#print "strings postdata:\n@predata\n";
+	#print "strings data:",Dumper(\%data),"\n";
+	
+	close DAT;
+
+	return if (!(keys %data));
+
+	my @sdata;
+	# For each data block, create an output string block.
+	for my $addr (sort (keys %data)) {
+		my $str = $data{$addr};
+
+		# Append extra null at end of string block.
+		$str .= "\x00";
+		
+		my $out = "";
+		# We process 4 bytes at a time to form words for MD cards.
+		for (my $i = 0; $i < length($str); ++$i) {
+			if ($i % 4 == 0) {
+				$out .= sprintf "\nMD n=Mem ra=0x%08x d=0x",$addr;
+				$addr += 4;
+			}
+			my $c = substr($str,$i,1);
+			my $d = ord($c);
+			#print "c: $c = $d\n";
+			$out .= sprintf("%02x",$d);
+		}
+		# Pad at the end.
+		my $extra = length($str) % 4;
+		if ($extra) {
+			my $pad = (2 * (4 - $extra));
+			#print "length:  ",length($str)," pad:  $pad\n";
+			$out .= "0" x $pad;
+		}
+
+		# Now add on the string block.
+		push @sdata,$out;
+	}
+
+  if (!$output) {
+		# We're processing a datfile, so by default we overwrite it,
+		# copying the original to a .bak extension.
+		system "cp $datfn $datfn.bak" 
+				and die "Could not copy original ($datfn) to backup ($datfn.bak).\n";
+		$output = $datfn;
+  }
+
+	open my $out,">$output" or die "Could not open output file $output\n";
+	vprint "Output File  :  $output\n";
+
+  # Now print everything out.
+  print $out
+			@predata,
+			"# <STR>\n",
+			@sdata,
+			"\n# </STR>\n",
+			@postdata;;
+
+
+  close $out;
+}

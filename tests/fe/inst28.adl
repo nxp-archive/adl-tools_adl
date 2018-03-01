@@ -1,0 +1,39 @@
+//
+// Tests various enumerated-field error conditions.
+//
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+
+  define (instrfield=Foo1) {
+    bits = (19,20);
+    enumerated = ( "", "+", "-", ".f", "-" );
+  }
+
+  define (instrfield=Foo2) {
+    bits = (19,20);
+    enumerated = ( reserved, reserved );
+  }
+
+  define (instrfield=Foo3) {
+    bits = (19,20);
+    enumerated = ( ".f" );
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

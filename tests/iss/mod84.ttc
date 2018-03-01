@@ -1,0 +1,6 @@
+
+define (core=P) {
+  define (config) {
+    reg_callbacks      = EXREG;
+  }
+}

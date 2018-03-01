@@ -1,0 +1,46 @@
+#
+# This makes sure that we can generate a UVP if no translation exists.
+# Note:  The last two addi's addresses are manually edited after generation.
+#
+= asm
+
+	addi r1,r1,2
+	addi r1,r1,2
+	addi r1,r1,2
+	addi r1,r1,2
+	addi r1,r1,4
+	addi r1,r1,4
+
+= /asm
+
+= mdopts
+
+instr-offset: 0x10ff0
+
+= /mdopts
+
+#
+# <GEN>
+MD n=Mem ra=0x00010ff0 d=0x38210002	#	addi r1,r1,2
+MD n=Mem ra=0x00010ff4 d=0x38210002	#	addi r1,r1,2
+MD n=Mem ra=0x00010ff8 d=0x38210002	#	addi r1,r1,2
+MD n=Mem ra=0x00010ffc d=0x38210002	#	addi r1,r1,2
+MD n=Mem ra=0x00001000 d=0x38210004	#	addi r1,r1,4
+MD n=Mem ra=0x00001004 d=0x38210004	#	addi r1,r1,4
+# </GEN>
+
+CORE n=:P
+
+
+
+# ea=0x0000 ra=0x10000
+TD n=TLBCAM set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+RD n=NIA d=0x00000ff0
+
+TRACE
+
+
+RESULTS
+
+RD n=GPR i=1 d=16

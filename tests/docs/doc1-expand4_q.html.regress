@@ -1,0 +1,314 @@
+     <html>
+     <big>
+     <head>
+     <title>ADL Database Report</title>
+     </head>
+     <body>
+     <table border="10">
+     <tr bgcolor="lightblue">
+
+<tr bgcolor="lightblue">
+<td>
+<big><b>NAME</big></b></td>
+<td>
+<big><b>FIELDS</big></b></td>
+<td>
+<big><b>SYNTAX</big></b></td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+add RT, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+add2</td>
+<td>
+</td>
+<td>
+add2<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addi</td>
+<td>
+OPCD,RA,RT,SI</td>
+<td>
+addi RT, RA, SI<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addic.</td>
+<td>
+OPCD,RA,RT,SI</td>
+<td>
+addic. RT, RA, SI<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+addis</td>
+<td>
+OPCD,RA,RT,SI</td>
+<td>
+addis RT, RA, SI<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+bc</td>
+<td>
+AA,BD,BI,BO,LK,OPCD</td>
+<td>
+bc BO, BI, BD<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+cmp</td>
+<td>
+BF,OPCD,RA,RB,XO</td>
+<td>
+cmp BF, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+cmpi</td>
+<td>
+BF,OPCD,RA,SI</td>
+<td>
+cmpi BF, RA, SI<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+crand</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+crand RT, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+crandc</td>
+<td>
+OPCD,RA,RB,RS,XO</td>
+<td>
+ crandc RS, RA, RB <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+dum1</td>
+<td>
+F1,OPCD,RA,RS</td>
+<td>
+  dum1 RA,RS  <br>
+  dum1,2 RA,RS  <br>
+  dum1,bark RA,RS  <br>
+  dum1,foo RA,RS  <br>
+  dum1,woof RA,RS  <br>
+  dum1reserved RA,RS  <br>
+  dum1reserved RA,RS  <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+halt</td>
+<td>
+OPCD</td>
+<td>
+halt<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+li</td>
+<td>
+</td>
+<td>
+li RT,SI32<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+lwz</td>
+<td>
+D,OPCD,RA,RT</td>
+<td>
+lwz RT, RA, D<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+lwzx</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+lwzx RT, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mfspr</td>
+<td>
+OPCD,RT,SPRN,XO</td>
+<td>
+mfspr RT, SPRN<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mr</td>
+<td>
+</td>
+<td>
+mr RA,RS<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mtspr</td>
+<td>
+OPCD,RS,SPRN,XO</td>
+<td>
+ mtspr RS, SPRN <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+mullw</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+mullw RT, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+or</td>
+<td>
+OPCD,RA,RB,RS,XO</td>
+<td>
+ or RS, RA, RB <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+ori</td>
+<td>
+OPCD,RA,RS,UI</td>
+<td>
+ ori RS, RA, UI <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+rfi</td>
+<td>
+OPCD,RA,RB,RS,XO</td>
+<td>
+ rfi RS, RA, RB <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+rlwinm</td>
+<td>
+MB,ME,OPCD,RA,RS,SH</td>
+<td>
+ rlwinm RS, RA, SH, MB, ME <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+se_add</td>
+<td>
+OPCD,RX,RY</td>
+<td>
+se_add RY, RX<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+se_addi</td>
+<td>
+OIM5,OPCD7,RX</td>
+<td>
+se_addi RX,OIM5<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stw</td>
+<td>
+D,OPCD,RA,RS</td>
+<td>
+ stw RS, RA, D <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stwu</td>
+<td>
+D,OPCD,RA,RS</td>
+<td>
+ stwu RS, RA, D <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+stwx</td>
+<td>
+OPCD,RA,RB,RS,XO</td>
+<td>
+ stwx RS, RA, RB <br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+tw</td>
+<td>
+OPCD,RA,RB,XO</td>
+<td>
+tw RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vaddubm</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+vaddubm RT, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vadduhm</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+vadduhm RT, RA, RB<br>
+</td>
+</tr>
+<tr bgcolor="lightblue">
+<td>
+vadduwm</td>
+<td>
+OPCD,RA,RB,RT,XO</td>
+<td>
+vadduwm RT, RA, RB<br>
+</td>
+</tr>
+</table>
+</body>
+</html>

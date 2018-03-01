@@ -1,0 +1,165 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Testing field property unsigned_upper_bound
+//
+
+define (core=P) {
+
+  archs=(minippc);
+
+  defmod (instr=(add1,add2)) {
+    define (aspect=A) {
+      labels = Update;
+      action = { GPR(RA) = 0; };
+    }
+  }
+
+  defmod (instr=add4) {
+    define (aspect=A) {
+      labels = Update;
+      exclusive = true;
+      action = { GPR(RA) = 1; };
+    }
+  }
+}
+
+
+define (arch=minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (reg=XER) {
+    """
+    The overflow and carry register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=SO) { bits = 32; }
+    define (field=OV) { bits = 33; }
+    define (field=CA) { bits = 34; }
+  }
+
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+    unsigned_upper_bound = true;
+  }
+
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+    value=Mode32;
+ }
+
+  define (instr=add1) {
+    fields=(OPCD(12),RT,RA,SI);
+
+    action = {
+      var carry = Carry(GPR(RA),SI,0);
+      Update:
+      GPR(RT) = GPR(RA) + SI;
+    };
+  }
+
+  define (instr=add2) {
+    fields=(OPCD(13),RT,RA,SI);
+
+    action = {
+      var carry = Carry(GPR(RA),SI,0);
+      Update:
+      GPR(RT) = GPR(RA) + SI;
+    };
+  }
+
+  define (instr=add3) {
+    fields=(OPCD(14),RT,RA,SI);
+
+    action = {
+      var carry = Carry(GPR(RA),SI,0);
+      Update:
+      GPR(RT) = GPR(RA) + SI;
+    };
+  }
+
+  define (instr=add4) {
+    fields=(OPCD(15),RT,RA,SI);
+
+    action = {
+      var carry = Carry(GPR(RA),SI,0);
+      Update:
+      GPR(RT) = GPR(RA) + SI;
+    };
+  }
+
+  define (reg=FOO) {};
+  define (reg=BAR) {};
+
+  define (aspect=B) {
+    labels = Update;
+    action = { BAR = 2; };
+  }
+
+}
+

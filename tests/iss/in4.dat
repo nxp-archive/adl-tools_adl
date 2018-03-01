@@ -1,0 +1,253 @@
+#
+# This implements the Sieve of Eratosthenes.
+#
+# The original C code is:
+# //#include <stdlib.h>
+# //#include <stdio.h>
+# 
+# #define N 100
+# unsigned int sieve[N];
+# unsigned int results[N];
+# 
+
+= ccode
+
+ int main()
+ {
+ 
+    int i,j;
+    for (i = 0; i != N; ++i) {
+       sieve[i] = 1;
+       results[i] = 0;
+    }
+ 
+    for (i = 2; i*i < N; ++i) {
+       if (sieve[i]) {
+          for (j = i+i; j < N; j += i) {
+             sieve[j] = 0;
+          }
+       }
+    }
+ 
+    i = 0;
+    for (j = 2; j < N; ++j) {
+       if (sieve[j]) {
+          results[i++] = j;
+       }
+    }
+ 
+    //   for (i = 0; i != N; ++i) {
+    //      if (!results[i]) {
+    //         break;
+    //      }
+    //      printf ("%d\n",results[i]);
+    //   }
+ 
+    return 0;
+ }
+ 
+= /ccode
+
+= asm
+
+       .file   "sieve.c"
+ gcc2_compiled.:
+       .section        ".text"
+       .align 2
+       .globl main
+       .type    main,@function
+ main:
+       li 7,100
+       mtctr 7
+       lis 9,0x0
+       lis 11,0x0
+       la 9,0x1000(9)
+       la 11,0x2000(11)
+       li 8,1
+       li 0,0
+       li 10,0
+ .L26:
+       stwx 8,10,9
+       stwx 0,10,11
+       addi 10,10,4
+       bdnz .L26
+       lis 9,0x0
+       la 9,0x1000(9)
+       mr 5,9
+       li 8,2
+ .L11:
+       slwi 7,8,2
+       lwzx 0,9,7
+       addi 6,8,1
+       cmpwi 0,0,0
+       bc 12,2,.L10
+       add 10,8,8
+       cmpwi 0,10,99
+       bc 12,1,.L10
+       slwi 0,10,2
+       add 11,0,5
+       mr 0,7
+       li 7,0
+ .L16:
+       add 10,10,8
+       cmpwi 0,10,99
+       stw 7,0(11)
+       add 11,11,0
+       bc 4,1,.L16
+ .L10:
+       mr 8,6
+       mullw 0,8,8
+       cmpwi 0,0,99
+       bc 4,1,.L11
+       li 0,98
+       mtctr 0
+       lis 9,0x0
+       la 9,0x1000(9)
+       lis 11,0x0
+       addi 9,9,8
+       la 11,0x2000(11)
+       li 10,2
+ .L25:
+       lwz 0,0(9)
+       addi 9,9,4
+       cmpwi 0,0,0
+       bc 12,2,.L21
+       stw 10,0(11)
+       addi 11,11,4
+ .L21:
+       addi 10,10,1
+       bdnz .L25
+       li 3,0
+ #      blr
+ .Lfe1:
+       .size    main,.Lfe1-main
+       .comm   sieve,400,4
+       .comm   results,400,4
+       .ident  "GCC: (GNU) 2.95.3 19991030 (prerelease)"
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38E00064	# li 7,100
+MD n=Mem ra=0x00000004 d=0x7CE903A6	# mtctr 7
+MD n=Mem ra=0x00000008 d=0x3D200000	# lis 9,0x0
+MD n=Mem ra=0x0000000c d=0x3D600000	# lis 11,0x0
+MD n=Mem ra=0x00000010 d=0x39291000	# la 9,0x1000(9)
+MD n=Mem ra=0x00000014 d=0x396B2000	# la 11,0x2000(11)
+MD n=Mem ra=0x00000018 d=0x39000001	# li 8,1
+MD n=Mem ra=0x0000001c d=0x38000000	# li 0,0
+MD n=Mem ra=0x00000020 d=0x39400000	# li 10,0
+MD n=Mem ra=0x00000024 d=0x7D0A492E	# stwx 8,10,9
+MD n=Mem ra=0x00000028 d=0x7C0A592E	# stwx 0,10,11
+MD n=Mem ra=0x0000002c d=0x394A0004	# addi 10,10,4
+MD n=Mem ra=0x00000030 d=0x4200FFF4	# bdnz .L26
+MD n=Mem ra=0x00000034 d=0x3D200000	# lis 9,0x0
+MD n=Mem ra=0x00000038 d=0x39291000	# la 9,0x1000(9)
+MD n=Mem ra=0x0000003c d=0x7D254B78	# mr 5,9
+MD n=Mem ra=0x00000040 d=0x39000002	# li 8,2
+MD n=Mem ra=0x00000044 d=0x5507103A	# slwi 7,8,2
+MD n=Mem ra=0x00000048 d=0x7C09382E	# lwzx 0,9,7
+MD n=Mem ra=0x0000004c d=0x38C80001	# addi 6,8,1
+MD n=Mem ra=0x00000050 d=0x2C000000	# cmpwi 0,0,0
+MD n=Mem ra=0x00000054 d=0x41820034	# bc 12,2,.L10
+MD n=Mem ra=0x00000058 d=0x7D484214	# add 10,8,8
+MD n=Mem ra=0x0000005c d=0x2C0A0063	# cmpwi 0,10,99
+MD n=Mem ra=0x00000060 d=0x41810028	# bc 12,1,.L10
+MD n=Mem ra=0x00000064 d=0x5540103A	# slwi 0,10,2
+MD n=Mem ra=0x00000068 d=0x7D602A14	# add 11,0,5
+MD n=Mem ra=0x0000006c d=0x7CE03B78	# mr 0,7
+MD n=Mem ra=0x00000070 d=0x38E00000	# li 7,0
+MD n=Mem ra=0x00000074 d=0x7D4A4214	# add 10,10,8
+MD n=Mem ra=0x00000078 d=0x2C0A0063	# cmpwi 0,10,99
+MD n=Mem ra=0x0000007c d=0x90EB0000	# stw 7,0(11)
+MD n=Mem ra=0x00000080 d=0x7D6B0214	# add 11,11,0
+MD n=Mem ra=0x00000084 d=0x4081FFF0	# bc 4,1,.L16
+MD n=Mem ra=0x00000088 d=0x7CC83378	# mr 8,6
+MD n=Mem ra=0x0000008c d=0x7C0841D6	# mullw 0,8,8
+MD n=Mem ra=0x00000090 d=0x2C000063	# cmpwi 0,0,99
+MD n=Mem ra=0x00000094 d=0x4081FFB0	# bc 4,1,.L11
+MD n=Mem ra=0x00000098 d=0x38000062	# li 0,98
+MD n=Mem ra=0x0000009c d=0x7C0903A6	# mtctr 0
+MD n=Mem ra=0x000000a0 d=0x3D200000	# lis 9,0x0
+MD n=Mem ra=0x000000a4 d=0x39291000	# la 9,0x1000(9)
+MD n=Mem ra=0x000000a8 d=0x3D600000	# lis 11,0x0
+MD n=Mem ra=0x000000ac d=0x39290008	# addi 9,9,8
+MD n=Mem ra=0x000000b0 d=0x396B2000	# la 11,0x2000(11)
+MD n=Mem ra=0x000000b4 d=0x39400002	# li 10,2
+MD n=Mem ra=0x000000b8 d=0x80090000	# lwz 0,0(9)
+MD n=Mem ra=0x000000bc d=0x39290004	# addi 9,9,4
+MD n=Mem ra=0x000000c0 d=0x2C000000	# cmpwi 0,0,0
+MD n=Mem ra=0x000000c4 d=0x4182000C	# bc 12,2,.L21
+MD n=Mem ra=0x000000c8 d=0x914B0000	# stw 10,0(11)
+MD n=Mem ra=0x000000cc d=0x396B0004	# addi 11,11,4
+MD n=Mem ra=0x000000d0 d=0x394A0001	# addi 10,10,1
+MD n=Mem ra=0x000000d4 d=0x4200FFE4	# bdnz .L25
+MD n=Mem ra=0x000000d8 d=0x38600000	# li 3,0
+# </GEN>
+
+MD n=Mem ra=0x00002000 d=0x00000000
+MD n=Mem ra=0x00002004 d=0x00000000
+MD n=Mem ra=0x00002008 d=0x00000000
+MD n=Mem ra=0x0000200c d=0x00000000
+MD n=Mem ra=0x00002010 d=0x00000000
+MD n=Mem ra=0x00002014 d=0x00000000
+MD n=Mem ra=0x00002018 d=0x00000000
+MD n=Mem ra=0x0000201c d=0x00000000
+MD n=Mem ra=0x00002020 d=0x00000000
+MD n=Mem ra=0x00002024 d=0x00000000
+MD n=Mem ra=0x00002028 d=0x00000000
+MD n=Mem ra=0x0000202c d=0x00000000
+MD n=Mem ra=0x00002030 d=0x00000000
+MD n=Mem ra=0x00002034 d=0x00000000
+MD n=Mem ra=0x00002038 d=0x00000000
+MD n=Mem ra=0x0000203c d=0x00000000
+MD n=Mem ra=0x00002040 d=0x00000000
+MD n=Mem ra=0x00002044 d=0x00000000
+MD n=Mem ra=0x00002048 d=0x00000000
+MD n=Mem ra=0x0000204c d=0x00000000
+MD n=Mem ra=0x00002050 d=0x00000000
+MD n=Mem ra=0x00002054 d=0x00000000
+MD n=Mem ra=0x00002058 d=0x00000000
+MD n=Mem ra=0x0000205c d=0x00000000
+MD n=Mem ra=0x00002060 d=0x00000000
+MD n=Mem ra=0x00002064 d=0x00000000
+
+RD n=NIA d=0x0
+
+TRACE
+
+
+RESULTS
+
+# Results are placed into a buffer at 0x2000.
+# These should be the prime numbers in [1,100].
+MD n=Mem ra=0x00002000 d=0x00000002	# (2)
+MD n=Mem ra=0x00002004 d=0x00000003	# (3)
+MD n=Mem ra=0x00002008 d=0x00000005	# (5)
+MD n=Mem ra=0x0000200c d=0x00000007	# (7)
+MD n=Mem ra=0x00002010 d=0x0000000b	# (11)
+MD n=Mem ra=0x00002014 d=0x0000000d	# (13)
+MD n=Mem ra=0x00002018 d=0x00000011	# (17)
+MD n=Mem ra=0x0000201c d=0x00000013	# (19)
+MD n=Mem ra=0x00002020 d=0x00000017	# (23)
+MD n=Mem ra=0x00002024 d=0x0000001d	# (29)
+MD n=Mem ra=0x00002028 d=0x0000001f	# (31)
+MD n=Mem ra=0x0000202c d=0x00000025	# (37)
+MD n=Mem ra=0x00002030 d=0x00000029	# (41)
+MD n=Mem ra=0x00002034 d=0x0000002b	# (43)
+MD n=Mem ra=0x00002038 d=0x0000002f	# (47)
+MD n=Mem ra=0x0000203c d=0x00000035	# (53)
+MD n=Mem ra=0x00002040 d=0x0000003b	# (59)
+MD n=Mem ra=0x00002044 d=0x0000003d	# (61)
+MD n=Mem ra=0x00002048 d=0x00000043	# (67)
+MD n=Mem ra=0x0000204c d=0x00000047	# (71)
+MD n=Mem ra=0x00002050 d=0x00000049	# (73)
+MD n=Mem ra=0x00002054 d=0x0000004f	# (79)
+MD n=Mem ra=0x00002058 d=0x00000053	# (83)
+MD n=Mem ra=0x0000205c d=0x00000059	# (89)
+MD n=Mem ra=0x00002060 d=0x00000061	# (97)
+MD n=Mem ra=0x00002064 d=0x00000000	# (0)
+
+
+
+

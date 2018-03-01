@@ -1,0 +1,388 @@
+in7.uadl:14: warning: Instructions access no data memory
+===============
+ADL Data Model:
+===============
+
+  =======================
+  C++ Outer Declarations:
+  =======================
+  
+ enum Stuff {
+    X
+    ,
+    Y
+    ,
+    Z
+} ;  
+
+//-------------------------
+  
+ int foo (  ) ;  
+
+//-------------------------
+  
+ int bar ( int x , int y ) ;  
+
+//-------------------------
+
+  ======
+  Cores:
+  ======
+  Name:  "P"
+  Register Files:
+    Name:  "GPR"
+    Size:  32
+    Usage:  read, written
+    Width:  32
+      h[16,31]   
+      l[0,15]   
+    -------------------------------
+  Registers:
+    Name:  "Bar"
+    Width:  32
+    -------------------------------
+    Name:  "Foo"
+    Width:  32
+      X[0,15]   
+      Y[16,31]   
+    -------------------------------
+    Name:  "PC"
+    Usage:  read, written
+    Width:  32
+    Attributes:  cia nia
+    -------------------------------
+  Current-instruction-address register:  PC
+  Next-instruction-address register:  PC
+  Real-address Mask:
+    Initial mask:  0xffffffff (constant)
+  Effective-address Mask:
+    Initial mask:  0xffffffff (constant)
+  Caches:
+    L1i (level 1, instr)
+      Size    :  32768 bytes
+      Linesize:  128 bytes
+      Sets    :  64 
+      Ways    :  4 
+    L1d (level 1, data)
+      Size    :  32768 bytes
+      Linesize:  128 bytes
+      Sets    :  64 
+      Ways    :  4 
+  Instruction Fields:
+    D: [16,31] [not used] 
+      Display:  dec
+      Signed:  1
+      Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+    OPCD: [0,5] 
+      Primary opcode.
+    
+    RA: [11,15] [regfile:  GPR]
+      Field used to specify a General Purpose Register to be used as a source.
+    
+    RB: [16,20] [regfile:  GPR]
+      Field used to specify a General Purpose Register to be used as a source.
+    
+    RS: [6,10] [regfile:  GPR]
+      Field used to specify a General Purpose Register as a target.
+    
+    RT: [6,10] [regfile:  GPR]
+      Field used to specify a General Purpose Register to be used as a target.
+    
+    SI: [16,31] 
+      Display:  dec
+      Signed:  1
+      Signed immediate field for arithmetic operations.
+    
+    UI: [16,31] 
+      Unsigned immediate field for arithmetic operations.
+    
+    XO: [21,30] 
+      Extended opcode.
+    
+  Instructions:
+    Name:  add (rank: 100)
+    Width:  32
+    Fields:  OPCD(31) RT RA RB XO(266)
+    Action:  {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+    Source Registers:  GPR(RA) GPR(RB) 
+    Target Registers:  GPR(RT) 
+    Documention:
+
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    
+    -------------------------------
+    Name:  addi (rank: 100)
+    Width:  32
+    Fields:  OPCD(14) RT RA SI
+    Action:  {
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + SI ;
+    }
+}
+    Source Registers:  GPR(RA)? 
+    Target Registers:  GPR(RT) 
+    -------------------------------
+    Name:  addic (rank: 100)
+    Width:  32
+    Fields:  OPCD(12) RT RA SI
+    Action:  {
+    GPR ( RT ) = GPR ( RA ) + SI ;
+}
+    Source Registers:  GPR(RA) 
+    Target Registers:  GPR(RT) 
+    -------------------------------
+    Name:  andi. (rank: 100)
+    Width:  32
+    Fields:  OPCD(28) RS RA UI
+    Action:  {
+    GPR ( RA ) = GPR ( RS ) & UI ;
+}
+    Source Registers:  GPR(RS) 
+    Target Registers:  GPR(RA) 
+    -------------------------------
+  
+Instruction Tables:
+  other:
+        Mask:  0xfc000000
+      12(30000000):  addic
+      14(38000000):  addi
+      28(70000000):  andi.
+      31(7c000000):        Mask:  0x7fe
+        266(214):  add
+  
+User Type Declarations:
+    // uADL Instruction Classes
+enum InstClass {
+unknownClass = 0,
+aClass,
+bClass,
+maxClass
+};
+
+
+  -------------------------------
+
+================
+uADL Data Model:
+================
+
+  P (for architecture P):
+    First-level instruction memory:  L1i
+
+    Fetch Unit:  Fetcher
+      Fetch Memory:  L1i
+      Entries     :  2
+      Entry Size  :  4
+      Fetch Sizes :  8 4 
+
+    Pipeline Stage:  mEX
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mID
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mMM
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mWB
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+
+    Register:  Bar
+      ID        :  0
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register:  Foo
+      ID        :  1
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register File:  GPR
+      ID        :  3
+      Size      :  32
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register:  PC
+      ID        :  2
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+
+    Forwarding Path:  reorder
+      Broadcast:  0
+      Size     :  1
+      Width    :  32
+
+    Memory:  Mem
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Read latency :  1
+      Write latency:  1
+      Read-only    :  0
+
+    Cache:  L1d
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Next-level memory          :  Mem
+      critical_word_first        :  1
+      invalidate_latency         :  1
+      linefill_access_width      :  64
+      linefill_lock_holdoff_cycle:  1
+      linefill_read_latency      :  1
+      linefill_write_latency     :  1
+      lock_latency               :  1
+      read_hit_latency           :  1
+      unlock_latency             :  1
+      write_hit_latency          :  1
+      write_mode                 :  WriteThrough
+      zero_latency               :  1
+    Cache:  L1i
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Next-level memory          :  Mem
+      critical_word_first        :  1
+      invalidate_latency         :  1
+      linefill_access_width      :  64
+      linefill_lock_holdoff_cycle:  1
+      linefill_read_latency      :  1
+      linefill_write_latency     :  1
+      lock_latency               :  1
+      read_hit_latency           :  1
+      unlock_latency             :  1
+      write_hit_latency          :  1
+      write_mode                 :  WriteThrough
+      zero_latency               :  1
+
+    Pipeline Scheduling Order:   mWB mMM mEX mID 
+
+    Machine:  normal
+      Initial state:  S_INIT
+      States       :  S_EX S_ID S_MM S_WB S_WBp
+      Default State Bindings:
+        S_ID = mID
+        S_EX = mEX
+        S_MM = mMM
+        S_WB = mWB
+        S_WBp = mWB
+
+    Instruction Class:  a
+      Instructions:
+        add
+          Src1 = (src: GPR(RA)), 
+          Src2 = (src: GPR(RB)), 
+          Trg = (trg: GPR(RT)), 
+        addi
+          Src1 = (src: GPR(RA)?), 
+          Trg = (trg: GPR(RT)), 
+
+      Commit On Exception:  1
+      Machine    :  normal
+      State Bindings:
+        S_ID = mID
+        S_EX = mEX
+        S_MM = mMM
+        S_WB = mWB
+        S_WBp = mWB
+      State actions:
+        S_EX:
+          To-States:  S_MM 
+          From-States:  S_ID S_INIT 
+          Action:
+if ( mMM . has_space (  ) ) {
+    exec (  ) ;
+    change_state ( S_MM ) ;
+}
+
+        S_ID:
+          To-States:  S_EX 
+          From-States:  S_INIT 
+          Action:
+if ( Src1 . can_read (  ) && Src2 . can_read (  ) && Trg . can_allocate (  ) && mEX . has_space (  ) ) {
+    Src1 . read (  ) ;
+    Src2 . read (  ) ;
+    Trg . allocate (  ) ;
+    change_state ( S_EX ) ;
+}
+
+        S_INIT:
+          To-States:  S_ID 
+          Action:
+if ( mID . has_space (  ) ) {
+    change_state ( S_ID ) ;
+}
+
+        S_MM:
+          To-States:  S_WB 
+          From-States:  S_EX S_ID S_INIT 
+          Action:
+if ( mWB . has_space (  ) ) {
+    change_state ( S_WB ) ;
+}
+
+        S_WB:
+          To-States:  S_WBp 
+          From-States:  S_EX S_ID S_INIT S_MM 
+          Action:
+if ( Trg . can_write (  ) ) {
+    write_ops (  ) ;
+    change_state ( S_WBp ) ;
+}
+
+        S_WBp:
+          To-States:  S_INIT 
+          From-States:  S_EX S_ID S_INIT S_MM S_WB 
+          Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+    Instruction Class:  b
+      Instructions:
+        andi.
+          Src1 = (trg: GPR(RA)), 
+          __other__ = (src: GPR(RS)), 
+
+      Commit On Exception:  1
+      Machine    :  normal
+      State Bindings:
+        S_ID = mID
+        S_EX = mEX
+        S_MM = mMM
+        S_WB = mWB
+        S_WBp = mWB
+

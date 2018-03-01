@@ -1,0 +1,7 @@
+
+define(core=P) {
+  define (config) {
+    exception_callbacks = (Program);
+  }
+}
+

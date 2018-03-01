@@ -1,0 +1,232 @@
+//
+// A simple model for testing of event buses and halt/restart in a
+// multi-threaded simulation environment.
+//
+
+#import "mod1.adl"
+
+define (arch=MtTest) {
+
+  enum RunControlType { Halt, Run };
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+    define (field=AS) {
+      bits = 12;
+    }
+    define (field=EE) {
+      bits = 13;
+    }
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR4) {
+    """
+    Interrupt-vector offset register 4 (External Interrupt).
+    """;
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+
+
+  define (eventbus=runctrl) {
+
+    define (field=type) {
+      reset = Run;
+    }
+
+    action = func (runctrl_t data) {
+      set_active_count( (data.type == Halt) ? 0 : 1 );
+    };
+  }
+
+  define (reg=RCTRL) {
+    define (write) {
+      action = func(bits<32> x) {
+        runctrl_t r;
+        r.type = x.uint32();
+        runctrl.send(r);
+      };
+    }
+  }
+
+  define (reg=EXREG) {}
+
+  defmod (regfile=SPR) {
+    define (entry=26)  { reg=SRR0; }
+    define (entry=27)  { reg=SRR1; }
+    define (entry=100) { reg = RCTRL; }
+    define (entry=101) { reg = EXREG; }
+  }
+
+  define (reg=RESRV) {
+    """
+    The reservation register.
+    """;
+    width = 64;
+    define (field=ADDR) { bits = (0,62); }
+    define (field=RES)  { bits = 63; }
+  }
+
+  define (eventbus=rsrvbus) {
+
+    define (field=real_addr) {
+      bits = 64;
+    }
+
+    action = func (rsrvbus_t data) {
+      info(1,"rsrvbus:  broadcast");
+      if (RESRV.RES == 1) {
+        info(1,"rsrvbus:  core ",getCoreId()," has reservation.");
+        var clMask = ~0x3fULL;
+        if (((RESRV.ADDR << 1) & clMask) == (data.real_addr & clMask)) {
+          info(1,"rsrvbus:  core ",getCoreId()," cancelling reservation.");
+          RESRV.RES = 0;
+        } 
+      }
+    };
+  }
+
+  void broadcastMemWrite (addr_t ra) {
+    rsrvbus_t d;
+    d.real_addr = ra;
+   
+    // Broadcast the store on the event bus
+    rsrvbus.send(d,false /* don't signal self, since we have the reservation. */);  
+  }
+
+  define (instrfield=FXM) {
+    """
+    Field used to specify a field mask.
+    """;
+    bits = (12,19);
+    display = dec;
+  }
+
+  //
+  // The lwarx/stwcx implementation is not fully correct, in that we only
+  // broadcast reservations on lwarx and not from other stores.  Thus, this only
+  // works correctly if a spin-lock is used exclusively by lwarx/stwcx pairs.
+  //
+  define (instr="lwarx") {
+    fields=(OPCD(31),RT,RA,RB,XO(20));
+    action = {
+      var a = (RA == 0) ? 0 : GPR(RA);
+      var EA = a + GPR(RB);
+      RESRV.RES = 1;
+      var clMask = ~0x3fULL;
+      addr_t ra = dataReadTranslate(EA);
+      RESRV.ADDR = (ra & clMask) >> 1;
+      GPR(RT) = Mem(EA,4);
+      broadcastMemWrite(ra);
+    };
+  }
+ 
+  define (instr="stwcx.") {
+    fields=(OPCD(31),RS,RA,RB,XO(150),RC(1));
+    action = {
+      var a = (RA == 0) ? 0 : GPR(RA);
+      var EA = a + GPR(RB);
+      if (RESRV.RES == 1) {
+        var clMask = ~0x3fULL;
+        if (((RESRV.ADDR << 1) & clMask) == (dataWriteTranslate(EA) & clMask)) {
+          Mem(EA,4) = GPR(RS);
+          bits<4> cr = 0x2 | XER.SO;
+          CR = CR.set (0,3,cr);
+        } else {
+          bits<4> cr = 0x0 | XER.SO;
+          CR = CR.set (0,3,cr);
+        }
+        RESRV.RES = 0;
+      } else {
+        bits<4> cr = XER.SO;
+        CR = CR.set (0,3,cr);
+      }
+    };
+  }
+
+  define (instr=mfcr) {
+    fields=(OPCD(31),RT,XO(19));
+    action = {
+      GPR(RT) = CR;
+    };
+  }
+
+  define (instr=mtcrf) {
+    fields=(OPCD(31),RS,FXM,XO(144));
+    syntax = ("%i %f,%f",FXM,RS);
+    action = {
+      var i = 0;
+      if (FXM == 0) {
+        CR = CR;
+      } else {
+        while (i < 8) {
+          if (FXM(i,i) == 1) {
+            CR = CR.set(4*i,4*i+3,GPR(RS)(4*i+32,4*i+35));
+          }
+          i = i + 1;
+        }
+      }
+    };
+  }
+
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+
+  //
+  // External interrupt.
+  //
+  define (exception=External) {
+    // We guard this with an enable so that we can generate an exception
+    // externally without going into an infinite loop.
+    enable = { return (MSR.EE == 1); };
+    action = {
+      SRR0 = NIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR4(16,31));
+      // This allows us to properly handle a critical interrupt which occurs at
+      // the same time as a non-critical interrupt.
+      CIA = NIA;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,MtTest);
+}

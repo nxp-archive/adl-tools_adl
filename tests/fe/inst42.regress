@@ -1,0 +1,66 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  1024
+  Prefix:  r
+  Usage:  written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  BS: [22,23] 
+    Valid ranges:   (0, 3)  
+  F1: [9,9] [not used] 
+    Enums:  '.up' '.down' 
+  F2: [10,10] [not used] 
+    Enums:  '.left' '.right' 
+  IMM: 
+    Pseudo:  1
+    Width:   4
+    Valid ranges:   (0, 10)  
+  IMM8: [24,31] 
+    Valid ranges:   (0, 255)  
+    Valid masks:   (0xf0, 0)  
+  OPCD: [1,5] 
+  RA: [11,15] 
+    Valid ranges:   (10, 11)   (23, 31)  
+    Valid masks:   (0x11, 0x11)   (0xf, 0xa)  
+Instructions:
+  Name:  foo (rank: 100)
+  Width:  32
+  Syntax:  "foo %f,%f,%f":   RA BS IMM8
+  Fields:  OPCD(11) RA BS IMM8
+  Action:  {
+    GPR ( RA ) = BS + IMM8 ;
+}
+  Target Registers:  GPR(RA) 
+  -------------------------------
+  Name:  foo3 (rank: 100) (shorthand) (no-disassemble)
+  Width:  32
+  Syntax:  "foo3 %f,%f":   RA IMM
+  Fields:  RA IMM
+  Alias:  foo RA(RA) BS(( IMM <= 0xFF ) ? RA : RA + 1) IMM8(IMM <= 0xFF ? IMM : IMM >> 8) 
+  Target Registers:  GPR(RA) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x7c000000
+    11(2c000000):  foo
+      Shorthand:  foo3: foo RA(RA) BS(( IMM <= 0xFF ) ? RA : RA + 1) IMM8(IMM <= 0xFF ? IMM : IMM >> 8) 
+-------------------------------
+

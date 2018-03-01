@@ -1,0 +1,248 @@
+//
+// A simple model with a fetch unit set up so that it will insert bubbles due to 
+// an inability to satisfy the pipeline.
+//
+//   tested features: pipeline stage parameter: stall_backwards
+//                    exec() with latency
+//                    explicit allocate() and release()
+//                    solved deadlock: stall_backwards + explicit allocate()
+
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 4;
+      entry_size = 2;
+      fetch_size = (2);
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM)) {
+      scheduler = lock_step;
+    };
+
+    define (pipestage mWB) {};
+
+    // memory system
+    define (memory mMEM) {
+      data_width = 32;
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_MM, S_MMp, S_WB );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = (S_EX);
+      mMM = (S_MM,S_MMp);
+      mWB = (S_WB);
+    };
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     add, or, 
+                     cmpi, cmp, 
+                     mfspr, srw, halt );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() &&	Trg.can_write() && mEX.has_space() && !stalled()) {
+				Src.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+		S_EX: if (mMM.has_space() && !stalled()) {
+			exec();
+			change_state(S_MM);
+		}
+		S_MM: if (mWB.has_space() && !stalled()) { 
+			change_state(S_WB); 
+		}
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+
+  }
+
+
+  define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzu, lwzx );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space() && !stalled()) {
+        Src.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && mMEM.can_request_read() && !stalled()) {
+        exec();
+        mMEM.send_read_request();
+        change_state(S_MM);
+      }
+		S_MM: if (mMEM.can_read()) { 
+        exec_and_read(mMEM);
+        change_state(S_MMp);
+      }
+    S_MMp: if (exec_done() && mWB.has_space() && !stalled()) {
+        change_state(S_WB);
+      }
+      else if (mMEM.can_request_read()) {
+        mMEM.send_read_request();
+        change_state(S_MM);
+      }
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+  }
+
+
+  define (instr_class store) {
+    instructions = (stb, sth, sthx, stw, stwu, stwx);
+
+    machine = normal;
+
+    allow_missing_operands = true;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read() && Trg.can_write() && mEX.has_space() && !stalled()) {
+				Src.read();
+        Trg.allocate();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && mMEM.can_request_write() && !stalled()) {
+        exec();
+        mMEM.send_write_request();
+        change_state(S_MM);
+      }
+		S_MM: if (mMEM.can_write()) { 
+        exec_and_write(mMEM);
+        change_state(S_MMp);
+      }
+    S_MMp: if (exec_done() && mWB.has_space() && !stalled()) {
+        change_state(S_WB);
+      }
+      else if (mMEM.can_request_write()) {
+        mMEM.send_write_request();
+        change_state(S_MM);
+      }
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+  }
+
+
+  define (instr_class branch) {
+    instructions = ( bc, b, bl, bclr );
+
+    machine = normal;
+
+    allow_missing_operands = true;
+
+    action = {
+    S_INIT :{
+      change_state(S_ID);
+    };
+    S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space() && !stalled()) {
+        read_ops();
+        allocate_ops();
+        change_state(S_EX);
+      }
+    S_EX: if (mMM.has_space() && !stalled()) {
+        exec();
+        write_ops();
+        if (branch_taken()) {
+          taken_flush();
+        }
+        change_state(S_MM);
+      }
+    S_MM: if (mWB.has_space() && !stalled()) {
+        change_state(S_WB);
+      }
+    S_WB: {
+      change_state(S_INIT);
+    }
+    };
+  }
+
+
+  define (instr_class spr) {
+    instructions = (mtspr, mfspr);
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+    S_INIT: {
+      change_state(S_ID);
+    }
+    S_ID: {
+      if (Src.can_read() && mEX.has_space() && !stalled()) {
+        Src.read();
+        Trg.allocate();
+        change_state(S_EX);
+      }
+    }
+    S_EX: if (mMM.has_space() && !stalled()) {
+      exec();
+      change_state(S_MM);
+    }
+    S_MM: if (mWB.has_space() && !stalled()) {
+      change_state(S_WB);
+    }
+    S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    };
+  }
+}

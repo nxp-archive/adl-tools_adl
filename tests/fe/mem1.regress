@@ -1,0 +1,2 @@
+mem1.adl:68: Memory does not have any member functions.
+mem1.adl:58: Second argument to a memory access must be a constant integer.

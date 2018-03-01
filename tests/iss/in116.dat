@@ -1,0 +1,65 @@
+#
+# Tests decode misses with the JIT.  We should take
+# two program interrupts, which will bump up a counter
+# at 0x1000.  We should also execute all of the normal
+# code (the addi instructions).
+#
+
+= asm
+
+  addi r1,r1,1
+  addi r2,r2,2
+  .long 0xffffffff
+  addi r3,r3,3
+  addi r4,r4,4
+  .long 0xffffffff
+  addi r5,r5,5
+  .long 0x0
+  .long 0x0
+  lwz r31,0x1000(r0)
+  addi r31,r31,1
+  stw r31,0x1000(r0)
+  mfspr r31,SRR0
+  addi r31,r31,4
+  mtspr SRR0,r31
+  rfi  
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0xFFFFFFFF	#	.long 0xffffffff
+MD n=Mem ra=0x0000000c d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000010 d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000014 d=0xFFFFFFFF	#	.long 0xffffffff
+MD n=Mem ra=0x00000018 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x83E01000	#	lwz r31,0x1000(r0)
+MD n=Mem ra=0x00000028 d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x0000002c d=0x93E01000	#	stw r31,0x1000(r0)
+MD n=Mem ra=0x00000030 d=0x7FFA02A6	#	mfspr r31,SRR0
+MD n=Mem ra=0x00000034 d=0x3BFF0004	#	addi r31,r31,4
+MD n=Mem ra=0x00000038 d=0x7FFA03A6	#	mtspr SRR0,r31
+MD n=Mem ra=0x0000003c d=0x4C000064	#	rfi  
+# </GEN>
+
+CORE n=:P
+
+RD n=IVOR6 d=0x24
+
+MD n=Mem ra=0x1000 d=0
+
+RESULTS
+
+RD n=NIA      d=0x00000020
+
+RD n=GPR i=0  d=0x00000000
+RD n=GPR i=1  d=0x00000001
+RD n=GPR i=2  d=0x00000002
+RD n=GPR i=3  d=0x00000003
+RD n=GPR i=4  d=0x00000004
+RD n=GPR i=5  d=0x00000005
+
+MD n=Mem ra=0x1000 d=2

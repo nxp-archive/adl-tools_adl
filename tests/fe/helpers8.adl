@@ -1,0 +1,36 @@
+//
+// Makes sure that we can access helper functions in some of the
+// core hooks, even if they're in another architecture.
+//
+
+define (arch=stat) {
+
+  define (reg=FCNT) {}
+  define (reg=ICNT) {}
+
+  void register_fetch() { 
+    FCNT = FCNT + 1; 
+  }
+
+  void register_commit() { 
+    ICNT = ICNT + 1; 
+  }
+
+}
+
+define (arch=mt) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  pre_fetch = { register_fetch(); };
+
+  post_exec = { register_commit(); };
+
+}
+
+define (core = P) {
+  type="Thread";
+  archs = (mt,stat);
+}

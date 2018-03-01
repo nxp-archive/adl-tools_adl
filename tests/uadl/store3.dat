@@ -1,0 +1,74 @@
+#
+# The is_misaligned predicate should be based upon the current memory request.
+# Thus, a word-aligned stmw should have the first is_misaligned(0x7) return
+# true, while the second returns false (it is aligned).
+#
+= asm
+
+	stmw r28,0x1000(r0)
+	stmw r28,0x1104(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xBF801000	#	stmw r28,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0xBF801104	#	stmw r28,0x1104(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x0
+
+RD n=CCR d=0xc0000000
+
+RD n=GPR i=28 d=10
+RD n=GPR i=29 d=20
+RD n=GPR i=30 d=30
+RD n=GPR i=31 d=40
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xbf801000
+INSTR op=0xbf801000					asm="stmw r28,4096(r0)"
+D n=Mem t=write ea=0x1000 nb=4
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x0000000a
+D n=Mem t=write ea=0x1004 nb=4
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000014
+D n=Mem t=write ea=0x1008 nb=4
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x0000001e
+D n=Mem t=write ea=0x100c nb=4
+M n=Mem t=write ea=0x100c ra=0x100c d=0x00000028
+ITIME t=4
+CTIME t=13
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xbf801104
+INSTR op=0xbf801104					asm="stmw r28,4356(r0)"
+D n=Mem t=write ea=0x1104 nb=4
+M n=Mem t=write ea=0x1104 ra=0x1104 d=0x0000000a
+D n=Mem t=write ea=0x1108 nb=4
+M n=Mem t=write ea=0x1108 ra=0x1108 d=0x00000014
+D n=Mem t=write ea=0x110c nb=4
+M n=Mem t=write ea=0x110c ra=0x110c d=0x0000001e
+D n=Mem t=write ea=0x1110 nb=4
+M n=Mem t=write ea=0x1110 ra=0x1110 d=0x00000028
+ITIME t=5
+CTIME t=31
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=6
+CTIME t=32
+
+RESULTS
+
+MD n=Mem ra=0x0000000000001000 d=0x0000000a	#	(10)
+MD n=Mem ra=0x0000000000001004 d=0x00000014	#	(20)
+MD n=Mem ra=0x0000000000001008 d=0x0000001e	#	(30)
+MD n=Mem ra=0x000000000000100c d=0x00000028	#	(40)
+MD n=Mem ra=0x0000000000001104 d=0x0000000a	#	(10)
+MD n=Mem ra=0x0000000000001108 d=0x00000014	#	(20)
+MD n=Mem ra=0x000000000000110c d=0x0000001e	#	(30)
+MD n=Mem ra=0x0000000000001110 d=0x00000028	#	(40)

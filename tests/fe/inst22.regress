@@ -1,0 +1,78 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  BA: [11,15] 
+        Field used to specify one of the Condition Register bits to be used as a source.
+    
+  BB: [16,20] 
+        Field used to specify one of the Condition Register bits to be used as a source.
+    
+  BD: [16,29] [not used] 
+        Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    
+  BF: [6,8] [not used] 
+        Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    
+  BH: [19,20] 
+        Field used to provide a hint about the target address with respect to whether
+    or not the instruction is a subroutine return.
+    
+  BI: [11,15] 
+        Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    
+  BO: [6,10] 
+        Field used to specify options for the Branch Conditional instructions.
+    
+  BT: [6,10] 
+        Field used to specify one of the Condition Register bits to be used as a target.
+    
+  LK: [31,31] 
+        LINK bit.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  XO: [21,30] 
+        Extended opcode.
+    
+Instructions:
+  Name:  bcctrl (rank: 100)
+  Width:  32
+  Fields:  OPCD(19) BO BI BH XO(528) LK(1)
+  Action:  func (  ) {
+     ;
+}
+  -------------------------------
+  Name:  creqv (rank: 100)
+  Width:  32
+  Fields:  OPCD(19) BT BA BB XO(289)
+  Action:  {
+     ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    637534497(4c000242):  creqv
+    637534736(4c000420):      Mask:  0x1
+      1(1):  bcctrl
+-------------------------------
+

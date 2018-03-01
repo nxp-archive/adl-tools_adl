@@ -1,0 +1,91 @@
+#
+# This makes sure that architectural parameters are reset between tests.
+# In this case, we're making use of the endian flag.
+#
+
+TEST id=0
+
+= asm
+
+	lwz r1,0x1000(r0)  # Little endian loads.
+	lwz r2,0x1004(r0)
+	lwz r3,0x1008(r0)
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x10000
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x80201000	#	lwz r1,0x1000(r0)  # Little endian loads.
+MD n=Mem ra=0x00010004 d=0x80401004	#	lwz r2,0x1004(r0)
+MD n=Mem ra=0x00010008 d=0x80601008	#	lwz r3,0x1008(r0)
+# </GEN>
+CORE n=:P
+
+RD n=NIA     d=0x00000000
+
+MD n=Mem ra=0xa1000 d=0xefbeadde
+MD n=Mem ra=0xa1004 d=0x21436587
+MD n=Mem ra=0xa1008 d=0x10203040
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x4 E=0x1
+
+# ea=0x2000 ra=0xB2000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x2c8 WIMG=0x3 SX=1 SR=1 SW=1 EPN=0x8 E=0x1
+
+# ea=0x3000 ra=0xB7000
+TD n=TlbCam set=0 way=3 V=1 TID=0 SIZE=1 TS=0 RPN=0x2dc WIMG=0x4 SX=1 SR=1 SW=1 EPN=0xc E=0x1
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x87654321
+RD n=GPR i=3 d=0x40302010
+
+TEST id=1
+
+= asm
+
+	lwz r1,0x1000(r0)  # Little endian loads.
+	lwz r2,0x1004(r0)
+	lwz r3,0x1008(r0)
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x10000
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x80201000	#	lwz r1,0x1000(r0)  # Big endian loads.
+MD n=Mem ra=0x00010004 d=0x80401004	#	lwz r2,0x1004(r0)
+MD n=Mem ra=0x00010008 d=0x80601008	#	lwz r3,0x1008(r0)
+# </GEN>
+CORE n=:P
+
+RD n=NIA     d=0x00000000
+
+MD n=Mem ra=0x01000 d=0x12345678
+MD n=Mem ra=0x01004 d=0xdeadbeef
+MD n=Mem ra=0x01008 d=0xa523fb82
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x12345678
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xa523fb82

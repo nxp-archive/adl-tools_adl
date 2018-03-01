@@ -1,0 +1,137 @@
+#
+# More testing o the pre-write and pre-read hook.
+#
+= asm
+
+	# Aligned case.
+	lwz r1,0x1000(r0)
+	lhz r2,0x1000(r0)
+	lbz r3,0x1000(r0)
+	stw r1,0x1010(r0)
+	sth r2,0x1014(r0)
+	stb r3,0x1018(r0)
+	# Misaligned case.
+	lwz r4,0x1002(r0)	
+	lhz r5,0x1001(r0)	
+	stw r4,0x101a(r0)
+	sth r5,0x101f(r0)
+	
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0xA0401000	#	lhz r2,0x1000(r0)
+MD n=Mem ra=0x00000008 d=0x88601000	#	lbz r3,0x1000(r0)
+MD n=Mem ra=0x0000000c d=0x90201010	#	stw r1,0x1010(r0)
+MD n=Mem ra=0x00000010 d=0xB0401014	#	sth r2,0x1014(r0)
+MD n=Mem ra=0x00000014 d=0x98601018	#	stb r3,0x1018(r0)
+MD n=Mem ra=0x00000018 d=0x80801002	#	lwz r4,0x1002(r0)	
+MD n=Mem ra=0x0000001c d=0xA0A01001	#	lhz r5,0x1001(r0)	
+MD n=Mem ra=0x00000020 d=0x9080101A	#	stw r4,0x101a(r0)
+MD n=Mem ra=0x00000024 d=0xB0A0101F	#	sth r5,0x101f(r0)
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+
+CORE n=:P
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201000
+INSTR op=0x80201000					asm="lwz r1,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+A l=0 m="Pre-read to 0x1000"
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=1 d=0xdeadbeef
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xa0401000
+INSTR op=0xa0401000					asm="lhz r2,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=2
+A l=0 m="Pre-read to 0x1000"
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=2 d=0x0000dead
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x88601000
+INSTR op=0x88601000					asm="lbz r3,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=1
+A l=0 m="Pre-read to 0x1000"
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=3 d=0x000000de
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x90201010
+INSTR op=0x90201010					asm="stw r1,4112(r0)"
+D n=Mem t=write ea=0x1010 nb=4
+A l=0 m="Pre-write to 0x1010"
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0xdeadbeef
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0xb0401014
+INSTR op=0xb0401014					asm="sth r2,4116(r0)"
+A l=0 m="Pre-write to 0x1014"
+D n=Mem t=write ea=0x1014 nb=2
+M n=Mem t=write ea=0x1014 ra=0x1014 d=0xdead0000
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x98601018
+INSTR op=0x98601018					asm="stb r3,4120(r0)"
+D n=Mem t=write ea=0x1018 nb=1
+A l=0 m="Pre-write to 0x1018"
+M n=Mem t=write ea=0x1018 ra=0x1018 d=0xde000000
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x80801002
+INSTR op=0x80801002					asm="lwz r4,4098(r0)"
+D n=Mem t=read ea=0x1002 nb=4
+A l=0 m="Pre-read to 0x1002"
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x12345678
+R n=GPR i=4 d=0xbeef1234
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0xa0a01001
+INSTR op=0xa0a01001					asm="lhz r5,4097(r0)"
+D n=Mem t=read ea=0x1001 nb=2
+A l=0 m="Pre-read to 0x1001"
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=5 d=0x0000adbe
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x9080101a
+INSTR op=0x9080101a					asm="stw r4,4122(r0)"
+D n=Mem t=write ea=0x101a nb=4
+A l=0 m="Pre-write to 0x101a"
+M n=Mem t=write ea=0x1018 ra=0x1018 d=0xde00beef
+M n=Mem t=write ea=0x101c ra=0x101c d=0x12340000
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0xb0a0101f
+INSTR op=0xb0a0101f					asm="sth r5,4127(r0)"
+D n=Mem t=write ea=0x101f nb=2
+A l=0 m="Pre-write to 0x101f"
+M n=Mem t=write ea=0x101c ra=0x101c d=0x123400ad
+M n=Mem t=write ea=0x1020 ra=0x1020 d=0xbe000000
+
+I ea=0x28 id=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x0000dead
+RD n=GPR i=3 d=0x000000de
+RD n=GPR i=4 d=0xbeef1234
+RD n=GPR i=5 d=0x0000adbe
+
+MD n=Mem ra=0x0000000000001000 d=0xdeadbeef	#	(3735928559)
+MD n=Mem ra=0x0000000000001004 d=0x12345678	#	(305419896)
+MD n=Mem ra=0x0000000000001010 d=0xdeadbeef	#	(3735928559)
+MD n=Mem ra=0x0000000000001014 d=0xdead0000	#	(3735879680)
+MD n=Mem ra=0x0000000000001018 d=0xde00beef	#	(3724590831)
+MD n=Mem ra=0x000000000000101c d=0x123400ad	#	(305397933)
+MD n=Mem ra=0x0000000000001020 d=0xbe000000	#	(3187671040)

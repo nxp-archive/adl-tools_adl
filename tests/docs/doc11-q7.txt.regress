@@ -1,0 +1,21 @@
+
+----------------------------------------------------------------------
+| NAME       | ATTRS      | DOC                                      |
+----------------------------------------------------------------------
+| D          | immop      | Immediate field used to specify a 16-bit |
+|            |            | signed two's complement integer which is |
+|            |            | sign-extended to 64-bits.                |
+| OPCD       |            | Primary opcode.                          |
+| RA         | regop      | Field used to specify a General Purpose  |
+|            |            | Register (GPR_) to be used as a source.  |
+| RB         | regop      | Field used to specify a General Purpose  |
+|            |            | Register (GPR_) to be used as a source.  |
+| RS         | regop      | Field used to specify a General Purpose  |
+|            |            | Register (GPR_) as a target.             |
+| RT         | regop      | Field used to specify a General Purpose  |
+|            |            | Register (GPR_) to be used as a target.  |
+| Src1       |            |                                          |
+| Src2       |            |                                          |
+| Trg        |            |                                          |
+| XO         | opcode     | Extended opcode.                         |
+----------------------------------------------------------------------

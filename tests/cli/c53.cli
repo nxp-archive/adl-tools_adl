@@ -1,0 +1,15 @@
+#
+# Testing of tracing of branch-taken information when register tracing is
+# disabled.
+#
+
+simload $env(srcdir)/../iss/in3.dat setpc
+
+clrfilter
+setfilter instr instr_prefetch branchtaken
+
+traceon c53.out.dat
+
+simmode $argv
+go
+quit

@@ -1,0 +1,6 @@
+microinstr3.adl:86: Unknown variable/resource found in action code:  execute
+microinstr3.adl:86: Unknown variable/resource found in action code:  execute
+microinstr3.adl:98: Expects arguments for the run() function
+microinstr3.adl:111: Invalid argument type for the run() function: AA
+microinstr3.adl:124: Invalid argument for the run() function: opHw3
+microinstr3.adl:137: Invalid argument type for the run() function: A17

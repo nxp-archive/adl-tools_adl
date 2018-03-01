@@ -1,0 +1,66 @@
+//
+// Test of valid_ranges, valid_masks and pseudo fields.
+//
+
+define (arch=minippc) {
+  attrs = (up,down,ff); 
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+ define (regfile = GPR){
+   prefix=r;
+   size = 1024; 
+ }
+ define(instrfield=IMM){
+   pseudo = true;
+   width = 4;
+   valid_ranges = (0,10);
+ }
+ define(instrfield=RA){
+   bits = (11,15);
+   valid_ranges = ((10,11),(23,31));
+   valid_masks  = ((0x11,0x11),(0xF,0xA));
+ }
+ define(instrfield=BS){
+   bits = ((22,22),(23,23));
+   valid_ranges = (0,3);
+ }
+ define(instrfield=OPCD){
+   bits =(1,5);
+ }
+ define(instrfield=IMM8){
+   bits =(24,31);
+   valid_ranges = (0,0xFF);
+   valid_masks = (0xF0,0);
+ } 
+  
+  define(instrfield=F1){
+    bits = 9;
+   enumerated = (".up",".down");
+  }
+  define(instrfield=F2){
+   bits = 10;
+   enumerated = (".left",".right");
+  }
+
+  
+  define(instr=foo){
+    fields = (OPCD(11),RA,BS,IMM8);
+    action = {
+      GPR(RA) = BS + IMM8;   
+    };
+    syntax = ("foo %f,%f,%f",RA,BS,IMM8);	   
+  }
+  
+  
+  define(instr=foo3){
+    alias = foo(RA(RA),BS( (IMM<=0xFF)?RA:RA+1 ),IMM8(IMM<=0xFF?IMM:IMM>>8));
+    syntax = ("foo3 %f,%f",RA,IMM);
+  } 
+  
+}
+
+define (core=P) {
+  archs=minippc;
+}

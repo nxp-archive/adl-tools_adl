@@ -1,0 +1,22 @@
+simload $env(srcdir)/mtbrkpt1.dat
+traceon mtbrkpt1.out.dat
+setpath procs::P0
+setbrk 0x24
+setbrk 0x3c
+setbrk 0x58
+
+go
+
+puts [format "P0 R2 is %d" [reg procs::P0::GPR2]]
+
+go
+
+puts [format "P0 R3 is %d" [reg procs::P0::GPR3]]
+
+go
+
+puts [format "P0 R4 is %d" [reg procs::P0::GPR4]]
+puts [format "P1 R2 is %d" [reg procs::P1::GPR2]]
+puts [format "P1 R4 is %d" [reg procs::P1::GPR4]]
+
+quit

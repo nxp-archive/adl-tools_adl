@@ -1,0 +1,131 @@
+//
+// Tests to make sure parm instruction fields are correctly defined.
+//
+
+define (arch = MiniPPC) {
+
+  //
+  // Registers.
+  //
+
+  blk = agu;
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (reloc=R1) {
+    value = 3;
+    instrfield = X21;
+  } 
+
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=X11) {
+    parm = true;
+    indexed = 1;
+    width = 3;
+  }
+  define (instrfield=X12) {
+    parm = true;
+    width = 3;
+    type = immed;
+  }
+  define (instrfield=X13) {
+    parm = true;
+    width = 3;
+    ref = GPR;
+  }
+  define (instrfield=X15) {
+    parm = true;
+    width = 3;
+    addr = abs;
+  }
+  define (instrfield=X16) {
+    parm = true;
+    width = 3;
+    shift = 1;
+  }
+  define (instrfield=X17) {
+    parm = true;
+    display = hex;
+    width = 3;
+  }
+  define (instrfield=X18) {
+    parm = true;
+    width = 3;
+    define(instrfield=Xn) { 
+       bits = (1);
+    }
+  }
+  define (instrfield=X19) {
+    parm = true;
+    alias = XO;
+  }
+  define (instrfield=X20) {
+    parm = true;
+    width = 3;
+    syntax = ("%f",XO);
+  }
+  define (instrfield=X21) {
+    parm = true;
+    width = 3;
+  }
+
+  define (instrfield=X22) {
+    parm = true;
+    width = 3;
+    action = {};
+  }
+  define (instrfield=X23) {
+    parm = true;
+    width = 3;
+  }
+
+
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),XO(266),X23);
+    syntax = ("%i %f",X23);
+    action = {
+    };
+  }
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

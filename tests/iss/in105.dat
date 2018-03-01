@@ -1,0 +1,39 @@
+#
+# Tests a custom PLRU algorithm.
+#
+
+CORE n=:P
+
+= asm
+
+	lwz r1,0x2000(r0)
+	lwz r1,0x4000(r0)
+	mtspr 300,r10
+	lwz r2,0x2000(r0)
+	lwz r2,0x4000(r0)	
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x80202000	#	lwz r1,0x2000(r0)
+MD n=Mem ra=0x00000104 d=0x80204000	#	lwz r1,0x4000(r0)
+MD n=Mem ra=0x00000108 d=0x7D4C4BA6	#	mtspr 300,r10
+MD n=Mem ra=0x0000010c d=0x80402000	#	lwz r2,0x2000(r0)
+MD n=Mem ra=0x00000110 d=0x80404000	#	lwz r2,0x4000(r0)	
+# </GEN>
+
+RD n=NIA d=0x0100
+
+RD n=GPR i=11 d=0x2000
+RD n=GPR i=12 d=0x6000
+RD n=GPR i=10 d=0x80000000
+
+MD n=Mem ra=0x00000 d=0x1
+MD n=Mem ra=0x02000 d=0x2
+

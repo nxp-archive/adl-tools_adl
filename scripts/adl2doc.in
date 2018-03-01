@@ -1,0 +1,563 @@
+#!@PERL@
+# -- -*-perl-*-a
+#
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+adl2doc [options] <.adl | .rst | .html file>
+
+=head1 SYNOPSIS
+
+Produces html or PDF documentation from an ADL file.  If a .rst
+(ReStructuredText file) is supplied, then that is used to generate an HTML file
+and, optionally, a PDF.  If an html file is supplied, then it will be used to
+generate a PDF if the relevant option is selected.
+
+=head1 OPTIONS
+
+Basic command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--man, -m>
+
+Display the complete help as a man page.
+
+=item B<--title=str, -t=str>
+
+Specify a title for the document.  Only one title is allowed; multiple title
+options will overwrite the prior value.
+
+=item B<--subtitle=str, -st=str>
+
+Specify a subtitle for the document.  Multiple options are allowed; each will
+produce a separate subtitle line.
+
+=item B<--html>
+
+Generate HTML.  This is on by default.  Disabling this with --no-html means that
+only reStructured Text will be produced.  If the PDF option is enabled and this
+option is disabled, then the HTML intermediate file will be deleted.
+
+=item B<--pdf>
+
+Generate PDF.  This is off by default.
+
+=item B<--output=file, -o=file>
+
+Specify the output file name.  If not specified, the base name of the input file
+will be used, with a .html or .pdf extension.  If specified, then the name is
+used as the base name for the output, with the appropriate extension appended.
+
+=item B<--config=file, -cf=file>
+
+Specify a configuration file name.
+
+=item B<--print-source-location, --psl>
+
+Print source location information (filename and line number) for action code.
+Default is off.  This option may be negated.
+
+=item B<--full-path, --fp>
+
+Display the full path for all location information.  If off, only the base-name
+is displayed.  The default is true.  This option may be negated.
+
+=item B<--hl-level=int>
+
+Specify a high-light level for syntax highlighting. 0 means simple verbatim
+text, 1 means color highlighting, 2 means additional subsitutions, such as
+logical symbol substititions, register-files have their index in subscript, etc.
+Default is 1.
+
+=item B<--orig-action>
+
+Display all original action/hook-code without expanding any aspects.  The
+default is false.  This option may be negated.
+
+=item B<--instr-prefix-bits, --ipb>
+
+Include prefix bits in instruction encodings.  The default is true.  This option
+may be negated.
+
+=item B<--ops-in-affect-tables, --oat>
+
+Include explicit operands in affected/affected-by tables in instruction
+documentation.  If set to false, only implicit operands will be shown in these
+tables, with the operands specified only in the B<Operands> table.  Default is
+true.  This option may be negated.
+
+=item B<--proportional-subfields,-psf>
+
+Force sub-fields to be displayed with widths proportional to their bit sizes.
+Default is false.  This option may be negated.
+
+=item B<--unused-instrs>
+
+Generate documentation for all instructions, including those not used in any
+instruction tables instantiated by the core.  If set to false, then only
+instructions used by the core will be displayed.  The default is true.  This
+option may be negated.
+
+=item B<--syntax-prefix-fields,spf>
+
+Print syntax prefix fields (fields which precede instruction names).  Defaultis
+true.  This option may be negated.
+
+=item B<--stylesheet>
+
+Specify an alternate stylesheet URI to be used.
+
+=item B<--prest=path>
+
+Specify a path to the Prest reStructured Text processing program. 
+
+=item B<--fop=path>
+
+Specify a path to the Apache FOP XSL-FO renderer.
+
+=item B<--fop-opts=str>
+
+Specify additional options to FOP, such as Java VM control options.  This option may be repeated.
+
+=item B<--jvm-max-heap=str>
+
+Specify a maximum heap size for the Java VM.  This is passed as the Java -Xmx option.  For example,
+to set the maximum heap size to 3 gigabytes, specify B<3G>.
+
+=item B<--xslt=path>
+
+Specify a path to an XSLT file for transforming XHTML to XSL-FO for PDF generation.
+
+=item B<--prest-args=str>
+
+Specify additional arguments to Prest.  This option may be repeated.
+
+=item B<--define=str, -D=str>
+
+Specify a preprocessor define.
+
+=item B<--include=path, -I=path>
+
+Specify a preprocessor include directory.
+
+=item B<--warn-redefine>
+
+Warn the user if a define block overwrites an existing item.
+The default is false.  This option may be negated.
+
+=item B<--cc=path>
+
+Specify an alternative compiler to use for preprocessing.
+
+=item B<--depfile=file, -df=file>
+
+Instruct the preprocessor to generate a dependency file suitable for inclusion
+by a Makefile.  This is done as a side-effect and does not affect the
+compilation process.
+
+=back
+
+Section options:
+
+=over 8
+
+=item B<--registers, --reg>
+
+Include a section on registers.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--register-files, --rf>
+
+Include a section on register files.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--instruction-fields, --if>
+
+Include a section on instruction fields.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--instructions, --instr>
+
+Include a section on instructions.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--instr-by-attr, --iba>
+
+Include a cross-section on instructions by attribute.  The default is true if
+any are defined.  This option may be negated.
+
+=item B<--instr-by-block, --ibb>
+
+Include a cross-section on instructions by block.  The default is true if
+any are defined.  This option may be negated.
+
+=item B<--exceptions, --exc>
+
+Include a section on exceptions.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--caches>
+
+Include a section on caches.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--memories, --mem>
+
+Include a section on memories.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--event-buses, --eb>
+
+Include a section on event buses.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--contexts>
+
+Include a section on contexts.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--mmu>
+
+Include a section on the MMU.  The default is true if any lookups are defined.
+This option may be negated.
+
+=item B<--core-level-hooks, --clh>
+
+Include a section on core-level hooks.  The default is true if any are defined.
+This option may be negated.
+
+=item B<--helper-functions>
+
+Include a section on helper functions.  The default is true if any are defined.
+This option may be negated.
+
+=back
+
+=cut
+
+@allregs = ();
+@regfiles = ();
+
+use FindBin;
+use Getopt::Long 2.33 qw(:config permute);
+use Pod::Usage;
+use strict;
+use File::Basename;
+use File::Temp qw/ :POSIX /;
+
+use lib "@adl_top_srcdir@/scripts";
+use lib "@prefix@/share";
+use adl_wrapper_support;
+
+# The default prefix is the installation prefix set by Autoconf.
+# This may be overridden using the "prefix" command-line option.
+my $prefix      = '@prefix@';
+my $prest       = '@PREST@';
+my $cc          = '@CXXPROG@';
+my $stylesheet  = '@AdlStyle@';
+my $default_st  = "adl.st";
+my $xslt        = "xhtml2fo-adl.xsl";
+my $ver         = "@PACKAGE_VERSION@";
+
+use vars qw ( @allregs @regfiles );
+
+my ($model,$help,$man,$debug,$config,$orig_action,$core,$output,$title,
+		$instr_prefix_bits,$ops_in_affect_tables,$prop_subfields,$unused_instrs,$fop,@fop_opts,$jvm_max_heap,
+		$print_source_location,$full_path,
+		$gen_registers,$gen_register_files,$gen_instr_fields,
+		$gen_instructions,$gen_mmu,
+		$gen_instrs_by_attr,$gen_instrs_by_block,$gen_exceptions,
+		$gen_caches,$gen_memories,$gen_event_buses,$gen_contexts,
+		$gen_core_level_hooks,$gen_helper_functions,$warn_redefine,$st_file,
+		@subtitle,@user_defines,@user_includes,@prest_args,$depfile);
+
+my $syntax_prefix_fields = 1;
+my $html = 1;
+my $pdf  = 0;
+my $warn_redefine = 0;
+my $hl_level = 1;
+
+if (!&GetOptions
+	(
+	 "h|help"                     => \$help,
+	 "m|man"                      => \$man,
+	 "verbose"                    => \$verbose,
+	 "debug!"                     => \$debug,
+	 "cf|config=s"                => \$config,
+	 "core=s"                     => \$core,
+	 "o|output=s"                 => \$output,
+	 "psl|print-source-location!" => \$print_source_location,
+	 "fp|full-path!"              => \$full_path,
+	 "orig-action!"               => \$orig_action,
+	 "ipb|instr-prefix-bits!"     => \$instr_prefix_bits,
+	 "oat|ops-in-affect-tables!"  => \$ops_in_affect_tables,
+	 "psf|proportional-subfields!"=> \$prop_subfields,
+	 "sfp|syntax-prefix-fields!"  => \$syntax_prefix_fields,
+	 "unused-instrs!"             => \$unused_instrs,
+	 "reg|registers!"             => \$gen_registers,
+	 "rf|register-files!"         => \$gen_register_files,
+	 "if|instruction-fields!"     => \$gen_instr_fields,
+	 "instr|instructions!"        => \$gen_instructions,
+	 "iba|instr-by-attr!"         => \$gen_instrs_by_attr,
+	 "ibb|instr-by-block!"        => \$gen_instrs_by_block,
+	 "exc|exceptions!"            => \$gen_exceptions,
+	 "caches!"                    => \$gen_caches,
+	 "mem|memories!"              => \$gen_memories,
+	 "eb|event-buses!"            => \$gen_event_buses,
+	 "contexts!"                  => \$gen_contexts,
+	 "mmu!"                       => \$gen_mmu,
+	 "clh|core-level-hooks!"      => \$gen_core_level_hooks,
+	 "helper-functions!"          => \$gen_helper_functions,
+	 "prest=s"                    => \$prest,
+	 "fop=s"                      => \$fop,
+	 "fop-opts=s"                 => \@fop_opts,
+	 "jvm-max-heap=s"             => \$jvm_max_heap,
+	 "xslt=s"                     => \$xslt,
+	 "t|title=s"                  => \$title,
+	 "st|subtitle=s"              => \@subtitle,
+	 "html!"                      => \$html,
+	 "pdf!"                       => \$pdf,
+	 "setpfx|prefix=s"            => \$prefix,
+	 "setbpfx=s"                  => sub {}, # Ignored.  Here for compatibility with adl-config.
+	 "prest-args=s"               => \@prest_args,
+	 "D|define=s"                 => \@user_defines,
+	 "I|include=s"                => \@user_includes,
+	 "warn-redefine!"             => \$warn_redefine,
+	 "stylesheet=s"               => \$stylesheet,
+	 "hl-level=i"                 => \$hl_level,
+	 "st-file=s"                  => \$st_file,
+	 "cc=s"                       => \$cc,
+	 "df|depfile=s"               => \$depfile,
+	 "<>"                         => \&plusargs,
+	)) {
+  printhelp(1,\&printversion,1);
+}
+
+sub plusargs {
+  $model = shift;
+}
+
+sub printversion {
+  print "ADL Version $ver\n";
+}
+
+# This is set via the prefix, rather than by autoconf, so that we can locate
+# this file if the --prefix command-line option is specified.
+my $sharedir    = "$prefix/share";
+
+# Massage any defines into the appropriate form.
+@user_defines = map { "--define=$_"; } @user_defines;
+@user_includes= map { "--include=$_"; } @user_includes;
+
+my $default_gen   = "$prefix/bin@archsuffix@/make-doc";
+my $default_x2pdf = "$prefix/bin@archsuffix@/xhtml2pdf";
+
+my $x2pdf   = $default_x2pdf;
+my $gen     = $default_gen;
+
+# Print help if requested to do so.
+printhelp(0,\&printversion,1) if $help;
+
+printhelp(0,\&printversion,2) if $man;
+
+if (!$model) {
+  print "Error:  No model was specified.\n\n";
+  printhelp(1,\&printversion,1);
+}
+
+my ($base,$path,$type) = fileparse($model,qr/\.(adl|rst|html)/);
+
+my ($genrst,$genhtml) = (1,1);
+
+my $rfile;
+if ($type eq ".rst") {
+	$rfile = $model;
+	$genrst = 0;
+} else {
+	$rfile = ($output) ? "$output.rst" : "$base.rst";
+}
+
+my ($hfile,$pfile);
+
+$hfile = ($output) ? "$output.html" : "$base.html";
+$pfile = ($output) ? "$output.pdf" : "$base.pdf";
+
+if ($type eq ".html") {
+	$hfile = $model;
+	($genrst,$genhtml) = (0,0);
+}
+
+
+# If the high-light level is > 1, then have the generator create a perl data
+# file to convey sideband information.
+my ($pl_file, $pl_option);
+
+if ($hl_level > 1) {
+	$pl_file = tmpnam();
+	$pl_option = "--pl-file=$pl_file";
+}
+
+if ($genrst) {
+
+	# First, generate the source code.
+	my $deptarget;
+	if ($depfile) {
+		$deptarget .= "$hfile " if ($genhtml);
+		$deptarget .= "$pfile " if ($pdf);
+	}
+		
+	# Generate the command-line options.
+	print "\nOptions:\n" if ($verbose);
+	my $gencmd = "$gen --cpp=$cc $model --output=$rfile $pl_option @user_defines @user_includes"
+			.addOption("title",$title)
+			.addOption("subtitle",@subtitle)
+			.addOption("config",$config)
+			.addOption("hl-level",$hl_level)
+			.addFlag("print-source-location",$print_source_location)
+			.addFlag("full-path",$full_path)
+			.addFlag("orig-action",$orig_action)
+			.addFlag("warn-redefine",$warn_redefine)
+			.addFlag("registers",$gen_registers)
+			.addFlag("register-files",$gen_register_files)
+			.addFlag("instruction-fields",$gen_instr_fields)
+			.addFlag("instructions",$gen_instructions)
+			.addFlag("instr-by-attr",$gen_instrs_by_attr)
+			.addFlag("instr-by-block",$gen_instrs_by_block)
+			.addFlag("exceptions",$gen_exceptions)
+			.addFlag("caches",$gen_caches)
+			.addFlag("memories",$gen_memories)
+			.addFlag("event-buses",$gen_event_buses)
+			.addFlag("contexts",$gen_contexts)
+			.addFlag("mmu",$gen_mmu)
+			.addFlag("core-level-hooks",$gen_core_level_hooks)
+			.addFlag("helper-functions",$gen_helper_functions)
+			.addFlag("instr-prefix-bits",$instr_prefix_bits)
+			.addFlag("ops-in-affect-tables",$ops_in_affect_tables)
+			.addFlag("proportional-subfields",$prop_subfields)
+			.addFlag("syntax-prefix-fields",$syntax_prefix_fields)
+			.addFlag("unused-instrs",$unused_instrs)
+			;
+
+  $gencmd .= " --depfile=$depfile --deptarget=$deptarget" if ($depfile);	
+
+# Execute the generation command.
+	print "Running generation command.\n";
+	print "Command output:\n" if ($verbose);
+
+	{
+		$show_output = 1;
+		runcmd $gencmd;
+		$show_output = 0;
+	}
+}
+
+# Now convert this to HTML using prest.
+if ($html || $pdf) {
+  if (!$prest) {
+	print<<EOM;
+
+No reStructured Text processing program was specified, either by the user or
+by the installer at configuration time.  The default program is named "prest"
+and should be installed into your standard Perl library location.
+
+It may be obtained from:
+
+http://search.cpan.org/~nodine/Text-Restructured-0.003030/lib/Text/Restructured.pm
+
+EOM
+	exit 1;
+  }
+	if ($genhtml) {
+		print "Running prest.\n";
+		print "Command output:\n" if ($verbose);
+		my $cmd = "$prest $rfile -W stylesheet=$stylesheet -W html-prolog=1 @prest_args";
+		my ($new_st_file,$unlink_st_file) = get_st_file($st_file,$pl_file);
+		if ($hl_level > 1) {
+			$cmd .= " -D code-block-states-file=$new_st_file";
+		}
+		runcmd "$cmd > $hfile";
+		unlink $new_st_file if (!$debug && $unlink_st_file);
+	}
+}
+
+if ($pdf) {
+	print "Running xhtml2pdf.\n";
+	print "\nOptions:\n" if ($verbose);
+	my $pdfcmd = "$x2pdf --output=$pfile $hfile "
+			.addOption("prefix",$prefix)
+			.addOption("fop",$fop)
+			.addOption("fop-opts",@fop_opts)
+			.addOption("jvm-max-heap",$jvm_max_heap)
+			.addOption("xslt",$xslt)
+			.addFlag("cleanup",($debug ? 0 : undef));
+	runcmd $pdfcmd;
+	unlink $hfile if (!$html && !$debug);
+}
+
+# We're done at this point.
+exit 0;
+
+# If the user supplied a states file, then we're done- just use that.
+# Otherwise, create one so that it's customized for the registers and
+# register-files we know about.  We get that data from a temporary data file
+# created by make-doc.
+sub get_st_file {
+	return (undef,undef) if ($hl_level <= 1);
+
+	my ($st_file,$pl_file) = @_;
+
+	if ($st_file) {
+		die "States file $st_file does not exist!" unless ( -f "$st_file" );
+		return ($st_file,0);
+	}
+
+	my $st_tmp = tmpnam();
+
+	if ( -f "$sharedir/$default_st" ) {
+		$st_file = "$sharedir/$default_st";
+	} else {
+		die "Could not locate a default states file.";
+	}
+
+	# We need to create a custom file.
+	open my $st_in,$st_file or die "Could not open ADL states file $st_file:  $!";
+	open my $st_out,">$st_tmp" or die "Could not open temporary ADL states file $st_tmp:  $!";
+
+	local $/ = undef;
+	my $data = <$st_in>;
+	close $st_in;
+
+	die "Perl data file '$pl_file' does not exist." if ( ! -f $pl_file );
+	eval {
+		do $pl_file;
+	};
+	if ($?) {
+		die "Failed to read $pl_file:  $?";
+	}
+
+	unlink $pl_file if (!$debug);
+
+	my $regfiles = join '|',@regfiles;
+	my $allregs  = join '|',@allregs;
+
+	$data =~ s/adl_regfiles = "";/adl_regfiles = "\\\\b($regfiles)[ \\t]*\\\\(([^)]+)\\\\)";/;
+	$data =~ s/adl_all_regs = "";/adl_all_regs = "\\\\b($allregs)\\\\b";/;
+	print $st_out $data;
+
+	close $st_out;
+
+	#print "Temporary states file:  $st_tmp\n";
+
+	return ($st_tmp,1);
+}

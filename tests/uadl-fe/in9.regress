@@ -1,0 +1,198 @@
+in9.uadl:43: warning: Instruction defined in class 'sfx' but not ADL:  halt
+in9.uadl:4: warning: Instructions access no data memory
+P (for architecture P):
+  First-level instruction memory:  mMEM
+
+  Fetch Unit:  fetcher
+    Fetch Memory:  mMEM
+    Entries     :  6
+    Entry Size  :  1
+    Fetch Sizes :  4 
+
+  Pipeline Stage:  mEX
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mID
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  1
+		Shared           :  0
+  Pipeline Stage:  mMM
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+  Pipeline Stage:  mWB
+    Size             :  1
+    Bandwidth        :  1
+    Rigid  :  0
+    Scheduler        :  dependent
+    Is issue stage   :  0
+		Shared           :  0
+
+  Semaphore:  MulFlag
+	  Count: 1
+
+  Register:  Bar
+    ID        :  0
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  Foo
+    ID        :  1
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register File:  GPR
+    ID        :  3
+    Size      :  32
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+  Register:  PC
+    ID        :  2
+    Size      :  1
+    Width     :  32
+    Latency   :  0
+    Is aliased:  0
+
+  Memory:  mMEM
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Cache:  L1d
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory          :  mMEM
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+  Cache:  L1i
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Next-level memory          :  mMEM
+    critical_word_first        :  1
+    invalidate_latency         :  1
+    linefill_access_width      :  64
+    linefill_lock_holdoff_cycle:  1
+    linefill_read_latency      :  1
+    linefill_write_latency     :  1
+    lock_latency               :  1
+    read_hit_latency           :  1
+    unlock_latency             :  1
+    write_hit_latency          :  1
+    write_mode                 :  WriteThrough
+    zero_latency               :  1
+
+  Pipeline Scheduling Order:   mWB mMM mEX mID 
+
+  Machine:  normal
+    Initial state:  S_INIT
+    States       :  S_EX S_ID S_MM S_WB S_WBp
+    Default State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_MM = mMM
+      S_WB = mWB
+      S_WBp = mWB
+
+  Instruction Class:  sfx
+    Instructions:
+      add
+        Src1 = (src: GPR(RA)), 
+        Src2 = (src: GPR(RB)), 
+        Trg = (trg: GPR(RT)), 
+      addi
+        Src1 = (src: GPR(RA)?), 
+        Trg = (trg: GPR(RT)), 
+
+		Commit On Exception:  1
+    Machine    :  normal
+    State Bindings:
+      S_ID = mID
+      S_EX = mEX
+      S_MM = mMM
+      S_WB = mWB
+      S_WBp = mWB
+    State actions:
+      S_EX:
+        To-States:  S_MM 
+        From-States:  S_ID S_INIT
+        Action:
+if ( mMM.has_space() ) {
+    exec (  ) ;
+    change_state ( S_MM ) ;
+}
+
+      S_ID:
+        To-States:  S_EX 
+        From-States:  S_INIT
+        Action:
+if ( Src1 . can_read (  ) && Src2 . can_read (  ) && Trg . can_allocate (  ) && mEX . has_space (  ) ) {
+    Src1 . read (  ) ;
+    Src2 . read (  ) ;
+    Trg . allocate (  ) ;
+    change_state ( S_EX ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID 
+        Action:
+if ( mID.has_space() ) {
+    change_state ( S_ID ) ;
+}
+
+      S_MM:
+        To-States:  S_WB 
+        From-States:  S_EX S_ID S_INIT
+        Action:
+if ( mWB.has_space() ) {
+    change_state ( S_WB ) ;
+}
+
+      S_WB:
+        To-States:  S_WBp 
+        From-States:  S_EX S_ID S_INIT S_MM
+        Action:
+if ( Trg . can_write (  ) ) {
+    write_ops (  ) ;
+    change_state ( S_WBp ) ;
+}
+
+      S_WBp:
+        To-States:  S_INIT 
+        From-States:  S_EX S_ID S_INIT S_MM S_WB
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+

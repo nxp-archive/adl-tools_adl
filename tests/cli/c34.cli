@@ -1,0 +1,8 @@
+# Test for step for parallel architecture, step now refers to a complet
+# execution set
+step 1;
+puts [reg QE_2risc:core0:PC];
+step 2;
+puts [reg QE_2risc:core0:PC];
+step 2;
+puts [reg QE_2risc:core0:PC];

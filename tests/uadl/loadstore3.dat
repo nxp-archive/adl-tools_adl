@@ -1,0 +1,35 @@
+#
+# This is used to test read/write latencies on a memory port.
+#
+= asm
+
+  lwz r1,0x1000(r0)
+  lwz r2,0x1004(r0)
+  stw r1,0x2000(r0)
+  stw r2,0x2004(r0)
+  
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x80401004	#	lwz r2,0x1004(r0)
+MD n=Mem ra=0x00000008 d=0x90202000	#	stw r1,0x2000(r0)
+MD n=Mem ra=0x0000000c d=0x90402004	#	stw r2,0x2004(r0)
+# </GEN>
+
+RD n=NIA d=0x0
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+MD n=Mem ra=0x2000 d=0xdeadbeef
+MD n=Mem ra=0x2004 d=0x12345678
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678

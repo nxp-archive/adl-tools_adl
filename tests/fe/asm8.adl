@@ -1,0 +1,55 @@
+// Assembler rule checks - fail
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  define (reg = R ) { };
+  define (instrfield = SG)  {  bits = (0,1); }
+  attrs = mini;  	  
+
+  parallel_execution = 3;
+
+  define(assembler) {
+
+    define(rule = R1) {
+      action = func (InstrInfo) {
+           R = 3 ;
+        };
+    }	       
+
+    define(rule = R2) {
+      action = func (InstrInfo) {
+         if(RA == 7) {
+        }
+      }; 
+    }	
+    define(rule = R3) {
+      action = func (InstrInfo) {
+         if(size() == 3) {
+	   
+         }
+      }; 
+    }	
+    define(rule = R4) {
+      action = func (InstrInfo) {
+	get_dest();
+      }; 
+    }	
+
+    define(rule = R5) {
+      action = func(int i) {
+      }; 
+    }	
+  };
+
+
+
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

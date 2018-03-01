@@ -1,0 +1,61 @@
+//
+// Tests that we correctly propagate transformed code in the front-end,
+// e.g. register read/write objects, through user statements, e.g. func () { ... }.
+//
+
+define (arch = MiniPPC) {
+
+  // Various helper routines.
+
+  attrs = (load,store,privileged);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instr=a) {
+    fields=(OPCD(16));
+    action = func() {
+      GPR(0) = GPR(1) + GPR(2);
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

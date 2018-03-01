@@ -1,0 +1,41 @@
+#
+# Test branching into the middle of an instruction packet (little-endian).
+#
+# Constructed using as-mod101
+#
+= asm
+
+	addi r1,r1,1 ; addi r2,r2,5
+L1:
+	add  r2,r2,r2 ; sub r2,r2,r1
+	addi r3,r3,1  ; bc r2,L1,1
+	mul  r4,r3,r3
+	halt
+
+= /asm
+= mdopts
+endian: little
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x000A2105	#	add  r2,r2,r2 ; sub r2,r2,r1
+MD n=Mem ra=0x00000004 d=0x00010842
+MD n=Mem ra=0x00000008 d=0x10800002	#	addi r3,r3,1  ; bc r2,L1,1
+MD n=Mem ra=0x0000000c d=0x04210422
+MD n=Mem ra=0x00000010 d=0xFFFFF10D	#	mul  r4,r3,r3
+MD n=Mem ra=0x00000014 d=0x000118C2
+MD n=Mem ra=0x00000018 d=0x00000002	#	halt
+MD n=Mem ra=0x0000001c d=0x06320C00
+MD n=Mem ra=0x00000020 d=0x00000000	#	
+MD n=Mem ra=0x00000024 d=0x00000000
+# </GEN>
+
+CORE n=packet_ops
+
+
+RESULTS
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=0
+RD n=GPR i=3 d=10
+RD n=GPR i=4 d=100

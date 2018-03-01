@@ -1,0 +1,6 @@
+
+define(core=P) {
+  define (config) {
+    external_dmi_write_update = false;
+  }
+}

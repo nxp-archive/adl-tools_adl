@@ -1,0 +1,301 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Blocks:
+dalu ipu lsu 
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "LC"
+  Width:  32
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia nia
+  -------------------------------
+  Name:  "SP"
+  Read alias/hook:
+    {
+    if ( SR . T1 == 0 ) {
+        return GPR ( 0 ) ;
+    } else if ( SR . T1 == 1 ) {
+        return GPR ( 1 ) ;
+    }
+}
+    Source Registers:  GPR(0)? GPR(1)? SR[mask 0x00000001]/p 
+
+  Width:  32
+  Attributes:  doc_hidden
+  Documention:
+
+ Stack Pointer
+ 
+  -------------------------------
+  Name:  "SR"
+  Usage:  field-read
+  Width:  32
+    T1[0]   
+      Usage:  field-read
+       SR.T1 field
+    T6[1]   
+      Usage:  field-read
+  -------------------------------
+Parallel execution packet size: 3
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CE: 
+    Pseudo:  1
+    Width:   4
+    Assembler:  1
+    Default value :'0'
+  CE1: [not used] 
+    Pseudo:  1
+    Width:   2
+    Assembler:  1
+    Default value :'0'
+  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_: [17,16] [5,4] 
+    Implements:  CE
+  CondEx: [instrfield: CondExec] [not used]
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  CondExec: 
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  CondExec_imp_bits__17_16_: [17,16] 
+    Implements:  CondExec
+  CondExec_imp_bits__33_32_: [33,32] 
+    Implements:  CondExec
+  Enc1: 
+    Pseudo:  1
+    Width:   16
+  Enc1_imp_bits__15_0_: [15,0] 
+    Implements:  Enc1
+  Enc2: 
+    Pseudo:  1
+    Width:   32
+  Enc2_imp_bits__31_0_: [31,0] 
+    Implements:  Enc2
+  IFT: [instrfield: CondExec]
+    Pseudo:  1
+    Width:   6
+    Size: 2
+    Prefix:  1
+    Indexed:  2 
+    Default value :'0'
+  IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_: [11,6] 
+    Implements:  IFT
+  IMM: [not used] 
+    Signed:  1
+    Pseudo:  1
+    Width:   3
+  NonScale: [not used] 
+    Pseudo:  1
+    Width:   2
+    Parm:  1
+  OP1: [not used] 
+    Pseudo:  1
+    Width:   2
+  OP2: [not used] 
+    Pseudo:  1
+    Width:   2
+  OPCD: 
+    Pseudo:  1
+    Complementary:  1
+  RA: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   3
+  RA2_tmp: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   5
+  RA_tmp: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   5
+  RB: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   3
+  RT: [regfile:  GPR] [not used]
+    Pseudo:  1
+    Width:   2
+  RelAdd: 
+    Signed:  1
+    Pseudo:  1
+    Width:   4
+    Addr:  PC-relative
+    Shift:  1
+  RelAdd_imp_bits__3_3_x_2_2_x_1_1_x_0_0_: [3,0] 
+    Implements:  RelAdd
+  Res1: 
+    Pseudo:  1
+    Width:   5
+  Rk: [regfile:  GPR]
+    Pseudo:  1
+    Width:   4
+    Enums:  'r0::r7' 'r1::r8' 'r2::r10' 'r3::r11' 'r4::r12' 'r5::r13' 'r6::r14' 'r7::r15' 
+  Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_: [12,12] [8,6] 
+    Implements:  Rk
+  SG: 
+    Pseudo:  1
+    Width:   1
+    Reserved:  1
+    Assembler:  1
+    Default value :'0'
+  SG_imp_bits__15_15_: [15,15] 
+    Implements:  SG
+  Src1: 
+    Pseudo:  1
+    Width:   3
+  Src2: [not used] 
+    Pseudo:  1
+    Width:   3
+  VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_x_9_9_: [14,13] [11,9] 
+  VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [15,12] [5,0] 
+    Prefix:  1
+  VlesSize: [not used] 
+    Pseudo:  1
+    Width:   3
+    Prefix:  1
+    Default value :'0'
+  flag: 
+    Pseudo:  1
+    Width:   1
+    Enums:  ( '' '-aab' ) '-aad' 
+  flag2:  [not used]
+    Pseudo:  1
+    Width:   1
+    Enums:  ( '' '-b' ) '-d' 
+  n: [not used] 
+    Pseudo:  1
+    Width:   2
+    Enums:  '0' '1' '2' '3' 
+Instructions:
+  Name:  LPREFIX (rank: 100)
+  Width:  16
+  Syntax:  "LPREFIX,  IFT => %f":   IFT
+  Attributes:  prefix
+  Fields:  VarPrefixOpcode_imp_bits__15_15_x_14_14_x_13_13_x_12_12_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ IFT_imp_bits__11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_
+  Prefix:  1
+  -------------------------------
+  Name:  OneWord (rank: 100)
+  Width:  18
+  Fetch width:  16
+  Fields:  CondExec_imp_bits__17_16_ Enc1_imp_bits__15_0_
+  Pseudo:  1
+  -------------------------------
+  Name:  TwoWord (rank: 100)
+  Width:  34
+  Fetch width:  32
+  Fields:  CondExec_imp_bits__33_32_ Enc2_imp_bits__31_0_
+  Pseudo:  1
+  -------------------------------
+  Name:  foo_family (rank: 100)
+  Block:  dalu
+  Fields:  OPCD flag Src1 Res1 CE
+  Action:  {
+    if ( flag == 0 ) {
+        GPR ( Res1 ) = Mem ( Src1 , 4 ) ;
+    } else {
+        GPR ( Res1 ) = 0 ;
+    }
+}
+  Target Registers:  GPR(Res1) 
+  Source Memories:  Mem 
+  Nested insructions:  
+    Name:  foo1 (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "foo1 %f %f":   Rk RelAdd
+    Block:  dalu
+    Attributes:  type1 first
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_x_9_9_ Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_ RelAdd_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  foo_family OPCD(28) flag(2) Src1(RelAdd) Res1(Rk) CE(CE) 
+    Source Registers:  PC 
+    Target Registers:  GPR(Res1) 
+    Type:  OneWord
+    -------------------------------
+    Name:  foo2 (rank: 100)
+    Width:  18
+    Fetch width:  16
+    Syntax:  "foo2 %f %f":   Rk RelAdd
+    Block:  dalu
+    Attributes:  type1 first
+    Fields:  CE_imp_bits__17_17_x_16_16_x_5_5_x_4_4_ SG_imp_bits__15_15_(reserved) VarInstrOpcode_imp_bits__14_14_x_13_13_x_11_11_x_10_10_x_9_9_ Rk_imp_bits__12_12_x_8_8_x_7_7_x_6_6_ RelAdd_imp_bits__3_3_x_2_2_x_1_1_x_0_0_
+    Alias:  foo_family OPCD(12) flag(0) Src1(RelAdd) Res1(Rk) CE(CE) 
+    Source Registers:  PC 
+    Target Registers:  GPR(Res1) 
+    Source Memories:  Mem 
+    Type:  OneWord
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0xf03f0000
+    3(30000):  LPREFIX
+type1:
+    Mask:  0x1b800000
+    20(a000000):  foo2
+    52(1a000000):  foo1
+type2:
+  
+Helper Functions:
+  add_func:
+ bits < 32 > add_func ( bits < 3 > src , bits < 2 > option ) {
+     bits < 1 > op = find_option ( option ) ;
+     bits < 32 > tmp = 0 ;
+    if ( option == 0 || option == 1 ) {
+        tmp = ( GPR ( src ) + GPR ( 0 ) ) ;
+    } else if ( option == 2 || option == 3 ) {
+        tmp = ( GPR ( src ) + GPR ( 2 ) ) ;
+    }
+    return ( tmp ) ;
+}
+    Source Registers:  GPR(0)? GPR(2)? GPR(src [parm #0])? SR[mask 0x00000003]/p? 
+    Helper Functions:  find_option 
+
+  calc_instr_size:
+ unsigned calc_instr_size ( uint32_t pc ) {
+     bits < 16 > a = Mem ( pc , 2 ) ;
+     bits < 16 > b = Mem ( pc + 2 , 2 ) ;
+    if ( a ( 15 ) == 1 ) {
+        return 1 ;
+    } else if ( b ( 15 ) == 1 ) {
+        return 2 ;
+    }
+}
+    Source Memories:  Mem 
+
+  find_option:
+ bits < 1 > find_option ( bits < 1 > opt ) {
+    switch ( opt . uint32 (  ) ) {
+        case 0 : return SR . T1 ;
+        break ;
+        case 2 : return SR . T6 ;
+        break ;
+        default : break ;
+    }
+}
+    Source Registers:  SR[mask 0x00000003]/p? 
+-------------------------------
+

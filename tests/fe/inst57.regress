@@ -1,0 +1,11 @@
+inst57.adl:50: Block inconsistent with target field.
+inst57.adl:59: Index information inconsistent with target field.
+inst57.adl:67: Indexed-field width is not an integer-divisor of instruction field width.
+inst57.adl:76: Width inconsistent with target field.
+inst57.adl:85: Field can not have variable width.
+inst57.adl:127: Target field size is smaller than source field size.
+inst57.adl:100: Value is larger than specified width.
+inst57.adl:117: Index out of field 'F2' range.
+inst57.adl:112: F1:  Specified width is smaller than actual width.
+inst57.adl:127: Some target pseudo fields are not mapped in alias:  OPCD
+Too many errors.

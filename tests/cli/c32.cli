@@ -1,0 +1,21 @@
+#
+# Another test of callback functions.
+#
+
+proc c1 {name ca cac level set way linemask ra } {
+    switch $cac {
+	read -
+	write {
+	    puts [format "Cache $name $ca on $cac at 0x%x" $ra]
+	}
+    }
+}
+
+proc c2 {ea opc name} {
+	puts "Executing $name"
+}
+
+setlogcmd cache_action c1
+setlogcmd instr c2
+
+go

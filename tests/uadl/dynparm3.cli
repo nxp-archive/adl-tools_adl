@@ -1,0 +1,22 @@
+#
+# Test that we can set a cache parameter and that it won't cause problems after
+# a reset.  Make sure that we can reset a uADL model and re-run a simulation.
+#
+simload $env(srcdir)/mt3.dat
+traceon mt3-0.out.dat
+setdynparm L1d-cache-num-sets 32
+go
+
+modelreset
+setreg PMT:TEN 0xc0000000
+setreg PMT:CCR 0x80000000
+setreg PMT:t0:NIA 0x0
+setreg PMT:t0:GPR31 0x0
+
+setreg PMT:t1:NIA 0x0
+setreg PMT:t1:GPR31 0x2000
+
+traceon mt3-1.out.dat
+go
+
+quit

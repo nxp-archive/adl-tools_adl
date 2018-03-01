@@ -1,0 +1,12 @@
+Breakpoint hit on node: t0  at address: 0x0000000000000014 count: 0  InstrCount: 13
+t0:GPR4:  0x0
+t0:GPR5:  0x3
+Breakpoint hit on node: t0  at address: 0x0000000000000014 count: 0  InstrCount: 19
+t1:GPR4:  0x4
+t1:GPR5:  0x6
+Simulation halted at address: 0x0000000000000024
+t0:GPR6:  0x1
+t1:GPR6:  0x1
+Simulation halted at address: 0x0000000000000024
+
+Instructions executed: 79

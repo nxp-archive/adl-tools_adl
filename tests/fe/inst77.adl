@@ -1,0 +1,94 @@
+//
+// This tests to make sure that a register which is first seen as a partial
+// target, but is then used as a source, is also registered as a source, in
+// order to make sure that we'll read in the complete value, in case we read
+// from bits which weren't first written by the partial write.
+//
+define (arch=minippc) {
+
+  define (instrfield = SE_OPCD8) {
+    """
+    Primary opcode, 8-bit width, for 16-bit instructions.
+    """;
+    bits = (0,7);
+  }
+
+  define (instrfield = SE_RX) {
+    """
+    Field used to specify a General Purpose Register in the ranges R0:R7 or 
+    R24:31 to be used as a source or as a destination.
+    """;
+    bits = (12,15);
+  }
+
+  define (instrfield = SE_RY) {
+    """
+    Field used to specify a General Purpose Register in the ranges R0:R7 or 
+    R24:31 to be used as a source.
+    """;
+    bits = (8,11);
+  }
+
+  define (instr = foo) {
+    width = 16;
+    fields = (SE_OPCD8(0x43),SE_RY,SE_RX);
+    action = {
+      uint32_t ovh = 1;
+      uint32_t ovl = 1;
+      SPEFSCR.OVH = ovh;
+      SPEFSCR.OV = ovl;
+      SPEFSCR.SOVH = SPEFSCR.SOVH | ovh;
+      SPEFSCR.SOV = SPEFSCR.SOV | ovl;      
+    };
+  }
+
+
+ define (reg=SPEFSCR) {
+   """
+    The SPE status and control register.
+    """;
+   width = 32;
+   define (field=SOVH) { bits = 0; }
+   define (field=OVH) { bits = 1; }
+   define (field=FGH) { bits = 2; }
+   define (field=FXH) { bits = 3; }
+   define (field=FINVH) { bits = 4; }
+   define (field=FDBZH) { bits = 5; }
+   define (field=FUNFH) { bits = 6; }
+   define (field=FOVFH) { bits = 7; }
+   define (field=FINXS) { bits = 10; }
+   define (field=FINVS) { bits = 11; }
+   define (field=FDBZS) { bits = 12; }
+   define (field=FUNFS) { bits = 13; }
+   define (field=FOVFS) { bits = 14; }
+   define (field=MODE) { bits = 15; }
+   define (field=SOV) { bits = 16; }
+   define (field=OV) { bits = 17; }
+   define (field=FG) { bits = 18; }
+   define (field=FX) { bits = 19; }
+   define (field=FINV) { bits = 20; }
+   define (field=FDBZ) { bits = 21; }
+   define (field=FUNF) { bits = 22; }
+   define (field=FOVF) { bits = 23; }
+   define (field=FINXE) { bits = 25; }
+   define (field=FINVE) { bits = 26; }
+   define (field=FDBZE) { bits = 27; }
+   define (field=FUNFE) { bits = 28; }
+   define (field=FOVFE) { bits = 29; }
+   define (field=FRMC) { bits = (30,31); }
+ }
+
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

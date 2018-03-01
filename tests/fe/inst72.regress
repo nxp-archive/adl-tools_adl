@@ -1,0 +1,83 @@
+======
+Cores:
+======
+Name:  "StarCore"
+Register Files:
+  Name:  "D"
+  Size:  16
+  Prefix:  d
+  Width:  40
+  -------------------------------
+Registers:
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Memories:
+  Name:  DMEM (1)
+  Size:   8192
+  Addressing unit: 1
+
+  Name:  IMEM (2)
+  Instruction memory
+  Size:   4096
+  Addressing unit: 1
+
+Instruction Fields:
+  DaDa: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+    Size: 8
+    Nested instruction fields:
+      Da: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   4
+        Fields:  ( DaDa(0,3) )
+      Db: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   4
+        Fields:  ( DaDa(4,7) )
+      jj: [0,1] [regfile:  D] [not used]
+        Pseudo:  1
+        Size: 3
+      Table:  (( 1 1 ), ( 3 3 ), ( 5 5 ), ( 7 7 ))
+    Fields:  ( DaDa(3,3) jj(1) DaDa(2,2) jj(0) )
+  Syntax:  "%f,%f":   Da Db
+  DaDa_imp_bits__0_3_: [0,3] 
+    Implements:  DaDa
+  FFF: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+  FFF_imp_bits__7_9_x_16_16_: [7,9] [16,16] 
+    Implements:  FFF
+  VarInstrOpcode_imp_bits__4_6_x_10_13_x_15_15_x_17_23_: [4,6] [10,13] [15,15] [17,23] 
+  reserved_imp_bits__14_14_: [14,14] 
+    Reserved:  1
+Instructions:
+  Name:  add (rank: 100)
+  Width:  24
+  Syntax:  "add %f,%f":   DaDa FFF
+  Fields:  DaDa_imp_bits__0_3_ reserved_imp_bits__14_14_(reserved) FFF_imp_bits__7_9_x_16_16_ VarInstrOpcode_imp_bits__4_6_x_10_13_x_15_15_x_17_23_
+  Action:  {
+     ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xe3d7f00
+    273408(42c0000):  add
+-------------------------------
+

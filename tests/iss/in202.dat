@@ -1,0 +1,26 @@
+#
+# Created via as-mod67
+#
+= asm
+
+	add r1,r2,r3
+	add r2,r3,r4
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3449 s=2	#	add r1,r2,r3
+MD n=Mem ra=0x00000002 d=0x4689 s=2	#	add r2,r3,r4
+# </GEN>
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=50

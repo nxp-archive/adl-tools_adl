@@ -1,0 +1,69 @@
+//
+// Simple test of a register and a register file.
+//
+// Also tests the alternate define/defmod form of define(x y) {}
+//
+// Enhanced to test that we can do simple expression evaluation and string
+// concatenation in defines.
+//
+
+define (arch=Base) {
+
+  attrs = (foo,stuff);
+
+  define (regfile sprs) {
+    size = 1024;
+    attrs = foo;
+  }
+}
+
+define (arch minippc) {
+
+  attrs = gpr;
+
+  define (regfile gprs) {
+    // Test simple expression evaluation.
+    size = (16+16);
+    attrs = (foo,stuff);
+  }
+
+  defmod (regfile="spr""s") {
+    define (entry=20) {
+      reg = a;
+    }
+    define (entry=21) {
+      reg = b;
+    }
+    define (entry=22) {
+      reg = c;
+    }
+    define (entry=50) {
+      reg = d;
+    }
+  }
+
+  define (reg a) {
+    """ This is a sample register!. """;
+    width = (2 * 2 * 2 * 2 * 2);
+    attrs = (foo,cia,nia);
+  }
+
+  define (reg b) {
+    width = 32;
+  }
+
+  define (reg c) {
+    width = 32;
+  }
+
+  define (reg d) {
+    width = 32;
+    attrs = stuff;
+  }
+
+}
+
+define (core P) {
+  archs = (Base,minippc);
+}
+

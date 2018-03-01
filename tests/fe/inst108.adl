@@ -1,0 +1,149 @@
+//
+// Tests expansion of sub-instruction call arguments.
+//
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    pseudo = true;
+    width = 8;
+  }
+  
+  define (instrfield=F) {
+    pseudo = true;
+    width = 4;
+  }
+
+  define (instrfield=X1) {
+    pseudo = true;
+    width = 16;
+  }
+
+  define (instrfield=X2) {
+    pseudo = true;
+    width = 24;
+  }
+
+  define (instrfield=RA) {
+    pseudo = true;
+    width = 4;
+  }
+
+  define (instrfield=RT) {
+    pseudo = true;
+    width = 4;
+  }
+  
+  define (reg = IAR) {
+    attrs = (cia,nia);
+  }
+
+  define (regfile=GPR) {
+    size = 16;
+  }
+
+  // The sub-instructions simply generate addresses:  Either a 16-bit or 24-bit offset.
+
+  define (subinstr=a1) {
+    fields = (F(0),X1);
+    action = func (bits<32> &addr) {
+      addr = X1;
+    };
+  }
+
+  define (subinstr=a2) {
+    fields = (F(1),X2);
+    action = func (bits<32> &addr) {
+      addr = X2;
+    };
+  }
+
+  define (instr=mov) {
+    fields = (OPCD(0x1e),A,B);
+    
+    define (subinstrs=A) { subs = (a1,a2); }
+    define (subinstrs=B) { subs = (a1,a2); }
+
+    action = {
+      bits<32> addr1, addr2;
+      A(addr1);
+      B(addr2);
+
+      Mem(addr1,4) = Mem(addr2,4);
+    };
+  }
+
+  define (instr=ld) {
+    fields = (OPCD(0x2e),RA,A);
+    
+    define (subinstrs=A) { subs = (a1,a2); }
+
+    action = {
+      bits<32> addr;
+      A(addr);
+
+      GPR(RA) = Mem(addr,4);
+    };
+  }
+
+  define (instr=st) {
+    fields = (OPCD(0x3e),RA,A);
+    
+    define (subinstrs=A) { subs = (a1,a2); }
+
+    action = {
+      bits<32> addr;
+      A(addr);
+
+      Mem(addr,4) = GPR(RA);
+    };
+  }
+
+  define (instr=addi) {
+    fields = (OPCD(0x4e),RT,RA,X1);
+    
+    action = {
+      GPR(RT) = GPR(RA) + X1;
+    };
+  }
+
+  define (subinstr=Incr) {
+    fields = (F(0));
+    action = func(bits<32> &result,bits<32> src) {
+      result = src + 1;
+    };
+  }
+
+  define (subinstr=Decr) {
+    fields = (F(1));
+    action = func(bits<32> &result,bits<32> src) {
+      result = src - 1;
+    };
+  }
+
+  // Make sure that we can handle sub-instructions with no operands.
+  define (instr=inc) {
+    fields = (OPCD(0x5e),RT,RA,Op);
+
+    define (subinstrs=Op) { subs = (Incr,Decr); }
+
+    action = {
+      bits<32> result;
+      Op(result,GPR(RA));
+
+      GPR(RT) = result;
+    };
+  }
+
+  define (instr=halt) {
+    fields = (OPCD(0x20));
+    action = { halt(); };
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,26 @@
+
+puts "Starting initialization"
+setreg NIA 0x0
+setreg GPR1 10
+setreg GPR2 20
+setmem 0x1000 0xdeadbeef
+setmem 0x1004 0x12345678
+
+proc rd_data {id name pwf seq ea ra val} {
+		if {$pwf==1} {
+				puts [format "Reading address 0x%x:  0x%x" $ea $val ]
+		}
+}
+setlogcmd mem_read rd_data
+
+puts "Starting program execution"
+setmem 0x0 0x7C620A14
+step
+puts "NIA:  [reg NIA]"
+puts "GPR3: [reg GPR3]"
+setmem 0x4 0x80801000
+step
+puts "reg NIA:  [reg NIA]"
+setmem 0x8 0x80801004
+step
+puts "reg NIA:  [reg NIA]"

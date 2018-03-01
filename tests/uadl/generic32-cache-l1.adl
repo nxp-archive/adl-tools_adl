@@ -1,0 +1,33 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// This model is only meant to demonstrate the use of the ADL language and does
+// not represent any actual Freescale product.
+//
+// THIS MODEL IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//--------------------------------------------------------------------------- 
+//
+// An example 32-bit Power ISA microprocessor with just a split L1.
+//
+//---------------------------------------------------------------------------
+
+#define DisableL2
+
+#import "../../designs/generic32-cache.adl"
+
+defmod(core=powerpc) {
+  defmod (cache=L2) {
+    remove = 1;
+  }
+}

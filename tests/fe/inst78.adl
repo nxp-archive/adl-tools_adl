@@ -1,0 +1,164 @@
+//
+// Tests the use of the exclude_sources key in an instruction.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RC) {
+    """
+    Extended RC opcode.
+    """;
+    bits = (31,31);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (reg=CR) {
+    // TODO - define all SPR register fields
+    """
+    The condition register.
+    """;
+    width = 32;
+    offset = 32;
+  }
+ 
+  void setCrField(unsigned m, const bits<32>& field, bits<regSize> x, bits<regSize> y)
+  {
+    if (m) {
+      // sign extend because we are in 32 bit mode
+      x.signExtend(regSize - m);
+      y.signExtend(regSize - m);
+    }
+          
+    bits<4> tmp =
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) |
+      0;
+     
+    unsigned i = 4*field.uint32();
+      
+    CR(i,i+3) = tmp;
+  }
+
+  void foo(unsigned m, const bits<32>& field, bits<regSize> x, bits<regSize> y)
+  {
+    if (m) {
+      // sign extend because we are in 32 bit mode
+      x.signExtend(regSize - m);
+      y.signExtend(regSize - m);
+          
+      bits<4> tmp =
+        ( (x.signedLT(y)) ? 0x8 : 0) |
+        ( (x.signedGT(y)) ? 0x4 : 0) |
+        ( (x == y)        ? 0x2 : 0) |
+        0;
+     
+      uint32_t cr = CR;
+
+      unsigned i = 4*field.uint32();
+      
+      CR(i,i+3) = tmp;
+    }
+  }
+
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10),RC(1));
+    action = {
+      var m = 32;
+      var carry = Carry(GPR(RA),GPR(RB),0); 
+      GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+      setCrField(m,0,GPR(RT),0);
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10),RC(1));
+    action = {
+      var m = 32;
+      var carry = Carry(GPR(RA),GPR(RB),0); 
+      GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+      setCrField(m,0,GPR(RT),0);
+    };
+  }    
+
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10),RC(1));
+    action = {
+      var m = 32;
+      var carry = Carry(GPR(RA),GPR(RB),0); 
+      GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+      setCrField(m,0,GPR(RT),0);
+    };
+  }    
+
+  define (instr=d) {
+    fields=(OPCD(4),RT,RA,RB,XO_X(10),RC(1));
+    exclude_sources = CR;
+    exclude_targets = CR;
+    action = {
+      var m = 32;
+      var carry = Carry(GPR(RA),GPR(RB),0); 
+      GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+      foo(1,0,GPR(RT),0);
+    };
+  }    
+
+  defmod(instr=(a,b)) {
+    exclude_sources = GPR(RT);
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

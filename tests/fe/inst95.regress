@@ -1,0 +1,56 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "SR"
+  Usage:  field-read
+  Width:  32
+    SCM[5,4]   
+      Usage:  field-read
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [5,0] 
+  RA: [15,11] 
+  RB: [20,16] 
+  RT: [10,6] 
+  XO_X: [30,21] 
+Instructions:
+  Name:  a (rank: 100)
+  Width:  32
+  Fields:  XO_X(10) RB RA RT OPCD(1)
+  Action:  {
+    if ( SR . SCM ) {
+        GPR ( RT ) = 1 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) ;
+    }
+}
+  Source Registers:  GPR(RA)? SR[mask 0x00000030]/p 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x7fe0003f
+    20971521(1400001):  a
+-------------------------------
+

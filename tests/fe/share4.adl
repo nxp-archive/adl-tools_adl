@@ -1,0 +1,60 @@
+//
+// This should pass- the fact that we have a globally
+// declared P should be ignored b/c we have a locally
+// declared P that overrides it while in that scope.
+//
+
+define (arch = minippc) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=HID0) {
+  }
+
+  define (reg=HID1) {
+  }
+
+  define (regfile=PMR) {
+    size = 32;
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+
+define (sys=PSystem) {
+  type="system";
+  PChip chip0;
+  PChip chip1;
+  define (shared) {
+    regs = HID0;
+  }
+  define (sys=PChip) {
+    type="chip";
+    define (core = P) {
+      type="core";
+      archs = minippc;
+    }
+    define (shared) {
+      regs = (HID0,HID1);
+      regfiles = PMR;
+    }
+    P context0;
+    P context1;
+    P context2;
+  }
+}
+
+

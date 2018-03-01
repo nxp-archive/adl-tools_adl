@@ -1,0 +1,112 @@
+
+define (arch = qe_risc_3_11)
+{
+
+  define (reg=CIA)
+	{
+      """
+		Current instruction address for fetch.
+		""";
+      attrs = cia;
+    }
+
+  define (reg=NIA) 
+	{
+      """
+		Next instruction address for fetch.
+	    """;
+      attrs = nia;
+	}
+	
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) 
+	{
+      """
+		Primary opcode.
+		""";
+      bits = (20,23);
+	}
+
+  define (instrfield=OPCD_2A) 
+	{
+      """
+		Secondary opcode type 1.
+		""";
+      bits = (0,3);
+	}
+
+  define (instrfield=OPCD_2B) 
+    {
+      """
+        Secondary opcode type 2.
+		""";
+      bits = (4,7);
+    }
+
+  define (instr=A) 
+    {
+      fields = (OPCD(1));
+      action = { ; };
+    }
+
+  define (instr=AA) 
+    {
+      fields = (OPCD(4));
+      action = { ; };
+    }
+
+  define (instr=AAA) 
+    {
+      fields = (OPCD(5));
+      action = { ; };
+    }
+
+  define (instr=B) 
+    {
+      fields = (OPCD(2),OPCD_2A(1));
+      action = { ; };
+    }
+
+  define (instr=C) 
+    {
+      fields = (OPCD(2),OPCD_2A(2));
+      action = { ; };
+    }
+
+  define (instr=D) 
+    {
+      fields = (OPCD(2),OPCD_2A(3));
+      action = { ; };
+    }
+
+  define (instr=E) 
+    {
+      fields = (OPCD(3),OPCD_2B(1));
+      action = { ; };
+    }
+
+  define (instr=F) 
+    {
+      fields = (OPCD(3),OPCD_2B(2));
+      action = { ; };
+    }
+
+  define (instr=G) 
+    {
+      fields = (OPCD(3),OPCD_2B(3));
+      action = { ; };
+    }
+    
+}
+
+
+
+define (core = qe_risc) {
+archs = qe_risc_3_11;
+}
+
+
+

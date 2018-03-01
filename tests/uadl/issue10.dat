@@ -1,0 +1,48 @@
+#
+# Checks that a fetch-exception won't cause a problem if flushed by a branch.
+# Also makes sure that we properly handle flushing of a fetch exception.
+#
+= asm
+
+L1:
+	addi r2,r2,2
+	.long 0x0
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r2,r2,2
+	b L1
+	
+= /asm
+
+= mdopts 
+
+instr-offset: 0x10fe4
+
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00010fe4 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00010fe8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fec d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010ff0 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010ff4 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010ff8 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00010ffc d=0x4BFFFFE8	#	b L1
+# </GEN>
+
+RD n=NIA      d=0x0fec
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 SX=1 SR=0 SW=0 EPN=0
+
+# ea=0x1000 ra=0x11000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x44 WIMG=0x2 SX=0 SR=0 SW=0 EPN=0x4
+
+
+RESULTS
+
+RD n=GPR i=1 d=3
+RD n=GPR i=2 d=4

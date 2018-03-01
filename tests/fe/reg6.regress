@@ -1,0 +1,33 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "sprs"
+  Size:  1024
+  Contained registers:
+    22:  c
+  Width:  32
+  Attributes:  foo
+  -------------------------------
+Registers:
+  Name:  "b"
+  Width:  32
+  -------------------------------
+  Name:  "c"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

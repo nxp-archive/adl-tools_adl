@@ -1,0 +1,246 @@
+format=huvp;
+//------------------------------------------------------------------------------
+test => cfp2 {
+  num     = 1001;
+  ver     = "Raptor release: Name:   raptor (rnumber v2_1_2  rutil v1_33_5, rml v1_19_2, rvc v1_19_2, ruvp v1_10_1 built on  ld0355-tx32 Linux ld0355-tx32 2.6.9-55.0.12.EL #1 Wed Oct 17 08:06:24 EDT 2007 x86_64 unknown)";
+  genseed = 0x423074a4;
+  seed    = ">)QC<S(H60+\"3 S,F7F&#&# :,;.SL ^\"D@%#*-A2#$8#4/* 0, Z;P@/   2";
+  genver  = {
+    {"/_TOOLS_/dist/fs-raptor-/r-2008Jun23/i686-pc-linux2.4/lib/RaptorDefaultTest.so","1.347" }, 
+    {"powerpc_base/PowerPC.so","1.373" }, 
+    {"powerpc_embedded/PpcEmbedded.so","1.348" }, 
+    {"units/spe_stub/spe_stub.so","1.0" }, 
+    {"units/context/context.so","1.341" }, 
+    {"elf/elf.so","1.347" }, 
+    {"elf8/elf8.so","1.64" }, 
+    {"elf8_2/elf8_2.so","0.0" }, 
+    {"units/ext_pid/ext_pid.so","0.0" }, 
+    {"elf9/elf9.so","0.0" }, 
+    {"units/floatbase/floatbase.so","1.338" }, 
+    {"units/fpu/fpu.so","1.340" }, 
+    {"units/ext_pid/ext_pid.so","0.0" }, 
+    {"units/decorated/decorated.so","0.0" }, 
+    {"v4/v4.so","0.0" }, 
+    {"/_TOOLS_/dist/fs-raptor-/r-2008Jun23/i686-pc-linux2.4/lib/libVPR4PwrSim.so","2.405" }, 
+    {"powersim version string ","     Processor: elfcorev4, rev. v15_12_5" }, 
+    {"Options","--cl=v4.so --rmf=cfp2.rmf --ic=20 " }, 
+    {"/proj/.ppc_arch_enablement/arch_enablement/u/r3aajx/work/ADL_models/regression/elf/elf_v4/cfp2.rmf","Crc:  0x536009e6" }, 
+    {"/proj/.ppc_arch_enablement/arch_enablement/u/r3aajx/work/ADL_models/regression/elf/elf_v4/in1.rmf","Crc:  0x17c29bc9" }, 
+  };
+
+  v4 => powerpc {
+    I : R {nm="BUCSR0"; d=0x00000001;};
+    //   BBFI:0 BPEN:1
+    I : R {nm="CDCSR0"; d=0xc8000000;};
+    //   AWARE:1 CNTL:0 PRESENT:1 STATE:1
+    I : R {nm="CR"; d=0x7f5dff34;};
+    //   CR0:7 CR1:f CR2:5 CR3:d CR4:f CR5:f CR6:3 CR7:4 EQ:1 GT:1 LT:0 SO:1
+    I : R {nm="CTR"; d=0xd40027aa;};
+    I : R {nm="DAC1"; d=0xf456cf1c;};
+    I : R {nm="DAC2"; d=0x0e04d37c;};
+    I : R {nm="DBCR0"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+    //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+    I : R {nm="DBCR1"; d=0x00000000;};
+    //   IAC12M:0 IAC1ER:0 IAC1US:0 IAC2ER:0 IAC2US:0 IAC34M:0 IAC3ER:0 IAC3US:0
+    //   IAC4ER:0 IAC4US:0
+    I : R {nm="DBCR2"; d=0x00000000;};
+    //   DAC12M:0 DAC1ER:0 DAC1US:0 DAC2ER:0 DAC2US:0 DACLINK1:0 DACLINK2:0 DVC1BE:0
+    //   DVC1M:0 DVC2BE:0 DVC2M:0
+    I : R {nm="DBCR4"; d=0x00006200;};
+    //   DAC1XM:6 DAC2XM:2
+    I : R {nm="DBSR"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 IAC1:0 IAC2:0 IAC3:0
+    //   IAC4:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0 TRAP:0 UDE:0
+    I : R {nm="DBSRWR"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 IAC1:0 IAC2:0 ICMP:0
+    //   IDE:0 IRPT:0 MRR:0 RET:0 TRAP:0 UDE:0
+    I : R {nm="DEAR"; d=0xd6003498;};
+    I : R {nm="EDBCR0"; d=0x00000000;};
+    //   DNH_EN:0 EDM:0
+    I : R {nm="EPCR"; d=0xc0000000;};
+    //   DGTMI:0 DMIUH:0 DSIGS:0 DTLBGS:1 DUVD:0 EXTGS:1 ISIGS:0 ITLBGS:0
+    I : R {nm="EPLC"; d=0x600c0012;};
+    //   EAS:1 EGS:1 ELPID:c EPID:12 EPR:0
+    I : R {nm="EPSC"; d=0x201e0031;};
+    //   EAS:0 EGS:1 ELPID:1e EPID:31 EPR:0
+    I : R {nm="F1"; d=0xb93119c080000000;};
+    I : R {nm="F10"; d=0xfff8000080000000;};
+    I : R {nm="F11"; d=0x9aeabb9b85d9d314;};
+    I : R {nm="F18"; d=0xd26a8fa9c7214183;};
+    I : R {nm="F29"; d=0xfff8000080000000;};
+    I : R {nm="F9"; d=0xb93119c080000000;};
+    I : R {nm="FPSCR"; d=0x2137233b;};
+    //   C:1 FE:1 FEX:0 FG:0 FI:1 FL:0 FPCC:2 FPRF:12 FR:1 FU:0 FX:0 NI:0 OE:0 OX:0
+    //   RN:3 UE:1 UX:0 VE:0 VX:1 VXCVI:1 VXIDI:0 VXIMZ:1 VXISI:0 VXSNAN:1 VXSOFT:0
+    //   VXSQRT:1 VXVC:0 VXZDZ:1 XE:1 XX:0 ZE:1 ZX:0
+    I : R {nm="HDBCR0"; d=0x00000000;};
+    //   ALL_GUARDED:0 DECODE1_ONLY:0 DIS_FLASH_INVAL:0 EIFM:0 EN_MHD:0 ESTLK:0
+    //   FETCH4_ONLY:0 FPU_FULLCLK:0 ISSUE1_ONLY:0 LFB_QSIZE1:0 NAOPT:0 NGBE:0
+    //   NOPREFETCH:0 PARADOX_DIS:0 REAL_MODE:0 SINGLE_DEALLOC:0 STASH_CNT1:0
+    //   STASH_CNT2:0 STASH_SIZE:0 STQ_IN_ORDER:0 STQ_SIZE_1:0
+    I : R {nm="HID0"; d=0x006000d1;};
+    //   CIGLSO:1 DCFA:1 DOZE:0 EMCP:0 EN_L2MMU_MHD:0 EN_MAS7_UPDATE:1 NAP:1 NOPTI:1
+    //   SLEEP:1
+    I : R {nm="IAC1"; d=0xca3e16c4;};
+    //   ADDR:328f85b1
+    I : R {nm="IAC2"; d=0x3d602d70;};
+    //   ADDR:f580b5c
+    I : R {nm="IAR"; d=0x81d71f04;};
+    I : R {nm="L1CSR0"; d=0x00010a89;};
+    //   DCBZ32:1 DCE:1 DCFI:0 DCLFR:0 DCLO:1 DCLOA:1 DCPE:1 DCSLC:1 DCUL:0 DPIE:0
+    I : R {nm="L1CSR1"; d=0x00010401;};
+    //   ICE:1 ICFI:0 ICLFR:0 ICLO:0 ICPE:1 ICSLC:0 ICUL:1 IPIE:0
+    I : R {nm="LPIDR"; d=0x0000002d;};
+    //   LPID:2d
+    I : R {nm="MAS0"; d=0x00070001;};
+    //   ESEL:7 NVPR4K:1 TLBSEL:0
+    I : R {nm="MAS1"; d=0x80271000;};
+    //   IPROT:0 TID:27 TS:1 TSIZE:0 V:1
+    I : R {nm="MAS2"; d=0x59122025;};
+    //   E:1 EPN:59122 G:0 I:0 M:1 W:0 XPR0:0 XPR1:1
+    I : R {nm="MAS3"; d=0xc6ad41e0;};
+    //   RPN:c6ad4 SR:0 SW:0 SX:0 U0:0 U1:1 U2:1 U3:1 UR:0 UW:0 UX:1
+    I : R {nm="MAS4"; d=0x10000524;};
+    //   ED:0 GD:0 ID:0 MD:1 TLBSELD:1 TSIZED:5 WD:0 XPR0D:0 XPR1D:1
+    I : R {nm="MAS5"; d=0x0000002e;};
+    //   SGS:0 SLPID:2e
+    I : R {nm="MAS6"; d=0x00f50001;};
+    //   SAS:1 SPID:f5
+    I : R {nm="MAS7"; d=0x00000006;};
+    //   RPN:6
+    I : R {nm="MAS8"; d=0x80000017;};
+    //   TGS:1 TLPID:17 TVF:0
+    I : R {nm="MCAR"; d=0x00000000;};
+    //   MCAR:0
+    I : R {nm="MSR"; d=0x00002000;};
+    //   CE:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0 UCLE:0
+    //   WE:0
+    I : R {nm="MSRP"; d=0x00000200;};
+    //   DEP:1 PMMP:0 UCLEP:0
+    I : R {nm="PID0"; d=0x0000006f;};
+    //   PID:6f
+    I : R {nm="PVR"; d=0x80230010;};
+    //   Revision:10 Version:8023
+    I : R {nm="TCR"; d=0x73664000;};
+    //   ARE:1 DIE:0 FIE:0 FP:3 FPEXT:2 PPC:1 WIE:0 WP:1 WPEXT:3 WRC:3
+    I : R {nm="TSR"; d=0xc0000000;};
+    //   DIS:0 ENW:1 FIS:0 WIS:1 WRS:0
+    I : R {nm="XER"; d=0x40000017;};
+    //   CA:0 CNT:17 OV:1 SO:0
+    I : T {n="TLB4K"; t="I"; way=0; ep=0x81d71000;
+            d={{"EPN",0x2075c4},{"NV",0x3},{"RPN",0x3f13bd8},{"SIZE",0x1},{"SR",0x0},
+              {"SW",0x0},{"SX",0x1},{"TGS",0x0},{"TID",0x0},{"TLPID",0x0},{"TS",0x0},
+              {"TVF",0x0},{"UA",0xa},{"UR",0x1},{"UW",0x0},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x11},{"XX",0x0},};};
+    E : I {asm="fdivs 11,29,1"; c=1;
+                   ea=0x81d71f04; ra=0xfc4ef6f04; d=0x24087ded; op=0xed7d0824; ta=0x11a; op_size=32;
+                   ir={[ t=>"reg", rn=>"F11", d=>0xfff8000080000000 ],
+                       [ t=>"reg", rn=>"FPSCR", d=>0x2131133b ],};};
+    E : I {asm="fdivs 18,9,10"; c=2;
+                   ea=0x81d71f08; ra=0xfc4ef6f08; d=0x245049ee; op=0xee495024; ta=0x11a; op_size=32;
+                   ir={[ t=>"reg", rn=>"F18", d=>0xfff8000080000000 ],
+                       [ t=>"reg", rn=>"FPSCR", d=>0x2131133b ],};};
+    R : RES {ea=0x81d71f0c; ra=0x0000000fc4ef6f0c; ta=0x11a;};
+    R : R {nm="BUCSR0"; d=0x00000001;};
+    //   BBFI:0 BPEN:1
+    R : R {nm="CDCSR0"; d=0xc8000000;};
+    //   AWARE:1 CNTL:0 PRESENT:1 STATE:1
+    R : R {nm="CR"; d=0x7f5dff34;};
+    //   CR0:7 CR1:f CR2:5 CR3:d CR4:f CR5:f CR6:3 CR7:4 EQ:1 GT:1 LT:0 SO:1
+    R : R {nm="CTR"; d=0xd40027aa;};
+    R : R {nm="DAC1"; d=0xf456cf1c;};
+    R : R {nm="DAC2"; d=0x0e04d37c;};
+    R : R {nm="DBCR0"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 EDM:0 FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0
+    //   ICMP:0 IDM:0 IRPT:0 RET:0 RST:0 TRAP:0
+    R : R {nm="DBCR1"; d=0x00000000;};
+    //   IAC12M:0 IAC1ER:0 IAC1US:0 IAC2ER:0 IAC2US:0 IAC34M:0 IAC3ER:0 IAC3US:0
+    //   IAC4ER:0 IAC4US:0
+    R : R {nm="DBCR2"; d=0x00000000;};
+    //   DAC12M:0 DAC1ER:0 DAC1US:0 DAC2ER:0 DAC2US:0 DACLINK1:0 DACLINK2:0 DVC1BE:0
+    //   DVC1M:0 DVC2BE:0 DVC2M:0
+    R : R {nm="DBCR4"; d=0x00006200;};
+    //   DAC1XM:6 DAC2XM:2
+    R : R {nm="DBSR"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 IAC1:0 IAC2:0 IAC3:0
+    //   IAC4:0 ICMP:0 IDE:0 IRPT:0 MRR:0 RET:0 TRAP:0 UDE:0
+    R : R {nm="DBSRWR"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 IAC1:0 IAC2:0 ICMP:0
+    //   IDE:0 IRPT:0 MRR:0 RET:0 TRAP:0 UDE:0
+    R : R {nm="DEAR"; d=0xd6003498;};
+    R : R {nm="EDBCR0"; d=0x00000000;};
+    //   DNH_EN:0 EDM:0
+    R : R {nm="EPCR"; d=0xc0000000;};
+    //   DGTMI:0 DMIUH:0 DSIGS:0 DTLBGS:1 DUVD:0 EXTGS:1 ISIGS:0 ITLBGS:0
+    R : R {nm="EPLC"; d=0x600c0012;};
+    //   EAS:1 EGS:1 ELPID:c EPID:12 EPR:0
+    R : R {nm="EPSC"; d=0x201e0031;};
+    //   EAS:0 EGS:1 ELPID:1e EPID:31 EPR:0
+    R : R {nm="F1"; d=0xb93119c080000000;};
+    R : R {nm="F10"; d=0xfff8000080000000;};
+    R : R {nm="F11"; d=0xfff8000080000000;};
+    R : R {nm="F18"; d=0xfff8000080000000;};
+    R : R {nm="F29"; d=0xfff8000080000000;};
+    R : R {nm="F9"; d=0xb93119c080000000;};
+    R : R {nm="FPSCR"; d=0x2131133b;};
+    //   C:1 FE:0 FEX:0 FG:0 FI:0 FL:0 FPCC:1 FPRF:11 FR:0 FU:1 FX:0 NI:0 OE:0 OX:0
+    //   RN:3 UE:1 UX:0 VE:0 VX:1 VXCVI:1 VXIDI:0 VXIMZ:1 VXISI:0 VXSNAN:1 VXSOFT:0
+    //   VXSQRT:1 VXVC:0 VXZDZ:1 XE:1 XX:0 ZE:1 ZX:0
+    R : R {nm="HDBCR0"; d=0x00000000;};
+    //   ALL_GUARDED:0 DECODE1_ONLY:0 DIS_FLASH_INVAL:0 EIFM:0 EN_MHD:0 ESTLK:0
+    //   FETCH4_ONLY:0 FPU_FULLCLK:0 ISSUE1_ONLY:0 LFB_QSIZE1:0 NAOPT:0 NGBE:0
+    //   NOPREFETCH:0 PARADOX_DIS:0 REAL_MODE:0 SINGLE_DEALLOC:0 STASH_CNT1:0
+    //   STASH_CNT2:0 STASH_SIZE:0 STQ_IN_ORDER:0 STQ_SIZE_1:0
+    R : R {nm="HID0"; d=0x006000d1;};
+    //   CIGLSO:1 DCFA:1 DOZE:0 EMCP:0 EN_L2MMU_MHD:0 EN_MAS7_UPDATE:1 NAP:1 NOPTI:1
+    //   SLEEP:1
+    R : R {nm="IAC1"; d=0xca3e16c4;};
+    //   ADDR:328f85b1
+    R : R {nm="IAC2"; d=0x3d602d70;};
+    //   ADDR:f580b5c
+    R : R {nm="IAR"; d=0x81d71f0c;};
+    R : R {nm="L1CSR0"; d=0x00010a89;};
+    //   DCBZ32:1 DCE:1 DCFI:0 DCLFR:0 DCLO:1 DCLOA:1 DCPE:1 DCSLC:1 DCUL:0 DPIE:0
+    R : R {nm="L1CSR1"; d=0x00010401;};
+    //   ICE:1 ICFI:0 ICLFR:0 ICLO:0 ICPE:1 ICSLC:0 ICUL:1 IPIE:0
+    R : R {nm="LPIDR"; d=0x0000002d;};
+    //   LPID:2d
+    R : R {nm="MAS0"; d=0x00070001;};
+    //   ESEL:7 NVPR4K:1 TLBSEL:0
+    R : R {nm="MAS1"; d=0x80271000;};
+    //   IPROT:0 TID:27 TS:1 TSIZE:0 V:1
+    R : R {nm="MAS2"; d=0x59122025;};
+    //   E:1 EPN:59122 G:0 I:0 M:1 W:0 XPR0:0 XPR1:1
+    R : R {nm="MAS3"; d=0xc6ad41e0;};
+    //   RPN:c6ad4 SR:0 SW:0 SX:0 U0:0 U1:1 U2:1 U3:1 UR:0 UW:0 UX:1
+    R : R {nm="MAS4"; d=0x10000524;};
+    //   ED:0 GD:0 ID:0 MD:1 TLBSELD:1 TSIZED:5 WD:0 XPR0D:0 XPR1D:1
+    R : R {nm="MAS5"; d=0x0000002e;};
+    //   SGS:0 SLPID:2e
+    R : R {nm="MAS6"; d=0x00f50001;};
+    //   SAS:1 SPID:f5
+    R : R {nm="MAS7"; d=0x00000006;};
+    //   RPN:6
+    R : R {nm="MAS8"; d=0x80000017;};
+    //   TGS:1 TLPID:17 TVF:0
+    R : R {nm="MSR"; d=0x00002000;};
+    //   CE:0 DE:0 DS:0 EE:0 FE0:0 FE1:0 FP:1 GS:0 IS:0 ME:0 PMM:0 PR:0 RI:0 UCLE:0
+    //   WE:0
+    R : R {nm="MSRP"; d=0x00000200;};
+    //   DEP:1 PMMP:0 UCLEP:0
+    R : R {nm="PID0"; d=0x0000006f;};
+    //   PID:6f
+    R : R {nm="TCR"; d=0x73664000;};
+    //   ARE:1 DIE:0 FIE:0 FP:3 FPEXT:2 PPC:1 WIE:0 WP:1 WPEXT:3 WRC:3
+    R : R {nm="TSR"; d=0xc0000000;};
+    //   DIS:0 ENW:1 FIS:0 WIS:1 WRS:0
+    R : R {nm="XER"; d=0x40000017;};
+    //   CA:0 CNT:17 OV:1 SO:0
+    R : T {n="TLB4K"; t="I"; way=0; ep=0x81d71000;
+            d={{"EPN",0x2075c4},{"NV",0x3},{"RPN",0x3f13bd8},{"SIZE",0x1},{"SR",0x0},
+              {"SW",0x0},{"SX",0x1},{"TGS",0x0},{"TID",0x0},{"TLPID",0x0},{"TS",0x0},
+              {"TVF",0x0},{"UA",0xa},{"UR",0x1},{"UW",0x0},{"UX",0x1},{"V",0x1},
+              {"WIMGE",0x11},{"XX",0x0},};};
+  } // powerpc
+} // cfp2

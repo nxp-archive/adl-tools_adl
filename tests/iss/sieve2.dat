@@ -1,0 +1,380 @@
+#
+# This is the sieve program with an extra loop around it in order to
+# boost up the runtime.  The loop is specified at the address identified
+# by loops@ha/loops@l.
+#
+
+= ccode
+
+//#define LOOPS 800000
+#define N 100
+unsigned int sieve[N];
+unsigned int results[N];
+
+extern unsigned done;
+extern unsigned loops;
+
+int main()
+{
+
+  int i,j,cnt_iter;
+  int max_count = loops;
+  for (cnt_iter = 0; cnt_iter < max_count; cnt_iter++) {
+    for (i = 0; i != N; ++i) {
+      sieve[i] = 1;
+      results[i] = 0;
+    }
+    
+    for (i = 2; i*i < N; ++i) {
+      if (sieve[i]) {
+        for (j = i+i; j < N; j += i) {
+          sieve[j] = 0;
+        }
+      }
+    }
+    
+    i = 0;
+    for (j = 2; j < N; ++j) {
+      if (sieve[j]) {
+        results[i++] = j;
+      }
+    }
+    
+    //   for (i = 0; i != N; ++i) {
+    //      if (!results[i]) {
+    //         break;
+    //      }
+    //      printf ("%d\n",results[i]);
+    //   }
+  }
+  done = cnt_iter;
+  return 0; 
+}
+
+= /ccode
+
+= asm
+
+	.file	"fileZMipV1.c"
+	.section	".text"
+	.align 2
+	.globl main
+	.type	main, @function
+main:
+	stwu 1,-48(1)
+	stw 31,44(1)
+	mr 31,1
+	lis 9,loops@ha
+	lwz 0,loops@l(9)
+	stw 0,20(31)
+	li 0,0
+	stw 0,16(31)
+.L2:
+	lwz 0,16(31)
+	lwz 9,20(31)
+	cmpw 0,0,9
+	blt 0,.L5
+	b .L3
+.L5:
+	li 0,0
+	stw 0,8(31)
+.L6:
+	lwz 0,8(31)
+	cmpwi 0,0,100
+	bne 0,.L9
+	b .L7
+.L9:
+	lis 9,sieve@ha
+	la 9,sieve@l(9)
+	lwz 0,8(31)
+	slwi 0,0,2
+	add 9,0,9
+	li 0,1
+	stw 0,0(9)
+	lis 9,results@ha
+	la 9,results@l(9)
+	lwz 0,8(31)
+	slwi 0,0,2
+	add 9,0,9
+	li 0,0
+	stw 0,0(9)
+	lwz 9,8(31)
+	addi 0,9,1
+	stw 0,8(31)
+	b .L6
+.L7:
+	li 0,2
+	stw 0,8(31)
+.L10:
+	lwz 9,8(31)
+	lwz 0,8(31)
+	mullw 0,9,0
+	cmpwi 0,0,99
+	ble 0,.L13
+	b .L11
+.L13:
+	lis 9,sieve@ha
+	la 9,sieve@l(9)
+	lwz 0,8(31)
+	slwi 0,0,2
+	add 9,0,9
+	lwz 0,0(9)
+	cmpwi 0,0,0
+	beq 0,.L12
+	lwz 0,8(31)
+	lwz 9,8(31)
+	add 0,0,9
+	stw 0,12(31)
+.L15:
+	lwz 0,12(31)
+	cmpwi 0,0,99
+	ble 0,.L18
+	b .L12
+.L18:
+	lis 9,sieve@ha
+	la 9,sieve@l(9)
+	lwz 0,12(31)
+	slwi 0,0,2
+	add 9,0,9
+	li 0,0
+	stw 0,0(9)
+	lwz 9,12(31)
+	lwz 0,8(31)
+	add 0,9,0
+	stw 0,12(31)
+	b .L15
+.L12:
+	lwz 9,8(31)
+	addi 0,9,1
+	stw 0,8(31)
+	b .L10
+.L11:
+	li 0,0
+	stw 0,8(31)
+	li 0,2
+	stw 0,12(31)
+.L19:
+	lwz 0,12(31)
+	cmpwi 0,0,99
+	ble 0,.L22
+	b .L4
+.L22:
+	lis 9,sieve@ha
+	la 9,sieve@l(9)
+	lwz 0,12(31)
+	slwi 0,0,2
+	add 9,0,9
+	lwz 0,0(9)
+	cmpwi 0,0,0
+	beq 0,.L21
+	lis 9,results@ha
+	la 11,results@l(9)
+	lwz 9,8(31)
+	mr 0,9
+	slwi 0,0,2
+	add 11,0,11
+	lwz 0,12(31)
+	stw 0,0(11)
+	addi 9,9,1
+	stw 9,8(31)
+.L21:
+	lwz 9,12(31)
+	addi 0,9,1
+	stw 0,12(31)
+	b .L19
+.L4:
+	lwz 9,16(31)
+	addi 0,9,1
+	stw 0,16(31)
+	b .L2
+.L3:
+	lis 9,done@ha
+	lwz 0,16(31)
+	stw 0,done@l(9)
+	li 0,0
+	mr 3,0
+	lwz 11,0(1)
+	lwz 31,-4(11)
+	mr 1,11
+	blr
+	.size	main, .-main
+	.comm	sieve,400,4
+	.comm	results,400,4
+	.ident	"GCC: (GNU) 3.3.2"
+
+= /asm
+= subst
+
+  # The high-half of all addresses are set to 0.
+  /\w+\@ha/0x0/
+
+  # The location of the loop count.
+  /loops\@l/0x1ff8/
+
+  # The location of the done flag.
+  /done\@l/0x1ffc/
+
+  # The starting point for the results array.
+  /results\@l/0x2000/
+
+  # The location of the sieve array.
+  /sieve\@l/0x1000/
+
+= /subst
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x9421FFD0	#	stwu 1,-48(1)
+MD n=Mem ra=0x00000004 d=0x93E1002C	#	stw 31,44(1)
+MD n=Mem ra=0x00000008 d=0x7C3F0B78	#	mr 31,1
+MD n=Mem ra=0x0000000c d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x00000010 d=0x80091FF8	#	lwz 0,0x1ff8(9)
+MD n=Mem ra=0x00000014 d=0x901F0014	#	stw 0,20(31)
+MD n=Mem ra=0x00000018 d=0x38000000	#	li 0,0
+MD n=Mem ra=0x0000001c d=0x901F0010	#	stw 0,16(31)
+MD n=Mem ra=0x00000020 d=0x801F0010	#	lwz 0,16(31)
+MD n=Mem ra=0x00000024 d=0x813F0014	#	lwz 9,20(31)
+MD n=Mem ra=0x00000028 d=0x7C004800	#	cmpw 0,0,9
+MD n=Mem ra=0x0000002c d=0x41800008	#	blt 0,.L5
+MD n=Mem ra=0x00000030 d=0x4800018C	#	b .L3
+MD n=Mem ra=0x00000034 d=0x38000000	#	li 0,0
+MD n=Mem ra=0x00000038 d=0x901F0008	#	stw 0,8(31)
+MD n=Mem ra=0x0000003c d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x00000040 d=0x2C000064	#	cmpwi 0,0,100
+MD n=Mem ra=0x00000044 d=0x40820008	#	bne 0,.L9
+MD n=Mem ra=0x00000048 d=0x4800004C	#	b .L7
+MD n=Mem ra=0x0000004c d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x00000050 d=0x39291000	#	la 9,0x1000(9)
+MD n=Mem ra=0x00000054 d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x00000058 d=0x5400103A	#	slwi 0,0,2
+MD n=Mem ra=0x0000005c d=0x7D204A14	#	add 9,0,9
+MD n=Mem ra=0x00000060 d=0x38000001	#	li 0,1
+MD n=Mem ra=0x00000064 d=0x90090000	#	stw 0,0(9)
+MD n=Mem ra=0x00000068 d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x0000006c d=0x39292000	#	la 9,0x2000(9)
+MD n=Mem ra=0x00000070 d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x00000074 d=0x5400103A	#	slwi 0,0,2
+MD n=Mem ra=0x00000078 d=0x7D204A14	#	add 9,0,9
+MD n=Mem ra=0x0000007c d=0x38000000	#	li 0,0
+MD n=Mem ra=0x00000080 d=0x90090000	#	stw 0,0(9)
+MD n=Mem ra=0x00000084 d=0x813F0008	#	lwz 9,8(31)
+MD n=Mem ra=0x00000088 d=0x38090001	#	addi 0,9,1
+MD n=Mem ra=0x0000008c d=0x901F0008	#	stw 0,8(31)
+MD n=Mem ra=0x00000090 d=0x4BFFFFAC	#	b .L6
+MD n=Mem ra=0x00000094 d=0x38000002	#	li 0,2
+MD n=Mem ra=0x00000098 d=0x901F0008	#	stw 0,8(31)
+MD n=Mem ra=0x0000009c d=0x813F0008	#	lwz 9,8(31)
+MD n=Mem ra=0x000000a0 d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x000000a4 d=0x7C0901D6	#	mullw 0,9,0
+MD n=Mem ra=0x000000a8 d=0x2C000063	#	cmpwi 0,0,99
+MD n=Mem ra=0x000000ac d=0x40810008	#	ble 0,.L13
+MD n=Mem ra=0x000000b0 d=0x48000084	#	b .L11
+MD n=Mem ra=0x000000b4 d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x000000b8 d=0x39291000	#	la 9,0x1000(9)
+MD n=Mem ra=0x000000bc d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x000000c0 d=0x5400103A	#	slwi 0,0,2
+MD n=Mem ra=0x000000c4 d=0x7D204A14	#	add 9,0,9
+MD n=Mem ra=0x000000c8 d=0x80090000	#	lwz 0,0(9)
+MD n=Mem ra=0x000000cc d=0x2C000000	#	cmpwi 0,0,0
+MD n=Mem ra=0x000000d0 d=0x41820054	#	beq 0,.L12
+MD n=Mem ra=0x000000d4 d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x000000d8 d=0x813F0008	#	lwz 9,8(31)
+MD n=Mem ra=0x000000dc d=0x7C004A14	#	add 0,0,9
+MD n=Mem ra=0x000000e0 d=0x901F000C	#	stw 0,12(31)
+MD n=Mem ra=0x000000e4 d=0x801F000C	#	lwz 0,12(31)
+MD n=Mem ra=0x000000e8 d=0x2C000063	#	cmpwi 0,0,99
+MD n=Mem ra=0x000000ec d=0x40810008	#	ble 0,.L18
+MD n=Mem ra=0x000000f0 d=0x48000034	#	b .L12
+MD n=Mem ra=0x000000f4 d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x000000f8 d=0x39291000	#	la 9,0x1000(9)
+MD n=Mem ra=0x000000fc d=0x801F000C	#	lwz 0,12(31)
+MD n=Mem ra=0x00000100 d=0x5400103A	#	slwi 0,0,2
+MD n=Mem ra=0x00000104 d=0x7D204A14	#	add 9,0,9
+MD n=Mem ra=0x00000108 d=0x38000000	#	li 0,0
+MD n=Mem ra=0x0000010c d=0x90090000	#	stw 0,0(9)
+MD n=Mem ra=0x00000110 d=0x813F000C	#	lwz 9,12(31)
+MD n=Mem ra=0x00000114 d=0x801F0008	#	lwz 0,8(31)
+MD n=Mem ra=0x00000118 d=0x7C090214	#	add 0,9,0
+MD n=Mem ra=0x0000011c d=0x901F000C	#	stw 0,12(31)
+MD n=Mem ra=0x00000120 d=0x4BFFFFC4	#	b .L15
+MD n=Mem ra=0x00000124 d=0x813F0008	#	lwz 9,8(31)
+MD n=Mem ra=0x00000128 d=0x38090001	#	addi 0,9,1
+MD n=Mem ra=0x0000012c d=0x901F0008	#	stw 0,8(31)
+MD n=Mem ra=0x00000130 d=0x4BFFFF6C	#	b .L10
+MD n=Mem ra=0x00000134 d=0x38000000	#	li 0,0
+MD n=Mem ra=0x00000138 d=0x901F0008	#	stw 0,8(31)
+MD n=Mem ra=0x0000013c d=0x38000002	#	li 0,2
+MD n=Mem ra=0x00000140 d=0x901F000C	#	stw 0,12(31)
+MD n=Mem ra=0x00000144 d=0x801F000C	#	lwz 0,12(31)
+MD n=Mem ra=0x00000148 d=0x2C000063	#	cmpwi 0,0,99
+MD n=Mem ra=0x0000014c d=0x40810008	#	ble 0,.L22
+MD n=Mem ra=0x00000150 d=0x4800005C	#	b .L4
+MD n=Mem ra=0x00000154 d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x00000158 d=0x39291000	#	la 9,0x1000(9)
+MD n=Mem ra=0x0000015c d=0x801F000C	#	lwz 0,12(31)
+MD n=Mem ra=0x00000160 d=0x5400103A	#	slwi 0,0,2
+MD n=Mem ra=0x00000164 d=0x7D204A14	#	add 9,0,9
+MD n=Mem ra=0x00000168 d=0x80090000	#	lwz 0,0(9)
+MD n=Mem ra=0x0000016c d=0x2C000000	#	cmpwi 0,0,0
+MD n=Mem ra=0x00000170 d=0x4182002C	#	beq 0,.L21
+MD n=Mem ra=0x00000174 d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x00000178 d=0x39692000	#	la 11,0x2000(9)
+MD n=Mem ra=0x0000017c d=0x813F0008	#	lwz 9,8(31)
+MD n=Mem ra=0x00000180 d=0x7D204B78	#	mr 0,9
+MD n=Mem ra=0x00000184 d=0x5400103A	#	slwi 0,0,2
+MD n=Mem ra=0x00000188 d=0x7D605A14	#	add 11,0,11
+MD n=Mem ra=0x0000018c d=0x801F000C	#	lwz 0,12(31)
+MD n=Mem ra=0x00000190 d=0x900B0000	#	stw 0,0(11)
+MD n=Mem ra=0x00000194 d=0x39290001	#	addi 9,9,1
+MD n=Mem ra=0x00000198 d=0x913F0008	#	stw 9,8(31)
+MD n=Mem ra=0x0000019c d=0x813F000C	#	lwz 9,12(31)
+MD n=Mem ra=0x000001a0 d=0x38090001	#	addi 0,9,1
+MD n=Mem ra=0x000001a4 d=0x901F000C	#	stw 0,12(31)
+MD n=Mem ra=0x000001a8 d=0x4BFFFF9C	#	b .L19
+MD n=Mem ra=0x000001ac d=0x813F0010	#	lwz 9,16(31)
+MD n=Mem ra=0x000001b0 d=0x38090001	#	addi 0,9,1
+MD n=Mem ra=0x000001b4 d=0x901F0010	#	stw 0,16(31)
+MD n=Mem ra=0x000001b8 d=0x4BFFFE68	#	b .L2
+MD n=Mem ra=0x000001bc d=0x3D200000	#	lis 9,0x0
+MD n=Mem ra=0x000001c0 d=0x801F0010	#	lwz 0,16(31)
+MD n=Mem ra=0x000001c4 d=0x90091FFC	#	stw 0,0x1ffc(9)
+MD n=Mem ra=0x000001c8 d=0x38000000	#	li 0,0
+MD n=Mem ra=0x000001cc d=0x7C030378	#	mr 3,0
+MD n=Mem ra=0x000001d0 d=0x81610000	#	lwz 11,0(1)
+MD n=Mem ra=0x000001d4 d=0x83EBFFFC	#	lwz 31,-4(11)
+MD n=Mem ra=0x000001d8 d=0x7D615B78	#	mr 1,11
+MD n=Mem ra=0x000001dc d=0x4E800020	#	blr
+# </GEN>
+
+
+MD n=Mem ra=0x00001ff8 d=1000000
+#MD n=Mem ra=0x00001ff8 d=10000
+MD n=Mem ra=0x00001ffc d=0x00000000
+MD n=Mem ra=0x00002000 d=0x00000000
+MD n=Mem ra=0x00002004 d=0x00000000
+MD n=Mem ra=0x00002008 d=0x00000000
+MD n=Mem ra=0x0000200c d=0x00000000
+MD n=Mem ra=0x00002010 d=0x00000000
+MD n=Mem ra=0x00002014 d=0x00000000
+MD n=Mem ra=0x00002018 d=0x00000000
+MD n=Mem ra=0x0000201c d=0x00000000
+MD n=Mem ra=0x00002020 d=0x00000000
+MD n=Mem ra=0x00002024 d=0x00000000
+MD n=Mem ra=0x00002028 d=0x00000000
+MD n=Mem ra=0x0000202c d=0x00000000
+MD n=Mem ra=0x00002030 d=0x00000000
+MD n=Mem ra=0x00002034 d=0x00000000
+MD n=Mem ra=0x00002038 d=0x00000000
+MD n=Mem ra=0x0000203c d=0x00000000
+MD n=Mem ra=0x00002040 d=0x00000000
+MD n=Mem ra=0x00002044 d=0x00000000
+MD n=Mem ra=0x00002048 d=0x00000000
+MD n=Mem ra=0x0000204c d=0x00000000
+MD n=Mem ra=0x00002050 d=0x00000000
+MD n=Mem ra=0x00002054 d=0x00000000
+MD n=Mem ra=0x00002058 d=0x00000000
+MD n=Mem ra=0x0000205c d=0x00000000
+MD n=Mem ra=0x00002060 d=0x00000000
+MD n=Mem ra=0x00002064 d=0x00000000
+
+RD n=LR  d=0x000001e0
+RD n=NIA d=0x00000000

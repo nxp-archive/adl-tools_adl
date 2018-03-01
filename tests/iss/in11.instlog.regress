@@ -1,0 +1,8 @@
+Model:  P
+
+Instr:  tw 1,2 [ ICNT=(written read) AR_W=( read) ARF[26]=(written ) AR_W=(written)  ARF[3]=(read) AR_R=( read) AR_R=(written) CRF[5]=(written read)  DR=(written read) FOO1=(written read) FOO3=(read) GPR[4]=(written ) GPR[5]=(written ) GPR[31]=(written ) GPR[1]=(read) GPR[2]=(written ) GPR[3]=(written read) GPR[6]=(written read) GPR[7]=(written(mask=0x000000000000000000000000fff0ffff) ) GPR[9]=(written ) GPR[10]=(written )  GPR[11]=(written ) FOO5_RD=(read) XPR[4]=(read(mask=0x000000000000000000000000ffff0000)) FOO5_RD=(written ) ]
+   Fields:  RB RB RA RB RB RB RB RB RB RB
+Instr:  halt  [ ICNT=(written read) ]
+   Fields:
+Instructions issued:  2
+

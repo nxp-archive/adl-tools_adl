@@ -1,0 +1,48 @@
+
+template <size_t Size>
+bitset<Size> signExtend(bitset<Size> a,int signbit)
+{
+  assert (signbit < a.size());
+  if (a.test(signbit)) {
+    for (int i = a.size()-1; i >= signbit; --i) {
+      a.set(i);
+    }
+  }
+  return a;
+}
+
+define (arch Base) {
+  define (attrs) {
+    regs = (pc,condition,foo);
+  }
+
+  define (regfile sprs) {
+    size = 1024;
+    sparse = 1;
+    attrs = (foo);
+  }
+}
+
+define (arch minippc) {
+
+  define (attrs) {
+    regs = gpr;
+  }
+
+  define (regfile gprs) {
+    size = 32;
+    attrs = (foo);
+  }
+
+  define (reg a) {
+    """ This is a sample register!. """;
+    width = 32;
+    regfile = (sprs,20);
+    attrs = (foo);
+  }
+
+}
+
+define (core P) {
+  archs = (Base,minippc);
+}

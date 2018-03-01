@@ -1,0 +1,102 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use rdriver;
+use strict;
+use regress_utils;
+use Data::Dumper;
+use Cwd;
+
+use vars qw($src $make_uadl);
+
+my @Tests = (
+	passtest(qw(p1 in1)),
+	passtest(qw(p1 in2)),
+	failtest(qw(p1 in3)),
+	passtest(qw(p1 in4)),
+	passtest(qw(p1 in5)),
+	failtest(qw(p1 in6)),
+	passtest(qw(p2 in7),"--print-all-data --uadl-strict"),
+	failtest(qw(p2 in8)),
+	passtest(qw(p2 in9)),
+	failtest(qw(p2 in10)),
+	passtest(qw(p2 in11)),
+	passtest(qw(p6 in12),"-I=$src"),
+	passtest(qw(p7 in13),"-I=$src"),
+	passtest(qw(p7 in14),"-I=$src"),
+	passtest(qw(p7 in15),"-I=$src"),
+	passtest(qw(../iss/mod11 in16)),
+	failtest(qw(p6 in17),"-I=$src"),
+	passtest(qw(p6 in18)),
+	failtest(qw(p6 in19)),
+	passtest(qw(p6 in20)),
+	failtest(qw(p3 in21)),
+	passtest(qw(p3 in22)),
+	failtest(qw(p2 in23)),
+	failtest(qw(p2 in24)),
+	passtest(qw(p2 in25)),
+	failtest(qw(p2 in26)),
+	passtest(qw(p5 in27),"--I=$src/../iss"),
+	failtest(qw(p5 in28),"--I=$src/../iss"),
+	passtest(qw(p2 in29)),
+	failtest(qw(p2 in30)),
+	passtest(qw(p8 in31)),
+	failtest(qw(p8 in32)),
+	failtest(qw(p8 in33)),
+	passtest(qw(p5 in34),"--I=$src/../iss"),
+	failtest(qw(p5 in35),"--I=$src/../iss"),
+	passtest(qw(p2 in36)),
+	failtest(qw(p2 in37)),
+	failtest(qw(../iss/mod11 in38)),
+	passtest(qw(p8 in39)),
+	passtest(qw(p2 in40)),
+	failtest(qw(p2 in41)),
+	failtest(qw(p2 in42)),
+	passtest(qw(p9 in43)),
+	passtest(qw(p2 in44)),
+	passtest(qw(p10 in45)),
+	failtest(qw(p10 in46)),
+	passtest(qw(p11 in47)),
+			);
+
+# Create a test that's expected to pass.
+# arg0:  Basename of file. Input is arg0.adl, golden is arg0.regress.
+# arg1:  Optional additional arguments.
+sub passtest($) {
+  my ($adl,$uadl,$opts) = @_;
+  return {
+		  cmd    => "$make_uadl --no-warn-redefine --no-full-path-errors --print-data --check-cr-args $opts $src/$adl.adl $src/$uadl.uadl",
+		  diff   => "$src/$uadl.regress",
+		  stdio  => 1,
+		  stderr => 1,
+		 };
+}
+
+# Create a test that's expected to fail.
+# arg0:  Basename of file.  Input is arg0.adl, golden is arg0.regress.
+sub failtest($) {
+  my ($adl,$uadl,$opts) = @_;
+  return {
+		  cmd    => "$make_uadl --no-warn-redefine --no-full-path-errors --print-data --check-cr-args $opts $src/$adl.adl $src/$uadl.uadl",
+		  diff   => "$src/$uadl.regress",
+		  stdio  => 1,
+		  stderr => 1,
+		  fail   => 1,
+		 };
+}
+
+doTest(\@Tests);
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+
+##
+## </TESTS>
+##

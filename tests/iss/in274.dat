@@ -1,0 +1,157 @@
+#
+# Test that delayed writes to memory work.
+#
+
+= asm
+
+	stw r1,0x1000(r0)  # Delayed write.
+	lwz r3,0x1000(r0)
+	lwz r4,0x1000(r0)
+	lwz r5,0x1000(r0)
+	lwz r6,0x1000(r0)
+	lwz r7,0x1000(r0)
+	stwx r1,r0,r30     # Immediate write.
+	stw  r2,0x1010(r0) # Delayed write.
+	lwz r10,0x1010(r0)
+	lwz r11,0x1010(r0)
+	lwz r12,0x1010(r0)
+	lwz r13,0x1010(r0)
+	lwz r14,0x1010(r0)
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90201000	#	stw r1,0x1000(r0)  # Delayed write.
+MD n=Mem ra=0x00000004 d=0x80601000	#	lwz r3,0x1000(r0)
+MD n=Mem ra=0x00000008 d=0x80801000	#	lwz r4,0x1000(r0)
+MD n=Mem ra=0x0000000c d=0x80A01000	#	lwz r5,0x1000(r0)
+MD n=Mem ra=0x00000010 d=0x80C01000	#	lwz r6,0x1000(r0)
+MD n=Mem ra=0x00000014 d=0x80E01000	#	lwz r7,0x1000(r0)
+MD n=Mem ra=0x00000018 d=0x7C20F12E	#	stwx r1,r0,r30     # Immediate write.
+MD n=Mem ra=0x0000001c d=0x90401010	#	stw  r2,0x1010(r0) # Delayed write.
+MD n=Mem ra=0x00000020 d=0x81401010	#	lwz r10,0x1010(r0)
+MD n=Mem ra=0x00000024 d=0x81601010	#	lwz r11,0x1010(r0)
+MD n=Mem ra=0x00000028 d=0x81801010	#	lwz r12,0x1010(r0)
+MD n=Mem ra=0x0000002c d=0x81A01010	#	lwz r13,0x1010(r0)
+MD n=Mem ra=0x00000030 d=0x81C01010	#	lwz r14,0x1010(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x0
+
+RD n=GPR i=1  d=0xdeadbeef
+RD n=GPR i=2  d=0x12345678
+RD n=GPR i=30 d=0x1010
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x90201000
+INSTR op=0x90201000					asm="stw r1,4096(r0)"
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x80601000
+INSTR op=0x80601000					asm="lwz r3,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000000
+R n=GPR i=3 d=0x00000000
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x80801000
+INSTR op=0x80801000					asm="lwz r4,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000000
+R n=GPR i=4 d=0x00000000
+
+I ea=0xc id=4 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x80a01000
+INSTR op=0x80a01000					asm="lwz r5,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000000
+R n=GPR i=5 d=0x00000000
+D n=Mem t=write ea=0x1000 nb=4
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0xdeadbeef
+
+I ea=0x10 id=5 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x80c01000
+INSTR op=0x80c01000					asm="lwz r6,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=6 d=0xdeadbeef
+
+I ea=0x14 id=6 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x80e01000
+INSTR op=0x80e01000					asm="lwz r7,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=7 d=0xdeadbeef
+
+I ea=0x18 id=7 tic=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7c20f12e
+INSTR op=0x7c20f12e					asm="stwx r1,r0,r30"
+D n=Mem t=write ea=0x1010 nb=4
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0xdeadbeef
+
+I ea=0x1c id=8 tic=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x90401010
+INSTR op=0x90401010					asm="stw r2,4112(r0)"
+
+I ea=0x20 id=9 tic=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x81401010
+INSTR op=0x81401010					asm="lwz r10,4112(r0)"
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0xdeadbeef
+R n=GPR i=10 d=0xdeadbeef
+
+I ea=0x24 id=10 tic=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x81601010
+INSTR op=0x81601010					asm="lwz r11,4112(r0)"
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0xdeadbeef
+R n=GPR i=11 d=0xdeadbeef
+
+I ea=0x28 id=11 tic=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x81801010
+INSTR op=0x81801010					asm="lwz r12,4112(r0)"
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0xdeadbeef
+R n=GPR i=12 d=0xdeadbeef
+D n=Mem t=write ea=0x1010 nb=4
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x12345678
+
+I ea=0x2c id=12 tic=12
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x81a01010
+INSTR op=0x81a01010					asm="lwz r13,4112(r0)"
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x12345678
+R n=GPR i=13 d=0x12345678
+
+I ea=0x30 id=13 tic=13
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x81c01010
+INSTR op=0x81c01010					asm="lwz r14,4112(r0)"
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x12345678
+R n=GPR i=14 d=0x12345678
+
+I ea=0x34 id=14 tic=14
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0xdeadbeef
+RD n=GPR i=7 d=0xdeadbeef
+RD n=GPR i=8 d=0x00000000
+RD n=GPR i=9 d=0x00000000
+RD n=GPR i=10 d=0xdeadbeef
+RD n=GPR i=11 d=0xdeadbeef
+RD n=GPR i=12 d=0xdeadbeef
+RD n=GPR i=13 d=0x12345678
+RD n=GPR i=14 d=0x12345678

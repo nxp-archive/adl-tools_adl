@@ -1,0 +1,33 @@
+#
+# Basic test of direct-access.
+#
+
+= asm
+
+xor 2,3,1
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C620A78	#	xor 2,3,1
+# </GEN>
+CORE n=:P
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x7c620a78                                     asm="xor 3,2,1"
+R n=GPR i=3 d=0x00000028
+R n=GPR i=2 d=0x0000000a
+
+I ea=0x4 id=2
+INSTR op=0x00000000                                     asm="halt "
+
+RESULTS
+
+RD n=GPR i=2 d=10
+RD n=GPR i=3 d=40

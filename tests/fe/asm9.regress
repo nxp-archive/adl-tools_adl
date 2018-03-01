@@ -1,0 +1,47 @@
+======
+Cores:
+======
+Name:  "StarCore"
+Blocks:
+blue red 
+Registers:
+  Name:  "R"
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Parallel execution packet size: 3
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  SG: [0,1] [not used]  
+
+Instruction Tables:
+prefix:
+  other:
+  
+Instruction Attributes:  mini 
+Assembler rules:
+  Name :  R1
+  Type  : instruction
+  func ( InstrInfo  ) {
+    if ( instrHasAttr ( mini ) && SG == 1 ) {
+        error ( 1 , "Illegal" ) ;
+    }
+}
+  Name :  R2
+  Type  : packet
+  func ( InstrBundle b ) {
+    if ( b . size (  ) > 3 && instrHasAttr ( mini ) || instrBlk ( blue ) ) {
+        error ( 1 , "Illegal" ) ;
+    }
+}
+-------------------------------
+

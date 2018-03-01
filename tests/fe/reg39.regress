@@ -1,0 +1,53 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "VPR"
+  Size:  32
+  Usage:  field-read, field-written
+  Width:  128
+    B[8bits x 16]  
+      Usage:  field-read, field-written
+  Documention:
+
+Vector registers.
+    
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+  RT: [6,10] 
+  XO_X: [21,30] 
+Instructions:
+  Name:  g (rank: 100)
+  Width:  32
+  Fields:  OPCD(7) RT RA RB XO_X(10)
+  Action:  {
+    for (  unsigned i = 0 ; i != VPR ( RT )[read: VPR(RT)] . size (  ) / 8 ; ++ i ) {
+        VPR ( RT ) . B ( i ) = VPR ( RA ) . B ( i )[read: VPR(RA).B(i)] + VPR ( RB ) . B ( i )[read: VPR(RB).B(i)][write: VPR(RT).B(i) := VPR ( RA ) . B ( i )[read: VPR(RA).B(i)] + VPR ( RB ) . B ( i )[read: VPR(RB).B(i)]] ;
+    }
+}
+  Source Registers:  VPR(RA)/p VPR(RB)/p 
+  Target Registers:  VPR(RT)/p 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    234881034(1c000014):  g
+-------------------------------
+

@@ -1,0 +1,124 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Parallel execution packet size: 2
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+    Primary opcode.
+    
+  R1: 
+    Pseudo:  1
+    Width:   5
+  R1_imp_bits__6_10_: [6,10] 
+    Implements:  R1
+  R2: 
+    Pseudo:  1
+    Width:   5
+  R2_imp_bits__11_15_: [11,15] 
+    Implements:  R2
+  R3: 
+    Pseudo:  1
+    Width:   5
+  R3_imp_bits__16_20_: [16,20] 
+    Implements:  R3
+Instructions:
+  Name:  add_family (rank: 100)
+  Width:  8
+  Fields:  OPCD R1 R2 R3
+  Action:  {
+    GPR ( R1 ) = GPR ( R2 . uint32 (  ) ) + GPR ( R3 ) ;
+}
+  Source Registers:  GPR(R2 . uint32 (  )) GPR(R3) 
+  Target Registers:  GPR(R1) 
+  Nested insructions:  
+    Name:  add (rank: 100)
+    Width:  32
+    Attributes:  alu
+    Fields:  OPCD(11) R1_imp_bits__6_10_ R2_imp_bits__11_15_ R3_imp_bits__16_20_
+    Alias:  add_family OPCD(OPCD) R1(R1) R2(R2) R3(R3) 
+    Source Registers:  GPR(R2 . uint32 (  )) GPR(R3) 
+    Target Registers:  GPR(R1) 
+    Assembler rules:  R2 
+    -------------------------------
+  -------------------------------
+  Name:  sub_family (rank: 100)
+  Width:  8
+  Fields:  OPCD R1 R2 R3
+  Action:  {
+    GPR ( R1 ) = GPR ( R2 . uint32 (  ) ) - GPR ( R3 ) ;
+}
+  Source Registers:  GPR(R2 . uint32 (  )) GPR(R3) 
+  Target Registers:  GPR(R1) 
+  Nested insructions:  
+    Name:  sub (rank: 100)
+    Width:  32
+    Attributes:  alu
+    Fields:  OPCD(10) R1_imp_bits__6_10_ R2_imp_bits__11_15_ R3_imp_bits__16_20_
+    Alias:  sub_family OPCD(OPCD) R1(R1) R2(R2) R3(R3) 
+    Source Registers:  GPR(R2 . uint32 (  )) GPR(R3) 
+    Target Registers:  GPR(R1) 
+    Assembler rules:  R1 R2 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    10(28000000):  sub
+    11(2c000000):  add
+
+Groups:
+  Name:  alu_instrs
+  Type:  instr
+  Items: add sub 
+  -------------------------------
+Assembler rules:
+  Name :  R1
+  Type  : instruction
+  func ( InstrInfo  ) {
+}
+  Name :  R2
+  Type  : instruction
+  func ( InstrInfo  ) {
+}
+-------------------------------
+

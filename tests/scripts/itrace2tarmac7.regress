@@ -1,0 +1,6 @@
+Converting ...
+[ERROR] Unsupported itrace format:
+    itrace.0.zen: 01028100 70000000  0r0[32:63]=00000000
+
+Supported format:
+    itrace.[Core#].zen @ [timestamp]: [instr_address] [opcode] [reg/mem update]

@@ -1,0 +1,43 @@
+
+--------------------------------------------------------------------------------------------------------------
+| NAME                           | FIELDS                                   | SYNTAX                         |
+--------------------------------------------------------------------------------------------------------------
+| add                            | OPCD,RA,RB,RT,XO                         | add RT, RA, RB                 |
+| add2                           |                                          | add2                           |
+| addi                           | OPCD,RA,RT,SI                            | addi RT, RA, SI                |
+| addic.                         | OPCD,RA,RT,SI                            | addic. RT, RA, SI              |
+| addis                          | OPCD,RA,RT,SI                            | addis RT, RA, SI               |
+| bc                             | AA,BD,BI,BO,LK,OPCD                      | bc BO, BI, BD                  |
+| cmp                            | BF,OPCD,RA,RB,XO                         | cmp BF, RA, RB                 |
+| cmpi                           | BF,OPCD,RA,SI                            | cmpi BF, RA, SI                |
+| crand                          | OPCD,RA,RB,RT,XO                         | crand RT, RA, RB               |
+| crandc                         | OPCD,RA,RB,RS,XO                         |  crandc RS, RA, RB             |
+| dum1                           | F1,OPCD,RA,RS                            |   dum1 RA,RS                   |
+|                                |                                          |   dum1,2 RA,RS                 |
+|                                |                                          |   dum1,bark RA,RS              |
+|                                |                                          |   dum1,foo RA,RS               |
+|                                |                                          |   dum1,woof RA,RS              |
+|                                |                                          |   dum1reserved RA,RS           |
+|                                |                                          |   dum1reserved RA,RS           |
+| halt                           | OPCD                                     | halt                           |
+| li                             |                                          | li RT,SI32                     |
+| lwz                            | D,OPCD,RA,RT                             | lwz RT, RA, D                  |
+| lwzx                           | OPCD,RA,RB,RT,XO                         | lwzx RT, RA, RB                |
+| mfspr                          | OPCD,RT,SPRN,XO                          | mfspr RT, SPRN                 |
+| mr                             |                                          | mr RA,RS                       |
+| mtspr                          | OPCD,RS,SPRN,XO                          |  mtspr RS, SPRN                |
+| mullw                          | OPCD,RA,RB,RT,XO                         | mullw RT, RA, RB               |
+| or                             | OPCD,RA,RB,RS,XO                         |  or RS, RA, RB                 |
+| ori                            | OPCD,RA,RS,UI                            |  ori RS, RA, UI                |
+| rfi                            | OPCD,RA,RB,RS,XO                         |  rfi RS, RA, RB                |
+| rlwinm                         | MB,ME,OPCD,RA,RS,SH                      |  rlwinm RS, RA, SH, MB, ME     |
+| se_add                         | OPCD,RX,RY                               | se_add RY, RX                  |
+| se_addi                        | OIM5,OPCD7,RX                            | se_addi RX,OIM5                |
+| stw                            | D,OPCD,RA,RS                             |  stw RS, RA, D                 |
+| stwu                           | D,OPCD,RA,RS                             |  stwu RS, RA, D                |
+| stwx                           | OPCD,RA,RB,RS,XO                         |  stwx RS, RA, RB               |
+| tw                             | OPCD,RA,RB,XO                            | tw RA, RB                      |
+| vaddubm                        | OPCD,RA,RB,RT,XO                         | vaddubm RT, RA, RB             |
+| vadduhm                        | OPCD,RA,RB,RT,XO                         | vadduhm RT, RA, RB             |
+| vadduwm                        | OPCD,RA,RB,RT,XO                         | vadduwm RT, RA, RB             |
+--------------------------------------------------------------------------------------------------------------

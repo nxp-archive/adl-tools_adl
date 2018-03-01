@@ -1,0 +1,31 @@
+#
+# Tests breakpoints and execution with the trace-cache.
+#
+
+proc check_tc {} {
+	if { [simmode] == "tc" } { 
+		puts "Trace-cache is on" 
+	} else { 
+		puts "Trace-cache is off" 
+	}
+}
+
+simmode tc
+simload $env(srcdir)/../iss/in4.dat
+check_tc
+setbrk 0x78
+go
+puts "r10:  [reg GPR10]"
+go
+puts "r10:  [reg GPR10]"
+go
+puts "r10:  [reg GPR10]"
+clrbrk 0x78
+setbrk 0xd8
+go
+puts "0x200c:  [mem 0x200c 4]"
+puts "0x2038:  [mem 0x2038 4]"
+puts "0x205c:  [mem 0x205c 4]"
+simmode normal
+check_tc
+

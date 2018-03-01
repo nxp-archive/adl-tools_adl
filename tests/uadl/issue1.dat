@@ -1,0 +1,100 @@
+#
+# Test multi-issue support.  Loads and stores should not be issued in parallel
+# on DLX2.
+#
+= asm
+  
+  addi r1,r2,1
+  addi r3,r4,1
+  addi r5,r6,1
+  addi r7,r8,1
+  lwz  r9,0x1000(r0)
+  lwz  r10,0x1004(r0)
+  stw  r9,0x1008(r0)
+  lwz  r11,0x1008(r0)
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38220001	#	addi r1,r2,1
+MD n=Mem ra=0x00000004 d=0x38640001	#	addi r3,r4,1
+MD n=Mem ra=0x00000008 d=0x38A60001	#	addi r5,r6,1
+MD n=Mem ra=0x0000000c d=0x38E80001	#	addi r7,r8,1
+MD n=Mem ra=0x00000010 d=0x81201000	#	lwz  r9,0x1000(r0)
+MD n=Mem ra=0x00000014 d=0x81401004	#	lwz  r10,0x1004(r0)
+MD n=Mem ra=0x00000018 d=0x91201008	#	stw  r9,0x1008(r0)
+MD n=Mem ra=0x0000001c d=0x81601008	#	lwz  r11,0x1008(r0)
+# </GEN>
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+
+RD n=NIA     d=0x0
+RD n=GPR i=2 d=10
+RD n=GPR i=4 d=5
+RD n=GPR i=6 d=20
+RD n=GPR i=8 d=79
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x38220001					asm="addi r1,r2,1"
+ITIME t=1
+CTIME t=5
+
+I ea=0x4 id=2
+INSTR op=0x38640001					asm="addi r3,r4,1"
+ITIME t=1
+CTIME t=5
+
+I ea=0x8 id=3
+INSTR op=0x38a60001					asm="addi r5,r6,1"
+ITIME t=2
+CTIME t=6
+
+I ea=0xc id=4
+INSTR op=0x38e80001					asm="addi r7,r8,1"
+ITIME t=2
+CTIME t=6
+
+I ea=0x10 id=5
+INSTR op=0x81201000					asm="lwz r9,4096(r0)"
+ITIME t=3
+CTIME t=7
+
+I ea=0x14 id=6
+INSTR op=0x81401004					asm="lwz r10,4100(r0)"
+ITIME t=3
+CTIME t=8
+
+I ea=0x18 id=7
+INSTR op=0x91201008					asm="stw r9,4104(r0)"
+ITIME t=4
+CTIME t=10
+
+I ea=0x1c id=8
+INSTR op=0x81601008					asm="lwz r11,4104(r0)"
+ITIME t=5
+CTIME t=11
+
+I ea=0x20 id=9
+INSTR op=0x00000000					asm="halt "
+ITIME t=7
+CTIME t=11
+
+
+RESULTS
+
+RD n=GPR i=1  d=11
+RD n=GPR i=3  d=6
+RD n=GPR i=5  d=21
+RD n=GPR i=7  d=80
+RD n=GPR i=9  d=0xdeadbeef
+RD n=GPR i=10 d=0x12345678
+RD n=GPR i=11 d=0xdeadbeef
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+MD n=Mem ra=0x1008 d=0xdeadbeef

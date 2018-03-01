@@ -1,0 +1,229 @@
+#
+# Tests cache modification instructions.
+#
+
+CORE n=:P
+
+= asm
+
+	dcbt r0,r10         # Brings in 0x1000 line
+	lwz  r2,0x0(r10)
+	addi r2,r2,0x3000
+	stw  r2,0x4(r10)
+	dcbf r0,r10         # Flushes dirty 0x1000 line
+	addi r2,r2,0x3000
+	stw  r2,0x8(r10)
+	dcbi r0,r10         # Invalidates dirty 0x1000 line
+	stw  r2,0xc(r10)
+	dcbst r0,r10        # Stores 0x1000 line (still valid)
+	dcba  r0,r11        # Allocates 0x3000 line
+	stw  r2,0x0(r11)
+	dcbf r0,r11         # Flushes 0x3000 line
+	dcbz r0,r12         # Zero out 0x2000 line
+	dcbf r0,r12         # Push to memory
+
+= /asm
+
+= aopts
+
+ -mregnames -mbooke
+
+= /aopts
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x7C00522C	# dcbt r0,r10 # Brings in 0x1000 line
+MD n=Mem ra=0x00000104 d=0x804A0000	# lwz r2,0x0(r10)
+MD n=Mem ra=0x00000108 d=0x38423000	# addi r2,r2,0x3000
+MD n=Mem ra=0x0000010c d=0x904A0004	# stw r2,0x4(r10)
+MD n=Mem ra=0x00000110 d=0x7C0050AC	# dcbf r0,r10 # Flushes dirty 0x1000 line
+MD n=Mem ra=0x00000114 d=0x38423000	# addi r2,r2,0x3000
+MD n=Mem ra=0x00000118 d=0x904A0008	# stw r2,0x8(r10)
+MD n=Mem ra=0x0000011c d=0x7C0053AC	# dcbi r0,r10 # Invalidates dirty 0x1000 line
+MD n=Mem ra=0x00000120 d=0x904A000C	# stw r2,0xc(r10)
+MD n=Mem ra=0x00000124 d=0x7C00506C	# dcbst r0,r10 # Stores 0x1000 line (still valid)
+MD n=Mem ra=0x00000128 d=0x7C005DEC	# dcba r0,r11 # Allocates 0x3000 line
+MD n=Mem ra=0x0000012c d=0x904B0000	# stw r2,0x0(r11)
+MD n=Mem ra=0x00000130 d=0x7C0058AC	# dcbf r0,r11 # Flushes 0x3000 line
+MD n=Mem ra=0x00000134 d=0x7C0067EC	# dcbz r0,r12 # Zero out 0x2000 line
+MD n=Mem ra=0x00000138 d=0x7C0060AC	# dcbf r0,r12 # Push to memory
+# </GEN>
+
+RD n=NIA d=0x0100
+RD n=GPR i=10 d=0x1000
+RD n=GPR i=11 d=0x3000
+RD n=GPR i=12 d=0x2000
+RD n=CCR d=0xc0000000
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x00000000
+MD n=Mem ra=0x1008 d=0x00000000
+MD n=Mem ra=0x100c d=0x00000000
+
+MD n=Mem ra=0x2000 d=0xffffffff
+MD n=Mem ra=0x2004 d=0xffffffff
+MD n=Mem ra=0x2008 d=0xffffffff
+
+MD n=Mem ra=0x3000 d=0x00000000
+
+
+TRACE
+
+I id=1 ea=0x100
+C a=miss n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C a=miss n=L2 t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L2 a=load t=ifetch set=2 way=0 lm=0x7f ra=0x100
+C n=L1i a=load t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x7c00522c
+INSTR op=0x7c00522c asm="#1 dcbt 0,10"
+C n=L1d a=miss t=touch set=32 way=0 lm=0x7f ra=0x1000
+C n=L2 a=miss t=touch set=32 way=0 lm=0x7f ra=0x1000
+R n=CCR d=0xc0111000
+C n=L2 a=load t=touch set=32 way=0 lm=0x7f ra=0x1000
+C n=L1d a=load t=touch set=32 way=0 lm=0x7f ra=0x1000
+C n=L2 a=hit t=touch set=32 way=0 lm=0x7f ra=0x1000
+
+I id=2 ea=0x104
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x804a0000
+INSTR op=0x804a0000 asm="#2 lwz 2,10,0"
+C a=hit n=L1d t=read set=32 way=0 lm=0x7f ra=0x1000
+R n=CCR d=0xc1111000
+M n=Mem ea=0x1000 ra=0x1000 t=read d=0xdeadbeef
+R n=GPR i=2 d=0xdeadbeef
+
+I id=3 ea=0x108
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x38423000
+INSTR op=0x38423000 asm="#3 addi 2,2,12288"
+R n=GPR i=2 d=0xdeadeeef
+
+I id=4 ea=0x10c
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x904a0004
+INSTR op=0x904a0004 asm="#4 stw 2,10,4"
+C a=hit n=L1d t=write set=32 way=0 lm=0x7f ra=0x1000
+R n=CCR d=0xc2111000
+M n=Mem ea=0x1004 ra=0x1004 t=write d=0xdeadeeef
+
+I id=5 ea=0x110
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x7c0050ac
+INSTR op=0x7c0050ac asm="#5 dcbf 0,10"
+C a=evict n=L1d t=flush set=32 way=0 lm=0x7f ra=0x1000
+C a=hit n=L2 t=flush set=32 way=0 lm=0x7f ra=0x1000
+C n=L1d t=invalidate set=32 way=0 lm=0x7f ra=0x1000
+C a=evict n=L2 t=flush set=32 way=0 lm=0x7f ra=0x1000
+C n=L2 t=invalidate set=32 way=0 lm=0x7f ra=0x1000
+
+I id=6 ea=0x114
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x38423000
+INSTR op=0x38423000 asm="#6 addi 2,2,12288"
+R n=GPR i=2 d=0xdeae1eef
+
+I id=7 ea=0x118
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x904a0008
+INSTR op=0x904a0008 asm="#7 stw 2,10,8"
+C a=miss n=L1d t=write set=32 way=1 lm=0x7f ra=0x1000
+C a=miss n=L2 t=write set=32 way=1 lm=0x7f ra=0x1000
+R n=CCR d=0xc2212000
+C n=L2 a=load t=write set=32 way=1 lm=0x7f ra=0x1000
+C n=L1d a=load t=write set=32 way=1 lm=0x7f ra=0x1000
+M n=Mem ea=0x1008 ra=0x1008 t=write d=0xdeae1eef
+
+I id=8 ea=0x11c
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0x7c0053ac
+INSTR op=0x7c0053ac asm="#8 dcbi 0,10"
+C n=L1d t=invalidate set=32 way=1 lm=0x7f ra=0x1000
+C n=L2 t=invalidate set=32 way=1 lm=0x7f ra=0x1000
+
+I id=9 ea=0x120
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x904a000c
+INSTR op=0x904a000c asm="#9 stw 2,10,12"
+C a=miss n=L1d t=write set=32 way=2 lm=0x7f ra=0x1000
+C a=miss n=L2 t=write set=32 way=2 lm=0x7f ra=0x1000
+R n=CCR d=0xc2313000
+C n=L2 a=load t=write set=32 way=2 lm=0x7f ra=0x1000
+C n=L1d a=load t=write set=32 way=2 lm=0x7f ra=0x1000
+M n=Mem ea=0x100c ra=0x100c t=write d=0xdeae1eef
+
+I id=10 ea=0x124
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x7c00506c
+INSTR op=0x7c00506c asm="#10 dcbst 0,10"
+C a=evict n=L1d t=write set=32 way=2 lm=0x7f ra=0x1000
+C a=hit n=L2 t=write set=32 way=2 lm=0x7f ra=0x1000
+C a=evict n=L2 t=write set=32 way=2 lm=0x7f ra=0x1000
+
+I id=11 ea=0x128
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0x7c005dec
+INSTR op=0x7c005dec asm="#11 dcba 0,11"
+C a=miss n=L1d t=alloc set=32 way=3 lm=0x7f ra=0x3000
+R n=CCR d=0xc2414000
+C a=miss n=L2 t=alloc set=96 way=0 lm=0x7f ra=0x3000
+
+I id=12 ea=0x12c
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x12c ra=0x12c d=0x904b0000
+INSTR op=0x904b0000 asm="#12 stw 2,11,0"
+C a=hit n=L1d t=write set=32 way=3 lm=0x7f ra=0x3000
+R n=CCR d=0xc3414000
+M n=Mem ea=0x3000 ra=0x3000 t=write d=0xdeae1eef
+
+I id=13 ea=0x130
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x130 ra=0x130 d=0x7c0058ac
+INSTR op=0x7c0058ac asm="#13 dcbf 0,11"
+C a=evict n=L1d t=flush set=32 way=3 lm=0x7f ra=0x3000
+C a=hit n=L2 t=flush set=96 way=0 lm=0x7f ra=0x3000
+C n=L1d t=invalidate set=32 way=3 lm=0x7f ra=0x3000
+C a=evict n=L2 t=flush set=96 way=0 lm=0x7f ra=0x3000
+C n=L2 t=invalidate set=96 way=0 lm=0x7f ra=0x3000
+
+I id=14 ea=0x134
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x134 ra=0x134 d=0x7c0067ec
+INSTR op=0x7c0067ec asm="#14 dcbz 0,12"
+C a=miss n=L1d t=write set=0 way=0 lm=0x7f ra=0x2000
+C a=miss n=L2 t=write set=64 way=0 lm=0x7f ra=0x2000
+R n=CCR d=0xc3515000
+
+I id=15 ea=0x138
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x138 ra=0x138 d=0x7c0060ac
+INSTR op=0x7c0060ac asm="#15 dcbf 0,12"
+C a=evict n=L1d t=flush set=0 way=0 lm=0x7f ra=0x2000
+C a=hit n=L2 t=flush set=64 way=0 lm=0x7f ra=0x2000
+C n=L1d t=invalidate set=0 way=0 lm=0x7f ra=0x2000
+C a=evict n=L2 t=flush set=64 way=0 lm=0x7f ra=0x2000
+C n=L2 t=invalidate set=64 way=0 lm=0x7f ra=0x2000
+
+I id=16 ea=0x13c
+C a=hit n=L1i t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x13c ra=0x13c d=0x0
+INSTR op=0x0 asm="#16 halt"
+
+RESULTS
+
+CD n=L1d set=32 way=2 ra=0x0000000000001000 valid=1 dirty=0 locked=0 d=0xdeadbeef,0xdeadeeef,0x00000000,0xdeae1eef,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L2 set=32 way=2 ra=0x0000000000001000 valid=1 dirty=0 locked=0 d=0xdeadbeef,0xdeadeeef,0x00000000,0xdeae1eef,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+
+MD n=Mem ra=0x0000000000001000 d=0xdeadbeef
+MD n=Mem ra=0x0000000000001004 d=0xdeadeeef
+MD n=Mem ra=0x0000000000001008 d=0x00000000
+MD n=Mem ra=0x000000000000100c d=0xdeae1eef
+MD n=Mem ra=0x0000000000002000 d=0x00000000
+MD n=Mem ra=0x0000000000002004 d=0x00000000
+MD n=Mem ra=0x0000000000002008 d=0x00000000
+MD n=Mem ra=0x0000000000003000 d=0xdeae1eef
+

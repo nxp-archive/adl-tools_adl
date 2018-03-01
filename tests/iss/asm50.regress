@@ -1,0 +1,2 @@
+asm50.s: Assembler messages:
+asm50.s:6: Error: move:  No version of instruction move matched the given arguments.

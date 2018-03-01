@@ -1,0 +1,281 @@
+======
+Cores:
+======
+Name:  "packet_ops"
+Bit Order:              little endian
+Instruction Byte Order: little endian
+Data Byte Order:        little endian
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  64
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  64
+  Attributes:  nia
+  Documention:
+
+    Next instruction address
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Relocations:
+  RELOC_1 1
+    Abbrev:  lo1
+    Field width:  16
+    PC-relative:  0
+    Right-shift:  0
+    Signed:  True
+    Check Overflow:  True
+    Dst Mask:  0xffff
+  RELOC_2 2
+    Abbrev:  lo2
+    Field width:  16
+    PC-relative:  0
+    Right-shift:  0
+    Signed:  True
+    Check Overflow:  True
+    Dst Mask:  0xffff
+Instruction Fields:
+  bdo: [30,29] [not used] 
+        Branch destination packet offset field.
+
+    This specifies the micro-op to execute within the target instruction.
+    
+  bdp: [28,10] [not used] 
+    Signed:  1
+    Addr:  PC-relative
+    Shift:  3
+        PC-relative branch destination-packet field.
+
+    This is used to specify the address of the instruction.
+    
+  bsimm: [61,10] 
+    Display:  hex
+    Signed:  1
+        Big signed immediate field.
+    
+  fop: [1,0] 
+        Outer 'envelope' instruction opcode.
+
+    Encodings:
+      0: Single large 62-bit instruction.
+      1: Two 32-bit instructions (serial execution).
+      2: Three 20-bit instructions (serial execution).
+      3: Two 32-bit instructions (parallel execution).
+    
+  op: [4,0] 
+        Primary opcode for sub-instrutions.
+    
+  opA: [32,2] [instr table: instr_subinstr1]
+	    Reloc:  RELOC_1 (macro-op field: opA)
+        Instruction field for storing a 31-bit instruction (first slot).
+    
+  opAA: [63,2] [instr table: instr_subinstr3] 
+        Instruction field for storing a 62-bit instruction.
+    
+  opB: [63,33] [instr table: instr_subinstr1]
+	    Reloc:  RELOC_2 (macro-op field: opB)
+        Instruction field for storing a 31-bit instruction (second slot).
+    
+  opC: [21,2] [instr table: instr_subinstr2] 
+        Instruction field for storing a 20-bit instruction (first slot).
+    
+  opD: [41,22] [instr table: instr_subinstr2] 
+        Instruction field for storing a 20-bit instruction (second slot).
+    
+  opE: [61,42] [instr table: instr_subinstr2] 
+        Instruction field for storing a 20-bit instruction (third slot).
+    
+  ra: [14,10] [regfile:  GPR] [not used] 
+        First operand source instruction field.
+    
+  ra_p: [regfile:  GPR] 
+    Pseudo:  1
+    Width:   5
+        First operand source instruction field.
+    
+  ra_p_imp_bits__14_10_: [14,10] 
+    Implements:  ra_p
+  rb: [19,15] [regfile:  GPR] [not used] 
+        Second operand source instruction field.
+    
+  rs: [9,5] [regfile:  GPR] [not used] 
+        Standard source instruction field.
+    
+  rt: [9,5] [regfile:  GPR] 
+        Standard target instruction field.
+    
+  rt_p: [regfile:  GPR] 
+    Pseudo:  1
+    Width:   5
+        Standard target instruction field.
+    
+  rt_p_imp_bits__9_5_: [9,5] 
+    Implements:  rt_p
+  scale: [not used] 
+    Pseudo:  1
+    Width:   32
+  simm: [30,15] [not used] 
+    Display:  dec
+    Signed:  1
+        Signed immediate field.
+    
+  simm_p: 
+    Display:  dec
+    Signed:  1
+    Pseudo:  1
+    Width:   16
+    Reloc:  RELOC_1 (macro-op field: opA)
+    Reloc:  RELOC_2 (macro-op field: opB)
+        Unsigned immediate field.
+    
+  simm_p_imp_bits__30_15_: [30,15] 
+    Implements:  simm_p
+Instructions:
+  Name:  addi (rank: 100)
+  Width:  31
+  Is micro op.
+  Syntax:  "addi %f,%f,%f":   rt_p ra_p simm_p
+  Attributes:  instr_subinstr1
+  Fields:  simm_p_imp_bits__30_15_ ra_p_imp_bits__14_10_ rt_p_imp_bits__9_5_ op(1)
+  Action:  {
+    GPR ( rt_p ) = GPR ( ra_p ) + simm_p ;
+}
+  Source Registers:  GPR(ra_p) 
+  Target Registers:  GPR(rt_p) 
+  Documention:
+
+    Add immediate.
+    
+  -------------------------------
+  Name:  addi_ (rank: 100) (shorthand)
+  Width:  31
+  Is micro op.
+  Syntax:  "addi %f,%f":   rt_p simm_p
+  Attributes:  instr_subinstr1
+  Fields:  rt_p simm_p
+  Alias:  addi simm_p_imp_bits__30_15_(simm_p) ra_p_imp_bits__14_10_(rt_p) rt_p_imp_bits__9_5_(rt_p) 
+  Source Registers:  GPR(ra_p) 
+  Target Registers:  GPR(rt_p) 
+  -------------------------------
+  Name:  addi_test_replace (rank: 100) (shorthand)
+  Width:  31
+  Is micro op.
+  Syntax:  "addit %f,%f":   rt_p simm_p
+  Attributes:  instr_subinstr1 addi_replace
+  Fields:  rt_p simm_p
+  Alias:  addi simm_p_imp_bits__30_15_(simm_p) ra_p_imp_bits__14_10_(rt_p) rt_p_imp_bits__9_5_(rt_p) 
+  Source Registers:  GPR(ra_p) 
+  Target Registers:  GPR(rt_p) 
+  -------------------------------
+  Name:  big (rank: 100)
+  Width:  64
+  Micro ops:  1
+  DSyntax:  "%f":   opAA
+  Attributes:  other
+  Fields:  opAA fop(0)
+  Documention:
+
+    Contains one 62-bit instruction.
+    
+  -------------------------------
+  Name:  halt (rank: 100)
+  Width:  62
+  Is micro op.
+  Attributes:  instr_subinstr3
+  Fields:  op(0)
+  Action:  {
+    halt (  ) ;
+}
+  Documention:
+
+    Halt simulation.
+    
+  -------------------------------
+  Name:  li (rank: 100)
+  Width:  62
+  Is micro op.
+  Syntax:  "li %f,%f":   rt bsimm
+  Attributes:  instr_subinstr3
+  Fields:  bsimm rt op(1)
+  Action:  {
+    GPR ( rt ) = signExtend ( bsimm , 64 ) ;
+}
+  Target Registers:  GPR(rt) 
+  Documention:
+
+    Load large immediate.
+    
+  -------------------------------
+  Name:  parallel (rank: 100)
+  Width:  64
+  Micro ops:  2
+  DSyntax:  "%f = %f":   opB opA
+  Attributes:  other
+  Fields:  opB opA fop(3)
+  Documention:
+
+    Contains two 31-bit instructions. Implies parallel execution.
+    
+  -------------------------------
+  Name:  serial1 (rank: 100)
+  Width:  64
+  Micro ops:  2
+  DSyntax:  "%f ; %f":   opB opA
+  Attributes:  other
+  Fields:  opB opA fop(1)
+  Documention:
+
+    Contains two 31-bit instructions. Implies serial execution.
+    
+  -------------------------------
+  Name:  serial2 (rank: 100)
+  Width:  64
+  Micro ops:  3
+  DSyntax:  "%f ; %f ; %f":   opE opD opC
+  Attributes:  other
+  Fields:  opE opD opC fop(2)
+  Documention:
+
+    Contains three 20-bit instructions. Implies serial execution.
+    
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x0000000300000000
+    0(0000000000000000):  big
+    1(0000000100000000):  serial1
+    2(0000000200000000):  serial2
+    3(0000000300000000):  parallel
+instr_subinstr1:
+    Mask:  0x1f
+    1(1):  addi
+      Shorthand:  addi_: addi simm_p_imp_bits__30_15_(simm_p) ra_p_imp_bits__14_10_(rt_p) rt_p_imp_bits__9_5_(rt_p) 
+      Shorthand:  addi_test_replace: addi simm_p_imp_bits__30_15_(simm_p) ra_p_imp_bits__14_10_(rt_p) rt_p_imp_bits__9_5_(rt_p) 
+instr_subinstr2:
+  instr_subinstr3:
+    Mask:  0x0000001f00000000
+    0(0000000000000000):  halt
+    1(0000000100000000):  li
+-------------------------------
+

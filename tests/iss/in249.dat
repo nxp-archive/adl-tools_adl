@@ -1,0 +1,146 @@
+#
+# A test of using large (128-bit) instructions.  Generate this file using
+# as-mod75.  Note that this also tests little-endian instructions and data.
+#
+= asm
+
+	set 0x1000,0xdeadbeef1234
+	get 0x1010,0x1000
+	add 0x1020,0x2000
+	add.mem 0x1020,0x0,0x1010
+	mult 1,1,4,0x2000,0x2010
+	stop
+
+= /asm
+
+= mdopts
+endian: little
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x00001000	#	set 0x1000,0xdeadbeef1234
+MD n=Mem ra=0x00000004 d=0x04000000
+MD n=Mem ra=0x00000008 d=0xBEEF1234
+MD n=Mem ra=0x0000000c d=0x0000DEAD
+MD n=Mem ra=0x00000010 d=0x10001010	#	get 0x1010,0x1000
+MD n=Mem ra=0x00000014 d=0x08000000
+MD n=Mem ra=0x00000018 d=0x00000000
+MD n=Mem ra=0x0000001c d=0x00000000
+MD n=Mem ra=0x00000020 d=0x00001020	#	add 0x1020,0x2000
+MD n=Mem ra=0x00000024 d=0x0C000000
+MD n=Mem ra=0x00000028 d=0x00002000
+MD n=Mem ra=0x0000002c d=0x00000000
+MD n=Mem ra=0x00000030 d=0x10101020	#	add.mem 0x1020,0x0,0x1010
+MD n=Mem ra=0x00000034 d=0x0E000000
+MD n=Mem ra=0x00000038 d=0x00000000
+MD n=Mem ra=0x0000003c d=0x00000000
+MD n=Mem ra=0x00000040 d=0x20002010	#	mult 1,1,4,0x2000,0x2010
+MD n=Mem ra=0x00000044 d=0x84000004
+MD n=Mem ra=0x00000048 d=0x00010000
+MD n=Mem ra=0x0000004c d=0x00000000
+MD n=Mem ra=0x00000050 d=0x00000000	#	stop
+MD n=Mem ra=0x00000054 d=0x10000000
+MD n=Mem ra=0x00000058 d=0x00000000
+MD n=Mem ra=0x0000005c d=0x00000000
+# </GEN>
+
+MD n=Mem ra=0x0000000000002000 d=0x0000000a	#	(10)
+MD n=Mem ra=0x0000000000002004 d=0x00000014	#	(20)
+MD n=Mem ra=0x0000000000002008 d=0x0000001e	#	(30)
+MD n=Mem ra=0x000000000000200c d=0x00000028	#	(40)
+
+CORE n=:biginst
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x00100000
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00000004
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x3412efbe
+M n=Mem t=ifetch ea=0xc ra=0xc d=0xadde0000
+INSTR op=0x0000100004000000beef12340000dead					asm="set 0x1000,0xdeadbeef1234"
+D n=Mem t=write ea=0x1000 nb=6
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x3412efbe
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0xadde0000
+
+I ea=0x10 id=2
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x10100010
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00000008
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x00000000
+INSTR op=0x10001010080000000000000000000000					asm="get 0x1010,0x1000"
+D n=Mem t=read ea=0x1000 nb=6
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x3412efbe
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0xadde0000
+D n=Mem t=write ea=0x1010 nb=6
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x3412efbe
+M n=Mem t=write ea=0x1014 ra=0x1014 d=0xadde0000
+
+I ea=0x20 id=3
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x20100000
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x0000000c
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00200000
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x00000000
+INSTR op=0x000010200c0000000000200000000000					asm="add 0x1020,0x000000002000"
+D n=Mem t=read ea=0x1020 nb=6
+M n=Mem t=read ea=0x1020 ra=0x1020 d=0x00000000
+M n=Mem t=read ea=0x1024 ra=0x1024 d=0x00000000
+D n=Mem t=write ea=0x1020 nb=6
+M n=Mem t=write ea=0x1020 ra=0x1020 d=0x00200000
+M n=Mem t=write ea=0x1024 ra=0x1024 d=0x00000000
+
+I ea=0x30 id=4
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x20101010
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x0000000e
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x00000000
+M n=Mem t=ifetch ea=0x3c ra=0x3c d=0x00000000
+INSTR op=0x101010200e0000000000000000000000					asm="add.mem 0x1020,0x000000000000,0x1010"
+D n=Mem t=read ea=0x1010 nb=6
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x3412efbe
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0xadde0000
+D n=Mem t=read ea=0x1020 nb=6
+M n=Mem t=read ea=0x1020 ra=0x1020 d=0x00200000
+M n=Mem t=read ea=0x1024 ra=0x1024 d=0x00000000
+D n=Mem t=write ea=0x1020 nb=6
+M n=Mem t=write ea=0x1020 ra=0x1020 d=0x3432efbe
+M n=Mem t=write ea=0x1024 ra=0x1024 d=0xadde0000
+
+I ea=0x40 id=5
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x10200020
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x04000084
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x00000100
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x00000000
+INSTR op=0x20002010840000040001000000000000					asm="mult.noss.noqext.imm 0x000000000001,1,0x0004,0x2000,0x2010"
+D n=Mem t=read ea=0x2000 nb=4
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0x0a000000
+D n=Mem t=read ea=0x2004 nb=4
+M n=Mem t=read ea=0x2004 ra=0x2004 d=0x14000000
+D n=Mem t=read ea=0x2008 nb=4
+M n=Mem t=read ea=0x2008 ra=0x2008 d=0x1e000000
+D n=Mem t=read ea=0x200c nb=4
+M n=Mem t=read ea=0x200c ra=0x200c d=0x28000000
+D n=Mem t=write ea=0x2010 nb=6
+M n=Mem t=write ea=0x2010 ra=0x2010 d=0x80a90300
+M n=Mem t=write ea=0x2014 ra=0x2014 d=0x00000000
+
+I ea=0x50 id=6
+M n=Mem t=ifetch ea=0x50 ra=0x50 d=0x00000000
+M n=Mem t=ifetch ea=0x54 ra=0x54 d=0x00000010
+M n=Mem t=ifetch ea=0x58 ra=0x58 d=0x00000000
+M n=Mem t=ifetch ea=0x5c ra=0x5c d=0x00000000
+INSTR op=0x00000000100000000000000000000000					asm="stop "
+
+RESULTS
+
+MD n=Mem ra=0x0000000000001000 d=0xbeef1234	#	(873656254)
+MD n=Mem ra=0x0000000000001004 d=0x0000dead	#	(2917007360)
+MD n=Mem ra=0x0000000000001010 d=0xbeef1234	#	(873656254)
+MD n=Mem ra=0x0000000000001014 d=0x0000dead	#	(2917007360)
+MD n=Mem ra=0x0000000000001020 d=0xbeef3234	#	(875753406)
+MD n=Mem ra=0x0000000000001024 d=0x0000dead	#	(2917007360)
+MD n=Mem ra=0x0000000000002000 d=0x0000000a	#	(167772160)
+MD n=Mem ra=0x0000000000002004 d=0x00000014	#	(335544320)
+MD n=Mem ra=0x0000000000002008 d=0x0000001e	#	(503316480)
+MD n=Mem ra=0x000000000000200c d=0x00000028	#	(671088640)
+MD n=Mem ra=0x0000000000002010 d=0x0003a980	#	(2158560000)
+MD n=Mem ra=0x0000000000002014 d=0x00000000	#	(0)

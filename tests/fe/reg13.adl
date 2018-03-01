@@ -1,0 +1,89 @@
+//
+// Register aliasing test.
+//
+define (arch = minippc) {
+  
+  define (regfile = gprs) {
+    size = 32;
+    width = 64;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg = SPRG0) {
+    width = 32;
+  }
+
+  define (reg=a) { }
+
+}
+
+define (arch = mixed) {
+
+  define (regfile = mixed_gprs) {
+    size = 16;
+    define (read) {
+      alias = gprs;
+      regs = ((0,7),(24,31));
+    }
+    define (write) {
+      alias = gprs;
+      regs = ((0,7),(24,31));
+    }
+  }
+
+  define (reg = USPRG0) {
+    define (read) {
+      alias = SPRG0;
+    }
+    define (write) {
+      ignore = true;
+    }
+  }
+
+  // Test alias shortcut.
+  define (reg = A) { alias = a; }
+  define (regfile = GPRS) { alias = gprs; }
+
+  // Test aliases to elements of register files.
+  define (reg = B) {
+    alias = gprs(1);
+  }
+  define (reg = C) {
+    define (read) {
+      alias = gprs(5);
+    }
+    define (write) {
+      alias = gprs(6);
+    }
+  }
+
+  // Should issue a warning b/c of the difference in width.
+  define (reg=D) {
+    width = 64;
+    alias = A;
+  }
+
+  // Should issue a warning b/c of the difference in width.
+  define (reg=E) {
+    width = 16;
+    alias = A;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instr=A) {
+    fields=(OPCD(20));
+    width = 32;
+    action = { };
+  }
+
+}
+
+define (core = P) {
+  archs = (minippc,mixed);
+}

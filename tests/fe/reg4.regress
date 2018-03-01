@@ -1,0 +1,2 @@
+reg4.adl:21: Register/register-file not found:  c
+reg4.adl:26: Did not find any registers identified as a current-instruction-address register (of class cia).

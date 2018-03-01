@@ -1,0 +1,48 @@
+======
+Cores:
+======
+Name:  "P"
+Exceptions:
+  Name:  DTlbMiss
+  Action:  func (  ) {
+}
+  -------------------------------
+  Name:  ITlbMiss
+  Action:  func (  ) {
+}
+  -------------------------------
+  Name:  ProtectionFault
+  Action:  func (  ) {
+}
+  -------------------------------
+Registers:
+  Name:  "DEAR"
+  Width:  32
+  -------------------------------
+  Name:  "HDBCR0"
+  Width:  32
+    MMU_ENABLE[0]   
+  -------------------------------
+  Name:  "MSR"
+  Width:  32
+    PR[10]   
+  -------------------------------
+  Name:  "PID0"
+  Width:  32
+  -------------------------------
+  Name:  "PID1"
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

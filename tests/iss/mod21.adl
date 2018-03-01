@@ -1,0 +1,613 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// A model with a split L1 and unified L2.  The L2 is a victim cache for
+// the L1-data cache.  Writethrough of the L2 is selectable based upon
+// a register field (CCR.WT).
+//
+// Write-allocation when in write-through is selecteble via WTNA:  If 0, then
+// allocation is performed, 1 means not allocated.
+//
+// This model also has a simple MMU which can adjust cache behavior based
+// upon translation attributes.
+//
+
+#import "mod1.adl"
+
+define (arch = cache) {
+
+  define (instrfield=XO_DS) {
+    """
+    Extended opcode for DS Instruction Format.
+    """;
+    bits = (30,31);
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=PID1) {
+  }
+
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+    define (field=L2E) {
+      bits = 1;
+    }
+    define (field=WT) {
+      bits = 2;
+    }
+    define (field=WTNA) {
+      """Write-through no-allocate.  If 1, don't allocate on a write.""";
+      bits = 3;
+    }
+    define (field=WTONA) {
+      """Write-through other no-allocate.  If 1, don't allocate on other operations.""";
+      bits = 4;
+    }
+  }
+
+  define (reg=DBGCTRL) {
+    define (field=EN) {
+      bits = 31;
+    }
+    define (field=CNT) {
+      bits = (0,7);
+    }
+    define (field=LIM) {
+      bits = (8,15);
+    }
+  }
+
+  define (reg=HDBCR0) {
+    """
+    Hardware debug control register 0.
+    """;
+
+    define (field=MMU_ON) {
+      """ Enable/disable the MMU. """;
+      bits = 0;
+    }
+  }
+
+
+  defmod(regfile=SPR) {
+    define (entry=52) { reg=CCR; }
+    define (entry=53) { reg=DBGCTRL; }
+  }
+
+  define (instr=dcba) {
+    fields=(OPCD(31),RA,RB,XO(758));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+      L1d.allocate(ra);
+#     ifndef NO_L2
+      L2.allocate(ra);
+#     endif
+    };
+  }
+
+  define (instr=dcbf) {
+    fields=(OPCD(31),RA,RB,XO(86));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+      L1d.flush(ra);
+      L1d.invalidate(ra);
+#     ifndef NO_L2
+      L2.flush(ra);
+      L2.invalidate(ra);
+#     endif
+    };
+  }
+
+  define (instr=dcbi) {
+    fields=(OPCD(31),RA,RB,XO(470));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+      L1d.invalidate(ra);
+#     ifndef NO_L2
+      L2.invalidate(ra);
+#     endif
+    };
+  }
+
+  define (instr=dcbst) {
+    fields=(OPCD(31),RA,RB,XO(54));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+      L1d.store(ra);
+#     ifndef NO_L2
+      L2.store(ra);
+#     endif
+    };
+  }
+
+  define (instr=dcbt) {
+    fields=(OPCD(31),RA,RB,XO(278));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+      L1d.touch(ra);
+#     ifndef NO_L2
+      L2.touch(ra);
+#     endif
+    };
+  }
+
+  define (instr=dcbz) {
+    fields=(OPCD(31),RA,RB,XO(1014));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      var ra = dataReadTranslate(ea);
+      L1d.fill(ra,0);
+#     ifndef NO_L2
+      L2.fill(ra,0);
+#     endif
+    };
+  }
+
+  // This is just here to make sure that we can compile w/o system-call support.
+  // This should all be stubbed out when we generate with --no-syscall-enabled.
+  define (instr=sc) {
+    fields=(OPCD(17),XO_DS(2));
+    action = {
+      if (syscall_enabled()) {
+        syscall_add_arg(GPR(1));        // stack pointer (brk needs it)
+        syscall_add_arg(GPR(3));        // arg0
+        syscall_add_arg(GPR(4));        // arg1
+        syscall_add_arg(GPR(5));        // arg2
+        syscall_trigger(GPR(0));        // syscode - 32 bit mode
+        GPR(3) = syscall_return_code(); // the return value
+      }
+    };
+  }
+  
+  // This is here so that we can test 64-bit writes.
+  define (instr=std) {
+    fields=(OPCD(62),RS,RA,D);
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      Mem(addr,8) = concat(GPR(RS),GPR(RS+1));
+    };
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1) && (InstrCacheInhibited == iciDisabled); };
+    miss_enable = func(CacheAccess ca,addr_t,unsigned set) {
+      // If we miss in the cache, then we only allow changes if we're not in a fully-locked mode.
+      if (ThisCache.fully_locked(set)) {
+        return false;
+      }
+      return true;
+    };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1) && (DataCacheInhibited == dciDisabled); };
+    write_through = func(CacheAccess,addr_t addr) { return (CCR.WT == 1); };
+    miss_enable  = func(CacheAccess ca,addr_t addr,unsigned set) { 
+      return (ca == CacheWrite) ? (!ThisCache.is_write_through(ca,addr) || (CCR.WTNA == 0)) : (CCR.WTONA == 0); 
+    };
+    read_line = func(CacheAccess ca,unsigned set,unsigned way,addr_t addr) {
+      if (!ThisCache.read_from_next(ca,set,way,addr,false)) {
+        ThisCache.read_from_mem(ca,set,way,addr);
+      }
+    };
+  }
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 65536;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L2E == 1) && (DataCacheInhibited == dciDisabled); };
+    write_through = func(CacheAccess,addr_t addr) { return (CCR.WT == 1); };
+    miss_enable  = func(CacheAccess ca,addr_t addr,unsigned set) { 
+      return (ca == CacheWrite) ? (!ThisCache.is_write_through(ca,addr) || (CCR.WTNA == 0)) : (CCR.WTONA == 0); 
+    };
+  }
+
+  define (parm=DataCacheInhibited) {
+   options = (dciEnabled,dciDisabled);
+   value = dciDisabled;
+  }
+
+  define (parm=InstrCacheInhibited) {
+   options = (iciEnabled,iciDisabled);
+   value = iciDisabled;
+  }
+
+  define (parm=InstrEndianness) {
+    options = (InstrBigEndian,InstrLittleEndian);
+    value = InstrBigEndian;
+  }
+
+  define (parm=DataEndianness) {
+    options = (DataBigEndian,DataLittleEndian);
+    value = DataBigEndian;
+  }
+
+  define (reg=LittleEndian) {}
+  define (reg=CacheInhibited) {}
+
+  attrs = (translation_attr);
+
+  define (mmu) {
+
+    interleaved_writes = false;
+    interleaved_reads = false;
+
+    both_enable = { return (HDBCR0.MMU_ON == 1); };
+
+    define (lookup=TlbFoo) {
+      priority = ignore;
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+    }
+
+    define(lookup=TlbCam) {
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=E) {
+        bits = 1;
+        attrs = translation_attr;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+
+      hit = func(TransType tt,TlbCam_t t,addr_t a,unsigned seq) {
+
+        if (tt == InstrTrans) {
+          LittleEndian(seq+8,seq+8) = t.E;
+        } else {
+          LittleEndian(seq,seq) = t.E;
+        }
+
+        CacheInhibited(seq+1,seq+1) = t.WIMG(1,1);
+
+        if (seq == 0) {
+          setup_translation_stuff(tt,0);
+        }
+
+        InstrCacheInhibited = (t.WIMG(1,1) == 1) ? iciEnabled : iciDisabled;
+      };
+
+      // On a miss, just do a 1-1 translation.
+      miss = func(TransType tt,addr_t a,unsigned seq) {
+        TlbCam_t t;
+        t.RPN = a >> 10;
+        t.SIZE = 4;
+        // Make sure we can use the ID enum.
+        if (t.id() != TlbCam_id) {
+          // Should never get this- this is just for testing that the ID exists.
+          error (0,"Bad ID for TlbCam object.");
+        }
+        info (0,"TlbCam miss.");
+        // This is redundant, but tests the ability to explicitly log a
+        // translation, which can be useful for something like hardware
+        // tablewalk.  In this situation, we're testing the ability to log a
+        // translation type that's not otherwise used.
+        TlbFoo_t ft;
+        ft.EPN = ft.RPN = a >> 10;
+        ft.SIZE = 4;        
+        logMmuTranslation(ft,tt,seq,a,a);
+        return t;
+      };
+
+      load_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SR : t.UR) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      store_perm = func (TlbCam_t t,addr_t,unsigned seq) {
+        if ( ((MSR.PR == 0) ? t.SW : t.UW) == 0 ) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      reset = {
+        // Reset state: One 4k translation at top of memory.  In this case,
+        // it maps the top 4k to the bottom 4k.
+        TlbCam_t t;
+      
+        t.EPN  = 0x3fffff;
+        t.TID  = 0;
+        t.V    = 1;
+        t.TS   = 0;
+                      
+        t.RPN  = 0;
+        t.SIZE = 1;
+                      
+        t.SX   = 1;
+        t.SW   = 1;
+        t.SR   = 1;
+
+        t.UX   = 0;
+        t.UW   = 0;
+        t.UR   = 0;
+        t.WIMG = 0;
+        t.E    = 0;
+            
+        TlbCam(0,0) = t;
+
+        // Not really necessary, but here just for testing that we can iterate
+        // over the proper number of ways, even if dynamically changed.
+        for (unsigned w = 1;  w < TlbCam.num_ways();  w++) {
+          TlbCam(0,w).V = 0;
+        }        
+      };      
+
+    }
+
+    // Called between misaligned writes in order to model stores which can
+    // partially complete.
+    misaligned_write = func (addr_t,addr_t) {
+      setup_translation_stuff(StoreTrans,1);
+    };
+
+    pre_read = func (addr_t ea,addr_t ra) {
+      info (0,"Pre-read to 0x",hex,ra);
+    };
+
+    pre_write = func (addr_t ea,addr_t ra) {
+      info (0,"Pre-write to 0x",hex,ra);
+    };
+        
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      ESR(0,0) = (instrHasAttr(store)) ? 1 : 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7.
+    """;
+  }
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+    define (field=AS) {
+      bits = 12;
+    }
+    define (field=EE) {
+      bits = 13;
+    }
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  define (instr=icbtls) {
+    fields=(OPCD(31),RA,RB,XO(486));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = instrReadTranslate(ea);
+        L1i.lock(ra);
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    }; 
+  }
+
+  define (instr=icblc) {
+    fields=(OPCD(31),RA,RB,XO(230));
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var ea = b + GPR(RB);
+      try {
+        var ra = instrReadTranslate(ea);
+        int set,way;
+        if (L1i.find(set,way,ra)) {
+          L1i.unlock(set,way);
+        }
+      }
+      catch (Exception e) {
+        // Do nothing if translation does not exist.
+      }
+    };
+  }
+
+  void setup_translation_stuff(TransType tt,int seq) 
+  {
+    if (tt == InstrTrans) {
+      InstrEndianness = ( LittleEndian(seq+8) == 0 ) ? InstrBigEndian : InstrLittleEndian;
+    } else {
+      DataEndianness = ( LittleEndian(seq) == 0 ) ? DataBigEndian : DataLittleEndian;
+    }
+
+    // cache inhibited mode
+    DataCacheInhibited = (CacheInhibited(seq+1) == 1) ? dciEnabled : dciDisabled;
+  }
+
+  define (mem=Mem) {
+    read = func(unsigned s,bits<s> v) {
+      if (DataEndianness == DataLittleEndian) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    } ;
+    instr_read = func(unsigned s,bits<s> v) {
+      if (DBGCTRL.EN == 1) {
+        // To test instruction jamming, return addi r31,r31,1 if 
+        // in debug mode.
+        DBGCTRL.CNT = DBGCTRL.CNT + 1;
+        CIA = CIA - 4;
+        // Only jam for a specified limit.
+        if (DBGCTRL.CNT == DBGCTRL.LIM) {
+          DBGCTRL.EN = 0;
+        }
+        return 0x3BFF0001;
+      }
+      if (InstrEndianness == InstrLittleEndian) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    } ;
+    write = func(unsigned s, bits<s> v) {
+      if (DataEndianness == DataLittleEndian) {
+        return v.swap_bytes();
+      } else {
+        return v;
+      }
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,cache);
+}

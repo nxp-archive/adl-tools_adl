@@ -1,0 +1,73 @@
+//
+// This makes sure that arch keys defined in a core have a higher priority than
+// those in the constituent architectures.
+//
+
+define (arch = minippc) {
+
+  int foo(int b)
+    {
+      return 10*b;
+    }
+
+  define (reg = MSR) {
+    width = 32;
+  }
+
+  define (regfile = GPR) {
+    width = 32;
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+  
+  define (instr = Foo) {
+    fields=(OPCD(40),RT,RA,RB);
+    width=32;
+    action = { 
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  // Should cause an error:  Second argument should be an unsigned int.
+  decode_miss = func (addr_t ea,unsigned ) { ; };
+
+  define (reg = PC) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+
+  define (reg=SRR0) {}
+
+  define (reg=SRR1) {}
+
+  define (exception=Program) {
+    action = { 
+      SRR0 = PC;
+      SRR1 = MSR;
+    };
+  }
+
+  // This should override what's in the architecture.
+  decode_miss = func(addr_t ea,unsigned) {
+    raiseException(Program);
+  };
+}

@@ -1,0 +1,45 @@
+#
+# Test the use of a branch-taken hook.
+#
+= asm
+
+  beq  L1       # Not taken.
+  addi r1,r1,1
+L1:
+  b    L2       # Taken.
+  addi r1,r1,1
+L2:
+  bne  L3       # Taken.
+L3:
+  bne  L4       # Taken.
+  addi r1,r1,1
+L4:
+  beq L5        # Not taken.
+L5:
+
+= /asm
+
+RD n=CR d=0
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x41820008	#	beq  L1       # Not taken.
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x48000008	#	b    L2       # Taken.
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x40820004	#	bne  L3       # Taken.
+MD n=Mem ra=0x00000014 d=0x40820008	#	bne  L4       # Taken.
+MD n=Mem ra=0x00000018 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000001c d=0x41820004	#	beq L5        # Not taken.
+# </GEN>
+CORE n=:P
+
+
+TRACE
+
+
+RESULTS
+
+RD n=BranchTaken d=3
+RD n=GPR i=1     d=1
+

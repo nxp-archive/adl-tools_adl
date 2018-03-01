@@ -1,0 +1,5 @@
+in23.uadl:37: Unknown OSM machine specified for binding:  foobar
+adl: Initial state has no exiting states.
+
+in23.uadl:5: warning: Instructions access no data memory
+Could not parse in23.uadl

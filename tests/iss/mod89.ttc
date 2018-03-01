@@ -1,0 +1,29 @@
+
+define (core=P) {
+
+  // Loads and stores normally take two cycles.
+  define(group=loadstores) {
+    items = (load,store);
+    stages = (Fetch,Decode = issue,Exec,Mem = exec,Writeback = compl);
+    // Allow this instruction to issue if we're in the first slot or if the
+    // instruction in the first slot wasn't a load or store.
+    allow_issue = func(unsigned index) { 
+      return (index == 0) || !((instrHasAttr(0,load) || instrHasAttr(0,store)) && (instrHasAttr(index,load) || instrHasAttr(index,store)));
+    };
+  }
+
+  define(group=allinsts) {
+    items = (default_instruction);
+    stages = (Fetch,Decode = issue,Exec,Mem,Writeback);
+  }
+
+  define (config) {
+    // On a cache miss, however, they'll take an extra 10 cycles.  Test both forms for latency:  Integer and function.
+    cache_miss_latency = (L1i = 10,L1d = func(CacheAccess ca,addr_t ra) { return 10; });
+    issue_width = 2;
+
+    // Test code generation for the completion-time hook.
+    compl_time = func(uint64_t t) { return t; };
+  
+  }
+}

@@ -1,0 +1,173 @@
+//
+// This makes sure that we properly allocate slots for aliases, based upon the
+// parent slots.
+//
+define (arch = MiniStarCore) {
+
+  bit_endianness = little;
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 16;  prefix = r; };
+
+  define (reg=A) {}
+  define (reg=B) {}
+  define (reg=C) {}
+
+  reserved_bits_value = 1;
+
+  // -------- INSTRFIELDS ----------
+  
+  define (instrfield = RT)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RY)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RX)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RXt)  { 
+    width = 3; 
+    pseudo = true; 
+    ref=GPR;
+    enumerated = ("r0","r1","r2","r3","r12","r13","r14","r15");
+    table = (0,1,2,3,12,13,14,15);
+  }	
+  define (instrfield = RYt)  { 
+    width = 3; 
+    pseudo = true; 
+    ref=GPR;
+    enumerated = ("r0","r1","r2","r3","r12","r13","r14","r15");
+    table = (0,1,2,3,12,13,14,15);
+  }	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = IMM)  { width = 5; pseudo = true; is_signed=true;}
+  define (instrfield = IMM2) { width = 37; pseudo = true; is_signed=true;}
+  define (instrfield = N)   { width = 2; pseudo = true; enumerated = ("1","2","3","4"); }
+  define (instrfield = BB) { width = 2; pseudo = true; };
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+
+  define (instr = nop) {
+    fields = (
+              (bits(0),1),
+              (bits(1),1),
+              (bits(2),1),
+              (bits(3),0),
+              (bits(4),0),
+              (bits(5),0),
+              (bits(6),0),
+              (bits(7),0),
+              (bits(8),1),
+              (bits(9),0),
+              (bits(10),1),
+              (bits(11),1),
+              (bits(12),0),
+              (bits(13),1),
+              (bits(14),0),
+              (bits(15),reserved)
+              );
+    syntax = ("nop");  
+    action = {};
+  }
+
+
+  define(instr=add_family) {
+
+    fields = (RT,RA,RB);
+
+    define (instr=add1) {
+      fields = (
+                (bits(0),1),
+                (bits(1),0),
+                (bits(2),0),
+                (bits(3),1),
+                (bits(4),0),
+                (bits(5),0),
+                (bits(6),RA(0)),		
+                (bits(7),RA(1)),		
+                (bits(8),RA(2)),		
+                (bits(9),RB(0)),
+                (bits(10),RB(1)),
+                (bits(11),RB(2)),
+                (bits(12),RT(0)),
+                (bits(13),RT(1)),
+                (bits(14),RT(2)),
+                (bits(15),0)
+                );
+      alias = add_family(RT(RT),RA(RA),RB(RB));
+
+      syntax = ("add %f,%f,%f",RA,RB,RT);
+    }
+
+    define (instr=add2) {
+      fields = (
+                (bits(0),1),
+                (bits(1),1),
+                (bits(2),0),
+                (bits(3),1),
+                (bits(4),0),
+                (bits(5),0),
+                (bits(6),RX(0)),		
+                (bits(7),RX(1)),		
+                (bits(8),RX(2)),		
+                (bits(9),0),
+                (bits(10),0),
+                (bits(11),0),
+                (bits(12),RY(0)),
+                (bits(13),RY(1)),
+                (bits(14),RY(2)),
+                (bits(15),0)
+                );
+      alias = add_family(RT(RY),RA(RX),RB(0));
+
+      syntax = ("add %f,%f",RX,RY);
+    }
+
+    define (instr=add3) {
+      fields = (
+                (bits(0),1),
+                (bits(1),0),
+                (bits(2),0),
+                (bits(3),1),
+                (bits(4),0),
+                (bits(5),0),
+                (bits(6),RXt(0)),		
+                (bits(7),RXt(1)),		
+                (bits(8),RXt(2)),		
+                (bits(9),0),
+                (bits(10),0),
+                (bits(11),0),
+                (bits(12),RYt(0)),
+                (bits(13),RYt(1)),
+                (bits(14),RYt(2)),
+                (bits(15),0)
+                );
+      alias = add_family(RT(RYt(0)),RA(RXt(0)),RB(0));
+
+      syntax = ("add+ %f,%f",RXt,RYt);
+    }
+
+    action = {
+      if (RB != 0) {
+        A = A + 1;
+        B = B + 2;
+        C = C + 3;
+      }
+      GPR(RT) = GPR(RB) + GPR(RA);
+    };
+
+  }
+
+  define(instr=halt)  {
+    fields = (
+              (bits(14,0),0),
+              (bits(15),0)
+              );
+    action = { halt(); };
+    syntax = ("%i");
+  }
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+}

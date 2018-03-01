@@ -1,0 +1,24 @@
+#
+# Result expects file for asm35.s.
+#
+
+CORE n=:P
+
+RESULTS 
+
+RD n=GPR i=0 d=0
+RD n=GPR i=1 d=50
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=30
+RD n=GPR i=5 d=20
+RD n=GPR i=6 d=600
+RD n=GPR i=7 d=1500
+RD n=GPR i=8 d=1520
+RD n=GPR i=9 d=1540
+RD n=GPR i=10 d=0
+RD n=GPR i=11 d=0
+RD n=GPR i=12 d=0
+RD n=GPR i=13 d=0
+RD n=GPR i=14 d=0
+RD n=GPR i=15 d=0

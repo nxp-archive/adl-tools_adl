@@ -1,0 +1,148 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+  ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "SC"
+Bit Order:              little endian
+Register Files:
+  Name:  "D"
+  Size:  16
+  Prefix:  d
+  Usage:  written
+  Width:  40
+  -------------------------------
+Registers:
+  Name:  "NPC"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  nia
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Serial: 1
+  Attributes:  cia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  NPC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  DaDb: [regfile:  D]
+    Pseudo:  1
+    Width:   7
+    Size: 8
+    Nested instruction fields:
+      Da: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   8
+        Size: 4
+        Fields:  ( DaDb(3,0) )
+      Db: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   8
+        Size: 4
+        Fields:  ( DaDb(7,4) )
+      JJJJJ: [4,0] [regfile:  D] [not used]
+        Pseudo:  1
+        Size: 3
+      Table:  (( 0 4 ), ( 0 5 ), ( 0 6 ), ( 0 7 ), ( 1 4 ), ( 1 5 ), ( 1 6 ), ( 1 7 ), ( 2 4 ), ( 2 5 ), ( 2 6 ), ( 2 7 ), ( 3 4 ), ( 3 5 ), ( 3 6 ), ( 3 7 ), ( 0 0 ), ( 0 1 ), ( 0 2 ), ( 0 3 ), ( 4 4 ), ( 4 5 ), ( 4 6 ), ( 4 7 ), ( 1 2 ), ( 1 3 ), ( 5 6 ), ( 5 7 ), ( 2 2 ), ( 2 3 ), ( 6 6 ), ( 6 7 ))
+    Fields:  ( DaDb(6,6) JJJJJ(1) DaDb(5,5) JJJJJ(0) )
+  Syntax:  "%f,%f":   Da Db
+  DaDb_imp_bits__12_6_: [12,6] 
+    Implements:  DaDb
+  FFF: [regfile:  D]
+    Pseudo:  1
+    Width:   4
+  FFF_imp_bits__10_7_: [10,7] 
+    Implements:  FFF
+  FFF_imp_bits__5_2_: [5,2] 
+    Implements:  FFF
+  OPCD: [not used]
+    Pseudo:  1
+    Complementary:  1
+  VarInstrOpcode_imp_bits__15_13_: [15,13] 
+  kk: [regfile:  D]
+    Pseudo:  1
+    Width:   2
+    Size: 16
+    Nested instruction fields:
+      Da: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   16
+        Size: 4
+        Fields:  ( kk(3,0) )
+      Db: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   16
+        Size: 4
+        Fields:  ( kk(7,4) )
+      Dc: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   16
+        Size: 4
+        Fields:  ( kk(11,8) )
+      Dd: [regfile:  D] [not used]
+        Pseudo:  1
+        Width:   16
+        Size: 4
+        Fields:  ( kk(15,12) )
+      JJ: [0,0] [regfile:  D] [not used]
+        Pseudo:  1
+        Size: 3
+      Table:  (( 0 2 4 6 ), ( 1 3 5 7 ))
+    Fields:  ( kk(1,1) JJ(3) kk(1,1) JJ(2) kk(1,1) JJ(1) kk(1,1) JJ(0) )
+  Syntax:  "%f:%f:%f:%f":   Da Db Dc Dd
+  kk_imp_bits__12_11_: [12,11] 
+    Implements:  kk
+Instructions:
+  Name:  add (rank: 100)
+  Width:  16
+  Syntax:  "add %f,%f":   symmetric(DaDb) FFF
+  Attributes:  one_word
+  Fields:  VarInstrOpcode_imp_bits__15_13_ DaDb_imp_bits__12_6_ FFF_imp_bits__5_2_
+  Action:  {
+    D ( DaDb . Da ) = DaDb . Db ;
+    D ( DaDb . Db ) = DaDb . Da ;
+    D ( FFF ) = DaDb . Da + DaDb . Db ;
+}
+  Target Registers:  D(DaDb . Da) D(DaDb . Db) D(FFF) 
+  -------------------------------
+  Name:  mv (rank: 100)
+  Width:  16
+  Syntax:  "mv %f,%f":   kk FFF
+  Attributes:  one_word
+  Fields:  VarInstrOpcode_imp_bits__15_13_ kk_imp_bits__12_11_ FFF_imp_bits__10_7_
+  Action:  {
+    D ( FFF ) = kk . Da + kk . Db + kk . Dc * kk . Dd ;
+}
+  Target Registers:  D(FFF) 
+  -------------------------------
+  Name:  stop (rank: 100)
+  Width:  16
+  Syntax:  "stop":  
+  Attributes:  one_word
+  Fields:  VarInstrOpcode_imp_bits__15_13_
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+one_word:
+    Mask:  0xe0000000
+    1(20000000):  add
+    2(40000000):  mv
+    3(60000000):  stop
+-------------------------------
+

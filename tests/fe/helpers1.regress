@@ -1,0 +1,99 @@
+=======================
+C++ Outer Declarations:
+=======================
+
+ const int RegSize = 64 ;
+
+//-------------------------
+
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "gprs"
+  Size:  32
+  Width:  32
+  Attributes:  foo stuff
+  -------------------------------
+  Name:  "sprs"
+  Size:  1024
+  Contained registers:
+    20:  a
+    21:  b
+    22:  c
+    50:  d
+  Width:  32
+  Attributes:  foo
+  -------------------------------
+Registers:
+  Name:  "CR"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "a"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia foo
+  Documention:
+
+ This is a sample register!. 
+  -------------------------------
+  Name:  "b"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "c"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "d"
+  Usage:  read, written
+  Width:  32
+  Attributes:  stuff
+  -------------------------------
+Current-instruction-address register:  a
+Next-instruction-address register:  a
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+
+Helper Functions:
+  bar:
+ void bar ( int x , int y ) {
+    """ Hello there! """ ;
+    a = x ;
+    b = y ;
+}
+    Target Registers:  a b 
+
+  foo:
+ void foo ( int a , int b ) {
+    return 20 ;
+}
+
+  setCrField:
+ foo & setCrField ( bits < 32 > field , bits < 32 > x , bits < 32 > y ) {
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    stuff (  ) ;
+    CR = CR . set ( 4 * field , 4 * field + 3 , r ) ;
+}
+    Source Registers:  CR 
+    Target Registers:  CR 
+    Helper Functions:  stuff 
+
+  setCrField2:
+ void setCrField2 ( int field , int x , int y ) {
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    CR = CR . set ( 4 * field , 4 * field + 3 , r ) ;
+}
+    Source Registers:  CR 
+    Target Registers:  CR 
+
+  stuff:
+ void stuff (  ) {
+     int i = 2 ;
+}
+-------------------------------
+

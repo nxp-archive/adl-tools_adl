@@ -1,0 +1,708 @@
+// 
+// An expanded PPC variant with an L2 cache, forwarding paths, etc.
+//
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  // Creating memory aliases so that we can remove the dcache if necessary.
+  define (mem_alias) {
+    DataMem = L1d;
+  }
+
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = L1i;
+      entries = 18;
+      entry_size = 2;
+      fetch_size = (8, 4);
+    }
+
+    // pipeline stages
+    define (pipestage=(mID, mEX, mMM, mWB)) {}
+
+    // forwarding paths
+    define (forwarding_path FwdEX) {
+      // we want to be able to handle data + flags, etc
+      size = 3;
+    }
+
+    define (forwarding_path FwdMM) {
+      // we want to be able to handle data + flags, etc
+      size = 3;
+    }
+
+    // memory system
+    define (cache L1i) {
+      next_level_memory = L2;
+      write_mode = WriteThrough;
+      data_width = 32;
+    }
+
+    define (cache L1d) {
+      next_level_memory = L2;
+      write_mode = WriteThrough;
+      data_width = 32;
+    }
+
+    define (cache L2) {
+      next_level_memory = Mem;
+      write_mode = WriteThrough;
+      data_width = 32;
+    }
+
+    define (memory Mem) {
+      data_width = 32;
+    }
+
+    // Load/store after mul/div stall
+    define (semaphore lsamd_stall) {}
+
+    // Flag for msync access stalling.
+    define (semaphore msync_stall) {}
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDp, S_IDe, S_EX, S_EXp, S_EXe, S_MM, S_MMp, S_MMe, S_WB, S_WBe );
+
+    define (mapping) {
+      mID = (S_ID,S_IDp,S_IDe);
+      mEX = (S_EX,S_EXp,S_EXe);
+      mMM = (S_MM,S_MMp,S_MMe);
+      mWB = (S_WB,S_WBe);
+    };
+
+    // Defines the state transition on an exception:
+    //  Lhs:  exception state.
+    //  Rhs:  states which might generate an exception.
+    define (exception_mapping) {
+      S_IDe = (S_ID,S_IDp);
+      S_EXe = (S_EX,S_EXp);
+      S_MMe = (S_MM,S_MMp);
+      S_WBe = S_WB;
+   }
+  }
+
+  // Common exception state transitions for all instruction classes.
+# define ExceptionStates                 \
+    S_IDe:    { change_state(S_EXe); };  \
+    S_EXe:    { change_state(S_MMe); };  \
+    S_MMe:    { change_state(S_WBe); };  \
+    S_WBe:    { change_state(S_INIT); };
+
+
+  define (instr_class dispatchSerial) {
+    instructions = msync;
+    machine = normal;
+
+    action = {
+		S_INIT: { 
+      set_speculative();
+			change_state(S_ID); 
+		};
+    S_ID:  if (msync_stall.can_allocate() && mEX.has_space() ) {
+				change_state(S_EX);
+        msync_stall.allocate();
+      }
+		S_EX: {
+			exec();
+      flush();
+			change_state(S_MM);
+		}
+		S_MM: {
+			change_state(S_WB);
+		}
+		S_WB: {
+      // Since we've flushed, we don't need to deallocate the semaphore (the
+      // flush takes care of that).
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  };
+
+  define (instr_class sfx) {
+    // FIXME: mulli
+    instructions = (halt,
+                    add, addc, addco, adde, addeo, addi, addic, addis, addme,
+                    addmeo, addo, addze, addzeo, and, andc, cntlzw, eqv, extsb,
+                    extsh, nand, neg, nego, nor, or, orc, ori, oris, rlwimi, rlwinm,
+                    rlwnm, slw, sraw, srawi, srw, subf, subfc, subfco, subfe,
+                    subfeo, subfic, subfme, subfmeo, subfo, subfze, subfzeo, xor,
+                    xori, xoris, "add.", "addc.", "addco.", "adde.", "addeo.", "addic.", "addme.",
+                    "addmeo.", "addo.", "addze.", "addzeo.", "and.", "andc.", "andi.", "andis.",
+                    "cntlzw.", "eqv.", "extsb.", "extsh.", "nand.", "neg.", "nego.", "nor.", "or.",
+                    "orc.", "rlwimi.", "rlwinm.", "rlwnm.", "slw.", "sraw.", "srawi.", "srw.",
+                    "subf.", "subfc.", "subfco.", "subfe.", "subfeo.", "subfme.", "subfmeo.",
+                    "subfo.", "subfze.", "subfzeo.", "xor.", cmpli, cmpi, cmp, cmpl, crxor,
+                    creqv,
+                    mulli, default_instruction );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && msync_stall.can_allocate() && mEX.has_space() ) {
+        Src.read(FwdEX,FwdMM);
+				Trg.allocate();
+				change_state(S_EX);
+      }
+		S_EX: {
+			exec();
+      FwdEX.write(Trg);
+			change_state(S_MM);
+		}
+		S_MM: {
+			exec();
+      FwdMM.write(Trg);
+			change_state(S_WB);
+		}
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+
+  };
+
+  unsigned signed_mul_div_delay(bits<32> x,bits<32> y)
+  {
+    return (x == 0 || y == 0) ? 0 : 9;
+  }
+
+  define (instr_class signedMulDiv) {
+    instructions = (mullw, mulhw, divw );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && 
+               msync_stall.can_allocate() && mEX.has_space() ) {
+        Src.read(FwdEX,FwdMM);
+				Trg.allocate();
+        lsamd_stall.allocate();
+				change_state(S_EX);
+      }
+		S_EX: {
+			exec();
+      set_latency(signed_mul_div_delay(Src1.value(),Src2.value()));
+			change_state(S_EXp);
+		}
+    S_EXp: if (check_latency() && mWB.has_space()) {
+        FwdEX.write(Trg);
+        change_state(S_MM);
+      } else {
+        decr_latency();
+      }
+    S_MM: {
+      FwdMM.write(Trg);
+      change_state(S_WB);
+    }
+		S_WB: {
+      write_ops();
+      lsamd_stall.deallocate();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  };
+
+  // This is for multiplies which modify the CR register. Note that mullwo is
+  // included, with a false CR dependency, to test that we can directly query a
+  // register, even when not necessary, such as when RTL might have a false
+  // dependency.
+  define (instr_class signedMulCr) {
+    instructions = ("mullw.", mullwo, "mullwo." );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && 
+               msync_stall.can_allocate() && CR.can_read(0xff000000) && mEX.has_space() ) {
+        Src.read(FwdEX,FwdMM);
+				Trg.allocate();
+        lsamd_stall.allocate();
+				change_state(S_EX);
+      }
+		S_EX: {
+			exec();
+      set_latency(signed_mul_div_delay(Src1.value(),Src2.value()));
+			change_state(S_EXp);
+		}
+    S_EXp: if (check_latency() && mWB.has_space()) {
+        FwdEX.write(Trg);
+        change_state(S_MM);
+      } else {
+        decr_latency();
+      }
+    S_MM: {
+      change_state(S_WB);
+    }
+		S_WB: {
+      write_ops();
+      lsamd_stall.deallocate();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  }
+
+  define (instr_class mftspr) { // model completion serialization
+    instructions = (mfspr, mtspr );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    define (instr=mtspr) {
+      define (operands) {
+        CheckDelay = 1;
+      }
+    }
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && msync_stall.can_allocate() && mEX.empty() && mWB.empty()) {
+        Src.read(FwdEX,FwdMM);
+				Trg.allocate();
+				change_state(S_EX);
+      }
+		S_EX: {
+			exec();
+      if (CheckDelay.value() && (Trg.field_value() == 284 || Trg.field_value() == 285)) {
+        set_latency(4);
+      }
+			change_state(S_EXp);
+		}
+    S_EXp: if (check_latency() && mWB.has_space()) {
+        FwdEX.write(Trg);
+        change_state(S_MM);
+      } else {
+        decr_latency();
+      }
+    S_MM: {
+      change_state(S_WB);
+    }
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  };
+
+
+  define (instr_class load) {
+    instructions = (lbz, lbzu, lbzux, lbzx, lhz, lhzu, lhzux, lhzx, lha, lhax, lwz, lwzu,
+                    lwzux, lwzx );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      TrgEA = (GPR(RA),target);
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write()) {
+        Src.read(FwdEX,FwdMM);
+				Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp: if (lsamd_stall.can_allocate() && msync_stall.can_allocate() && mEX.has_space() &&
+               DataMem.can_request_read() && !stalled() ) {
+        // Calc ea.
+        exec();
+        DataMem.send_read_request();
+        change_state(S_EX);
+      }
+    S_EX: if (mMM.has_space(capacity())) {
+        FwdEX.write(TrgEA);
+        // Loads proceed through the pipeline, skipping to Exec1 even if the load isn't performed in Exec0.
+        if (!has_next_request()) {
+          if (has_more_mem() && DataMem.can_read()) {
+            exec_and_read(DataMem);
+          }
+        } else if (DataMem.can_request_read()) {
+          DataMem.send_read_request();
+        }
+        change_state(S_MM);
+      }
+    S_MM: if (exec_done() && mWB.has_space(capacity())) {
+        FwdMM.write(TrgEA);
+        FwdMM.write(Trg);
+        change_state(S_WB);
+      } else if (!has_next_request()) {
+        if (DataMem.can_read()) {
+          // If we requested a read, but moved into MM from EX w/o doing the
+          // read, then try and read here.  Then change to the same state in order
+          // to force a re-evaluation.
+          exec_and_read(DataMem);
+          change_state(S_MM);
+        }
+      } else if (DataMem.can_request_read()) {
+        DataMem.send_read_request();
+        change_state(S_MMp);
+      }
+    S_MMp: if (DataMem.can_read()) {
+        exec_and_read(DataMem);
+        FwdMM.write(TrgEA);
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  };
+
+  // Note that lmw does 64-bit reads, loading two operands at a time.
+  define (instr_class lmw) {
+    instructions = (lmw );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write()) {
+        Src.read(FwdEX,FwdMM);
+				Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp: if (lsamd_stall.can_allocate() && msync_stall.can_allocate() && mEX.has_space()) {
+        // Calc ea.
+        exec();
+        DataMem.send_read_request(8);
+        next_req_mem();
+        change_state(S_EX);
+      }
+		S_EX: {
+      if (has_next_request() && DataMem.can_request_read()) {
+        DataMem.send_read_request(8);
+        next_req_mem();
+      }
+      change_state(S_MM);
+    }
+    S_MM: if (DataMem.can_read()) { 
+        exec_and_read(DataMem,2);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (DataMem.can_request_read()) {
+        DataMem.send_read_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  }
+
+
+  define (instr_class store) {
+    instructions = (stb, stbu, stbux, stbx, sth, sthu, sthux, sthx, stw, stwu,
+                    stwux, stwx );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      TrgEA = (GPR(RA),target);
+    };
+
+    action = {
+    S_INIT: {
+      change_state(S_ID);
+    };
+    S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && mEX.has_space()) {
+        Src.read(FwdEX,FwdMM);
+        Trg.allocate();
+        change_state(S_IDp);
+      }
+    S_IDp: if (mEX.has_space(capacity()) && DataMem.can_request_write()) {
+        // Calc ea.
+        exec();
+        DataMem.send_write_request();
+        change_state(S_EX);
+      }
+    S_EX: if (mMM.has_space(capacity())) {
+        FwdEX.write(TrgEA);
+        if (!has_next_request()) {
+          if (DataMem.can_write()) {
+            exec_and_write(DataMem);
+          }
+        } else if (DataMem.can_request_write()) {
+          DataMem.send_write_request();
+        }
+        change_state(S_MM);
+      }
+    S_MM: if (exec_done() && mWB.has_space(capacity())) {
+        FwdMM.write(TrgEA);
+        change_state(S_WB);
+      } else if (!has_next_request()) {
+        if (DataMem.can_write()) {
+          // If we requested a write, but moved into Exec1 from Exec0 w/o doing the
+          // write, then try and write here.  Then change to the same state in order
+          // to force a re-evaluation.
+          exec_and_write(DataMem);
+          change_state(S_MM);
+        }
+      } else if (DataMem.can_request_write()) {
+        DataMem.send_write_request();
+        change_state(S_MMp);
+      }
+    S_MMp: if (DataMem.can_write()) {
+        exec_and_write(DataMem);
+        FwdMM.write(TrgEA);
+        change_state(S_MM);
+      }
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+    
+    ExceptionStates;
+
+    };
+  };
+
+  // Note that stmw does 64-bit writes, writing two operands at a time.
+  define (instr_class stmw) {
+    instructions = (stmw );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src.can_read_fp(FwdEX,FwdMM) && Trg.can_write() && mEX.has_space()) {
+				Src.read(FwdEX,FwdMM);
+        Trg.allocate();
+				change_state(S_IDp);
+			}
+    S_IDp: if (mEX.has_space() && lsamd_stall.can_allocate() && msync_stall.can_allocate() && DataMem.can_request_write()) {
+        // Calc ea.
+        exec();
+        DataMem.send_write_request(8);
+        next_req_mem();
+        change_state(S_EX);
+      }
+    S_EX: {
+      if (has_next_request() && DataMem.can_request_write()) {
+        DataMem.send_write_request(8);
+        next_req_mem();
+      }
+      change_state(S_MM);
+    }
+		S_MM: if (DataMem.can_write()) { 
+        // Do 64-bit writes, unless our request is odd in size, in which case
+        // we'll have a 4-byte write at the end.
+        exec_and_write(DataMem,2,4);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (DataMem.can_request_write()) {
+        DataMem.send_write_request(8);
+        next_req_mem();
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  };
+
+  define (instr_class branch) {
+    // branch behavior (not implemented yet):
+    //   - always predicted taken (at decode stage, sends out target address)
+    //   - resolved at EX stage
+    //   - targets (other than PC) updated at WB stage
+    instructions = (bc, b, bl, bcl, bclr, bcctr, bcctrl, bclrl );
+
+    machine = normal;
+
+    allow_missing_operands = true;
+   
+    action = {
+    S_INIT :{
+      change_state(S_ID);
+    };
+    S_ID: if (can_read_ops() && can_write_ops() && msync_stall.can_allocate() && mEX.has_space()) {
+        read_ops();
+        allocate_ops();
+        exec();
+        write_ops();
+        if (branch_taken()) {
+          taken_flush();
+        }
+        change_state(S_EX);
+      }
+    S_EX: {
+      change_state(S_MM);
+    }
+    S_MM: {
+      change_state(S_WB);
+    }
+    S_WB: {
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  };
+
+  define (instr_class jump) {
+    instructions = (rfi, rfci );
+
+    machine = normal;
+
+    allow_missing_operands = true;
+   
+    action = {
+    S_INIT :{
+      change_state(S_ID);
+    };
+    S_ID: if (can_read_ops() && can_write_ops() && msync_stall.can_allocate() && mEX.has_space()) {
+        read_ops();
+        allocate_ops();
+        exec();
+        write_ops();
+        if (branch_taken()) {
+          taken_flush();
+        }
+        change_state(S_EX);
+      }
+    S_EX: {
+      change_state(S_MM);
+    }
+    S_MM: {
+      change_state(S_WB);
+    }
+    S_WB: {
+      change_state(S_INIT);
+    }
+
+    ExceptionStates;
+
+    };
+  }
+
+  // dummy- we don't really have a fetch-exception in this design.
+  define (instr_class fetch_exception) {
+    instructions = ( fetch_exception );
+   
+    machine = normal;
+
+    // We have explicit code to do this, so we don't need the automatic code.
+    commit_on_exception = false;
+
+    action = {
+    S_INIT: {
+      change_state(S_ID);
+    }
+    S_ID: {
+      commit_exceptions();
+      taken_flush();
+      change_state(S_EX);
+    }
+    S_EX: {
+      change_state(S_MM);
+    }
+    S_MM: {
+      change_state(S_WB);
+    }
+    S_WB: {
+      change_state(S_INIT);
+    }
+
+    };
+  }
+};
+
+

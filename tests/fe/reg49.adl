@@ -1,0 +1,155 @@
+//
+// Test to make sure that we can understand register access ranges for various
+// loop usages, including the use of helper functions to set bounds.
+//
+
+enum {
+  RegWidth = 32,
+};
+
+define (arch = MiniPPC) {
+
+  // Various helper routines.
+
+  attrs = (load,store,privileged,debug);
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = (nia,debug(4));
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = RegWidth;
+    prefix = r;
+    attrs = debug(0);
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  void load_regs(unsigned r,unsigned e,unsigned addr)
+  {
+    for (; r != e; ++r) {
+      GPR(r) = Mem(addr,4);
+    }
+  }
+
+  unsigned get_upper_bound(const bits<5> &rt)
+  {
+    return rt.uint32();
+  }
+
+  unsigned get_recv_upper_bound(unsigned s,unsigned e)
+  {
+    return s + e + 1;
+  }
+
+  // Test that we can correctly deduce the range of registers starting with a
+  // constant and ending with an instruction field.
+  define (instr=lmw1) {
+    fields=(OPCD(46),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      int r = 10;
+      int e = get_upper_bound(RT);
+      load_regs(r,get_upper_bound(RT),addr);
+    };
+  }
+
+  // Test that we can correctly deduce the range of registers starting with a
+  // register file and ending with a constant.
+  define (instr=lmw2) {
+    fields=(OPCD(47),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      int r = RT.uint32();
+      int e = 32;
+      load_regs(r,e,addr);
+    };
+  }
+
+  
+  // We should deduce that no GPRs are affected because the loop bounds are both
+  // 0.
+  define (instr=lmw3) {
+    fields=(OPCD(48),RT,RA,D);
+    syntax = ("%i %f,%f(%f)",RT,D,RA);
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      load_regs(0,0,addr);
+    };
+  }  
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

@@ -1,0 +1,4 @@
+in19.uadl:111: Unknown port within Mem: Foo
+in19.uadl:111: Unknown port within Mem: Foo
+in19.uadl:117: Unknown port Foo
+Could not parse in19.uadl

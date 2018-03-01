@@ -1,0 +1,76 @@
+//
+// This should fail b/c we reference an unknown
+// variable (GPR).
+//
+
+define (arch = minippc) {
+
+  int foo(int b)
+    {
+      return 10*b;
+    }
+
+  define (reg = MSR) {
+    width = 32;
+  }
+
+  define (regfile = GPR) {
+    width = 32;
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instrfield=SI) {
+  }
+  
+  define (instr = Foo) {
+    fields=(OPCD(40),RT,RA,RB);
+    action = { 
+      GPRS(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  // Should cause an error:  Second argument should be an unsigned int.
+  decode_miss = func (addr_t ea,char *c) { ; };
+
+  post_fetch = func(char *c) { ; };
+
+  pre_fetch = { ; };
+
+  post_exec = { ; };
+
+  addr_check = func ( addr_t ea , addr_t ra , unsigned tt ) {
+    if ( tt = InstrTrans ) {
+      LoadTrans ;
+      StoreTrans ;
+    }
+  };
+  
+  pre_exception = func ( unsigned x ) { 7 ; };
+  
+  post_exception = func ( int x ) { 8 ; };
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}

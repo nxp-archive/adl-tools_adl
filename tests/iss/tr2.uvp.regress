@@ -1,0 +1,5 @@
+
+Register mismatch:
+Expected TEN = 0x0
+Found 0x40000
+Error:  Test 1:  Core powerpc:t1:  Register mismatch

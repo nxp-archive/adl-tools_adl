@@ -1,0 +1,40 @@
+
+asm81.o:     file format elf32-powerpc
+
+
+Disassembly of section .text:
+
+00000000 <foo>:
+   0:	94 21 ff e0 	stwu   r1,-32(r1)
+   4:	93 e1 00 1c 	stw    r31,28(r1)
+   8:	7c 3f 0b 78 	mr     r31,r1
+   c:	3c 00 00 00 	lis    r0,0
+			e: RELOC_HI16	coefLowPass
+  10:	7c 09 03 78 	mr     r9,r0
+  14:	38 09 00 00 	addi   r0,r9,0
+			16: RELOC_LO16	coefLowPass
+  18:	90 1f 00 08 	stw    r0,8(r31)
+  1c:	3c 00 00 00 	lis    r0,0
+			1e: RELOC_HI16	.data+0xc
+  20:	7c 09 03 78 	mr     r9,r0
+  24:	38 09 00 0c 	addi   r0,r9,12
+			26: RELOC_LO16	.data+0xc
+  28:	7c 03 03 78 	mr     r3,r0
+  2c:	39 7f 00 20 	addi   r11,r31,32
+  30:	83 eb ff fc 	lwz    r31,-4(r11)
+  34:	7d 61 5b 78 	mr     r1,r11
+  38:	4e 80 00 20 	blr    
+
+Disassembly of section .data:
+
+00000000 <coefLowPass>:
+   0:	00 00 00 06 	.long 0x6
+   4:	00 00 00 07 
+   8:	00 00 00 08 	.long 0x8
+   c:	00 00 00 00 
+			c: RELOC_BIG	coefLowPass
+
+0000000c <firLow1.1279>:
+	...
+  14:	00 00 00 23 	.long 0x23
+  18:	00 00 00 00 

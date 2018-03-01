@@ -1,0 +1,13 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Same as mod89, but compiled w/o time-tagging and just with the logging of td
+// commits.
+//
+
+#import "mod89.adl"

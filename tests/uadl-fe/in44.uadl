@@ -1,0 +1,82 @@
+//
+// Test of helper funcctions across core definitions.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mWB)) { }
+
+  }
+
+  define (machine sfx) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_EX0, S_EX1, S_WB  );
+
+    define (mapping) {
+      mID = S_ID;
+			mEX = (S_EX,S_EX0,S_EX1);
+			mWB = S_WB;
+    };
+	}
+
+  bool foo() { return bar(); };
+
+  bool bar() { return stuff(); };
+
+  bool stuff() { return true; };
+
+  define (instr_class sfx) {
+    instructions = ( add, addi, addic, halt );
+
+    machine = sfx;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { change_state(S_ID); }
+		S_ID:   { change_state(S_EX); }
+		S_EX:  { 
+        exec();
+        change_state(S_WB); 
+      }
+		S_WB:   { change_state(S_INIT); }
+    };
+  }
+ 
+}
+
+defmod (core P) {
+
+  defmod (instr_class sfx) {
+    instructions = ( "andi." );
+
+    // This should override just the S_EX state.
+    action = {
+		S_EX:  if (mWB.has_space() && foo()) { 
+        exec();
+        change_state(S_WB); 
+      }
+    };
+  }
+}

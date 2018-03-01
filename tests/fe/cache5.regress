@@ -1,0 +1,2 @@
+cache5.adl:35: Unknown variable/resource found in action code:  FOO
+cache5.adl:41: return statements are not allowed here.

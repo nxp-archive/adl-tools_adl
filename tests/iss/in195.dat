@@ -1,0 +1,178 @@
+#
+# Tests register-file aliases and register attributes.
+#
+
+= asm
+
+	mfspr r1,61     # priv. exception.
+	mtmsr r0
+	mfspr r2,61
+	mfspr r3,63
+	mfspr r4,67
+	mtspr 70,r0     # read-only exception.
+	mfspr r5,73
+	addi  r5,r5,10
+	mtspr 62,r5
+	.long 0x0
+	mfspr r30,SRR0
+	addi r31,r31,1
+	addi r30,r30,4
+	mtspr SRR0,r30
+	rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C3D0AA6	#	mfspr r1,61     # priv. exception.
+MD n=Mem ra=0x00000004 d=0x7C000124	#	mtmsr r0
+MD n=Mem ra=0x00000008 d=0x7C5D0AA6	#	mfspr r2,61
+MD n=Mem ra=0x0000000c d=0x7C7F0AA6	#	mfspr r3,63
+MD n=Mem ra=0x00000010 d=0x7C8312A6	#	mfspr r4,67
+MD n=Mem ra=0x00000014 d=0x7C0613A6	#	mtspr 70,r0     # read-only exception.
+MD n=Mem ra=0x00000018 d=0x7CA912A6	#	mfspr r5,73
+MD n=Mem ra=0x0000001c d=0x38A5000A	#	addi  r5,r5,10
+MD n=Mem ra=0x00000020 d=0x7CBE0BA6	#	mtspr 62,r5
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000028 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x0000002c d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x00000030 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x00000034 d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x00000038 d=0x4C000064	#	rfi
+# </GEN>
+CORE n=:P
+
+RD n=MSR     d=0x00400000
+RD n=NIA     d=0x00000000
+RD n=IVOR6   d=0x00000028
+
+RD n=PMC1 d=10
+RD n=PMC3 d=11
+RD n=PMC7 d=12
+
+TRACE
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c3d0aa6
+INSTR op=0x7c3d0aa6					asm="mfspr r1,p1"
+E n=Program
+R n=SRR0 d=0x00000000
+R n=SRR1 d=0x00400000
+R n=MSR d=0x00000001
+B taken=1 ea=0x28
+
+I ea=0x28 id=2
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x7fda02a6
+INSTR op=0x7fda02a6					asm="mfspr r30,SRR0"
+R n=GPR i=30 d=0x00000000
+
+I ea=0x2c id=3
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x3bff0001
+INSTR op=0x3bff0001					asm="addi r31,r31,1"
+R n=GPR i=31 d=0x00000001
+
+I ea=0x30 id=4
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x3bde0004
+INSTR op=0x3bde0004					asm="addi r30,r30,4"
+R n=GPR i=30 d=0x00000004
+
+I ea=0x34 id=5
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x7fda03a6
+INSTR op=0x7fda03a6					asm="mtspr SRR0,r30"
+R n=SRR0 d=0x00000004
+
+I ea=0x38 id=6
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi r0,r0,r0"
+R n=MSR d=0x00400000
+B taken=1 ea=0x4
+
+I ea=0x4 id=7
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c000124
+INSTR op=0x7c000124					asm="mtmsr r0"
+R n=MSR d=0x00000000
+
+I ea=0x8 id=8
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c5d0aa6
+INSTR op=0x7c5d0aa6					asm="mfspr r2,p1"
+R n=GPR i=2 d=0x0000000a
+
+I ea=0xc id=9
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c7f0aa6
+INSTR op=0x7c7f0aa6					asm="mfspr r3,p3"
+R n=GPR i=3 d=0x0000000b
+
+I ea=0x10 id=10
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c8312a6
+INSTR op=0x7c8312a6					asm="mfspr r4,p7"
+R n=GPR i=4 d=0x0000000c
+
+I ea=0x14 id=11
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c0613a6
+INSTR op=0x7c0613a6					asm="mtspr UPMC0,r0"
+E n=Program
+R n=SRR0 d=0x00000014
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000001
+B taken=1 ea=0x28
+
+I ea=0x28 id=12
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x7fda02a6
+INSTR op=0x7fda02a6					asm="mfspr r30,SRR0"
+R n=GPR i=30 d=0x00000014
+
+I ea=0x2c id=13
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x3bff0001
+INSTR op=0x3bff0001					asm="addi r31,r31,1"
+R n=GPR i=31 d=0x00000002
+
+I ea=0x30 id=14
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x3bde0004
+INSTR op=0x3bde0004					asm="addi r30,r30,4"
+R n=GPR i=30 d=0x00000018
+
+I ea=0x34 id=15
+M n=Mem t=ifetch ea=0x34 ra=0x34 d=0x7fda03a6
+INSTR op=0x7fda03a6					asm="mtspr SRR0,r30"
+R n=SRR0 d=0x00000018
+
+I ea=0x38 id=16
+M n=Mem t=ifetch ea=0x38 ra=0x38 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi r0,r0,r0"
+R n=MSR d=0x00000000
+B taken=1 ea=0x18
+
+I ea=0x18 id=17
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7ca912a6
+INSTR op=0x7ca912a6					asm="mfspr r5,UPMC3"
+R n=GPR i=5 d=0x0000000b
+
+I ea=0x1c id=18
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x38a5000a
+INSTR op=0x38a5000a					asm="addi r5,r5,10"
+R n=GPR i=5 d=0x00000015
+
+I ea=0x20 id=19
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x7cbe0ba6
+INSTR op=0x7cbe0ba6					asm="mtspr p2,r5"
+R n=PMC2 d=0x00000015
+
+I ea=0x24 id=20
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1  d=0
+RD n=GPR i=2  d=10
+RD n=GPR i=3  d=11
+RD n=GPR i=4  d=12
+RD n=GPR i=5  d=21
+RD n=GPR i=31 d=2
+
+RD n=PMC1 d=10
+RD n=PMC2 d=21
+RD n=PMC3 d=11
+RD n=PMC7 d=12

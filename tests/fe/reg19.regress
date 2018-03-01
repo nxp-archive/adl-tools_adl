@@ -1,0 +1,57 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPRS"
+  Size:  32
+  Usage:  read
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "Foo"
+  Write alias/hook:
+    func ( bits < 32 > v ) {
+     int f = foo ( 10 ) ;
+     int g = MSR ( 20 ) ;
+     int h = GPRS ( 4 ) ;
+    TBR2 = v ;
+    g = f ;
+}
+    Source Registers:  GPRS(4) MSR[mask 0x00000800]/p 
+    Target Registers:  TBR2 
+    Helper Functions:  foo 
+
+  Usage:  read, written
+  Width:  32
+  External Write:  func ( bits < 32 > v ) {
+    ThisReg = ThisReg & ~ v ;
+}
+  -------------------------------
+  Name:  "MSR"
+  Usage:  slice-read
+  Width:  32
+  -------------------------------
+  Name:  "TBR2"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+
+Helper Functions:
+  foo:
+ int foo ( int b ) {
+    return 10 * b ;
+}
+-------------------------------
+

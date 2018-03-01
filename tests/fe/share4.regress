@@ -1,0 +1,89 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "PMR"
+  Size:  32
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  -------------------------------
+  Name:  "HID0"
+  Width:  32
+  -------------------------------
+  Name:  "HID1"
+  Width:  32
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+
+=======
+Systems:
+=======
+System:  PSystem
+  Type:  system
+  Shared Resources:
+    Registers:  HID0 
+  Locally-defined Systems:
+    System:  PChip
+      Type:  chip
+      Shared Resources:
+        Registers:  HID0 HID1 
+        Register-files:  PMR 
+      Locally-defined Cores:
+        Name:  "P"
+        Type:  core
+        Register Files:
+          Name:  "PMR"
+          Size:  32
+          Width:  32
+          -------------------------------
+        Registers:
+          Name:  "CIA"
+          Usage:  read, written
+          Width:  32
+          Attributes:  cia
+          -------------------------------
+          Name:  "HID0"
+          Width:  32
+          -------------------------------
+          Name:  "HID1"
+          Width:  32
+          -------------------------------
+          Name:  "NIA"
+          Usage:  read, written
+          Width:  32
+          Attributes:  nia
+          -------------------------------
+        Current-instruction-address register:  CIA
+        Next-instruction-address register:  NIA
+        Real-address Mask:
+          Initial mask:  0xffffffff (constant)
+        Effective-address Mask:
+          Initial mask:  0xffffffff (constant)
+        -------------------------------
+      Constituent Items:
+        context0:  P
+        context1:  P
+        context2:  P
+    -------------------------------
+  Constituent Items:
+    chip0:  PChip
+    chip1:  PChip
+-------------------------------
+

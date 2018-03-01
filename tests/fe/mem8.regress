@@ -1,0 +1,3 @@
+mem8.adl:67: Second argument to memory hook must be a bits object of size 'size'.
+mem8.adl:64: Unknown variable/resource found in action code:  foo
+mem8.adl:78: No name was specified for the memory hook size argument.

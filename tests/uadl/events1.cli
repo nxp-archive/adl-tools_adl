@@ -1,0 +1,16 @@
+
+proc c1 {name msg} {
+		puts "Stall in $name (cycle [ccount]):  $msg"
+}
+
+proc c2 {name msg} {
+		puts "Flush in $name (cycle [ccount]):  $msg"
+}
+
+simload $env(srcdir)/in3.dat
+setlogcmd stall c1
+setlogcmd flush c2
+ptraceon events1.uapipe
+go
+ptraceoff
+

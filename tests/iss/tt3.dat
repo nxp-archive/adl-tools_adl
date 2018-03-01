@@ -1,0 +1,120 @@
+#
+# <ASM>
+# mullw r1,r2,r3
+# add   r4,r2,r3
+# add   r5,r1,r4
+# add   r6,r2,r3
+# </ASM>
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C2219D6	# mullw r1,r2,r3
+MD n=Mem ra=0x00000004 d=0x7C821A14	# add r4,r2,r3
+MD n=Mem ra=0x00000008 d=0x7CA12214	# add r5,r1,r4
+MD n=Mem ra=0x0000000c d=0x7CC21A14	# add r6,r2,r3
+# </GEN>
+
+CORE n=PSystem:core0
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=1
+RD n=GPR i=6 d=1
+
+CORE n=PSystem:core1
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=1
+RD n=GPR i=5 d=1
+RD n=GPR i=6 d=1
+
+TRACE
+
+CORE n=PSystem:core0
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0  d=0x7c2219d6
+INSTR op=0x7c2219d6 asm="mullw 1,2,3"
+ITIME t=1
+CTIME t=11
+
+CORE n=PSystem:core1
+I id=2 ea=0x0
+M n=Mem t=ifetch ea=0x0  d=0x7c2219d6
+INSTR op=0x7c2219d6 asm="mullw 1,2,3"
+ITIME t=1
+CTIME t=11
+
+CORE n=PSystem:core0
+I id=3 ea=0x4
+M n=Mem t=ifetch ea=0x4  d=0x7c821a14
+INSTR op=0x7c821a14 asm="add 4,2,3"
+ITIME t=2
+CTIME t=12
+
+CORE n=PSystem:core1
+I id=4 ea=0x4
+M n=Mem t=ifetch ea=0x4  d=0x7c821a14
+INSTR op=0x7c821a14 asm="add 4,2,3"
+ITIME t=2
+CTIME t=12
+
+CORE n=PSystem:core0
+I id=5 ea=0x8
+M n=Mem t=ifetch ea=0x8  d=0x7ca12214
+INSTR op=0x7ca12214 asm="add 5,1,4"
+ITIME t=8
+CTIME t=13
+
+CORE n=PSystem:core1
+I id=6 ea=0x8
+M n=Mem t=ifetch ea=0x8  d=0x7ca12214
+INSTR op=0x7ca12214 asm="add 5,1,4"
+ITIME t=8
+CTIME t=13
+
+CORE n=PSystem:core0
+I id=7 ea=0xc
+M n=Mem t=ifetch ea=0xc  d=0x7cc21a14
+INSTR op=0x7cc21a14 asm="add 6,2,3"
+ITIME t=11
+CTIME t=14
+
+CORE n=PSystem:core1
+I id=8 ea=0xc
+M n=Mem t=ifetch ea=0xc  d=0x7cc21a14
+INSTR op=0x7cc21a14 asm="add 6,2,3"
+ITIME t=11
+CTIME t=14
+
+CORE n=PSystem:core0
+I id=9 ea=0x10
+M n=Mem t=ifetch ea=0x10  d=0x0
+INSTR op=0x0 asm="halt"
+ITIME t=12
+CTIME t=15
+
+CORE n=PSystem:core1
+I id=10 ea=0x10
+M n=Mem t=ifetch ea=0x10  d=0x0
+INSTR op=0x0 asm="halt"
+ITIME t=12
+CTIME t=15
+
+RESULTS
+
+CORE n=PSystem:core0
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=5
+RD n=GPR i=5 d=11
+RD n=GPR i=6 d=5
+
+CORE n=PSystem:core1
+RD n=GPR i=1 d=6
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+RD n=GPR i=4 d=5
+RD n=GPR i=5 d=11
+RD n=GPR i=6 d=5

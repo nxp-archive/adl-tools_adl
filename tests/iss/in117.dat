@@ -1,0 +1,79 @@
+#
+# Tests to make sure that we properly set up the not-taken side
+# of a branch that crosses a page and is thus not immediately set up.
+#
+
+= asm
+
+  addi r1,r1,20
+  b 72
+  bc 0xc,0x0,84
+  addi r1,r1,20
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  .long 0
+  addi r2,r2,1
+  addi r2,r2,1
+  addi r2,r2,1
+  b -80
+  addi r3,r3,1 # This shouldn't be executed.
+  b -84
+
+= /asm
+
+= mdopts
+
+instr-offset: 0x1fb0
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00001fb0 d=0x38210014	#	addi r1,r1,20
+MD n=Mem ra=0x00001fb4 d=0x48000048	#	b 72
+MD n=Mem ra=0x00001fb8 d=0x41800054	#	bc 0xc,0x0,84
+MD n=Mem ra=0x00001fbc d=0x38210014	#	addi r1,r1,20
+MD n=Mem ra=0x00001fc0 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fc4 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fc8 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fcc d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fd0 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fd4 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fd8 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fdc d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fe0 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fe4 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fe8 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001fec d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001ff0 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001ff4 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001ff8 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00001ffc d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00002000 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00002004 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00002008 d=0x4BFFFFB0	#	b -80
+MD n=Mem ra=0x0000200c d=0x38630001	#	addi r3,r3,1 # This shouldn't be executed.
+MD n=Mem ra=0x00002010 d=0x4BFFFFAC	#	b -84
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x00001fb0
+RD n=CR  d=0x40000000
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000028
+RD n=GPR i=2 d=0x00000003
+RD n=GPR i=3 d=0x00000000

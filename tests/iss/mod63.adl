@@ -1,0 +1,162 @@
+
+
+define (arch=minippc) {
+  attrs = (one,two); 
+
+  define (reg = PC) { attrs = (cia,nia);  };  
+
+  define (regfile = GPR) {  width = 32;  size  = 16;  prefix = r; };
+
+  define(instrfield=R1){
+    width = 4;
+    pseudo = true;
+    ref = GPR;
+    type = regfile;
+  }
+  define(instrfield=R2) {
+    width = 4;
+    pseudo = true;
+    ref = GPR;
+    type = regfile;
+  }
+  define(instrfield=R3){
+    width = 4;
+    pseudo = true;
+    ref = GPR;
+    type = regfile;
+  }
+  define (instrfield=IMM) {
+    width = 16;
+    pseudo = true;
+  }
+
+  define (instrfield=CG) {
+    width = 1;
+    pseudo = true;
+    allow_conflict = true;
+  }
+
+  define (instr = add){
+    attrs = one;
+    fields = (
+              (bits(0,7),b11001100),
+              (bits(11,14),R1),
+              (bits(17,20),R2),
+              (bits(26,29),R3)
+              );
+    action={
+      GPR(R1) = GPR(R2) + GPR(R3);
+    };
+  }
+
+  define (instr = imm){
+    attrs = one;
+    fields = (
+              (bits(0,7),b11001101),
+              (bits(11,14),R1),
+              (bits(16,31),IMM)
+              );
+    action={
+      GPR(R1) = IMM;
+    };
+  }
+
+  define (instr=halt) {
+    attrs = one;
+    fields = (
+              (bits(0,31),0)
+              );
+    action={
+      halt();
+    };
+  }
+  // The rest will conflict with add unless CG has allow_conflict set.
+
+  define (instr = sub){
+    attrs = (one,two);
+    fields = (
+              (bits(0,3),b1100),
+              (bits(4),CG),
+              (bits(5,7),b100),
+              (bits(8,10),b100),
+              (bits(11,14),R1),
+              (bits(17,20),R2),
+              (bits(26,29),R3)
+              );
+    action={
+      GPR(R1) = GPR(R2) - GPR(R3);
+    };
+  }
+
+  define (instr = sub_1st) {
+    alias = sub(CG(0),R1(R1),R2(R2),R3(R3));
+  }
+
+  define (instr = sub_2nd) {
+    alias = sub(CG(1),R1(R1),R2(R2),R3(R3));
+  }
+
+  define (instr = mul){
+    attrs = (one,two);
+    fields = (
+              (bits(0,3),b1100),
+              (bits(4),CG),
+              (bits(5,7),b100),
+              (bits(8,10),b101),
+              (bits(11,14),R1),
+              (bits(17,20),R2),
+              (bits(26,29),R3)
+              );
+    action={
+      GPR(R1) = GPR(R2) * GPR(R3);
+    };
+  }
+
+  define (instr = mul_1st) {
+    alias = mul(CG(0),R1(R1),R2(R2),R3(R3));
+  }
+
+  define (instr = mul_2nd) {
+    alias = mul(CG(1),R1(R1),R2(R2),R3(R3));
+  }
+
+  define (instr = div){
+    attrs = (one,two);
+    fields = (
+              (bits(0,3),b1100),
+              (bits(4),CG),
+              (bits(5,7),b100),
+              (bits(8,10),b110),
+              (bits(11,14),R1),
+              (bits(17,20),R2),
+              (bits(26,29),R3)
+              );
+    action={
+      GPR(R1) = GPR(R2) / GPR(R3);
+    };
+  }
+
+  define (instr = div_1st) {
+    alias = div(CG(0),R1(R1),R2(R2),R3(R3));
+  }
+
+  define (instr = div_2nd) {
+    alias = div(CG(1),R1(R1),R2(R2),R3(R3));
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+  instrtables = (one,two);
+
+  defmod(instr=(sub,mul,div)) {
+    next_table = {
+      if (CG == 0) {
+        setCurrentInstrTable(two);
+      } else {
+        setCurrentInstrTable(one);
+      }
+    };
+  }
+}

@@ -1,0 +1,71 @@
+
+asm10.o:     file format elf32-powerpc
+asm10.o
+architecture: powerpc:common, flags 0x00000011:
+HAS_RELOC, HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000100  00000000  00000000  00000100  2**8
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000200  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000200  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000050 l       .text	00000000 l4
+0000004c l       .text	00000000 l2
+00000030 l       .text	00000000 l1
+0000004c l       .text	00000000 l3
+00000054 l       .text	00000000 lowend
+
+
+
+Disassembly of section .text:
+
+00000000 <l1-0x30>:
+   0:	f0 04 00 50 	foo4      50 <l4>,r0,0x1111
+   4:	00 00 11 11 
+			0: R_PPC_ADDR14	.text+0x50
+   8:	f0 02 00 00 	foo2      a,PCPC,0x1111
+   c:	00 03 11 11 
+  10:	f0 02 00 00 	foo2      a,PCPC,0x2222
+  14:	00 03 22 22 
+  18:	f0 02 00 00 	foo2      a,PCPC,0x3333
+  1c:	00 03 33 33 
+  20:	f0 01 00 4c 	foo1      4c <l2>
+			20: R_PPC_ADDR14	.text+0x4c
+  24:	f0 02 00 00 	foo2      a,PCPC,0x4
+  28:	00 03 00 04 
+  2c:	f0 01 00 30 	foo1      30 <l1>
+			2c: R_PPC_ADDR14	.text+0x30
+
+00000030 <l1>:
+  30:	f0 02 00 00 	foo2      a,PCPC,0x5
+  34:	00 03 00 05 
+  38:	f0 06 00 00 	foo6      a,PC,4c <l2>,0xa
+  3c:	00 02 00 4c 
+  40:	00 0a 
+			38: R_PPC_ADDR14	.text+0x4c
+  42:	f0 01 00 4c 	foo1      4c <l2>
+			42: R_PPC_ADDR14	.text+0x4c
+  46:	f0 03 00 01 	foo3      b,r1
+  4a:	00 01 
+
+0000004c <l2>:
+  4c:	f0 01 00 4c 	foo1      4c <l2>
+			4c: R_PPC_ADDR14	.text+0x4c
+
+00000050 <l4>:
+  50:	00 44 00 00 	instr_new PC
+
+00000054 <lowend>:
+  54:	f0 12 01 00 	move      r1,(<54 <lowend>)
+  58:	00 00 
+  5a:	f0 11 01 fa 	move      r1,(>54 <lowend>)
+  5e:	f0 11 01 f6 	move      r1,(>54 <lowend>)
+	...

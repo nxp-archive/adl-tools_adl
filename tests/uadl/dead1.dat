@@ -1,0 +1,30 @@
+#
+# This is used for deadlock detection (and recovery with safe-mode models).
+# The dlx-stall model gets stuck on store instructions.
+#
+CORE n=:P
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	stw r1,0x1000(r0)
+	addi r2,r2,1
+	addi r2,r2,1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x90201000	#	stw r1,0x1000(r0)
+MD n=Mem ra=0x0000000c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000010 d=0x38420001	#	addi r2,r2,1
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000000

@@ -1,0 +1,162 @@
+#
+# This tests the ability of the scripting engine to control individual cores via
+# step.  The interleaving would be different if this just runs via the default
+# schedule.
+#
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	stw  r2,0x1000(r0)
+	lwz  r3,0x1004(r0)
+	addi r1,r1,1
+	addi r2,r2,2
+	.long 0x0
+	addi r4,r4,4
+	addi r5,r5,5
+	lwz  r6,0x1000(r0)
+	stw  r5,0x1004(r0)
+	addi r4,r4,4
+	addi r5,r5,5
+	
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x90401000	#	stw  r2,0x1000(r0)
+MD n=Mem ra=0x0000000c d=0x80601004	#	lwz  r3,0x1004(r0)
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000020 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000024 d=0x80C01000	#	lwz  r6,0x1000(r0)
+MD n=Mem ra=0x00000028 d=0x90A01004	#	stw  r5,0x1004(r0)
+MD n=Mem ra=0x0000002c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000030 d=0x38A50005	#	addi r5,r5,5
+# </GEN>
+
+CORE n=PMT
+
+RD n=TEN d=0xc0000000
+
+CORE n=PMT:t0
+
+RD n=NIA0 d=0
+
+CORE n=PMT:t1
+
+RD n=NIA1 d=0x1c
+
+TRACE
+
+CORE n=:PMT:t0
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+R n=GPR i=2 d=0x00000002
+
+CORE n=:PMT:t1
+
+
+I ea=0x1c id=3
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x38840004
+INSTR op=0x38840004					asm="addi r4,r4,4"
+R n=GPR i=4 d=0x00000004
+
+I ea=0x20 id=4
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x38a50005
+INSTR op=0x38a50005					asm="addi r5,r5,5"
+R n=GPR i=5 d=0x00000005
+
+CORE n=:PMT:t0
+
+
+I ea=0x8 id=5
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x90401000
+INSTR op=0x90401000					asm="stw r2,4096(r0)"
+D n=Mem t=write ea=0x1000 nb=4
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x00000002
+
+CORE n=:PMT:t1
+
+
+I ea=0x24 id=6
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x80c01000
+INSTR op=0x80c01000					asm="lwz r6,4096(r0)"
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000002
+R n=GPR i=6 d=0x00000002
+
+I ea=0x28 id=7
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x90a01004
+INSTR op=0x90a01004					asm="stw r5,4100(r0)"
+D n=Mem t=write ea=0x1004 nb=4
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000005
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=8
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x80601004
+INSTR op=0x80601004					asm="lwz r3,4100(r0)"
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000005
+R n=GPR i=3 d=0x00000005
+
+I ea=0x10 id=9
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000002
+
+CORE n=:PMT:t1
+
+
+I ea=0x2c id=10
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x38840004
+INSTR op=0x38840004					asm="addi r4,r4,4"
+R n=GPR i=4 d=0x00000008
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=11
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+R n=GPR i=2 d=0x00000004
+
+CORE n=:PMT:t1
+
+
+I ea=0x30 id=12
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x38a50005
+INSTR op=0x38a50005					asm="addi r5,r5,5"
+R n=GPR i=5 d=0x0000000a
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000004
+RD n=GPR i=3 d=0x00000005
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0x00000000
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=0x00000000
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0x00000008
+RD n=GPR i=5 d=0x0000000a
+RD n=GPR i=6 d=0x00000002

@@ -1,0 +1,372 @@
+//
+// An SMT model, using a basic out-of-order pipeline.  The integer and memory
+// pipelines are not shared, but the complex fixed point stages are.  A simple
+// alternating-thread scheduling mechanism is used to schedule cfx instructions.
+//
+
+#define NumThreads 2
+
+define (core PMT) {
+
+  allow_unimpl_instrs = true;
+
+  define (thread=Thread) {
+
+    define (resources) {
+      // Instruction buffer (fetch stage)
+      define (fetchunit Fetcher) {
+        fetch_memory = Mem;
+        entries = 8;
+        entry_size = 4;
+        fetch_size = 4;
+        can_cancel = true;
+        max_fetch_count = 2;
+      }
+
+      // Issue/decode stage: Can store up to 4 instructions, can issue 2 at a
+      // time.  Scheduling is 'dependent', since instructions must be placed into
+      // the write-back stage (reorder queue) queue in order so that they will
+      // complete in-order.
+      define (pipestage=mID) {
+        size = 4;
+        bandwidth = 2;
+      }
+
+      // Integer execution stages.  Can actually handle two integer ops at the same
+      // time, treated completely independently.
+      define (pipestage=mEX0) {
+        size = 2;
+        scheduler = independent;
+      }
+        
+      // Branch stage.
+      define (pipestage=mBR) {}
+
+      // Load/Store pipe.
+      define (pipestage=(mLS0,mLS1)) {}
+
+      // The reorder/completion stage.  Can complete 2 instructions per cycle.
+      // It's marked as shared so that it can be used as the reorder queue.  An
+      // instruction is added to this stage, as well as to the relevant stage for
+      // actual execution.
+      define (pipestage=mWB) {
+        size = 4;
+        shared = true;
+        bandwidth = 2;
+      }
+
+    }
+
+  }
+
+  define (resources) {
+
+    // Shared complex-fixed-point pipeline stages.
+    define (pipestage=(mCX0,mCX1,mCX2)) { }
+
+    // Completion bus.  Data is put onto the completion bus, as well as written
+    // to the destination registers, to allow dependent instructions to proceed.
+    define (forwarding_path=FwdCB) {
+      size = 10;
+      broadcast = true;
+    }
+
+    // Memory system
+    define (memory Mem) { 
+      data_width = 32;
+
+      addr_bandwidth = 4;
+      data_bandwidth = 4;
+      max_requests = 4;
+    }
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDe, S_EX0, S_EX0p, S_EX0e, S_CX0, S_CX0e, S_CX1, S_CX1e, S_CX2, S_CX2e, 
+               S_BR, S_BRe, S_LS0, S_LS0e, S_LS1, S_LS1, S_LS1p, S_LS1e, S_WB, S_WBe );
+
+    define (mapping) {
+      mID  = (S_ID, S_IDe);
+      mEX0  = (S_EX0,S_EX0p,S_EX0e);
+      mCX0  = (S_CX0,S_CX0e);
+      mCX1  = (S_CX1,S_CX1e);
+      mCX2  = (S_CX2,S_CX2e);
+      mBR  = (S_BR,S_BRe);
+      mLS0 = (S_LS0,S_LS0e);
+      mLS1 = (S_LS1,S_LS1p,S_LS1e);
+      mWB  = (S_WB,S_WBe);
+    };
+
+    // Defines the state transition on an exception:
+    //  Lhs:  exception state.
+    //  Rhs:  states which might generate an exception.
+    define (exception_mapping) {
+      S_IDe  = S_ID;
+      S_EX0e = S_EX0;
+      S_CX0e = S_CX0;
+      S_CX1e = S_CX1;
+      S_CX2e = S_CX2;
+      S_BRe  = S_BR;
+      S_LS0e = S_LS0;
+      S_LS1e = S_LS1;
+      S_WBe  = S_WB;
+   }
+
+  }
+
+  define (instr_class sfx) {
+    instructions = ( "addic.", addi, addis, ori, "andi.", 
+                     add, or, rlwinm,
+                     cmpi, cmp, 
+                     mtspr, mfspr, srw, halt );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+      Trg = (CR,0xffffffff);
+      Trg = (XER,0xffffffff);
+    }   
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Trg.can_write() && mWB.has_space() && mEX0.has_space() ) {
+        Src.record_sources();
+				Trg.allocate();
+        // Add to write-back (reorder queue) in order to serialize.
+        mWB.add_instr();
+				change_state(S_EX0);
+      }
+    S_EX0: if (Src.read_avail(FwdCB) && mWB.no_capacity_check()) {
+        // No space check required b/c already added to mWB.
+        exec();
+        change_state(S_WB);
+      }
+		S_WB: {
+      FwdCB.write(Trg);
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    S_IDe:  { change_state(S_EX0e); };
+    S_EX0e: { change_state(S_WBe); };
+    S_WBe:  { change_state(S_INIT); };
+
+    };
+  }
+
+  // Complex-fixed-point scheduling: If the other issue/decode stage has a
+  // multiply, then proceed by alternating between threads.  Otherwise, we can
+  // go.
+  bool cfxIssueCheck(InstrType &instr)
+  {
+    unsigned tid = getChildId();
+    if ( (tid == 0 && !top.t1.mID.has_attr(thisCore(),instr,0,0,cfx_instr)) ||
+         (tid == 1 && !top.t0.mID.has_attr(thisCore(),instr,0,0,cfx_instr)) )
+      return true;
+    return cfxProceed(tid,NumThreads);
+  }
+
+  define (instr_class cfx) {
+    instructions = ( mulli, mullw );
+
+    attrs = cfx_instr;
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }   
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Trg.can_write()  && mWB.has_space() && mCX0.has_space() && cfxIssueCheck(thisInstr())) {
+        Src.record_sources();
+        Trg.allocate();
+        // Add to write-back (reorder queue) in order to serialize.
+        mWB.add_instr();
+				change_state(S_CX0);
+      }
+    S_CX0: if (Src.read_avail(FwdCB) && mCX1.has_space()) {
+        exec();
+        change_state(S_CX1);
+      }
+    S_CX1: {
+      change_state(S_CX2);
+    }
+		S_CX2: if (mWB.no_capacity_check()) {
+        // No space check required b/c already added to mWB.
+        change_state(S_WB);
+      }
+		S_WB: {
+      FwdCB.write(Trg);
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    S_IDe:  { change_state(S_CX0e); };
+    S_CX0e: { change_state(S_CX1e); };
+    S_CX1e: { change_state(S_CX2e); };
+    S_CX2e: { change_state(S_WBe); };
+    S_WBe:  { change_state(S_INIT); };
+
+    };
+  }
+
+ define (instr_class load) {
+    instructions = ( lbz, lhz, lwz, lwzu, lwzx );
+
+    machine = normal;
+    
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Trg.can_write() && mWB.has_space() && mLS0.has_space() ) {
+        Src.record_sources();
+				Trg.allocate();
+        // Add to write-back (reorder queue) in order to serialize.
+        mWB.add_instr();
+				change_state(S_LS0);
+			}
+    S_LS0: if (Src.read_avail(FwdCB) && mLS1.has_space() && Mem.can_request_read()) {
+        // Calc ea.
+        exec();
+        Mem.send_read_request();
+        change_state(S_LS1);
+      }
+		S_LS1: if (Mem.can_read()) { 
+        exec_and_read(Mem);
+        change_state(S_LS1p);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_LS1p: if (exec_done() && mWB.no_capacity_check()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_read()) {
+        Mem.send_read_request();
+        change_state(S_LS1);
+      }
+		S_WB: {
+      FwdCB.write(Trg);
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    S_IDe:  { change_state(S_LS0e); };
+    S_LS0e: { change_state(S_LS1e); };
+    S_LS1e: { change_state(S_WBe); };
+    S_WBe:  { change_state(S_INIT); };
+
+    };
+  }
+
+
+ define (instr_class store) {
+    instructions = (stb, sth, sthx, stw, stwu, stwx);
+
+   machine = normal;
+
+   define (operands) {
+     Src = sources;
+     Trg = targets;
+   };
+
+   action = {
+   S_INIT: {
+     change_state(S_ID);
+   };
+   S_ID: if (Trg.can_write() && mWB.has_space() && mLS0.has_space() ) {
+        Src.record_sources();
+				Trg.allocate();
+        // Add to write-back (reorder queue) in order to serialize.
+        mWB.add_instr();
+				change_state(S_LS0);
+     }
+    S_LS0: if (Src.read_avail(FwdCB) && mLS1.has_space() && Mem.can_request_write()) {
+        // Calc ea.
+        exec();
+        Mem.send_write_request();
+        change_state(S_LS1);
+      }
+		S_LS1: if (Mem.can_read()) { 
+        exec_and_write(Mem);
+        change_state(S_LS1p);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_LS1p: if (exec_done() && mWB.no_capacity_check()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_write()) {
+        Mem.send_write_request();
+        change_state(S_LS1);
+      }
+		S_WB: {
+      FwdCB.write(Trg);
+      write_ops();
+      change_state(S_INIT);
+    }
+
+    S_IDe:  { change_state(S_LS0e); };
+    S_LS0e: { change_state(S_LS1e); };
+    S_LS1e: { change_state(S_WBe); };
+    S_WBe:  { change_state(S_INIT); };
+
+   };
+ }
+
+  define (instr_class serializing) {
+    instructions = ( bc, b, bl, bclr, halt );
+
+    machine = normal;
+
+    define (operands) {
+      Src = sources;
+      Trg = targets;
+    }   
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+    S_ID:  if (Trg.can_write() && mWB.has_space() && mBR.has_space() ) {
+        Src.record_sources();
+				Trg.allocate();
+        // Add to write-back (reorder queue) in order to serialize.
+        mWB.add_instr();
+				change_state(S_BR);
+      }
+    S_BR: if (Src.read_avail(FwdCB) && mWB.no_capacity_check()) {
+        change_state(S_WB);
+      }
+		S_WB: {
+      exec();
+      FwdCB.write(Trg);
+      write_ops();
+      if (branch_taken()) {
+        taken_flush();
+      }
+      change_state(S_INIT);
+    }
+
+    S_IDe:  { change_state(S_BRe); };
+    S_BRe:  { change_state(S_WBe); };
+    S_WBe:  { change_state(S_INIT); };
+
+    };
+  }
+
+};

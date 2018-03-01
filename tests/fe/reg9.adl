@@ -1,0 +1,20 @@
+//
+// Register files must have a size value set.
+//
+
+define (arch = minippc) {
+
+  define (regfile = vprs) {
+    width = 128;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

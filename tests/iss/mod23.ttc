@@ -1,0 +1,22 @@
+//
+// Adds some simple tracing on/off hooks to check this functionality.
+//
+
+define (core = P) {
+
+  define (config) {
+  
+    tracing_on = func() {
+      info (1,"Tracing ON.");
+    };
+
+    tracing_off = {
+      info (1,"Tracing OFF.");
+      dummyHelper();
+    };
+
+    clock_cycle_ratio = 1.2;
+
+  }
+
+}

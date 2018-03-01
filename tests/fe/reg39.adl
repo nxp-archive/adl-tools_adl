@@ -1,0 +1,61 @@
+//
+// This makes sure that indexed fields which use a variable that's a loop variable
+// do not get recorded as fixed accesses.
+//
+// We also ignore the usage of a register-file element if we just call size(),
+// which is a static method.
+//
+
+define (arch=minippc) {
+  
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+  
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+ 
+  define (instr=g) {
+    fields=(OPCD(7),RT,RA,RB,XO_X(10));
+    
+    action= {
+      for (unsigned i = 0; i != VPR(RT).size()/8; ++i) {
+        VPR(RT).B(i) = VPR(RA).B(i) + VPR(RB).B(i);
+      }
+    };
+  }
+  
+  define (regfile=VPR) {
+    """
+Vector registers.
+    """;
+    width=128;
+    size = 32;
+
+    define (field=B) {
+      indexed = 8;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,88 @@
+
+asm5.o:     file format elf32-powerpc
+asm5.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000dc  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000110  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000110  2**0
+                  ALLOC
+  3 .comment      00000029  00000000  00000000  00000110  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+00000000 l    df *ABS*	00000000 sieve.c
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000 l       .text	00000000 gcc2_compiled.
+00000000 l    d  .comment	00000000 .comment
+00000000 g     F .text	000000dc main
+00000014       O *COM*	00000004 sieve
+00000014       O *COM*	00000004 results
+
+
+
+Disassembly of section .text:
+
+00000000 <main>:
+   0:	38 e0 00 05 	li	r7,5
+   4:	7c e9 03 a6 	mtctr	r7
+   8:	3d 20 00 00 	lis	r9,0
+   c:	3d 60 00 00 	lis	r11,0
+  10:	39 29 10 00 	addi	r9,r9,4096
+  14:	39 6b 20 00 	addi	r11,r11,8192
+  18:	39 00 00 01 	li	r8,1
+  1c:	38 00 00 00 	li	r0,0
+  20:	39 40 00 00 	li	r10,0
+  24:	7d 0a 49 2e 	stwx	r8,r10,r9
+  28:	7c 0a 59 2e 	stwx	r0,r10,r11
+  2c:	39 4a 00 04 	addi	r10,r10,4
+  30:	42 00 ff f4 	bdnz+	24 <main+0x24>
+  34:	3d 20 00 00 	lis	r9,0
+  38:	39 29 10 00 	addi	r9,r9,4096
+  3c:	7d 25 4b 78 	mr	r5,r9
+  40:	39 00 00 02 	li	r8,2
+  44:	55 07 10 3a 	rlwinm	r7,r8,2,0,29
+  48:	7c 09 38 2e 	lwzx	r0,r9,r7
+  4c:	38 c8 00 01 	addi	r6,r8,1
+  50:	2c 00 00 00 	cmpwi	r0,0
+  54:	41 82 00 34 	beq-	88 <main+0x88>
+  58:	7d 48 42 14 	add	r10,r8,r8
+  5c:	2c 0a 00 04 	cmpwi	r10,4
+  60:	41 81 00 28 	bgt-	88 <main+0x88>
+  64:	55 40 10 3a 	rlwinm	r0,r10,2,0,29
+  68:	7d 60 2a 14 	add	r11,r0,r5
+  6c:	7c e0 3b 78 	mr	r0,r7
+  70:	38 e0 00 00 	li	r7,0
+  74:	7d 4a 42 14 	add	r10,r10,r8
+  78:	2c 0a 00 04 	cmpwi	r10,4
+  7c:	90 eb 00 00 	stw	r7,0(r11)
+  80:	7d 6b 02 14 	add	r11,r11,r0
+  84:	40 81 ff f0 	ble+	74 <main+0x74>
+  88:	7c c8 33 78 	mr	r8,r6
+  8c:	7c 08 41 d6 	mullw	r0,r8,r8
+  90:	2c 00 00 04 	cmpwi	r0,4
+  94:	40 81 ff b0 	ble+	44 <main+0x44>
+  98:	38 00 00 03 	li	r0,3
+  9c:	7c 09 03 a6 	mtctr	r0
+  a0:	3d 20 00 00 	lis	r9,0
+  a4:	39 29 10 00 	addi	r9,r9,4096
+  a8:	3d 60 00 00 	lis	r11,0
+  ac:	39 29 00 08 	addi	r9,r9,8
+  b0:	39 6b 20 00 	addi	r11,r11,8192
+  b4:	39 40 00 02 	li	r10,2
+  b8:	80 09 00 00 	lwz	r0,0(r9)
+  bc:	39 29 00 04 	addi	r9,r9,4
+  c0:	2c 00 00 00 	cmpwi	r0,0
+  c4:	41 82 00 0c 	beq-	d0 <main+0xd0>
+  c8:	91 4b 00 00 	stw	r10,0(r11)
+  cc:	39 6b 00 04 	addi	r11,r11,4
+  d0:	39 4a 00 01 	addi	r10,r10,1
+  d4:	42 00 ff e4 	bdnz+	b8 <main+0xb8>
+  d8:	38 60 00 00 	li	r3,0

@@ -1,0 +1,34 @@
+#
+# Simple script to stop at a specific address when encountered N times.
+# Usage:  --script-arg=<addr> --script-arg=<N>
+#
+set SafeMode 0
+set MaxCount 0
+set Count 0
+set Ic 0
+
+proc checkEnd {id ea} {
+		global Count
+		global MaxCount
+		incr Count
+		puts [format "Breaking proc at 0x%x for %d time. id is %d, cycle is %d" $ea $Count $id [ccount]]
+		if {$Count == $MaxCount} {
+				global Ic
+				incr Ic
+				puts "Stopping execution."
+				return "simstop"
+		} 
+}
+
+if { $argc < 2} {
+		puts "Usage:  <brkpt-addr> <stop-count>"
+		quit
+} else {
+		setbreakcmd [lindex $argv 0] checkEnd
+		global MaxCount
+		set MaxCount [lindex $argv 1]
+}
+
+go
+puts "Done at cycle [ccount].  [commitcount] instructions committed.  [issuecount] instructions issued."
+quit

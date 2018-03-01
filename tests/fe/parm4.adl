@@ -1,0 +1,23 @@
+//
+// We allow a parameter option to be used for different parameters only
+// for boolean parameters (true,false);
+//
+
+define (arch=a1) {
+  define (parm=p1) {
+    options=(true,false);
+    value=true;
+  }
+  define (parm=p2) {
+    options=(true,false);
+    value=false;    
+  }
+  
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+}
+
+define (core=bar) {
+  archs=a1;
+}

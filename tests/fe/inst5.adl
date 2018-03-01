@@ -1,0 +1,38 @@
+//
+// Simple test of instructions:  This should
+// fail because we have an instruction with no
+// opcode fields.
+//
+define (arch=minippc) {
+
+
+  
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instr=addi) {
+    attrs=(fxu,base);
+    fields=(OPCD,RA,RB);
+    action = { };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

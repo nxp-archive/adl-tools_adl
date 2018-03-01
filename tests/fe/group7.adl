@@ -1,0 +1,91 @@
+//
+// Tests the use of groups using attribute and field selections. 
+//
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+      
+  define (reg=a) { attrs = up; }  
+  define (reg=b) { attrs = down; define (field=V) { bits = (0,3); } }
+  define (regfile=c) { attrs = (up,red); size=16; }  
+  define (regfile=d) { attrs = blue; size=16; define (field=V) { bits = (0,3); } }
+
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,30);}
+  define (instrfield = C   ) { bits = (21,30);}
+  
+  define (instr = i1) { attrs = (up,down);    fields = (OPCD(1),A,B); action  = {};}
+  define (instr = i2) { attrs = (left,right); fields = (OPCD(2),A,B); action  = {};}
+  define (instr = i3) { attrs = (red,blue);   fields = (OPCD(3),A,B); action  = {};}  
+  define (instr = i4) { attrs = (up);         fields = (OPCD(4),A,B); action  = {}; attrs = red;}  
+  define (instr = i5) { attrs = (right);      fields = (OPCD(5),A,C); action  = {};}  
+  define (instr = i6) { attrs = (blue);       fields = (OPCD(6),A,C); action  = {};}  
+
+  define (group = g1) {
+    has_attrs = (up,left,red);
+    type = instr;
+  }
+
+  define (group = g2) {
+    items = (*g1 - i3);
+  }
+
+  defmod (instr=*g2) {
+    action = { int i = 10; };
+  }
+
+  define (group=g3) {
+    has_fields = C;
+    type = instr;
+  }
+
+  define (instr=*g3) {
+    action = { int j = 20; };
+  }
+
+  define (group=g4) {
+    has_attrs = up;
+    type = reg;
+  }
+
+  define (group=g5) {
+    has_attrs = up;
+    type = regfile;
+  }
+
+  define (reg=*g4) {
+    define (field=X) { bits = (0,3); };
+  }
+
+  define (regfile=*g5) {
+    define (field=X) { bits = (0,3); };
+  }
+
+  define (group=g6) {
+    has_fields = V;
+    type = reg;
+  }
+
+  define (group=g7) {
+    has_fields = V;
+    type = regfile;
+  }
+
+  define (reg=*g6) {
+    defmod (field=V) { attrs = red; };
+  }
+
+  define (regfile=*g7) {
+    defmod (field=V) { attrs = red; };
+  }
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

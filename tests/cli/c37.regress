@@ -1,0 +1,6 @@
+NIA:  0x8
+Breakpoint hit on node: P  at address: 0x0000000000000018 count: 0  InstrCount: 12
+Breakpoint hit on node: P  at address: 0x0000000000000020 count: 0  InstrCount: 19
+Simulation halted at address: 0x0000000000000038
+
+Instructions executed: 24

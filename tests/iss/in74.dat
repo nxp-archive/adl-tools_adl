@@ -1,0 +1,70 @@
+
+#
+# Tests the use of slices with aliases.
+#
+
+= asm
+
+  mtspr 210,r3
+  mfspr  r4,209
+  mtspr 209,r3
+  mfspr r5,210
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C7233A6	#	mtspr 210,r3
+MD n=Mem ra=0x00000004 d=0x7C9132A6	#	mfspr  r4,209
+MD n=Mem ra=0x00000008 d=0x7C7133A6	#	mtspr 209,r3
+MD n=Mem ra=0x0000000c d=0x7CB232A6	#	mfspr r5,210
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=3 d=0xdeadbeef
+
+TRACE
+
+I ea=0x0 id=1
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c7233a6
+INSTR op=0x7c7233a6                                     asm="mtspr 3,0xd2"
+R n=FOO9 d=0xbeef0000
+R n=FOO9 d=0xbeef0000
+R n=ICNT d=0x00000001
+
+I ea=0x4 id=2
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c9132a6
+INSTR op=0x7c9132a6                                     asm="mfspr 4,0xd1"
+R n=GPR i=4 d=0xbeef0000
+R n=ICNT d=0x00000002
+
+I ea=0x8 id=3
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c7133a6
+INSTR op=0x7c7133a6                                     asm="mtspr 3,0xd1"
+R n=FOO9 d=0xdeadbeef
+R n=ICNT d=0x00000003
+
+I ea=0xc id=4
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7cb232a6
+INSTR op=0x7cb232a6                                     asm="mfspr 5,0xd2"
+R n=GPR i=5 d=0x0000dead
+R n=ICNT d=0x00000004
+
+I ea=0x10 id=5
+R n=FCNT d=0x00000005
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x0                                    asm="halt "
+R n=ICNT d=0x00000005
+
+RESULTS
+
+RD n=FOO9 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeadbeef
+RD n=GPR i=4 d=0xbeef0000
+RD n=GPR i=5 d=0x0000dead
+
+

@@ -1,0 +1,31 @@
+//
+// Simple test of exceptions.
+//
+
+define (arch=minippc) {
+
+  define (reg = FOO) {
+    width = 32;
+  }
+
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  attrs = (user,super);
+
+  define (exception="Program") {
+    "Program interrupt.";
+    attrs = (user,super);
+    action = {
+      FOO = 12;
+      IAR = 0x0000700;
+    };
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

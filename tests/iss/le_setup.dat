@@ -1,0 +1,6 @@
+#
+# Sets up little-endian mode for mod28
+#
+
+# This activates instruction and data little-endian mode.
+RD n=MSR d=0x000c0000

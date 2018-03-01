@@ -1,0 +1,109 @@
+//
+// This tests to make sure that we will propagate parameter values in order to
+// evaluate conditional expressions for source/target tracking.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      x(RT,0);
+    };
+  }
+
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      x(RT,1);
+    };
+  }
+
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    action = {
+      y(RT,true);
+    };
+  }
+
+  define (instr=d) {
+    fields=(OPCD(4),RT,RA,RB,XO_X(10));
+    action = {
+      y(RT,false);
+    };
+  }
+
+  void x(int x,int s)
+  {
+    if (s != 0) {
+      GPR(1) = 20;
+    } else {
+      GPR(2) = 30;
+    }
+  }
+
+  void y(int x,bool s)
+  {
+    if (s) {
+      GPR(1) = 20;
+    } else {
+      GPR(2) = 30;
+    }
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Simple script for running some tests on Windows.
+#
+
+type=$1
+if [ -z $type ]; then
+    echo "usage:  $0 <build-type>"
+    exit 1
+fi
+
+cat <<EOF | make -f -
+
+all: run-adl run-adl-tc run-uadl run-asm2 run-asm5 run-mt-uadl run-sysc
+
+run-adl:
+	./${type}/model.exe in4.dat -trace -o=in4.out.dat
+
+run-adl-tc:
+	./${type}/model.exe in4.dat -trace -decode-cache -o=in4-tc.out.dat
+
+run-uadl:
+	./${type}/uadl-model.exe in4.dat -trace -o=in4-uadl.out.dat
+
+run-mt-uadl:
+	./${type}/mt-uadl-model.exe mt3.dat -trace -o=mt3.out.dat
+
+run-asm2:
+	rm -f asm2.o
+	./${type}/as-adl.exe asm2.s -o asm2.o
+	./${type}/objdump-adl.exe -dx asm2.o
+
+run-asm5:
+	rm -f asm5.o
+	./${type}/as-adl.exe asm5.s -o asm5.o
+	./${type}/objdump-adl.exe -dx asm5.o
+
+run-sysc:
+	./${type}/sysc-model.exe
+
+EOF
+
+if [ $? != 0 ]; then
+		echo "Test FAILED!"
+		exit 1
+else
+		echo "Test PASSED!"
+		exit 0
+fi

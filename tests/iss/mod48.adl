@@ -1,0 +1,199 @@
+#import "mod1.adl"
+
+define (arch = PPC_parallel) {
+
+  parallel_execution = 2;
+
+  attrs = branch_target;
+  
+  //
+  // params
+  //
+  
+  define (parm = last_in_packet) {
+    options = (true,false);
+    value = false;
+  }
+
+   
+  // 
+  // hooks
+  //
+  post_fetch = func(unsigned sz) {
+    if (last_in_packet) {
+      setPacketPosition(0);
+    }
+    last_in_packet = !last_in_packet;
+    NIA = CIA + sz;
+  };
+
+  post_packet = func() {
+    if (Fetch == Fetch::Normal) {
+    } else if (Fetch == Fetch::DelaySlot) {
+      Fetch = Fetch::Jump;
+    } else if (Fetch == Fetch::Jump) {
+      NIA = DSIA;
+      Fetch = Fetch::Normal;
+    }
+  };
+
+  //
+  // regs
+  // 
+  
+  defmod(reg = (CIA,NIA)) {
+    serial = true;
+  }
+
+  define(reg = DSIA) {
+    serial = true;
+    attrs = branch_target;
+  }
+ 
+  define (reg = Fetch) {
+    width = 2;
+    enumerated = (Normal,DelaySlot,Jump);
+    reset = Normal;
+    serial = true;
+  }
+
+  //
+  // instrfields
+  //
+  define (instrfield = (R1,R2,R3)) {
+    pseudo = true;
+    width = 5;
+  }
+
+
+  // 
+  // new instrs
+  //
+  
+  define (instr = nop) {
+    fields=(OPCD(1));
+    width = 32;
+    action = {};
+  }
+ 
+
+  define (instr = sync) {
+    fields=(OPCD(2),(bits(11,15),R1),(bits(16,20),R2),(bits(6,10),R3));
+    width = 32;
+    action = {
+      GPR(R3) = GPR(R1+R2);
+    };
+  }
+
+
+  define(instr=sub_family) {
+    fields = (OPCD,R1,R2,R3);
+
+    define (instr=sub) {
+      width = 32;
+      fields = (OPCD(10),R1,R2,R3);
+      alias = sub_family(OPCD(OPCD),R1(R1),R2(R2),R3(R3));
+    }
+
+    action = {
+      GPR(R1) = GPR(R2.uint32()) - GPR(R3);
+    };
+  }
+ 
+  define (instr = b_impl) {
+    fields=(OPCD(3),LI,AA(0),LK(0));
+    width = 32;
+    action = {
+      if (GPR(0) == 1) {
+        Fetch = Fetch::Jump;
+        DSIA = LI;
+      }
+    };
+  }
+ 
+  define (instr = bd) {
+    fields=(OPCD(3),LI,AA(0),LK(1));
+    width = 32;
+    action = {
+      DSIA = LI;
+      Fetch = Fetch::DelaySlot;
+    };
+  }
+ 
+  define (instrfield = big_field) {
+    bits = (32,63);
+  }
+  
+  // to test instruction larger than 32 bit
+  define (instr = big_instr) {
+    fields=(OPCD(3),LI(0),AA(1),LK(0),big_field);
+    width = 64;
+    action = {
+      GPR(14) = big_field;
+    };
+  }
+
+  // 
+  // modified instrs
+  //
+
+  defmod (instr=bl) {
+    syntax = ("bt %f",LI);
+    action = func() {
+      if (GPR(0) == 1) {
+        NIA = LI;
+      }
+    };
+  }
+
+  // For experimenting with rollback.  This instruction turns it on and off.
+  // Note: It's not clear if we really want to export this interface for real
+  // models, but it's at least useful for testing.
+  //
+  // Usage:  RT = 0:  Toggle rollback.  Enable is RA.
+  // Usage:  RT = 1:  Commit rollback.
+  // Usage:  RT = 2:  Flush rollback.
+  define (instr=crorc) {
+    fields=(OPCD(19),RT,RA,RB,XO(417));
+    action = {
+      if (RT == 0) {
+        enable_rollback(RA.uint32());
+      }
+      else if (RT == 1) {
+        // We want to continue to make forward progress, so we have to preserve the NIA.
+        var nia = NIA;
+        commit_rollback();
+        NIA = nia;
+      } 
+      else if (RT == 2) {
+        flush_rollback();
+      }
+    };
+  }
+    
+  // For testing ignore mode.
+  defmod (instr=(add,addi,addic,"andi.","addic.",addis,stw,sth,stb,sthx,stmw,stwu,stwx,
+                 lbz,lhz,lwz,lmw,lwzu,lwzx)) {
+    define (aspect=Ignore1) {
+      instr_pre_exec = true;
+      action = {
+        if (CR(2) == 1) {
+          info(1,"Predicate set to ignore.");
+          set_ignore_mode(true);
+        }
+      };
+    }
+    define (aspect=Ignore2) {
+      instr_post_exec = true;
+      action = {
+        set_ignore_mode(false);
+      };
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,PPC_parallel);
+}
+

@@ -1,0 +1,15 @@
+#
+# Tests instruction jamming of large instructions.
+# The results are only valid when run with in250.cli.
+#
+
+RESULTS
+
+MD n=Mem ra=0x0000000000001000 d=0x00000010     #       (16)
+MD n=Mem ra=0x0000000000001004 d=0x00000020     #       (32)
+MD n=Mem ra=0x0000000000001008 d=0x00000030     #       (48)
+MD n=Mem ra=0x000000000000100c d=0x00000040     #       (64)
+MD n=Mem ra=0x0000000000001010 d=0x00000050     #       (80)
+MD n=Mem ra=0x0000000000001014 d=0x00000060     #       (96)
+MD n=Mem ra=0x0000000000001020 d=0xd0000000     #       (184320)
+MD n=Mem ra=0x0000000000001024 d=0x00000002     #       (0)

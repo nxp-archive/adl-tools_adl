@@ -1,0 +1,121 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  A: [6,20] 
+  B: [21,23] 
+  OPCD: [0,4] 
+  OPCDX: [5,5] 
+Subinstructions:
+Name:  addOp
+Attributes:  left
+Fields:  OPCD(10) A
+Action:  {
+}
+-------------------------------
+Name:  divideOp
+Fields:  OPCD(13) A
+Action:  {
+}
+-------------------------------
+Name:  eaRegDirect
+Fields:  OPCDX(0) B
+Action:  {
+}
+-------------------------------
+Name:  eaRegIndirect
+Fields:  OPCDX(1) B
+Action:  {
+}
+-------------------------------
+Name:  multOp
+Fields:  OPCD(12) A
+Action:  {
+}
+-------------------------------
+Name:  subOp
+Fields:  OPCD(11) A
+Action:  {
+}
+-------------------------------
+Instructions:
+  Name:  add (rank: 0)
+  Width:  32
+  Syntax:  "add %f  (%f) ":   A B
+  Attributes:  left time(2)
+  Fields:  OPCD(10) OPCDX(0) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  addi (rank: 0)
+  Width:  24
+  Syntax:  "addi =  %f + %f ":   A B
+  Attributes:  left time(2)
+  Fields:  OPCD(10) OPCDX(1) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  div (rank: 0)
+  Width:  32
+  Syntax:  "div %f  (%f) ":   A B
+  Attributes:  time(12)
+  Fields:  OPCD(13) OPCDX(0) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  divi (rank: 0)
+  Width:  24
+  Attributes:  time(5)
+  Fields:  OPCD(13) OPCDX(1) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  mult (rank: 0)
+  Width:  32
+  Syntax:  "mult %f  (%f) ":   A B
+  Attributes:  time(5)
+  Fields:  OPCD(12) OPCDX(0) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  multi (rank: 0)
+  Width:  24
+  Attributes:  right time(5)
+  Fields:  OPCD(12) OPCDX(1) A B
+  Action:  {
+}
+  -------------------------------
+  Name:  sub (rank: 0)
+  Width:  32
+  Syntax:  "sub %f  (%f) ":   A B
+  Attributes:  time(2)
+  Fields:  OPCD(11) OPCDX(0) A B
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    20(50000000):  add
+    21(54000000):  addi
+    22(58000000):  sub
+    24(60000000):  mult
+    25(64000000):  multi
+    26(68000000):  div
+    27(6c000000):  divi
+-------------------------------
+

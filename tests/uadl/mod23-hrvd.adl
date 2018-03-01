@@ -1,0 +1,15 @@
+//
+// This changes the model so that it only has an instruction cache.
+//
+
+#define UADL
+
+#import "mod23.adl"
+
+defmod (core P) {
+
+  defmod (cache=L1d) {
+    remove = true;
+  }
+
+}

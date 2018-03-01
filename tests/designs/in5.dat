@@ -1,0 +1,48 @@
+#
+# Tests that we can handle, in a trace-cache or jit model, a situation where we
+# run off of a page during translation.  We should catch the exception and then
+# continue execution.
+#
+= asm
+
+ L1:
+  addi r1,r1,1
+  .long 0x0
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  bc 0x14,0,L1
+  addi r1,r1,1
+  addi r1,r1,1
+
+= /asm
+
+= mdopts
+
+instr-offset: 0xfe4
+
+= /mdopts
+
+CORE n=:powerpc
+
+# <GEN>
+MD n=Mem ra=0x00000fe4 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000fe8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000fec d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000ff0 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000ff4 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000ff8 d=0x4280FFEC	#	bc 0x14,0,L1
+MD n=Mem ra=0x00000ffc d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00001000 d=0x38210001	#	addi r1,r1,1
+# </GEN>
+
+RD n=NIA   d=0xfec
+
+# ea=0x0000 ra=0x0000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0 WIMG=0x1 SX=1 SR=1 SW=1 EPN=0
+
+
+RESULTS
+
+RD n=GPR i=1 d=4
+

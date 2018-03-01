@@ -1,0 +1,787 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<data>
+<cores>
+<core name="P">
+<doc>
+<str><![CDATA[
+Example documentation string- place overview information here.
+
+]]></str>
+</doc>
+<RaMask>
+<initial>
+<str>0xffffffff</str>
+</initial>
+<constant>
+<true />
+</constant>
+</RaMask>
+<EaMask>
+<initial>
+<str>0xffffffff</str>
+</initial>
+<constant>
+<true />
+</constant>
+</EaMask>
+<regs>
+<register name="CIA">
+<doc>
+<str><![CDATA[
+Current instruction address.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<attributes>
+<attribute name="cia">
+<str></str>
+</attribute>
+</attributes>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="CR">
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="NIA">
+<doc>
+<str><![CDATA[
+Next instruction address.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<attributes>
+<attribute name="nia">
+<str></str>
+</attribute>
+</attributes>
+<shared>
+<int>0</int>
+</shared>
+</register>
+</regs>
+<regfiles>
+<regfile name="GPR">
+<doc>
+<str><![CDATA[
+General purpose registers.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<size>
+<int>32</int>
+</size>
+<shared>
+<int>0</int>
+</shared>
+</regfile>
+</regfiles>
+<instrfields>
+<instrfield name="OPCD">
+<doc>
+<str><![CDATA[
+Primary opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>0</int>
+<int>5</int>
+</range>
+</bits>
+<width>
+<int>6</int>
+</width>
+<size>
+<int>6</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0xfc000000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RA">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>11</int>
+<int>15</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x1f0000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RB">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>20</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0xf800</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RS">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RT">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="Src1">
+<pseudo>
+<true />
+</pseudo>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x0</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="Src2">
+<pseudo>
+<true />
+</pseudo>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x0</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="Trg">
+<pseudo>
+<true />
+</pseudo>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x0</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="XO">
+<doc>
+<str><![CDATA[
+Extended opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>21</int>
+<int>30</int>
+</range>
+</bits>
+<width>
+<int>10</int>
+</width>
+<size>
+<int>10</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<mask>
+<str>0x7fe</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+</instrfields>
+<instrs>
+<instruction name="add_family">
+<doc>
+<str><![CDATA[
+This description should represent the entire family
+    and appear at the top.
+]]></str>
+</doc>
+<syntax>
+<str>add_family Src1, Src2, Trg</str>
+</syntax>
+<fields>
+<field name="Src1">
+<str></str>
+</field>
+<field name="Src2">
+<str></str>
+</field>
+<field name="Trg">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+    setCrField ( 0 , GPR ( Trg ) , 0 ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>CR</str>
+<str>GPR(Src1)</str>
+<str>GPR(Src2)</str>
+</inputs>
+<outputs>
+<str>CR</str>
+<str>GPR(Trg)</str>
+</outputs>
+<helpers>
+<str>setCrField</str>
+</helpers>
+</instruction>
+<instruction name="add1">
+<width>
+<int>32</int>
+</width>
+<doc>
+<str><![CDATA[
+This description should be appended
+      to that of the family.
+]]></str>
+</doc>
+<syntax>
+<str>add1 RT, RA, RB</str>
+</syntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>266</int>
+</field>
+</fields>
+<alias>
+<target>
+<str>add_family</str>
+</target>
+<sources>
+<source>
+<field>
+<str>Src1</str>
+</field>
+<value>
+<str>RA</str>
+</value>
+</source>
+<source>
+<field>
+<str>Src2</str>
+</field>
+<value>
+<str>RB</str>
+</value>
+</source>
+</sources>
+<destinations>
+<destination>
+<field>
+<str>Trg</str>
+</field>
+<value>
+<str>RT</str>
+</value>
+</destination>
+</destinations>
+</alias>
+<disassemble>
+<true />
+</disassemble>
+<doc_op>
+<str><![CDATA[
+Ra + Rb -> Rt
+]]></str>
+</doc_op>
+</instruction>
+<instruction name="add2">
+<width>
+<int>32</int>
+</width>
+<doc>
+<str><![CDATA[
+This description should also be appended
+      to that of the family.
+]]></str>
+</doc>
+<syntax>
+<str>add2 RT, RA, RB</str>
+</syntax>
+<fields>
+<field name="OPCD">
+<int>32</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>300</int>
+</field>
+</fields>
+<alias>
+<target>
+<str>add_family</str>
+</target>
+<sources>
+<source>
+<field>
+<str>Src1</str>
+</field>
+<value>
+<str>RA</str>
+</value>
+</source>
+<source>
+<field>
+<str>Src2</str>
+</field>
+<value>
+<str>RB</str>
+</value>
+</source>
+</sources>
+<destinations>
+<destination>
+<field>
+<str>Trg</str>
+</field>
+<value>
+<str>RT</str>
+</value>
+</destination>
+</destinations>
+</alias>
+<disassemble>
+<true />
+</disassemble>
+<doc_op>
+<str><![CDATA[
+Ra2 + Rb2 -> Rt2
+]]></str>
+</doc_op>
+</instruction>
+<instruction name="sub_family">
+<syntax>
+<str>sub_family Src1, Src2, Trg</str>
+</syntax>
+<fields>
+<field name="Src1">
+<str></str>
+</field>
+<field name="Src2">
+<str></str>
+</field>
+<field name="Trg">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    GPR ( Trg ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+    setCrField ( 0 , GPR ( Trg ) , 0 ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>CR</str>
+<str>GPR(Src1)</str>
+<str>GPR(Src2)</str>
+</inputs>
+<outputs>
+<str>CR</str>
+<str>GPR(Trg)</str>
+</outputs>
+<helpers>
+<str>setCrField</str>
+</helpers>
+</instruction>
+<instruction name="sub1">
+<width>
+<int>32</int>
+</width>
+<doc>
+<str><![CDATA[
+This is the only description.
+]]></str>
+</doc>
+<syntax>
+<str>sub1 RT, RA, RB</str>
+</syntax>
+<fields>
+<field name="OPCD">
+<int>33</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>266</int>
+</field>
+</fields>
+<alias>
+<target>
+<str>sub_family</str>
+</target>
+<sources>
+<source>
+<field>
+<str>Src1</str>
+</field>
+<value>
+<str>RA</str>
+</value>
+</source>
+<source>
+<field>
+<str>Src2</str>
+</field>
+<value>
+<str>RB</str>
+</value>
+</source>
+</sources>
+<destinations>
+<destination>
+<field>
+<str>Trg</str>
+</field>
+<value>
+<str>RT</str>
+</value>
+</destination>
+</destinations>
+</alias>
+<disassemble>
+<true />
+</disassemble>
+<doc_op>
+<str><![CDATA[
+Ra - Rb -> Rt
+]]></str>
+</doc_op>
+</instruction>
+<instruction name="sub2">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>sub2 RT, RA, RB</str>
+</syntax>
+<fields>
+<field name="OPCD">
+<int>34</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>300</int>
+</field>
+</fields>
+<alias>
+<target>
+<str>sub_family</str>
+</target>
+<sources>
+<source>
+<field>
+<str>Src1</str>
+</field>
+<value>
+<str>RA</str>
+</value>
+</source>
+<source>
+<field>
+<str>Src2</str>
+</field>
+<value>
+<str>RB</str>
+</value>
+</source>
+</sources>
+<destinations>
+<destination>
+<field>
+<str>Trg</str>
+</field>
+<value>
+<str>RT</str>
+</value>
+</destination>
+</destinations>
+</alias>
+<disassemble>
+<true />
+</disassemble>
+<doc_op>
+<str><![CDATA[
+Ra - Rb -> Rt
+]]></str>
+</doc_op>
+</instruction>
+</instrs>
+<core-level-hooks>
+<decode-miss>
+<str><![CDATA[
+
+]]></str>
+</decode-miss>
+<pre-cycle>
+<str><![CDATA[
+
+]]></str>
+</pre-cycle>
+<post-cycle>
+<str><![CDATA[
+
+]]></str>
+</post-cycle>
+<pre-fetch>
+<str><![CDATA[
+
+]]></str>
+</pre-fetch>
+<post-fetch>
+<str><![CDATA[
+
+]]></str>
+</post-fetch>
+<post-exec>
+<str><![CDATA[
+
+]]></str>
+</post-exec>
+<post-asm>
+<str><![CDATA[
+
+]]></str>
+</post-asm>
+<post-packet-asm>
+<str><![CDATA[
+
+]]></str>
+</post-packet-asm>
+<post-packet>
+<str><![CDATA[
+
+]]></str>
+</post-packet>
+<active-watch>
+<str><![CDATA[
+
+]]></str>
+</active-watch>
+<instr-table-watch>
+<str><![CDATA[
+
+]]></str>
+</instr-table-watch>
+</core-level-hooks>
+<asm_config>
+<comments>
+<str>#</str>
+</comments>
+<line_comments>
+<str>#</str>
+</line_comments>
+</asm_config>
+<helpers>
+<helper name="setCrField">
+<action>
+<str><![CDATA[
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+]]></str>
+</action>
+<inputs>
+<str>CR</str>
+</inputs>
+<outputs>
+<str>CR</str>
+</outputs>
+</helper>
+</helpers>
+</core>
+</cores>
+<systems>
+</systems>
+</data>

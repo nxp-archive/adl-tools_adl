@@ -1,0 +1,17 @@
+#
+# Setup and results file for running with asm86.s assembled and linked by
+# assembler and linker from mod1.adl and mod1-dis.adl.
+#
+
+CORE n=:P
+
+MD n=Mem ra=0x2a0e8 d=0
+
+RESULTS
+
+RD n=GPR i=1 d=0x000200b0
+RD n=GPR i=2 d=0x0002a0e8
+RD n=GPR i=6 d=0x00000001
+
+MD n=Mem ra=0x2a0e8 d=0x48656c6c
+

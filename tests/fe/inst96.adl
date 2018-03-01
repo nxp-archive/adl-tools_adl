@@ -1,0 +1,97 @@
+//
+// Various strict-mode tests, plus make sure that we give a warning on a
+// re-definition of an item.
+//
+
+define (core=P) {
+
+  define (reg=PC) {
+    attrs = (nia,cia);
+  }
+
+  define (reg=Foo) {
+  }
+
+  define (reg=Bar) {
+  }
+
+  define (reg=Bar) {
+    width = 64;
+  }
+
+  defmod (reg=Foo) { remove=true; };
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  defmod (regfile=GPR) {
+    width = 64;
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instr=add) {
+    """
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    """;
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  } 
+
+  define (instr=add) {
+    """
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    """;
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + 2*GPR(RB);
+    };
+  } 
+
+}

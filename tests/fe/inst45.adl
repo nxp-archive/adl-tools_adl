@@ -1,0 +1,118 @@
+//
+// Test of syntax
+//
+
+ define (arch=minippc) {
+  attrs = (up,down,ff); 
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+ 
+ define (regfile = GPR){
+   prefix=r;
+   size = 1024; 
+ }
+ 
+ define(instrfield=IMM){
+   width = 8;
+   pseudo = true;
+ }
+ 
+ define(instrfield=IMM2){
+   width = 8;
+   pseudo = true;
+ } 
+ 
+ define(instrfield=OPCD){
+   bits =(0,5);
+ }
+ 
+ define(instrfield=F1){
+   bits = 6;
+   enumerated = (".up",".down");
+ }
+ 
+ define(instrfield=F2){
+   bits = 7;
+   enumerated = (".left",".right");
+ }
+ 
+ define(instrfield=R1){
+   bits = (8,11);
+ }
+ 
+ define(instrfield=R2){
+   bits = (12,15);
+ }
+ 
+ define(instrfield=R3){
+   bits = (16,19);
+ }
+ 
+ define(instrfield=R4){
+   bits = (20,23);
+ }
+ 
+ define(instrfield=R5){
+   bits = (24,29);
+ }
+ 
+ define(instrfield=R6){
+   bits = (30,31);
+ }
+
+  
+ define(instr=foo){
+   fields = (OPCD(11),R1,R2,R3,R4,R5,R6);
+   action = {};     
+ }
+ define(instr=foo1){
+   fields = (OPCD(11),R1,R2,R3,R4,R5,R6);
+   syntax = ("%i%p%p %f,%f,%f,%f",R1,R2,R3,R4,R6);
+   action = {};     
+ }
+ define(instr=foo2){
+   fields = (OPCD(11),R1,R2,R3,R4,R5,R6);
+   syntax = ("%i%p%p %f,%f,%f,%f",R4,R2,R3,R1,R5,R6);
+   action = {};     
+ }
+ 
+ define(instr=foo3){
+   fields = (OPCD(11),R1,R2,R3,R4,R5,R6);
+   syntax = ("%i%p%p %f,%f,%f,%f",R6,R1,R2,R3,R4,R5,R1);
+   action = {};     
+ }
+ 
+ define(instr=foo4){
+   fields = (OPCD(11),R1,R2,R3,R4,R5,R6);
+   syntax = ("%i%p%p %f,%f,%f,%f",R6,R5,R4,R3,R2,R1);
+   action = {};     
+ }
+ define(instr=foo5){
+   fields = (OPCD(11),F1,F2,R1,R2,R3,R4,R5,R6);
+   syntax = ("%i%p%p %f,%f",F1,F2,IMM,IMM2,
+                     R1(IMM + IMM2),
+		     R2(IMM2),
+		     R3(IMM),
+		     R4(IMM2 > 1 ? IMM: IMM/2),
+		     R5(F1*IMM + F2*IMM2),
+		     R6(F1&F2));
+   dsyntax = ("%i %f",(R1+R2)/3,F1);		     
+   action = {};     
+ }
+ 
+ define(instr=foo6){
+   fields = (OPCD(11),F1,F2,R1,R3,R4);
+   syntax = ("%i %p%p %f,%f", F1,F2,R1, IMM2, R3( IMM2 > 0xFFFF ? 0 : 1),R4( IMM2 > 0xFFFF ? IMM2 >> 16 : IMM2));
+   dsyntax= ("%i%f%f %f,%f",F1,F2,R1,IMM2(R3 == 1 ? R4 : R4<<16),IMM8);
+   action = {};     
+ }
+ 
+ 
+ 
+ 
+}
+define (core=P) {
+  archs=minippc;
+}

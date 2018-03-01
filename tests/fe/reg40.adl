@@ -1,0 +1,93 @@
+//
+// Test to make sure that we record the proper resource index expression
+// for register-file accesses.
+//
+define (arch = nested){
+
+  define (reg=CIA) {
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=Src1) {
+    width = 5; 
+    pseudo = true;
+    pseudo=true;
+  }
+
+  define (instrfield=Src2) {
+    width = 5; 
+    pseudo = true;
+  }
+
+  define (instrfield=Res) {
+    width = 5; 
+    pseudo = true;
+  }
+
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instrfield=Rc) {
+    bits = 31;
+  }
+
+  bits<32>  extra(bits<2> n, bits<2>m) {
+    return (GPR(n) + GPR(m))/2;
+  }
+
+
+  // Both of the nested instructions are aliases which use expressions.
+  define(instr=add_outer) { 
+    fields = (Src1, Src2, Res); 
+    width = 32;
+    define(instr="add.") { 
+      fields = (OPCD(31),RT,RA,RB,XO(266),Rc(1));
+
+      alias = add_outer(Src1(RA+16),Src2(RB+16),Res(RT+16)); 
+    } 
+    define(instr=add) { 
+      fields = (OPCD(31),RT,RA,RB,XO(266),Rc(0));
+
+      alias = add_outer(Src1(RA&0xf),Src2(RB&0xf),Res(RT&0xf)); 
+    } 
+
+    action = { 
+      var x = Res.uint32();
+      var y = Src1;
+      GPR(x) = GPR(y) + GPR(Src2) + extra(Src1(0,1),Src2(0,1)); 
+    };
+  }
+
+} // arch
+
+define (core = P)
+{
+  archs = nested;
+}

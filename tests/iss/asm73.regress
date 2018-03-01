@@ -1,0 +1,37 @@
+
+asm73.elf:     file format elf32-powerpc
+asm73.elf
+architecture: powerpc:common, flags 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+start address 0xffffff00
+
+Program Header:
+    LOAD off    0x00000000 vaddr 0xffff0000 paddr 0xffff0000 align 2**16
+         filesz 0x0000ff1c memsz 0x0000ff1c flags r-x
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         0000001c  ffffff00  ffffff00  0000ff00  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .text2        0000001c  00080000  00080000  0000ff1c  2**2
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+ffffff00 l    d  .text	00000000 .text
+00080000 l    d  .text2	00000000 .text2
+00000000 l    df *ABS*	00000000 sieve.c
+ffffff00 l       .text	00000000 gcc2_compiled.
+ffffff00 g     F .text	00000000 main
+00080000 g     F .text2	00000000 func2
+
+
+
+Disassembly of section .text:
+
+ffffff00 <main>:
+ffffff00:	38 21 00 01 	addi   r1,r1,1
+ffffff04:	38 21 00 01 	addi   r1,r1,1
+ffffff08:	38 21 00 01 	addi   r1,r1,1
+ffffff0c:	38 21 00 01 	addi   r1,r1,1
+ffffff10:	38 21 00 01 	addi   r1,r1,1
+ffffff14:	38 21 00 01 	addi   r1,r1,1
+ffffff18:	48 08 00 e8 	b      80000 <func2>

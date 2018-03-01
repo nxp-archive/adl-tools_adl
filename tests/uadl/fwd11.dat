@@ -1,0 +1,124 @@
+#
+# Tests to make sure that alias resolution works properly with forwarding paths.
+# The mtlr forwards back the LR value to the blr instruction.
+#
+CORE n=:P
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	li r2,0x40
+	mtlr r2
+	blr
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	addi r3,r3,3
+	addi r3,r3,3
+	addi r3,r3,3
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38400040	#	li r2,0x40
+MD n=Mem ra=0x0000000c d=0x7C4803A6	#	mtlr r2
+MD n=Mem ra=0x00000010 d=0x4E800020	#	blr
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000002c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000030 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000034 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000038 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000003c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000040 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000044 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000048 d=0x38630003	#	addi r3,r3,3
+# </GEN>
+
+RD n=NIA d=0x0
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=2
+R n=GPR i=1 d=0x00000001
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=3
+R n=GPR i=1 d=0x00000002
+CTIME t=6
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38400040
+INSTR op=0x38400040					asm="li r2,64"
+ITIME t=3
+R n=GPR i=2 d=0x00000040
+CTIME t=6
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c4803a6
+INSTR op=0x7c4803a6					asm="mtlr r2"
+ITIME t=4
+R n=LR d=0x00000040
+CTIME t=7
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x4e800020
+INSTR op=0x4e800020					asm="blr "
+B taken=1 ea=0x40
+ITIME t=5
+CTIME t=8
+
+I ea=0x40 id=6
+M n=Mem t=ifetch ea=0x40 ra=0x40 d=0x38630003
+INSTR op=0x38630003					asm="addi r3,r3,3"
+ITIME t=7
+R n=GPR i=3 d=0x00000003
+CTIME t=10
+
+I ea=0x44 id=7
+M n=Mem t=ifetch ea=0x44 ra=0x44 d=0x38630003
+INSTR op=0x38630003					asm="addi r3,r3,3"
+ITIME t=8
+R n=GPR i=3 d=0x00000006
+CTIME t=11
+
+I ea=0x48 id=8
+M n=Mem t=ifetch ea=0x48 ra=0x48 d=0x38630003
+INSTR op=0x38630003					asm="addi r3,r3,3"
+ITIME t=9
+R n=GPR i=3 d=0x00000009
+CTIME t=12
+
+I ea=0x4c id=9
+M n=Mem t=ifetch ea=0x4c ra=0x4c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=12
+CTIME t=15
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000040
+RD n=GPR i=3 d=0x00000009

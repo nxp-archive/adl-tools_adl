@@ -1,0 +1,169 @@
+#
+# Options:
+#   ./dlx_cache_split ../iss/in2.dat -trace 
+#
+
+TEST id=0
+
+CORE n=:P
+
+TRACE
+
+I ea=0x100 id=1
+C n=L1i a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x80401000
+INSTR op=0x80401000					asm="lwz r2,4096(r0)"
+ITIME t=3
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=0 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=2 d=0xdeadbeef
+CTIME t=9
+
+I ea=0x104 id=2
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x394a0100
+INSTR op=0x394a0100					asm="addi r10,r10,256"
+ITIME t=6
+R n=GPR i=10 d=0x00000100
+CTIME t=10
+
+I ea=0x108 id=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add r3,r2,r1"
+ITIME t=9
+R n=GPR i=3 d=0xdeaddeee
+CTIME t=13
+
+I ea=0x10c id=4
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x34a5fffe
+INSTR op=0x34a5fffe					asm="addic. r5,r5,-2"
+ITIME t=12
+R n=CR d=0x80000000
+R n=GPR i=5 d=0xfffffffe
+R n=XER d=0x00000000
+CTIME t=16
+
+I ea=0x110 id=5
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x90640000
+INSTR op=0x90640000					asm="stw r3,0(r4)"
+ITIME t=15
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=0 way=4 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0xdeaddeee
+CTIME t=25
+
+I ea=0x114 id=6
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x90660000
+INSTR op=0x90660000					asm="stw r3,0(r6)"
+ITIME t=18
+D n=Mem t=write ea=0xfffffffe nb=4
+M n=Mem t=write ea=0xfffffffc ra=0xfffffffc d=0x0000dead
+C n=L1d a=miss t=write set=0 way=2 lm=0x7f ra=0x0
+M n=Mem t=write ea=0x0 ra=0x0 d=0xdeee0000
+CTIME t=60
+
+I ea=0x118 id=7
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=24
+CTIME t=61
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=5 d=0xfffffffe
+RD n=GPR i=10 d=0x100
+
+MD n=Mem ra=0x00001000 d=0xdeadbeef
+MD n=Mem ra=0x00002000 d=0xdeaddeee
+MD n=Mem ra=0xfffffffc d=0x0000dead
+MD n=Mem ra=0x00000000 d=0xdeee0000
+
+TEST id=1
+
+CORE n=:P
+
+
+TRACE
+
+I ea=0x100 id=1
+C n=L1i a=miss t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x80401000
+INSTR op=0x80401000					asm="lwz r2,4096(r0)"
+ITIME t=79
+D n=Mem t=read ea=0x1000 nb=4
+C n=L1d a=miss t=read set=0 way=0 lm=0x7f ra=0x1000
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=2 d=0xdeadbeef
+CTIME t=85
+
+I ea=0x104 id=2
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x394a0100
+INSTR op=0x394a0100					asm="addi r10,r10,256"
+ITIME t=82
+R n=GPR i=10 d=0x00000100
+CTIME t=86
+
+I ea=0x108 id=3
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add r3,r2,r1"
+ITIME t=85
+R n=GPR i=3 d=0xdeaddeee
+CTIME t=89
+
+I ea=0x10c id=4
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x34a5fffe
+INSTR op=0x34a5fffe					asm="addic. r5,r5,-2"
+ITIME t=88
+R n=CR d=0x80000000
+R n=GPR i=5 d=0xfffffffe
+R n=XER d=0x00000000
+CTIME t=92
+
+I ea=0x110 id=5
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x90640000
+INSTR op=0x90640000					asm="stw r3,0(r4)"
+ITIME t=91
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=0 way=4 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0xdeaddeee
+CTIME t=101
+
+I ea=0x114 id=6
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x90660000
+INSTR op=0x90660000					asm="stw r3,0(r6)"
+ITIME t=94
+D n=Mem t=write ea=0xfffffffe nb=4
+M n=Mem t=write ea=0xfffffffc ra=0xfffffffc d=0x0000dead
+C n=L1d a=miss t=write set=0 way=2 lm=0x7f ra=0x0
+M n=Mem t=write ea=0x0 ra=0x0 d=0xdeee0000
+CTIME t=136
+
+I ea=0x118 id=7
+C n=L1i a=hit t=ifetch set=2 way=0 lm=0x7f ra=0x100
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=100
+CTIME t=137
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=5 d=0xfffffffe
+RD n=GPR i=10 d=0x100
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0xdeaddeee

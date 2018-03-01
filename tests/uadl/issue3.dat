@@ -1,0 +1,42 @@
+#
+# The two instructions should issue in parallel, since addic. should
+# only have XER as a target, and not as a source.
+#
+= asm
+
+  addic. 1,1,10   # Sources and targets the XER
+  addic  2,2,20   # Only targets the XER, so shouldn't stall.
+
+  
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3421000A	#	addic. 1,1,10   # Sources and targets the XER
+MD n=Mem ra=0x00000004 d=0x30420014	#	addic  2,2,20   # Only targets the XER, so shouldn't stall.
+# </GEN>
+
+RD n=NIA d=0x0
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x3421000a                                     asm="addic. r1,r1,10"
+ITIME t=1
+CTIME t=5
+
+I ea=0x4 id=2
+INSTR op=0x30420014                                     asm="addic r2,r2,20"
+ITIME t=1
+CTIME t=5
+
+I ea=0x8 id=3
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=2
+CTIME t=6
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20

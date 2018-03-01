@@ -1,0 +1,13 @@
+#
+# Checks to make sure that we get the expected cycle count.
+# In this situation, mod3's ratio is set at 1.2, so we expect
+# that the BCCNT and PCCNT registers should have a value ~ 1.2 x
+# the number of instructions in the test.
+#
+
+CORE n=:P
+
+RESULTS
+
+RD n=BCCNT d=2059
+RD n=PCCNT d=2059

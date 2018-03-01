@@ -1,0 +1,33 @@
+
+asm70.o:     file format elf32-powerpc
+asm70.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000008  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  0000003c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  0000003c  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	1f          	pop  a,b,c,d,
+   1:	18          	pop  a,
+   2:	14          	pop  b,
+   3:	12          	pop  c,
+   4:	11          	pop  d,
+   5:	1f          	pop  a,b,c,d,
+   6:	25          	push b,d,
+   7:	2a          	push a,c,

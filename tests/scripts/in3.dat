@@ -1,0 +1,44 @@
+
+= asm
+
+  lwz r1,0x1000(r0)
+  lwz r2,0x3000(r0)
+  lwz r3,0x1004(r0)
+  .long 0
+  .long 0
+  mfspr r10,SRR0
+  addi r10,r10,4
+  li r20,0x1234
+  mtspr SRR0,r10
+  rfi
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+CORE n=:P
+
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000104 d=0x80403000	#	lwz r2,0x3000(r0)
+MD n=Mem ra=0x00000108 d=0x80601004	#	lwz r3,0x1004(r0)
+MD n=Mem ra=0x0000010c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000110 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000114 d=0x7D5A02A6	#	mfspr r10,SRR0
+MD n=Mem ra=0x00000118 d=0x394A0004	#	addi r10,r10,4
+MD n=Mem ra=0x0000011c d=0x3A801234	#	li r20,0x1234
+MD n=Mem ra=0x00000120 d=0x7D5A03A6	#	mtspr SRR0,r10
+MD n=Mem ra=0x00000124 d=0x4C000064	#	rfi
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0x12345678
+RD n=GPR i=20 d=0x00001234

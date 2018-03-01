@@ -1,0 +1,3 @@
+inst28.adl:16: Duplicate enumeration value '-' found.
+inst28.adl:21: The enumerated field has no non-reserved entries.
+inst28.adl:26: An enumerated field must have more than one item.

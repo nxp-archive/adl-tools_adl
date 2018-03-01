@@ -1,0 +1,312 @@
+#
+# This tests the scheduling of load/store instructions, in which we group them
+# if both threads have load/store instructions at the same time.
+#
+= asm
+
+	lwz r1,0x1000(r0)
+	lwz r2,0x1004(r0)
+	lwz r3,0x1008(r0)
+	lwz r4,0x100c(r0)
+	add r1,r1,r10
+	add r2,r2,r10
+	add r3,r3,r10
+	add r4,r4,r10
+	lwz r5,0x1010(r0)
+	lwz r6,0x1014(r0)
+	add r5,r5,r10
+	add r6,r6,r10
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x80401004	#	lwz r2,0x1004(r0)
+MD n=Mem ra=0x00000008 d=0x80601008	#	lwz r3,0x1008(r0)
+MD n=Mem ra=0x0000000c d=0x8080100C	#	lwz r4,0x100c(r0)
+MD n=Mem ra=0x00000010 d=0x7C215214	#	add r1,r1,r10
+MD n=Mem ra=0x00000014 d=0x7C425214	#	add r2,r2,r10
+MD n=Mem ra=0x00000018 d=0x7C635214	#	add r3,r3,r10
+MD n=Mem ra=0x0000001c d=0x7C845214	#	add r4,r4,r10
+MD n=Mem ra=0x00000020 d=0x80A01010	#	lwz r5,0x1010(r0)
+MD n=Mem ra=0x00000024 d=0x80C01014	#	lwz r6,0x1014(r0)
+MD n=Mem ra=0x00000028 d=0x7CA55214	#	add r5,r5,r10
+MD n=Mem ra=0x0000002c d=0x7CC65214	#	add r6,r6,r10
+# </GEN>
+
+CORE n=:PMT
+
+RD n=CCR d=0x80000000
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=GPR i=10 d=1
+
+RD n=NIA d=0x0
+
+CORE n=:PMT:t1
+
+RD n=GPR i=10 d=10
+
+RD n=NIA d=0x0
+
+MD n=Mem ra=0x1000 d=1
+MD n=Mem ra=0x1004 d=2
+MD n=Mem ra=0x1008 d=3
+MD n=Mem ra=0x100c d=4
+MD n=Mem ra=0x1010 d=5
+MD n=Mem ra=0x1014 d=6
+
+TRACE
+
+
+
+CORE n=:PMT:t0
+
+
+I ea=0x0 id=1 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201000
+INSTR op=0x80201000					asm="lwz r1,4096(r0)"
+ITIME t=4
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000001
+R n=GPR i=1 d=0x00000001
+CTIME t=9
+
+I ea=0x4 id=2 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x80401004
+INSTR op=0x80401004					asm="lwz r2,4100(r0)"
+ITIME t=5
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000002
+R n=GPR i=2 d=0x00000002
+CTIME t=10
+
+I ea=0x8 id=3 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x80601008
+INSTR op=0x80601008					asm="lwz r3,4104(r0)"
+ITIME t=8
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000003
+R n=GPR i=3 d=0x00000003
+CTIME t=11
+
+I ea=0xc id=4 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x8080100c
+INSTR op=0x8080100c					asm="lwz r4,4108(r0)"
+ITIME t=9
+D n=Mem t=read ea=0x100c nb=4
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000004
+R n=GPR i=4 d=0x00000004
+CTIME t=12
+
+I ea=0x10 id=5 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c215214
+INSTR op=0x7c215214					asm="add r1,r1,r10"
+ITIME t=9
+R n=GPR i=1 d=0x00000002
+CTIME t=12
+
+I ea=0x14 id=6 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c425214
+INSTR op=0x7c425214					asm="add r2,r2,r10"
+ITIME t=10
+R n=GPR i=2 d=0x00000003
+CTIME t=13
+
+CORE n=:PMT:t1
+
+
+I ea=0x0 id=7 tic=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x80201000
+INSTR op=0x80201000					asm="lwz r1,4096(r0)"
+ITIME t=10
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000001
+R n=GPR i=1 d=0x00000001
+CTIME t=13
+
+CORE n=:PMT:t0
+
+
+I ea=0x18 id=8 tic=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7c635214
+INSTR op=0x7c635214					asm="add r3,r3,r10"
+ITIME t=11
+R n=GPR i=3 d=0x00000004
+CTIME t=14
+
+CORE n=:PMT:t1
+
+
+I ea=0x4 id=9 tic=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x80401004
+INSTR op=0x80401004					asm="lwz r2,4100(r0)"
+ITIME t=11
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000002
+R n=GPR i=2 d=0x00000002
+CTIME t=14
+
+CORE n=:PMT:t0
+
+
+I ea=0x1c id=10 tic=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7c845214
+INSTR op=0x7c845214					asm="add r4,r4,r10"
+ITIME t=12
+R n=GPR i=4 d=0x00000005
+CTIME t=15
+
+CORE n=:PMT:t1
+
+
+I ea=0x8 id=11 tic=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x80601008
+INSTR op=0x80601008					asm="lwz r3,4104(r0)"
+ITIME t=12
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000003
+R n=GPR i=3 d=0x00000003
+CTIME t=15
+
+CORE n=:PMT:t0
+
+
+I ea=0x20 id=12 tic=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x80a01010
+INSTR op=0x80a01010					asm="lwz r5,4112(r0)"
+ITIME t=13
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000005
+R n=GPR i=5 d=0x00000005
+CTIME t=16
+
+I ea=0x24 id=13 tic=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x80c01014
+INSTR op=0x80c01014					asm="lwz r6,4116(r0)"
+ITIME t=14
+D n=Mem t=read ea=0x1014 nb=4
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0x00000006
+R n=GPR i=6 d=0x00000006
+CTIME t=17
+
+I ea=0x28 id=14 tic=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x7ca55214
+INSTR op=0x7ca55214					asm="add r5,r5,r10"
+ITIME t=15
+R n=GPR i=5 d=0x00000006
+CTIME t=18
+
+I ea=0x2c id=15 tic=12
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x7cc65214
+INSTR op=0x7cc65214					asm="add r6,r6,r10"
+ITIME t=16
+R n=GPR i=6 d=0x00000007
+CTIME t=19
+
+I ea=0x30 id=16 tic=13
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=16
+CTIME t=19
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=17 tic=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x8080100c
+INSTR op=0x8080100c					asm="lwz r4,4108(r0)"
+ITIME t=17
+D n=Mem t=read ea=0x100c nb=4
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000004
+R n=GPR i=4 d=0x00000004
+CTIME t=20
+
+I ea=0x10 id=18 tic=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c215214
+INSTR op=0x7c215214					asm="add r1,r1,r10"
+ITIME t=18
+R n=GPR i=1 d=0x0000000b
+CTIME t=21
+
+I ea=0x14 id=19 tic=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c425214
+INSTR op=0x7c425214					asm="add r2,r2,r10"
+ITIME t=18
+R n=GPR i=2 d=0x0000000c
+CTIME t=21
+
+I ea=0x18 id=20 tic=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7c635214
+INSTR op=0x7c635214					asm="add r3,r3,r10"
+ITIME t=19
+R n=GPR i=3 d=0x0000000d
+CTIME t=22
+
+I ea=0x1c id=21 tic=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x7c845214
+INSTR op=0x7c845214					asm="add r4,r4,r10"
+ITIME t=19
+R n=GPR i=4 d=0x0000000e
+CTIME t=22
+
+I ea=0x20 id=22 tic=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x80a01010
+INSTR op=0x80a01010					asm="lwz r5,4112(r0)"
+ITIME t=20
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000005
+R n=GPR i=5 d=0x00000005
+CTIME t=23
+
+I ea=0x24 id=23 tic=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x80c01014
+INSTR op=0x80c01014					asm="lwz r6,4116(r0)"
+ITIME t=21
+D n=Mem t=read ea=0x1014 nb=4
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0x00000006
+R n=GPR i=6 d=0x00000006
+CTIME t=24
+
+I ea=0x28 id=24 tic=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x7ca55214
+INSTR op=0x7ca55214					asm="add r5,r5,r10"
+ITIME t=22
+R n=GPR i=5 d=0x0000000f
+CTIME t=25
+
+I ea=0x2c id=25 tic=12
+M n=Mem t=ifetch ea=0x2c ra=0x2c d=0x7cc65214
+INSTR op=0x7cc65214					asm="add r6,r6,r10"
+ITIME t=23
+R n=GPR i=6 d=0x00000010
+CTIME t=26
+
+I ea=0x30 id=26 tic=13
+M n=Mem t=ifetch ea=0x30 ra=0x30 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=23
+CTIME t=26
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000003
+RD n=GPR i=3 d=0x00000004
+RD n=GPR i=4 d=0x00000005
+RD n=GPR i=5 d=0x00000006
+RD n=GPR i=6 d=0x00000007
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=0x0000000b
+RD n=GPR i=2 d=0x0000000c
+RD n=GPR i=3 d=0x0000000d
+RD n=GPR i=4 d=0x0000000e
+RD n=GPR i=5 d=0x0000000f
+RD n=GPR i=6 d=0x00000010

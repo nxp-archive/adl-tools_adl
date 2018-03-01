@@ -1,0 +1,63 @@
+format=huvp;
+//------------------------------------------------------------------------------
+test => in92 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x1;
+  seed    = "";
+  genver  = {};
+  
+  P => P {
+    I : R {nm="NIA"; d=0x00000000;};
+    I : R {nm="TIA"; d=0x00000000;};
+    I : R {nm="GPR0"; d=0x0000000000000003;};
+    I : R {nm="GPR1"; d=0x0000000000000000;};
+    I : R {nm="GPR2"; d=0x0000000000000000;};
+    I : R {nm="GPR3"; d=0x0000000000000000;};
+    E : I {asm="addi16 1,0x1"; c=1;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0x4202; op=0x4202;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x0000000000000001],};};
+    E : I {asm="loop16 0,0x0"; c=2;
+                   ea=0x0000000000000002; ra=0x0000000000000002; d=0x9000; op=0x9000;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR0", d=>0x0000000000000002],
+                       [ t=>"reg", rn=>"TIA", d=>0x00000000],};};
+    E : I {asm="addi96 1,0x3fffffffffffffff"; c=3;
+                   ea=0x0000000000000004; ra={0x0000000000000004,0x0000000000000008,0x000000000000000c}; d={0xa0800001,0x7fffffff,0xffffffff}; op=0xa08000017fffffffffffffff; op_size=96;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x3fffffffffffffff],};};
+    E : I {asm="addi16 1,0x1"; c=4;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0x4202; op=0x4202;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x4000000000000000],};};
+    E : I {asm="loop16 0,0x0"; c=5;
+                   ea=0x0000000000000002; ra=0x0000000000000002; d=0x9000; op=0x9000;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR0", d=>0x0000000000000001],
+                       [ t=>"reg", rn=>"TIA", d=>0x00000000],};};
+    E : I {asm="addi96 1,0x3fffffffffffffff"; c=6;
+                   ea=0x0000000000000004; ra={0x0000000000000004,0x0000000000000008,0x000000000000000c}; d={0xa0800001,0x7fffffff,0xffffffff}; op=0xa08000017fffffffffffffff; op_size=96;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x3fffffffffffffff],};};
+    E : I {asm="addi16 1,0x1"; c=7;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0x4202; op=0x4202;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x4000000000000000],};};
+    E : I {asm="loop16 0,0x0"; c=8;
+                   ea=0x0000000000000002; ra=0x0000000000000002; d=0x9000; op=0x9000;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR0", d=>0x0000000000000000],
+                       [ t=>"reg", rn=>"TIA", d=>0x00000000],};};
+    E : I {asm="addi96 1,0x3fffffffffffffff"; c=9;
+                   ea=0x0000000000000004; ra={0x0000000000000004,0x0000000000000008,0x000000000000000c}; d={0xa0800001,0x7fffffff,0xffffffff}; op=0xa08000017fffffffffffffff; op_size=96;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x3fffffffffffffff],};};
+    E : I {asm="addi16 1,0x1"; c=10;
+                   ea=0x0000000000000000; ra=0x0000000000000000; d=0x4202; op=0x4202;  op_size=16;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x4000000000000000],};};
+    E : I {asm="loop16 0,0x0"; c=11;
+                   ea=0x0000000000000002; ra=0x0000000000000002; d=0x9000; op=0x9000;  op_size=16;};
+    E : I {asm="addi96 1,0x3fffffffffffffff"; c=12;
+                   ea=0x0000000000000004; ra={0x0000000000000004,0x0000000000000008,0x000000000000000c}; d={0xa0800001,0x7fffffff,0xffffffff}; op=0xa08000017fffffffffffffff; op_size=96;
+                   ir={[ t=>"reg", rn=>"GPR1", d=>0x3fffffffffffffff],};};
+    R : RES {ea=0x0000000000000010; ra=0x0000000000000010; };
+    R : R {nm="NIA"; d=0x00000010;};
+    R : R {nm="TIA"; d=0x00000000;};
+    R : R {nm="GPR0"; d=0x0000000000000000;};
+    R : R {nm="GPR1"; d=0x3fffffffffffffff;};
+    R : R {nm="GPR2"; d=0x0000000000000000;};
+    R : R {nm="GPR3"; d=0x0000000000000000;};
+  } // P
+} 

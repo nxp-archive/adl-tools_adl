@@ -1,0 +1,4 @@
+../asm111.s: Assembler messages:
+../asm111.s:5: Warning: Immediate value is big.
+../asm111.s:7: Warning: Immediate value is big.
+../asm111.s:9: Warning: Immediate value is big.

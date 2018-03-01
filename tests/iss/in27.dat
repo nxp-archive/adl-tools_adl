@@ -1,0 +1,58 @@
+
+= asm
+ lwz  r2,0x1000(0)
+ lwz  r2,0x2000(0)
+ add  r3,r2,r1
+ stw  r3,0x1004(0)
+ stw  r3,0x2004(0)
+= /asm
+
+= mdopts
+ instr-offset: 0x10000
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x80401000	# lwz r2,0x1000(0)
+MD n=Mem ra=0x00010004 d=0x80402000	# lwz r2,0x2000(0)
+MD n=Mem ra=0x00010008 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x0001000c d=0x90601004	# stw r3,0x1004(0)
+MD n=Mem ra=0x00010010 d=0x90602004	# stw r3,0x2004(0)
+# </GEN>
+CORE n=:P
+# Protection-fault handler.
+# addi  r31,r31,1
+# mfspr r30,SRR0
+# addi r30,r30,4
+# mtspr SRR0,r30
+# rfi
+MD n=Mem ra=0x00010100 d=0x3BFF0001	# addi r31,r31,1
+MD n=Mem ra=0x00010104 d=0x7FDA02A6	# mfspr r30,SRR0
+MD n=Mem ra=0x00010108 d=0x3BDE0004	# addi r30,r30,4
+MD n=Mem ra=0x0001010c d=0x7FDA03A6	# mtspr SRR0,r30
+MD n=Mem ra=0x00010110 d=0x4C000064	# rfi
+
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=4 d=0x2000
+RD n=IVOR7 d=0x100
+RD n=NIA   d=0x00000000
+
+MD n=Mem ra=0xb2000 d=0xdeadbeef
+MD n=Mem ra=0xa1004 d=0x12345678
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 EPN=0x0 SX=1 SR=1 SW=1
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 EPN=0x4 SX=1 SR=0 SW=1
+
+# ea=0x2000 ra=0xB2000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x2c8 WIMG=0x3 EPN=0x8 SX=1 SR=1 SW=0
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=31 d=2
+
+MD n=Mem ra=0xb2000 d=0xdeadbeef
+MD n=Mem ra=0xa1004 d=0xdeaddeee

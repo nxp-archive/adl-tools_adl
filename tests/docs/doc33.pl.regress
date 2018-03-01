@@ -1,0 +1,724 @@
+$data = {
+"cores" => {
+"P" => {
+"doc" => <<DATA
+Example documentation string- place overview information here.
+
+DATA
+,
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"doc" => <<DATA
+Current instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"CR" => {
+"doc" => <<DATA
+The condition register.
+    
+DATA
+,
+"width" => 32,
+"fields" => {
+"CR" => {
+"indexed" => {
+"width" => 4,
+"count" => 8,
+},
+"attributes" => {
+"one" => "",
+},
+},
+"EQ" => {
+"doc" => <<DATA
+Zero (EQ)- This bit is set when the result is zero.
+
+DATA
+,
+"bits" => [
+[
+2,
+2,
+],
+],
+"attributes" => {
+"three" => "",
+},
+},
+"FEX" => {
+"doc" => <<DATA
+Floating-point enabled exception (FEX). Copy of the final state of FPSCR(FEX)
+at the completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+5,
+5,
+],
+],
+},
+"FX" => {
+"doc" => <<DATA
+Floating point exception (FX). Copy of the final state of FPSCR(FX) at the
+completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+4,
+4,
+],
+],
+},
+"GT" => {
+"doc" => <<DATA
+Positive (GT)- This bit is set when the result is positive (and not zero).
+
+DATA
+,
+"bits" => [
+[
+1,
+1,
+],
+],
+"attributes" => {
+"two" => "",
+},
+},
+"LT" => {
+"doc" => <<DATA
+Negative (LT)- This bit is set when the result is negative.
+
+DATA
+,
+"bits" => [
+[
+0,
+0,
+],
+],
+},
+"OX" => {
+"doc" => <<DATA
+Floating-point overflow exception (OX). Copy of the final state of FPSCR(OX) at
+the completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+7,
+7,
+],
+],
+},
+"SO" => {
+"doc" => <<DATA
+Summary overflow (SO)- This is a copy of the final state of XER(SO) at the
+completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+3,
+3,
+],
+],
+},
+"VX" => {
+"doc" => <<DATA
+Floating-point invalid exception (VX). Copy of the final state of FPSCR(CX) at
+the completion of the instruction.
+
+DATA
+,
+"bits" => [
+[
+6,
+6,
+],
+],
+},
+},
+"shared" => 0,
+},
+"CTR" => {
+"doc" => <<DATA
+The counter register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+"read" => {
+<<DATA
+{
+    return CTR / 2 ;
+}
+DATA
+,
+},
+"write" => {
+<<DATA
+{
+    CTR = x * 2 ;
+}
+DATA
+,
+},
+},
+"ESR" => {
+"doc" => <<DATA
+Exception syndrome register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"IVOR6" => {
+"doc" => <<DATA
+Interrupt-vector offset register 6.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"IVPR" => {
+"doc" => <<DATA
+Interrupt-vector prefix register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"MSR" => {
+"doc" => <<DATA
+Machine state register.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"NIA" => {
+"doc" => <<DATA
+Next instruction address.
+    
+DATA
+,
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+"SRR0" => {
+"doc" => <<DATA
+Save-restore register 0.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+"SRR1" => {
+"doc" => <<DATA
+Save-restore register 1.
+    
+DATA
+,
+"width" => 32,
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"doc" => <<DATA
+General purpose registers.
+    
+DATA
+,
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+"SPR" => {
+"width" => 32,
+"size" => 1024,
+"shared" => 0,
+"entries" => {
+"9" => {
+"syntax" => "CTR",
+"reg" => "CTR",
+},
+"26" => {
+"syntax" => "SRR0",
+"reg" => "SRR0",
+},
+"27" => {
+"syntax" => "SRR1",
+"reg" => "SRR1",
+},
+"62" => {
+"syntax" => "ESR",
+"reg" => "ESR",
+},
+},
+},
+},
+"instrfields" => {
+"D" => {
+"doc" => <<DATA
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+0,
+5,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfc000000",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "imm",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "imm",
+},
+"RS" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "imm",
+},
+"SI" => {
+"doc" => <<DATA
+Signed immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"UI" => {
+"doc" => <<DATA
+Unsigned immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"type" => "imm",
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+21,
+30,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add" => {
+"width" => 32,
+"syntax" => "add RT, RA, RB",
+"dsyntax" => "add ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 266,
+},
+"action" => <<DATA
+{
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"addi" => {
+"width" => 32,
+"syntax" => "addi RT, RA, SI",
+"dsyntax" => "addi ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 14,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var si = signExtend ( SI , 32 ) ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + si ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"addic." => {
+"width" => 32,
+"syntax" => "addic. RT, RA, SI",
+"dsyntax" => "addic. ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 13,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     var si = signExtend ( SI , 32 ) ;
+    GPR ( RT ) = GPR ( RA ) + si ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"CR",
+"GPR(RA)",
+],
+"outputs" => [
+"CR",
+"GPR(RT)",
+],
+"helpers" => [
+"setCrField",
+],
+},
+"addis" => {
+"width" => 32,
+"syntax" => "addis RT, RA, SI",
+"dsyntax" => "addis ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 15,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+     bits < 32 > si = SI ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si << 16 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + ( si << 16 ) ;
+    }
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)",
+],
+},
+"lwz" => {
+"width" => 32,
+"syntax" => "lwz RT,D(RA)",
+"dsyntax" => "lwz ${RT},${D}(${RA})",
+"fields" => {
+"OPCD" => 32,
+"RT" => "",
+"RA" => "",
+"D" => "",
+},
+"action" => <<DATA
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + D ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+],
+"outputs" => [
+"GPR(RT)",
+],
+"input_mems" => [
+"Mem",
+],
+},
+},
+"ext_resources" => {
+"bar" => {
+"objtype" => "Bar",
+"external" => 0,
+"constr_args" => [
+"constr_arg" => "1",
+"constr_arg" => "2",
+"constr_arg" => "3",
+],
+},
+"foo" => {
+"objtype" => "Foo",
+"external" => 1,
+"constr_args" => [
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+"helpers" => {
+"setCrField" => {
+"action" => <<DATA
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+DATA
+,
+"inputs" => [
+"CR",
+],
+"outputs" => [
+"CR",
+],
+},
+"setcrfield" => {
+"action" => <<DATA
+ void setcrfield ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+DATA
+,
+"inputs" => [
+"CR",
+],
+"outputs" => [
+"CR",
+],
+},
+},
+},
+},
+"systems" => {
+},
+};
+

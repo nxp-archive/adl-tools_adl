@@ -1,0 +1,97 @@
+//
+// Sub-instructions should work with pseudo instruction fields as well.
+//
+// Pseudo-fields may be re-used within sub-instructions without a conflict. 
+//
+// This tests little-endian ordering.
+//
+define (arch=minippc) {
+
+  bit_endianness = little;
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    pseudo = true;
+    width = 8;
+  }
+  
+  define (instrfield=F) {
+    pseudo = true;
+    width = 8;
+  }
+
+  define (instrfield=X1) {
+    pseudo = true;
+    width = 8;
+  }
+
+  define (instrfield=X2) {
+    pseudo = true;
+    width = 16;
+  }
+
+  define (instrfield=X3) {
+    pseudo = true;
+    width = 24;
+  }
+  
+  define (reg = IAR) {
+    width = 32;
+    attrs = (cia,nia);
+  }
+
+  define (subinstr=a1) {
+    fields = (F(0),X1);
+    action = {};
+  }
+
+  define (subinstr=a2) {
+    fields = (F(1),X2);
+    action = {};
+  }
+
+  define (subinstr=a3) {
+    fields = (F(2),X3);
+    action = {};
+  }
+
+  define (subinstr=b1) {
+    fields = (F(0),X1);
+    action = {};
+  }
+
+  define (subinstr=b2) {
+    fields = (F(1),X2);
+    action = {};
+  }
+
+  define (subinstr=b3) {
+    fields = (F(2),X3);
+    action = {};
+  }
+
+  define (instr=foo) {
+    fields = (OPCD(0x1e),A,B);
+    
+    define (subinstrs=A) { subs = (a1,a2,a3); }
+    define (subinstrs=B) { subs = (b1,b2,b3); }
+
+    action = {};
+  }
+
+  define (instr=bar) {
+    fields = (OPCD(0x2e),A,B);
+    
+    define (subinstrs=A) { subs = (a1,a2,a3); }
+    define (subinstrs=B) { subs = (b1,b2,b3); }
+
+    action = {};
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,7 @@
+inst67.adl:564: Field 'VarPrefixOpcode_imp_bits__6_15_' is larger than the instruction.
+inst67.adl:1026: Width must be an even number of bytes.
+inst67.adl:1075: Width must be an even number of bytes.
+inst67.adl:1164: Field 'FFF_imp_bits__7_9_x_16_16_' is larger than the instruction.
+inst67.adl:998: Width must be an even number of bytes.
+inst67.adl:1033: Width must be an even number of bytes.
+inst67.adl:1046: Width must be an even number of bytes.

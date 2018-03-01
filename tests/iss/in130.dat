@@ -1,0 +1,57 @@
+#
+# Demonstrates a fetch which results in an exception- a protection fault in this
+# case.  This tests the situation where a protection fault occurs on the first
+# instruction.
+#
+= asm
+
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  .long 0x0
+  addi r31,r31,1
+  mfspr r30,SRR0
+  addi r30,r30,4
+  mtspr SRR0,r30
+  rfi
+
+= /asm
+
+= mdopts
+ instr-offset: 0x10ffc
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010ffc d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00011000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00011004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00011008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0001100c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00011010 d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x00011014 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x00011018 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x0001101c d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x00011020 d=0x4C000064	#	rfi
+# </GEN>
+CORE n=:P
+
+RD n=GPR i=1  d=0
+RD n=GPR i=31 d=0
+
+RD n=IVOR7 d=0x1010
+RD n=NIA   d=0x0ffc
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 EPN=0x0 SX=0 SR=1 SW=1
+
+# ea=0x1000 ra=0x11000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x44 WIMG=0x1 EPN=0x4 UX=0 SX=1 SR=1 SW=1
+
+# ea=0x2000 ra=0xB2000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x2c8 WIMG=0x3 EPN=0x8 SX=1 SR=1 SW=0
+
+RESULTS
+
+RD n=GPR i=1  d=3
+RD n=GPR i=31 d=1

@@ -1,0 +1,63 @@
+//
+// This just adds a few extra instructions for further testing of forwarding paths.
+//
+
+#define UADL
+
+#import "mod1.adl"
+
+define (arch=extra) {
+
+  define (reg=FOO) {
+    define (write) {
+      action = func (bits<32> x) {
+        ThisReg = ThisReg + x;
+      };
+    }
+  };
+
+  defmod (regfile=SPR) {
+    define (entry=200) { reg = FOO; };
+  }
+
+  define (instrfield=BA) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BB) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=BT) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instr=cror) {
+    fields=(OPCD(19),BT,BA,BB,XO(449));
+    action = {
+      CR(BT,BT) = CR(BA) | CR(BB);
+    };
+  }
+
+  define (instr=crand) {
+    fields=(OPCD(19),BT,BA,BB,XO(257));
+    action = {
+      CR(BT,BT) = CR(BA) | CR(BB);
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,extra);
+}
+

@@ -1,0 +1,129 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+  Name:  "PMC"
+  Size:  8
+  Prefix:  p
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+  Name:  "PMR"
+  Size:  1024
+  Contained registers:
+    0:  UPMC(0)
+    1:  UPMC(1)
+    2:  UPMC(2)
+    3:  UPMC(3)
+    4:  UPMC(4)
+    5:  UPMC(5)
+    6:  UPMC(6)
+    7:  UPMC(7)
+  Width:  32
+  Documention:
+
+      Special purpose registers.
+      
+  -------------------------------
+  Name:  "UPMC"
+  Size:  8
+  Read alias/hook:
+    PMC
+
+  Write alias/hook:
+    PMC
+
+  Usage:  read, written
+  Width:  32
+  Pseudo:  1
+  Attributes:  read_only
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+      Current instruction address.
+      
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+      Next instruction address.
+      
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+    Primary opcode.
+    
+  PMRN: [16,20] [11,15] [regfile:  PMR] [not used]
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  RA: [11,15] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] [regfile:  GPR] [not used]
+    Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  XO: [21,30] 
+    Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  Documention:
+
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    1040187658(7c000214):  add
+-------------------------------
+

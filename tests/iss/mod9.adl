@@ -1,0 +1,45 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+
+// Grab the P core.
+#import "mod1.adl"
+
+define (arch=PStuff) {
+  define (reg=PIR) {
+    reset = { PIR = getCoreId(); };
+  }
+  define (regfile=PMR) {
+    size = 32;
+  }
+}
+
+define (sys=PSystem) {
+  define (sys=PChip) {
+    define (core = P0) {
+      archs = (MiniPPC,PStuff);
+    }
+    define (core = P1) {
+      archs = (MiniPPC,PStuff);
+    }
+    define (shared) {
+      regs = (HID0,HID1);
+      regfiles = PMR;
+    }
+    P0 core0;
+    P1 core1;
+  }
+  define (shared ) {
+    regs = HID0;
+  }
+  PChip chip0;
+  PChip chip1;
+}
+
+defmod (core=P) {
+  remove = true;
+}

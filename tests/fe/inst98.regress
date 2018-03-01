@@ -1,0 +1,85 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Relocations:
+  D1 7
+    Field width:  3
+    PC-relative:  1
+    Instr width:  32
+    Right-shift:  0
+    Check Overflow:  True
+    Dst Mask:  0x7
+  R1 1
+    Field width:  10
+    PC-relative:  0
+    Right-shift:  0
+    Check Overflow:  True
+    Dst Mask:  0x3ff
+  R2 8
+    Field width:  5
+    PC-relative:  0
+    Right-shift:  0
+    Check Overflow:  True
+    Dst Mask:  0x1f
+  R8 12
+    Field width:  6
+    PC-relative:  0
+    Right-shift:  0
+    Check Overflow:  True
+    Dst Mask:  0x3f
+    Action:  func ( addr_t relocation, int ) {
+    return relocation + ( ( relocation & 0x8000 ) << 1 ) ;
+}
+Instruction Fields:
+  OPCD: [0,5] [not used] 
+    Reloc:  R8
+        Primary opcode.
+    
+  RA: [11,15] [not used] 
+    Reloc:  R2
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: 
+    Pseudo:  1
+    Width:   3
+    Reloc:  D1
+    Addr:  PC-relative
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB_imp_bits__21_23_: [21,23] 
+    Implements:  RB
+  SPRN: [16,20] [11,15] 
+        Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  XO: [21,30] [not used]
+    Reloc:  R1
+        Extended opcode.
+    
+Instructions:
+  Name:  Foo (rank: 100)
+  Width:  32
+  Fields:  SPRN(3) RB_imp_bits__21_23_
+  Action:  {
+}
+  Source Registers:  pc 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x1ff800
+    96(30000):  Foo
+-------------------------------
+

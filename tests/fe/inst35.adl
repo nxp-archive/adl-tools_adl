@@ -1,0 +1,54 @@
+//
+// Simple test of instructions. Instruction width, if not defined
+// is determined by highest bit of fields used rounded up to nearest byte
+//
+
+define (arch=minippc) {
+
+
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+  }
+
+
+
+  define (instrfield=RS) {
+    bits = (6,10);
+    ref = GPR;
+  }
+
+  define (instrfield=UI) {
+    bits = (16,31);
+  }
+
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

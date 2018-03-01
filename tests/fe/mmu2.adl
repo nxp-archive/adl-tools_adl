@@ -1,0 +1,57 @@
+//
+// Checking of tests:  Errors should be produced.
+// 
+define (arch=foo) {
+
+  define (mmu) {
+
+    instr_enable = { 
+      return FOO.IR(); 
+    };
+    data_enable = { 
+      return FOO.DR(); 
+    };
+
+    define(lookup=TlbCam) {
+      define (wayfield=x) {
+        bits = 2;
+      }
+      define (wayfield=y) {
+        bits = 3;
+      }
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      test = Compare(TID,PID0,PID1); // Fail:  PID0 and PID1 not defined.
+      test = Compare(1,2,3);         // Fail:  First argument must be a field name.
+      test = AddrComp(ZPN);          // Fail:  Not a field.
+      test = AddrIndex(0,3);         // Fail:  Not 1-way assoc.
+      valid = { return FOO; };       // Fail:  Unknown field.
+      reset = { FooCam(0,0) = 1; };  // Fail:  Unknown variable FooCam.
+    }
+
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=foo;
+}

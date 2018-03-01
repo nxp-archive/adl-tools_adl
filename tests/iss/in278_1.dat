@@ -1,0 +1,24 @@
+
+CORE n=:procs:P1
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000000
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+
+RD n=GPR i=10 d=0x0000000a
+RD n=GPR i=11 d=0x0000000b
+RD n=GPR i=12 d=0x0000000c
+RD n=GPR i=13 d=0x0000000d
+RD n=GPR i=14 d=0x0000000e
+
+RD n=GPR i=21 d=32000
+
+MD n=Mem ra=0x0000000000002000 d=0x0000000a     #       (10)
+MD n=Mem ra=0x0000000000002004 d=0x0000000b     #       (11)
+MD n=Mem ra=0x0000000000002008 d=0x0000000c     #       (12)
+MD n=Mem ra=0x000000000000200c d=0x0000000d     #       (13)
+MD n=Mem ra=0x0000000000002010 d=0x0000000e     #       (14)

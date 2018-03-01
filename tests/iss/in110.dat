@@ -1,0 +1,68 @@
+#
+# Tests to make sure that we treat a target as a partial write even if it
+# is also a source.
+#
+
+= asm
+
+  addis r3,r3,0xdead
+  rlwimi r3,r2,8,16,23
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3C63DEAD	#	addis r3,r3,0xdead
+MD n=Mem ra=0x00000004 d=0x5043442E	#	rlwimi r3,r2,8,16,23
+# </GEN>
+
+CORE n=:P
+
+RD n=Slice d=16
+
+RD n=GPR i=2 d=0x12345678
+RD n=GPR i=3 d=0x0000beef
+
+TRACE
+
+I ea=0x0 id=1
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3c63dead
+R n=NIA d=0x00000004
+INSTR op=0x3c63dead                                     asm="addis 3,3,0xdead"
+ITIME t=0
+R n=ICNT d=0x00000001
+R n=GPR i=3 d=0xdeadbeef
+CTIME t=3
+
+I ea=0x4 id=2
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x5043442e
+R n=NIA d=0x00000008
+INSTR op=0x5043442e                                     asm="rlwimi 2,3,8,16,23"
+ITIME t=1
+R n=ICNT d=0x00000001
+R n=GPR i=3 d=0xdead78ef
+CTIME t=4
+
+I ea=0x8 id=3
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+R n=NIA d=0x0000000c
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=2
+R n=ICNT d=0x00000002
+CTIME t=5
+
+I ea=0xc id=4
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+R n=NIA d=0x00000010
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=3
+R n=ICNT d=0x00000002
+CTIME t=6
+
+RESULTS
+
+RD n=GPR i=3 d=0xdead78ef

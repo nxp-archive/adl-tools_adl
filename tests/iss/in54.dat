@@ -1,0 +1,141 @@
+#
+# Tests basic course-grained MT.  The main thing we're testing here is that we
+# can switch back-and-forth between threads w/o the simulation halting.  This
+# requires that we first cycle the system, then assess activity.  If we were to
+# simply 'or' together the results from each simulate() function, we would get a
+# wrong answer because, in the case of switching from t1 -> t0, t1 goes
+# inactive, but t0 has already been skipped b/c it was already considered
+# inactive, so the simulation would halt.  Instead, we must first cycle all
+# threads, then query to see if any are active.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	mtspr 50,r10
+	addi r1,r1,1
+	addi r1,r1,1
+	.long 0x0
+	addi r1,r1,1
+	addi r1,r1,1
+	mtspr 50,r10
+	addi r1,r1,1
+	addi r1,r1,1
+
+= /asm
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000104 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000108 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000010c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000110 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000114 d=0x7D520BA6	#	mtspr 50,r10
+MD n=Mem ra=0x00000118 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000011c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000120 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000124 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000128 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000012c d=0x7D520BA6	#	mtspr 50,r10
+MD n=Mem ra=0x00000130 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000134 d=0x38210001	#	addi r1,r1,1
+# </GEN>
+
+CORE n=:PMT
+
+RD n=NIA0 d=0x100
+RD n=NIA1 d=0x124
+
+CORE n=:PMT:t0
+
+RD n=GPR i=10 d=1
+
+CORE n=:PMT:t1
+
+RD n=GPR i=10 d=0
+
+TRACE
+
+CORE n=:PMT:t0
+
+I ea=0x100 id=1
+M n=Mem t=ifetch ea=0x100 ra=0x100 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x104 id=2
+M n=Mem t=ifetch ea=0x104 ra=0x104 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0x108 id=3
+M n=Mem t=ifetch ea=0x108 ra=0x108 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000003
+
+I ea=0x10c id=4
+M n=Mem t=ifetch ea=0x10c ra=0x10c d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000004
+
+I ea=0x110 id=5
+M n=Mem t=ifetch ea=0x110 ra=0x110 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000005
+
+I ea=0x114 id=6
+M n=Mem t=ifetch ea=0x114 ra=0x114 d=0x7d520ba6
+INSTR op=0x7d520ba6 asm="mtspr 10,50"
+R n=TACTIVE d=0x00000001
+
+CORE n=:PMT:t1
+
+I ea=0x124 id=7
+M n=Mem t=ifetch ea=0x124 ra=0x124 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x128 id=8
+M n=Mem t=ifetch ea=0x128 ra=0x128 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0x12c id=9
+M n=Mem t=ifetch ea=0x12c ra=0x12c d=0x7d520ba6
+INSTR op=0x7d520ba6 asm="mtspr 10,50"
+R n=TACTIVE d=0x00000000
+
+CORE n=:PMT:t0
+
+I ea=0x118 id=10
+M n=Mem t=ifetch ea=0x118 ra=0x118 d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000006
+
+I ea=0x11c id=11
+M n=Mem t=ifetch ea=0x11c ra=0x11c d=0x38210001
+INSTR op=0x38210001 asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000007
+
+I ea=0x120 id=12
+M n=Mem t=ifetch ea=0x120 ra=0x120 d=0x0
+INSTR op=0x0 asm="halt"
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0x00000007
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=0x00000002

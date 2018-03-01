@@ -1,0 +1,116 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "DEAR"
+  Width:  32
+  -------------------------------
+  Name:  "L2CR"
+  Usage:  field-read
+  Width:  32
+    EN[0]   
+      Usage:  field-read
+  -------------------------------
+  Name:  "L2HitReg"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "L2MissReg"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "MSR"
+  Width:  32
+    PR[10]   
+  -------------------------------
+  Name:  "PID0"
+  Width:  32
+  -------------------------------
+  Name:  "PID1"
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Caches:
+  L1i (level 1, instr)
+    Size    :  32768 bytes
+    Linesize:  256 bytes
+    Sets    :  32 
+    Ways    :  4 
+  L1d (level 1, data)
+    Size    :  32768 bytes
+    Linesize:  256 bytes
+    Sets    :  32 
+    Ways    :  4 
+  L2 (level 2, unified)
+    Size    :  131072 bytes
+    Linesize:  256 bytes
+    Sets    :  256 
+    Ways    :  2 
+    Enable function:  func ( CacheAccess ca , addr_t addr ) {
+    return L2CR . EN == 1 && addr > 0x2000 ;
+}
+
+    Hit predicate:  func ( CacheAccess ca , unsigned set , unsigned way ) {
+}
+
+    Hit handler:  func ( CacheAccess ca , addr_t  ) {
+    L2HitReg = L2HitReg + 1 ;
+}
+
+    Miss handler:  func ( CacheAccess ca , addr_t  ) {
+    L2MissReg = L2MissReg + 1 ;
+}
+
+    Invalidate action:  func ( CacheAccess ca , unsigned set , unsigned way ) {
+}
+
+    Read action:  func ( CacheAccess ca , unsigned set , unsigned way , addr_t addr ) {
+}
+
+    Write-through predicate:  func ( CacheAccess ca , addr_t addr ) {
+}
+
+    Miss-enable predicate:  func ( CacheAccess ca , addr_t addr , unsigned set ) {
+}
+
+Instruction Fields:
+  OPCD: [0,5] 
+    Primary opcode.
+    
+  RA: [11,15] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  XO: [21,30] 
+    Extended opcode.
+    
+Instructions:
+  Name:  dcbf (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RA RB XO(86)
+  Action:  {
+    L1d . flush ( 0 ) ;
+    L2 . flush ( 0 ) ;
+}
+  Source Caches:  L1d L2 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007fe
+    1040187478(7c0000ac):  dcbf
+-------------------------------
+

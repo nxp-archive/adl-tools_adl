@@ -1,0 +1,141 @@
+======
+Cores:
+======
+Name:  "foo"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SI: [16,31] 
+        Signed immediate field for arithmetic operations.
+    
+  XO: [21,30] 
+        Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    {
+         int k = 3 ;
+    }
+    {
+         int j = 2 ;
+    }
+    {
+        GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+    }
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  addi (rank: 100)
+  Width:  32
+  Aspects:
+    Name:  A
+    Trigger on instruction pre-exec.
+    Action:  {
+     int i = 1 ;
+}
+    Name:  D (priority 10)
+    Labels:  Foo 
+    Action:  {
+     int l = 4 ;
+}
+  Fields:  OPCD(14) RT RA SI
+  Action:  {
+    {
+         int k = 3 ;
+    }
+    {
+         int j = 2 ;
+    }
+    {
+         int i = 1 ;
+    }
+    {
+        if ( RA == 0 ) {
+            GPR ( RT ) = signExtend ( SI , 32 ) ;
+        } else {
+            Foo : {
+                     int k = 3 ;
+                }{
+                     int l = 4 ;
+                }GPR ( RT ) = GPR ( RA ) + signExtend ( SI , 32 ) ;
+            
+        }
+    }
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  Documention:
+
+    If RA=0, the sign extended value of the SI field is placed into GPR(RT)
+    
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    14(38000000):  addi
+    31(7c000000):      Mask:  0x7fe
+      266(214):  add
+Aspects:
+  Name:  B (priority 1)
+  Trigger on instruction pre-exec.
+  Action:  {
+     int j = 2 ;
+}
+  Name:  C (priority 0)
+  Labels:  Foo 
+  Trigger on instruction pre-exec.
+  Action:  {
+     int k = 3 ;
+}
+-------------------------------
+

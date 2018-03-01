@@ -1,0 +1,14 @@
+
+------------------------------------------------------------------------------------------------------
+| SYNTAX                                   | EXTRACTED-DOC-OP                                        |
+------------------------------------------------------------------------------------------------------
+| add RT, RA, RB                           |  GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ( 0 , 15 ) ;      |
+| add1 RT, RA, RB                          |  GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ( 0 , 15 ) + 1 ;  |
+| bit1 RT, RA, RB                          | GPR ( RT ) = ( GPR ( RA ) & GPR ( RB ) ) ;              |
+| bit2 RT, RA, RB                          | GPR ( RT ) = ( GPR ( RA ) | GPR ( RB ) ) ;              |
+| mv1 RT, RA, RB                           |  GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ( 0 , 15 ) ;      |
+| mv2 RT, RA, RB                           |  GPR ( RT ) = GPR ( RA ) - GPR ( RB ) ( 0 , 15 ) ;      |
+| mv3 RT, RA, RB                           |  GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ( 0 , 15 ) ; GPR (|
+|                                          | RA ) = GPR ( RA ) + 1 ;                                 |
+| sub RT, RA, RB                           |  GPR ( RT ) = GPR ( RA ) - GPR ( RB ) ( 0 , 15 ) ;      |
+------------------------------------------------------------------------------------------------------

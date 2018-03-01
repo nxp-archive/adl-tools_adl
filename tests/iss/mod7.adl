@@ -1,0 +1,213 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Tests the use of an architectural parameter to switch between
+// 32-bit and 64-bit behavior.  It also tests that write hooks
+// can reference other registers and their fields.
+// 
+
+define (arch = MiniPPC) {
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    """
+    General purpose registers.
+    """;
+    width=64;
+    size = 32;
+  }
+
+  define (regfile=SPR) {
+    """
+    Special purpose registers.
+    """;
+    size=1024;
+
+    define (entry=50) { reg = HID0; }
+  }
+
+  define (reg=HID0) {
+    """
+    A hardware control register.
+    """;
+    define (field=M) {
+      bits = 0;
+    }
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+    Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  //
+  // Instructions.
+  //
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      var r = GPR(RA) + GPR(RB);
+      r.setUndefined(0,31);
+      GPR(RT) = r;
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      var si = signExtend(SI,64);
+      var r = (RA == 0) ? si : (GPR(RA) + si);
+      r.setUndefined(0,31);
+      GPR(RT) = r;
+    };
+  }
+
+  define (instr=mtspr) {
+    fields=(OPCD(31),RS,SPRN,XO(467));
+    action = {
+      SPR(SPRN) = GPR(RS);
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+  }
+
+}
+
+define (arch=Foo) {
+
+  defmod (parm=Mode) {
+    value=Mode32;
+  }
+
+  defmod (reg=HID0) {
+    define (field=LP) {
+      bits = 1;
+    }
+    define (write) {
+      // If HID0(0)==1, the implementation operates in 64-bit mode,
+      // otherwise it operates in 32-bit mode.
+      action = func(bits<32> value) {
+        HID0 = value;
+        if (HID0.M == 0) {
+          Mode = Mode32;
+        } else {
+          Mode = Mode64;
+        }
+      };
+    }
+  }
+  
+  defmod (regfile=GPR) {
+    define (write) {
+      action = func(unsigned index,bits<64> value) {
+        if (Mode == Mode32) {
+          if (HID0.LP == 1) {
+            // In LP mode, blank the upper half of the register.
+            GPR(index) = value(32,63);
+          } else {
+            // Otherwise, use the prior upperhalf's value.
+            GPR(index) = concat(GPR(index)(0,31),value(32,63));
+          }
+          return;
+        }
+        // Default case- full 64-bit update.
+        GPR(index) = value;
+      };
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,Foo);
+}
+

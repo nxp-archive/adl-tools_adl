@@ -1,0 +1,59 @@
+======
+Cores:
+======
+Name:  "StarCore"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Parallel execution packet size: 3
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  VarInstrOpcode_imp_bits__0_7_: [0,7] 
+  pfx_field: [not used]  
+    Pseudo:  1
+    Width:   3
+    Prefix:  1
+    Default value :'0'
+Instructions:
+  Name:  LPMARK_A (rank: 100) (not used by core)
+  Width:  0
+  Fields: 
+  Assembler:  {
+    halt (  ) ;
+}
+  -------------------------------
+  Name:  ahalt (rank: 100)
+  Width:  8
+  Fields:  VarInstrOpcode_imp_bits__0_7_
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+prefix:
+  other:
+    Mask:  0xff000000
+    0(0):  ahalt
+
+Post-Asm Handler:  func ( unsigned instr_width ) {
+    pfx_field += instr_width ;
+}
+
+Assember configuration:
+  Comment strings: '//' '#' ';' 
+  Line comment strings: '#rem' '#' 
+  Line separators: '\t' 
+  Instruction separators: '|' 
+  Explicit regnames: 0
+  Packet grouping: ('[',']') '\t' 
+-------------------------------
+

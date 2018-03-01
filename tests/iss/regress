@@ -1,0 +1,2710 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use adl_config;
+use strict;
+use Data::Dumper;
+use File::Basename;
+
+use vars qw( $src $sepdirs $make_iss $designs $is_external_release $jit_ok $gdb_ok $lang_frontend);
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+# Tests that can be run even w/o the front-end facilities.
+my @Tests = (
+			 model_test("./mod1-simple","$src/in4.dat"),
+			 model_test("./mod1-simple","$src/in2.uvp"),
+
+
+             
+			);
+
+# Tests in here are those that require the front-end tools.
+if ($lang_frontend) {
+
+  #
+  # IMPORTANT: Add to this list only the tests which reference models which may be
+  # released as open source.
+  #
+  @Tests = (@Tests,(
+                            
+							#1
+							model_test("./mod1","$src/in1.dat"),
+							model_test("./mod1","$src/in2.dat"),
+							# Sanity check- make sure that the fast-dat writer works.
+							ext_model_test(
+								model   => "./mod1",
+								flags   => "-trace",
+								input   => "$src/in2.dat",
+								output  => "in2.out.fdat",
+								results => "$src/in2.dat",
+								ignores => [qw(card:M card:R)],
+							),
+							model_test("./mod1","$src/in3.dat"),
+							model_test("./mod1","$src/in4.dat"),
+							# Test to make sure that we can load a plugin.
+							{
+								cmd  => "./mod1 $src/in4.dat --foo -o=in4.icnt --plugin=./count-instrs.so  -trace > count.out",
+								checker => sub { 
+									file_diff("in4.icnt","$src/in4.icnt.regress"); 
+									file_diff("count.out","$src/count.regress");
+								},
+							},
+							# Test branch taken/untaken handling.
+							{
+								cmd  => "./mod1 $src/in4.dat -o=in4.bcnt --plugin=./count-branches.so -trace",
+								checker => sub { 
+									file_diff("in4.bcnt","$src/in4.bcnt.regress"); 
+								},
+							},
+							{
+								cmd  => "./mod1 $src/in4.dat -o=in4.bcnt -dc --plugin=./count-branches.so -trace",
+								checker => sub { 
+									file_diff("in4.bcnt","$src/in4.bcnt.regress"); 
+								},
+							},
+							# An unknown command-line option should cause an error.
+							{
+								cmd     => "./mod1 $src/in4.dat --stuff",
+								fail    => 1,
+								stderr  => 1,
+								checker => \&check_bad_cmdline,
+							},
+							# We should be able to specify formats explicitly, irregardless of
+							# format, using the name:format method.
+							{
+								pre     => sub { system("cp $src/in4.dat in4.foo") and die "Could not create in4.foo"; },
+								cmd     => "./mod1 in4.foo:dat -o=in4.out:uvp -trace",
+								checker => sub { 
+									my $r = "in4.out.uvp";
+									system("cp in4.out $r") and die "Could not create $r";
+									check_results("$src/in4.uvp","in4.out.uvp");
+								},
+								temps   => [ "in4.foo", "in4.out", "in4.out.uvp" ],
+							},
+							# Test that the --max-dat-instrs option works.
+							{
+								cmd     => "./mod1 $src/in4.dat --output=in4.out.dat --dat-max-instrs=1000 -trace",
+								checker => sub {
+									check_results("$src/in4_n0-maxinst.dat","in4_n0.out.dat");
+									check_results("$src/in4_n1-maxinst.dat","in4_n1.out.dat");
+								},
+							},
+							# Test that the --max-dat-instrs option works.  We can't simply
+							# rely upon comparing the files, because the tellp() method in the
+							# streams doesn't appear to be consistent across filesystems, for
+							# some reason.  So, instead, we concatenate and compare.
+							{
+								cmd     => "./mod1 $src/in4.dat --quiet --output=in4.out.dat --dat-max-size=200000 -trace && ./mod1 $src/in4.dat --output=in4.out.dat -trace",
+								checker => sub {
+									system("cat in4_n0.out.dat in4_n1.out.dat > in4_all.out.dat") && die "Could not concatenate output files.";
+									check_results("in4.out.dat","in4_all.out.dat");
+								},
+							},
+							model_test("./mod1","$src/in17.dat"),
+							model_test("./mod1","$src/in18.dat"),
+							ext_model_test(
+								model    => "./mod1",
+								flags    => "-trace",
+								results  => "$src/in41.dat",
+								td_flags => "--check-all --ignore-reg=NIA",
+							),
+							# Checks to make sure that we can disable output.  The trace
+							# flag has no effect, of course, but it's there to make sure that
+							# we'll still ignore everything.
+							{
+								pre     => sub { unlink "in4.out.dat" },
+								cmd     => "./mod1 $src/in4.dat --output=in4.out.dat --no-output -trace",
+								checker => sub { check_no_output("in4.out.dat"); },
+							},
+							# Test simple UVP reading.
+							model_test("./mod1","$src/in2.uvp"),
+							# Test UVP reading with a specified RES card value.
+							ext_model_test(
+								model   => "./mod1",
+								flags   => "-trace --uvp-res-value=0x38420001",
+								input   => "$src/in2.uvp",
+								results => "$src/in2-1.uvp",
+							),
+							# Make sure that no intermediate results are printed if tracing is not on.
+							{
+								cmd     => "./mod1 $src/in4.dat",
+								checker => sub { check_no_ir("in4.out.dat"); },
+								temps   => [ "in4.out.dat" ],
+							},
+							model_test("./mod1","$src/in19.dat",1), # intentionally cause a fail
+							rerun_model_test("./mod1","$src/in18.dat"), # pass the output (in18.out.dat) back through (uni)
+							rerun_model_test("./mod1","$src/in17.dat"), # pass the output (in18.out.dat) back through (mt/mp)
+							{
+								cmd => "./objdump-mod1 --section=.text -Dx $src/sieve.o.elf > sieve.objdump",
+								checker => sub { ext_file_diff( in    => "sieve.objdump",
+																								exp   => "$src/sieve.objdump.regress",
+																								start => "Disassembly of section .text:"); 
+								},
+							},
+							# Test instruction jamming
+							model_test("./mod1 --script=$src/in212.cli","$src/in212.dat"),
+							# Test instruction jamming with UVP output.  We should see E:A jam cards.
+							ext_model_test(
+								model   => "./mod1",
+								flags   => "--script=$src/in212.cli",
+								input   => "$src/in212.dat",
+								results => "$src/in212.uvp",
+							),
+
+							# Test instruction jamming and external-register-write loging.
+							model_test("./mod1 --script=$src/in243.cli","$src/in243.dat"),
+							ext_model_test(
+								model   => "./mod1",
+								flags   => " --script=$src/in243.cli",
+								input   => "$src/in243.dat",
+								results => "$src/in243.uvp",
+							),
+							model_test("./mod1","$src/in225.dat"),
+
+							# A very simple system-call test.
+							{
+								cmd   => "./mod1 --syscall-enabled $src/in261.elf -fep --no-output",
+								stdio => 1,
+								diff  => "$src/in261.regress",
+							},
+
+							# Make sure that we detect that a file is ELF, even if its extension isn't .elf.
+							{
+								pre   => sub { system("cp $src/in261.elf a.out") and die "Could not create a.out."; },
+								cmd   => "./mod1 --syscall-enabled a.out -fep -no-output",
+								stdio => 1,
+								diff  => "$src/in261.regress",
+								temp  => [ 'a.out' ],
+							},
+
+							# Test DAT multi-file mode.
+							{
+								cmd     => "./mod1 -n=2 $src/in264.dat -trace -dat-multi-file",
+								checker => sub {
+									check_results ("$src/in264_0.dat","in264_0.out.dat");
+									check_results ("$src/in264_1.dat","in264_1.out.dat");
+								},
+								temps   => [ "in264_0.out.dat", "in264_1.out.dat" ],
+							},
+					
+							# Test to make sure that --uvp-log-result-mem writes initial data
+							# as well as result data.  We do this by first running the test
+							# w/o tracing, but logging all memory, then re-running the test
+							# and checking the results.  If we don't log the initialization
+							# cards, then the second run won't have any instruction data to
+							# load.
+							{
+								cmd     => "./mod1 $src/in271.uvp -uvp-log-result-mem -o in271.tmp.uvp >/dev/null 2>&1 && ./mod1 in271.tmp.uvp -o in271.out.uvp -uvp-log-result-mem >/dev/null 2>&1",
+								checker => sub { check_results("$src/in271.uvp","in271.out.uvp",0,0,0,0,"--ignore-ir"); },
+								temps   => [ "in271.tmp.uvp", "in271.out.uvp" ],
+							},
+
+							# Test using --entry-point with a DAT file.
+							model_test("./mod1 --entry-point=0x14","$src/in275.dat"),
+
+							# Make sure that we can load multiple ELF files, with overwriting
+							# of data, but that we warn on such overwrites.
+							{
+								cmd     => "./mod1 $src/in276-1.elf $src/in276-2.elf -o=in276.out.dat",
+								stderr  => 1,
+								checker => \&check_in276,
+								temps   => [ "in276.out.dat" ],
+							},
+							# Same as above, except we want logical -> physical translation.
+							{
+								cmd     => "./mod1 $src/in276-1t.elf $src/in276-2t.elf -o=in276t.out.dat",
+								stderr  => 1,
+								checker => sub { 
+									check_results("$src/in276t.dat","in276t.out.dat");
+								},
+								temps   => [ "in276t.out.dat" ],
+							},
+							# Same as above, except we the physical addresses are zero, so we
+							# should ignore them and just use logical addresses.
+							{
+								cmd     => "./mod1 $src/in276-1z.elf $src/in276-2z.elf -o=in276z.out.dat",
+								stderr  => 1,
+								checker => sub { 
+									check_results("$src/in276.dat","in276z.out.dat");
+								},
+								temps   => [ "in276z.out.dat" ],
+							},
+
+							# Make sure that we can set a breakpoint after a block has been
+							# compiled and pointed to by other blocks via direct-threading.
+							{
+								cmd     => "./mod1 --script=$src/in280.cli --mic=0 --script-arg=dc --no-output",
+								stdout  => 1,
+								checker => \&check_in280,
+							},
+
+							# Make sure that we can load an ELF file with a 1-byte section.
+							ext_model_test(
+								model   => "./mod1 -fep",
+								input   => "$src/in294.elf",
+								results => "$src/in294.dat",
+							),
+
+							# Make sure that we can load an Intel Hex file.
+							ext_model_test(
+								model   => "./mod1 -fep -trace",
+								input   => "$src/asm84.hex",
+								results => "$src/asm84.dat",
+							),
+
+							# Make sure that we won't execute any instructions, even in
+							# decode-cache mode, if our td threshold is set to 0.
+							model_test("./mod1 --script=$src/in316.cli -dc --dc-hot-count=0","$src/in316.dat"),
+
+							# Check to make sure that we catch watchpoints which are not aligned on a word boundary.
+							model_test("./mod1",                     "$src/in320.dat"),
+							model_test("./mod1 -dc --dc-hot-count=0","$src/in320.dat"),
+
+							asm_test(as => "as-mod1",     of => "objdump-mod1",   sf => "$src/asm2.s",   rf => "$src/asm2.regress"),
+							asm_test(as => "as-mod1 -a64",of => "objdump-mod1",   sf => "$src/asm2.s",   rf => "$src/asm2-64.regress"),
+     					asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm3.s",   rf => "$src/asm3.regress"),
+	    				asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm4.s",   rf => "$src/asm4.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm5.s",   rf => "$src/asm5.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm6.s",   rf => "$src/asm6.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm7.s",   rf => "$src/asm7.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm21.s",  rf => "$src/asm21.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm22.s",  rf => "$src/asm22.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm23.s",  rf => "$src/asm23.regress"),
+							asm_test(as => "as-mod1 -d --fatal-warnings",  of => "objdump-mod1",  sf => "$src/asm17.s",  rf => "$src/asm17.regress", fail => 1),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm75.s",  rf => "$src/asm75.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm76.s",  rf => "$src/asm76.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm77.s",  rf => "$src/asm77.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm78.s",  rf => "$src/asm78.regress", fail => 1),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm79.s",  rf => "$src/asm79.regress"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm81.s",  rf => "$src/asm81.regress", dflags => "-Dr -j.text -j.data"),
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm83.s",  rf => "$src/asm83.regress"),
+
+							# Make sure that we detect out-of-range errors for fixups.
+							asm_test(as => "as-mod1",   of => "objdump-mod1",  sf => "$src/asm85.s",  rf => "$src/asm85.regress", fail => 1),
+
+							asm_and_run_test("./as-mod1","./mod1","$src/asm1.s $src/asm1.expects"),
+							objdump_test(of => "./objdump-mod1", in => "$src/asm1.elf",  rf => "$src/asm1.regress"),
+							objdump_test(of => "./objdump-mod1", in => "$src/asm73.elf", rf => "$src/asm73.regress"),
+
+							# Test that we can correctly link a file using a generated linker.
+							{
+								cmd     => "./as-mod1 $src/asm86.s -o asm86.o && ./ld-mod1 asm86.o -o asm86.elf && ./mod1 asm86.elf $src/asm86-results.dat -fep -o=asm86.out.dat",
+								checker => sub {
+									check_results("$src/asm86-results.dat","asm86.out.dat");
+								},
+							},
+
+							# Same, checking that we can generate ELF64.
+							{
+								cmd     => "./as-mod1 -a64 $src/asm86.s -o asm86.o && ./ld-mod1 -T$src/asm86.lnk asm86.o -o asm86.elf && ./mod1 asm86.elf $src/asm86-64-results.dat -fep -o=asm86.out.dat",
+								checker => sub {
+									check_results("$src/asm86-64-results.dat","asm86.out.dat");
+								},
+							},
+
+							# Test that we can detect undefined symbols if they're used by shorthand instructions with modifier functions.
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm90.s",  rf => "$src/asm90.regress", fail => 1),
+
+							# Test the use of %reloc(sym) synax for relocations.
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm91.s",  rf => "$src/asm91.regress"),
+
+							# Test multi-instruction aliases.
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm92.s",  rf => "$src/asm92.regress"),
+
+							# Test that we properly clear fields before adding in a relocation value.
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   ld => "ld-mod1",       sf => "$src/asm93.s",  rf => "$src/asm93.regress"),
+
+							# Test complex aliases driven by action code.
+							asm_test(as => "as-mod1",   of => "objdump-mod1",   sf => "$src/asm94.s",  rf => "$src/asm94.regress"),							
+
+							asm_test(as => "as-mod8",   of => "objdump-mod8",   sf => "$src/asm8.s",   rf => "$src/asm8.regress"),
+							asm_test(as => "as-mod8",   of => "objdump-mod8",   sf => "$src/asm64.s",  rf => "$src/asm64.regress"),
+							asm_elf_run_test("as-mod8","mod8","$src/asm64.s","$src/asm64.dat"),
+
+							asm_test(as => "as-mod35",  of => "objdump-mod35",  sf => "$src/asm9.s",   rf => "$src/asm9.regress"),
+							asm_test(as => "as-mod33",  of => "objdump-mod33",  sf => "$src/asm10.s",  rf => "$src/asm10.regress"),
+							asm_test(as => "as-mod33",  of => "objdump-mod33",  sf => "$src/asm11.s",  rf => "$src/asm11.regress"),
+							asm_test(as => "as-mod43",  of => "objdump-mod43",  sf => "$src/asm12.s",  rf => "$src/asm12.regress"),
+							asm_test(as => "as-mod44",  of => "objdump-mod44",  sf => "$src/asm13.s",  rf => "$src/asm13.regress"),
+							asm_test(as => "as-mod44",  of => "objdump-mod44",  sf => "$src/asm72.s",  rf => "$src/asm72.regress"),
+							asm_test(as => "as-mod45",  of => "objdump-mod45",  sf => "$src/asm14.s",  rf => "$src/asm14.regress", flags => "-mone_word"),
+							asm_test(as => "as-mod45",  of => "objdump-mod45",  sf => "$src/asm26.s",  rf => "$src/asm26.regress"),
+							
+							# Assembler of model without encoding. The model is run on the input data in another test 
+							asm_test(as => "as-mod46",  of => "objdump-mod46",  sf => "$src/asm15.s",  rf => "$src/asm15.regress"),
+
+							asm_test(as => "as-mod47",  of => "objdump-mod47",  sf => "$src/asm16.s",  rf => "$src/asm16.regress"),
+							# We're turning on listing here in order to make sure that we can
+							# use this feature with a design that has a queue size > 1.
+							# Enabling listing creates a new frag after each line, thus
+							# affecting how fixups are handled.
+							asm_test(as => "as-mod47 -a=asm100.lst",  of => "objdump-mod47",  sf => "$src/asm100.s", rf => "$src/asm100.regress"),							
+							
+							asm_test(as => "as-mod53",  of => "objdump-mod53",  sf => "$src/asm18.s",  rf => "$src/asm18.regress"),
+
+							asm_test(as => "as-mod54",  of => "objdump-mod54",  sf => "$src/asm19.s",  rf => "$src/asm19.regress"),
+
+							asm_test(as => "as-mod55",  of => "objdump-mod55",  sf => "$src/asm20.s",  rf => "$src/asm20.regress"),
+							asm_test(as => "as-mod55",  of => "objdump-mod55",  sf => "$src/asm24.s",  rf => "$src/asm24.regress"),
+
+							asm_test(as => "as-mod58",  of => "objdump-mod58",  sf => "$src/asm25.s",  rf => "$src/asm25.regress"),
+
+							asm_test(as => "as-mod59",  of => "objdump-mod59",  sf => "$src/asm27.s",  rf => "$src/asm27.regress"),
+							asm_test(as => "as-mod59",  of => "objdump-mod59",  sf => "$src/asm38.s",  rf => "$src/asm38.regress"),
+
+							asm_test(as => "as-mod60",  of => "objdump-mod60",  sf => "$src/asm28.s",  rf => "$src/asm28.regress"),
+							asm_test(as => "as-mod60",  of => "objdump-mod60",  sf => "$src/asm29.s",  rf => "$src/asm29.regress"),
+							asm_test(as => "as-mod60",  of => "objdump-mod60",  sf => "$src/asm30.s",  rf => "$src/asm30.regress"),
+							asm_test(as => "as-mod60",  of => "objdump-mod60",  sf => "$src/asm37.s",  rf => "$src/asm37.regress", fail => 1),
+							asm_test(as => "as-mod60",  of => "objdump-mod60",  sf => "$src/asm50.s",  rf => "$src/asm50.regress", fail => 1),
+
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm32.s",  rf => "$src/asm32.regress"),
+							asm_elf_run_test("as-mod61","mod61","$src/asm31.s","$src/asm31.dat"),
+							asm_elf_run_test("as-mod61","mod61","$src/asm40.s","$src/asm40.dat"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm41.s",  rf => "$src/asm41.regress"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm43.s",  rf => "$src/asm43.regress", fail => 1),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm45.s",  rf => "$src/asm45.regress"),
+							asm_elf_run_test("as-mod61","mod61","$src/asm45.s","$src/asm45.dat"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm47.s",  rf => "$src/asm47.regress"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm48.s",  rf => "$src/asm48.regress", fail => 1),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm49.s",  rf => "$src/asm49.regress"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm51.s",  rf => "$src/asm51.regress"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm52.s",  rf => "$src/asm52.regress"),
+							asm_elf_run_test("as-mod61","mod61","$src/asm52.s","$src/asm52.dat"),
+							asm_test(as => "as-mod61",  of => "objdump-mod61",  sf => "$src/asm63.s",  rf => "$src/asm63.regress"),
+							model_test("./mod61","$src/in204.dat",0,0,[],"--check-all-card=A"),
+
+							asm_test(as => "as-mod62",  of => "objdump-mod62",  sf => "$src/asm33.s",  rf => "$src/asm33.regress"),
+							asm_test(as => "as-mod62",  of => "objdump-mod62",  sf => "$src/asm34.s",  rf => "$src/asm34.regress"),
+							asm_test(as => "as-mod62",  of => "objdump-mod62",  sf => "$src/asm42.s",  rf => "$src/asm42.regress"),
+
+							asm_test(as => "as-mod63",  of => "objdump-mod63",  sf => "$src/asm35.s",  rf => "$src/asm35.regress"),
+							asm_elf_run_test("as-mod63","mod63","$src/asm35.s","$src/asm35.dat"),
+
+							asm_test(as => "as-mod64",  of => "objdump-mod64",  sf => "$src/asm36.s",  rf => "$src/asm36.regress"),
+
+							asm_test(as => "as-mod65",  of => "objdump-mod65",  sf => "$src/asm39.s",  rf => "$src/asm39.regress"),
+							asm_test(as => "as-mod65",  of => "objdump-mod65",  sf => "$src/asm54.s",  rf => "$src/asm54.regress"),
+
+							asm_test(as => "as-mod67",  of => "objdump-mod67",  sf => "$src/asm31.s",  rf => "$src/asm31.regress"),
+							asm_test(as => "as-mod67",  of => "objdump-mod67",  sf => "$src/asm32.s",  rf => "$src/asm32.regress"),
+							asm_elf_run_test("as-mod67","mod67","$src/asm31.s","$src/asm31.dat"),
+							asm_elf_run_test("as-mod67","mod67","$src/asm40.s","$src/asm40.dat"),
+							asm_test(as => "as-mod67",  of => "objdump-mod67",  sf => "$src/asm43.s",  rf => "$src/asm43.regress", fail => 1),
+							asm_test(as => "as-mod67",  of => "objdump-mod67",  sf => "$src/asm44.s",  rf => "$src/asm44.regress"),
+							model_test("./mod67","$src/in230.dat"),
+
+							asm_test(as => "as-mod68",  of => "objdump-mod68",  sf => "$src/asm46.s",  rf => "$src/asm46.regress"),
+
+							asm_test(as => "as-mod71",  of => "objdump-mod71",  sf => "$src/asm53.s",  rf => "$src/asm53.regress"),
+
+							asm_test(as => "as-mod74",  of => "objdump-mod74",  sf => "$src/asm65.s",  rf => "$src/asm65.regress"),
+							asm_test(as => "as-mod74",  of => "objdump-mod74",  sf => "$src/asm66.s",  rf => "$src/asm66.regress"),
+
+							asm_test(as => "as-mod75",  of => "objdump-mod75 -z", sf => "$src/asm67.s",  rf => "$src/asm67.regress"),
+
+							asm_test(as => "as-mod76",  of => "objdump-mod76",  sf => "$src/asm68.s",  rf => "$src/asm68.regress"),
+
+							asm_test(as => "as-mod77",  of => "objdump-mod77",  sf => "$src/asm68.s",  rf => "$src/asm68.regress"),
+							asm_test(as => "as-mod77",  of => "objdump-mod77",  sf => "$src/asm69.s",  rf => "$src/asm69.regress"),
+
+							asm_test(as => "as-mod80",  of => "objdump-mod80",  sf => "$src/asm70.s",  rf => "$src/asm70.regress"),
+
+							asm_test(as => "as-mod87",  of => "objdump-mod87",  sf => "$src/asm74.s",  rf => "$src/asm74.regress"),
+
+							asm_test(as => "as-mod91",  of => "objdump-mod91",  sf => "$src/asm80.s",  rf => "$src/asm80.regress"),
+
+							asm_test(as => "as-mod96",  of => "objdump-mod96",  sf => "$src/asm82.s",  rf => "$src/asm82.regress"),
+
+							asm_test(as => "as-mod97",  of => "objdump-mod97",  ld => "ld-mod97",      sf => "$src/asm87.s",  rf => "$src/asm87.regress"),
+
+							asm_test(as => "as-mod99",  of => "objdump-mod99",  ld => "ld-mod99",      sf => "$src/asm88.s",  rf => "$src/asm88.regress"),
+
+							asm_test(as => "as-mod99",  of => "objdump-mod99",  ld => "ld-mod99",      sf => "$src/asm89.s",  rf => "$src/asm89.regress"),
+
+							asm_test(as => "as-mod99",  of => "objdump-mod99",  sf => "$src/asm101.s", rf => "$src/asm101.regress"),
+
+							asm_test(as => "as-mod99",  of => "objdump-mod99",  sf => "$src/asm112.s", rf => "$src/asm112.regress", flags => "--ignore-low-bits"),
+							
+							asm_test(as => "as-mod100", of => "objdump-mod100", sf => "$src/asm95.s",  rf => "$src/asm95.regress"),
+
+							asm_test(as => "as-mod100", of => "objdump-mod100", sf => "$src/asm96.s",  rf => "$src/asm96.regress"),
+
+							asm_test(as => "as-mod100", of => "objdump-mod100", sf => "$src/asm97.s",  rf => "$src/asm97.regress"),														
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", ld => "ld-mod101 --oformat=elf32-powerpcle",      sf => "$src/asm88.s",  rf => "$src/asm88-le.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", ld => "ld-mod101 --oformat=elf32-powerpcle",      sf => "$src/asm89.s",  rf => "$src/asm89-le.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", ld => "ld-mod101 --oformat=elf32-powerpcle",      sf => "$src/asm98.s",  rf => "$src/asm98.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm99.s",  rf => "$src/asm99.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm101.s", rf => "$src/asm101-le.regress"),																					
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", ld => "ld-mod101 --oformat=elf32-powerpcle",      sf => "$src/asm103.s",  rf => "$src/asm103.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", ld => "ld-mod101 --oformat=elf32-powerpcle",      sf => "$src/asm104.s",  rf => "$src/asm104.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm109.s", rf => "$src/asm109.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm113.s", rf => "$src/asm113.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm114.s", rf => "$src/asm114.regress", flags => "--scale=2"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm117.s", rf => "$src/asm117.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm118.s", rf => "$src/asm118.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm119.s", rf => "$src/asm119.regress"),
+
+							asm_test(as => "as-mod101", of => "objdump-mod101", sf => "$src/asm121.s", rf => "$src/asm121.regress", fail => 1),
+
+							asm_test(as => "as-mod104", of => "objdump-mod104", ld => "ld-mod104 --oformat=elf32-powerpcle",      sf => "$src/asm104.s",  rf => "$src/asm104.regress"),
+
+							asm_test(as => "as-mod104", of => "objdump-mod104", sf => "$src/asm119.s", rf => "$src/asm119.regress"),							
+
+							asm_test(as => "as-mod105", of => "objdump-mod105", sf => "$src/asm105.s", rf => "$src/asm105.regress"),
+
+							asm_test(as => "as-mod105", of => "objdump-mod105", sf => "$src/asm107.s", rf => "$src/asm107.regress"),
+
+							asm_test(as => "as-mod105", of => "objdump-mod105", ld => "ld-mod105 --oformat=elf32-powerpcle",      sf => "$src/asm108.s",  rf => "$src/asm108.regress"),
+
+							asm_test(as => "as-mod105", of => "objdump-mod105", sf => "$src/asm110.s",  rf => "$src/asm110.regress"),														
+
+							{
+								cmd     => "./as-mod105 $src/asm111.s -o asm111.o",
+								stdio   => 1,
+								stderr  => 1,
+								checker => \&check_asm111,
+								temps   => [ "asm111.o" ],
+							},
+
+							asm_test(as => "as-mod105", of => "objdump-mod105", sf => "$src/asm116.s",  rf => "$src/asm116.regress"),
+							
+							asm_test(as => "as-mod106", of => "objdump-mod106", sf => "$src/asm106.s", rf => "$src/asm106.regress"),														
+							
+							{
+								cmd     => "./as-mod81 $src/asm71.s -o=asm71.o",
+								stdio   => 1,
+								stderr  => 1,
+								checker => \&check_asm71,
+								temps   => [ "asm71.o" ],
+							},
+
+							# Test instruction selection using asm_rank.
+							asm_test(as => "as-mod108", of => "objdump-mod108", sf => "$src/asm115.s", rf => "$src/asm115.regress"),
+
+							# Test complex macros which manipulate instruction arguments' addends if relocations are present.
+							asm_test(as => "as-mod109", of => "objdump-mod109", sf => "$src/asm120.s", rf => "$src/asm120.regress"),
+
+							# Test explicitly keeping whitespace in syntax strings.
+							asm_test(as => "as-mod110", of => "objdump-mod110", sf => "$src/asm122.s", rf => "$src/asm122.regress"),
+							
+							ext_model_test(
+								model    => "./mod2",
+								flags    => "-trace",
+								results  => "$src/in5.dat",
+								td_flags => "-check-all --ignore-reg=NIA",
+							),
+							model_test("./mod2","$src/in5.uvp"),
+							model_test("./mod2","$src/in97.uvp"),
+							model_test("./mod2","$src/in121.dat"),
+							model_test("./mod2","$src/in127.dat"),
+							model_test("./mod2","$src/in128.dat"),
+							model_test("./mod2","$src/in177.dat"),
+							model_test("./mod3","$src/in6.dat"),
+							model_test("./mod3","$src/in11.dat"),
+							model_test("./mod3","$src/in12.dat"),
+							model_test("./mod3","$src/in13.dat"),
+							model_test("./mod3","$src/in40.dat"),
+							{
+								cmd     => "./mod3 $src/in55.dat --output=in55.out.uvp -trace",
+								checker => \&check_in55,
+							},
+							ext_model_test(
+								model   => "./mod3",
+								flags   => "-trace -max-instr-count=999",
+								input   => "$src/in48.dat",
+								output  => "in48.out.dat",
+								results => "$src/in48.dat",),
+							model_test("./mod3","$src/in53.dat"),
+							model_test("./mod3","$src/in64.dat"),
+							model_test("./mod3","$src/in70.dat"),
+							model_test("./mod3","$src/in74.dat"),
+							model_test("./mod3","$src/in76.dat"),
+							model_test("./mod3","$src/in76.uvp"),
+							model_test("./mod3","$src/in85.dat"),
+							# This makes sure that a warning shows up in a DAT file even if tracing is off.
+							{
+								cmd     => "./mod3 $src/in11.dat -o=in11.out.dat",
+								checker => sub { check_for_regex("in11.out.dat",
+																								 [ "This is a warning message and should always show up" ],
+																								 [ "This is an info message with data and should only show up when tracing is on" ]
+																		 ); },
+																										 temps   => [ "in11.out.dat" ],
+							},
+							# This makes sure that messages show up in UVP files.
+							{
+								cmd     => "./mod3 $src/in11.dat -trace -o=in11.out.uvp",
+								checker => sub { check_for_regex("in11.out.uvp",
+																								 [ "This is a warning message and should always show up",
+																									 "This is an info message with data and should only show up when tracing is on" ],
+																								 [ ]
+																		 ); },
+																										 temps   => [ "in11.out.uvp" ],
+							},
+							# This makes sure that warnings show up in UVP files even if tracing is off.
+							{
+								cmd     => "./mod3 $src/in11.dat -o=in11.out.uvp",
+								checker => sub { check_for_regex("in11.out.uvp",
+																								 [ "This is a warning message and should always show up" ],
+																								 [ "This is an info message with data and should only show up when tracing is on" ]
+																		 ); },
+																										 temps   => [ "in11.out.uvp" ],
+							},
+							model_test("./mod3","$src/in88.dat"),
+							model_test("./mod3","$src/in106.dat"),
+							model_test("./mod3","$src/in124.dat"),
+							ext_model_test(
+								model   => "./mod3",
+								input   => "$src/in4.dat",
+								results => "$src/in133.dat",
+							),
+							model_test("./mod3","$src/in135.dat"),
+							model_test("./mod3","$src/in137.dat"),
+							model_test("./mod3","$src/in138.dat"),
+							model_test("./mod3","$src/in139.dat"),
+							model_test("./mod3","$src/in142.dat"),
+							model_test("./mod3","$src/in234.dat"),
+							model_test("./mod3rp","$src/in178.dat"),
+							ext_model_test(
+								model   => "./mod3rp",
+								flags   => "-trace",
+								input   => "$src/in178.dat",
+								results => "$src/in178.uvp",
+							),
+							model_test("./mod3rp -n=2","$src/in200.dat"),
+							model_test("./mod3","$src/in181.dat"),
+							model_test("./mod3","$src/in218.dat"),
+							model_test("./mod3","$src/in301.dat"),
+							model_test("./mod4","$src/in7.dat"),
+							model_test("./mod4","$src/in189.dat"),
+							model_test("./mod4","$src/in239.dat"),
+							ext_model_test(
+								model   => "./mod5",
+								flags   => "-trace -ms=0x40000",
+								results => "$src/in8.dat",
+							),
+							model_test("./mod6","$src/in9.dat"),
+							{
+								cmd     => "./mod6 $src/in9.dat -trace",
+								checker => \&check_in9,
+								temps   => [ "in9.out.dat" ],
+							},
+							model_test("./mod7","$src/in10.dat"),
+							model_test("./mod8","$src/in14.dat"),
+							model_test("./mod9","$src/in15.dat"),
+							model_test("./mod9","$src/in16.dat"),
+							model_test("./mod10","$src/in20.dat"),
+							model_test("./mod10","$src/in32.dat"),
+							model_test("./mod10","$src/in201.dat"),
+							model_test("./mod10","$src/in215.dat"),
+							jit_model_test($jit_ok,"./mod10","$src/in300.dat"),
+							model_test("./mod10","$src/in319.dat"),
+							jit_model_test($jit_ok,"./mod10","$src/in319.dat"),
+							model_test("./ttmod1","$src/tt1.dat"),
+							model_test("./ttmod1 -dc","$src/tt1.dat"),
+							model_test("./ttmod1 --dc --dc-hot-count=0","$src/tt1.dat",0,0,["card:M"]),
+							model_test("./ttmod1","$src/tt2.dat"),
+							model_test("./ttmod1 -dc","$src/tt2.dat"),
+							model_test("./ttmod1 --dc --dc-hot-count=0","$src/tt2.dat",0,0,["card:M"]),
+							model_test("./ttmod2","$src/tt3.dat"),
+							model_test("./ttmod3","$src/tt4.dat"),
+							latency_test("$src/mod1.adl","$src/cfg1.ttc",\&check_cfg1),
+							latency_test("$src/mod9.adl","$src/cfg2.ttc",\&check_cfg2),
+							
+							{
+								cmd    => "$make_iss --time-tagged --config=$src/cfg3.ttc $src/mod1.adl --output=mod1.temp.cc --no-full-path-errors",
+								stderr => 1,
+								fail   => 1,
+								diff   => "$src/cfg3.regress",
+								temps  => [ "mod1.temp.cc" ],
+							},
+							{
+								cmd    => "$make_iss --time-tagged --config=$src/cfg4.ttc $src/mod9.adl --output=mod9.temp.cc --no-full-path-errors",
+								stderr => 1,
+								fail   => 1,
+								diff   => "$src/cfg4.regress",
+								temps  => [ "mod9.temp.cc" ],
+							},
+							
+							model_test("./mod11","$src/in21.dat"),
+							model_test("./mod11","$src/in27.dat"),
+							model_test("./mod11","$src/in28.dat"),
+							model_test("./mod11","$src/in34.dat",0,0,0,"--check-all --ignore-reg=dsFoo"),
+							model_test("./mod11","$src/in44.dat"),
+							model_test("./mod11","$src/in62.dat"),
+							model_test("./mod11","$src/in69.dat"),
+							model_test("./mod11","$src/in72.dat"),
+							model_test("./mod11","$src/in79.uvp"),
+							# Test UVP reading with a specified RES card value.
+							ext_model_test(
+								model   => "./mod11",
+								flags   => "-trace --uvp-ta-mask=1 --uvp-res-value='1=0x38420001,0=0xdeadbeef'",
+								input   => "$src/in79.uvp",
+								results => "$src/in79-1.uvp",
+							),
+							model_test("./mod11","$src/in80.dat"),
+							model_test("./mod11","$src/in81.dat"),
+							# Tests max-instruction-count.
+							{
+								cmd     => "./mod11 $src/in67.dat -of=dat -trace -mic=20 -no-dump-options",
+								checker => sub { file_diff("in67.out.dat","$src/in67.dat.regress"); },
+								temps   => [ "in67.out.dat" ],
+							},
+							# Tests the default mic (if it doesn't hang it passes).
+							{
+								cmd     => "./mod11 $src/in67.dat --no-output -mic=1000000",
+								checker => sub { },
+							},
+							model_test("./mod11","$src/in78.uvp"),
+							model_test("./mod11","$src/in93.dat"),
+							model_test("./mod11","$src/in94.uvp"),
+							model_test("./mod11","$src/in101.dat"),
+							model_test("./mod11","$src/in114.dat"),
+							ext_model_test(
+								model   => "./mod11",
+								flags   => "-trace --fep --elf-pa",
+								input   => "$src/in118.dat $src/in118.elf",
+								results => "$src/in118.dat",
+							),
+							# This time, use --entry-point with an address, to make sure that works.
+							ext_model_test(
+								model   => "./mod11",
+								flags   => "-trace --entry-point=0x10000 --elf-pa",
+								input   => "$src/in118.dat $src/in118.elf",
+								results => "$src/in118.dat",
+							),
+							model_test("./mod11","$src/in123.dat"),
+							model_test("./mod11","$src/in129.dat"),
+							model_test("./mod11","$src/in130.uvp"),
+							model_test("./mod11","$src/in132.dat"),
+							model_test("./mod11","$src/in141.dat"),
+							model_test("./mod11","$src/in163.dat"),
+							model_test("./mod11","$src/in159.dat"),
+							model_test("./mod11","$src/in164.dat"),
+							model_test("./mod11 --uvp-res-value=0x7c00007c","$src/in173.uvp"),
+							model_test("./mod11","$src/in166.dat"),
+							model_test("./mod11","$src/in171.dat"),
+							model_test("./mod11","$src/in183.dat"),
+							model_test("./mod11","$src/in185.dat"),
+							model_test("./mod11","$src/in191.dat"),
+							model_test("./mod11","$src/in193.dat"),
+							model_test("./mod11","$src/in219.dat"),
+							model_test("./mod11 --script=$src/in220.cli","$src/in220.dat"),
+							model_test("./mod11","$src/in231.dat",0,0,0,"--check-all-card=T"),
+							model_test("./mod11 --mic=10","$src/in266.dat"),
+							model_test("./mod11","$src/in277.dat",0,0,0,"--no-ignore-extra-found-fields"),
+							jit_model_test($jit_ok,"./mod11 -mic=100","$src/in286.dat"),
+							jit_model_test($jit_ok,"./mod11 -mic=100","$src/in287.dat"),
+							model_test("./mod11 --script=$src/in315.cli","$src/in315.dat"),
+							model_test("./mod12","$src/in22.dat"),
+							model_test("./mod12","$src/in23.dat"),
+							model_test("./mod12","$src/in197.dat"),
+							# Make sure that we get the proper masks we expect.  Tracediff doesn't check this.
+							{
+								cmd     => "./mod12 $src/in197.dat -trace --no-dump-options",
+								checker => sub { file_diff("in197.out.dat","$src/in197.dat.regress"); },
+								temps   => [ "in197.out.dat" ],
+							},
+							model_test("./mod12","$src/in198.dat",0,0,0,"--check-all-card=R"),
+							model_test("./mod12","$src/in199.dat"),
+							# Make sure that we get the proper masks we expect.  Tracediff doesn't check this.
+							{
+								cmd     => "./mod12 $src/in199.dat -trace --no-dump-options",
+								checker => sub { file_diff("in199.out.dat","$src/in199.dat.regress"); },
+								temps   => [ "in199.out.dat" ],
+							},
+							model_test("./mod13","$src/in24.dat"),
+							model_test("./mod13","$src/in25.dat"),
+							model_test("./mod13","$src/in217.dat"),
+							model_test("./mod13","$src/in224.dat"),
+							model_test("./mod13","$src/in228.dat"),
+							model_test("./mod13","$src/in232.dat"),
+							model_test("./mod13 --script=$src/in236.cli","$src/in236.dat"),
+							model_test("./mod13","$src/in237.dat"),
+							model_test("./mod13","$src/in238.dat"),
+							model_test("./mod13 --script=$src/in240.cli","$src/in240.dat"),
+							model_test("./mod13","$src/in242.dat"),
+							model_test("./mod13","$src/in313.dat"),
+							model_test("./mod13 -dc","$src/in313.dat"),
+
+							# Test dynamic parameters for caches with an MT design.  In the
+							# first instance, we expect it to fail, since we don't set the
+							# number of ways to 8.
+							model_test("./mod13","$src/in289.dat",1),
+							model_test("./mod13 --eval='setdynparm L1d-cache-num-ways 8'","$src/in289.dat"),
+
+							model_test("./mod13","$src/in290.dat"),
+
+							model_test("./mod14","$src/in26.dat"),
+							ext_model_test(
+								model   => "./mod14",
+								flags   => "--trace",
+								input   => "$src/in26.dat",
+								results => "$src/in26.uvp",
+							),
+							rerun_model_test("./mod14","$src/in26.dat"),
+							model_test("./mod14","$src/in223.dat"),
+							model_test("./mod14","$src/in248.dat"),
+							ext_model_test(
+								model   => "./mod14",
+								flags   => "--trace",
+								input   => "$src/in248.dat",
+								results => "$src/in248.uvp",
+							),
+							model_test("./mod15","$src/in29.dat"),
+							model_test("./mod15","$src/in63.dat"),
+							model_test("./mod15","$src/in156.dat"),
+							model_test("./mod15","$src/in194.dat"),
+							model_test("./mod15","$src/in213.dat"),
+							model_test("./mod15","$src/in227.dat"),
+							model_test("./mod16","$src/in30.dat"),
+							model_test("./mod16","$src/in31.dat"),
+							model_test("./mod16","$src/in37.dat"),
+							model_test("./mod17","$src/in33.dat"),
+
+							# Various tests of introspection data using the --model-info or
+							# -mi option.
+							{
+								cmd     => "./mod14 --model-info",
+								stdio   => 1,
+								diff    => "$src/itest1.regress",
+							},
+							{
+								cmd     => "./mod19 --model-info",
+								stdio   => 1,
+								diff    => "$src/itest2.regress",
+							},
+							{
+								cmd     => "./mod36 --model-info",
+								stdio   => 1,
+								diff    => "$src/itest3.regress",
+							},
+							{
+								cmd     => "./mod21 --model-info",
+								stdio   => 1,
+								diff    => "$src/itest4.regress",
+							},
+							model_test("./mod18","$src/in35.dat"),
+							# We re-run this as a UVP in order to test the printing of D cards
+							# from the core's perspective, irregardless of whether the cache is
+							# on or not.
+							model_test("./mod18","$src/in35.uvp"),
+							model_test("./mod18","$src/in35.dat"),
+							model_test("./mod18","$src/in36.dat"),
+							model_test("./mod18","$src/in38.dat"),
+							model_test("./mod18","$src/in43.dat"),
+							model_test("./mod18","$src/in47.dat"),
+							model_test("./mod18","$src/in49.dat"),
+							model_test("./mod18","$src/in51.dat"),
+							model_test("./mod18","$src/in87.dat"),
+							model_test("./mod18","$src/in89.dat"),
+							model_test("./mod18","$src/in99.dat"),
+							model_test("./mod18","$src/in104.dat"),
+							model_test("./mod18","$src/in122.dat"),
+							model_test("./mod18","$src/in126.dat"),
+							model_test("./mod18","$src/in143.dat"),
+							model_test("./mod18","$src/in167.dat"),
+							model_test("./mod18","$src/in168.dat"),
+							model_test("./mod18","$src/in169.dat"),
+							model_test("./mod18","$src/in170.dat"),
+							model_test("./mod18","$src/in180.uvp"),
+							model_test("./mod18 --eval='setdynparm L2-cache-num-sets 256'","$src/in211.dat"),
+							model_test("./mod18","$src/in222.dat"),
+							model_test("./mod18","$src/in293.dat"),
+							model_test("./mod18","$src/in303.dat",0,0,0,"--check-all-card=C"),
+							model_test("./mod19","$src/in39.dat"),
+							model_test("./mod20","$src/in42.dat"),
+							model_test("./mod21","$src/in45.dat",0,0,0,"--check-all-card=A"),
+							model_test("./mod21","$src/in50.dat"),
+							model_test("./mod21","$src/in90.dat"),
+							# Test to make sure that we can instruct the model to dump all
+							# cache and MMU results, even if not valid, if so instructed.
+							ext_model_test(
+								model   => "./mod21",
+								flags   => "-trace --show-all-cache-inits --show-all-cache-results --show-all-mmu-inits --show-all-mmu-results",
+								input   => "$src/in90.dat",
+								results => "$src/in90.dat"
+								),
+							ext_model_test(
+								model   => "./mod21",
+								flags   => "-trace --show-all-cache-inits --show-all-cache-results --show-all-mmu-inits --show-all-mmu-results",
+								input   => "$src/in90.dat",
+								output  => "in90.out.uvp",
+								results => "$src/in90.regress.uvp"
+								),
+							model_test("./mod21","$src/in98.dat"),
+							model_test("./mod21","$src/in162.dat"),
+							model_test("./mod21 --config=$src/in182.tcl","$src/in182.dat"),
+							# Make sure that we're properly setting/getting dynamic
+							# parameters.
+							{
+								cmd => "./mod21 --config=$src/in182.tcl $src/in182.dat",
+								stdio => 1,
+								checker => sub { checkregex($_[0],
+																						"L1d cache size\\s+:\\s+1048576",
+																						"L1d cache line size\\s+:\\s+256",
+																						"L1d cache set size\\s+:\\s+512",
+																						"L1d cache way size\\s+:\\s+8",
+																						"L1i cache size\\s+:\\s+16384",
+																						"L1i cache line size\\s+:\\s+128",
+																						"L1i cache set size\\s+:\\s+32",
+																						"L1i cache way size\\s+:\\s+4",
+																						"TlbCam tlb way size\\s+:\\s+20"
+																		 ); },
+							},
+							model_test("./mod21 --config=$src/in192.tcl","$src/in192.dat"),
+							# This is just here to make sure that user calls of
+							# logMmuTranslation work with the UVP writer- the UVP writer
+							# caches translations, so it has to clone TLB objects which are
+							# originally created on the stack.
+							ext_model_test(
+								model   => "./mod21",
+								flags   => "--trace",
+								input   => "$src/in192.dat",
+								results => "$src/in192.uvp",
+							),
+							# This uses a UVP, b/c with a UVP, we end up reseting the core at
+							# the end b/c of how the parser works (it claims to have more
+							# input, but then returns false on read readNextInput()).  Reseting
+							# the core means that we reset to defalt parms, then re-init the
+							# cache.  If we've shrunk the cache, this reset will set it to
+							# normal size, testing the fact that we properly reallocate
+							# (otherwise, we'll get a segfault).
+							model_test("./mod21 --config=$src/small-cache.tcl","$src/in4.uvp"),
+							model_test("./mod21","$src/in241.dat",0,0,0,"--check-all-card=A"),
+							model_test("./mod22","$src/in46.dat"),
+
+							model_test("./mod23",                     "$src/in52.dat"),
+							model_test("./mod23",                     "$src/in188.dat"),
+							model_test("./mod23",                     "$src/in333.dat"),
+							model_test("./mod23 -dc -dc-hot-count=0", "$src/in333.dat"),
+							
+							model_test("./mod25","$src/in54.dat"),
+							model_test("./mod26","$src/in56.dat"),
+							model_test("./mod27","$src/in57.dat"),
+							# Little endian tests
+							model_test("./mod28","$src/in58.dat"),
+							model_test("./mod28","$src/in71.dat"),
+							ext_model_test(
+								model   => "./mod28",
+								flags   => "--use-file-entry-point --elf-be --trace",
+								input   => "$src/le_setup.dat $src/sieve_le.elf",
+								output  => "sieve_le.out.dat",
+								results => "$src/sieve_le.dat",
+							),
+							ext_model_test(
+								model   => "./mod28",
+								flags   => "--use-file-entry-point --elf-be --trace",
+								input   => "$src/le_setup.dat $src/sieve_le.elf",
+								output  => "sieve_le.out.uvp",
+								results => "$src/sieve_le.uvp",
+							),
+							model_test("./mod29","$src/in59.dat"),
+							# Make sure that we can generate an MP UVP w/shared memory.
+							ext_model_test(
+								model   => "./mod29",
+								flags   => "-trace",
+								input   => "$src/in59.dat",
+								output  => "in59.out.uvp",
+								results => "$src/in59.uvp",
+							),
+							model_test("./mod29","$src/in77.dat"),
+							model_test("./mod29","$src/in77.uvp"),
+							model_test("./mod29","$src/in100.dat"),
+							model_test("./mod30","$src/in60.dat"),
+							model_test("./mod31","$src/in65.dat"),
+							{
+								cmd     => "./mod31 -trace $src/in65.dat -o=in65.out.dat",
+								checker => sub { tracediff_inc("$src/in65.dat","in65.out.dat")},
+								temps   => ["in65.out.dat" ],
+							},
+							ext_model_test(
+								model    => "./mod31",
+								flags    => "-trace",
+								input    => "$src/in65.uvp",
+								output   => "in65.out.uvp",
+								results  => "$src/in65.uvp",
+								td_flags => "--compare-global-count",
+							),
+							model_test("./mod31","$src/in66.dat"),
+							model_test("./mod31","$src/in66.uvp"),
+							model_test("./mod31","$src/in96.dat"),
+							model_test("./mod31","$src/in304.dat"),
+							model_test("./mod32","$src/in68.dat"),
+							model_test("./mod34","$src/in78.dat"),
+							
+							
+							# Tests for N-bit encodings
+							model_test("./mod37","$src/in91.dat"),
+							model_test("./mod37","$src/in91.uvp"),
+							model_test("./mod37","$src/in92.dat"),
+							model_test("./mod37","$src/in92.uvp"),
+							model_test("./mod37","$src/in95.dat"),
+							model_test("./mod37","$src/in95.uvp"),			 
+							
+							# Test for sbits
+							model_test("./mod38","$src/in102.dat"),
+							
+							# Little endian tests
+							model_test("./mod39","$src/in102.dat"),
+							model_test("./mod40","$src/in103.dat"),
+							ext_model_test(
+								model   => "./mod40",
+								flags   => "-trace",
+								input   => "$src/in311.dat",
+								output  => "in311.out.uvp",
+								results => "$src/in311.uvp",
+							),
+							
+							# Prefix and serial grouping
+							model_test("./mod41","$src/in107.dat"),
+							model_test("./mod41","$src/in107.uvp"),
+							model_test("./mod43","$src/in113.dat"),
+							
+							# Enumerated registers and delay slots.
+							model_test("./mod42","$src/in108.dat"),
+
+							model_test("./mod46","$src/in125.dat"),
+
+							# Nested instructions
+							model_test("./mod47","$src/in134.dat"),
+
+							# Parallel execution with rollback in a normal ISS.
+							model_test("./mod48","$src/in140.dat"),
+
+							# Test of ignore-mode.
+							model_test("./mod48","$src/in190.dat"),
+							
+							# Parallel execution with rollback, post_fetch skip immediate
+							# write-hooks, and ValueBundle write hook in normal ISS
+							model_test("./mod50","$src/in154.dat"),
+              model_test("./mod50","$src/in209.dat"),
+              model_test("./mod50","$src/in233.dat"),
+
+							# Variable-length instructions with implicit instruction-field
+							# bit assignments with sub-instructions.
+							model_test("./mod51","$src/in155.dat"),
+
+							# Test the ability of the UVP reader/writer to modify its address-shifting
+							# according to user attributes.
+							model_test("./mod52","$src/in158.uvp"),
+
+							# Test that a large concatenation will work.
+							model_test("./mod52","$src/in161.dat"),
+
+							# Make sure that we can generate a UVP even if a translation
+							# doesn't exist for the final NIA value.
+							ext_model_test(
+								model   => "./mod52",
+								flags   => "-trace",
+								input   => "$src/in216.dat",
+								results => "$src/in216.uvp",
+							),
+
+							# Test that multi-hit MMU functionality works.
+							model_test("./mod56","$src/in179.dat"),
+							model_test("./mod56","$src/in179.uvp"),
+							model_test("./mod56","$src/in186.dat"),
+
+							# Test that we can insert data into a translation and then restart
+							# the translation in order to translate using the new data.
+							model_test("./mod56","$src/in229.dat"),
+
+							# Test long encodings w/same first words.
+							model_test("./mod57","$src/in187.dat"),
+
+							# Test register-file aliasing and more register-attribute stuff.
+							model_test("./mod66","$src/in195.dat"),
+							model_test("./mod66","$src/in196.dat"),
+
+							# Test to make sure that instruction attributes are cleared after
+							# execution so that external exceptions don't get stale attribute
+							# data.
+							model_test("./mod66 --script=$src/in244.cli","$src/in244.dat"),
+
+							# Sanity check that this works for a simple model.  The real test
+							# comes with using tdriver8, which makes sure that slot
+							# allocations for aliases work.
+							model_test("./mod69","$src/in206.dat"),
+
+              # Testing of data dependency tracking.
+              model_test("./mod70","$src/in208.dat"),
+
+							# Testing of a simple memory-protection unit model.
+              model_test("./mod72","$src/in214.dat"),
+              model_test("./mod72","$src/in226.dat"),
+              model_test("./mod72","$src/in235.dat"),
+              model_test("./mod72","$src/in262.dat"),
+              model_test("./mod72","$src/in314.dat"),
+
+              model_test("./mod72 --plugin=./branch-callback.so","$src/in263.dat"),
+              model_test("./mod72 --plugin=./branch-callback.so -dc --dc-hot-count=0","$src/in263.dat"),
+              model_test("./mod72 --plugin=./branch-callback.so -dc --dc-hot-count=0","$src/in312.dat"),
+
+							# Testing of external resources.
+							model_test("./mod73","$src/in245.dat"),
+
+							# Testing of large instructions.
+							model_test("./mod75","$src/in249.dat"),
+							# Test instruction jamming with large instructions.
+							ext_model_test(
+								model   => "./mod75",
+								flags   => "--script=$src/in250.cli",
+								input   => "$src/in250.dat",
+								results => "$src/in250.dat",
+							),
+
+							# Another simple nested-field test.
+							model_test("./mod76","$src/in251.dat"),
+
+							model_test("./mod77","$src/in251.dat"),
+							model_test("./mod77","$src/in252.dat"),
+
+							# Test cache touch with decode-cache models, with variable-sized
+							# instructions and no icache (so that we use a load instead).
+							model_test("./mod79 -dc -dc-hot-count=0","$src/in318.dat"),
+
+							# Test cache touch when it's at the end of the decode-cache kernel.
+							model_test("./mod79 -dc -dc-hot-count=0","$src/in321.dat"),
+
+							# Testing of large reads and writes.
+							model_test("./mod82","$src/in272.dat"),
+							model_test("./mod82","$src/in273.dat"),
+
+							# Testing of delayed write semantics.
+							model_test("./mod83","$src/in274.dat"),
+
+							# Same as above, using the generic multi-file-trace option.
+							{
+								cmd     => "./mod84 -n=2 $src/in264.dat -trace -multi-file-trace",
+								checker => sub {
+									check_results ("$src/in264_0.dat","in264_0.out.dat");
+									check_results ("$src/in264_1.dat","in264_1.out.dat");
+								},
+								temps   => [ "in264_0.out.dat", "in264_1.out.dat" ],
+							},
+
+							# Similar to the above, using a longer test and the MT kernel with the interpreter.
+							{
+								cmd     => "./mod84 --multi-threaded-sim -n=2 $src/in278.dat -multi-file-trace",
+								checker => sub {
+									check_results ("$src/in278_0.dat","in278_0.out.dat");
+									check_results ("$src/in278_1.dat","in278_1.out.dat");
+								},
+								temps   => [ "in278_0.out.dat", "in278_1.out.dat" ],
+							},
+
+							# Same as above, using the decode cache.  We'll also enable
+							# tracing, just to make sure it doesn't cause problems.
+							{
+								cmd     => "./mod84 --multi-threaded-sim -n=2 $src/in278.dat -dc -trace -mft",
+								checker => sub {
+									check_results ("$src/in278_0.dat","in278_0.out.dat");
+									check_results ("$src/in278_1.dat","in278_1.out.dat");
+								},
+								temps   => [ "in278_0.out.dat", "in278_1.out.dat" ],
+							},
+							
+							# Same as above, but test merged single-stream tracing.
+							model_test("./mod84 --multi-threaded-sim -n=2",    "$src/in278.dat"),
+							model_test("./mod84 --multi-threaded-sim -n=2 -dc","$src/in278.dat"),
+
+							# Another MT test, this time with system calls.
+							{
+								cmd     => "./mod84 --multi-threaded-sim -n=2 $src/in279-1.elf $src/in279-2.elf $src/in279.dat -syscall-enabled -mic=0",
+								stdio   => 1,
+								checker => \&check_in279,
+							},
+							{
+								cmd     => "./mod84 --multi-threaded-sim -n=2 $src/in279-1.elf $src/in279-2.elf $src/in279.dat -syscall-enabled -mic=0 -dc",
+								stdio   => 1,
+								checker => \&check_in279,
+							},
+
+							# Test to make sure that we can awaken a sleeping core with the MT
+							# kernel.
+							model_test("./mod84 --multi-threaded-sim -n=2",           "$src/in281.dat"),
+							model_test("./mod84 --multi-threaded-sim -n=2 -dc -mic=0","$src/in281.dat"),
+
+							# Reservation modeling with the MT kernel.
+							model_test("./mod84 --multi-threaded-sim -n=3 --syscall-enabled",           "$src/in282.dat"),
+							model_test("./mod84 --multi-threaded-sim -n=3 -dc -mic=0 --syscall-enabled","$src/in282.dat"),
+
+							# External exceptions modeling with the MT kernel.
+							model_test("./mod84 --multi-threaded-sim -n=2 --plugin=./exception-callback.so",           "$src/in283.dat"),
+							model_test("./mod84 --multi-threaded-sim -n=2 --plugin=./exception-callback.so -dc -mic=0","$src/in283.dat"),
+
+							# Make sure that progress is made via the td threshold.
+							model_test("./mod84 --multi-threaded-sim -n=2 -dc -td-count=10","$src/in288.dat"),
+
+							# Test of external plugins (a uart model) with the MT kernel.
+							in284_test("./mod85"),
+							in284_test("./mod85","-dc"),
+							in284_test("./mod85","-mt "),
+							in284_test("./mod85","-mt -dc"),
+
+							in285_test("./mod85",""),
+							in285_test("./mod85","-dc"),
+							in285_test("./mod85","-mic=0 -mt "),
+							in285_test("./mod85","-mic=0 -mt -dc"),
+
+							in284_test("./mod86"),
+							in284_test("./mod86","-dc"),
+							in284_test("./mod86","-mt "),
+							in284_test("./mod86","-mt -dc"),
+
+							in285_test("./mod86",""),
+							in285_test("./mod86","-dc"),
+							in285_test("./mod86","-mic=0 -mt "),
+							in285_test("./mod86","-mic=0 -mt -dc"),
+
+							# Make sure that sparse registers mapped to multiple elements of a target file work.
+							model_test("./mod88","$src/in295.dat"),
+
+							# Test tag-only caches by having two cores work in a
+							# producer/consumer arrangement.  When checking, we ignore all
+							# instruction-cache activity, but check for an exact match with A
+							# cards (which report invalidates) and C cards, which report
+							# data-cache activity.
+							model_test("./mod89 -n=2","$src/in296.dat",0,0,["cache:L1i"],"--check-all-card=A --check-all-card=C"),
+
+							# Make sure that cache-miss penalties can be specified for time-tagged ISSs.
+							model_test("./mod89","$src/in297.dat",0,0,["cache:L1i"]),
+
+							# Make sure we handle slice-writes correctly.
+							model_test("./mod89","$src/in298.dat",0,0,["cache:L1i"]),
+
+							# Another test of dual-issue time-tagged ISS w/loads and arithmetics.
+							model_test("./mod89","$src/in299.dat",0,0,["cache:L1i"]),							
+
+							# Make sure that cache-miss penalties can be specified for td-commit-logged ISSs.
+							ext_model_test(
+								model   => "./mod90",
+								flags   => "-trace",
+								input   => "$src/in297.dat",
+								results => "$src/in297td.dat",
+								ignores => ["cache:L1i"],
+							),
+							# Same as above, using the decode-cache.
+							ext_model_test(
+								model   => "./mod90",
+								flags   => "-trace -dc -dc-hot-count=0",
+								input   => "$src/in297.dat",
+								results => "$src/in297td.dat",
+								ignores => [ "cache:L1i", "card:M" ],
+							),
+
+							# Testing of per-context TLBs.
+							model_test("./mod92","$src/in305.dat"),
+							model_test("./mod92","$src/in306.dat"),
+
+							# Testing of 64-bit addressing with a DMI cache.
+							model_test("./mod93 --plugin=./pic-uart.so","$src/in307.dat"),
+							model_test("./mod93 --plugin=./pic-uart.so -dc -dc-hot-count=0","$src/in307.dat"),
+
+							# Test the use of split branches with the decode cache.
+							model_test("./mod94","$src/in308.dat"),
+							model_test("./mod94 -dc -dc-hot-count=0","$src/in308.dat"),
+							model_test("./mod94","$src/in309.dat"),
+							model_test("./mod94 -dc -dc-hot-count=0","$src/in309.dat"),
+							model_test("./mod94 -dc -dc-hot-count=2","$src/in309.dat"),
+
+							# Test DMI cache invalidation with modeled caches.
+							model_test("./mod95","$src/in310.dat"),
+							model_test("./mod95 -dc -dc-hot-count=0","$src/in310.dat"),
+
+							# Test cache touch with decode-cache models, with variable-sized instructions.
+							model_test("./mod98 -dc -dc-hot-count=0","$src/in317.dat"),
+
+							# Tests of a serial-execution model w/packetized encodings.
+							model_test("./mod99",                     "$src/in322.dat"),
+							model_test("./mod99 -dc -dc-hot-count=0", "$src/in322.dat"),
+							
+							model_test("./mod99",                     "$src/in323.dat"),
+							model_test("./mod99 -dc -dc-hot-count=0", "$src/in323.dat"),
+
+							model_test("./mod99",                     "$src/in324.dat"),
+							model_test("./mod99 -dc -dc-hot-count=0", "$src/in324.dat"),
+
+							# Tests of little-endian variable-length instructions.
+							model_test("./mod100",                    "$src/in325.dat"),
+							model_test("./mod100 -dc -dc-hot-count=0","$src/in325.dat"),
+
+							# Tests of a serial-execution model w/packetized encodings in little-endian.
+							model_test("./mod101",                    "$src/in326.dat"),
+							model_test("./mod101 -dc -dc-hot-count=0","$src/in326.dat"),
+							
+							model_test("./mod101",                    "$src/in327.dat"),
+							model_test("./mod101 -dc -dc-hot-count=0","$src/in327.dat"),
+
+							model_test("./mod101",                    "$src/in328.dat"),
+							model_test("./mod101 -dc -dc-hot-count=0","$src/in328.dat"),
+
+							{
+								cmd     => "./mod101 $src/in334.dat --quiet --output=in334.out.dat -trace",
+								checker => \&check_in334,
+							},
+							model_test("./mod101 -dc -dc-hot-count=0","$src/in334.dat"),
+							
+							# Tests of packetized encodings and separate imem/dmem.
+							model_test("./mod102",                    "$src/in329.dat"),
+							model_test("./mod102 -dc -dc-hot-count=0","$src/in329.dat"),							
+
+							asm_ld_run_test("as-mod101","ld-mod101 -T $src/mod102.lnk --no-check-sections","mod102","$src/asm102.s","$src/in329.dat"),
+
+							# Test of external harvard memory (imem is external).
+							model_test("./mod103 --plugin=./ext-hrvd.so",                    "$src/in329.dat"),
+							model_test("./mod103 --plugin=./ext-hrvd.so -dc -dc-hot-count=0","$src/in329.dat"),
+
+							# Test of complex encodings requiring conflicts to be allowed.
+							model_test("./mod106", "$src/in330.dat"),
+
+							# Test of external harvard memory (dmem is external).
+							model_test("./mod107 --plugin=./ext-hrvd.so",                    "$src/in331.dat"),
+							model_test("./mod107 --plugin=./ext-hrvd.so -dc -dc-hot-count=0","$src/in331.dat"),
+
+							model_test("./mod107 --plugin=./ext-hrvd.so",                    "$src/in332.dat"),							
+							model_test("./mod107 --plugin=./ext-hrvd.so -dc -dc-hot-count=0","$src/in332.dat"),
+							
+							# Tracediff regressions
+							fail_tracediff("trorig.dat","tr1.dat",2,0,"--print-asm --no-local-count"),
+							fail_tracediff("trorig.dat","tr2.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr3.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr4.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr5.dat",2,0,"--no-local-count"),
+							pass_tracediff("trorig.dat","tr6.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr7.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr8.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr9.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig.dat","tr10.dat",2,0,"--no-local-count"),
+							fail_tracediff("trorig1.dat","tr11.dat",0,1),
+							
+							fail_tracediff("trorig.uvp","tr1.uvp",2,1,0,"--print-asm"),
+							fail_tracediff("trorig.uvp","tr2.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr3.uvp",2,1),
+							pass_tracediff("trorig.uvp","tr4.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr5.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr6.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr7.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr8.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr9.uvp",2,1),
+							pass_tracediff("trorig.uvp","tr10.uvp",2,1),
+							pass_tracediff("tcard_test1_orig.uvp","tcard_test1.uvp",0,1,"--ignore-reg=\"IAR\"",1),
+
+							# This checks to make sure that we can ignore a field.  The test should fail otherwise.
+							{
+								cmd     => "$datdiff $src/trorig2.uvp $src/tr11.uvp --ignore-field=ta --ignore-field=L",
+								checker => sub {},
+							},
+
+							pass_tracediff("trorig3.uvp","tr14.uvp",0,1,"--ignore-extra-mem --ignore-reg=IAR --ignore-reg=PID1 --ignore-reg=PID2 --ignore-reg=IVOCR --ignore-reg=VSCR --ignore-reg=SBSR0 --ignore-field=L"),
+
+							fail_tracediff("trorig.uvp","tr12.uvp",0,1),
+							pass_tracediff("trorig.uvp","tr13.uvp",0,1,"--ignore-ir"),
+
+							# This checks to make sure that we can ignore a field.  The test should fail otherwise.
+							{
+								cmd     => "$datdiff $src/ign1-1.uvp $src/ign1-2.uvp --ignore-field=ta --ignore-card=RES",
+								checker => sub {},
+							},
+							# To double check, this test should fail b/c we're not ignoring the field.
+							{
+								cmd     => "$datdiff $src/trorig.uvp $src/tr11.uvp --ignore-field=foo",
+								checker => sub {},
+								fail    => 1,
+							},
+
+							# This checks to make sure that we can ignore fields which are in
+							# the expects file but not in the found file.
+							pass_tracediff("trorig4.uvp","tr15.uvp",0,1,"--ignore-extra-fields"),
+
+							# Check that --check-all will find extra register updates and that --ignore-reg
+							# will work with --check-all.
+							fail_tracediff("trorig.uvp","tr16.uvp",0,1,"--check-all --ignore-reg=FOO"),
+
+							# Check that we can ignore portions of a register using the --reg-mask option.
+							pass_tracediff("trorig5.uvp","tr17.uvp",0,1,"--reg-mask=0xffffffff",1),
+
+							# Check that we'll catch the case where we're missing some, but not
+							# all, of a given type with --check-all.
+							fail_tracediff("trorig.dat","tr20.dat",0,1,"--check-all --no-local-count",1),
+
+							# Check to make sure that we catch no-opped memory instructions.
+							fail_tracediff("trorig.uvp","tr21.uvp",0,1),
+							fail_tracediff("trorig.uvp","tr22.uvp",0,1,"--no-check-all-card=M"),
+
+							# Check that we can ignore extra T cards in the expects file.
+							fail_tracediff("trorig6.uvp","tr18.uvp",0,1,"",1),
+							pass_tracediff("trorig6.uvp","tr18.uvp",0,1,"--ignore-extra-tlbs",1),
+							pass_tracediff("trorig6.uvp","tr19.uvp",0,1,"--ignore-extra-tlbs",1),
+
+							# Check that we ignore consecutive memory accesses of the same type by default.
+							pass_tracediff("trorig7.dat","tr23.dat",0,1,"--remove-consecutive-mem",1),
+							fail_tracediff("trorig7.dat","tr23.dat",0,1,"--no-local-count"),
+
+              # Check comparison logic for register data-dependency (dt).
+              fail_tracediff("trorig8.dat","tr24.dat",0,1,"--no-local-count"),
+
+							# Check that we can compare UVPs if T:ep doesn't exist, by using --ignore-field=ep.
+							fail_tracediff("trorig9.uvp","tr25.uvp",0,1),
+							pass_tracediff("trorig9.uvp","tr25.uvp",0,1,"--ignore-field=ep",1),
+							
+							fail_tracediff("twotests.uvp","twotests_ir1.uvp",2,1),
+							fail_tracediff("twotests.uvp","twotests_ir2.uvp",2,1),
+							
+							fail_tracediff("twotests.dat","twotests_ir1.dat",2,1,"--no-local-count"), 	 
+							fail_tracediff("twotests.dat","twotests_ir2.dat",2,1,"--no-local-count"), 
+							
+							fail_tracediff("trorig.dat","tr_length1.dat",2),
+							fail_tracediff("trorig.dat","tr_length2.dat",2),
+							fail_tracediff("trorig.dat","tr_length3.dat",15,0,"--no-local-count"),
+							
+							fail_tracediff("trorig.uvp","tr_length1.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr_length2.uvp",2,1),
+							fail_tracediff("trorig.uvp","tr_length3.uvp",2,1),
+							
+							fail_tracediff("big_orig.uvp","big_ir1.uvp",1000,1),
+							fail_tracediff("big_orig.dat","big_ir4.dat",1000,1,"--no-local-count"),
+
+							fail_tracediff("uvp-error1.uvp","uvp-error1.uvp",0,1),
+
+							fail_tracediff("time-good1.dat","time1.dat",0,1,"--max-delta=0.1 --min-time-error=3 --no-local-count"),
+							pass_tracediff("time-good1.dat","time2.dat",0,1,"--max-delta=0.2"),
+							fail_tracediff("time-good1.dat","time3.dat",0,1,"--max-delta=0.1 --no-local-count"),
+
+							fail_tracediff("time-good1.dat","time4.dat",0,1,"--instr-timing-offset=3 --no-local-count"),
+							pass_tracediff("time-good1.dat","time4.dat",0,1,"--instr-timing-offset=4",1),
+							fail_tracediff("time-good1.dat","time5.dat",0,1,"--instr-timing-offset=3 --max-delta=0.1 --no-local-count"),
+
+							pass_tracediff("time-good1.dat","time6.dat",0,1,"--ignore-ctime",1),
+							fail_tracediff("time-good1.dat","time6.dat",0,1,"--no-local-count"),
+
+							fail_tracediff("ijam-orig.uvp","ijam1.uvp",0,1),
+							pass_tracediff("ijam-orig.uvp","ijam2.uvp",0,1),
+
+							fail_tracediff("ijam-orig.dat","ijam3.dat",0,1,"--no-local-count"),
+							
+							# Tests transactional-ISSs.
+							ext_model_test(
+								model   => "./tdriver1",
+								flags   => "-trace -log-mem",
+								results => "$src/in2.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in2.memlog.regress"); },
+								stdio   => 1,
+							),
+							ext_model_test(
+								model   => "./tdriver1",
+								flags   => "-trace -log-mem -log-branches -log-instr",
+								results => "$src/in4.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in4.memlog.regress"); },
+								stdio   => 1,
+							),
+							ext_model_test(
+								model     => "./tdriver1",
+								flags     => " -trace",
+								results   => "$src/in2.uvp",
+								max_tests => 1,
+							),
+							model_test("./tdriver1","$src/in3.dat"),
+							model_test("./tdriver1 --pipelined","$src/in83.dat"),
+							model_test("./tdriver1 --pipelined","$src/in84.dat"),
+							ext_model_test(
+								model     => "./tdriver1",
+								flags     => "--pipelined -trace",
+								results   => "$src/in2.dat",
+								max_tests => 1,
+							),
+							model_test("./tdriver1","$src/in18.dat"),
+							model_test("./tdriver1","$src/in35.dat"),
+							model_test("./tdriver1","$src/in43.dat"),
+							ext_model_test(
+								model     => "./tdriver1",
+								flags     => " -trace",
+								results   => "$src/in41.dat",
+								td_flags => "--check-all --ignore-reg=NIA",
+							),
+							# For this test, we have to ignore final memory, because tdriver
+							# can't handle inactive L2s or write-through.
+							model_test("./tdriver1","$src/in51.dat",0,0,0,"--ignore-card=MD"),
+							model_test("./tdriver1","$src/in89.dat"),
+							model_test("./tdriver1","$src/in126.dat"),
+							ext_model_test(
+								model   => "./tdriver1",
+								flags   => "-trace -log-mem",
+								results => "$src/in153.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in153.memlog.regress"); },
+								stdio   => 1,
+							),
+							ext_model_test(
+								model   => "./tdriver1",
+								flags   => "-trace -log-instr",
+								results => "$src/in157.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in157.memlog.regress"); },
+								stdio   => 1,
+							),
+							model_test("./tdriver1","$src/in225.dat"),
+							model_test("./tdriver2","$src/in6.dat",0,0,["BCCNT","PCCNT"]),
+							model_test("./tdriver2","$src/in11.dat"),
+							model_test("./tdriver2","$src/in12.dat"),
+							model_test("./tdriver2","$src/in13.dat"),
+							model_test("./tdriver2","$src/in40.dat"),
+							model_test("./tdriver2","$src/in76.dat"),
+							model_test("./tdriver2","$src/in106.dat"),
+							ext_model_test(
+								model     => "./tdriver2",
+								flags     => "--pipelined -trace",
+								results   => "$src/in109.dat",
+							),
+							ext_model_test(
+								model     => "./tdriver2",
+								flags     => "--pipelined -trace",
+								results   => "$src/in110.dat",
+							),
+							# Right now, there's a subtle difference, whereby an exception
+							# generated during a commit on a transactional ISS will occur after
+							# post_exec occurs, rather than cancelling post_exec, as in the
+							# normal ISS.  This might be something that we'll have to fix later
+							# on, but for now we'll ignore it.
+							ext_model_test(
+								model    => "./tdriver2",
+								flags    => "-trace",
+								results  => "$src/in85.dat",
+								td_flags => "--ignore-reg=ICNT",
+							),
+							model_test("./tdriver2","$src/in120.dat"),
+							model_test("./tdriver2","$src/in124.dat"),
+							model_test("./tdriver2","$src/in131.dat"),
+							model_test("./tdriver2","$src/in135.dat"),
+							model_test("./tdriver2","$src/in136.dat"),
+							model_test("./tdriver2","$src/in138.dat"),
+							model_test("./tdriver2","$src/in165.dat"),
+							model_test("./tdriver2","$src/in181.dat"),
+							ext_model_test(
+								model   => "./tdriver2",
+								flags   => "-trace -log-mem",
+								results => "$src/in203.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in203.memlog.regress"); },
+								stdio   => 1,
+							),
+							ext_model_test(
+								model   => "./tdriver2",
+								flags   => "-trace -log-instr",
+								results => "$src/in205.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in205.memlog.regress"); },
+								stdio   => 1,
+							),
+							model_test("./tdriver2","$src/in218.dat"),
+							model_test("./tdriver3","$src/in5.dat"),
+							model_test("./tdriver3","$src/in127.dat"),
+							model_test("./tdriver3","$src/in128.dat"),
+							model_test("./tdriver4","$src/in27.dat"),
+							model_test("./tdriver4","$src/in28.dat"),
+							model_test("./tdriver4","$src/in78.uvp"),
+							model_test("./tdriver4","$src/in94.uvp"),
+							model_test("./tdriver4","$src/in123.dat"),
+							model_test("./tdriver4","$src/in129.dat"),
+							model_test("./tdriver4","$src/in130.uvp"),
+							model_test("./tdriver4","$src/in159.dat"),
+							model_test("./tdriver4","$src/in219.dat"),
+							model_test("./tdriver5","$src/in151.dat"),
+
+							ext_model_test(
+								model   => "./tdriver6",
+								flags   => "-trace -log-instr",
+								results => "$src/in9.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in9.memlog.regress"); },
+								stdio   => 1,
+							),
+
+							model_test("./tdriver7","$src/in201.dat"),
+
+							model_test("./tdriver8","$src/in206.dat"),
+							{
+								cmd     => "./tdriver8 $src/in210.dat -trace -o=in210.out.dat -log-instr > in210.instlog.out",
+								checker => sub { 
+									check_results("$src/in210.dat","in210.out.dat");
+									file_diff("in210.instlog.out","$src/in210.instlog.regress"); 
+								},
+								temps   => [qw(in210.out.dat in210.instlog.out)],
+							},
+
+							model_test("./tdriver9","$src/in17.dat"),
+							model_test("./tdriver9","$src/in18.dat"),
+							model_test("./tdriver9","$src/in225.dat"),
+
+							# Testing of safe-mode ISSs (memory transactions go through the
+							# normal memory hierarchy).
+							ext_model_test(
+								model   => "./smdriver1",
+								flags   => "-trace -log-mem",
+								results => "$src/in2.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in2.memlog.regress"); },
+								stdio   => 1,
+							),
+							model_test("./smdriver1","$src/in4.dat"),
+							model_test("./smdriver1","$src/in35.dat"),
+
+							# Test a safe-mode ISS.
+							model_test("./smdriver2","$src/in6.dat",0,0,["BCCNT","PCCNT"]),
+							model_test("./smdriver2","$src/in11.dat"),
+							model_test("./smdriver2","$src/in12.dat"),
+							model_test("./smdriver2","$src/in13.dat"),
+							model_test("./smdriver2","$src/in40.dat"),
+							model_test("./smdriver2","$src/in76.dat"),
+							model_test("./smdriver2","$src/in106.dat"),
+							# These tests are designed to use the --pipelined mode, but that
+							# doesn't exist for hybrid ISSs, so we have to ignore several
+							# things in order for the comparisons to match.
+							ext_model_test(
+								model     => "./smdriver2",
+								results   => "$src/in109.dat",
+								flags     => "--trace",
+								ignores   => [qw( ICNT )],
+								td_flags  => "--ignore-timing --no-ir-length-check",
+							),
+							ext_model_test(
+								model     => "./smdriver2",
+								results   => "$src/in110.dat",
+								flags     => "--trace",
+								ignores   => [qw( ICNT )],
+								td_flags  => "--ignore-timing --no-ir-length-check",
+							),
+							# Right now, there's a subtle difference, whereby an exception
+							# generated during a commit on a transactional ISS will occur after
+							# post_exec occurs, rather than cancelling post_exec, as in the
+							# normal ISS.  This might be something that we'll have to fix later
+							# on, but for now we'll ignore it.
+							ext_model_test(
+								model    => "./smdriver2",
+								flags    => "-trace",
+								results  => "$src/in85.dat",
+								td_flags => "--ignore-reg=ICNT",
+							),
+							model_test("./smdriver2","$src/in120.dat"),
+							model_test("./smdriver2","$src/in124.dat"),
+							model_test("./smdriver2","$src/in131.dat"),
+							model_test("./smdriver2","$src/in135.dat"),
+							model_test("./smdriver2","$src/in138.dat"),
+							ext_model_test(
+								model   => "./smdriver2",
+								flags   => "-trace -log-mem -log-fetch",
+								results => "$src/in203.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in203.memlog.regress"); },
+								stdio   => 1,
+							),
+							ext_model_test(
+								model   => "./smdriver2",
+								flags   => "-trace -log-mem -log-orig-mem -log-fetch",
+								results => "$src/in221.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in221.memlog.regress"); },
+								stdio   => 1,
+							),
+
+							# Test a safe-mode ISS w/MMU.
+							model_test("./smdriver3","$src/in18.dat"),
+							model_test("./smdriver3","$src/in27.dat"),
+							model_test("./smdriver3","$src/in28.dat"),
+							model_test("./smdriver3","$src/in78.uvp"),
+							model_test("./smdriver3","$src/in94.uvp"),
+							model_test("./smdriver3","$src/in123.dat"),
+							model_test("./smdriver3","$src/in129.dat"),
+							model_test("./smdriver3","$src/in130.uvp"),
+							model_test("./smdriver3","$src/in159.dat"),
+							model_test("./smdriver3","$src/in219.dat"),
+
+							# Test a safe-mode hybrid ISS w/MMU.
+							model_test("./smdriver4","$src/in27.dat"),
+							model_test("./smdriver4","$src/in28.dat"),
+							model_test("./smdriver4","$src/in78.uvp"),
+							model_test("./smdriver4","$src/in94.uvp"),
+							model_test("./smdriver4","$src/in123.dat"),
+							model_test("./smdriver4","$src/in129.dat"),
+							model_test("./smdriver4","$src/in130.uvp"),
+							{
+								cmd     => "./smdriver4 $src/in2.dat -o=in2.out.dat -log-instr > in2.instlog.out",
+								checker => sub { 
+									file_diff("in2.instlog.out","$src/in2.instlog.regress"); 
+								},
+								temps   => [qw(in2.out.dat in2.instlog.out)],
+							},
+							model_test("./smdriver4","$src/in159.dat"),
+							model_test("./smdriver4","$src/in219.dat"),
+
+							# Test a safe-mode hybrid ISS.
+							model_test("./smdriver5","$src/in6.dat",0,0,["BCCNT","PCCNT"]),
+							model_test("./smdriver5","$src/in11.dat"),
+							model_test("./smdriver5","$src/in12.dat"),
+							model_test("./smdriver5","$src/in13.dat"),
+							model_test("./smdriver5","$src/in40.dat"),
+							model_test("./smdriver5","$src/in76.dat"),
+							model_test("./smdriver5","$src/in106.dat"),
+							# These tests are designed to use the --pipelined mode, but that
+							# doesn't exist for hybrid ISSs, so we have to ignore several
+							# things in order for the comparisons to match.
+							ext_model_test(
+								model     => "./smdriver5",
+								results   => "$src/in109.dat",
+								flags     => "--trace",
+								ignores   => [qw( ICNT )],
+								td_flags  => "--ignore-timing --no-ir-length-check",
+							),
+							ext_model_test(
+								model     => "./smdriver5",
+								results   => "$src/in110.dat",
+								flags     => "--trace",
+								ignores   => [qw( ICNT )],
+								td_flags  => "--ignore-timing --no-ir-length-check",
+							),
+							# Right now, there's a subtle difference, whereby an exception
+							# generated during a commit on a transactional ISS will occur after
+							# post_exec occurs, rather than cancelling post_exec, as in the
+							# normal ISS.  This might be something that we'll have to fix later
+							# on, but for now we'll ignore it.
+							ext_model_test(
+								model    => "./smdriver5",
+								flags    => "-trace",
+								results  => "$src/in85.dat",
+								td_flags => "--ignore-reg=ICNT",
+							),
+							model_test("./smdriver5","$src/in120.dat"),
+							model_test("./smdriver5","$src/in124.dat"),
+							model_test("./smdriver5","$src/in131.dat"),
+							model_test("./smdriver5","$src/in135.dat"),
+							model_test("./smdriver5","$src/in138.dat"),
+							model_test("./smdriver5","$src/in139.dat"),
+							{
+								cmd     => "./smdriver5 $src/in11.dat -o=in11.out.dat -log-instr > in11.instlog.out",
+								checker => sub { 
+									file_diff("in11.instlog.out","$src/in11.instlog.regress"); 
+								},
+								temps   => [qw(in11.out.dat in11.instlog.out)],
+							},
+							ext_model_test(
+								model   => "./smdriver5",
+								flags   => "-trace -log-mem -log-fetch",
+								results => "$src/in203.dat",
+								checker => sub { check_tdriver_log($_[0],"$src/in203.memlog.regress"); },
+								stdio   => 1,
+							),
+              model_test("./smdriver5","$src/in207.dat"),
+							{
+								cmd     => "./smdriver5 $src/in207.dat -o=in207.out.dat -log-instr > in207.instlog.out",
+								checker => sub { 
+									file_diff("in207.instlog.out","$src/in207.instlog.regress"); 
+								},
+								temps   => [qw(in207.out.dat in207.instlog.out)],
+							},
+
+							model_test("./smdriver6","$src/in140.dat"),
+
+							model_test("./smdriver7","$src/in202.dat"),
+
+							# Tests library-mode ISSs.
+							{
+								cmd    => "./libdriver1",
+								diff   => "$src/lib1.regress",
+								stdio  => 1,
+							},
+
+							# We always add in the JIT tests, because these add in both JIT
+							# (if valid) and decode-cache tests, which are always valid.
+							jit_model_test($jit_ok,"./mod1","$src/in2.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in3.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in4.dat"),
+							ext_model_test(
+								model   => "./mod1",
+								flags   => "--decode-cache --dc-hot-count=0",
+								input   => "$src/in41.dat",
+								output  => "in41.out.dat",
+								results => "$src/in41-dmi.dat"
+							),
+							{
+								cmd     => "./mod1 --script=$src/in253.cli $src/in4.dat --script-arg=dc",
+								checker => sub { check_results("$src/in253.dat","in253.out.dat"); },
+								temps   => [ "in253.out.dat" ],
+							},
+							{
+								cmd     => "./mod1 --script=$src/in256.cli --dc-hot-count=3 $src/in256.dat -o=in256.out.dat --script-arg=dc",
+								diff    => "$src/in256.regress",
+								stdio   => 1,
+								checker => sub { check_results("$src/in256.dat","in256.out.dat"); },
+								temps   => [ "in256.out.dat" ],
+							},
+							jit_model_test($jit_ok,"./mod1 --max-instr-count=999","$src/in48.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in112.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in115.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in119.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in117.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in144.dat"),
+							jit_model_test($jit_ok,"./mod1 --jit-max-bb-size=20","$src/in148.dat"),
+							jit_model_test($jit_ok,"./mod1","$src/in150.dat"),
+							# Test an MP JIT simulation.  I've turned off MT for now, because
+							# I get occasional segfaults, but I don't know why, so we need to
+							# come back and take a look at this.
+							jit_model_test($jit_ok,"./mod1 --n=2 --td-count=20 --mic=0","$src/in257.dat"),
+							# Same thing, but we make sure that the td threshold is set to default
+							# value if not specified.
+							jit_model_test($jit_ok,"./mod1 --n=2 --mic=0","$src/in257.dat"),
+							# Try it again with the scripting interface (decode-cache only here- JIT is added below).
+							# We'll also make sure we can specify the number of compiler threads.
+							{
+								cmd     => "./mod1 --n=2 --dc-hot-count=0 --jit-mt=2 --script=$src/in257.cli $src/in257.dat --script-arg=dc",
+								diff    => "$src/in257.regress",
+								stdio   => 1,
+								checker => sub { check_results("$src/in257.dat","in257.out.dat"); },
+								temps   => [ "in257.out.dat" ],
+							},		
+							# Test to make sure that cold blocks check the temporal-decoupling threshold in the decode-cache.
+							model_test("./mod1 -n=2 -td-count=1 -dc","$src/in260.dat"),
+							# A very simple system-call test- make sure it works with the decode cache.
+							{
+								cmd   => "./mod1 --syscall-enabled $src/in261.elf -fep --no-output -dc",
+								stdio => 1,
+								diff  => "$src/in261.regress",
+							},
+							# Make sure that we can handle a buffer-full situation properly.
+							model_test("./mod1 --decode-cache --dc-buf-size=25 --jit-max-bb-size=5 --dc-hot-count=0","$src/in292.dat"),
+							jit_model_test($jit_ok,"./mod3","$src/in6.dat"),
+							jit_model_test($jit_ok,"./mod3","$src/in116.dat"),
+							jit_model_test($jit_ok,"./mod3","$src/in142.dat"),
+							jit_model_test($jit_ok,"./mod3","$src/in149.dat"),
+							jit_model_test($jit_ok,"./mod3","$src/in181.dat"),
+							jit_model_test($jit_ok,"./mod6","$src/in9.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in21.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in141.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in145.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in146.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in152.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in159.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in171.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in175.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in176.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in183.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in185.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in191.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in193.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in219.dat"),
+							jit_model_test($jit_ok,"./mod11","$src/in247.dat"),
+							{
+								cmd     => "./mod11 --dc-hot-count=0 --script=$src/in254.cli $src/in254.dat -o=in254.out.dat --script-arg=dc",
+								diff    => "$src/in254.regress",
+								stdio   => 1,
+								checker => sub { check_results("$src/in254.dat","in254.out.dat"); },
+								temps   => [ "in254.out.dat" ],
+							},
+							# Test to make sure we will exit out of an exception loop.
+							jit_model_test($jit_ok,"./mod11 --mic=10","$src/in265.dat"),
+							jit_model_test($jit_ok,"./mod11 --mic=10","$src/in266.dat"),
+							jit_model_test($jit_ok,"./mod11 --mic=10","$src/in267.dat"),
+							jit_model_test($jit_ok,"./mod11 --mic=10 --jit-max-bb-size=5","$src/in270.dat"),
+							jit_model_test($jit_ok,"./mod13 --td-count=20 --mic=0","$src/in259.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in35.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in143.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in147.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in167.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in168.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in169.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in170.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in172.dat"),
+							jit_model_test($jit_ok,"./mod18 --jit-max-bb-size=10","$src/in174.dat"),
+							jit_model_test($jit_ok,"./mod18","$src/in222.dat"),
+							jit_model_test($jit_ok,"./mod18 --jit-hot-count=0 --dc-hot-count=0","$src/in291.dat",0,0,[],"--check-all-card=CD"),
+							jit_model_test($jit_ok,"./mod72","$src/in214.dat"),
+							jit_model_test($jit_ok,"./mod72","$src/in226.dat"),
+							jit_model_test($jit_ok,"./mod72","$src/in235.dat"),
+							jit_model_test($jit_ok,"./mod72","$src/in262.dat"),
+							jit_model_test($jit_ok,"./mod72 --mic=10","$src/in268.dat"),
+							jit_model_test($jit_ok,"./mod72 --mic=10","$src/in269.dat"),
+							jit_model_test($jit_ok,"./mod78","$src/in255.dat"),
+							jit_model_test($jit_ok,"./mod79","$src/in258.dat"),
+                            
+							# Test micro-instruction run 
+							model_test("./microinstr6 --elf-be","$src/microinstr6.elf"),
+							model_test("./microinstr7 --elf-be","$src/microinstr7.elf"),
+							model_test("./microinstr9 --elf-be","$src/microinstr9.elf"),
+							model_test("./microinstr10 --elf-be","$src/microinstr10.elf"),
+							model_test("./microinstr12 --elf-be","$src/microinstr12.elf"),
+							model_test("./microinstr13 --elf-be","$src/microinstr13.elf"),
+							model_test("./microinstr14 --elf-be","$src/microinstr14.elf"),
+							asm_test(as => "as-microinstr8",  of => "objdump-microinstr8",  sf => "$src/microinstr8.s",   rf => "$src/microinstr8.regress"),
+							asm_test(as => "as-mod-alias1",  of => "objdump-mod-alias1",  sf => "$src/mod-alias1.s",   rf => "$src/mod-alias1.regress"),
+							asm_test(as => "as-mod-alias2",  of => "objdump-mod-alias2",  sf => "$src/mod-alias2.s",   rf => "$src/mod-alias2.regress"),
+							asm_test(as => "as-microinstr9",  of => "objdump-microinstr9",  sf => "$src/microinstr9.s",   rf => "$src/microinstr9.regress"),
+							asm_test(as => "as-microinstr10",  of => "objdump-microinstr10",  sf => "$src/microinstr10.s",   rf => "$src/microinstr10.regress"),
+							asm_test(as => "as-microinstr12",  of => "objdump-microinstr12",  sf => "$src/microinstr12.s",   rf => "$src/microinstr12.regress"),
+							asm_test(as => "as-microinstr13",  of => "objdump-microinstr13",  sf => "$src/microinstr13.s",   rf => "$src/microinstr13.regress"),
+							asm_test(as => "as-microinstr14",  of => "objdump-microinstr14",  sf => "$src/microinstr14.s",   rf => "$src/microinstr14.regress"),
+							asm_test(as => "as-microinstr15",  of => "objdump-microinstr15",  sf => "$src/microinstr15.s",   rf => "$src/microinstr15.regress"),
+							asm_test(as => "as-microinstr17",  of => "objdump-microinstr17",  sf => "$src/microinstr17.s",   rf => "$src/microinstr17.regress"),
+							asm_test(as => "as-microinstr16",  of => "objdump-microinstr16",  sf => "$src/microinstr16.s",   rf => "$src/microinstr16.regress"),
+							
+						));
+
+	# If we have LZ4 support.
+	if ( $lz4_ok ) {
+		my @Lz4Tests = (
+							ext_model_test(
+								model   => "./mod1",
+								flags   => "-trace",
+								results => "$src/in4.dat",
+								output  => "in4.out.dlz4",
+								checker => sub {
+									my $o = "in4.out.dlz4";
+									# Make sure we have an actual LZ4 file.
+									check_lz4($o);
+									# Make sure that tracediff can directly check an LZ4 file.
+									check_results("$src/in4.dat",$o);
+								})
+				);
+		@Tests = (@Tests,@Lz4Tests);							
+	}
+	
+	# Pure JIT tests (only added in if we have JIT).
+	if ( $jit_ok ) {
+		my @JitTests = (
+			ext_model_test(
+				model   => "./mod1",
+				flags   => "--jit --jit-hot-count=0",
+				input   => "$src/in41.dat",
+				output  => "in41.out.dat",
+				results => "$src/in41-dmi.dat"
+			),
+			{
+				cmd     => "./mod1 --script=$src/in253.cli $src/in4.dat --script-arg=jit",
+				checker => sub { check_results("$src/in253.dat","in253.out.dat"); },
+				temps   => [ "in253.out.dat" ],
+			},
+			{
+				cmd     => "./mod1 --script=$src/in256.cli --no-jit-mt --dc-hot-count=2 --jit-hot-count=3 $src/in256.dat -o=in256.out.dat --script-arg=jit",
+				diff    => "$src/in256.regress",
+				stdio   => 1,
+				checker => sub { check_results("$src/in256.dat","in256.out.dat"); },
+				temps   => [ "in256.out.dat" ],
+			},
+			# Try it again with the scripting interface.
+			{
+				cmd     => "./mod1 --n=2 --dc-hot-count=0 --jit-hot-count=0 --script=$src/in257.cli $src/in257.dat --script-arg=jit",
+				diff    => "$src/in257.regress",
+				stdio   => 1,
+				checker => sub { check_results("$src/in257.dat","in257.out.dat"); },
+				temps   => [ "in257.out.dat" ],
+			},		
+			# Test to make sure that cold blocks check the temporal-decoupling threshold in the JIT.
+			model_test("./mod1 -n=2 -td-count=1 -jit","$src/in260.dat"),
+			# A very simple system-call test- make sure it works with the jit.
+			{
+				cmd   => "./mod1 --syscall-enabled $src/in261.elf -fep --no-output -jit",
+				stdio => 1,
+				diff  => "$src/in261.regress",
+			},
+			# Make sure that we can set a breakpoint after a block has been
+			# compiled and pointed to by other blocks via direct-threading.
+			{
+				cmd     => "./mod1 --script=$src/in280.cli --mic=0 --script-arg=jit --no-output",
+				stdout  => 1,
+				checker => \&check_in280,
+			},
+			# Test branch-end logging with the JIT.
+			{
+				cmd  => "./mod1 $src/in4.dat -o=in4.bcnt -jit -jit-hot-count=0 -dc-hot-count=0 --plugin=./count-branches.so -trace",
+				checker => sub { 
+					file_diff("in4.bcnt","$src/in4.bcnt.regress"); 
+				},
+			},
+			# Note: I disabled splitting up a bb on a page crossing b/c it doesn't
+			# currently work with instructions which can be misaligned.  Thus,
+			# in254.regress's escape count is set to 3, but if this feature is
+			# re-enabled, then it should be changed back to have 4 escapes.
+			{
+				cmd     => "./mod11 --dc-hot-count=0 --jit-hot-count=0 --no-jit-mt --script=$src/in254.cli $src/in254.dat -o=in254.out.dat --script-arg=jit",
+				diff    => "$src/in254.regress",
+				stdio   => 1,
+				checker => sub { check_results("$src/in254.dat","in254.out.dat"); },
+				temps   => [ "in254.out.dat" ],
+			},
+			# Test to make sure that explicit-basic-block-end instructions work.
+			model_test("./mod72 --plugin=./branch-callback.so --jit --dc-hot-count=0 --jit-hot-count=0","$src/in263.dat"),
+				);
+
+		@Tests = (@Tests,@JitTests);
+	}
+
+	# If we're OK with gdb tests, then add them here.
+	if ( $gdb_ok ) {
+		my @GdbTests = (
+			# A simple test.  We specify no configuration file, so the default register map should be used.
+			gdb_test(m => "./mod1", i => "$src/in4.dat", t => "$src/gdbtest0.gdb", cfg => "none"),
+			# Same test as above, but uses udp for communicating.
+			gdb_test(m => "./mod1", i => "$src/in4.dat", t => "$src/gdbtest0.gdb", cfg => "none", prot=>"udp"),
+			#			 gdb_test(m => "./mod1", i => "$src/in4.dat", t => "$src/gdbtest1.gdb"),
+			# Test checks the ability to interrupt the ISS, poll memory, and continue.
+			gdb_test(m => "./mod1", i => "$src/in75.dat", t => "$src/gdbtest5.gdb", mopts => "--no-gdb-halt --mic=0", checker => \&check_gdbtest5, retries => 4),
+			# Test the ability to respond to multiple clients w/o getting confused about acks.
+			#
+      # NOTE: Disabled for now.  I'm not really we sure need this functionality,
+      # since we support multiple simultaneous tcp and udp connections
+			#
+      #TBD#			gdb_test(m => "./mod1", i => "$src/in86.dat", t => "$src/gdbtest6.gdb", prot => "udp", gopts => "--num-sockets=2 --cmdfile=$src/multiplex.pl"),
+			# Test checks the setRegister/s with strings and variable length and also does single register
+			# writes followed by entire register set reads for an MT model with threads modeled as cores.
+			gdb_test(m => "./mod31", i => "$src/in4.dat", t => "$src/mod31_test0.gdb", cfg => "$src/mod1-config.tcl", prot => "udp"),			 
+			# Test setMem & getMem handles alignment and translation correctly.
+			gdb_test(m => "./mod14", i => "$src/in26.dat", t => "$src/gdbtest7.gdb"),			 
+			# Test direct setMem & getMem queries using the special "qadl.[mM]" command.
+			gdb_test(m => "./mod14", i => "$src/in26.dat", t => "$src/gdbtest8.gdb"),
+			# Test of binary-set-memory.
+			gdb_test(m => "./mod1", i => "$src/in4.dat", t => "$src/gdbtest10.gdb"),
+			# Test of MP:  Multiple sockets linked to separate cores.
+			gdb_test(m => "./mod11", i=> "$src/gdbin2-mmu.dat $src/gdbin2-1.elf $src/gdbin2-2.elf",
+							 t => "$src/gdbtest11.gdb", cfg => "$src/mod1-config.tcl",
+							 mopts => "-n=2 --elf-ea --elf2node=$src/gdbin2-1.elf:procs:P0,$src/gdbin2-2.elf:procs:P1 --fep --no-warn-mem-overwrite",
+							 prot => "udp", gopts => "--multi-connect --num-sockets=2 --pf='procs:P0=%f,procs:P1=%f'", retries => 2),
+			# Test of MP:  Multiple sockets linked to separate cores, using the decode-cache (should be the same
+			# with the JIT.
+			gdb_test(m => "./mod11", i=> "$src/gdbin2-mmu.dat $src/gdbin2-1.elf $src/gdbin2-2.elf",
+							 t => "$src/gdbtest11.gdb", cfg => "$src/mod1-config.tcl",
+							 mopts => "-n=2 --elf-ea --elf2node=$src/gdbin2-1.elf:procs:P0,$src/gdbin2-2.elf:procs:P1 --fep -dc  --no-warn-mem-overwrite",
+							 prot => "udp", gopts => "--multi-connect --num-sockets=2 --pf='procs:P0=%f,procs:P1=%f'", retries => 2),
+			# Test of SMT:  Single socket communicating with two cores.
+			gdb_test(m => "./mod11", i=> "$src/gdbin2-mmu2.dat $src/gdbin2-1.elf $src/gdbin2-2.elf",
+							 t => "$src/gdbtest16.gdb", cfg => "$src/mod1-config.tcl",
+							 mopts => "-n=2 --elf-ea --elf2node=$src/gdbin2-1.elf:procs:P0,$src/gdbin2-2.elf:procs:P1 --fep",
+							 prot => "udp", retries => 2),
+			# Test of SMT:  Single socket communicating with two cores, using the decode-cache.
+			gdb_test(m => "./mod11", i=> "$src/gdbin2-mmu2.dat $src/gdbin2-1.elf $src/gdbin2-2.elf",
+							 t => "$src/gdbtest16.gdb", cfg => "$src/mod1-config.tcl",
+							 mopts => "-n=2 --elf-ea --elf2node=$src/gdbin2-1.elf:procs:P0,$src/gdbin2-2.elf:procs:P1 --fep -dc",
+							 prot => "udp", retries => 2),
+			# Test SMT with Hg and vCont behavior.  Refer to gdbtest18.gdb for more detail.
+			gdb_test(m => "./mod11", i=> "$src/gdbin2-mmu2.dat $src/gdbin2-1.elf $src/gdbin2-2.elf",
+							 t => "$src/gdbtest18.gdb", cfg => "$src/mod1-config.tcl",
+							 mopts => "-n=2 --elf-ea --elf2node=$src/gdbin2-1.elf:procs:P0,$src/gdbin2-2.elf:procs:P1 --fep",
+							 prot => "udp", retries => 2),			
+			# Test of monitor commands: A bad command should return the error
+			# string, rather E00 so that the user can debug the problem.
+			gdb_test(m => "./mod1", i => "$src/sieve.elf", t=> "$src/gdbtest12.gdb"),
+			# Test to make sure that watchpoints allow the actual instruction to complete.
+			gdb_test(m => "./mod1", i => "$src/in184.elf", t=> "$src/gdbtest13.gdb", mopts=> "-fep"),
+			# Make sure that we support vCont with a -1 thread id, vKill, and vRun.
+			gdb_test(m => "./mod1", i => "$src/in4.dat", t=> "$src/gdbtest14.gdb"),
+			# Make sure we report we're finished even if we're stepping.
+			gdb_test(m => "./mod1", i => "$src/in4.dat", t=> "$src/gdbtest15.gdb"),
+			# Make sure vCont works properly with single threads.
+			gdb_test(m => "./mod1", i => "$src/in4.dat", t=> "$src/gdbtest17.gdb"),
+            # trace-run m0 model testing
+			gdb_test(m => "./simplified_arm", 
+               i => "$src/test_boot.elf", 
+               t=> "$src/tracerun0.gdb", cfg => "$src/simplified_arm-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/m0.tarmac --fep --sce"),
+            # trace-run armv8 model testing
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun1.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun2.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun3.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun4.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun5.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun6.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun7.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun8.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun9.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun10.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun11.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+			gdb_test(m => "./simplified_armv8", 
+               i => "$src/quicksort.elf", 
+               t=> "$src/tracerun12.gdb", cfg => "$src/simplified_armv8-config.tcl",
+               mopts=> "-trace-run -if=tarmac $src/quicksort.tarmac --fep --sce"),
+				);
+		@Tests = (@Tests,@GdbTests);
+	}
+
+  #
+  # IMPORTANT: Add any tests here which use models which are considered
+  # proprietary/confidential.
+  #
+  if (! $is_external_release ) {
+		my @ProprietaryTests = (
+				);
+		
+		@Tests = (@Tests,@ProprietaryTests);
+  }
+
+}
+
+## If we're on Solaris, then for now we do not test the assembler or the gdbclient.
+## Assembler issues relate to the fact that Solaris' built-in regular expression compiler
+## is basically broken and doesn't match stuff that it should match.
+## The gdbclient is currently broken on Solaris b/c the IO signals aren't being correctly generated.
+my $solaris = (`uname` =~ /^SunOS/);
+@Tests = grep { (!$solaris) || ($_->{cmd} !~ /as-mod\d+/ && $_->{cmd} !~ /gdbclient/); } @Tests;
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## </HELPERS>
+##
+
+# Checks to make sure that, for the supplied regular expressions, each one is found in the file
+# the specified number of times.
+# arg0:  Input filename.
+# arg1:  List of regular expressions.
+# arg2:  List of regular expressions which should not be found.
+sub check_for_regex {
+  my ($input,$elist,$xlist) = @_;
+  my (%ehash,%xhash);
+  @ehash{@$elist} = (0) x @$elist;
+  @xhash{@$xlist} = (0) x @$xlist;
+  open IN,$input or die "Could not open input file $input";
+  
+  while (<IN>) {
+	for my $r (keys %ehash) {
+	  if ( /$r/ ) {
+		++$ehash{$r};
+	  }
+	}
+	for my $r (keys %xhash) {
+	  if ( /$r/ ) {
+		++$xhash{$r};
+	  }
+	}
+  }
+  close IN;
+
+  my ($efails,$xfails) = (0,0);
+  for my $r (keys %ehash) {
+	if ( !$ehash{$r} ) {
+	  print "Did not find expected regex:  $r\n";
+	  ++$efails;
+	}
+  }
+  for my $r (keys %xhash) {
+	if ( $xhash{$r} ) {
+	  print "Found (and shouldn't have) expected regex:  $r\n";
+	  ++$xfails;
+	}
+  }
+  if ($efails) {
+	die "$efails expected regular expressions not found.";
+  }
+  if ($xfails) {
+	die "$xfails excluded regular expressions found.";
+  }
+}
+
+# Compares memory information on stdout to a memory log expects file.
+sub check_tdriver_log {
+  my ($input,$expects) = @_;
+
+  my @l = split /\n/,$input;
+  my ($base,$path,$type) = fileparse($expects,qr/\.(memlog.regress)/);
+  my $found = "$base.memlog";
+  open OUT,">$found" or die "Could not open $found for writing memory log information.";
+  for (@l) {
+	if ( /^Instr(?: (Fetch|ID|0x[0-9a-f]+))?:/ ) {
+	  print OUT "$_\n";
+	}
+  }
+  close OUT;
+  file_diff($found,$expects);
+  unlink $input if (!$keepoutput);
+}
+
+# Checks the number of occurrances of registers in a UVP.
+# arg0:  Reg-count hash:  Keys are reg names, values are ocurrance counts.
+#        If an occurrance count is -1, then it means that we just expect to find
+#        one or more occurrances, but we don't care about the exact count.
+# arg1:  Input UVP.
+sub check_reg_count {
+  my ($expects,$uvp) = @_;
+
+  open UVP,$uvp or die "Could not open input UVP file: $uvp";
+
+  my %found;
+
+  while (<UVP>) {
+	if ( /[IR] : R \{nm="(\w+)";/ ) {
+	  $found{$1}++;
+	} 
+	elsif ( /t=>\"reg\", rn=>\"(\w+)\"/ ) {
+	  $found{$1}++;
+	}
+  }
+
+  my $fails = 0;
+  for (keys(%$expects)) {
+	my $exp = $expects->{$_};
+	my $fnd = $found{$_};
+
+	if ($exp < 0) {
+	  if ($fnd == 0) {
+		++$fails;
+		print "  Error:  Mismatch on register $_:  Expected to find occurrances but didn't find any.\n";
+	  }
+	} elsif ($exp != $fnd) {
+	  ++$fails;
+	  print "  Error:  Mismatch on register $_:  Expected $exp occurrances, found $fnd.\n";
+	}
+  }
+  if ($fails) {
+	die "Register-count mismatch.";
+  }
+
+  close UVP;
+}
+
+# Checks the number of occurrances of registers in a DAT.
+# arg0:  Reg-count hash:  Keys are reg names, values are ocurrance counts.
+#        If an occurrance count is -1, then it means that we just expect to find
+#        one or more occurrances, but we don't care about the exact count.
+# arg1:  Input UVP.
+sub check_dat_reg_count {
+  my ($expects,$dat) = @_;
+
+  open DAT,$dat or die "Could not open input DAT file: $dat";
+
+  my %found;
+
+  while (<DAT>) {
+	if ( /^RD / || /^R / ) {
+	  /n=(\S+)/;
+	  $found{$1}++;
+	}
+  }
+
+  my $fails = 0;
+  for (keys(%$expects)) {
+	my $exp = $expects->{$_};
+	my $fnd = $found{$_};
+
+	if ($exp < 0) {
+	  if ($fnd == 0) {
+		++$fails;
+		print "  Error:  Mismatch on register $_:  Expected to find occurrances but didn't find any.\n";
+	  }
+	} elsif ($exp != $fnd) {
+	  ++$fails;
+	  print "  Error:  Mismatch on register $_:  Expected $exp occurrances, found $fnd.\n";
+	}
+  }
+  if ($fails) {
+	die "Register-count mismatch.";
+  }
+
+  close UVP;
+}
+
+# Checks to see if the specified file is a valid lz4 file.
+# arg0:  Input file
+sub check_lz4 {
+  my $file = shift;
+
+  if (system("$lz4 -t $file > /dev/null 2>&1")) {
+	die "$file is either not an lz4 file or is corrupted.";
+  }
+  #print "$file is a valid lz4 file\n";
+}
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+sub check_bad_cmdline {
+  my @lines = split /\n/,$_[0];
+
+  my $e = 0;
+  for (@lines) {
+	$e = 1 if ( /Bad command-line/ );
+  }
+
+  if (!$e) {
+	print "Did not find expected bad-command-line error.\n";
+	die;
+  }
+}
+
+sub check_no_output {
+  my ($fn) = @_;
+
+  if ( -e $fn ) {
+	die "File $fn exists but shouldn't.";
+  }
+
+  unlink $fn unless $keepoutput;
+}
+
+# We don't want to see anything in the TRACE section.
+sub check_no_ir {
+  my $infile = shift;
+
+  open IN,$infile or die "Could not open results file $infile";
+  my %counts = {
+				INITS   => 0,
+				TRACE   => 0,
+				RESULTS => 0,
+			   };
+
+  my $key = "INITS";
+
+  while (<IN>) {
+	next if (!/^\s*(\w+)(.*)/);
+	next if ( /^\s*#/ );
+
+	if ( /^(TRACE)/ || /^(RESULTS)/ ) {
+	  $key = $1;
+	} else {
+	  ++$counts{$key};
+	}
+  }
+
+  if ($counts{TRACE} > 0) {
+	die "Expected to find no intermediate results, but found $counts{TRACE} items.\n";
+  }
+}
+
+# We expect that all loads and stores should take
+# 2 cycles and multiply take 8.
+sub check_cfg1 {
+  check_latencies({
+				   Zen => [
+						   [ "stwx"      , 3 ],
+						   [ "cmpi|ori"  , 1 ],
+						   [ "srw|cmp|or", 4 ],
+						   [ "^l|st"     , 2 ],
+						   [ "mullw"     , 8 ],
+						   [ ".+"        , 1 ],
+						  ],
+				  },
+				  ,$_[0]);
+}
+
+# The nested core should have a multiply latency of 8
+# but the outer core should not.
+sub check_cfg2 {
+  check_latencies({
+				   Zen => [
+						   [ ".+" , 1 ],
+						  ],
+				   "ZenSystem::ZenChip::Zen" => [
+												 [ "mullw" , 8 ],
+												 [ ".+"    , 1 ],
+												],
+				  },
+				  ,$_[0]);
+}
+
+# This makes sure that we don't see any mention of the GPR aliases
+# in the testcase.
+sub check_in9 {
+  check_dat_reg_count({
+					   aGPR =>  0,
+					   rGPR =>  0,
+					   GPR  => -1, # This means that we should find some of these.
+					  },
+					  "in9.out.dat"
+					 );
+}
+
+sub check_in55 {
+  check_reg_count({
+				   CTR  => 3,
+				   FOO3 => 2,
+				   FOO1 => 0,
+				  },
+				  "in55.out.uvp"
+				  );
+}
+
+
+sub check_asm71 {
+	my $d = $_[0];
+
+	my ($micro,$nmicro) = (0,0);
+	while ($d =~ /This is a micro instruction/g) { $micro++ }
+	while ($d =~ /This is not a micro instruction/g) { $nmicro++ }
+
+	if ($micro != 3) {
+		print "Didn't find expected number of micro instructions.\n";
+		die;
+	}
+
+	if ($nmicro != 1) {
+		print "Didn't find expected number of non-micro instructions.\n";
+		die;
+	}
+}
+
+sub check_asm111 {
+	my $d = $_[0];
+
+	my $msgcount = 0;
+	while ($d =~ /Warning: Immediate value is big\./g) { $msgcount++ }
+
+	if ($msgcount != 3) {
+		print "Didn't find expected number of warning messages.\n";
+		die;
+	}
+}
+
+sub check_in276 {
+	check_results("$src/in276.dat","in276.out.dat");
+
+	my %mem;
+	my @l = split /\n/,$_[0];
+	for (@l) {
+		if (/Overwriting initialized memory at (0x[0-9a-f]+)/ ) {
+			my $addr = (eval $1);
+			$mem{$addr} = 1;
+		}
+	}
+
+	my $fail = 0;
+	for (my $a = 0x20000; $a <= 0x20014; $a += 4) {
+		if ( ! exists $mem{$a} ) {
+			printf "Expected to find an overwrite warning for address 0x%x\n",$a;
+			$fail++
+		}
+	}
+	die if ($fail);
+}
+
+sub check_in276t {
+	check_results("$src/in276t.dat","in276t.out.dat");
+}
+
+# This tests that the data read is monotonically increasing and that the second
+# element of each pair of memory reads is greater than the first.  Also, it
+# checks to make sure that the first value is non-0, since we want to make sure
+# that instructions were actually being executed from the start.
+sub check_gdbtest5 {
+  my $fn = "gdbtest5.out";
+  open IN,$fn or die "Could not open $fn";
+
+  my @data;
+  while (<IN>) {
+		chomp;
+		next if ( $_ =~ /^S02/ );
+		push @data,(eval "0x$_");
+  }
+  close IN;
+
+  dprint "Data:  @data\n";
+
+  if ($data[0] == 0) {
+	print "Element 0 is 0, indicating that the model did not execute prior to receiving debugger commands.\n";
+	die;
+  }
+
+  my ($last_a,$last_b);
+  for (my $i = 2; $i < @data; $i = $i + 2) {
+	if ( !($data[$i] > $last_a) ) {
+	  print "Element $i is not greater than last element.";
+	  die;
+	}
+	if ( !($data[$i+1] > $last_b) ) {
+	  print "Element ",$i+1," is not greater than last element.";
+	  die;
+	}
+	$last_a = $data[$i];
+	$last_b = $data[$i+1];
+  }
+}
+
+# Make sure that we get the expected number of text strings.
+sub check_in279 {
+	my %expects = (
+		"Hello, world." => 1000,
+		"Hi there!"     => 1000,
+			);
+
+	my %found;
+
+	for my $l (split /\n/,$_[0]) {
+		if ( exists $expects{$l} ) {
+			$found{$l}++;
+		}
+	}
+
+	my $fails = 0;
+	for my $k ( keys %expects ) {
+		if ($found{$k} != $expects{$k}) {
+			print "Text-string count mismatch:  Expected '$k' = $expects{$k}, found $found{$k}.\n";
+			++$fails;
+		}
+	}
+	die if ($fails);
+}
+
+sub check_in280 {
+	my %output;
+
+	my @lines = split /\n/,$_[0];
+	@output{@lines} = @lines x (1);
+
+	return if ( 
+		exists $output{"At first phase."} && 
+		exists $output{"At second phase."} &&
+		exists $output{"At third phase."}
+			);
+
+	#print "Output:  ",Dumper(\%output),"\n";
+
+	die "Did not find expected output strings.";
+}
+
+sub check_in334 {
+
+	my $results = "in334.out.dat";
+
+	my ($got_rd,$got_pos,$got_neg) = 0;
+	
+	# Make sure we didn't leak out the showpos formating into the final results.
+	open my $in,$results or die "Could not open $results: $!";
+	while (<$in>) {
+		++$got_rd if ( /RD n=GPR i=1 d=/ );
+		++$got_pos if ( /\[sp\+512\]/ );
+		++$got_neg if ( /\[sp\-10\]/ );		
+	}
+	close $in;
+
+	if ($got_rd != 2) {
+		print "Couldn't find result line for GPR1.\n";
+		die;
+	}
+
+	if (!$got_pos) {
+		print "Couldn't find sp+N line.\n";
+		die;
+	}
+
+	if (!$got_neg) {
+		print "Couldn't find sp-N line.\n";
+		die;
+	}		
+	
+	# Basic result checking.
+	check_results("$src/in334.dat",$results);
+}
+
+sub pass_tracediff($) {
+  my ($exp,$fnd,$max_cmd,$non_inc,$extras,$no_cmp) = @_;
+
+  my $mc;
+  $mc = "--max-cmd=$max_cmd" if ($max_cmd);
+
+  my $inc;
+  $inc = "-inc-scan" if (!$non_inc);
+
+  my ($diff,$stdio,$stderr) = ("$src/$fnd.regress",1,1);
+  if ($no_cmp) {
+	($diff,$stdio,$stderr) = (0,0,0);
+  }
+
+  return {
+		  cmd    => "$datdiff $inc $mc $src/$exp $src/$fnd $extras",
+		  diff   => $diff,
+		  stdio  => $stdio,
+		  stderr => $stderr,
+	 };
+}
+
+# Simple string checker: Input is a hash of strings with expect counts.  At the
+# end of the test, anything with a non-zero count flags as error.
+sub check_strings {
+	my ($data,$expects) = @_;
+
+	my @lines = split /\n/,$data;
+	for (@lines) {
+		if ( /^P\d+: / ) {
+			$expects->{$_} -= 1;
+		}
+	}
+			
+	my $fails = 0;
+	for ( keys %$expects ) {
+		if ( $expects->{$_} > 0) {
+			print "Error:  Didn't find expected string:  $_\n";
+			++$fails;
+		}
+	}
+	die if ($fails);
+}
+
+# This returns a complete test entry.
+# arg0:  Extra flags to add to the model invocation.
+sub in284_test {
+	my ($model,$flags) = @_;
+	return {
+		cmd     => "$model -n=3 --plugin=./pic-uart.so $src/in284.dat --no-output $flags",
+		stdio   => 1,
+		checker => sub {
+			my %expects = (
+				"P0: hello there" => 1,
+				"P0: how are you?" => 1,
+				"P0: This is P0!" => 1,
+				"P1: This is P1!" => 1,
+				"P1: Hi, I am core P1." => 1,
+				"P1: This is P1 again!" => 1,
+				"P2: This is P2!" => 1,
+				"P2: Hi, I am core P2." => 1,
+				"P2: How's it going, this is P2." => 1,
+					);
+			check_strings($_[0],\%expects);
+		}
+	},
+}
+
+sub in285_test {
+	my ($model,$flags) = @_;
+	return {
+		cmd     => "$model -n=4 --plugin=./pic-uart.so $src/in285.dat --no-output $flags -l",
+		stdio   => 1,
+		checker => sub {
+			my %expects = (
+				"P2: Got an exception!" => 10,
+				"P3: Got an exception!" => 10,
+					);
+			check_strings($_[0],\%expects);
+		}
+	},
+}
+
+sub fail_tracediff($) {
+  my ($exp,$fnd,$max_cmd,$non_inc,$extras) = @_;
+
+  my $mc;
+  $mc = "--max-cmd=$max_cmd" if ($max_cmd);
+
+  my $inc;
+  $inc = "-inc-scan" if (!$non_inc);
+
+  return {
+		  cmd    => "$datdiff $inc $mc $src/$exp $src/$fnd --no-print-asm $extras --no-full-path-errors",
+		  diff   => "$src/$fnd.regress",
+		  stdio  => 1,
+		  stderr => 1,
+		  fail   => 1,
+	 };
+}
+
+# Make sure that each string in the arguments exists in the output.  Order is
+# not important.
+#
+# arg0   :  Test output.
+# arg1..n:  Strings to check.
+sub checkstr
+{
+	my ($out,@strings) = @_;
+	my @l = split (/\n/,$out);
+	my %lines;
+	@lines{@l} = (1) x @l;
+	
+	for my $s (@strings) {
+		if (!exists $lines{$s}) {
+			print "Did not find required string in output:  $s\n";
+			print "Output was:\n$out\n\n";
+			die;
+		}
+	}
+}
+
+# Make sure that each regular expression in the arguments exists in the output.  Order is
+# not important.
+#
+# arg0   :  Test output.
+# arg1..n:  Regex's to check.
+sub checkregex
+{
+    my ($out,@regexs) = @_;
+    my @lines = split (/\n/,$out);
+
+    # Parallel list of flags, one item for each regular expression.
+    my @rflags = (0) x @regexs;
+
+    # For each line, scan through the regular expressions.  If we get a match,
+    # then set the match flag in the regex list.  Once done, anything without a
+    # set flag causes an error.
+    for my $l (@lines) {
+        for my $i (0..$#regexs) {
+            $rflags[$i] = 1 if ( $l =~ $regexs[$i] );
+        }
+    }
+
+    for my $i (0..$#regexs) {
+        if (!$rflags[$i]) {
+            print "Did not find required regular expression in output:  $regexs[$i]\n";
+            print "Output was:\n$out\n\n";
+            die;
+        }
+    }
+}
+
+
+
+
+##
+## </TESTS>
+##

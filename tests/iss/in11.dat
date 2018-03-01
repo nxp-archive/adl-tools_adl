@@ -1,0 +1,128 @@
+#
+# Simple test to exercise register fields.
+#
+# <ASM>
+#       tw 0,1,2
+# </ASM>
+# <GEN>
+
+MD n=Mem ra=0x00000000 d=0x7C011008	# tw 0,1,2
+MD n=Mem ra=0x00000004 d=0x00000000	# halt
+# </GEN>
+CORE n=:P
+
+RD n=FOO3 d=0xdeadbeef
+RD n=GPR i=1 d=0x88776655
+RD n=GPR i=3 d=0x11111111
+
+RD n=FBCTRL d=2
+
+RD n=XPR i=4 d=0xdeadbeef
+
+CTX n=foobar cn=0
+
+RD n=AR d=0x2
+RD n=BR d=0x4
+
+CTX n=foobar cn=1
+
+RD n=AR d=0x12345678
+RD n=BR d=0xdeadbeef
+
+RD n=A i=12 d=0x12345678
+RD n=A i=14 d=0xdeadbeef
+RD n=A i=15 d=0x87654321
+RD n=A i=16 d=0xb0f0babe
+
+CTX n=foobar cn=2
+RD n=A i=3  d=0xa5a5a5a5
+
+NOCTX
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c011008
+INSTR op=0x7c011008					asm="tw      1,2"
+R n=GPR i=2 d=0x00000089
+R n=FOO1 d=0x88ad1100
+R n=GPR i=3 d=0xbeefdead
+R n=GPR i=4 d=0x00000001
+R n=GPR i=5 d=0x0000000f
+R n=GPR i=6 d=0x00000deb
+# Note:  These should all be collapsed so that we only check against
+#        the final value.
+R n=GPR i=7 d=0xc000beef
+R n=GPR i=7 d=0xc000beef
+R n=GPR i=7 d=0xd000beef
+R n=GPR i=7 d=0xde00beef
+R n=GPR i=7 d=0xdee0beef
+R n=GPR i=9 d=0x000000ad
+R n=GPR i=10 d=0x0000000a
+R n=GPR i=11 d=0x00000014
+R n=GPR i=31 d=0x00000009
+R n=AR d=0xdeadbeef ctx=foobar ctxi=0
+R n=A i=10 d=0x12345678 ctx=foobar ctxi=0
+R n=AR d=0xbeefbeef ctx=foobar ctxi=0
+R n=A i=26 d=0xa5a5a5a5
+R n=BR d=0x00560004 ctx=foobar ctxi=0
+R n=BR d=0xdead8877 ctx=foobar ctxi=1
+R n=A i=13 d=0xbeef0000 ctx=foobar ctxi=0
+R n=A i=14 d=0x00430000 ctx=foobar ctxi=0
+R n=AR d=0x12340004 ctx=foobar ctxi=1
+R n=A i=15 d=0x0000b0f0 ctx=foobar ctxi=0
+A l=1 m="This is a warning message and should always show up." t=Warn
+A l=2 m="This is an info message with data and should only show up when tracing is on." ea=1 ra=9 stuff=16045690981402826360 str1="foo" str2="bar"
+R n=FOO5_RD d=0x00000001
+R n=AR_R d=10
+R n=AR_W d=8
+R n=DR d=0x00000014
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x00000000
+INSTR op=0x0					asm="halt    "
+
+RESULTS
+
+NOCTX
+
+RD n=FOO1     d=0x88ad1100
+RD n=GPR i=2  d=0x00000089
+RD n=GPR i=3  d=0xbeefdead
+RD n=GPR i=4  d=1
+RD n=GPR i=5  d=0xf
+RD n=GPR i=6  d=0xdeb
+RD n=GPR i=7  d=0xdee0beef
+RD n=GPR i=9  d=0xad
+RD n=GPR i=31 d=0x9
+RD n=FOO5_RD  d=1
+RD n=AR_R d=10
+RD n=AR_W d=8
+
+CTX n=foobar cn=0
+
+RD n=AR d=0xbeefbeef
+RD n=BR d=0x00560004
+
+RD n=A i=10 d=0x12345678
+RD n=A i=11 d=0x00000000
+RD n=A i=12 d=0x00000000
+RD n=A i=13 d=0xbeef0000
+RD n=A i=14 d=0x00430000
+RD n=A i=15 d=0x0000b0f0
+
+CTX n=foobar cn=1
+
+RD n=AR d=0x12340004
+RD n=BR d=0xdead8877
+
+RD n=A i=12 d=0x12345678
+RD n=A i=14 d=0xdeadbeef
+RD n=A i=15 d=0x87654321
+RD n=A i=16 d=0xb0f0babe
+
+CTX n=foobar cn=2
+RD n=A i=3 d=0xa5a5a5a5
+RD n=A i=26 d=0xa5a5a5a5
+RD n=C i=5 d=0x0000000a
+RD n=DR d=0x00000014

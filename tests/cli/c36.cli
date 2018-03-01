@@ -1,0 +1,14 @@
+#
+# Test of log_instr_args callback function.
+#
+
+
+proc c5 {opc name srcs tgts} {
+	puts "Executing $name sources: $srcs  targets: $tgts"
+}
+
+
+setlogcmd instr_args c5
+
+
+go

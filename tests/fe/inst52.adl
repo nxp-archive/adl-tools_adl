@@ -1,0 +1,51 @@
+// instructions/subinstructions: defmods on 
+// subinstruction with "instr" key etc.
+
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (left,right,time);
+    
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,23);}
+  
+
+  
+  define (subinstr = addOp) { fields=(OPCD(10),A); attrs = left ;action = {};}
+  define (subinstr = subOp) { fields=(OPCD(11),A); action = {};}
+
+  define (subinstr = multOp) { fields=(OPCD(10),A); action = {};}
+  define (subinstr = divideOp) { fields=(OPCD(11),A); action = {};}
+
+  define (subinstr = eaRegDirect  ) {fields=(B);action = {};}
+  define (subinstr = eaRegIndirect) {fields=(B);action = {};}  
+  
+
+
+  define (instr=intOp) {
+    fields=(theOp,theEa);
+    define (subinstrs=theOp) { subs = (addOp,subOp);}	
+    define (subinstrs=theEa) { subs = (eaRegDirect,eaRegIndirect); }
+    names=(add,sub,addi,subi);
+    action = {};
+    attrs = time(2);
+  }
+  
+
+ 
+  
+  defmod (instr = (add,aaa)) {
+    attrs = right;
+  }
+  
+
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

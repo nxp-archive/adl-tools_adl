@@ -1,0 +1,53 @@
+//
+// Adds simple split branches to mod1.adl.  The CTR register acts as the target
+// register for split branches.  A ptb (prepare-to-branch) instruction sets up a
+// split branch, while a mtctr will cancel the fixed-target nature of the
+// branch.  The bcctr instruction acts as the split branch.  We test two forms:
+// The conditional and an encoding variant which is unconditional.  This is only
+// broken out to test our own code generation.
+//
+
+#import "mod1.adl"
+
+define (arch = split_branches) {
+
+  // This is not implemented as an alias, so that we detect it and use it to
+  // cancel a pending split branch.
+  define (instr=mtctr) {
+    fields=(OPCD(31),RS,SPRN(9),XO(467));
+    action = {
+      CTR = GPR(RS);
+    };
+  }
+
+  // Prepare to branch.  This targets a PC-relative fixed location.
+  define (instr=ptb) {
+    fields=(OPCD(20),LI,AA(0),LK(0));
+    action =  {
+      CTR = LI;
+    };
+  }
+
+  define (instr=bcctr) {
+    fields=(OPCD(19),BO,BI,LK(0),XO(528));
+    action =  {
+      var cond_ok = (CR(BI+32) == BO(1));
+      if (cond_ok) {
+        NIA = CTR;
+      }
+    };
+  }
+
+  define (instr=bctr) {
+    fields=(OPCD(19),BO(0),BI(0),LK(0),XO(528));
+    action =  {
+      NIA = CTR;
+    };
+  }
+
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,split_branches);
+}

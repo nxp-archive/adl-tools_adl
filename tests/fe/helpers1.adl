@@ -1,0 +1,100 @@
+//
+// Tests of helper code.
+//
+
+// A sample declaration
+const int RegSize = 64;
+
+define (arch=Base) {
+
+  void stuff() {
+    int i = 2;
+  }
+
+  foo & setCrField(bits<32> field,bits<32> x,bits<32> y)
+    {
+      bits<4> r = 
+        ( (x.signedLT(y)) ? 0x8 : 0) |
+        ( (x.signedGT(y)) ? 0x4 : 0) |
+        ( (x == y)        ? 0x2 : 0) ;
+   
+      // Test a helper calling a helper.
+      stuff();
+   
+      CR = CR.set(4*field,4*field+3,r);
+    }
+
+  void setCrField2(int field,int x,int y)
+    {
+      bits<4> r = 
+        ( (x.signedLT(y)) ? 0x8 : 0) |
+        ( (x.signedGT(y)) ? 0x4 : 0) |
+        ( (x == y)        ? 0x2 : 0) ;
+      
+      CR = CR.set(4*field,4*field+3,r);
+    }
+
+
+  void foo (int a,int b) { return 20; }
+
+  void  bar (int a,int b) { int i; }
+
+  attrs = (foo,stuff);
+
+  define (reg=CR) {};
+
+  define (regfile=sprs) {
+    size = 1024;
+    attrs = foo;
+  }
+}
+
+define (arch=minippc) {
+
+  attrs = gpr;
+
+  // This should replace Base::bar.
+  // This should compile b/c we reference valid registers.
+  void  bar (int x,int y) { 
+    """ Hello there! """;
+    a = x; 
+    b = y; 
+  }  
+
+  define (regfile=gprs) {
+    size = 32;
+    attrs = (foo,stuff);
+  }
+
+  define (reg=a) {
+    """ This is a sample register!. """;
+    width = 32;
+    attrs = (foo,cia,nia);
+  }
+
+  define (reg=b) {
+    width = 32;
+  }
+
+  define (reg=c) {
+    width = 32;
+  }
+
+  define (reg=d) {
+    width = 32;
+    attrs = stuff;
+  }
+
+  defmod(regfile=sprs) {
+    define (entry=20) { reg=a; };
+    define (entry=21) { reg=b; };
+    define (entry=22) { reg=c; };
+    define (entry=50) { reg=d; };
+  }
+
+}
+
+define (core=P) {
+  archs = (Base,minippc);
+}
+

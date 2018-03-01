@@ -1,0 +1,61 @@
+//
+// Adds a control-register for the branch predictor.
+//
+
+#import "mod11.adl"
+
+define (arch=bp_control) {
+
+  define (reg HID0) {
+    define (field=BPEN) {
+      bits = 0;
+    }
+    reset = 0x80000000;
+  }
+
+  define (aspect=MmuNotify) {
+    labels = AddrCheck;
+    action = {
+      // Note:  This call is only relevant when generating for uADL.
+      // Guarded region is 0x10000-0x1ffff
+      setExtInstrFlag(getExtInstrFlag() | ((ea > 0x10000 && ea < 0x1ffff) ? 1 : 0));
+    };
+  }
+
+  // Make sure that write hooks don't get misinterpreted as aliases and
+  // potentially cause infinite loops.
+  define (reg BAR) {
+    define (write) {
+      action = func (bits<32> x) {
+        x(31) = x.count_ones() % 2;
+        ThisReg = x;
+      };
+    }
+  }
+
+  defmod (regfile SPR) {
+    define (entry=210) { reg=HID0; }    
+    define (entry=211) { reg=BAR; }      
+
+    // In order to test exceptions on read-operands, we add an entry here.
+    define (entry=250) {
+      define(write) {
+        action = func (bits<32> value) {
+          raiseException(Program);  // read-only register
+        };
+      }
+      define(read) {
+        action = {
+          raiseException(Program);
+          return 0;  // just to avoid the compiler warning
+        };
+      }      
+    }
+  }
+
+}
+
+define (core = P) {
+
+  archs = (MiniPPC,ppc_mmu,bp_control);
+}

@@ -1,0 +1,63 @@
+======
+Cores:
+======
+Name:  "P"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] [not used] 
+
+Decode-Miss Handler:  func ( addr_t ea , unsigned  ) {
+    0 ;
+}
+
+Branch-taken Handler:  {
+    6 ;
+}
+
+Address-check Handler:  func ( addr_t ea , addr_t ra , TransType tt , int id , int set , int way ) {
+    if ( tt = InstrTrans ) {
+        LoadTrans ;
+        StoreTrans ;
+    }
+}
+
+Pre-exception Handler:  func ( Exception x ) {
+    7 ;
+}
+
+Post-exception Handler:  func ( Exception x ) {
+    8 ;
+}
+
+Pre-Cycle Handler:  {
+    1 ;
+}
+
+Pre-Fetch Handler:  {
+    4 ;
+}
+
+Post-Fetch Handler:  func ( unsigned  ) {
+    3 ;
+}
+
+Post-Exec Handler:  {
+    5 ;
+}
+
+Post-Cycle Handler:  {
+    2 ;
+}
+-------------------------------
+

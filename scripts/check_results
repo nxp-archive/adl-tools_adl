@@ -1,0 +1,186 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+check_results <options> <model> <.dat or .uvp file>
+
+=head1 SYNOPSIS
+
+check_results <options> <model> <.dat or .uvp file>
+
+Given a DAT or UVP file, this script runs the model with that file and does final
+results checking.
+
+B<NOTE>:  The model must be a path to an executable.  Thus, if "." is not in your path,
+you will need to specify your model as I<./model>.
+
+=head1 OPTIONS
+
+Command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--man, -m>
+
+Display the complete help as a man page.
+
+=item B<--keepoutput, --ko>
+
+Do not delete temporary files. 
+
+=item B<--showcmd, --sc>
+
+Print the command to be executed.
+
+=item B<--extra=s, --e=s>
+
+Add extra command-line options for the model.
+
+=item B<--compare-file=s, --cf=s>
+
+If set, then the model is not executed and instead we simply compare the input
+test file to this file.
+
+=back
+
+=cut
+
+use FindBin;
+use lib $FindBin::RealBin;
+use lib "$FindBin::RealBin/../share";
+use Getopt::Long qw(:config permute);
+use Pod::Usage;
+use strict;
+use Data::Dumper;
+use File::Basename;
+use regress_utils;
+use rdriver;
+
+my ($help,$man,$keepoutput,$showcmd,$extra,$comparefile,@files);
+
+if (!&GetOptions
+	(
+	 "h|help"            => \$help,
+	 "m|man"             => \$man,
+	 "ko|keepoutput"     => \$keepoutput,
+	 "sc|showcmd"        => \$showcmd,
+	 "d|debug:i"         => \$rdriver::debug,
+	 "e|extra:s"         => \$extra,
+	 "cf|compare-file:s" => \$comparefile,
+	 "<>"                => \&plusargs,
+	)) {
+  printhelp(1,1);
+}
+
+# A value on debug is optional.  If not specified, but the option is,
+# we want it to default to a value of 1.
+if ($rdriver::debug == 0) {
+  $rdriver::debug = 1;
+} elsif ($rdriver::debug < 0) {
+  $rdriver::debug = 0;
+}
+
+
+sub plusargs {
+  push @files,shift;
+}
+
+# Print help if requested to do so.
+printhelp(0,1) if $help;
+
+printhelp(0,2) if $man;
+
+my $model = $files[0];
+my $input = $files[1];
+
+if (!$comparefile) {
+  if (!$model) {
+	print "No model specified.\n\n";
+	printhelp(1,1);
+  }
+  
+  if (! -x $model) {
+	print "Could not find $model:  Check that the model exists and is executable.\n\n";
+	printhelp(1,1);
+  }
+} else {
+  if (! -f $comparefile) {
+	print "Could not find compare file:  Check that the file exists and is readable.\n\n";
+	printhelp(1,1);
+  }
+  $input = $files[0];
+}
+
+if (!$input) {
+  print "No input file specified.\n\n";
+  printhelp(1,1);
+}
+
+if (! -f $input ) {
+  print "Could not find input file $input:  Check that the file exists and is readable.\n\n";
+  printhelp(1,1);
+}
+
+my ($base,$path,$type) = fileparse($input,qr/\.(dat|uvp)/);
+
+my ($datfn,$outfn);
+
+if ($type eq ".dat") {
+  $datfn = $input;
+  $outfn = "$base.out.dat";
+} elsif ($type eq ".uvp") {
+  # uvp file format, create dat and check both intermediate and final results
+  $datfn = "$base.gen.dat";
+  $outfn = "$base.out.dat";
+  # Create the .dat file from the .uvp.
+  dprint "Converting UVP to DAT.\n";
+  uvp2dat($input,$datfn);
+  dprint "Done with conversion.\n";
+} else {
+  print "You must supply a .dat file.  The file type '$type' is not recognized.\n";
+  exit 1;
+}
+
+# Run the model and check for a crash.
+if (!$comparefile) {
+  my $cmd = "$model --lax --trace $extra $datfn --output=$outfn";
+  print "  Cmd: $cmd\n" if ($showcmd);
+  my $output = `$cmd 2>&1`;
+  my $fc = ($? >> 8);
+  if ($?) {
+	die " Test failed and was not expected to.  Return code was $?. Output is:\n\n$output\n";
+  }
+}
+
+# Check the intermediate results, if applicable.
+eval {
+  if ($comparefile) {
+	check_results($datfn,$comparefile);
+  } else {
+	check_results($datfn,$outfn);
+  }
+};
+if ($@) {
+  print "\nCheck FAILED:  $@\n\n";
+  exit 1;
+}
+
+print "\nCheck SUCCEEDED.\n\n";
+
+sub printhelp() {
+  my ($eval,$verbose) = (shift,shift);
+  pod2usage(-exitval => $eval,-verbose=>$verbose);
+  exit 0;
+}

@@ -1,0 +1,23 @@
+//
+// Basic test of machine definitions.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+   
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = (S_ID, S_EX, S_MM, S_WB);
+  }
+
+}

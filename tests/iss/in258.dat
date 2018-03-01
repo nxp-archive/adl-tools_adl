@@ -1,0 +1,77 @@
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	se_b L1
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	se_addi 1,2
+L1:
+	se_addi 1,2
+	se_addi 2,4
+			
+= /asm
+
+= mdopts
+	instr-offset: 0xfe2
+= /mdopts
+
+= aopts
+	-mvle -mregnames
+= /aopts
+
+#
+# <GEN>
+MD n=Mem ra=0x00000fe2 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000fe6 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000fea d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000fee d=0xE808 s=2	#	se_b L1
+MD n=Mem ra=0x00000ff0 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ffc d=0x2011 s=2	#	se_addi 1,2
+MD n=Mem ra=0x00000ffe d=0x2011 s=2	#	se_addi 1,2
+MD n=Mem ra=0x00001000 d=0x2032 s=2	#	se_addi 2,4
+# </GEN>
+
+RD n=NIA d=0xfe2
+
+CORE n=:P
+
+TRACE
+
+I ea=0xfe2 id=1 tic=1
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0xfe6 id=2 tic=2
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0xfea id=3 tic=3
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000003
+
+I ea=0xfee id=4 tic=4
+INSTR op=0xe808					asm="se_b 0x0000000000001000"
+B taken=1 ea=0xffe
+
+I ea=0xffe id=5 tic=5
+INSTR op=0x2011					asm="se_addi rr1,1"
+R n=GPR i=1 d=0x00000005
+
+I ea=0x1000 id=6 tic=6
+INSTR op=0x2032					asm="se_addi rr2,3"
+R n=GPR i=2 d=0x00000004
+
+I ea=0x1002 id=7 tic=7
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000005
+RD n=GPR i=2 d=0x00000004
+RD n=GPR i=3 d=0x00000000

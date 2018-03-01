@@ -1,0 +1,21 @@
+#
+# Simple test to check that we can generate little-endian UVP files.
+#
+= asm
+
+I1 1
+I3 2
+I8 2
+halt
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x1101 s=2	#	I1 1
+MD n=Mem ra=0x00000002 d=0x30000102	#	I3 2
+MD n=Mem ra=0x00000006 d=0x80000000	#	I8 2
+MD n=Mem ra=0x0000000a d=0x00000102
+MD n=Mem ra=0x0000000e d=0xFFFF s=2	#	halt
+# </GEN>
+
+RD n=FOO d=0xdeadbeef

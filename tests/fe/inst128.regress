@@ -1,0 +1,137 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+      General purpose registers.
+      
+  -------------------------------
+Registers:
+  Name:  "AR"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "BR"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  Res: 
+    Pseudo:  1
+    Width:   5
+  Src1: 
+    Pseudo:  1
+    Width:   5
+  Src2: 
+    Pseudo:  1
+    Width:   5
+  Type: 
+    Pseudo:  1
+    Width:   1
+    Parm:  1
+Instructions:
+  Name:  add (rank: 100)
+  Width:  8
+  Fields:  OPCD Src1 Src2 Res Type
+  Action:  {
+    if ( Type == 0 ) {
+        GPR ( Res ) = GPR ( Src1 ) + GPR ( Src2 ) ;
+    } else {
+        GPR ( Res ) = GPR ( Src1 ) ;
+    }
+}
+  Source Registers:  GPR(Src1) GPR(Src2)? 
+  Target Registers:  GPR(Res) 
+  Nested insructions:  
+    Name:  add1 (rank: 100)
+    Width:  32
+    Fields:  OPCD(1) RT RA RB
+    Alias:  add OPCD(OPCD) Src1(RA) Src2(RB) Res(RT) Type(0) 
+    Source Registers:  GPR(Src1) GPR(Src2) 
+    Target Registers:  GPR(Res) 
+    -------------------------------
+    Name:  add2 (rank: 100)
+    Width:  32
+    Fields:  OPCD(2) RT RA RB
+    Alias:  add OPCD(OPCD) Src1(RA) Src2(RB) Res(RT) Type(1) 
+    Source Registers:  GPR(Src1) 
+    Target Registers:  GPR(Res) 
+    -------------------------------
+  -------------------------------
+  Name:  mv (rank: 100)
+  Width:  8
+  Fields:  OPCD Src1 Src2 Res Type
+  Action:  {
+    switch ( Type ) {
+        case 0 : GPR ( Res ) = GPR ( Src1 ) + GPR ( Src2 ) + AR ;
+        break ;
+        case 1 : GPR ( Res ) = GPR ( Src1 ) + AR ;
+        break ;
+        case 2 : GPR ( Res ) = GPR ( Src2 ) + BR ;
+        break ;
+    }
+}
+  Source Registers:  AR? BR? GPR(Src1)? GPR(Src2)? 
+  Target Registers:  GPR(Res)? 
+  Nested insructions:  
+    Name:  mv1 (rank: 100)
+    Width:  32
+    Fields:  OPCD(3) RT RA RB
+    Alias:  mv OPCD(OPCD) Src1(RA) Src2(RB) Res(RT) Type(0) 
+    Source Registers:  AR GPR(Src1) GPR(Src2) 
+    Target Registers:  GPR(Res) 
+    -------------------------------
+    Name:  mv2 (rank: 100)
+    Width:  32
+    Fields:  OPCD(4) RT RA RB
+    Alias:  mv OPCD(OPCD) Src1(RA) Src2(RB) Res(RT) Type(1) 
+    Source Registers:  AR GPR(Src1) 
+    Target Registers:  GPR(Res) 
+    -------------------------------
+    Name:  mv3 (rank: 100)
+    Width:  32
+    Fields:  OPCD(5) RT RA RB
+    Alias:  mv OPCD(OPCD) Src1(RA) Src2(RB) Res(RT) Type(2) 
+    Source Registers:  BR GPR(Src2) 
+    Target Registers:  GPR(Res) 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    1(4000000):  add1
+    2(8000000):  add2
+    3(c000000):  mv1
+    4(10000000):  mv2
+    5(14000000):  mv3
+-------------------------------
+

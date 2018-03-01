@@ -1,0 +1,135 @@
+// Test little endian bit order.
+define (arch=le_arch) {
+      
+  define (reg = PC) {
+    attrs = (cia,nia);
+  }
+  define (regfile = GPR) {
+    size = 32;
+    width = 32;
+  }
+ 
+  define  (reg = FOO) {
+    width = 40;
+    define (field=WH) {
+      bits =((39,36),(31,16));
+    }
+    define (field=WL) {
+      bits=((35,32),(15,0));
+    }
+  } 
+
+  bit_endianness = little;
+
+  define (instrfield = A) {
+    bits = (7,0);  
+  };
+
+  define (instrfield = B) {
+    pseudo = true;
+    width = 8;
+    table = ((0),(1),(4),(34));
+  }
+  
+  define (instr = spl1) {
+    fields = ((bits(15,0),0x0001));  
+    width = 16;
+    action = {
+      FOO.WL = 0xdead1;
+      FOO.WH = 0xdead2;
+    };  
+  };
+ 
+  define (instr = spl2) {
+    fields = ((bits(15,0),0x0002));  
+    width = 16;
+    action = {
+      FOO.WL = FOO.WH;
+      FOO.WH = 0xdead3;
+    };  
+  };
+
+  define (instr = I1) {
+    fields = ((bits(15,8),0x11), A);  
+    width = 16;
+    action = {
+      GPR(A) = 1;    
+    };  
+  };
+  
+  define (instr = I2) {
+    fields = ((bits(23,8),0x2001), (bits(7,0),B));  
+    width = 24;
+    action = {
+      GPR(B(0)) = 2;    
+    };  
+  }; 
+   
+  define (instr = I3) {
+    fields = ((bits(31,8),0x300001), A);  
+    width = 32;
+    action = {
+      GPR(A) = 3;    
+    };  
+  };  
+    
+  define (instr = I4) {
+    fields = ((bits(39,8),0x40000001), A);  
+    width = 40;
+    action = {
+      GPR(A) = 4;    
+    };  
+  }; 
+  
+  define (instr = I5) {
+    fields = ((bits(47,16),0x50000000), 
+              (bits(15,8),0x01),
+              A);  
+    width = 48;
+    action = {
+      GPR(A) = 5;    
+    };  
+  };  
+  
+  define (instr = I6) {
+    fields = ((bits(55,24),0x60000000), 
+              (bits(23,8),0x0001),
+              A);
+    width = 56;
+    action = {
+      GPR(A) = 6;    
+    };  
+  };   
+  
+  define (instr = I7) {
+    fields = ((bits(63,32),0x70000000), 
+              (bits(31,8),0x000001), A);  
+    width = 64;
+    action = {
+      GPR(A) = 7;    
+    };  
+  };
+
+  define (instr = I8) {
+    fields = ((bits(63,32),0x80000000), 
+              (bits(31,8),0x000001), A);  
+    width = 64;
+    action = {
+      FOO = GPR(A);
+    };  
+  };
+    
+  define (instr=halt) {
+    width = 16;
+    fields = ((bits(15,0),0xFFFF)) ;  
+    action = {halt();};  
+  }
+ 
+
+}
+
+
+define (core=le_core) {
+  archs=le_arch;
+  
+}

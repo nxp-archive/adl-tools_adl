@@ -1,0 +1,400 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Model for demonstrating multiple instruction tables.
+//
+
+#import "mod1.adl"
+
+define (arch = Mixed) {
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=OPCD5) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,4);
+  }
+
+  define (instrfield=OPCD7) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,6);
+  }
+
+  define (instrfield=OPCD8) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,7);
+  }
+
+  define (instrfield=XO16) {
+    """
+    Extended opcode.
+    """;
+    bits = (6,7);
+  }
+
+  define (instrfield=BO16) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (5,5);
+  }
+
+  define (instrfield=BI16) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (6,7);
+  }
+
+  define (instrfield=BD8) {
+    """
+    Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (8,15);
+    addr = pc;
+    shift = 1;
+    is_signed = true;
+  }
+
+  define (instrfield = CIApsSEBD8sl1) {
+    """
+    Immediate field specifying a signed two's complement branch displacement 
+    which is concatenated on the right with 0b0 and sign-extended to 32 bits.
+    """;
+    bits = (8,15);
+    is_signed = true;
+    shift = 1;
+    addr = pc;
+  }
+
+  define (instrfield=RC) {
+    """
+    Extended RC opcode.
+    """;
+    bits = (31,31);
+  }
+
+  define (instrfield=RY) {
+    bits = (8,11);
+    type = regfile;    
+    ref = rGPR;
+  }
+
+  define (instrfield=RX) {
+    bits = (12,15);
+    type = regfile;    
+    ref = rGPR;
+  }
+
+  define (instrfield=BA) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BB) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=BT) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a target.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield = E_XO_SCI8) {
+    """
+    Extended opcode used in SCI8 format.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield = E_F) {
+    """
+    Fill value used to fill the remaining 24 bits of a scaled-immediate 8 value,
+    in SCI8-format instructions.
+    """;
+    bits = 21;
+  }
+
+  define (instrfield = E_SCL) {
+    """
+    Field used to specify a scale amount in Immediate instructions using the SCI8
+    format.
+    """;
+    bits = (22,23);
+  }
+
+  define (instrfield = E_UI8) {
+    """
+    Immediate field used to specify an 8-bit unsigned integer, used in SCI8
+    format.
+    """;
+    bits = (24,31);
+  }
+
+ define (instrfield = SCI8) {
+    """
+    A placeholder for the assembly representation of an SCI8-format constant.
+    """;
+    width = 32;
+    pseudo = true;
+    display = hex;
+  }
+
+  define (instrfield = OIM5) {
+    """
+    Offset Immediate field used to specify a 5-bit unsigned integer in the 
+    range [1:32] encoded as [0:31].
+    """;
+    bits = (7,11);
+    offset = 1;
+  }
+
+  define (regfile=rGPR) {
+    """
+    Upper and lower halves of GPR for use by Mixed instructions.
+    """;
+    size = 16;
+    define (read) {
+      alias = GPR;
+      regs = ((0,7),(24,31));
+    }
+    define (write) {
+      alias = GPR;
+      regs = ((0,7),(24,31));
+    }
+    prefix = rr;
+  }
+
+  // This hardware register modifies the current instruction table:
+  // Mixed:
+  //   0:  Use MiniPPC.
+  //   1:  Use Mixed.
+  define (reg=HID0) {
+    define (field=MIXD) {
+      bits = 0;
+    }
+  }
+
+  // Watch function for identifying the correct table.
+  itable_watch = func () {
+    if (HID0.MIXD == 0) {
+      return other;
+    } else {
+      return mixed;
+    }
+  };
+
+  define (reg=PRGINTR) {}
+
+  //
+  // Instructions.
+  //
+
+  attrs = (mixed,empty);
+
+  bits<32> sci8(bits<1> f, bits<2> scl, bits<8> ui8){
+    uint32_t ff = 0xff;
+    var mask = ff << (scl.uint32() * 8);
+    var shVal = ui8.uint32() << (scl.uint32() * 8);
+    return f == 1? shVal | ~mask : shVal & mask;
+  }
+
+  unsigned get_E_F(unsigned x) {
+    return ((x & 0x0000ffff) == 0  // upper or lower halfword will be 0000 or ffff
+            || (x & 0xffff0000) == 0?  0 : 1  // if neither upper nor lower half is 0000 must be Fs
+            );
+  }
+
+  unsigned get_E_SCL(unsigned x) {
+    // For E_SCL, the question is "what's different?" - not the fill value.
+    // Remember that the E_SCL value is a left-shift byte count, not a big-endian addr.
+    return ((x & 0xff000000) >> 24) == ((x & 0x00ff0000) >> 16)?  // top two bytes same?
+      (((x & 0x0000ff00) >> 8) == ((x & 0xff000000) >> 24)?  // 2nd lowest == top two?
+       0 : 1  // if so, its lowest-order, else second-lowest
+       )
+      : // top two bytes not the same, low two bytes must be same
+      (((x & 0xff000000) >> 24) == (x & 0x000000ff)?  // high byte matches low bytes?
+       2 : 3  // if so, must be second-highest byte, else high byte
+       );
+  }
+
+  unsigned get_E_UI8(unsigned x) {
+    var r = ((x >> (get_E_SCL(x) * 8)) & 0xff);
+    return r;
+  }
+
+  define (instr = e_addi) {
+    attrs = (other,mixed);
+    width = 32;
+    fields = (OPCD(0x06),RT,RA,E_XO_SCI8(0x10),E_F,E_SCL,E_UI8);
+    dsyntax = ("%i %f,%f,%f",RT,RA,SCI8(sci8(E_F,E_SCL,E_UI8)));
+    action = {
+      GPR(RT)(32,63) = GPR(RA) + sci8 (E_F, E_SCL, E_UI8);
+    };
+  }
+
+  define (instr=e_addi_) {
+    alias = e_addi(RT(RT),RA(RA),E_F(get_E_F(SCI8)),E_SCL(get_E_SCL(SCI8)),E_UI8(get_E_UI8(SCI8)));
+    syntax = ("e_addi %f,%f,%f",RT,RA,SCI8);
+  }
+
+  defmod (instr=add) {
+    attrs=(other,mixed);
+  }
+
+  defmod (instr=addi) {
+    attrs=(other,mixed);
+  }
+
+  define (instr=crand) {
+    fields=(OPCD(19),BT,BA,BB,XO(257));
+    attrs = mixed;
+    action = {
+      CR = CR.set(BT+32,CR(BA+32) & CR(BB+32));
+    };
+  }
+
+  define (instr=se_add) {
+    attrs=mixed;
+    width = 16;
+    fields=(OPCD(1),RY,RX);
+    syntax = ("%i %f,%f",RX,RY);
+    action = {
+      rGPR(RX) = rGPR(RX) + rGPR(RY);
+    };
+  }
+
+  define (instr = se_addi) {
+    attrs = mixed;
+    width = 16;
+    fields = (OPCD7(0x10),OIM5,RX);
+    syntax = ("%i %f,%f", RX,OIM5);
+    action = {
+      rGPR(RX) = rGPR(RX) + OIM5;
+    };
+  }
+
+  define (instr="subf.") {
+    attrs=mixed;
+    fields=(OPCD(0x1f),RT,RA,RB,XO(0x28),RC(1));
+    action = func() {
+      GPR(RT) = GPR(RB) - GPR(RA);
+      setCrField(0,GPR(RT),0);
+    };
+  }
+
+  define (instr = se_b) {
+    attrs = mixed;
+    width = 16;
+    fields = (OPCD7(0x74),CIApsSEBD8sl1);
+    action = {
+      NIA = CIApsSEBD8sl1;
+    };
+  }
+
+  define (instr=se_bc) {
+    attrs=mixed;
+    width=16;
+    fields=(OPCD5(0x1c),BO16,BI16,BD8);
+    action = func() {
+      bool cond_ok = (CR(BI16) == BO16);
+      if (cond_ok) {
+        NIA = BD8;
+      }
+    };
+  }
+
+  define (instr=se_bne) {
+    alias = se_bc(BO16(0),BI16(2),BD8(BD8));
+    syntax = ("%i %f",BD8);    
+    attrs=mixed;
+  }
+
+  define (instr=se_or) {
+    fields = (OPCD(17),XO16(0),RY,RX);
+    syntax = ("%i %f,%f",RX,RY);
+    width = 16;
+    attrs=mixed;
+    action = {
+      GPR(RX) = GPR(RX) | GPR(RY);
+    };
+  }
+
+  define (instr = se_slw) {
+    fields = (OPCD8(0x42),RY,RX);
+    syntax = ("%i %f,%f",RX,RY);
+    width = 16;
+    attrs = mixed;
+    action = {
+      uint32_t sh = rGPR(RY)(58,63).uint32();
+      if (sh > 31) {
+        rGPR(RX)(32,63) = 0;
+      } else {
+        rGPR(RX)(32,63) = rGPR(RX)(32,63) << sh;
+      } 
+    };
+  }
+
+  defmod (instr=srw) {
+    attrs = mixed;
+  }
+
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  defmod (instr=halt) {
+    attrs=(mixed,other);
+  }
+
+  //
+  // Decode miss handler.
+  // 
+  decode_miss = func (addr_t ea,unsigned) {
+    raiseException(Program);
+  };
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      NIA = PRGINTR;
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,Mixed);
+
+  define (instr="subic.") {
+    alias = "addic."(RT(RT),RA(RA),SI(-SI));
+  }
+
+  // Changing to having 'other' be the default, so that the disassembly will
+  // work.  We now set the default table to the first table listed.
+  instrtables=(other,mixed,empty);
+}
+

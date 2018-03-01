@@ -1,0 +1,149 @@
+#
+# Testing of dependency tracking.
+#
+= asm
+
+	add  r3,r2,r1
+	addi r4,r2,10
+	lwzu r5,0xfe2(r3)
+	addic r5,r5,0x100
+	stwu r5,4(r3)
+	lmw  r28,0x2000(r0)
+	addi r28,r28,4
+	addi r31,r31,4
+	stmw r28,0x2010(r0)
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C620A14	#	add  r3,r2,r1
+MD n=Mem ra=0x00000004 d=0x3882000A	#	addi r4,r2,10
+MD n=Mem ra=0x00000008 d=0x84A30FE2	#	lwzu r5,0xfe2(r3)
+MD n=Mem ra=0x0000000c d=0x30A50100	#	addic r5,r5,0x100
+MD n=Mem ra=0x00000010 d=0x94A30004	#	stwu r5,4(r3)
+MD n=Mem ra=0x00000014 d=0xBB802000	#	lmw  r28,0x2000(r0)
+MD n=Mem ra=0x00000018 d=0x3B9C0004	#	addi r28,r28,4
+MD n=Mem ra=0x0000001c d=0x3BFF0004	#	addi r31,r31,4
+MD n=Mem ra=0x00000020 d=0xBF802010	#	stmw r28,0x2010(r0)
+# </GEN>
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+
+MD n=Mem ra=0x2000 d=10
+MD n=Mem ra=0x2004 d=20
+MD n=Mem ra=0x2008 d=30
+MD n=Mem ra=0x200c d=40
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c620a14
+INSTR op=0x7c620a14					asm="add r3,r2,r1"
+R a=read n=GPR i=1 d=0x0000000a sn=1
+R a=read n=GPR i=2 d=0x00000014 sn=2
+R n=GPR i=3 d=0x0000001e dt=R1,R2
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x3882000a
+INSTR op=0x3882000a					asm="addi r4,r2,10"
+R a=read n=GPR i=2 d=0x00000014 sn=1
+R n=GPR i=4 d=0x0000001e dt=R1
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x84a30fe2
+INSTR op=0x84a30fe2					asm="lwzu r5,4066(r3)"
+R a=read n=GPR i=3 d=0x0000001e sn=1
+D n=Mem t=read ea=0x1000 nb=4 sn=1
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0xdeadbeef
+R n=GPR i=5 d=0xdeadbeef dt=M1
+R n=GPR i=3 d=0x00001000 dt=R1
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x30a50100
+INSTR op=0x30a50100					asm="addic r5,r5,256"
+R a=read n=GPR i=5 d=0xdeadbeef sn=1
+R a=read n=GPR i=5 d=0xdeadbeef sn=2
+R n=GPR i=5 d=0xdeadbfef dt=R1,R2
+R n=XER d=0x00000000 dt=R1,R2
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x94a30004
+INSTR op=0x94a30004					asm="stwu r5,4(r3)"
+R a=read n=GPR i=3 d=0x00001000 sn=1
+R a=read n=GPR i=5 d=0xdeadbfef sn=2
+D n=Mem t=write ea=0x1004 nb=4 dt=R2
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0xdeadbfef
+R n=GPR i=3 d=0x00001004 dt=R1
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0xbb802000
+INSTR op=0xbb802000					asm="lmw r28,8192(r0)"
+D n=Mem t=read ea=0x2000 nb=4 sn=1
+M n=Mem t=read ea=0x2000 ra=0x2000 d=0x0000000a
+R n=GPR i=28 d=0x0000000a dt=M1
+D n=Mem t=read ea=0x2004 nb=4 sn=2
+M n=Mem t=read ea=0x2004 ra=0x2004 d=0x00000014
+R n=GPR i=29 d=0x00000014 dt=M2
+D n=Mem t=read ea=0x2008 nb=4 sn=3
+M n=Mem t=read ea=0x2008 ra=0x2008 d=0x0000001e
+R n=GPR i=30 d=0x0000001e dt=M3
+D n=Mem t=read ea=0x200c nb=4 sn=4
+M n=Mem t=read ea=0x200c ra=0x200c d=0x00000028
+R n=GPR i=31 d=0x00000028 dt=M4
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x3b9c0004
+INSTR op=0x3b9c0004					asm="addi r28,r28,4"
+R a=read n=GPR i=28 d=0x0000000a sn=1
+R n=GPR i=28 d=0x0000000e dt=R1
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x3bff0004
+INSTR op=0x3bff0004					asm="addi r31,r31,4"
+R a=read n=GPR i=31 d=0x00000028 sn=1
+R n=GPR i=31 d=0x0000002c dt=R1
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0xbf802010
+INSTR op=0xbf802010					asm="stmw r28,8208(r0)"
+R a=read n=GPR i=28 d=0x0000000e sn=1
+D n=Mem t=write ea=0x2010 nb=4 dt=R1
+M n=Mem t=write ea=0x2010 ra=0x2010 d=0x0000000e
+R a=read n=GPR i=29 d=0x00000014 sn=2
+D n=Mem t=write ea=0x2014 nb=4 dt=R2
+M n=Mem t=write ea=0x2014 ra=0x2014 d=0x00000014
+R a=read n=GPR i=30 d=0x0000001e sn=3
+D n=Mem t=write ea=0x2018 nb=4 dt=R3
+M n=Mem t=write ea=0x2018 ra=0x2018 d=0x0000001e
+R a=read n=GPR i=31 d=0x0000002c sn=4
+D n=Mem t=write ea=0x201c nb=4 dt=R4
+M n=Mem t=write ea=0x201c ra=0x201c d=0x0000002c
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x0000000a
+RD n=GPR i=2 d=0x00000014
+RD n=GPR i=3 d=0x00001004
+RD n=GPR i=4 d=0x0000001e
+RD n=GPR i=5 d=0xdeadbfef
+
+MD n=Mem ra=0x0000000000001000 d=0xdeadbeef	#	(3735928559)
+MD n=Mem ra=0x0000000000001004 d=0xdeadbfef	#	(3735928815)
+MD n=Mem ra=0x0000000000002000 d=0x0000000a	#	(10)
+MD n=Mem ra=0x0000000000002004 d=0x00000014	#	(20)
+MD n=Mem ra=0x0000000000002008 d=0x0000001e	#	(30)
+MD n=Mem ra=0x000000000000200c d=0x00000028	#	(40)
+MD n=Mem ra=0x0000000000002010 d=0x0000000e	#	(14)
+MD n=Mem ra=0x0000000000002014 d=0x00000014	#	(20)
+MD n=Mem ra=0x0000000000002018 d=0x0000001e	#	(30)
+MD n=Mem ra=0x000000000000201c d=0x0000002c	#	(44)

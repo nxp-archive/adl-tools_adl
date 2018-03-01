@@ -1,0 +1,108 @@
+//
+// Checking of tests:  Errors should be produced.
+// 
+define (arch=foo) {
+
+  define (reg=HDBCR0) {
+    define (field=MMU_ENABLE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  define (mmu) {
+
+    both_enable = { return HDBCR0.MMU_ENABLE(); };
+
+    define(lookup=TlbCam) {
+      define (wayfield=x) {
+        bits = 2;
+      }
+      define (wayfield=y) {
+        bits = 3;
+      }
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      test = Compare(TID,PID0,PID1);
+      test = AddrComp(EPN);
+      size = SIZE;
+      realpage = RPN;
+
+      hit = func(TransType tt,int x,addr_t x,unsigned seq) { };
+      miss = func(TransType tt,int z,unsigned seq) { };
+
+      exec_perm = func(TlbCam t,addr_t,unsigned seq) {
+        if (!((MSR.PR()) ? t.SX : t.UX)) {
+          raiseException(ProtectionFault);
+        }
+      };
+
+      load_perm = func (TransType) {
+        return 1;
+      };
+
+      store_perm = func (TransType) {
+      };
+
+    }
+
+    instr_miss = func (int x,unsigned seq) { raiseException(ITlbMiss); };
+    data_miss = func (int y,unsigned seq) { DEAR = a; raiseException(DTlbMiss); };
+    misaligned_write = func (int y,int z) { };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define(arch=foo2) {
+  defmod(mmu) {
+    defmod(lookup=TlbCam) {
+      define (wayfield=a) {
+        bits = 5;
+      }
+      defmod (wayfield=y) {
+        bits = 5;
+      }
+    }
+  }
+}
+
+
+define (core=P) {
+  archs=(foo,foo2);
+}

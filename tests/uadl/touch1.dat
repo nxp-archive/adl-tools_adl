@@ -1,0 +1,51 @@
+#
+# This makes sure that we don't run into problems performing
+# a cache action which does not allocate a cache way, such as
+# the touch operation with no allocation.
+#
+= asm
+
+	dcbt r0,r1
+	addi r1,r1,1
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C000A2C	#	dcbt r0,r1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=1 d=0x20100
+
+RD n=CCR d=0xc8000000
+
+TRACE
+
+I ea=0x0 id=1 tic=1
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c000a2c
+INSTR op=0x7c000a2c                                     asm="dcbt r0,r1"
+ITIME t=3
+CTIME t=7
+
+I ea=0x4 id=2 tic=2
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001                                     asm="addi r1,r1,1"
+ITIME t=6
+R n=GPR i=1 d=0x00020101
+CTIME t=10
+
+I ea=0x8 id=3 tic=3
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=9
+CTIME t=13
+
+RESULTS
+
+RD n=GPR i=1 d=0x00020101

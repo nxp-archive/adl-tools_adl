@@ -1,0 +1,108 @@
+#
+# Another test of variable-length instructions.  This makes sure that the
+# instruction size is used to properly update the fetch unit.
+#
+CORE n=:P
+
+= asm
+
+	addi r2,r2,1
+	se_add r1,r2
+	addi r2,r2,1
+	se_add r1,r2
+	addi r2,r2,1
+	se_add r1,r2
+	addi r2,r2,1
+	se_add r1,r2
+
+= /asm
+= aopts
+  -mvle -mregnames
+= /aopts
+
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000004 d=0x0421 s=2	#	se_add r1,r2
+MD n=Mem ra=0x00000006 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x0000000a d=0x0421 s=2	#	se_add r1,r2
+MD n=Mem ra=0x0000000c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000010 d=0x0421 s=2	#	se_add r1,r2
+MD n=Mem ra=0x00000012 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000016 d=0x0421 s=2	#	se_add r1,r2
+# </GEN>
+
+RD n=NIA     d=0x0
+
+TRACE
+
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=2
+R n=GPR i=2 d=0x00000001
+CTIME t=6
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x04213842
+INSTR op=0x0421					asm="se_add rr1,rr2"
+ITIME t=3
+R n=GPR i=1 d=0x00000001
+CTIME t=7
+
+I ea=0x6 id=3
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x04213842
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00010421
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=5
+R n=GPR i=2 d=0x00000002
+CTIME t=9
+
+I ea=0xa id=4
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00010421
+INSTR op=0x0421					asm="se_add rr1,rr2"
+ITIME t=6
+R n=GPR i=1 d=0x00000003
+CTIME t=10
+
+I ea=0xc id=5
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38420001
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=8
+R n=GPR i=2 d=0x00000003
+CTIME t=12
+
+I ea=0x10 id=6
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x04213842
+INSTR op=0x0421					asm="se_add rr1,rr2"
+ITIME t=9
+R n=GPR i=1 d=0x00000006
+CTIME t=13
+
+I ea=0x12 id=7
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x04213842
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00010421
+INSTR op=0x38420001					asm="addi r2,r2,1"
+ITIME t=11
+R n=GPR i=2 d=0x00000004
+CTIME t=15
+
+I ea=0x16 id=8
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00010421
+INSTR op=0x0421					asm="se_add rr1,rr2"
+ITIME t=12
+R n=GPR i=1 d=0x0000000a
+CTIME t=16
+
+I ea=0x18 id=9
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=14
+CTIME t=18
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000000a
+RD n=GPR i=2 d=0x00000004
+

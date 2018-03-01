@@ -1,0 +1,11 @@
+#
+# Make sure that we can trigger a level sensitive exception, then cancel it so
+# that the core makes forward progress.
+#
+setreg MSR 0x40000
+step 100
+triggerexcpt External
+step 1
+cancelexcpt External
+go
+quit

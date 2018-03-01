@@ -1,0 +1,4 @@
+asm6.adl:10: Unknown attribute 'undefined' in instrHasAttr call.
+asm6.adl:15: Unknown variable/resource found in action code:  SG
+asm6.adl:32: First argument to post-packet-asm handler must be 'InstrBundle'.
+asm6.adl:22: Unknown variable/resource found in action code:  RT

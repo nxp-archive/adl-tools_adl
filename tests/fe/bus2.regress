@@ -1,0 +1,3 @@
+bus2.adl:52: Identifier does not match any registered enum values.
+bus2.adl:67: Unknown variable/resource found in action code:  HIT
+bus2.adl:84: Unknown variable/resource found in action code:  Stuff

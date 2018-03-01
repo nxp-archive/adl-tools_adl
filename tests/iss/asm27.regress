@@ -1,0 +1,36 @@
+
+asm27.o:     file format elf32-powerpc
+asm27.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         0000002c  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000060  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000060  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+
+
+
+Disassembly of section .text:
+
+00000000 <.text>:
+   0:	00 3f 60 03 	LPREFIX, VlesSize = 3, HighReg = 0xf60
+   4:	00 00 8c 49 	add      r19,r18,r17
+   8:	00 00 4d 09 	add      r19,r1,r20
+   c:	00 01 45 49 	add      r1,r5,r21
+  10:	00 21 80 03 	LPREFIX, VlesSize = 2, HighReg = 0x180
+  14:	00 40 07 cb 	mv       r1,0x100,r15
+  18:	7f fd a5 8b 	mv       r9,-0xa,r22
+  1c:	00 02 84 8b 	mv       r1,0xa,r2
+  20:	00 00 2d 07 	nop
+  24:	00 00 2d 07 	nop
+  28: 00 00 00 00     halt

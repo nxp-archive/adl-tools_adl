@@ -1,0 +1,18 @@
+//
+// Defines a register callback for checking purposes, plus we want mtspr to
+// explicitly end a basic block so that a move to BRREG will be registered as a
+// flow-control change.
+//
+
+define (core=P) {
+  define (config) {
+    reg_callbacks      = (BRREG,BRWO,BRFSTAT);
+    reg_read_callbacks = (BRSTAT,BRRO,BRFSTAT,TDEXIT);
+    bb_end_instrs      = mtspr_attr;
+    opt_bb_end_instrs  = mfspr_attr;
+
+    // Test post-simulation function.
+    post_sim = func() { QEXIT = QEXIT + 1; };
+    
+  }
+}

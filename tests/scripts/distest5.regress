@@ -1,0 +1,15 @@
+Assembler messages:
+Error: bad expression
+ADL-library version: 1.2.3
+
+ Encoding Failed 
+
+ ADL_num_of_bits = 48
+
+ ADL_code->size() = 3
+
+ ADL_relocation_info->size() = 0
+
+ ADL_messages->size() = 0
+
+DONE

@@ -1,0 +1,247 @@
+#
+# Test multi-operand ops which bunch together memory reads/writes in uADL.
+# Same as loadstore1.dat, except with a different core name so that we can
+# run it on the DLX models.
+#
+
+= asm
+  
+  lmw r11,0x1000(r0)
+  stmw r11,0x2000(r0)
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xB9601000	#	lmw r11,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0xBD602000	#	stmw r11,0x2000(r0)
+# </GEN>
+
+MD n=Mem ra=0x1000 d=1
+MD n=Mem ra=0x1004 d=2
+MD n=Mem ra=0x1008 d=3
+MD n=Mem ra=0x100c d=4
+MD n=Mem ra=0x1010 d=5
+MD n=Mem ra=0x1014 d=6
+MD n=Mem ra=0x1018 d=7
+MD n=Mem ra=0x101c d=8
+MD n=Mem ra=0x1020 d=9
+MD n=Mem ra=0x1024 d=10
+MD n=Mem ra=0x1028 d=11
+MD n=Mem ra=0x102c d=12
+MD n=Mem ra=0x1030 d=13
+MD n=Mem ra=0x1034 d=14
+MD n=Mem ra=0x1038 d=15
+MD n=Mem ra=0x103c d=16
+MD n=Mem ra=0x1040 d=17
+MD n=Mem ra=0x1044 d=18
+MD n=Mem ra=0x1048 d=19
+MD n=Mem ra=0x104c d=20
+MD n=Mem ra=0x1050 d=21
+
+RD n=NIA d=0
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xb9601000
+INSTR op=0xb9601000					asm="lmw r11,4096(r0)"
+ITIME t=2
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000001
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000002
+D n=Mem t=read ea=0x1008 nb=4
+M n=Mem t=read ea=0x1008 ra=0x1008 d=0x00000003
+D n=Mem t=read ea=0x100c nb=4
+M n=Mem t=read ea=0x100c ra=0x100c d=0x00000004
+D n=Mem t=read ea=0x1010 nb=4
+M n=Mem t=read ea=0x1010 ra=0x1010 d=0x00000005
+D n=Mem t=read ea=0x1014 nb=4
+M n=Mem t=read ea=0x1014 ra=0x1014 d=0x00000006
+D n=Mem t=read ea=0x1018 nb=4
+M n=Mem t=read ea=0x1018 ra=0x1018 d=0x00000007
+D n=Mem t=read ea=0x101c nb=4
+M n=Mem t=read ea=0x101c ra=0x101c d=0x00000008
+D n=Mem t=read ea=0x1020 nb=4
+M n=Mem t=read ea=0x1020 ra=0x1020 d=0x00000009
+D n=Mem t=read ea=0x1024 nb=4
+M n=Mem t=read ea=0x1024 ra=0x1024 d=0x0000000a
+D n=Mem t=read ea=0x1028 nb=4
+M n=Mem t=read ea=0x1028 ra=0x1028 d=0x0000000b
+D n=Mem t=read ea=0x102c nb=4
+M n=Mem t=read ea=0x102c ra=0x102c d=0x0000000c
+D n=Mem t=read ea=0x1030 nb=4
+M n=Mem t=read ea=0x1030 ra=0x1030 d=0x0000000d
+D n=Mem t=read ea=0x1034 nb=4
+M n=Mem t=read ea=0x1034 ra=0x1034 d=0x0000000e
+D n=Mem t=read ea=0x1038 nb=4
+M n=Mem t=read ea=0x1038 ra=0x1038 d=0x0000000f
+D n=Mem t=read ea=0x103c nb=4
+M n=Mem t=read ea=0x103c ra=0x103c d=0x00000010
+D n=Mem t=read ea=0x1040 nb=4
+M n=Mem t=read ea=0x1040 ra=0x1040 d=0x00000011
+D n=Mem t=read ea=0x1044 nb=4
+M n=Mem t=read ea=0x1044 ra=0x1044 d=0x00000012
+D n=Mem t=read ea=0x1048 nb=4
+M n=Mem t=read ea=0x1048 ra=0x1048 d=0x00000013
+D n=Mem t=read ea=0x104c nb=4
+M n=Mem t=read ea=0x104c ra=0x104c d=0x00000014
+D n=Mem t=read ea=0x1050 nb=4
+M n=Mem t=read ea=0x1050 ra=0x1050 d=0x00000015
+R n=GPR i=11 d=0x00000001
+R n=GPR i=12 d=0x00000002
+R n=GPR i=13 d=0x00000003
+R n=GPR i=14 d=0x00000004
+R n=GPR i=15 d=0x00000005
+R n=GPR i=16 d=0x00000006
+R n=GPR i=17 d=0x00000007
+R n=GPR i=18 d=0x00000008
+R n=GPR i=19 d=0x00000009
+R n=GPR i=20 d=0x0000000a
+R n=GPR i=21 d=0x0000000b
+R n=GPR i=22 d=0x0000000c
+R n=GPR i=23 d=0x0000000d
+R n=GPR i=24 d=0x0000000e
+R n=GPR i=25 d=0x0000000f
+R n=GPR i=26 d=0x00000010
+R n=GPR i=27 d=0x00000011
+R n=GPR i=28 d=0x00000012
+R n=GPR i=29 d=0x00000013
+R n=GPR i=30 d=0x00000014
+R n=GPR i=31 d=0x00000015
+CTIME t=15
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xbd602000
+INSTR op=0xbd602000					asm="stmw r11,8192(r0)"
+ITIME t=15
+D n=Mem t=write ea=0x2000 nb=4
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x00000001
+D n=Mem t=write ea=0x2004 nb=4
+M n=Mem t=write ea=0x2004 ra=0x2004 d=0x00000002
+D n=Mem t=write ea=0x2008 nb=4
+M n=Mem t=write ea=0x2008 ra=0x2008 d=0x00000003
+D n=Mem t=write ea=0x200c nb=4
+M n=Mem t=write ea=0x200c ra=0x200c d=0x00000004
+D n=Mem t=write ea=0x2010 nb=4
+M n=Mem t=write ea=0x2010 ra=0x2010 d=0x00000005
+D n=Mem t=write ea=0x2014 nb=4
+M n=Mem t=write ea=0x2014 ra=0x2014 d=0x00000006
+D n=Mem t=write ea=0x2018 nb=4
+M n=Mem t=write ea=0x2018 ra=0x2018 d=0x00000007
+D n=Mem t=write ea=0x201c nb=4
+M n=Mem t=write ea=0x201c ra=0x201c d=0x00000008
+D n=Mem t=write ea=0x2020 nb=4
+M n=Mem t=write ea=0x2020 ra=0x2020 d=0x00000009
+D n=Mem t=write ea=0x2024 nb=4
+M n=Mem t=write ea=0x2024 ra=0x2024 d=0x0000000a
+D n=Mem t=write ea=0x2028 nb=4
+M n=Mem t=write ea=0x2028 ra=0x2028 d=0x0000000b
+D n=Mem t=write ea=0x202c nb=4
+M n=Mem t=write ea=0x202c ra=0x202c d=0x0000000c
+D n=Mem t=write ea=0x2030 nb=4
+M n=Mem t=write ea=0x2030 ra=0x2030 d=0x0000000d
+D n=Mem t=write ea=0x2034 nb=4
+M n=Mem t=write ea=0x2034 ra=0x2034 d=0x0000000e
+D n=Mem t=write ea=0x2038 nb=4
+M n=Mem t=write ea=0x2038 ra=0x2038 d=0x0000000f
+D n=Mem t=write ea=0x203c nb=4
+M n=Mem t=write ea=0x203c ra=0x203c d=0x00000010
+D n=Mem t=write ea=0x2040 nb=4
+M n=Mem t=write ea=0x2040 ra=0x2040 d=0x00000011
+D n=Mem t=write ea=0x2044 nb=4
+M n=Mem t=write ea=0x2044 ra=0x2044 d=0x00000012
+D n=Mem t=write ea=0x2048 nb=4
+M n=Mem t=write ea=0x2048 ra=0x2048 d=0x00000013
+D n=Mem t=write ea=0x204c nb=4
+M n=Mem t=write ea=0x204c ra=0x204c d=0x00000014
+D n=Mem t=write ea=0x2050 nb=4
+M n=Mem t=write ea=0x2050 ra=0x2050 d=0x00000015
+CTIME t=28
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=29
+CTIME t=32
+
+RESULTS
+
+RD n=GPR i=0 d=0x00000000
+RD n=GPR i=1 d=0x00000000
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0x00000000
+RD n=GPR i=7 d=0x00000000
+RD n=GPR i=8 d=0x00000000
+RD n=GPR i=9 d=0x00000000
+RD n=GPR i=10 d=0x00000000
+RD n=GPR i=11 d=0x00000001
+RD n=GPR i=12 d=0x00000002
+RD n=GPR i=13 d=0x00000003
+RD n=GPR i=14 d=0x00000004
+RD n=GPR i=15 d=0x00000005
+RD n=GPR i=16 d=0x00000006
+RD n=GPR i=17 d=0x00000007
+RD n=GPR i=18 d=0x00000008
+RD n=GPR i=19 d=0x00000009
+RD n=GPR i=20 d=0x0000000a
+RD n=GPR i=21 d=0x0000000b
+RD n=GPR i=22 d=0x0000000c
+RD n=GPR i=23 d=0x0000000d
+RD n=GPR i=24 d=0x0000000e
+RD n=GPR i=25 d=0x0000000f
+RD n=GPR i=26 d=0x00000010
+RD n=GPR i=27 d=0x00000011
+RD n=GPR i=28 d=0x00000012
+RD n=GPR i=29 d=0x00000013
+RD n=GPR i=30 d=0x00000014
+RD n=GPR i=31 d=0x00000015
+MD n=Mem ra=0x0000000000000000 d=0xb9601000	#	(3110080512)
+MD n=Mem ra=0x0000000000000004 d=0xbd602000	#	(3177193472)
+MD n=Mem ra=0x0000000000001000 d=0x00000001	#	(1)
+MD n=Mem ra=0x0000000000001004 d=0x00000002	#	(2)
+MD n=Mem ra=0x0000000000001008 d=0x00000003	#	(3)
+MD n=Mem ra=0x000000000000100c d=0x00000004	#	(4)
+MD n=Mem ra=0x0000000000001010 d=0x00000005	#	(5)
+MD n=Mem ra=0x0000000000001014 d=0x00000006	#	(6)
+MD n=Mem ra=0x0000000000001018 d=0x00000007	#	(7)
+MD n=Mem ra=0x000000000000101c d=0x00000008	#	(8)
+MD n=Mem ra=0x0000000000001020 d=0x00000009	#	(9)
+MD n=Mem ra=0x0000000000001024 d=0x0000000a	#	(10)
+MD n=Mem ra=0x0000000000001028 d=0x0000000b	#	(11)
+MD n=Mem ra=0x000000000000102c d=0x0000000c	#	(12)
+MD n=Mem ra=0x0000000000001030 d=0x0000000d	#	(13)
+MD n=Mem ra=0x0000000000001034 d=0x0000000e	#	(14)
+MD n=Mem ra=0x0000000000001038 d=0x0000000f	#	(15)
+MD n=Mem ra=0x000000000000103c d=0x00000010	#	(16)
+MD n=Mem ra=0x0000000000001040 d=0x00000011	#	(17)
+MD n=Mem ra=0x0000000000001044 d=0x00000012	#	(18)
+MD n=Mem ra=0x0000000000001048 d=0x00000013	#	(19)
+MD n=Mem ra=0x000000000000104c d=0x00000014	#	(20)
+MD n=Mem ra=0x0000000000001050 d=0x00000015	#	(21)
+MD n=Mem ra=0x0000000000002000 d=0x00000001	#	(1)
+MD n=Mem ra=0x0000000000002004 d=0x00000002	#	(2)
+MD n=Mem ra=0x0000000000002008 d=0x00000003	#	(3)
+MD n=Mem ra=0x000000000000200c d=0x00000004	#	(4)
+MD n=Mem ra=0x0000000000002010 d=0x00000005	#	(5)
+MD n=Mem ra=0x0000000000002014 d=0x00000006	#	(6)
+MD n=Mem ra=0x0000000000002018 d=0x00000007	#	(7)
+MD n=Mem ra=0x000000000000201c d=0x00000008	#	(8)
+MD n=Mem ra=0x0000000000002020 d=0x00000009	#	(9)
+MD n=Mem ra=0x0000000000002024 d=0x0000000a	#	(10)
+MD n=Mem ra=0x0000000000002028 d=0x0000000b	#	(11)
+MD n=Mem ra=0x000000000000202c d=0x0000000c	#	(12)
+MD n=Mem ra=0x0000000000002030 d=0x0000000d	#	(13)
+MD n=Mem ra=0x0000000000002034 d=0x0000000e	#	(14)
+MD n=Mem ra=0x0000000000002038 d=0x0000000f	#	(15)
+MD n=Mem ra=0x000000000000203c d=0x00000010	#	(16)
+MD n=Mem ra=0x0000000000002040 d=0x00000011	#	(17)
+MD n=Mem ra=0x0000000000002044 d=0x00000012	#	(18)
+MD n=Mem ra=0x0000000000002048 d=0x00000013	#	(19)
+MD n=Mem ra=0x000000000000204c d=0x00000014	#	(20)
+MD n=Mem ra=0x0000000000002050 d=0x00000015	#	(21)

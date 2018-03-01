@@ -1,0 +1,91 @@
+//
+// Make sure that we handle the case where a variable is assigned a constant
+// initially, then re-assigned a value within a conditional.  When that
+// conditional exits, we should consider the variable to be dirty.  In this
+// case, we check it by checking to make sure that we consider the helper y() to
+// be used.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      x(1);
+    };
+  }
+
+  void x(int x)
+  {
+    int z = 0;
+
+    if (x == 1) {
+      z = 1;
+      foo();
+    }
+
+    if (z == 1) {
+      bar();
+    }
+  }
+
+  void foo() {}
+
+  void bar() {}
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

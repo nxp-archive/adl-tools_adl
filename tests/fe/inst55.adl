@@ -1,0 +1,45 @@
+//
+// Test nested instruction fields
+//
+
+ define (arch=minippc) {
+
+ define (reg = REG1) {
+   attrs = (cia,nia);
+ }
+
+ blk = (agu,dalu);
+
+ define(instrfield=OPCD) {
+   bits =(0,5);
+   define(instrfield=A) {
+     bits = (4,5);
+   }
+   fields = (0,A,(1,3));	
+ }
+
+
+ define(instrfield=OPCD1) {
+   bits =(9,(10,15));
+   define(instrfield=C) {
+     bits = (2,3);
+     table = ((0,0),(1,1),(2,2),(3,3));
+   }
+   fields = (0, C(0),1,C(1));
+ }
+
+
+ define(instr=Foo) {
+   fields = (OPCD(0),OPCD1);
+   syntax = ("%i %f",OPCD1.C(0));
+   action = {
+   } ;
+  }
+
+} 
+
+ 
+
+define (core=P) {
+  archs=minippc;
+}

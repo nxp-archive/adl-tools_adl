@@ -1,0 +1,769 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use adl_config;
+use strict;
+use Cwd;
+use Data::Dumper;
+
+use vars qw($src $designs $is_external_release $jit_ok $gdb_ok );
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+my $dsrc = "$src/../../designs";
+
+#
+# IMPORTANT: Add to this list only the tests which reference models which may be
+# released as open source.
+#
+my @Tests = (
+	model_test("$designs/generic32 -trace --fep","$src/sieve.elf"),
+	model_test("$designs/generic32 -l","$src/in1_32bit.uvp",0,"in1_32bit.dat"), 	
+	model_test("$designs/generic32-cache","$src/in5.dat"), 	
+	model_test("$designs/generic32-cache $src/enable-cache.dat ","$src/in1_32bit.uvp",0,0,[ qw(IAR extra-mem field:ta) ]),
+	ext_model_test(
+		model   => "$designs/generic32-cache",
+		flags   => "-fep",
+		input   => "$src/enable-cache.dat $src/dhry.elf",
+		results => "$src/dhry.dat",
+	),
+	# Simple assembler test of Dhrystone.
+	asm_test(as => "as-g32",  of => "objdump-g32", sf => "$src/dhry_1.s",  rf => "$src/dhry_1.regress"),
+	asm_test(as => "as-g32",  of => "objdump-g32", sf => "$src/dhry_2.s",  rf => "$src/dhry_2.regress"),
+
+	# Test the use of addr2line.
+	{
+		cmd     => "/bin/true",  # Dummy command; all of the work is done in
+														 # check_addr2line.
+		checker => sub {
+			check_addr2line("objdump-g32","$src/addr1.elf","addr1.c",7,11);
+		},
+	},
+	# Test addr2line on an object file created by our assembler.  This also makes
+	# sure that the assembler can handle CFI directives.
+	{
+		cmd     => "./as-g32 $src/addr1.s -o addr1.o",
+		checker => sub {
+			check_addr2line("objdump-g32","addr1.o","addr1.c",7,11);
+		},
+	},
+
+	# System-call test:  Don't close stdin, stdout, stderr.
+	{
+		cmd     => "$designs/generic32 -sce -fep $src/syscall6.elf --no-output > syscall6.out",
+		checker => \&check_syscall6,
+	},
+
+	# Check that large reads work.
+	{
+		pre     => sub { my $fn = "hamlet.txt"; system("cp $src/$fn $fn") and die "Could not copy $fn"; },
+		cmd     => "$designs/generic32 -sce -fep $src/syscall7.elf --no-output > syscall7.out",
+		checker => \&check_syscall7,
+	},
+
+	jit_model_test($jit_ok,"$designs/generic32","$src/adpcm.dat"),
+	jit_model_test($jit_ok,"$designs/generic32","$src/des.dat"),
+	jit_model_test($jit_ok,"$designs/generic32","$src/fir.dat"),
+	jit_model_test($jit_ok,"$designs/generic32-cache","$src/in5.dat"),
+	jit_model_test($jit_ok,"$designs/generic32","$src/ucbqsort.dat"),
+	ext_model_test(
+		model   => "$designs/generic32",
+		flags   => "-of=dat -fep --elf-log-bss --decode-cache",
+		input   => "$src/compress_gcc.elf",
+		results => "$src/compress_gcc.dat",
+	),
+	ext_model_test(
+		model   => "$designs/generic32-cache",
+		flags   => "-fep --decode-cache",
+		input   => "$src/enable-cache.dat $src/dhry.elf",
+		results => "$src/dhry.dat",
+		td_flags=> "--ignore-card=CD",
+	),
+
+	# Simple test of a hello-word C program loaded via ELF.
+	{
+		cmd     => "$designs/generic32 -sce -fep $src/hello.elf --no-output",
+		stdio   => 1,
+		checker => \&check_hello,
+	},
+
+	{
+		cmd     => "$designs/generic32 -sce -fep $src/hello.hex --no-output",
+		stdio   => 1,
+		checker => \&check_hello,
+	},
+
+		);
+
+# If we're OK with gdb tests, then add them here.
+if ($gdb_ok) {
+	my @GdbTests = (
+		# Same test as above, but uses udp for communicating.
+		gdb_test(m => "$designs/generic32", i => "$src/gdbin1.elf", t => "$src/gdbtest4.gdb", prot => "udp", cfg => "$dsrc/generic32-config.tcl", mopts => "--mic=0", retries => 2),
+		# Test checks the setRegister/s with strings and variable length and also does single register
+		# writes followed by entire register set reads.
+		gdb_test(m => "$designs/generic32", i => "$src/../iss/in4.dat", t => "$src/gdbtest11.gdb", cfg => "$dsrc/generic32-config.tcl", prot => "udp"),
+		# Test of SMT debugging.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg.elf", t => "$src/gdbtest12.gdb", cfg => "$dsrc/generic32-config.tcl",
+		         mopts => "-n=2 -fep -l", prot => "udp"),		
+		# Another test of SMT debugging.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest13.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -l", prot => "udp"),		
+		# Same thing, but using the decode cache.
+		gdb_test(m => "$designs/generic32mt", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest13.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -l -decode-cache", prot => "udp"),		
+		# Same thing, but using the decode cache and the MT kernel.
+		gdb_test(m => "$designs/generic32mt", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest13.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -decode-cache -mt -l", prot => "udp"),		
+		# Test independent execution of two cores.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg3.elf", t => "$src/gdbtest14.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -mic=0 -l", gopts => "--multi-connect --num-sockets=2 --pf='procs:powerpc0=%f,procs:powerpc1=%f'", 
+						 retries => 2),		
+		# Test non-stop mode.  Simple test with stepping a thread.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg3.elf", t => "$src/gdbtest15.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -mic=0 -l"),		
+		# Test non-stop mode.  More complex test with the second thread continuing.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg3.elf", t => "$src/gdbtest16.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -mic=0 -l"),		
+		# Test all-stop mode.  The second thread should not continue executing when we step the first thread.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg3.elf", t => "$src/gdbtest17.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -mic=0 -l"),		
+		# On a breakpoint, the current thread should be updated to match whichever
+		# thread hit the breakpoint.  This appears to be what gdb wants- it gets
+		# confused if it last queried about a thread, e.g. thread 2, then a
+		# breakpoint hits on thread1.  Subsequent queries should reflect thread 1,
+		# not thread 2.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest20.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -l", prot => "udp"),		
+		# After a vKill, we should consider ourself finished and report an X00 in
+		# response to a halt-reason request (? packet).  Otherwise, gdb can segfault
+		# because it erases all of its threads, then tries to get info about a
+		# thread.  We also reset ourself to thread 1, since when we restart with a
+		# vRun command, gdb expects to be running in thread 1 unless it specifies
+		# otherwise.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest21.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -l", prot => "udp"),		
+		# This is just like gdbtest13, but with more cores, so we can make sure that
+		# we use hex notation for thread IDs.
+		gdb_test(m => "$designs/generic32", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest22.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=12 -fep", prot => "udp"),		
+		# Make sure that using a vCont command with a step and a continue, in
+		# all-stop mode, doesn't actually do any continues (weird, I know).
+		# Otherwise, other threads will advance, and may throw off gdb, which
+		# expects only one thread to make progress.
+		gdb_test(m => "$designs/generic32mt", i => "$src/pids.dat $src/mpdbg2.elf", t => "$src/gdbtest23.gdb", cfg => "$dsrc/generic32-config.tcl", 
+		         mopts => "--syscall-enabled -n=2 -fep -l -dc", prot => "udp"),		
+			);
+  @Tests = (@Tests,@GdbTests);
+}
+
+# If we're ok with jit tests, then add them here.
+if ($jit_ok) {
+  my @JitTests = (
+				  ext_model_test(
+								 model   => "$designs/generic32",
+								 flags   => "-of=dat -fep --elf-log-bss --jit",
+								 input   => "$src/compress_gcc.elf",
+								 results => "$src/compress_gcc.dat",
+								),
+				  ext_model_test(
+								 model   => "$designs/generic32-cache",
+								 flags   => "-fep --jit",
+								 input   => "$src/enable-cache.dat $src/dhry.elf",
+								 results => "$src/dhry.dat",
+								 td_flags=> "--ignore-card=CD",
+								),
+				 );
+  @Tests = (@Tests,@JitTests);
+}
+
+#
+# IMPORTANT: Add any tests here which use models which are considered
+# proprietary/confidential.
+#
+if (! $is_external_release ) {
+  my @ProprietaryTests = (			  
+			  model_test("$designs/sc3400_arch","$src/dalu_bfu.dat"),
+			  model_test("$designs/sc3400_arch","$src/general1m.dat"),
+			  model_test("$designs/sc3400_arch","$src/highreg1.dat"),
+			  model_test("$designs/sc3400_arch","$src/highreg2.dat"),
+			  model_test("$designs/sc3400_arch","$src/highreg3.dat"),
+			  model_test("$designs/sc3400_arch","$src/highreg4.dat"),
+			  model_test("$designs/sc3400_arch","$src/hw_nested_loops.dat"),
+			  model_test("$designs/sc3400_arch","$src/mac_i_f.dat"),
+			  model_test("$designs/sc3400_arch","$src/mac.dat"),
+			  model_test("$designs/sc3400_arch","$src/macr.dat"),
+			  model_test("$designs/sc3400_arch","$src/mpy_i_f.dat"),
+			  model_test("$designs/sc3400_arch","$src/mpy_mpyr.dat"),
+			  model_test("$designs/sc3400_arch","$src/serial1.dat"),
+			  model_test("$designs/sc3400_arch","$src/serial2.dat"),
+			  model_test("$designs/sc3400_arch","$src/single_vles1.dat"),
+			  model_test("$designs/sc3400_arch","$src/single_vles2.dat"),
+			  model_test("$designs/sc3400_arch","$src/test1.dat"),
+			  model_test("$designs/sc3400_arch","$src/test2.dat"),
+			  model_test("$designs/sc3400_arch","$src/test3.dat"),
+			  model_test("$designs/sc3400_arch","$src/test4.dat"),
+			  model_test("$designs/sc3400_arch","$src/test5.dat"),
+			  model_test("$designs/sc3400_arch","$src/test6.dat"),
+			  model_test("$designs/sc3400_arch","$src/test7.dat"),
+			  model_test("$designs/sc3400_arch","$src/test8.dat"),
+			  model_test("$designs/sc3400_arch","$src/test9.dat"),
+			  model_test("$designs/sc3400_arch","$src/test10.dat"),
+			  model_test("$designs/sc3400_arch","$src/test11.dat"),
+			  model_test("$designs/sc3400_arch","$src/test14.dat"),
+			  model_test("$designs/sc3400_arch","$src/test15.dat"),
+			  model_test("$designs/sc3400_arch","$src/test16.dat"),
+			  model_test("$designs/sc3400_arch","$src/test18.dat"),
+			  ext_model_test(model      => "$designs/sc3400_arch",
+					 flags      => "-mic=10 -trace -entry-point=\"_main\"",
+					 input      => "$src/globals.elf",
+					 output     => "globals.out.dat",
+					 results    => "$src/globals.dat"),
+			  
+			  # CDCpp58457
+			  model_test("$designs/altair_r1_mt -l","$src/mt3.dat",0,0,[ qw(VPIA0 IAR AVPID0) ]),
+			  model_test("$designs/altair_r1_mt -l","$src/fp1.uvp",0,0,[ qw(VPIA0 IAR) ]),
+			  model_test("$designs/altair_r1_ut","$src/ldst.uvp",0,0,[ qw(VPIA0 IAR) ]),
+			  ext_model_test(
+					 model      => "$designs/altair_r1_mt",
+					 flags      => "-l -trace",
+					 output     => "mt1.out.uvp",
+					 results    => "$src/mt1.uvp",
+					 no_ir_lc   => 1,
+					 ignores    => [ qw(VPIA0 NIA0 AVPID0 IAR) ],
+					),
+			  model_test("$designs/altair_r1_mt -l","$src/in1_32bit_lowpower.uvp",0,0,[ qw(VPIA0 IAR extra-mem)]),
+			  model_test("$designs/altair_r1_mt -l","$src/in1_32bit_hybrid.uvp",0,0,[ qw(VPIA0 IAR extra-mem)]),
+			  {
+			   # make sure that the RES cards are properly translated.
+			   pre     => sub { uvp2dat ("$src/in1_32bit_hybrid.uvp","in1_32bit_hybrid.gen.dat"); },
+			   cmd     => "$designs/altair_r1_mt -trace in1_32bit_hybrid.gen.dat -o=in1_32bit_hybrid.out.uvp",
+			   checker => sub { check_res_cards("$src/in1_32bit_hybrid.uvp","in1_32bit_hybrid.out.uvp"); },
+			   temps   => [ "in1_32bit_hybrid.gen.dat", "in1_32bit_hybrid.out.uvp" ],
+			  },
+			  model_test("$designs/altair_r1_mt -l","$src/in1_64bit.uvp",0,"in1_64bit.dat"),
+			  model_test("$designs/altair_r1_ut $src/startup_mmu.dat","$src/fir.dat"),
+			  model_test("$designs/altair_r1_ut $src/startup_mmu.dat","$src/des.dat"),
+			  model_test("$designs/altair_r1_ut $src/startup_mmu.dat","$src/adpcm.dat"),
+			  model_test("$designs/altair_r1_ut $src/startup_mmu.dat","$src/ucbqsort.dat"),
+			  model_test("$designs/g32_tdriver","$src/adpcm.dat"),
+			  model_test("$designs/g32_tdriver","$src/ucbqsort.dat"),
+			  model_test("$designs/altair_r1_mt -l","$src/mttmr.uvp",0,0,[ qw(VPIA0 AVPID0 IAR) ]),
+			  ext_model_test(
+					 model   => "$designs/altair_r1_mt",
+					 flags   => "-l -trace -fep",
+					 input   => "$src/sieve.elf $src/startup.dat",
+					 output  => "sieve.out.dat",
+					 results => "$src/sieve.dat"),	     
+			  ext_model_test(
+					 model   => "$designs/altair_r1_ut",
+					 flags   => "-l -trace -fep --no-elf-use-fd -no-elf-pa",
+					 input   => "$src/sieve64.elf $src/startup_mmu.dat",
+					 output  => "sieve64.out.dat",
+					 results => "$src/sieve64.dat",),
+			  ext_model_test(
+					 model   => "$designs/altair_r1_ut",
+					 flags   => "-of=dat -fep --elf-log-bss",
+					 input   => "$src/compress_gcc.elf $src/startup_mmu.dat",
+					 output  => "compress_gcc.out.dat",
+					 results => "$src/compress_gcc.dat",
+					),
+			  # this tests mapping elf files to separate threads
+			  ext_model_test(
+					 model   => "$designs/altair_r1_mt",
+					 flags   => "-of=dat --elf-log-bss -elf-ea -fep -elf2node=\"$src/compress_gcc.elf:powerpc:thread0,$src/sieve.elf:powerpc:thread1\"",
+					 input   => "$src/init.dat  $src/compress_gcc.elf $src/sieve.elf",
+					 output  => "compress_gcc_sieve.out.dat",
+					 results => "$src/compress_gcc_sieve.dat",
+					),
+			  
+			  # CDCpp57506 initialized memory in elf incorrectly read as zero
+			  ext_model_test(
+					 model   => "$designs/altair_r1_mt",
+					 flags   => "--elf-log-bss -fep -mic 206 -trace --no-elf-use-fd -no-elf-pa",
+					 input   => "$src/dumb_polling.elf $src/startup_mmu1.dat",
+					 output  => "dumb_polling.out.uvp",
+					 results => "$src/dumb_polling.uvp",
+					),
+			  # test of tlb intermediate results in UVPs.
+			  model_test("$designs/altair_r1_mt -l","$src/tlbwe.uvp",0,0,[ qw(VPIA0 IAR) ]),
+			  # test the parsing/loading of an MP/MT UVP file.
+			  model_test("$designs/altair_r1_mt -n=2 -l","$src/mp1.uvp",0,0,[ qw(VPIA0 IAR) ]),
+			  round_trip_test("$designs/altair_r1_ut","$src/in2_64bit.dat"),
+			  round_trip_test("$designs/altair_r1_mt -l","$src/in3_64bit_mt.uvp"),	
+			  round_trip_test("$designs/altair_r1_mt -n=2 -l","$src/mp1.uvp"),
+			  {
+			   # make sure we don't get any trace data
+			   cmd     => "$designs/altair_r1_mt -fep $src/init2.dat $src/sieve.elf -o trace.out.dat",
+			   checker => sub { check_trace("trace.out.dat"); },
+			   temps   => [ "trace.out.dat" ],
+			  },
+			  {
+			   # check ABE nitpicks 
+			   cmd     => "$designs/altair_r1_mt -fep $src/init2.dat $src/sieve.elf -of=uvp -o sieve.out.uvp",
+			   checker => sub { check_abe("sieve.out.uvp"); },
+			   temps   => [ "sieve.out.uvp" ],
+			  },
+			  
+			  {
+			   # check for cache events specific to this test 
+			   pre     => sub { uvp2dat ("$src/cache1.uvp","cache1.gen.dat"); },
+			   cmd     => "$designs/altair_r1_mt -trace cache1.gen.dat",
+			   checker => sub { check_cache1("cache1.gen.out.dat"); },
+			   temps   => [ "cache1.gen.out.dat","cache1.gen.dat"],
+			  },
+			  {
+			   # check for mmu events specific to this test 
+			   cmd     => "$designs/altair_r1_mt -trace $src/startup.dat $src/mttmr.dat -of=uvp",
+			   checker => sub { check_mmu1("mttmr.out.uvp"); },
+			  },
+			  model_test("$designs/altair_r1_mt -l","$src/mmu3.dat",0,0,[qw(VPIA0 IAR AVPID0)]),
+			  model_test("$designs/altair_r1_mt -l","$src/mmu4.dat",0,0,[qw(VPIA0 IAR AVPID0)]),
+			  {
+			   # system-call test.
+			   pre     => sub { `cp $src/sc_in1.txt .` if ( ! -e "sc_in1.txt" ); },
+			   cmd     => "$designs/altair_r1_ut -fep -mic 30000 $src/syscall1.elf  $src/startup_mmu2.dat --no-output -sce > syscall1.out",
+			   checker => \&check_syscall1,
+				 temps   => [ "sc_out1.txt" ],
+			  },
+			  {
+			   # system-call test.
+			   pre     => sub { `cp $src/sc_in2.txt .` if ( ! -e "sc_in2.txt" ); },
+			   cmd     => "$designs/altair_r1_ut -fep $src/syscall2.elf  $src/startup_mmu2.dat -sce > syscall2.out",
+			   checker => sub { file_diff("syscall2.out","$src/syscall2.regress"); },
+			  },
+			  {
+			   # system-call test.
+			   cmd     => "$designs/altair_r1_ut -fep $src/syscall3.elf  $src/syscall3.dat -sce > syscall3.out",
+			   checker => sub { file_diff("syscall3.out","$src/syscall3.regress"); },
+			  },
+			  {
+			   # system-call test of the 'annotate' system call.
+			   cmd     => "$designs/altair_r1_ut -fep $src/syscall4.elf  $src/startup_mmu2.dat -sce -trace -o syscall4.out.dat",
+			   checker => \&check_syscall4,
+			   temps   => [ "syscall4.out.dat" ],
+			  },
+			  {
+			   # system-call test of the 'getcwd' system call.
+			   cmd     => "$designs/altair_r1_ut -fep $src/syscall5.elf  $src/startup_mmu2.dat -sce --no-output",
+			   checker => \&check_syscall5,
+				 stdio   => 1,
+			  },
+			  # tests mic with MT (if it doesn't hang, it passes)
+			  {
+			   cmd     => "$designs/altair_r1_mt  $src/init3.dat -fep -elf-ea -elf2node=pntrch01.elf:powerpc:thread0,tmp.elf:powerpc:thread1 $src/pntrch01.elf $src/tmp.elf --no-output -mic=8165",
+			   checker => sub {},
+			  },
+			  model_test("$designs/altair_r1_mt -l","$src/eip1.uvp",0,0,[qw(VPIA0 IAR AVPID0)]),
+			  # tests that if we end on an rfi, our RES card's ta will be correct.
+			  model_test("$designs/altair_r1_mt -l","$src/end_on_rfi.uvp",0,0,[qw(VPIA0 IAR CDCSR0)]),
+			  model_test("$designs/qe","$src/risc_alu_swap.dat"),
+			  model_test("$designs/qe","$src/risc_spr_mtspris.dat"),
+			  model_test("$designs/qe","$src/risc_branch_call_ia.dat"),
+			  model_test("$designs/qe","$src/risc_dram_ld.dat"),
+			  model_test("$designs/qe","$src/risc_dram_st.dat"),
+			  
+			  
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm9.s",  rf => "$src/asm9.regress"),
+			  #asm_test(as => "./as-qe",  of => "./objdump-qe", sf => "$src/asm10.s",  rf => "$src/asm10.regress", fail=>1),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm11.s",  rf => "$src/asm11.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm12.s",  rf => "$src/asm12.regress", fail=>1),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm13.s",  rf => "$src/asm13.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm14.s",  rf => "$src/asm14.regress", fail=>1),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm15.s",  rf => "$src/asm15.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm16.s",  rf => "$src/asm16.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm17.s",  rf => "$src/asm17.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm18.s",  rf => "$src/asm18.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm19.s",  rf => "$src/asm19.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm20.s",  rf => "$src/asm20.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm21.s",  rf => "$src/asm21.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm22.s",  rf => "$src/asm22.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm23.s",  rf => "$src/asm23.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm24.s",  rf => "$src/asm24.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm25.s",  rf => "$src/asm25.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm26.s",  rf => "$src/asm26.regress"),
+			  asm_test(as => "as-qe",  of => "objdump-qe", sf => "$src/asm27.s",  rf => "$src/asm27.regress"),
+			 );
+  @Tests = (@Tests,@ProprietaryTests);
+
+	if ($gdb_ok) {
+		my @GdbPropTests = (
+			  gdb_test(m => "$designs/altair_r1_ut", i => "$src/gdbin0.elf $src/startup_mmu.dat", t => "$src/gdbtest2.gdb", cfg => "$dsrc/altair64-config.tcl", retries => 2 ),
+			  # Same test as above, but uses stdio for communicating.
+			  gdb_test(m => "$designs/altair_r1_ut", i => "$src/gdbin0.elf $src/startup_mmu.dat", t => "$src/gdbtest2.gdb", cfg => "$dsrc/altair64-config.tcl", prot => "udp", retries => 2 ),
+			  # Test to make sure that shrinking registers to a smaller size works.
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/regsetup1.dat", t=> "$src/gdbtest9.gdb", cfg => "$dsrc/altair32-config.tcl", retries => 2),
+			  # Make sure that thread context swaps are detected after monitor commands.
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/startup_mmu.dat $src/gdbin1.elf", t => "$src/gdbtest10.gdb", prot=> "udp", cfg => "$dsrc/altair64-config.tcl", retries => 2),
+			  # Test checks the setRegister/s with strings and variable length and also does single register
+			  # writes followed by entire register set reads.
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/gdbin1.elf", t => "$src/a_r1_mt_reg.gdb", prot=> "udp", cfg => "$dsrc/altair64-config.tcl", retries => 2),
+			  # Test checks the thread commands 
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/startup_mmu.dat $src/gdbin1.elf", t => "$src/a_r1_mt_thread0.gdb", prot=> "udp", cfg => "$dsrc/altair64-config.tcl", retries => 2),
+			  # Test checks the monitor commands with long output.
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/startup_mmu.dat $src/gdbin1.elf", t => "$src/a_r1_monitor.gdb", cfg => "$dsrc/altair64-config.tcl", retries => 2),
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/startup_mmu.dat $src/gdbin1.elf", t => "$src/a_r1_monitor.gdb", cfg => "$dsrc/altair64-config.tcl", prot => "udp", retries => 2),
+			  # Test checks the setRegister/s with strings and variable length and also does single register
+			  # writes followed by entire register set reads.
+			  gdb_test(m => "$designs/altair_r1_ut", i => "$src/gdbin1.elf", t => "$src/a_r1_ut_reg.gdb", prot=> "udp", cfg => "$dsrc/altair64-config.tcl", retries => 2),
+			  # Test checks the thread switching functionality with T Reply packets 
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/mt_eip.uvp", t => "$src/mt_eip.gdb", prot=> "udp", mopts=>"-l", cfg => "$dsrc/altair64-config.tcl", retries => 2),
+			  # Test multi-core/multi-threading with simple register queries.
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/regsetup2.dat", mopts => "-n=2", t=> "$src/gdbtest18.gdb", cfg => "$dsrc/altair32-config.tcl", retries => 2),
+			  # Test that breakpoints work with multi-core multi-context simulations and that thread numbers are reported correctly.
+			  gdb_test(m => "$designs/altair_r1_mt", i => "$src/ctx-brkpts1.dat", mopts => "-n=2", t=> "$src/gdbtest19.gdb", cfg => "$dsrc/altair32-config.tcl", retries => 2),
+				);
+		@Tests = (@Tests,@GdbPropTests);
+	}
+}
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## </HELPERS>
+##
+
+                                                                                                                                                     
+sub check_abe {
+  my $infile = shift;
+  my $found = 0;
+  open IN,$infile or die "Could not open results file $infile";
+  while(<IN>) {
+    if (/USPRG0 /) {
+      die "Expected no register cards for USPRG0. found $_\n";
+    }
+    if (/PID\"/) {
+      die "Expected no register cards for PID. found $_\n";
+    }
+    if (/NIA\"/) {
+      die "Expected no register cards for NIA. found $_\n";
+    }
+    if (/ } \/\/ powerpc::t[0-9]/) {
+      $found++; 
+    } elsif (/ } \/\/ powerpc/) {
+      $found++;
+    }
+    if (/thread => t[0-9]/) {
+      $found++;
+    }
+    if (/altair => powerpc/) {
+      $found++;
+    }
+  }
+  if ($found != 8) {
+    die "Did not find expected beginning and ending section markers for each thread and the shared state.\n";
+  }                                                                                                                                                   
+}
+
+sub check_trace {
+
+  my $infile = shift;
+  open IN,$infile or die "Could not open results file $infile";
+  while(<IN>) {
+    if (/^[ITCRMA] /) {
+      die "Expected no tracing data, found: \n     $_\n";
+    }
+ }
+
+}
+
+
+
+sub check_cache1 (fn) {
+  my $infile = shift;
+  my $id = 0;                                                           
+  my $f = 0;                                                                                                                                              
+  open IN,$infile or die "Could not open results file $infile";
+  while(<IN>) {
+    # we expect that no EPNS in the intermediate results to be equal to zero. 
+    if (/T n=TLBCAM  EPN=(0x[0-9a-fA-F]+)/) {                                                                                                                                                               
+      my $ep = parseint($1);
+      if (!$ep) { die "There should not be any intermediate results using a translation with an epn=0.\n";}
+    }
+    
+    if (/id=([0-9]+)/) {$id= eval($1);}
+    
+    #events 1 & 2: the first ifetch should miss in the l1 and the l2 
+    if ($id == 1) {
+      if(/C n=L1d a=miss/) {
+	$f = $f + 1;  
+	dprint "1\n";
+      } elsif(/C n=L2 a=miss t=write/) {
+	$f = $f + 1;
+	dprint "2\n";
+      }
+    }
+    
+    #event3: the lmw after the lwz should hit in the l1 dcache 18 of the 19 loads
+    if ($id == 4) {
+      if (/C n=L1d a=hit/) {
+	$f = $f + 1; 
+	dprint "3\n";
+      }
+    }
+    
+    #event4: the last stb should cause an eviction  
+    if ($id == 17) {
+      if (/C n=L1d a=evict/) {
+	$f = $f + 1;
+	dprint "4\n";
+      }
+    }
+  }
+  if ($f != 21) { die "Did not find the 4 cache events: f=$f.\n";}
+}
+
+sub check_mmu1 (fn) {
+  my $infile = shift;               
+  my $tcards = 0;
+  my $global = 0;
+                                                                                                                                                                                        
+  open IN,$infile or die "Could not open results file $infile";
+  while(<IN>) {
+
+    # we expect to find exactly 15 translations w/ ep != 0, and they should all be
+    #  at the global level.
+    if (/altair => powerpc/) {
+      $global = 1;
+    }
+    if (/thread =>/) {
+      $global = 0;
+    }
+    if (($global) && (/I : T {n="TLBCAM"; t="ID"; way=[0-9]+; ep=(0x[0-9a-fA-F]+)/)) {
+      my $ep = parseint($1);
+      if ($ep) {
+	$tcards++;
+      }
+    }
+    elsif (/I : T {n=\"TLBCAM/) {
+      die "Should not find any initial tcards that aren't at the global (shared) level.\n";
+    }
+  }
+  if ($tcards != 15) {
+    die "Should have found 15 initial tcards at the global (shared) level, with ep != 0\n";
+  }
+}
+
+sub check_res_cards {
+  my ($exp,$fnd) = @_;
+
+  open my $efile,"$exp" or die "Could not open expects file $exp";
+  open my $ffile,"$fnd" or die "Could not open found file $fnd";
+
+  my $getResCards = sub {
+	my ($in,$list) = @_;
+
+	while (<$in>) {
+	  if ( /R : RES/ ) {
+		/ea=(0x[a-zA-Z0-9]+);\s+ra=(0x[a-zA-Z0-9]+);/;
+		my $ea = parseint($1);
+		my $ra = parseint($2);
+		push @{$list},{ ea => $ea, ra => $ra };
+	  }
+	}
+  };
+
+  my (@eres,@fres);
+
+  &$getResCards($efile,\@eres);
+  &$getResCards($ffile,\@fres);
+
+  #print "Expected res cards:  ",Dumper(\@eres),"\n";
+  #print "Found res cards:  ",Dumper(\@fres),"\n";
+
+  for (0..$#eres) {
+	my ($exp_ea,$exp_ra) = ($eres[$_]->{ea},$eres[$_]->{ra});
+	my ($fnd_ea,$fnd_ra) = ($fres[$_]->{ea},$fres[$_]->{ra});
+
+	
+	#printf "Comparing %s to %s\n",printhex($exp_ea),printhex($fnd_ea);
+	if ( $exp_ea != $fnd_ea) {
+	  printf "EA mismatch for RES card $_:  Expected %s, found %s",printhex($exp_ea),printhex($fnd_ea);
+	  die;
+	}
+	if ( $exp_ra != $fnd_ra) {
+	  printf "RA mismatch for RES card $_:  Expected %s, found %s",printhex($exp_ra),printhex($fnd_ra);
+	  die;
+	}
+  }
+
+}
+
+
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+sub check_syscall6 {
+	
+	file_diff("syscall6.out","$src/syscall6.regress");
+}
+
+sub check_syscall7 {
+	
+	file_diff("syscall7.out","$src/syscall7.regress");
+}
+
+sub check_syscall5 {
+	my $r = (shift =~ /cwd:\s+(\S+)/)[0];
+	#print "Resulting cwd:  $r\n";
+
+	my $elast = (split /\//,getcwd())[-1];
+
+	my @p = split /\//,$r;
+	my $last = pop @p;
+	if ( $last ne $elast ) {
+		print "Expected last element of cwd to be '$elast' but got '$last'.\n";
+		die;
+	}
+}
+
+sub check_syscall4 {
+
+  my $fn = "syscall4.out.dat";
+
+  open DAT,$fn or die "Could not open file $fn\n";
+
+  my $found = 0;
+  while (<DAT>) {
+	if ( /^A\s+l=(\d+)\s+m=\"([^\"]+)\"/ ) {
+	  my ($level,$msg) = ($1,$2);
+	  dprint "Level  :  $level\n";
+	  dprint "Message:  $msg\n";
+	  if ($level != 2) {
+		die "Expected to find a level-2 message.\n";
+	  }
+	  if ($msg ne "This is a test of the annotate function:  100") {
+		die "Did not find expected annotation message value.\n";
+	  }
+	  $found++;
+	}
+  }
+  close DAT;
+
+  if (!$found) {
+	die "Did not find an annotation card.\n";
+  }
+  
+}
+
+sub check_syscall1 {
+	
+	file_diff("syscall1.out","$src/syscall1.regress");
+
+	my $of = "sc_out1.txt";
+	if ( ! -e $of) {
+		print "Expected file $of to exist, but it doesn't.\n";
+		die;
+	}
+
+	open IN,$of;
+	my $d = <IN>;
+	if ( $d !~ /Some written data/ ) {
+		print "Did not find expected data in file $of\n";
+		die;
+	}
+	close IN;
+}
+
+sub check_hello {
+	
+	if ($_[0] !~ /^Hello, the results are 20 and 30\./g) {
+		die "Did not find expected hello message.";
+	}
+
+}
+
+# This is a little complicated to make it somewhat robust.  We first disassemble
+# the input file in order to get the addresses for main().  Then we call
+# addr2line on each of those addresses to make sure that we cover all lines in
+# the input C file.
+sub check_addr2line {
+
+	my ($objdump,$fn,$cfn,$estart,$estop) = @_;
+
+	my $pfx = ($sepdirs) ? ".." : ".";
+
+	my @dl = split /\n/,`$pfx/$objdump -gdx $fn`;
+
+	# First, get the disassembly dump from the ELF, in order to extract an address
+	# range for main.
+	my @addrs;
+	my ($main_done,$in_main,$got_cfi) = (0,0,0);
+	for (@dl) {
+		$got_cfi = 1 if ( /DW_CFA/ );
+		if (!$main_done) {
+			if ( /<main>:/ ) {
+				$in_main = 1;
+			} elsif ($in_main) {
+				if (/halt/ || $_ eq "") {
+					$main_done = 1;
+				} elsif (/^\s*([0-8a-f]+):/) {
+					push @addrs,$1;
+					#print "main:  $1\n";
+				}
+			}
+		}
+	}
+
+	#print "Extracted addresses:  @addrs\n";
+
+	if (!$got_cfi) {
+		die "Did not find any CFI directives in the output.\n";
+	}
+
+	if (!@addrs) {
+		die "Could not extract addresses from disassembly dump.\n";
+	}
+
+	my %lines;
+	# Now iterate over all addresses, calling addr2line.  We should see that it
+	# refers to our file and that it has a numerical line number.
+	for my $a (@addrs) {
+		my $aout = `../addr2line-g32 -e $fn $a`;
+		if ( $aout =~ /^([^:]+):(.*)$/ ) {
+			my ($file,$line) = ($1,$2);
+			#print "a2l:  $file:$line\n";
+			if ($line !~ /\d+/) {
+				die "Bad line number extracted from $fn:$a:  $line";
+			}
+			if ($file !~ /$cfn$/ ) {
+				die "Bad file name extracted from $fn:$a:  $file";
+			}
+			$lines{$line} = 1;
+		} else {
+			die "Bad addr2line output:  $aout\n";
+		}
+	}
+
+	# Now make sure that we got all lines that we expected.
+	for my $i ($estart..$estop) {
+		if (!exists $lines{$i}) {
+			die "No information found for line $i from addr2line data.\n";
+		}
+	}
+}
+
+##
+## </TESTS>
+##

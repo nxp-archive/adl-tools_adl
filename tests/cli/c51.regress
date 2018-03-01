@@ -1,0 +1,17 @@
+Start of function main at 0x1000032c
+Start of function a1 at 0x10000274
+Start of function b1 at 0x10000204
+Start of function b2 at 0x10000220
+Start of function a2 at 0x100002a8
+Start of function c1 at 0x1000023c
+Start of function c1 at 0x1000023c
+Start of function c1 at 0x1000023c
+Start of function c1 at 0x1000023c
+Start of function c1 at 0x1000023c
+Start of function c2 at 0x10000258
+Start of function c2 at 0x10000258
+Start of function c2 at 0x10000258
+Start of function exit at 0x10000364
+Simulation halted at address: 0x0000000010000374
+
+Instructions executed: 193

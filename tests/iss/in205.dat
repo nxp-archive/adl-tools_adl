@@ -1,0 +1,76 @@
+#
+= asm
+
+	mfspr r1,302
+	addi r1,r1,1
+	mtspr 302,r1
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C2E4AA6	#	mfspr r1,302
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x7C2E4BA6	#	mtspr 302,r1
+# </GEN>
+
+RD n=DEC d=10
+
+TRACE
+
+I ea=0x0 id=1
+R n=BCCNT d=0x00000001
+R n=FCNT d=0x00000001
+R n=DEC d=0x00000009
+R n=NIA d=0x00000004
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c2e4aa6
+INSTR op=0x7c2e4aa6                                     asm="mfspr 1,0x12e"
+ITIME t=0
+R n=PCCNT d=0x00000001
+R n=ICNT d=0x00000001
+R n=GPR i=1 d=0x00000009
+CTIME t=0
+
+I ea=0x4 id=2
+R n=BCCNT d=0x00000002
+R n=FCNT d=0x00000002
+R n=DEC d=0x00000008
+R n=NIA d=0x00000008
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001                                     asm="addi 1,1,0x0001"
+ITIME t=0
+R n=PCCNT d=0x00000002
+R n=ICNT d=0x00000002
+R n=GPR i=1 d=0x0000000a
+CTIME t=0
+
+I ea=0x8 id=3
+R n=BCCNT d=0x00000003
+R n=FCNT d=0x00000003
+R n=DEC d=0x00000007
+R n=NIA d=0x0000000c
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c2e4ba6
+INSTR op=0x7c2e4ba6                                     asm="mtspr 1,0x12e"
+ITIME t=0
+R n=PCCNT d=0x00000003
+R n=ICNT d=0x00000003
+R n=DEC d=0x0000000a
+CTIME t=0
+
+I ea=0xc id=4
+R n=BCCNT d=0x00000004
+R n=FCNT d=0x00000004
+R n=DEC d=0x00000009
+R n=NIA d=0x00000010
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=0
+R n=PCCNT d=0x00000004
+R n=ICNT d=0x00000004
+CTIME t=0
+
+
+RESULTS
+
+RD n=DEC d=0x00000009

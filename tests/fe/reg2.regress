@@ -1,0 +1,50 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "gprs"
+  Size:  32
+  Width:  32
+  Attributes:  foo stuff
+  -------------------------------
+  Name:  "sprs"
+  Size:  1024
+  Contained registers:
+    20:  a
+    21:  b
+    22:  c
+    50:  d
+  Width:  32
+  Attributes:  foo
+  -------------------------------
+Registers:
+  Name:  "a"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia foo
+  Documention:
+
+ This is a sample register!. 
+  -------------------------------
+  Name:  "b"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "c"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "d"
+  Usage:  read, written
+  Width:  32
+  Attributes:  stuff
+  -------------------------------
+Current-instruction-address register:  a
+Next-instruction-address register:  a
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

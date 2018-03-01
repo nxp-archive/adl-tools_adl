@@ -1,0 +1,11 @@
+in28.uadl:7: warning: Core powerpc is not defined by ADL, using core P instead.
+in28.uadl:112: warning: Instruction defined in class 'cacheNop' but not ADL:  icbi
+in28.uadl:86: Multiple first-level data memories/caches:  L1d (current 1st) vs. Mem
+in28.uadl:86: Multiple first-level instruction memories/caches:  L1i (current 1st) vs. Mem
+in28.uadl:97: Multiple first-level data memories/caches:  L1d (current 1st) vs. Mem
+in28.uadl:97: Multiple first-level instruction memories/caches:  L1i (current 1st) vs. Mem
+in28.uadl:97: Multiple first-level data memories/caches:  L1d (current 1st) vs. Mem
+in28.uadl:97: Multiple first-level instruction memories/caches:  L1i (current 1st) vs. Mem
+in28.uadl:98: Multiple first-level data memories/caches:  L1d (current 1st) vs. Mem
+in28.uadl:98: Multiple first-level instruction memories/caches:  L1i (current 1st) vs. Mem
+Could not parse in28.uadl

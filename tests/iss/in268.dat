@@ -1,0 +1,30 @@
+#
+# Same as in267.dat- another itlb loop.  We're just testing with mod72 since it
+# uses the low-fidelity td-counter and I want to check that this works.
+#
+= asm
+
+	addi r1,r1,1
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000ff0 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000ff4 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ff8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000ffc d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00001000 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00001004 d=0x4C000064	#	rfi
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x0
+
+# ea=0x0000 ra=0x0
+TD n=MpuCam set=0 way=0 LB=0x0 UB=0x1fff SR=0 SW=1 UR=0 UW=1 V=1
+
+RESULTS
+
+RD n=PFAULT d=10

@@ -1,0 +1,166 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// This model is only meant to demonstrate the use of the ADL language and does
+// not represent any actual Freescale product.
+//
+// THIS MODEL IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------------------------------
+//
+//  An example 32-bit Power ISA microprocessor.  This does not contain a cache
+//  or an MMU.
+//
+//---------------------------------------------------------------------------
+
+#define regSize 32
+#define defaultOffset 32
+
+#import "power.adl"
+
+define (arch = generic32) {
+
+  attrs = (graphite_conditional_mem, graphite_atomic, graphite_multi_mem_start, graphite_multi_mem_end);
+
+  //
+  // Some basic relocations for use by the assembler/disassembler.
+  //
+
+  define (reloc=RELOC_32) {
+    abbrev = "a";
+    value = 1;
+    field_width = 32;
+  }
+
+  define (reloc=RELOC_HI16) {
+    abbrev = "ha";
+    value = 6;
+    field_width = 16;
+    offset = 2;
+    right_shift = 16;
+  }
+
+  define (reloc=RELOC_LO16) {
+    abbrev = "l";
+    value = 4;
+    field_width = 16;
+    offset = 2;
+  }
+
+  define (reloc=RELOC_REL24) {
+    value = 10;
+    pcrel = true;
+    dst_mask = 0x3fffffc;
+    instrfield = LI;
+  }
+
+  //-------------------------------------------------------------------------
+  // Address masks
+  //-------------------------------------------------------------------------
+ 
+  // The effective address size is fixed.
+  define (ea_mask) {
+    value = 0xffffffff;
+  }
+                                                                                                                                                         
+  // The real-address size is fixed.
+  define (ra_mask) {
+    value = 0xffffffff;
+  }
+
+  // The mode is always 32-bit.
+ int mode (bool reg, bool addr ) {
+   return 32;
+ }  
+
+ //-------------------------------------------------------------------------
+ // The eventbus for broadcasting memory writes 
+ //-------------------------------------------------------------------------  
+ 
+  define (eventbus=rsrvbus) {
+
+    define (field=real_addr) {
+      bits = 64;
+    }
+
+    action = func (rsrvbus_t data) {
+      if (RESRV.RES == 1) {
+        var clMask = ~0x3fULL;
+        if (((RESRV.ADDR << 1) & clMask) == (data.real_addr & clMask)) {
+          RESRV.RES = 0;
+        } 
+      }
+    };
+  }
+
+ void broadcastMemWrite (addr_t ra) {
+   rsrvbus_t d;
+   d.real_addr = ra;
+   
+   // Broadcast the store on the event bus
+   rsrvbus.send(d,false /* don't signal self, since we have the reservation. */);  
+ }
+
+ //
+ // The lwarx/stwcx implementation is not fully correct, in that we only
+ // broadcast reservations on lwarx and not from other stores.  Thus, this only
+ // works correctly if a spin-lock is used exclusively by lwarx/stwcx pairs.
+ //
+ define (instr="lwarx") {
+   fields=(OPCD(31),RT,RA,RB,XO_X(20));
+   attrs = (graphite_atomic);  
+   action = {
+     var m = mode (true/*reg*/,false/*addr*/);
+     var a = (RA == 0) ? 0 : GPR(RA);
+     var EA = buildDataEA(a + GPR(RB));
+     RESRV.RES = 1;
+     var clMask = ~0x3fULL;
+     addr_t ra = dataReadTranslate(EA);
+     RESRV.ADDR = (ra & clMask) >> 1;
+     GPR(RT)(m,regSize-1) = Mem(EA,4);
+     broadcastMemWrite(ra);
+   };
+ }
+
+ defmod (instr="stwcx.") {
+   // Required so that the Graphite integration knows that this is a conditional
+   // store.  We also need to flag it as atomic.
+   attrs = (graphite_conditional_mem, graphite_atomic);  
+ }
+
+}
+
+//---------------------------------------------------------------------------
+//  An example 32-bit Power ISA processor core.
+//---------------------------------------------------------------------------
+
+define (core = powerpc) {
+  //---------------------------------------------------------------------------
+  // Helper functions
+  //---------------------------------------------------------------------------
+
+  // These BookE helper functions are stubbed out becuase z0 does not implement caches.
+  void AllocateDataCacheBlock(bits<regSize> x ) {}
+  void FlushDataCacheBlock(bits<regSize> x) {}
+  void InvalidateDataCacheBlock(bits<regSize> x) {}
+  void InvalidateInstructionCacheBlock(bits<regSize> x) {}
+  void StoreDataCacheBlock(bits<regSize> x) {}
+  void PrefetchDataCacheBlock(bits<regSize> x,bits<5> y) {}
+  void PrefetchInstructionCacheBlock(bits<regSize> x,bits<5> y) {}
+  void ZeroDataCacheBlock(bits<regSize> x) {}
+
+  archs = (power,generic32);
+  type = "generic32_0";
+}
+
+

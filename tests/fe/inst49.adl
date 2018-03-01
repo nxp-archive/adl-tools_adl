@@ -1,0 +1,97 @@
+//
+// Simple test of syntax built from subsyntax.
+// Support for table construct 
+//
+define (arch=minippc) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  define(regfile=GPR) {
+    size = 32;
+	
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,4);
+  }
+
+  define (instrfield=ADCD) {
+    """
+    secondary opcode.
+    """;
+    bits = (5,5);
+  }
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    table = ((0,1),reserved,(2,3),reserved);
+    bits = (11,15);
+  }
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+  }
+  define (subinstr=addOp) {
+    fields=(OPCD(10));
+    syntax = ("add");
+    action = func(bits<32> RX, bits<32> a, bits<32>& res) {
+	res = RX+a;
+    };
+  }
+  define (subinstr=subOp) {
+    fields=(OPCD(11));
+    syntax = ("sub");
+    action = func(bits<32> RX, bits<32> a, bits<32>& res) {
+	res = RX-a;
+    };
+  }
+
+  define (subinstr=eaRegDirect) {
+    fields=(ADCD(1));
+    syntax = ("");
+    action =  func(bits<32> Rn, bits<32>& res) {
+	res = Rn;
+    };
+  }
+
+  define (subinstr=eaRegIndirect) {
+    fields=(ADCD(0));
+    syntax = ("i");
+    action =  func(bits<32> Rn, bits<32>& res) {
+	res = Mem(Rn,4);
+	Rn = Rn+1;
+
+    };
+  }
+
+  define (instr=aritOp) {
+    fields=(theOp,theEa,RA,RS);
+    syntax = ("%f %f %f %f",theOp,theEa,RA,RS);
+    define (subinstrs=theOp) {
+      subs = (addOp,subOp);
+    }	
+    define (subinstrs=theEa) {
+      subs = (eaRegDirect,eaRegIndirect);
+    }
+    names=(add,addi,reserved,subi);	
+    action = {
+      bits<32> addr;
+      theEa(RS,addr);
+      bits<32> res;
+      theOp(RA,addr,res);
+      GPR(RA.uint32()) = res;
+    };
+  }
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{05CA59DE-8379-42FA-8660-B8F783AB02AA}</ProjectGuid>
+    <RootNamespace>libiberty</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">libiberty\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">libiberty\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\binutils-adl\libiberty;$(SolutionDir)\external\binutils-adl\include;$(SolutionDir)\external\binutils-adl\win-build\libiberty;$(SolutionDir)\external\binutils-adl\win-headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4267;4244;4800;4101;4102;4715;4312;4355;4311;4312;4996;4099;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\binutils-adl\libiberty;$(SolutionDir)\external\binutils-adl\include;$(SolutionDir)\external\binutils-adl\win-build\libiberty;$(SolutionDir)\external\binutils-adl\win-headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="external\binutils-adl\libiberty\alloca.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\argv.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\asprintf.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\bcmp.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\bcopy.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\bzero.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\choose-temp.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\concat.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\cp-demangle.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\cp-demint.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\cplus-dem.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\dwarfnames.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\dyn-string.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\fdmatch.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\ffs.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\fibheap.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\filename_cmp.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\floatformat.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\fnmatch.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\fopen_unlocked.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\getopt.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\getopt1.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\getpwd.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\getruntime.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\hashtab.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\hex.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\lbasename.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\lrealpath.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\make-relative-prefix.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\make-temp-file.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\md5.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\mempcpy.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\mkstemps.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\objalloc.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\obstack.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\partition.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\pex-common.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\pex-one.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\pex-win32.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\pexecute.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\physmem.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\random.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\regex.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\rindex.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\safe-ctype.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\setenv.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\sigsetmask.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\snprintf.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\sort.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\spaces.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\splay-tree.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\stpncpy.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\strcasecmp.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\strerror.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\strncasecmp.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\strndup.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\strsignal.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\strverscmp.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\unlink-if-ordinary.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\vasprintf.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\vfork.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\waitpid.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xatexit.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xexit.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xmalloc.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xmemdup.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xstrdup.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xstrerror.c" />
+    <ClCompile Include="external\binutils-adl\libiberty\xstrndup.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="external\binutils-adl\win-build\libiberty\config.h" />
+    <ClInclude Include="external\binutils-adl\libiberty\cp-demangle.h" />
+    <ClInclude Include="external\binutils-adl\libiberty\pex-common.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

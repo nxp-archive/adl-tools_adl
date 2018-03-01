@@ -1,0 +1,619 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+ 
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use adl_config;
+use strict;
+use Data::Dumper;
+use File::Basename;
+use vars qw($src $designs $is_external_release $jit_ok );
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+my $cli     = "$designs/altair_r1_mt --cli";
+my $non_cli = "$designs/altair_r1_mt";
+my $iss     = "$root/tests/iss";
+my $s_iss   = "$src/../iss";
+
+#
+# IMPORTANT: Add to this list only the tests which reference models which may be
+# released as open source.
+#
+my @Tests = ( 
+	diff_test(cmd => "$iss/mod1 --script-arg=foo --script-arg=bar", in => "$s_iss/in4.dat", script => "$src/c20.cli"),
+	diff_test(cmd => "$iss/mod1", stderr => 1, fail => 1, script => "$src/c23.cli", start => "Finished initialization."),
+	diff_test(cmd => "$iss/mod1", eval => [ "set foo 20", "set bar 50", ], config => "$src/c24.cli", script => "$src/c24.cli"),
+	diff_test(cmd => "$iss/mod1", in => "$s_iss/in4.dat", script => "$src/c25.cli"),
+	ext_model_test(
+		model   => "$iss/mod1",
+		flags   => "-trace --script=$src/c26.cli",
+		results => "$src/../iss/in18.dat",
+	),
+	diff_test(cmd => "$iss/mod1", in => "$s_iss/in2.dat", script => "$src/c29.cli"),
+	diff_test(cmd => "$iss/mod1", in => "$s_iss/in4.dat", script => "$src/c30.cli"),
+	diff_test(cmd => "$iss/mod1 -n=2",                    script => "$src/c44.cli"),
+	diff_test(cmd => "$iss/mod1", in => "$s_iss/in4.dat", script => "$src/c45.cli"),
+	diff_test(cmd => "$iss/mod1", in => "$s_iss/in2.dat", script => "$src/c36.cli"),
+	diff_test(cmd => "$iss/mod1",                         script => "$src/c42.cli"),
+	diff_test(cmd => "$iss/mod1",                 in => "$src/in8.dat",   script => "$src/c50.cli"),
+	diff_test(cmd => "$iss/mod1 --script-arg=dc", in => "$src/in8.dat",   script => "$src/c50.cli"),
+	diff_test(cmd => "$iss/mod1",                                         script => "$src/c51.cli"),
+	diff_test(cmd => "$iss/mod1 --script-arg=dc",                         script => "$src/c51.cli"),
+	{
+		cmd     => "$iss/mod1 --script=$src/c53.cli",
+		checker => sub {
+			check_results("$src/c53.dat","c53.out.dat",0,0,0,[],"--check-all-card=B");
+		},
+		temps   => [ "c53.out.dat" ],
+	},
+	{
+		cmd     => "$iss/mod1 --script=$src/c53.cli -dc --dc-hot-count=0",
+		checker => sub {
+			check_results("$src/c53.dat","c53.out.dat",0,0,0,[],"--check-all-card=B");
+		},
+		temps   => [ "c53.out.dat" ],
+	},
+	diff_test(cmd => "$iss/mod1",                        stdin => "$src/c54.cli"),
+
+	# Checks to make sure that breakpoints are triggered in an MT simulation and
+	# that they'll stop another core that's still running.
+	{
+		cmd     => "$iss/mod84 -n=2 --script=$src/c52.cli --mic=0 -mt -mft",
+		checker => \&check_c52,
+		stdio   => 1,
+		temps   => [ "mtbrkpt1_0.out.dat", "mtbrkpt1_1.out.dat" ],
+	},
+	{
+		cmd     => "$iss/mod84 -n=2 --script=$src/c52.cli --mic=0 -mt -mft -dc",
+		checker => \&check_c52,
+		stdio   => 1,
+		temps   => [ "mtbrkpt1_0.out.dat", "mtbrkpt1_1.out.dat" ],
+	},
+
+	diff_test(cmd => "$iss/mod3",                         script => "$src/c28.cli"),
+	{
+		cmd     => "$iss/mod3 -trace --script=$src/c37.cli $src/level_excepts.dat",
+		checker => sub { check_results("$src/level_excepts.dat","level_excepts.out.dat"); },
+		temps   => [ "level_excepts.out.dat" ],
+		stdio   => 1,
+		diff    => "$src/c37.regress",
+	},
+	ext_model_test(
+		model   => "$iss/mod3",
+		flags   => "-trace --script=$src/c46.cli",
+		results => "$src/in6.dat",
+	),
+	diff_test(cmd => "$iss/mod11", script => "$src/c27.cli"),
+	diff_test(cmd => "$iss/mod11", in => "$s_iss/in28.dat", script => "$src/c31.cli"),
+	ext_model_test(
+		model   => "$iss/mod11",
+		flags   => "-trace --script=$src/c38.cli",
+		results => "$src/in3.dat",
+	),
+	ext_model_test(
+		model   => "$iss/mod11",
+		flags   => "-trace $src/in5.dat --script=$src/c40.cli",
+		results => "$src/in5.dat",
+	),
+	diff_test(cmd => "$iss/mod18", in => "$s_iss/in104.dat", script => "$src/c32.cli"),
+	diff_test(cmd => "$iss/mod34", in => "$s_iss/in78.dat", script => "$src/c34.cli"),
+	diff_test(cmd => "$iss/mod31", in => "$s_iss/in65.dat", script => "$src/c35.cli"),
+	diff_test(cmd => "$designs/generic32 --fep", in =>"$src/hello.elf", script =>"$src/termio.cli"),
+	ext_model_test(
+		model   => "$iss/mod13",
+		flags   => "--script=$src/c47.cli",
+		input   => " ",
+		results => "$src/adds.dat",
+	),
+	ext_model_test(
+		model   => "$iss/mod13",
+		flags   => "--script=$src/c49.cli",
+		input   => "$src/in7.dat",
+		results => "$src/in7.uvp",
+	),
+	diff_test(cmd => "$iss/mod72", in => "$src/c55.dat", script => "$src/c55.cli")
+		);
+
+# JIT-specific tests.
+if ($jit_ok) {
+  push @Tests,(
+		diff_test(cmd => "$iss/mod1 --no-jit-mt", script => "$src/c39.cli"),
+		diff_test(cmd => "$iss/mod1",             script => "$src/c39.cli"),
+		diff_test(cmd => "$iss/mod1 --script-arg=jit",in => "$src/in8.dat",   script => "$src/c50.cli"),
+		diff_test(cmd => "$iss/mod1 --script-arg=jit",                        script => "$src/c51.cli"),
+	      );
+}
+
+#
+# IMPORTANT: Add any tests here which use models which are considered
+# proprietary/confidential.
+#
+if (! $is_external_release ) {
+  my @ProprietaryTests = (
+		cli_test   (cmd => $cli, in => "$src/in1.dat",   script => "$src/c1.cli", ns => 1, use_redir => 1),
+		cli_test   (cmd => $cli, in => "$src/in2.dat",   script => "$src/c2.cli", ns => 3),
+		filter_test(cmd => $cli, in => "$src/in2.dat",   script => "$src/c5.cli", excl => "D:C",req => "I:M:R"),
+		cli_test   (cmd => $cli, script => "$src/c6.cli", ns => 1, base => "setpc_sieve",extra_in => "$src/startup_mmu.dat"),
+		# this tests feeding the iss (via the cli)  multiple elf input files and using the load mechanism to map them into separate address spaces
+		cli_test   (cmd => $cli, in => "-of=dat --elf-log-bss -elf-ea -elf2node=\"$src/../designs/compress_gcc.elf:powerpc:thread0,$src/../designs/sieve.elf:powerpc:thread1\" $src/../designs/init.dat  $src/../designs/compress_gcc.elf $src/../designs/sieve.elf", script => "$src/c4.cli", base => "in4",ext=> "dat"), 
+		cli_test   (cmd => $cli, in => "$src/in1.dat",   script => "$src/c7.cli", ns => 1),
+		# this test will be for CDCpp55187
+		cli_test   (cmd => $cli, in => "$src/eip_torture_sp.gen.dat", script => "$src/c8.cli", ns => 1), 
+		{
+			checker => \&check_sieve2,
+			cmd     => "$cli $src/startup_mmu.dat < $src/c9.cli",
+			temps   => [ "sieve2_slice.dat", "sieve2_slice.out.dat" ],
+		},
+		{
+			cmd     => "$cli $src/startup_mmu.dat --script $src/c10.cli",
+			stdio   => 1,
+			diff    => "$src/c10.regress",
+		},               
+		#{
+		# cmd     => "$cli $src/startup_mmu.dat < $src/c11.cli > c11.out 2>&1",
+		#  checker => \&check_c11,
+		#  temps   => [ "c11.out" ],
+		# },               
+		{
+			cmd     => "$cli $src/startup_mmu.dat < $src/c12.cli",
+			checker => sub {
+				check_results("$src/in1_slice1.dat","in1_slice1.out.dat");
+				check_results("$src/in1_slice2.dat","in1_slice2.out.dat");
+			},
+			temps   => [ "in1_slice1.out.dat", "in1_slice2.out.dat" ],
+		},               
+		cli_test   (cmd => $cli, in => "$src/sieve.elf", script => "$src/c13.cli", ns => 3,extra_in => "$src/startup_mmu.dat"),
+		cli_test   (cmd => $cli, in => "$src/sieve.elf", script => "$src/c14.cli", ns => 3,extra_in => "$src/startup_mmu.dat"),
+		{	# CDCpp56870 
+			cmd     => "$cli -fep $src/startup_mmu.dat $src/sieve.elf --script=$src/c18.cli > c18.out 2>&1",
+			checker => sub { file_diff("c18.out","$src/c18.regress") },
+			temps   => [ "c18.out","new.uvp" ],
+		},
+
+		# CDCpp55187
+		cli_test (cmd => $cli, in => "$src/tswitch.gen.dat", script => "$src/c17.cli", ns => 1),
+		{
+			cmd     => "$cli $src/pntr_pntr.dat -v --script=$src/c16.cli > c16.out 2>&1",
+			checker => sub {
+				check_breakpoints("$src/c16.regress","c16.out");
+			},
+			temps   => [ "c16.out" ],
+		},
+		# CDCpp56612 thread context is updated correctly before querying for state
+		{	
+			cmd     => "$cli $src/mt_eip.uvp -v -l --script=$src/mt_eip.cli > mt_eip.out 2>&1",
+			checker => sub {
+				file_diff("mt_eip.out","$src/mt_eip.regress");
+			},
+			temps   => [ "mt_eip.out" ],
+		},
+		# This uses a TCL for-loop to make sure that we actually support TCL.
+		cli_test   (cmd => $cli, in => "$src/in2.dat", script => "$src/c19.cli", ns => 3, base => "c19"),
+		{
+			cmd     => "$cli $src/eip_torture_sp.gen.dat --script=$src/c22.cli",
+			stdio   => 1,
+			diff    => "$src/c22.regress",
+		},
+		diff_test(cmd => "$designs/sc3400_arch", in => "$src/../designs/highreg4.in.dat", script => "$src/c33.cli"),
+		# Check an MP test w/64-bit ELF files.
+		{
+			cmd     => "$cli -n 2 --script=$src/c43.cli",
+			checker => sub {
+				check_results("$src/setup-count64.dat","count64.out.dat");
+			},
+			temps   => [ "count64.out.dat" ],
+		},
+		{
+			cmd     => "$designs/altair_r1_ut --script=$src/c48.cli",
+			checker => sub { check_results("$src/../designs/sieve64.dat","sieve64.out.dat"); },
+			temps   => [ "sieve64.out.dat" ],
+		},
+			);
+  
+  @Tests = (@Tests,@ProprietaryTests);
+
+}
+
+
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+## </HELPERS>
+
+sub strip_input_and_compare {
+  my ($in,$exp,$prompt) = @_;
+  
+  my $tmp = "$in.out";
+  
+  my $record = 0;
+  open OUT,">$tmp" or die "Could not open $tmp for writing.";
+  open IN,$in or die "Could not open $in";
+  while (<IN>) {
+    chomp;
+    if ( /^$prompt/ ) {
+      $record = 1;
+      next;
+    }
+    next if (!$record);
+    next if ( length($_) == 0 );
+    print OUT "$_\n";
+  }
+  close IN;
+  close OUT;
+  
+  file_diff($tmp,$exp);
+  unlink $in unless $keepoutput;
+}
+
+# Generate a filter test.
+# Argument passing is by-name.
+# cmd   :  Command to execute.
+# in    :  Input file
+# script:  CLI command script
+# excl  :  Optional:  List of card types (string of colon delimited items) that should *not* be in the testcase.
+# req   :  Optional:  List of card types (string of colon delimited items) that *should* be in the testcase.
+sub filter_test {
+  my %args = @_;
+  my ($cli,$infile,$cmd_script,$ex,$req) = @_;
+  
+  my @exlist = split ':',$args{excl};
+  my %exhash;
+  @exhash{@exlist} = 1 x @exlist;
+  
+  my @reqlist = split ':',$args{req};
+  my %reqhash;
+  @reqhash{@reqlist} = 0 x @reqlist;
+  
+  my $cmd = "$args{cmd} $args{in} --script=$args{script}";
+  
+  my ($base,$path,$type) = fileparse($args{in},qr/\.(uvp|dat|elf)/);
+  my $outfile = "$base.out.dat";
+  
+  return {
+          cmd => "$cmd",
+          checker => sub { 
+	    open IN,$outfile or die "Could not open $outfile";
+	    my $lc = 0;
+	    while (<IN>) {
+	      ++$lc;
+	      next if (!/^\s*(\S+)(.*)/);
+	      my $type = $1;
+	      if (keys %exhash) {
+		if ($exhash{$type}) {
+		  print "$outfile:$lc:  Found a card of type '$type', which should not be there due to filtering.\n";
+		  die;
+		}
+	      }
+	      if (keys %reqhash) {
+		$reqhash{$type}++;
+	      }
+	    }
+	    close IN;
+	    my $fail = 0;
+	    for (keys(%reqhash)) {
+	      if (!$reqhash{$_}) {
+		print "$outfile:  Did not find any instances of type '$_'.\n";
+		++$fail;
+	      }
+	    }
+	    die if $fail;
+	  },
+          temps => [$outfile],
+         };
+}
+
+
+# To use this test, create an elf or dat to be loaded into the cli (infile), a cmd script, and
+# for every slice, create a golden regress file named: regress_<testname>_slice<n>.uvp.  
+# Argument passing is by-name:
+# cmd      : Command to execute.
+# in       : Input file
+# script   : CLI command script
+# ns       : Number of slices.
+# pre      : A pre-test setup function, if needed.
+# extra_in : Extra input files.
+# use_redir: If 1, then we'll use input redirection (<), otherwise we'll use the --script option
+#            for specifying the command file.
+sub cli_test {
+  my %args = @_;
+  my $cmd;
+  
+  my $num_slices = $args{ns};
+  $num_slices = 1 if (!$num_slices);
+  
+  my ($base,$path,$type,$cmp);
+  if ($args{in}) {
+    ($base,$path,$type) = fileparse($args{in},qr/\.(uvp|dat|elf)/);
+  }
+  if ($args{base}) {
+    $base = $args{base};
+  }
+  if ($args{extra_in}) {
+    $cmd = "$args{cmd} $args{extra_in} $args{in}";
+  } else {
+    $cmd = "$args{cmd} $args{in}";
+  }
+
+  $cmd .= " --no-output ";
+
+  if ($args{use_redir}) {
+    $cmd .= " < $args{script}";
+  } else {
+    $cmd .= " --script=$args{script}";
+  }
+
+  if ($args{cmp}) {
+    $cmp = $args{cmp}
+  } else {
+    $cmp = \&check_results;
+  }
+
+  my $ext = "uvp";
+  if ($args{ext}) { 
+    $ext = $args{ext};
+  }
+  
+  return {
+          cmd => "$cmd",
+          checker => sub { 
+	    for my $i (1..$num_slices) {
+	      &$cmp("$src/regress_$base" . "_slice$i.$ext","$base" . "_slice$i.$ext"); 
+	    }
+	  },
+          temps => [$base."_slice*.$ext"],
+	  pre => $args{pre},
+         };
+  
+}
+
+# Run a CLI script with optional input and compare standard-out against a golden file.
+# Argument passing is by-name:
+# cmd   : Command to execute.
+# in    : Input file (optional)
+# script: TCL script to execute.
+# config: TCL script to run as a config script (optional).
+# stdin : Redirect the specified file, via standard-in, to the interactive interpreter.
+# stderr: If true, then record standard-error as well (optional).
+# fail  : If true, then the test should fail (optional).
+# eval  : List of strings to be passed as eval arguments (optional).
+# start:   If defined, regular expression to match to start checking.
+# stop:    If defined, regular expression to match to stop checking.
+sub diff_test {
+  my %args =  @_;
+  my $cmd;
+
+  my ($base,$path,$type); 
+
+	$cmd = "$args{cmd} $args{in} --no-output";
+
+	if ($args{script}) {
+		($base,$path,$type) = fileparse($args{script},qr/\.(cli)/);
+	  $cmd .= " --script=$args{script}";
+	}
+
+  if ($args{config}) {
+    $cmd .= " --config=$args{config}";
+  }
+
+  my ($start,$stop) = ($args{start},$args{stop});
+  
+
+  if ($args{eval}) {
+    for (@{$args{eval}}) {
+      $cmd .= " --eval=\"$_\"";
+    }
+  }
+
+	if ($args{stdin}) {
+		($base,$path,$type) = fileparse($args{stdin},qr/\.(cli)/);
+	  $cmd .= " --cli < $args{stdin}";
+	}
+
+  if ($start || $stop) {
+    my $tmp = "$base.out";
+    return {
+	    cmd     => $cmd,
+	    stdio   => 1,
+	    checker => sub { 
+	      open TMP,">$tmp";
+	      print TMP $_[0];
+	      close TMP;
+	      ext_file_diff(in => $tmp,exp => "$path$base.regress", 
+			    start => $start, stop => $stop);
+	    },
+	    stderr  => $args{stderr},
+	    fail    => $args{fail},
+	    temps   => [ $tmp ],
+	   };
+  } else {
+    return {
+	    cmd    => $cmd,
+	    stdio  => 1,
+	    diff   => "$path$base.regress",
+	    stderr => $args{stderr},
+	    fail   => $args{fail},
+	   };
+  }
+}
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+sub check_breakpoints {
+  my $expects = shift;
+  my $results = shift;
+  my %e;
+  my %r;
+  my $error;
+  open OUT ,$expects or die "couldn't open $expects for reading.\n";
+  while (<OUT>) {
+    if (/id=(\S+)/) {
+      $e{$1}=1;
+    }
+  }
+
+  open OUT ,$results or die "couldn't open $results for reading.\n";
+  while (<OUT>) {
+    if (/Break point hit, counter=[0-9]+ count=[0-9]+  InstrCount=([0-9]+)/) {
+      $r{$1}=1;
+    }
+  }
+  close OUT;
+
+  my $n = keys %e;
+  if ($n != 512) {
+    die "Expected 512 breakpoint addresses. Found $n\n";
+  }
+  foreach my $i (sort keys %e) {
+    if (! exists $r{$i}) {
+      print " $i found in expects but not in results.\n";
+      $error++;
+    }
+  }
+
+  foreach my $i (sort keys %r) {
+    if (! exists $e{$i}) {
+      print " $i found in results but not in expects.\n";
+      $error;
+    }
+    if ($error) {
+      die "found $error errors\n";
+    } 
+  }
+
+
+}
+
+sub check_sieve2 {
+  my ($in,$out) = ("sieve2_slice.dat","sieve2_slice.out.dat");
+  # Re-run this test on altair_r1_mt in order to re-generate the test.
+  my $cmd = "$non_cli $in -trace > /dev/null 2>&1 ";
+  print "  Cmd:  $cmd\n" if ($showcmd);
+  system ($cmd) and die "Could not run $non_cli on $in";
+
+  # Then compare the two files.
+  check_results($in,$out);
+}
+
+sub check_c11 {
+  open IN,"c11.out" or die "Could not open c11.out";
+  
+  my %expects = (
+		 none => { L1CSR0 => "0x18401",},
+		 thread0 => { GPR8 => "0x0000000012345678",},
+		 thread1 => { CR => "0x18946648",},
+		);
+  
+  my %found = ( none => { },
+	      );
+  
+  # Store the found data.
+  my $ctx = "none";
+  my $trg = $found{$ctx};
+  while (<IN>) {
+    if ( /EndContext/ ) {
+      $ctx = "none";
+    } elsif ( /Context=(\S+)/ ) {
+      my $ctx = $1;
+      if (!exists $found{$ctx}) {
+	#print "Adding context $ctx\n";
+	$found{$ctx} = {};
+      }
+      $trg = $found{$ctx};
+    } elsif ( /(\S+)=(\S+)/ ) {
+      $trg->{$1} = $2;
+    }
+  }
+  
+  if ($debug) {
+    print "Found data:  ",Dumper(\%found),"\n";
+  }
+  
+  # Now check against the expects.
+  for (keys(%expects)) {
+    my $ctx = $_;
+    my $exp = $expects{$ctx};
+    if (!$found{$_}) {
+      die "Found no data for context $_\n";
+    }
+    my $fnd = $found{$_};
+    
+    for (keys(%{$exp})) {
+      #print "$_:  $exp->{$_} and $fnd->{$_}\n";
+      my $e = $exp->{$_};
+      my $f = $fnd->{$_};
+      #print "$_:  $e and $f\n";
+      if ( $e ne $f ) {
+	print "Mismatch:  Expected $ctx:$_ = $e, but found $f\n";
+	die;
+      }
+    }
+  }
+}
+
+sub check_c52 {
+	check_results("$src/mtbrkpt1.dat","mtbrkpt1_0.out.dat");
+
+	my %expects = (
+		P0_R2 => 1000,
+		P0_R3 => 2000,
+		P0_R4 => 3000,
+		P1_R2 => "nonzero",
+		P1_R4 => 0,
+			);
+
+	my $fails = 0;
+	my @lines = split /\n/,$_[0];
+	for (@lines) {
+		if ( /(P\d+) (R\d+) is (\d+)/ ) {
+			my $key = "$1_$2";
+			my $val = $3;
+
+			my $ev = $expects{$key};
+
+			if ($ev eq "nonzero") {
+				if ($val == 0) {
+					print "Expected non-zero value for $key, found $val\n";
+					++$fails;
+				}
+			} else {
+				if ($val != $ev) {
+					print "Bad value for $key:  Expected $ev, found $val\n";
+					++$fails;
+				}
+			}
+			delete $expects{$key};
+		}
+	}
+
+	for my $k (keys %expects) {
+		print "Didn't find a value for $k => $expects{$k}\n";
+		++$fails;
+	}
+
+	die if ($fails);
+}
+
+##
+## </TESTS>
+##

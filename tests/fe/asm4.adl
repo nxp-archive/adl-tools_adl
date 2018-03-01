@@ -1,0 +1,26 @@
+// Assembler configuration test - bad grouping sep
+
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  
+  parallel_execution = 3;
+
+  define (assembler) {
+    comments = ("//","#",";");
+    line_comments =  ("#rem","#");
+    line_separators = (";","\t");
+    packet_grouping = (("[","]["),"4");
+  }
+
+
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

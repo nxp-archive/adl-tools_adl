@@ -1,0 +1,99 @@
+#
+# Tests the operation of mod73, which has an external resource.
+#
+= asm
+
+	addi r1,r1,10
+	addi r2,r2,20
+	add  r3,r1,r2
+	mullw r5,r1,r3
+	sth r0,0x1000(r0)
+	lhz r0,0x1004(r0)
+	addi r1,r1,60
+	addi r2,r2,70
+	add  r3,r1,r2
+	sth r0,0x1004(r0)	
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x38420014	#	addi r2,r2,20
+MD n=Mem ra=0x00000008 d=0x7C611214	#	add  r3,r1,r2
+MD n=Mem ra=0x0000000c d=0x7CA119D6	#	mullw r5,r1,r3
+MD n=Mem ra=0x00000010 d=0xB0001000	#	sth r0,0x1000(r0)
+MD n=Mem ra=0x00000014 d=0xA0001004	#	lhz r0,0x1004(r0)
+MD n=Mem ra=0x00000018 d=0x3821003C	#	addi r1,r1,60
+MD n=Mem ra=0x0000001c d=0x38420046	#	addi r2,r2,70
+MD n=Mem ra=0x00000020 d=0x7C611214	#	add  r3,r1,r2
+MD n=Mem ra=0x00000024 d=0xB0001004	#	sth r0,0x1004(r0)	
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+R n=GPR i=1 d=0x0000000a
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38420014
+INSTR op=0x38420014					asm="addi r2,r2,20"
+R n=GPR i=2 d=0x00000014
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c611214
+INSTR op=0x7c611214					asm="add r3,r1,r2"
+R n=GPR i=3 d=0x0000001e
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7ca119d6
+INSTR op=0x7ca119d6					asm="mullw r5,r1,r3"
+R n=GPR i=5 d=0x0000012c
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0xb0001000
+INSTR op=0xb0001000					asm="sth r0,r0,4096"
+D n=Mem t=write ea=0x1000 nb=4
+M n=Mem t=write ea=0x1000 ra=0x1000 d=0x00000004
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0xa0001004
+INSTR op=0xa0001004					asm="lhz r0,r0,4100"
+D n=Mem t=read ea=0x1004 nb=4
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000000
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x3821003c
+INSTR op=0x3821003c					asm="addi r1,r1,60"
+R n=GPR i=1 d=0x00000046
+
+I ea=0x1c id=8
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x38420046
+INSTR op=0x38420046					asm="addi r2,r2,70"
+R n=GPR i=2 d=0x0000005a
+
+I ea=0x20 id=9
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x7c611214
+INSTR op=0x7c611214					asm="add r3,r1,r2"
+R n=GPR i=3 d=0x000000a0
+
+I ea=0x24 id=10
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0xb0001004
+INSTR op=0xb0001004					asm="sth r0,r0,4100"
+D n=Mem t=write ea=0x1004 nb=4
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000003
+
+I ea=0x28 id=11
+M n=Mem t=ifetch ea=0x28 ra=0x28 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000046
+RD n=GPR i=2 d=0x0000005a
+RD n=GPR i=3 d=0x000000a0
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x0000012c

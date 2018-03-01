@@ -1,0 +1,86 @@
+#
+# External exception testing for MT models.  Relies upon an external plug-in to
+# generate external exceptions when a write occurs to SPR[101].
+#
+= asm
+
+Start1:
+	b Prog1
+	.long 0x0
+Start2:
+	b Prog2
+	.long 0x0
+
+Prog1:
+	# Run in a loop until 0x1000 is 5.
+	li r3,1
+	li r1,200
+	mtctr r1
+L1:										# Simple wait loop.
+	addi r2,r1,1
+	bdnz L1
+	mtspr 101,r3				# Generate exception on core 1.
+	lwz r2,0x1000(r0)
+	cmpwi r2,1
+	blt Prog1
+	stw r2,0x1004(r0)
+	.long 0x0
+
+Prog2:
+	addi r2,r2,1				# Infinite loop until r5 is 5.
+	cmpwi r5,5
+	blt Prog2
+	li r6,1
+	stw r6,0x1000(r0)		# A signal that we're done.
+	.long 0x0
+
+Excpt:
+	addi r5,r5,1				# Exception handler.
+	rfi
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x48000010	#	b Prog1
+MD n=Mem ra=0x00000004 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000008 d=0x48000034	#	b Prog2
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x38600001	#	li r3,1
+MD n=Mem ra=0x00000014 d=0x382000C8	#	li r1,200
+MD n=Mem ra=0x00000018 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x0000001c d=0x38410001	#	addi r2,r1,1
+MD n=Mem ra=0x00000020 d=0x4200FFFC	#	bdnz L1
+MD n=Mem ra=0x00000024 d=0x7C651BA6	#	mtspr 101,r3				# Generate exception on core 1.
+MD n=Mem ra=0x00000028 d=0x80401000	#	lwz r2,0x1000(r0)
+MD n=Mem ra=0x0000002c d=0x2C020001	#	cmpwi r2,1
+MD n=Mem ra=0x00000030 d=0x4180FFE0	#	blt Prog1
+MD n=Mem ra=0x00000034 d=0x90401004	#	stw r2,0x1004(r0)
+MD n=Mem ra=0x00000038 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000003c d=0x38420001	#	addi r2,r2,1				# Infinite loop until r5 is 5.
+MD n=Mem ra=0x00000040 d=0x2C050005	#	cmpwi r5,5
+MD n=Mem ra=0x00000044 d=0x4180FFF8	#	blt Prog2
+MD n=Mem ra=0x00000048 d=0x38C00001	#	li r6,1
+MD n=Mem ra=0x0000004c d=0x90C01000	#	stw r6,0x1000(r0)		# A signal that we're done.
+MD n=Mem ra=0x00000050 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000054 d=0x38A50001	#	addi r5,r5,1				# Exception handler.
+MD n=Mem ra=0x00000058 d=0x4C000064	#	rfi
+# </GEN>
+
+CORE n=:procs:P0
+
+RD n=NIA   d=0x0
+
+CORE n=:procs:P1
+
+RD n=NIA	 d=0x8
+RD n=IVOR4 d=0x54
+RD n=MSR   d=0x00040000
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=1
+MD n=Mem ra=0x1004 d=1

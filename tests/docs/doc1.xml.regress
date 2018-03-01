@@ -1,0 +1,3363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<data>
+<cores>
+<core name="P">
+<doc>
+<str><![CDATA[
+Example documentation string- place overview information here.
+
+]]></str>
+</doc>
+<RaMask>
+<initial>
+<str>0xffffffff</str>
+</initial>
+<constant>
+<true />
+</constant>
+</RaMask>
+<EaMask>
+<initial>
+<str>0xffffffff</str>
+</initial>
+<constant>
+<true />
+</constant>
+</EaMask>
+<regs>
+<register name="CIA">
+<doc>
+<str><![CDATA[
+Current instruction address.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<attributes>
+<attribute name="cia">
+<str></str>
+</attribute>
+</attributes>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="CR">
+<doc>
+<str><![CDATA[
+The condition register.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<fields>
+<field name="CR">
+<indexed>
+<width>
+<int>4</int>
+</width>
+<count>
+<int>8</int>
+</count>
+</indexed>
+<attributes>
+<attribute name="one">
+<str></str>
+</attribute>
+</attributes>
+</field>
+<field name="EQ">
+<doc>
+<str><![CDATA[
+Zero (EQ)- This bit is set when the result is zero.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>2</int>
+<int>2</int>
+</range>
+</bits>
+<attributes>
+<attribute name="three">
+<str></str>
+</attribute>
+</attributes>
+</field>
+<field name="FEX">
+<doc>
+<str><![CDATA[
+Floating-point enabled exception (FEX). Copy of the final state of FPSCR(FEX)
+at the completion of the instruction.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>5</int>
+<int>5</int>
+</range>
+</bits>
+</field>
+<field name="FX">
+<doc>
+<str><![CDATA[
+Floating point exception (FX). Copy of the final state of FPSCR(FX) at the
+completion of the instruction.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>4</int>
+<int>4</int>
+</range>
+</bits>
+</field>
+<field name="GT">
+<doc>
+<str><![CDATA[
+Positive (GT)- This bit is set when the result is positive (and not zero).
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>1</int>
+<int>1</int>
+</range>
+</bits>
+<attributes>
+<attribute name="two">
+<str></str>
+</attribute>
+</attributes>
+</field>
+<field name="LT">
+<doc>
+<str><![CDATA[
+Negative (LT)- This bit is set when the result is negative.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>0</int>
+<int>0</int>
+</range>
+</bits>
+</field>
+<field name="OX">
+<doc>
+<str><![CDATA[
+Floating-point overflow exception (OX). Copy of the final state of FPSCR(OX) at
+the completion of the instruction.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>7</int>
+<int>7</int>
+</range>
+</bits>
+</field>
+<field name="SO">
+<doc>
+<str><![CDATA[
+Summary overflow (SO)- This is a copy of the final state of XER(SO) at the
+completion of the instruction.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>3</int>
+<int>3</int>
+</range>
+</bits>
+</field>
+<field name="VX">
+<doc>
+<str><![CDATA[
+Floating-point invalid exception (VX). Copy of the final state of FPSCR(CX) at
+the completion of the instruction.
+
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>6</int>
+</range>
+</bits>
+</field>
+</fields>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="CTR">
+<doc>
+<str><![CDATA[
+The counter register.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+<read>
+<str><![CDATA[
+{
+    return CTR / 2 ;
+}
+]]></str>
+</read>
+<write>
+<str><![CDATA[
+{
+    CTR = x * 2 ;
+}
+]]></str>
+</write>
+</register>
+<register name="ESR">
+<doc>
+<str><![CDATA[
+Exception syndrome register.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="FOO">
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="FOO1">
+<width>
+<int>32</int>
+</width>
+<fields>
+<field name="A">
+<bits>
+<range>
+<int>0</int>
+<int>7</int>
+</range>
+</bits>
+<attributes>
+<attribute name="one">
+<str></str>
+</attribute>
+<attribute name="two">
+<str></str>
+</attribute>
+<attribute name="three">
+<str></str>
+</attribute>
+</attributes>
+</field>
+<field name="B">
+<bits>
+<range>
+<int>8</int>
+<int>15</int>
+</range>
+</bits>
+<readonly>
+<true />
+</readonly>
+</field>
+<field name="C">
+<bits>
+<range>
+<int>16</int>
+<int>23</int>
+</range>
+</bits>
+</field>
+</fields>
+<reserved_mask>
+<str>0b00000000000000000000000011111111</str>
+</reserved_mask>
+<readonly_mask>
+<str>0b00000000111111110000000000000000</str>
+</readonly_mask>
+<reset>
+<str>0xdead1100</str>
+</reset>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="FOO2">
+<width>
+<int>64</int>
+</width>
+<fields>
+<field name="X">
+<indexed>
+<width>
+<int>8</int>
+</width>
+<count>
+<int>8</int>
+</count>
+</indexed>
+</field>
+<field name="Y">
+<indexed>
+<width>
+<int>16</int>
+</width>
+<count>
+<int>4</int>
+</count>
+</indexed>
+</field>
+<field name="Z">
+<indexed>
+<width>
+<int>32</int>
+</width>
+<count>
+<int>2</int>
+</count>
+</indexed>
+</field>
+</fields>
+<reset>
+<str><![CDATA[
+{
+    FOO2 = 0xdeadbeef ;
+}
+]]></str>
+</reset>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="IVOR6">
+<doc>
+<str><![CDATA[
+Interrupt-vector offset register 6.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="IVPR">
+<doc>
+<str><![CDATA[
+Interrupt-vector prefix register.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="MSR">
+<doc>
+<str><![CDATA[
+Machine state register.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="NIA">
+<doc>
+<str><![CDATA[
+Next instruction address.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<attributes>
+<attribute name="nia">
+<str></str>
+</attribute>
+</attributes>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="SRR0">
+<doc>
+<str><![CDATA[
+Save-restore register 0.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="SRR1">
+<doc>
+<str><![CDATA[
+Save-restore register 1.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<shared>
+<int>0</int>
+</shared>
+</register>
+<register name="aFOO">
+<width>
+<int>32</int>
+</width>
+<pseudo>
+<true />
+</pseudo>
+<shared>
+<int>0</int>
+</shared>
+<read>
+<alias>
+<str>FOO</str>
+</alias>
+</read>
+<write>
+<alias>
+<str>FOO</str>
+</alias>
+</write>
+</register>
+</regs>
+<regfiles>
+<regfile name="GPR">
+<doc>
+<str><![CDATA[
+General purpose registers.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<size>
+<int>32</int>
+</size>
+<shared>
+<int>0</int>
+</shared>
+</regfile>
+<regfile name="SPR">
+<width>
+<int>32</int>
+</width>
+<size>
+<int>1024</int>
+</size>
+<shared>
+<int>0</int>
+</shared>
+<entries>
+<entry name="9">
+<syntax>
+<str>CTR</str>
+</syntax>
+<reg>
+<str>CTR</str>
+</reg>
+</entry>
+<entry name="26">
+<syntax>
+<str>SRR0</str>
+</syntax>
+<reg>
+<str>SRR0</str>
+</reg>
+</entry>
+<entry name="27">
+<syntax>
+<str>SRR1</str>
+</syntax>
+<reg>
+<str>SRR1</str>
+</reg>
+</entry>
+<entry name="30">
+<syntax>
+<str>FOO1</str>
+</syntax>
+<reg>
+<str>FOO1</str>
+</reg>
+</entry>
+<entry name="31">
+<syntax>
+<str>FOO2</str>
+</syntax>
+<reg>
+<str>FOO2</str>
+</reg>
+</entry>
+<entry name="32">
+<syntax>
+<str>SPR32</str>
+</syntax>
+<read>
+<str><![CDATA[
+{
+    ESR = 0x00040020 ;
+    return 0 ;
+}
+]]></str>
+</read>
+<write>
+<str><![CDATA[
+{
+    ESR = 0x00040020 ;
+}
+]]></str>
+</write>
+</entry>
+<entry name="62">
+<syntax>
+<str>ESR</str>
+</syntax>
+<reg>
+<str>ESR</str>
+</reg>
+</entry>
+</entries>
+</regfile>
+<regfile name="VPR">
+<doc>
+<str><![CDATA[
+Vector registers.
+    
+]]></str>
+</doc>
+<width>
+<int>128</int>
+</width>
+<fields>
+<field name="B">
+<indexed>
+<width>
+<int>8</int>
+</width>
+<count>
+<int>16</int>
+</count>
+</indexed>
+</field>
+<field name="H">
+<indexed>
+<width>
+<int>16</int>
+</width>
+<count>
+<int>8</int>
+</count>
+</indexed>
+</field>
+<field name="W">
+<indexed>
+<width>
+<int>32</int>
+</width>
+<count>
+<int>4</int>
+</count>
+</indexed>
+</field>
+</fields>
+<size>
+<int>32</int>
+</size>
+<shared>
+<int>0</int>
+</shared>
+</regfile>
+<regfile name="aGPR">
+<doc>
+<str><![CDATA[
+Alternate GPRs for VLE: Middle block of 16 registers.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<pseudo>
+<true />
+</pseudo>
+<size>
+<int>16</int>
+</size>
+<shared>
+<int>0</int>
+</shared>
+<read>
+<alias>
+<reg>
+<str>GPR</str>
+</reg>
+<map>
+<alias_index name="0">
+<int>8</int>
+</alias_index>
+<alias_index name="1">
+<int>9</int>
+</alias_index>
+<alias_index name="2">
+<int>10</int>
+</alias_index>
+<alias_index name="3">
+<int>11</int>
+</alias_index>
+<alias_index name="4">
+<int>12</int>
+</alias_index>
+<alias_index name="5">
+<int>13</int>
+</alias_index>
+<alias_index name="6">
+<int>14</int>
+</alias_index>
+<alias_index name="7">
+<int>15</int>
+</alias_index>
+<alias_index name="8">
+<int>16</int>
+</alias_index>
+<alias_index name="9">
+<int>17</int>
+</alias_index>
+<alias_index name="10">
+<int>18</int>
+</alias_index>
+<alias_index name="11">
+<int>19</int>
+</alias_index>
+<alias_index name="12">
+<int>20</int>
+</alias_index>
+<alias_index name="13">
+<int>21</int>
+</alias_index>
+<alias_index name="14">
+<int>22</int>
+</alias_index>
+<alias_index name="15">
+<int>23</int>
+</alias_index>
+</map>
+</alias>
+</read>
+<write>
+<alias>
+<reg>
+<str>GPR</str>
+</reg>
+<map>
+<alias_index name="0">
+<int>8</int>
+</alias_index>
+<alias_index name="1">
+<int>9</int>
+</alias_index>
+<alias_index name="2">
+<int>10</int>
+</alias_index>
+<alias_index name="3">
+<int>11</int>
+</alias_index>
+<alias_index name="4">
+<int>12</int>
+</alias_index>
+<alias_index name="5">
+<int>13</int>
+</alias_index>
+<alias_index name="6">
+<int>14</int>
+</alias_index>
+<alias_index name="7">
+<int>15</int>
+</alias_index>
+<alias_index name="8">
+<int>16</int>
+</alias_index>
+<alias_index name="9">
+<int>17</int>
+</alias_index>
+<alias_index name="10">
+<int>18</int>
+</alias_index>
+<alias_index name="11">
+<int>19</int>
+</alias_index>
+<alias_index name="12">
+<int>20</int>
+</alias_index>
+<alias_index name="13">
+<int>21</int>
+</alias_index>
+<alias_index name="14">
+<int>22</int>
+</alias_index>
+<alias_index name="15">
+<int>23</int>
+</alias_index>
+</map>
+</alias>
+</write>
+</regfile>
+<regfile name="rGPR">
+<doc>
+<str><![CDATA[
+Upper and lower halves of GPR for use by VLE instructions.
+    
+]]></str>
+</doc>
+<width>
+<int>32</int>
+</width>
+<pseudo>
+<true />
+</pseudo>
+<size>
+<int>16</int>
+</size>
+<shared>
+<int>0</int>
+</shared>
+<read>
+<alias>
+<reg>
+<str>GPR</str>
+</reg>
+<map>
+<alias_index name="0">
+<int>0</int>
+</alias_index>
+<alias_index name="1">
+<int>1</int>
+</alias_index>
+<alias_index name="2">
+<int>2</int>
+</alias_index>
+<alias_index name="3">
+<int>3</int>
+</alias_index>
+<alias_index name="4">
+<int>4</int>
+</alias_index>
+<alias_index name="5">
+<int>5</int>
+</alias_index>
+<alias_index name="6">
+<int>6</int>
+</alias_index>
+<alias_index name="7">
+<int>7</int>
+</alias_index>
+<alias_index name="8">
+<int>24</int>
+</alias_index>
+<alias_index name="9">
+<int>25</int>
+</alias_index>
+<alias_index name="10">
+<int>26</int>
+</alias_index>
+<alias_index name="11">
+<int>27</int>
+</alias_index>
+<alias_index name="12">
+<int>28</int>
+</alias_index>
+<alias_index name="13">
+<int>29</int>
+</alias_index>
+<alias_index name="14">
+<int>30</int>
+</alias_index>
+<alias_index name="15">
+<int>31</int>
+</alias_index>
+</map>
+</alias>
+</read>
+<write>
+<alias>
+<reg>
+<str>GPR</str>
+</reg>
+<map>
+<alias_index name="0">
+<int>0</int>
+</alias_index>
+<alias_index name="1">
+<int>1</int>
+</alias_index>
+<alias_index name="2">
+<int>2</int>
+</alias_index>
+<alias_index name="3">
+<int>3</int>
+</alias_index>
+<alias_index name="4">
+<int>4</int>
+</alias_index>
+<alias_index name="5">
+<int>5</int>
+</alias_index>
+<alias_index name="6">
+<int>6</int>
+</alias_index>
+<alias_index name="7">
+<int>7</int>
+</alias_index>
+<alias_index name="8">
+<int>24</int>
+</alias_index>
+<alias_index name="9">
+<int>25</int>
+</alias_index>
+<alias_index name="10">
+<int>26</int>
+</alias_index>
+<alias_index name="11">
+<int>27</int>
+</alias_index>
+<alias_index name="12">
+<int>28</int>
+</alias_index>
+<alias_index name="13">
+<int>29</int>
+</alias_index>
+<alias_index name="14">
+<int>30</int>
+</alias_index>
+<alias_index name="15">
+<int>31</int>
+</alias_index>
+</map>
+</alias>
+</write>
+</regfile>
+</regfiles>
+<instrfields>
+<instrfield name="AA">
+<doc>
+<str><![CDATA[
+Absolute address bit.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>30</int>
+<int>30</int>
+</range>
+</bits>
+<width>
+<int>1</int>
+</width>
+<size>
+<int>1</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x2</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="BD">
+<doc>
+<str><![CDATA[
+Immediate field specifying a 14-bit signed two's complement branch displacement
+which is concatenated on the right with 0b00 and sign-extended.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>29</int>
+</range>
+</bits>
+<width>
+<int>14</int>
+</width>
+<size>
+<int>14</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xfffc</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="BF">
+<doc>
+<str><![CDATA[
+Field used to specify one of the Condition Register (CR_) fields or one of the
+Floating-Point Status and Control Register fields to be used as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>8</int>
+</range>
+</bits>
+<width>
+<int>3</int>
+</width>
+<size>
+<int>3</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3800000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="BI">
+<doc>
+<str><![CDATA[
+Field used to specify a bit in the Condition Register (CR_) to be used
+as the condition of a Branch Conditional instruction.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>11</int>
+<int>15</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x1f0000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="BO">
+<doc>
+<str><![CDATA[
+Field used to specify options for the Branch Conditional (`bc BO, BI, BD`_) instruction.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="D">
+<doc>
+<str><![CDATA[
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>31</int>
+</range>
+</bits>
+<width>
+<int>16</int>
+</width>
+<size>
+<int>16</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xffff</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="F1">
+<doc>
+<str><![CDATA[
+An example enumerated field.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>28</int>
+<int>31</int>
+</range>
+</bits>
+<width>
+<int>4</int>
+</width>
+<size>
+<int>4</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xf</str>
+</mask>
+<enumerated>
+<option name="0">
+<str></str>
+</option>
+<option name="1">
+<str>,1</str>
+</option>
+<option name="1">
+<str>,bark</str>
+</option>
+<option name="2">
+<str>,2</str>
+</option>
+<option name="3">
+<str>,3</str>
+</option>
+<option name="3">
+<str>,woof</str>
+</option>
+<option name="4">
+<str>reserved</str>
+</option>
+<option name="5">
+<str>reserved</str>
+</option>
+<option name="6">
+<str>,foo</str>
+</option>
+</enumerated>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="LK">
+<doc>
+<str><![CDATA[
+LINK bit.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>31</int>
+<int>31</int>
+</range>
+</bits>
+<width>
+<int>1</int>
+</width>
+<size>
+<int>1</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x1</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="MB">
+<bits>
+<range>
+<int>21</int>
+<int>25</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x7c0</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="ME">
+<bits>
+<range>
+<int>26</int>
+<int>30</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3e</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="OIM5">
+<doc>
+<str><![CDATA[
+    Offset Immediate field used to specify a 5-bit unsigned integer in the
+    range [1:32] encoded as [0:31].
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>7</int>
+<int>11</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>1</int>
+</offset>
+<mask>
+<str>0x1f00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="OPCD">
+<doc>
+<str><![CDATA[
+Primary opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>0</int>
+<int>5</int>
+</range>
+</bits>
+<width>
+<int>6</int>
+</width>
+<size>
+<int>6</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xfc000000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="OPCD7">
+<doc>
+<str><![CDATA[
+    Primary opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>0</int>
+<int>6</int>
+</range>
+</bits>
+<width>
+<int>7</int>
+</width>
+<size>
+<int>7</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xfe000000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RA">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>11</int>
+<int>15</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x1f0000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RB">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>20</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xf800</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RS">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RT">
+<doc>
+<str><![CDATA[
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>6</int>
+<int>10</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x3e00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RX">
+<bits>
+<range>
+<int>12</int>
+<int>15</int>
+</range>
+</bits>
+<width>
+<int>4</int>
+</width>
+<size>
+<int>4</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xf0000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="RY">
+<bits>
+<range>
+<int>8</int>
+<int>11</int>
+</range>
+</bits>
+<width>
+<int>4</int>
+</width>
+<size>
+<int>4</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xf00000</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="SH">
+<bits>
+<range>
+<int>16</int>
+<int>20</int>
+</range>
+</bits>
+<width>
+<int>5</int>
+</width>
+<size>
+<int>5</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xf800</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="SI">
+<doc>
+<str><![CDATA[
+Signed immediate field for arithmetic operations.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>31</int>
+</range>
+</bits>
+<width>
+<int>16</int>
+</width>
+<size>
+<int>16</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xffff</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="SI32">
+<pseudo>
+<true />
+</pseudo>
+<width>
+<int>32</int>
+</width>
+<size>
+<int>32</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x0</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="SPRN">
+<doc>
+<str><![CDATA[
+Field used to specify a Special Purpose Register (SPR_) for the *mtspr* and *mfspr* instructions.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>20</int>
+</range>
+<range>
+<int>11</int>
+<int>15</int>
+</range>
+</bits>
+<width>
+<int>10</int>
+</width>
+<size>
+<int>10</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x1ff800</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="UI">
+<doc>
+<str><![CDATA[
+Unsigned immediate field for arithmetic operations.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>16</int>
+<int>31</int>
+</range>
+</bits>
+<width>
+<int>16</int>
+</width>
+<size>
+<int>16</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0xffff</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+<instrfield name="XO">
+<doc>
+<str><![CDATA[
+Extended opcode.
+    
+]]></str>
+</doc>
+<bits>
+<range>
+<int>21</int>
+<int>30</int>
+</range>
+</bits>
+<width>
+<int>10</int>
+</width>
+<size>
+<int>10</int>
+</size>
+<shift>
+<int>0</int>
+</shift>
+<offset>
+<int>0</int>
+</offset>
+<mask>
+<str>0x7fe</str>
+</mask>
+<type>
+<str>imm</str>
+</type>
+</instrfield>
+</instrfields>
+<instrs>
+<instruction name="add">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>add RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>add ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>266</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RB)</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="add2">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>add2</str>
+</syntax>
+<dsyntax>
+<str>add2</str>
+</dsyntax>
+<alias>
+<target>
+<str>add</str>
+</target>
+<sources>
+</sources>
+<destinations>
+</destinations>
+<miscs>
+<misc>
+<field>
+<str>RT</str>
+</field>
+<value>
+<int>0</int>
+</value>
+</misc>
+<misc>
+<field>
+<str>RA</str>
+</field>
+<value>
+<int>0</int>
+</value>
+</misc>
+<misc>
+<field>
+<str>RB</str>
+</field>
+<value>
+<int>0</int>
+</value>
+</misc>
+</miscs>
+</alias>
+<parent_action>
+<str><![CDATA[
+{
+    GPR ( 0 ) = GPR ( 0 ) + GPR ( 0 ) ;
+}
+]]></str>
+</parent_action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(0)</str>
+</inputs>
+<outputs>
+<str>GPR(0)</str>
+</outputs>
+</instruction>
+<instruction name="addi">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>addi RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>addi ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>14</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var si = signExtend ( SI , 32 ) ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + si ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)?</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="addic.">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>addic. RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>addic. ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>13</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var si = signExtend ( SI , 32 ) ;
+    GPR ( RT ) = GPR ( RA ) + si ;
+    setCrField ( 0 , GPR ( RT ) , 0 ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>CR</str>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>CR</str>
+<str>GPR(RT)</str>
+</outputs>
+<helpers>
+<str>setCrField</str>
+</helpers>
+</instruction>
+<instruction name="addis">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>addis RT, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>addis ${RT}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>15</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     bits < 32 > si = SI ;
+    if ( RA == 0 ) {
+        GPR ( RT ) = si << 16 ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + ( si << 16 ) ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)?</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="bc">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>bc BO, BI, BD</str>
+</syntax>
+<dsyntax>
+<str>bc ${BO}, ${BI}, ${BD}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>16</int>
+</field>
+<field name="BO">
+<str></str>
+</field>
+<field name="BI">
+<str></str>
+</field>
+<field name="BD">
+<str></str>
+</field>
+<field name="AA">
+<int>0</int>
+</field>
+<field name="LK">
+<int>0</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    if ( ( BO ( 2 ) ) == 0 ) {
+        CTR = CTR - 1 ;
+    }
+     var ctr_ok = BO ( 2 ) || ( ( CTR != 0 ) ^ BO ( 3 ) ) ;
+     var cond_ok = BO ( 0 ) || ( CR ( BI ) == BO ( 1 ) ) ;
+    if ( ctr_ok && cond_ok ) {
+         var ea = signExtend ( concat ( BD , zero ( 2 ) ) , 32 ) ;
+        NIA = CIA + ea ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>CIA?</str>
+<str>CR/p</str>
+<str>CTR?</str>
+</inputs>
+<outputs>
+<str>CTR?</str>
+<str>NIA?</str>
+</outputs>
+</instruction>
+<instruction name="cmp">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>cmp BF, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>cmp ${BF}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="BF">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>0</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    setCrField ( BF , GPR ( RA ) , GPR ( RB ) ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>CR</str>
+<str>GPR(RA)</str>
+<str>GPR(RB)</str>
+</inputs>
+<outputs>
+<str>CR</str>
+</outputs>
+<helpers>
+<str>setCrField</str>
+</helpers>
+</instruction>
+<instruction name="cmpi">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>cmpi BF, RA, SI</str>
+</syntax>
+<dsyntax>
+<str>cmpi ${BF}, ${RA}, ${SI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>11</int>
+</field>
+<field name="BF">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var si = signExtend ( SI , 32 ) ;
+    setcrfield ( BF , GPR ( RA ) , si ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>CR</str>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>CR</str>
+</outputs>
+<helpers>
+<str>setcrfield</str>
+</helpers>
+</instruction>
+<instruction name="crand">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>crand RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>crand ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>19</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>257</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    if ( RB == 0 ) {
+        GPR ( RT ) = FOO2 . X ( RA ) ;
+    } else if ( RB == 1 ) {
+        GPR ( RT ) = FOO2 . Y ( RA ) ;
+    } else {
+        GPR ( RT ) = FOO2 . Z ( RA ) ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>FOO2/p</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="crandc">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>crandc RS, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>crandc ${RS}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>19</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>129</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    if ( RB == 0 ) {
+        FOO2 . X ( RA ) = GPR ( RS ) ;
+    } else if ( RB == 1 ) {
+        FOO2 . Y ( RA ) = GPR ( RS ) ;
+    } else {
+        FOO2 . Z ( RA ) = GPR ( RS ) ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>FOO2/p</str>
+</outputs>
+</instruction>
+<instruction name="dum1">
+<width>
+<int>32</int>
+</width>
+<doc>
+<str><![CDATA[
+Dummy field to test enumerated fields.
+    
+]]></str>
+</doc>
+<syntax>
+<str>dum1F1 RA,RS</str>
+</syntax>
+<dsyntax>
+<str>dum1${F1} ${RA},${RS}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>69</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="F1">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+</instruction>
+<instruction name="halt">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>halt</str>
+</syntax>
+<dsyntax>
+<str>halt</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>0</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    halt (  ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+</instruction>
+<instruction name="li">
+<width>
+<int>16</int>
+</width>
+<syntax>
+<str>li RT,SI32</str>
+</syntax>
+<dsyntax>
+<str>li ${RT},${SI32}</str>
+</dsyntax>
+<alias_action>
+<str><![CDATA[
+{
+     unsigned r = args [ 0 ] ;
+     uint64_t c = args [ 1 ] ;
+     InstrBundle b ;
+    if ( ( c & 0xffff ) == 0 ) {
+        b . push_back ( createInstr ( "addis" , r , 0 , ( c >> 16 ) ) ) ;
+    } else if ( ( c & 0xffff ) == c ) {
+        b . push_back ( createInstr ( "ori" , r , 0 , c ) ) ;
+    } else {
+        create_constant_loader ( b , r , c ) ;
+    }
+    return b ;
+}
+]]></str>
+</alias_action>
+<disassemble>
+<false />
+</disassemble>
+</instruction>
+<instruction name="lwz">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>lwz RT, RA, D</str>
+</syntax>
+<dsyntax>
+<str>lwz ${RT}, ${RA}, ${D}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>32</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="D">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + d ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+<input_mems>
+<str>Mem</str>
+</input_mems>
+</instruction>
+<instruction name="lwzx">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>lwzx RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>lwzx ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>23</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    GPR ( RT ) = Mem ( addr , 4 ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RB)</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+<input_mems>
+<str>Mem</str>
+</input_mems>
+</instruction>
+<instruction name="mfspr">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>mfspr RT, SPRN</str>
+</syntax>
+<dsyntax>
+<str>mfspr ${RT}, ${SPRN}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="SPRN">
+<str></str>
+</field>
+<field name="XO">
+<int>339</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    GPR ( RT ) = SPR ( SPRN ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>ESR?</str>
+<str>SPR(SPRN)</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+<raises_exception>
+<true />
+</raises_exception>
+</instruction>
+<instruction name="mr">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>mr RA,RS</str>
+</syntax>
+<dsyntax>
+<str>mr ${RA},${RS}</str>
+</dsyntax>
+<alias>
+<target>
+<str>or</str>
+</target>
+<sources>
+<source>
+<field>
+<str>RS</str>
+</field>
+<value>
+<str>RS</str>
+</value>
+</source>
+<source>
+<field>
+<str>RB</str>
+</field>
+<value>
+<str>RS</str>
+</value>
+</source>
+</sources>
+<destinations>
+<destination>
+<field>
+<str>RA</str>
+</field>
+<value>
+<str>RA</str>
+</value>
+</destination>
+</destinations>
+</alias>
+<parent_action>
+<str><![CDATA[
+{
+    GPR ( RA ) = GPR ( RS ) | GPR ( RS ) ;
+}
+]]></str>
+</parent_action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>GPR(RA)</str>
+</outputs>
+</instruction>
+<instruction name="mtspr">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>mtspr RS, SPRN</str>
+</syntax>
+<dsyntax>
+<str>mtspr ${RS}, ${SPRN}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="SPRN">
+<str></str>
+</field>
+<field name="XO">
+<int>467</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    if ( ! SPR . validIndex ( SPRN ) ) {
+        ESR . set ( 4 ) ;
+        raiseException ( Program ) ;
+    }
+    SPR ( SPRN ) = GPR ( RS ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>ESR?</str>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>SPR(SPRN)</str>
+</outputs>
+<raises_exception>
+<true />
+</raises_exception>
+</instruction>
+<instruction name="mullw">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>mullw RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>mullw ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>235</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    GPR ( RT ) = GPR ( RA ) * GPR ( RB ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RB)</str>
+</inputs>
+<outputs>
+<str>GPR(RT)</str>
+</outputs>
+</instruction>
+<instruction name="or">
+<width>
+<int>32</int>
+</width>
+<doc>
+<str><![CDATA[
+The contents of **rS** are ORed with the contents of **rB** and the result is placed into **rA**.
+
+The simplified mnemonic **`mr RA,RS`_** demonstrates the use of the **or** instruction
+to move register contents.
+
+]]></str>
+</doc>
+<syntax>
+<str>or RS, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>or ${RS}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>444</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    GPR ( RA ) = GPR ( RS ) | GPR ( RB ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RB)</str>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>GPR(RA)</str>
+</outputs>
+</instruction>
+<instruction name="ori">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>ori RS, RA, UI</str>
+</syntax>
+<dsyntax>
+<str>ori ${RS}, ${RA}, ${UI}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>24</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="UI">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    GPR ( RA ) = GPR ( RS ) | UI ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>GPR(RA)</str>
+</outputs>
+</instruction>
+<instruction name="rfi">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>rfi RS, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>rfi ${RS}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>19</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>50</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    MSR = SRR1 ;
+    NIA = SRR0 ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>SRR0</str>
+<str>SRR1</str>
+</inputs>
+<outputs>
+<str>MSR</str>
+<str>NIA</str>
+</outputs>
+</instruction>
+<instruction name="rlwinm">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>rlwinm RS, RA, SH, MB, ME</str>
+</syntax>
+<dsyntax>
+<str>rlwinm ${RS}, ${RA}, ${SH}, ${MB}, ${ME}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>21</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="SH">
+<str></str>
+</field>
+<field name="MB">
+<str></str>
+</field>
+<field name="ME">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var r = GPR ( RS ) . left_rotate ( SH ) ;
+     bits < 32 > m ;
+    m . mask ( MB , ME ) ;
+    GPR ( RA ) = r & m ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>GPR(RA)</str>
+</outputs>
+</instruction>
+<instruction name="se_add">
+<width>
+<int>16</int>
+</width>
+<syntax>
+<str>se_add RY, RX</str>
+</syntax>
+<dsyntax>
+<str>se_add ${RY}, ${RX}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>1</int>
+</field>
+<field name="RY">
+<str></str>
+</field>
+<field name="RX">
+<str></str>
+</field>
+</fields>
+<alias>
+<target>
+<str>add</str>
+</target>
+<sources>
+<source>
+<field>
+<str>RA</str>
+</field>
+<value>
+<str>RX</str>
+</value>
+</source>
+<source>
+<field>
+<str>RB</str>
+</field>
+<value>
+<str>RY</str>
+</value>
+</source>
+</sources>
+<destinations>
+<destination>
+<field>
+<str>RT</str>
+</field>
+<value>
+<str>RX</str>
+</value>
+</destination>
+</destinations>
+</alias>
+<parent_action>
+<str><![CDATA[
+{
+    GPR ( RX ) = GPR ( RX ) + GPR ( RY ) ;
+}
+]]></str>
+</parent_action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RX)</str>
+<str>GPR(RY)</str>
+</inputs>
+<outputs>
+<str>GPR(RX)</str>
+</outputs>
+</instruction>
+<instruction name="se_addi">
+<width>
+<int>16</int>
+</width>
+<syntax>
+<str>se_addi RX,OIM5</str>
+</syntax>
+<dsyntax>
+<str>se_addi ${RX},${OIM5}</str>
+</dsyntax>
+<fields>
+<field name="OPCD7">
+<int>16</int>
+</field>
+<field name="OIM5">
+<str></str>
+</field>
+<field name="RX">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    rGPR ( RX ) = rGPR ( RX ) + OIM5 ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>rGPR(RX)</str>
+</inputs>
+<outputs>
+<str>rGPR(RX)</str>
+</outputs>
+</instruction>
+<instruction name="stw">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>stw RS, RA, D</str>
+</syntax>
+<dsyntax>
+<str>stw ${RS}, ${RA}, ${D}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>36</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="D">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var d = signExtend ( D , 32 ) ;
+     var addr = b + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RS)</str>
+</inputs>
+<output_mems>
+<str>Mem</str>
+</output_mems>
+</instruction>
+<instruction name="stwu">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>stwu RS, RA, D</str>
+</syntax>
+<dsyntax>
+<str>stwu ${RS}, ${RA}, ${D}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>37</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="D">
+<str></str>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var d = signExtend ( D , 32 ) ;
+     var addr = GPR ( RA ) + d ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+    GPR ( RA ) = addr ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RS)</str>
+</inputs>
+<outputs>
+<str>GPR(RA)</str>
+</outputs>
+<output_mems>
+<str>Mem</str>
+</output_mems>
+</instruction>
+<instruction name="stwx">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>stwx RS, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>stwx ${RS}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RS">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>151</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+     var b = ( RA == 0 ) ? 0 : GPR ( RA ) ;
+     var addr = b + GPR ( RB ) ;
+    Mem ( addr , 4 ) = GPR ( RS ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RB)</str>
+<str>GPR(RS)</str>
+</inputs>
+<output_mems>
+<str>Mem</str>
+</output_mems>
+</instruction>
+<instruction name="tw">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>tw RA, RB</str>
+</syntax>
+<dsyntax>
+<str>tw ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>31</int>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>4</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    FOO1 = GPR ( RA ) ;
+    GPR ( RB ) = FOO1 . A + 1 ;
+    FOO1 . C = GPR ( RB + 1 ) ;
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>GPR(RA)</str>
+<str>GPR(RB + 1)</str>
+</inputs>
+<outputs>
+<str>FOO1</str>
+<str>GPR(RB)</str>
+</outputs>
+</instruction>
+<instruction name="vaddubm">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>vaddubm RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>vaddubm ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>4</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>0</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 8 ; ++ i ) {
+        VPR ( RT ) . B ( i ) = VPR ( RA ) . B ( i ) + VPR ( RB ) . B ( i ) ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>VPR(RA)/p</str>
+<str>VPR(RB)/p</str>
+</inputs>
+<outputs>
+<str>VPR(RT)/p</str>
+</outputs>
+</instruction>
+<instruction name="vadduhm">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>vadduhm RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>vadduhm ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>4</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>32</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 16 ; ++ i ) {
+        VPR ( RT ) . H ( i ) = VPR ( RA ) . H ( i ) + VPR ( RB ) . H ( i ) ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>VPR(RA)/p</str>
+<str>VPR(RB)/p</str>
+</inputs>
+<outputs>
+<str>VPR(RT)/p</str>
+</outputs>
+</instruction>
+<instruction name="vadduwm">
+<width>
+<int>32</int>
+</width>
+<syntax>
+<str>vadduwm RT, RA, RB</str>
+</syntax>
+<dsyntax>
+<str>vadduwm ${RT}, ${RA}, ${RB}</str>
+</dsyntax>
+<fields>
+<field name="OPCD">
+<int>4</int>
+</field>
+<field name="RT">
+<str></str>
+</field>
+<field name="RA">
+<str></str>
+</field>
+<field name="RB">
+<str></str>
+</field>
+<field name="XO">
+<int>64</int>
+</field>
+</fields>
+<action>
+<str><![CDATA[
+{
+    for (  unsigned i = 0 ; i != VPR ( RT ) . size (  ) / 32 ; ++ i ) {
+        VPR ( RT ) . W ( i ) = VPR ( RA ) . W ( i ) + VPR ( RB ) . W ( i ) ;
+    }
+}
+]]></str>
+</action>
+<disassemble>
+<true />
+</disassemble>
+<inputs>
+<str>VPR(RA)/p</str>
+<str>VPR(RB)/p</str>
+</inputs>
+<outputs>
+<str>VPR(RT)/p</str>
+</outputs>
+</instruction>
+</instrs>
+<exceptions>
+<exception name="Program">
+<doc>
+<str><![CDATA[
+The program interrupt occurs for various reasons, such as when an illegal
+instruction is encountered.
+
+]]></str>
+</doc>
+<priority>
+<int>0</int>
+</priority>
+<action>
+<str><![CDATA[
+{
+    SRR0 = CIA ;
+    SRR1 = MSR ;
+    MSR = 0 ;
+    NIA = concat ( IVPR . get < 16 > ( 0 , 15 ) , IVOR6 . get < 16 > ( 16 , 31 ) ) ;
+}
+]]></str>
+</action>
+</exception>
+</exceptions>
+<core-level-hooks>
+<decode-miss>
+<str><![CDATA[
+{
+    ESR . set ( 4 ) ;
+    raiseException ( Program ) ;
+}
+]]></str>
+</decode-miss>
+<pre-cycle>
+<str><![CDATA[
+
+]]></str>
+</pre-cycle>
+<post-cycle>
+<str><![CDATA[
+
+]]></str>
+</post-cycle>
+<pre-fetch>
+<str><![CDATA[
+
+]]></str>
+</pre-fetch>
+<post-fetch>
+<str><![CDATA[
+
+]]></str>
+</post-fetch>
+<post-exec>
+<str><![CDATA[
+
+]]></str>
+</post-exec>
+<post-asm>
+<str><![CDATA[
+
+]]></str>
+</post-asm>
+<post-packet-asm>
+<str><![CDATA[
+
+]]></str>
+</post-packet-asm>
+<post-packet>
+<str><![CDATA[
+
+]]></str>
+</post-packet>
+<active-watch>
+<str><![CDATA[
+
+]]></str>
+</active-watch>
+<instr-table-watch>
+<str><![CDATA[
+
+]]></str>
+</instr-table-watch>
+</core-level-hooks>
+<asm_config>
+<comments>
+<str>#</str>
+</comments>
+<line_comments>
+<str>#</str>
+</line_comments>
+</asm_config>
+<helpers>
+<helper name="create_constant_loader">
+<action>
+<str><![CDATA[
+ void create_constant_loader ( InstrBundle & b , unsigned r , uint64_t c ) {
+     unsigned upper = ( c >> 16 ) + ( ( c & 0x8000 ) ? 1 : 0 ) ;
+    b . push_back ( createInstr ( "addis" , r , 0 , upper ) ) ;
+    b . push_back ( createInstr ( "addi" , r , r , ( c & 0xffff ) ) ) ;
+}
+]]></str>
+</action>
+</helper>
+<helper name="setCrField">
+<action>
+<str><![CDATA[
+ void setCrField ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+]]></str>
+</action>
+<inputs>
+<str>CR</str>
+</inputs>
+<outputs>
+<str>CR</str>
+</outputs>
+</helper>
+<helper name="setcrfield">
+<action>
+<str><![CDATA[
+ void setcrfield ( bits < 3 > field , bits < 32 > x , bits < 32 > y ) {
+     var cr = CR ;
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    cr . set ( 4 * field , 4 * field + 3 , r ) ;
+    CR = cr ;
+}
+]]></str>
+</action>
+<inputs>
+<str>CR</str>
+</inputs>
+<outputs>
+<str>CR</str>
+</outputs>
+</helper>
+</helpers>
+</core>
+</cores>
+<systems>
+</systems>
+</data>

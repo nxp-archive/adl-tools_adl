@@ -1,0 +1,107 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Testing of documentation and database generation for delayed writes.
+//
+
+define (arch = foo) {
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=SI) {
+    """
+Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+
+  define (instr=add) {
+    """
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    """;
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      delayed_write(GPR(RT),3) = GPR(RA) + GPR(RB);
+      delayed_write(Mem(RA,4),2) = GPR(RA);
+    };
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+       if (RA == 0) {
+         delayed_write(GPR(RT),2) = SI;
+      } else
+         // Note: Braces have been left off specifically to test code generation
+         // for this situation.
+         delayed_write(GPR(RT),2) = GPR(RA) + SI;
+    };
+  }
+
+
+}
+
+define (core = P) {
+  archs = (foo);
+}

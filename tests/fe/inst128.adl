@@ -1,0 +1,138 @@
+//
+// This makes sure that we record accurate usage information for aliases.  If
+// constants are passed in from an alias, we should take those constants into
+// account when evaluating conditionals.
+//
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+  
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (reg=AR) { }
+
+  define (reg=BR) { }
+   
+  define (instrfield=Type) { parm = true; width = 1;};
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=Src1) {
+    width = 5; 
+    pseudo = true;
+  }
+
+  define (instrfield=Src2) {
+    width = 5; 
+    pseudo = true;
+  }
+
+  define (instrfield=Res) {
+    width = 5; 
+    pseudo = true;
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+   
+  define(instr=add) { 
+    fields = (OPCD, Src1, Src2, Res, Type); 
+    define(instr=add1) { 
+      width = 32;
+      fields = (OPCD(1),RT,RA,RB);
+      alias = add(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT),Type(0)); 
+    } 
+
+    // Does not use GPR(Src2) b/c Type == 1.
+    define(instr=add2) { 
+      width = 32;
+      fields = (OPCD(2),RT,RA,RB);
+      alias = add(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT),Type(1)); 
+    } 
+
+    action = { 
+      if (Type == 0) {
+        GPR(Res) = GPR(Src1) + GPR(Src2); 
+      } else {
+        GPR(Res) = GPR(Src1); 
+      }
+    };
+  }
+
+  define(instr=mv) { 
+    fields = (OPCD, Src1, Src2, Res, Type); 
+    define(instr=mv1) { 
+      width = 32;
+      fields = (OPCD(3),RT,RA,RB);
+      alias = mv(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT),Type(0)); 
+    } 
+
+    define(instr=mv2) { 
+      width = 32;
+      fields = (OPCD(4),RT,RA,RB);
+      alias = mv(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT),Type(1)); 
+    } 
+
+    define(instr=mv3) { 
+      width = 32;
+      fields = (OPCD(5),RT,RA,RB);
+      alias = mv(OPCD(OPCD),Src1(RA),Src2(RB),Res(RT),Type(2)); 
+    } 
+
+    action = { 
+      switch (Type) {
+      case 0:
+      GPR(Res) = GPR(Src1) + GPR(Src2) + AR; 
+      break;
+      case 1:
+      GPR(Res) = GPR(Src1) + AR;
+      break;
+      case 2:
+      GPR(Res) = GPR(Src2) + BR;
+      break;
+      }
+    };
+  }
+
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

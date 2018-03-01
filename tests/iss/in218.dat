@@ -1,0 +1,89 @@
+#
+# Test the use of mod3's stmw, which uses an explicit 'sources' value to
+# override what is derived automatically.
+#
+= asm
+
+	stmw r20,0x1004(r0)
+	stmw r28,0x1100(r0)
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0xBE801004	#	stmw r20,0x1004(r0)
+MD n=Mem ra=0x00000004 d=0xBF801100	#	stmw r28,0x1100(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=20 d=1
+RD n=GPR i=21 d=2
+RD n=GPR i=22 d=3
+RD n=GPR i=23 d=4
+RD n=GPR i=24 d=5
+RD n=GPR i=25 d=6
+RD n=GPR i=26 d=7
+RD n=GPR i=27 d=8
+RD n=GPR i=28 d=9
+RD n=GPR i=29 d=10
+RD n=GPR i=30 d=11
+RD n=GPR i=31 d=12
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0xbe801004
+INSTR op=0xbe801004                                     asm="stmw 20,0,0x1004"
+D n=Mem t=write ea=0x1004 nb=4
+M n=Mem t=write ea=0x1004 ra=0x1004 d=0x00000001
+D n=Mem t=write ea=0x1008 nb=8
+M n=Mem t=write ea=0x1008 ra=0x1008 d=0x00000002
+M n=Mem t=write ea=0x100c ra=0x100c d=0x00000003
+D n=Mem t=write ea=0x1010 nb=8
+M n=Mem t=write ea=0x1010 ra=0x1010 d=0x00000004
+M n=Mem t=write ea=0x1014 ra=0x1014 d=0x00000005
+D n=Mem t=write ea=0x1018 nb=8
+M n=Mem t=write ea=0x1018 ra=0x1018 d=0x00000006
+M n=Mem t=write ea=0x101c ra=0x101c d=0x00000007
+D n=Mem t=write ea=0x1020 nb=8
+M n=Mem t=write ea=0x1020 ra=0x1020 d=0x00000008
+M n=Mem t=write ea=0x1024 ra=0x1024 d=0x00000009
+D n=Mem t=write ea=0x1028 nb=8
+M n=Mem t=write ea=0x1028 ra=0x1028 d=0x0000000a
+M n=Mem t=write ea=0x102c ra=0x102c d=0x0000000b
+D n=Mem t=write ea=0x1030 nb=4
+M n=Mem t=write ea=0x1030 ra=0x1030 d=0x0000000c
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0xbf801100
+INSTR op=0xbf801100                                     asm="stmw 28,0,0x1100"
+D n=Mem t=write ea=0x1100 nb=8
+M n=Mem t=write ea=0x1100 ra=0x1100 d=0x00000009
+M n=Mem t=write ea=0x1104 ra=0x1104 d=0x0000000a
+D n=Mem t=write ea=0x1108 nb=8
+M n=Mem t=write ea=0x1108 ra=0x1108 d=0x0000000b
+M n=Mem t=write ea=0x110c ra=0x110c d=0x0000000c
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+
+RESULTS
+
+MD n=Mem ra=0x0000000000001004 d=0x00000001     #       (1)
+MD n=Mem ra=0x0000000000001008 d=0x00000002     #       (2)
+MD n=Mem ra=0x000000000000100c d=0x00000003     #       (3)
+MD n=Mem ra=0x0000000000001010 d=0x00000004     #       (4)
+MD n=Mem ra=0x0000000000001014 d=0x00000005     #       (5)
+MD n=Mem ra=0x0000000000001018 d=0x00000006     #       (6)
+MD n=Mem ra=0x000000000000101c d=0x00000007     #       (7)
+MD n=Mem ra=0x0000000000001020 d=0x00000008     #       (8)
+MD n=Mem ra=0x0000000000001024 d=0x00000009     #       (9)
+MD n=Mem ra=0x0000000000001028 d=0x0000000a     #       (10)
+MD n=Mem ra=0x000000000000102c d=0x0000000b     #       (11)
+MD n=Mem ra=0x0000000000001030 d=0x0000000c     #       (12)
+MD n=Mem ra=0x0000000000001100 d=0x00000009     #       (9)
+MD n=Mem ra=0x0000000000001104 d=0x0000000a     #       (10)
+MD n=Mem ra=0x0000000000001108 d=0x0000000b     #       (11)
+MD n=Mem ra=0x000000000000110c d=0x0000000c     #       (12)

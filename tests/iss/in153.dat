@@ -1,0 +1,38 @@
+#
+# A transactional ISS should issue cache operations to the driver
+# for flush and invalidate even if a line isn't in the cache.
+#
+CORE n=:P
+
+= asm
+
+  stw  r2,0(r1)
+  dcbf r1,r0      # Should do a real flush.
+  dcbf r1,r0      # Placeholder cache operation.
+  addi r1,r1,0x1000
+  stw  r2,0(r1)
+  dcbst r1,r0      # Should do a real flush.
+  dcbst r1,r0      # Placeholder cache operation.
+  dcbi  r1,r0
+  dcbi  r1,r0
+
+= /asm
+
+RD n=CCR     d=0xc0000000
+RD n=GPR i=1 d=0x00001000
+RD n=GPR i=2 d=0xdeadbeef
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90410000	#	stw  r2,0(r1)
+MD n=Mem ra=0x00000004 d=0x7C0100AC	#	dcbf r1,r0      # Should do a real flush.
+MD n=Mem ra=0x00000008 d=0x7C0100AC	#	dcbf r1,r0      # Placeholder cache operation.
+MD n=Mem ra=0x0000000c d=0x38211000	#	addi r1,r1,0x1000
+MD n=Mem ra=0x00000010 d=0x90410000	#	stw  r2,0(r1)
+MD n=Mem ra=0x00000014 d=0x7C01006C	#	dcbst r1,r0      # Should do a real flush.
+MD n=Mem ra=0x00000018 d=0x7C01006C	#	dcbst r1,r0      # Placeholder cache operation.
+MD n=Mem ra=0x0000001c d=0x7C0103AC	#	dcbi  r1,r0
+MD n=Mem ra=0x00000020 d=0x7C0103AC	#	dcbi  r1,r0
+# </GEN>
+ 
+RESULTS
+

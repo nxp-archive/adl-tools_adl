@@ -1,0 +1,55 @@
+#
+# Demonstrate change in flow with a plug-in with the JIT and the decode-cache.
+#
+= asm
+
+	li r1,0x20
+	addi r10,r10,1
+	addi r11,r11,2
+	mtspr 210,r1    # This causes a branch when the branch-callback.so plugin is used.
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	addi r12,r12,3
+	addi r13,r13,4
+	mfspr r14,211   # Triggers a read callback.
+	li		r1,10
+	mtspr 221,r1    # Triggers a writecallback.
+	mfspr r15,221		# Triggers a read callback.
+	.long 0x0
+			
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38200020	#	li r1,0x20
+MD n=Mem ra=0x00000004 d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x00000008 d=0x396B0002	#	addi r11,r11,2
+MD n=Mem ra=0x0000000c d=0x7C3233A6	#	mtspr 210,r1    # This causes a branch when the branch-callback.so plugin is used.
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x398C0003	#	addi r12,r12,3
+MD n=Mem ra=0x00000024 d=0x39AD0004	#	addi r13,r13,4
+MD n=Mem ra=0x00000028 d=0x7DD332A6	#	mfspr r14,211   # Triggers a read callback.
+MD n=Mem ra=0x0000002c d=0x3820000A	#	li		r1,10
+MD n=Mem ra=0x00000030 d=0x7C3D33A6	#	mtspr 221,r1    # Triggers a writecallback.
+MD n=Mem ra=0x00000034 d=0x7DFD32A6	#	mfspr r15,221		# Triggers a read callback.
+MD n=Mem ra=0x00000038 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+RESULTS
+
+RD n=GPR i=10 d=1
+RD n=GPR i=11 d=2
+RD n=GPR i=12 d=3
+RD n=GPR i=13 d=4
+RD n=GPR i=14 d=1
+RD n=GPR i=15 d=100
+
+# Should be non-zero because of our post-sim hook.
+RD n=QEXIT d=1

@@ -1,0 +1,86 @@
+#
+# Forwarding path test w/partial allocations of XER.  Make sure that we can
+# extract a subset from the value in a fowarding path.
+#
+= asm
+
+	addme r5,r5
+	addi r4,r4,20
+	addi r3,r3,20
+	addo r2,r2,r2
+	addi r1,r1,10
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7CA501D4	#	addme r5,r5
+MD n=Mem ra=0x00000004 d=0x38840014	#	addi r4,r4,20
+MD n=Mem ra=0x00000008 d=0x38630014	#	addi r3,r3,20
+MD n=Mem ra=0x0000000c d=0x7C421614	#	addo r2,r2,r2
+MD n=Mem ra=0x00000010 d=0x3821000A	#	addi r1,r1,10
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA     d=0x0
+RD n=XER     d=0xe0000000
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=40
+RD n=GPR i=5 d=50
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7ca501d4
+INSTR op=0x7ca501d4					asm="addme r5,r5"
+ITIME t=2
+R n=GPR i=5 d=0x00000032
+R n=XER d=0xe0000000
+CTIME t=5
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38840014
+INSTR op=0x38840014					asm="addi r4,r4,20"
+ITIME t=2
+R n=GPR i=4 d=0x0000003c
+CTIME t=5
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38630014
+INSTR op=0x38630014					asm="addi r3,r3,20"
+ITIME t=3
+R n=GPR i=3 d=0x00000032
+CTIME t=6
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c421614
+INSTR op=0x7c421614					asm="addo r2,r2,r2"
+ITIME t=3
+R n=GPR i=2 d=0x00000028
+R n=XER d=0xa0000000
+CTIME t=6
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x3821000a
+INSTR op=0x3821000a					asm="addi r1,r1,10"
+ITIME t=4
+R n=GPR i=1 d=0x00000014
+CTIME t=7
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=7
+CTIME t=10
+
+RESULTS
+
+RD n=XER     d=0xa0000000
+RD n=GPR i=1 d=0x00000014
+RD n=GPR i=2 d=0x00000028
+RD n=GPR i=3 d=0x00000032
+RD n=GPR i=4 d=0x0000003c
+RD n=GPR i=5 d=0x00000032

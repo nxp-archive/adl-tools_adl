@@ -1,0 +1,3 @@
+mmu11.adl:176: Argument 1 of execute permission function must be of type(s) 'Tlb4k_t TlbBase_t '.
+mmu11.adl:176: Argument 1 of execute permission function must be of type(s) 'TlbBase_t '.
+mmu11.adl:176: Argument 1 of execute permission function must be of type(s) 'TlbCam_t TlbBase_t '.

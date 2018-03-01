@@ -1,0 +1,23 @@
+
+OUTPUT_FORMAT("elf32-powerpcle")
+OUTPUT_ARCH(powerpc:common)
+ENTRY(_start)
+
+MEMORY {
+		imem ("rx")  : org = 0x00000000, len = 0x8000
+		dmem ("rw")  : org = 0x00000000, len = 0x8000
+}
+	
+SECTIONS {
+		.text : {
+			*(.text)
+		} > imem
+		
+		.data : {
+	    __data_start = .;
+			*(.rom)
+			*(.rodata)
+			__data_end = .;
+		} >dmem	
+
+}

@@ -1,0 +1,74 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Exceptions:
+  Name:  Program
+  Action:  {
+    SRR0 = PC ;
+    SRR1 = MSR ;
+}
+  -------------------------------
+Registers:
+  Name:  "MSR"
+  Usage:  read
+  Width:  32
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+  Name:  "SRR0"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "SRR1"
+  Usage:  written
+  Width:  32
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+  RT: [6,10] 
+Instructions:
+  Name:  Foo (rank: 100)
+  Width:  32
+  Fields:  OPCD(40) RT RA RB
+  Action:  {
+    GPR ( RT ) = GPR ( RA ) + GPR ( RB ) ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    40(a0000000):  Foo
+
+Decode-Miss Handler:  func ( addr_t ea , unsigned  ) {
+    raiseException ( Program ) ;
+}
+  Does raise exceptions.
+
+Helper Functions:
+  foo:
+ int foo ( int b ) {
+    return 10 * b ;
+}
+-------------------------------
+

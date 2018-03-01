@@ -1,0 +1,51 @@
+//
+// An example of using an offset to modify a register's
+// starting index.
+//
+
+define (arch = minippc) {
+
+  define (regfile = vprs) {
+    width = 128;
+    size = 32;
+    offset = 32;
+    define (field = w) {
+      indexed = 32;
+    }
+    define (field = h) {
+      indexed = 16;
+    }
+    define (field = b) {
+      indexed = 8;
+    }
+  }
+
+  define (reg = a) {
+    width = 32;
+    offset = 32;
+    define (field = f0) {
+      "A reserved field.";
+      bits = (32,42);
+      reserved = 1;
+    }
+    define (field = f1) {
+      "A read-only field.";
+      bits = (43,50);
+      readonly = 1;
+      writable = true;
+    }
+    define (field = f2) {
+      bits = (53,63);
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

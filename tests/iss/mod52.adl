@@ -1,0 +1,238 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This model is just to test that we can modify the address hack required
+// to load UVPs (required due to Raptor), based upon the pageshift value.
+//
+// It also tests very large concatenation operations.
+//
+define (arch = MiniPPC) {
+
+  define (reg=CIA) {
+    """
+      Current instruction address.
+      """;
+    attrs = cia;
+
+  }
+
+  define (reg=NIA) {
+    """
+      Next instruction address.
+      """;
+    attrs = nia;
+  }
+
+  define (reg=HDBCR0) {
+    """
+    Hardware debug control register 0.
+    """;
+
+    define (field=REALMODE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=MSR) {
+    """
+    Machine state register.
+    """;
+    define (field=PR) {
+      bits = 9;
+    }
+    define (field=IR) {
+      bits = 10;
+    }
+    define (field=DR) {
+      bits = 11;
+    }
+    define (field=AS) {
+      bits = 12;
+    }
+    define (field=EE) {
+      bits = 13;
+    }
+  }
+
+  define (regfile=GPR) {
+    """
+      General purpose registers.
+      """;
+    size = 32;
+    prefix = r;
+  }
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=D) {
+    """
+Immediate field used to specify a 16-bit signed two's complement integer
+which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=UI) {
+    """
+Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+  }
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,UI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = UI;
+      } else {
+        GPR(RT) = GPR(RA) + UI;
+      }
+    };
+  }
+
+  define (instr=lwz) {
+    fields=(OPCD(32),RT,RA,D);
+    attrs = load;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      GPR(RT) = Mem(addr,4);
+    };
+  }
+
+  // Test that a very large concatenation will compile.
+  define (instr=oris) {
+    fields=(OPCD(25),RT,RA,UI);
+    syntax = ("%i %f,%f,%f",RA,RT,UI);
+    action = {
+      GPR(RA) = concat(GPR(RT)(28,31),GPR(RT)(24,27),GPR(RT)(20,23),GPR(RT)(16,19),GPR(RT)(12,15),GPR(RT)(8,11),GPR(RT)(4,7),GPR(RT)(0,3));
+    };
+  }
+
+  // Special instruction:  This is used for simulation purposes and is
+  // not a PPC instruction.
+  define (instr=halt) {
+    width = 32;
+    fields=(OPCD(0));
+    action = {
+      halt();
+    };
+  }
+
+  attrs = (translation_attr,load,store,no_mmu_control,unarchitected);
+
+  define (mmu) {
+
+    both_enable = { return (HDBCR0.REALMODE == 0); };
+
+    define(lookup=TLBCAM) {
+
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=E) {
+        bits = 1;
+        attrs = translation_attr;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = Compare(TID,0,PID0);      
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+      pageshift = 0;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = MiniPPC;
+}

@@ -1,0 +1,101 @@
+// Pass test
+// Instruction-type fields: opHw1, opHw2
+// Instruction actions: run() in parallel and sequence
+
+define (core = rubber) {
+  archs = rubber;
+  instrtables = (other, instr_micro, instr_macro);
+}
+
+define (arch = rubber) {
+ 
+  attrs = (instr_ctrl, instr_micro, instr_macro, log_as_reg);
+  bit_endianness = little;
+  instr_endianness = little;
+  data_endianness = little;
+
+  
+  define (reg=CIA) {
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    attrs = nia;
+  }
+
+  define(instrfield=HfWd){
+    display = dec;
+    bits = (53, 52);
+  }
+
+  define(instrfield=opHw1) {
+    display = hex;
+	pseudo = true;
+	width = 25;
+	type = instr;
+	ref = instr_micro;
+  }
+
+  define(instrfield=opHw2) {
+    display = hex;
+	pseudo = true;
+	width = 25;
+	type = instr;
+	ref = instr_micro;
+  }
+
+  define (instr = two_opHw_1){  //
+    width = 64;
+    fields = (HfWd(0), 
+             (bits(51,27),opHw1), (bits(26,2),opHw2), 
+             (bits(1,0),reserved));
+    syntax = ("exec1");
+    attrs = (instr_macro);
+	action={ 
+            run(opHw2);
+            run(opHw1);
+           };
+  }    
+
+  define (instr = two_opHw_2){  //
+    width = 64;
+    fields = (HfWd(1), 
+             (bits(51,27),opHw1), (bits(26,2),opHw2), 
+             (bits(1,0),reserved));
+    syntax = ("exec2");
+    attrs = (instr_macro);
+	action={ 
+            run(opHw2, opHw1);
+           };
+  }    
+  
+ 
+  define (instr = done){ 
+    width = 64;
+    fields = ((bits(55,46),0), (bits(45,0),reserved));  
+    syntax = ("done");
+    attrs = (instr_ctrl);
+    action={ halt(); };
+  }  
+
+  define (instr = null){
+    width = 25;
+    fields = ((bits(24,17),b00111111), (bits(16,0),reserved));
+    syntax = ("null");
+    attrs = (instr_micro);
+    action={ };
+  }  
+
+
+  define (assembler) {
+    comments = ("//", "#");
+    line_comments = (".", "//", "#");
+    line_separators = (";");
+    asm_instrtables = (other, instr_macro);
+    disasm_instrtables = (other, instr_macro);
+  }
+ 
+ }
+
+
+

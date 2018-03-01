@@ -1,0 +1,52 @@
+#
+# Simple test of ignore-mode.
+# 
+CORE n=:P
+
+= asm
+
+	addi r1,r1,1
+	addi r2,r1,2
+	cmpwi 0,r2,2
+	nop
+	stw r1,0x1000(r0)
+	stw r2,0x1004(r0)
+	lwz r3,0x1008(r0)
+	addi r1,r1,1
+	addi r2,r1,2
+	cmpwi 0,r2,0
+	nop
+	addi r1,r1,1
+	addi r2,r2,2
+
+= /asm
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x1008 d=0xdeadbeef
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38410002	#	addi r2,r1,2
+MD n=Mem ra=0x00000008 d=0x2C020002	#	cmpwi 0,r2,2
+MD n=Mem ra=0x0000000c d=0x60000000	#	nop
+MD n=Mem ra=0x00000010 d=0x90201000	#	stw r1,0x1000(r0)
+MD n=Mem ra=0x00000014 d=0x90401004	#	stw r2,0x1004(r0)
+MD n=Mem ra=0x00000018 d=0x80601008	#	lwz r3,0x1008(r0)
+MD n=Mem ra=0x0000001c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000020 d=0x38410002	#	addi r2,r1,2
+MD n=Mem ra=0x00000024 d=0x2C020000	#	cmpwi 0,r2,0
+MD n=Mem ra=0x00000028 d=0x60000000	#	nop
+MD n=Mem ra=0x0000002c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000030 d=0x38420002	#	addi r2,r2,2
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000004
+RD n=GPR i=3 d=0x00000000
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x1008 d=0xdeadbeef

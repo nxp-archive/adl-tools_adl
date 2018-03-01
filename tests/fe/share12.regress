@@ -1,0 +1,65 @@
+=======
+Systems:
+=======
+System:  PSuperSystem
+  Constituent Items:
+    zs0:  PSystem
+    zs1:  PSystem
+-------------------------------
+System:  PSystem
+  Shared Resources:
+    Registers:  HID0 
+  Locally-defined Systems:
+    System:  PChip
+      Shared Resources:
+        Registers:  HID0 HID1 
+        Register-files:  PMR 
+        Parameters:  Mode 
+      Locally-defined Cores:
+        Name:  "P"
+        Architectural Parameters:
+          Name:  Mode
+          Options:  Mode32 Mode64 
+          Value:  Mode32
+          Const:  0
+          Boolean:  0
+          -------------------------------
+        Register Files:
+          Name:  "PMR"
+          Size:  32
+          Width:  32
+          -------------------------------
+        Registers:
+          Name:  "CIA"
+          Usage:  read, written
+          Width:  32
+          Attributes:  cia
+          -------------------------------
+          Name:  "HID0"
+          Width:  32
+          -------------------------------
+          Name:  "HID1"
+          Width:  32
+          -------------------------------
+          Name:  "NIA"
+          Usage:  read, written
+          Width:  32
+          Attributes:  nia
+          -------------------------------
+        Current-instruction-address register:  CIA
+        Next-instruction-address register:  NIA
+        Real-address Mask:
+          Initial mask:  0xffffffff (constant)
+        Effective-address Mask:
+          Initial mask:  0xffffffff (constant)
+        -------------------------------
+      Constituent Items:
+        context0:  P
+        context1:  P
+        context2:  P
+    -------------------------------
+  Constituent Items:
+    chip0:  PChip
+    chip1:  PChip
+-------------------------------
+

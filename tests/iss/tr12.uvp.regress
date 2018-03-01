@@ -1,0 +1,9 @@
+powerpc:t0:  Instr 5 (local count 5):  Register GPR17 mismatch:  Found 0x00000000a081250f, expected 0x00000000a081250e
+powerpc:t0:  Instr 8 (local count 8):  Register GPR31 mismatch:  Found 0x00000000d176468f, expected 0x00000000d176468e
+powerpc:t0:  Differences were found when checking intermediate results.
+powerpc:t1:  Instr 14 (local count 1):  IR element 1 of type M:  Bad tags:  (d => 0xef52a0cd )
+  Found data:  (d => 0xef52a0cf ra => 0x000000000a000000 t => load ta => 0x1 )
+powerpc:t1:  Differences were found when checking intermediate results.
+powerpc:t2:  Instr 17 (local count 2):  Register TEN mismatch:  Found 0xf, expected 0x0
+powerpc:t2:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

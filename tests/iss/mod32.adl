@@ -1,0 +1,1825 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+int access_spr(int i, unsigned int j) ;
+
+
+
+define (arch = qe_risc_3_11)
+{
+
+// Functions
+
+
+
+
+	
+    define(mem=DMEM)
+    {
+            size = 0x8000;
+            addr_unit = 1;
+    }
+
+    define(mem=IMEM)
+    {
+            size = 0x8000;
+            instr_mem = true;
+            addr_unit = 4;
+    }
+ 
+	define (regfile=DSEM)
+	{
+		"""
+		DATA MEMORY semaphore.
+		""";
+		size = 32;
+        width = 1;
+
+	}
+
+
+// muram access
+bits<65> muram_bus_access(bits<1> RDWR, bits<24> EA, bits<8> BE, bits<64> WDATA, bits<1> SM)
+{
+//	static bits<32> sem = 0;
+//	static unsigned char DMEM[0xffff];
+	bits<8> byte;
+	
+	bits<5> sem_ptr = EA(16,20);
+
+	bits<24> addr = EA & 0x00fff8;
+
+	bits<64> rdata = 0;
+//	bits<1>  sm_rdata = sem(sem_ptr,sem_ptr);
+	bits<1>  sm_rdata = DSEM(sem_ptr);
+	
+	bits<25> i = addr;
+	bits<25> e = i + 8;
+//	int size = 0;
+	
+	
+	// load
+	if(RDWR == 1)
+	{
+		rdata = DMEM(addr, 8);
+
+		if(SM == 1) DSEM(sem_ptr) = 1;
+
+	}
+	else // store
+	{
+		while(BE != 0)
+		{
+			if(BE(0) == 1)
+			{
+				DMEM(addr, 1) = WDATA(0,7);
+			}
+			
+			WDATA = concat(WDATA, zero(8));
+			BE    = concat(BE,    zero(1));
+			addr  = addr + 1;
+			
+		}
+
+		if(SM == 1) DSEM(sem_ptr) = 0;
+			
+	}
+
+	return concat(sm_rdata, rdata);
+}
+
+
+
+
+// merge function
+bits<32> merge(bits<32> A, bits<32> B, bits<32> M)
+{
+
+    return ( (A & M) | (B & ~M) );
+}
+
+// expand imm16
+bits<32> imm16e( bits<16> IMM16, bits<1> HWS)
+{
+	bits<32> imm = 0;
+
+	if(HWS == 1) 
+       imm = concat(zero(16), IMM16);
+	else   
+       imm = concat(IMM16, zero(16));
+
+	return imm;   
+}
+
+// General status function
+bits<32> CR_status(bits<32> RES_S, bits<32> RES)
+{
+// RES_S  - swapped result
+// RES    - result
+
+
+    bits<1> z    = (RES_S == 0) ? 1 : 0 ;
+	
+    bits<1> neg  = ((RES_S & 0x80000000) == 0) ? 0 : 1 ;
+	
+    bits<1> leq  = (neg | z) ;
+	
+    bits<1> awz  = (((RES_S & 0xffff0000) == 0) ||
+	               ((RES_S & 0x0000ffff) == 0)   ) ? 1 : 0 ;
+				   
+    bits<1> lwz  = ((RES_S & 0x0000ffff) == 0) ? 1 : 0 ;
+	
+    bits<1> lwn  = ((RES_S & 0x00008000) == 0) ? 0 : 1 ;
+	
+    bits<1> lbz  = ((RES_S & 0x000000ff) == 0) ? 1 : 0 ;
+	
+    bits<1> abz  = (((RES_S & 0xff000000) == 0) ||
+	                ((RES_S & 0x00ff0000) == 0) ||
+	                ((RES_S & 0x0000ff00) == 0) ||
+	                ((RES_S & 0x000000ff) == 0)    ) ? 1 : 0 ;
+					
+    bits<1> odd  = ((RES_S & 0x00000001) == 0) ? 0 : 1 ;
+
+    bits<1> min  = (RES == 0x80000000) ? 1 : 0 ;
+	
+    bits<32> CR_new = 0;//concat(zero(1), z, neg, leq, awz, lwz, lbz, zero(4), abz, odd, zero(1), min, zero(16));
+
+	CR_new.set(1,1,z);
+	CR_new.set(2,2,neg);
+	CR_new.set(3,3,leq);
+	CR_new.set(4,4,awz);
+	CR_new.set(5,5,lwz);
+	CR_new.set(6,6,lwn);
+	CR_new.set(7,7,lbz);
+	CR_new.set(12,12,abz);
+	CR_new.set(13,13,odd);
+	CR_new.set(15,15,min);
+
+ //   return merge(CR_new, CR, 0xffbf0000); // merge new with old CR[0:15] exclude sov 
+    return ((CR_new & 0xffbf0000) | (CR & ~0xffbf0000)); // merge new with old CR[0:15] exclude sov 
+
+} // ebd of CR_status
+
+
+
+	define (reg=PR)
+	{
+		"""
+		Temporal regester for debug prints .
+		""";
+		width = 65;
+
+    }
+
+	//
+	// Registers.
+	//
+
+
+	define (reg=NIA) 
+	{
+		"""
+		Next instruction address for fetch.
+	    """;
+//		classes = nia;
+		attrs = nia;
+//		reset = 4;
+		reset = 0;
+		define(write)
+		{
+			action = func(bits<32> value)
+			{
+//	      	    NIA.set(6,29,NPC);
+//	      	    NIA.set(0,31,NPC);
+	      	    NIA.set(0,31,PC);
+			};
+		}
+	}
+	
+	define (reg=PC)
+	{
+		"""
+		Current instruction address.
+		""";
+
+		width = 24;
+		reset = 0;
+	    attrs = cia;
+    }
+
+	define (reg=NPC) 
+	{
+		"""
+		Next instruction address.
+	    """;
+		width = 24;
+		reset = 1;
+//		attrs = nia;
+	}
+	
+	define (reg=NNPC) 
+	{
+		"""
+		NPC+.
+	    """;
+		width = 24;
+		reset = 2;
+	}
+	
+        define (reg=R1)    {}
+        define (reg=R2)    {}
+        define (reg=R3)    {}
+        define (reg=R4)    {}
+        define (reg=R5)    {}
+        define (reg=R6)    {}
+        define (reg=R7)    {}
+        define (reg=R8)    {}
+        define (reg=R9)    {}
+        define (reg=R10)   {}
+        define (reg=R11)   {}
+        define (reg=R12)   {}
+        define (reg=R13)   {}
+        define (reg=R14)   {}
+        define (reg=R15)   {}
+        define (reg=R16)   {}
+        define (reg=R17)   {}
+        define (reg=R18)   {}
+        define (reg=R19)   {}
+        define (reg=R20)   {}
+        define (reg=R21)   {}
+        define (reg=R22)   {}
+        define (reg=R23)   {}
+        define (reg=R24)   {}
+        define (reg=R25)   {}
+        define (reg=R26)   {}
+        define (reg=RPAGE) {}
+        define (reg=RBA)   {}
+        define (reg=SER)   {}
+        define (reg=SST)   {}
+        define (reg=SP)    {}
+        define (reg=R0)
+        {
+            reset   = 0;
+			
+			define (read)  
+			{
+				action = { return 0; };
+			}
+			
+			define (write)  
+			{
+				ignore = true;
+			}
+        }
+
+	define (regfile=GPR0)
+	{
+		"""
+		General purpose registers.
+		""";
+		size = 32;
+	
+		define (entry=0 ) { reg = R1    ;}  
+		define (entry=1 ) { reg = R2    ;}  
+		define (entry=2 ) { reg = R3    ;}  
+		define (entry=3 ) { reg = R4    ;}  
+		define (entry=4 ) { reg = R5    ;}  
+		define (entry=5 ) { reg = R6    ;}  
+		define (entry=6 ) { reg = R7    ;}  
+		define (entry=7 ) { reg = R8    ;}  
+		define (entry=8 ) { reg = R9    ;}  
+		define (entry=9 ) { reg = R10   ;}  
+		define (entry=10) { reg = R11   ;}  
+		define (entry=11) { reg = R12   ;}  
+		define (entry=12) { reg = R13   ;}  
+		define (entry=13) { reg = R14   ;}  
+		define (entry=14) { reg = R15   ;}  
+		define (entry=15) { reg = R16   ;}  
+		define (entry=16) { reg = R17   ;}  
+		define (entry=17) { reg = R18   ;}  
+		define (entry=18) { reg = R19   ;}  
+		define (entry=19) { reg = R20   ;}  
+		define (entry=20) { reg = R21   ;}  
+		define (entry=21) { reg = R22   ;}  
+		define (entry=22) { reg = R23   ;}  
+		define (entry=23) { reg = R24   ;}  
+		define (entry=24) { reg = R25   ;}  
+		define (entry=25) { reg = R26   ;}  
+		define (entry=26) { reg = RPAGE ;}  
+		define (entry=27) { reg = RBA   ;}  
+		define (entry=28) { reg = SER   ;}  
+		define (entry=29) { reg = SST   ;}  
+		define (entry=30) { reg = SP    ;}  
+		define (entry=31) { reg = R0    ;}
+	}
+
+	define(regfile=GPR) 
+        {
+	  alias=GPR0;
+        }
+
+	define (reg=CR) 
+	{
+		"""
+		Conditional Regester .
+	    """;
+
+//		regfile = (SPR, 1);
+		reset   = 0x8001;
+
+		define (field=carry)
+		{
+			bits = 0;
+		}
+		
+		define (field=zero)
+		{
+			bits = 1;
+		}
+		
+		define (field=neg)
+		{
+			bits = 2;
+		}
+		
+		define (field=leq)
+		{
+			bits = 3;
+		}
+		
+		define (field=awz)
+		{
+			bits = 4;
+		}
+		
+		define (field=lwz)
+		{
+			bits = 5;
+		}
+		
+		define (field=lwn)
+		{
+			bits = 6;
+		}
+		
+		define (field=lbz)
+		{
+			bits = 7;
+		}
+		
+		define (field=ov)
+		{
+			bits = 8;
+		}
+		
+		define (field=sov)
+		{
+			bits = 9;
+		}
+		
+		define (field=sle)
+		{
+			bits = 10;
+		}
+		
+		define (field=sl)
+		{
+			bits = 11;
+		}
+		
+		define (field=abz)
+		{
+			bits = 12;
+		}
+		
+		define (field=odd)
+		{
+			bits = 13;
+		}
+		
+		define (field=mod)
+		{
+			bits = 14;
+		}
+		
+		define (field=min)
+		{
+			bits = 15;
+		}
+		
+		define (field=rcnf0)
+		{
+			bits = 16;
+		}
+		
+		define (field=rcnf1)
+		{
+			bits = 17;
+		}
+		
+		define (field=rcnf2)
+		{
+			bits = 18;
+		}
+		
+		define (field=rcnf3)
+		{
+			bits = 19;
+		}
+		
+		define (field=rcnf4)
+		{
+			bits = 20;
+		}
+		
+		define (field=rcnf5)
+		{
+			bits = 21;
+		}
+		
+		define (field=leac)
+		{
+			bits = 22;
+		}
+		
+		define (field=rcnf7)
+		{
+			bits = 23;
+		}
+		
+		define (field=cr24)
+		{
+			bits = 24;
+		}
+		
+		define (field=cr25)
+		{
+			bits = 25;
+		}
+		
+		define (field=cr26)
+		{
+			bits = 26;
+		}
+		
+		define (field=cr27)
+		{
+			bits = 27;
+		}
+		
+		define (field=emrd)
+		{
+			bits = 28;
+		}
+		
+		define (field=emr)
+		{
+			bits = 29;
+		}
+		
+		define (field=sm)
+		{
+			bits = 30;
+		}
+		
+		define (field=alw)
+		{
+			bits = 31;
+			readonly=true;
+		}
+	}
+	
+	define (reg=SNUMR) 
+	{
+		"""
+		Serial Number Register .
+	    """;
+
+		reset   = 0x80000000;
+
+		define (field=org_bg)
+		{
+			bits = 0;
+		}
+		
+		define (field=org_snum)
+		{
+			bits = (8,15);
+		}
+		
+		define (field=bg)
+		{
+			bits = 16;
+		}
+		
+		define (field=snum)
+		{
+			bits = (24,31);
+		}
+	}
+	
+	define (reg=ILR) 
+	{
+		"""
+		Interrupt Link Register .
+	    """;
+
+		reset   = 0;
+
+		define (field=en)
+		{
+			bits = 0;
+		}
+		
+		define (field=addr)
+		{
+			bits = (8,31);
+		}
+	}
+	
+	define (reg=ITR) 
+	{
+		"""
+		Interrupt Temporal Register .
+	    """;
+
+		reset   = 0;
+
+	}
+	
+	define (reg=BTR) 
+	{
+		"""
+		Breakpoint Temporal Register .
+	    """;
+
+		reset   = 0;
+
+	}
+	
+	define (reg=DVR) 
+	{
+		"""
+		Debug Virtual Register .
+	    """;
+ 		define (read)  
+		{ 
+			action = { return 0; }; 
+		}
+		
+		define (write) 
+		{
+			ignore = true; 
+		} 
+	}
+	
+	define (reg=BGTLR) 
+	{
+		"""
+		BackGround Task Link Register .
+	    """;
+
+		reset   = 0;
+
+		define (field=en)
+		{
+			bits = 0;
+		}
+		
+		define (field=addr)
+		{
+			bits = (8,31);
+		}
+	}
+	
+	define (reg=RESERVED0) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVED2) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVED4) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVED6) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVED8) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVEDa) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVEDc) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	define (reg=RESERVEDe) { define (read)  { action = { return 0; }; } define (write) { ignore = true; } } 
+	
+	define (regfile=SPR)
+	{
+		"""
+		Special purpose registers.
+		""";
+		size = 0x80;
+		
+		define (entry=0x1) {reg=CR;}
+		define (entry=0x3) {reg=SNUMR;}
+		define (entry=0x5) {reg=ILR;}
+		define (entry=0x7) {reg=ITR;}
+		define (entry=0x9) {reg=BTR;}
+		define (entry=0xb) {reg=DVR;}
+		define (entry=0xd) {reg=BGTLR;}
+		
+		define (entry=0x0) {reg=RESERVED0;}
+		define (entry=0x2) {reg=RESERVED2;}
+		define (entry=0x4) {reg=RESERVED4;}
+		define (entry=0x6) {reg=RESERVED6;}
+		define (entry=0x8) {reg=RESERVED8;}
+		define (entry=0xa) {reg=RESERVEDa;}
+		define (entry=0xc) {reg=RESERVEDc;}
+		define (entry=0xe) {reg=RESERVEDe;}
+	}
+
+	//
+	// Instruction fields.
+	//
+
+	define (instrfield=OPCD) 
+	{
+		"""
+		Primary opcode.
+		""";
+		bits = (0,4);
+	}
+
+	define (instrfield=OPCD_SHRT) 
+	{
+		"""
+		Primary short opcode.
+		""";
+		bits = (0,3);
+	}
+
+	define (instrfield=SW) 
+	{
+		"""
+		Swap option for LD instruction
+		""";
+		bits = 4;
+	}
+
+	define (instrfield=SM) 
+	{
+		"""
+		Semaphor option for DMA instructions
+		""";
+		bits = 4;
+	}
+
+	define (instrfield=OPCD_BTM) 
+	{
+		"""
+		Secondary opcode for BTM instructions
+		""";
+		bits = (5,7);
+	}
+
+	define (instrfield=CRC) 
+	{
+		"""
+		CRC type for BCRC/BCOPY instructions
+		""";
+		bits = (8,9);
+	}
+
+	define (instrfield=DSIZE) 
+	{
+		"""
+		DSIZE field for BCAM/BMIN/BMAX instructions
+		""";
+		bits = (8,9);
+	}
+
+	define (instrfield=RV) 
+	{
+		"""
+		RV option for BCRC/BCOPY instructions
+		""";
+		bits = 10;
+	}
+
+	define (instrfield=RVS) 
+	{
+		"""
+		RVS option for BCRCI/BCOPYI instructions
+		""";
+		bits = (10,11);
+	}
+
+	define (instrfield=M) 
+	{
+		"""
+		M option for BCAM instructions
+		""";
+		bits = 10;
+	}
+
+	define (instrfield=DMA_SIZE) 
+	{
+		"""
+		Size option for DMA instructions
+		""";
+		bits = (5,8);
+	}
+
+	define (instrfield=DATA) 
+	{
+		"""
+		Size option for DMA instructions
+		""";
+		bits = 9;
+	}
+
+	define (instrfield=OPCD_B10) 
+	{
+		"""
+		DMAR/DMAW selector for DMA instructions
+		""";
+		bits = 10;
+	}
+
+	define (instrfield=OPCD_B11) 
+	{
+		"""
+		Reserved field for BCAMI/BMINI/BMAXI instructions
+		""";
+		bits = 11;
+	}
+
+	define (instrfield=OPCD_B12) 
+	{
+		"""
+		Reserved field for BCAMI/BMINI/BMAXI instructions
+		""";
+		bits = 12;
+	}
+
+	define (instrfield=DES) 
+	{
+		"""
+		DES option for BCOPYI instruction
+		""";
+		bits = 12;
+	}
+
+	define (instrfield=BUFFER_SIZE) 
+	{
+		"""
+		BUFFER_SIZE field for BTM Imm instructions
+		""";
+		bits = (13,15);
+	}
+
+	define (instrfield=SML) 
+	{
+		"""
+		Semaphor option for LD instruction
+		""";
+		bits = 8;
+	}
+
+	define (instrfield=HWS) 
+	{
+		"""
+		High Word Select for ALU immideate instructions
+		""";
+		bits = 4;
+	}
+
+	define (instrfield=NOT_J) 
+	{
+		"""
+		Condition NOT for JMP instructions
+		""";
+		bits = 4;
+	}
+
+	define (instrfield=OPCD_B5) 
+	{
+		"""
+		Secondary opcode.
+		""";
+		bits = 5;
+	}
+
+	define (instrfield=HU) 
+	{
+		"""
+		Flag to update half of target register for push instruction.
+		""";
+		bits = 5;
+	}
+
+	define (instrfield=RS) 
+	{
+		"""
+		RS field for mfspr instruction.
+		""";
+		bits = 5;
+	}
+
+	define (instrfield=AU) 
+	{
+		"""
+		Address Update option for pushsch/ldsch instructions.
+		""";
+		bits = 5;
+	}
+
+	define (instrfield=SBS) 
+	{
+		"""
+		BS field for mtspri instruction.
+		""";
+		bits = (6,7);
+	}
+
+	define (instrfield=OPCD_B6) 
+	{
+		"""
+		Secondary opcode for push/pushl instructions.
+		""";
+		bits = 6;
+	}
+
+	define (instrfield=OPCD_B7) 
+	{
+		"""
+		Secondary opcode.
+		""";
+		bits = 7;
+	}
+
+	define (instrfield=CMPRS) 
+	{
+		"""
+		CMPRS option for push/pushl instructions.
+		""";
+		bits = 7;
+	}
+
+    define (instrfield=B8) 
+	{
+		"""
+		mfspr.b8 instructions.
+		""";
+		bits = 7;
+	}
+
+	define (instrfield=CMPRS_J) 
+	{
+		"""
+		CMPRS option for jmp instructions.
+		""";
+		bits = 23;
+	}
+
+
+    define (instrfield=OPCD_B8) 
+	{
+		"""
+		LD/ST selector for LDM/STM instructions.
+		""";
+		bits = 8;
+	}
+
+    define (instrfield=IMM8S) 
+	{
+		"""
+		IMM8 for mtspri instructions.
+		""";
+		bits = (8,15);
+	}
+
+    define (instrfield=CASE_SIZE) 
+	{
+		"""
+		size of case instruction.
+		""";
+		bits = (8,10);
+	}
+
+	define (instrfield=NOP_J) 
+	{
+		"""
+		NOP option in JMP instruction.
+		""";
+		bits = 5;
+	}
+
+	define (instrfield=INVA) 
+	{
+		"""
+		INV operand B in ALU instruction.
+		""";
+		bits = 5;
+	}
+
+	define (instrfield=SIZEB) 
+	{
+		"""
+		SIZEB field for mtspr instruction.
+		""";
+		bits = (5,7);
+	}
+
+	define (instrfield=SIZEA) 
+	{
+		"""
+		SIZEA field for mtspr instruction.
+		""";
+		bits = (8,10);
+	}
+
+	define (instrfield=OPCD_ALU) 
+	{
+		"""
+		Secondary opcode for ALU instructions.
+		""";
+		bits = (6,8);
+	}
+
+	define (instrfield=SIZE_LDST) 
+	{
+		"""
+		size field for ld/st instructions.
+		""";
+		bits = (5,7);
+	}
+
+    define (instrfield=RT1) 
+	{
+		"""
+		Reserved tag for pushsch/ldsch instructions.
+		""";
+		bits = 7;
+	}
+
+    define (instrfield=RT2) 
+	{
+		"""
+		Reserved tag for pushsch/ldsch instructions.
+		""";
+		bits = 8;
+	}
+
+    define (instrfield=UPDATE) 
+	{
+		"""
+		Update option of ALU instruction.
+		""";
+		bits = 9;
+	}
+
+    define (instrfield=RT3) 
+	{
+		"""
+		Reserved tag for pushsch/ldsch instructions.
+		""";
+		bits = 9;
+	}
+
+	define (instrfield=FLAGS) 
+	{
+		"""
+		CR update for ALU instruction.
+		""";
+		bits = 10;
+	}
+
+	define (instrfield=UR) 
+	{
+		"""
+		Micro code requesr option for pushsch/ldsch instructions.
+		""";
+		bits = 10;
+	}
+
+	define (instrfield=IMM16) 
+	{
+		"""
+		immideate 16.
+		""";
+		bits = (16,31);
+	}
+
+	define (instrfield=IMM8) 
+	{
+		"""
+		immideate 8.
+		""";
+		bits = (24,31);
+	}
+
+    define (instrfield=RSV_B21) 
+	{
+		"""
+		Reserved bit.
+		""";
+		bits = 21;
+	}
+
+    define (instrfield=OPCD_B21) 
+	{
+		"""
+		CALL/POP/RETURN bit.
+		""";
+		bits = 21;
+	}
+
+    define (instrfield=OPCD_B22) 
+	{
+		"""
+		CALL/POP/RETURN bit.
+		""";
+		bits = 22;
+	}
+
+    define (instrfield=BS) 
+	{
+		"""
+		Bite select bit for ALUIS instructions.
+		""";
+		bits = (22,23);
+	}
+
+    define (instrfield=SWAP_TYPE) 
+	{
+		"""
+		ALU swap type.
+		""";
+		bits = (26,28);
+	}
+
+    define (instrfield=DS_ALU) 
+	{
+		"""
+		data size for cnt and ffs instructions.
+		""";
+		bits = (26,29);
+	}
+
+    define (instrfield=DIRECTION) 
+	{
+		"""
+		Shift instructions direction.
+		""";
+		bits = 26;
+	}
+
+    define (instrfield=SHIFT_OPTION) 
+	{
+		"""
+		shift type for shift* instructions.
+		""";
+		bits = (27,29);
+	}
+
+    define (instrfield=RSV_B29) 
+	{
+		"""
+		Reserved bit.
+		""";
+		bits = 29;
+	}
+
+    define (instrfield=RSV_B30) 
+	{
+		"""
+		Reserved bit.
+		""";
+		bits = 30;
+	}
+
+    define (instrfield=RSV_B31) 
+	{
+		"""
+		Reserved bit.
+		""";
+		bits = 31;
+	}
+
+    define (instrfield=OPCD_B31) 
+	{
+		"""
+		Secondary opcode.
+		""";
+		bits = 31;
+	}
+
+    define (instrfield=ONE) 
+	{
+		"""
+		ONE option for add/sub instructions.
+		""";
+		bits = 31;
+	}
+
+
+	define (instrfield=ML)
+	{
+		"""
+		Mask Left.
+		""";
+		bits = (6,10);
+	}
+	
+	define (instrfield=BIT)
+	{
+		"""
+		Conditional BIT select for JMP instruction.
+		""";
+		bits = (6,10);
+	}
+	
+	define (instrfield=MR)
+	{
+		"""
+		Mask Rigth.
+		""";
+		bits = (26,30);
+	}
+	
+	define (instrfield=RA)
+	{
+		"""
+		RA.
+		""";
+		bits = (11,15);
+		ref = GPR;
+	}
+	
+	define (instrfield=RA_2)
+	{
+		"""
+		RA_2.
+		""";
+		table = ((0,1), reserved,(2,3),reserved,(4,5),reserved,(6,7),reserved,
+			 (8,9), reserved,(10,11),reserved,(12,13),reserved,(14,15),reserved,	
+			 (16,17), reserved,(18,19),reserved,(20,21),reserved,(22,23),reserved,
+			 (24,25), reserved,(26,27),reserved,(28,29),reserved,(30,31),reserved);
+
+		bits = (11,15);
+		ref = GPR;
+	}
+
+	define (instrfield=RA_4)
+	{
+		"""
+		RA_4.
+		""";
+		table = ((0,1,2,3),reserved,reserved,reserved,(4,5,6,7),reserved,reserved,reserved,
+			 (8,9,10,11),reserved,reserved,reserved,(12,13,14,15),reserved,reserved,reserved,
+			 (16,17,18,19),reserved,reserved,reserved,(20,21,22,23),reserved,reserved,reserved,	
+			 (24,25,26,27),reserved,reserved,reserved,(28,29,30,31),reserved,reserved,reserved);	
+		bits = (11,15);
+		ref = GPR;
+	}
+	
+
+	define (instrfield=RB)
+	{
+		"""
+		RB.
+		""";
+		bits = (16,20);
+		ref  = GPR;
+	}
+	
+	define (instrfield=RC)
+	{
+		"""
+		RC.
+		""";
+		bits = (21,25);
+		ref = GPR;
+	}
+	
+	define (instrfield=DATA5)
+	{
+		"""
+		DATA5 field for mergei instruction.
+		""";
+		bits = (11,15);
+	}
+	
+	define (instrfield=IMM5M)
+	{
+		"""
+		IMM5 field for rlmerge and mergei instructions.
+		""";
+		bits = (21,25);
+	}
+	
+	define (instrfield=IMM5)
+	{
+		"""
+		shift size for shifti instruction.
+		""";
+		bits = (16,20);
+	}
+	
+	define (instrfield=CFA)
+	{
+		"""
+		pointer to CR bit for alu conditional instructions.
+		""";
+		bits = (26,30);
+	}
+	
+	define (instrfield=NOTAC)
+	{
+		"""
+		NOT of CR flag for alu conditional instructions.
+		""";
+		bits = 31;
+	}
+	
+	define (instrfield=INSTR_OFFSET)
+	{
+		"""
+		instruction offset for imm. jmp instructions
+		""";
+		bits = (16,31);
+	}
+	
+	define (instrfield=LONG_OFFSET)
+	{
+		"""
+		instruction offset for pushl instruction
+		""";
+		bits = (8,31);
+	}
+	
+	define (instrfield=DRAM_OFFSET)
+	{
+		"""
+		MURAM offset for ld/st/spr instructions
+		""";
+		bits = (21,31);
+	}
+	
+	define (instrfield=SPRF)
+	{
+		"""
+		SPR address field for mtspr/mfspr instructions
+		""";
+		bits = (21,31);
+	}
+	
+	define (parm=Fetch) 
+	{
+    	options = (Normal,JmpN);
+    	value = Normal;
+	}
+
+
+	post_exec =
+	{
+//PR=PC;		
+//PR=NPC;		
+//PR=NNPC;		
+		bits<24> s = 1;
+
+		PC.set(0,23,(Fetch == JmpN) ? NNPC : NPC);
+
+		NIA.set(0,31,PC);
+		
+		NPC.set(0,23,(Fetch == JmpN) ? NNPC + s : NNPC);
+
+		NNPC.set(0,23,NPC + 1);
+		
+//PR=PC;		
+//PR=NPC;		
+//PR=NNPC;		
+    	Fetch = Normal;
+		
+	};
+
+    define (subinstr=ld2) {
+	fields = (SW,SIZE_LDST(6),RA_2,FLAGS);
+	action = func(bits<64> data1) {
+	        bits<64> data = data1;
+		GPR(RA_2(0)) = (SW == 1) ? concat(data(24,31), data(16,23), data(8,15), data(0,7)) 
+  			                 : data(0 ,31);
+			       GPR(RA_2(1)) = (SW == 1) ? concat(data(56,63), data(48,55), data(40,47), data(32,39))
+                                             : data(32,63);
+
+			if(FLAGS == 1)
+		        {
+			     CR = CR_status(GPR(RA_2(0)),GPR(RA_2(0)));
+			     CR.min = 0;
+			}
+		data1 = data;
+	   };
+        }
+
+    define (subinstr=ld4) {
+	fields = (SW,SIZE_LDST(7),RA_4,FLAGS);
+	action = func(bits<64> data1) {
+		       bits<64> data = data1;
+
+			GPR(RA_4(0)) = (SW == 1) ? concat(zero(16), data (24,31), data(16,23)) 
+				 	         : concat(zero(16), data(0 ,15)) ;
+											
+			GPR(RA_4(1)) = (SW == 1) ? concat(zero(16), data (8 ,15), data(0,7)) 
+					         : concat(zero(16), data(16,31)) ;
+											
+			GPR(RA_4(2)) = (SW == 1) ? concat(zero(16), data (56,63), data(48,55)) 
+					         : concat(zero(16), data(32,47)) ;
+												
+			GPR(RA_4(3)) = (SW == 1) ? concat(zero(16), data (40,47), data(32,39))
+					         : concat(zero(16), data(48,63)) ;
+
+			if(FLAGS == 1)
+  			{
+			  bits<32> tmps = concat(GPR(RA_4(0))(16,31), GPR(RA_4(1))(16,31));		
+			  CR = CR_status(tmps, tmps);
+			  CR.min = 0;
+			}
+
+			data1 = data;
+	  };
+        }
+    define(subinstr=ld1) {
+	fields = (SW,SIZE_LDST,RA,FLAGS);
+	action = func(bits<64>& data1) {
+			bits<64> data = data1;
+			if     (SIZE_LDST == 0) GPR(RA) = concat(zero(24), data(0,7));
+			
+			// .b1s
+			if(SIZE_LDST == 1) GPR(RA) = signExtend(data(0,7), 32);
+			
+			// .b2
+			if(SIZE_LDST == 2) GPR(RA) = (SW == 1) ? concat(zero(16), data(8,15), data(0,7)) 
+								    : concat(zero(16), data(0,15)) ;
+											
+			// .b2s
+			if(SIZE_LDST == 3) GPR(RA) = (SW == 1) ? signExtend(concat(data(8,15), data(0,7)), 32) 
+								    : signExtend(data(0,15), 32) ;
+											
+			// .b4
+			if(SIZE_LDST == 4) GPR(RA) = (SW == 1) ? concat(data(24,31), data(16,23), data(8,15), data(0,7)) 
+								    : data(0,31) ;
+											
+			// .b3
+			if(SIZE_LDST == 5) GPR(RA) = concat(zero(8), data(8,31));
+			
+			if(FLAGS == 1)
+		        {
+			     CR = CR_status(GPR(RA),GPR(RA));
+			     CR.min = 0;
+			}
+			data1 = data;
+        } ;
+    }	
+	define(instr=ld) {
+		fields=(OPCD_SHRT(0), reg_update, SML, UPDATE, RB, DRAM_OFFSET );
+		define (subinstrs=reg_update) {
+		  subs= (ld1,ld2,ld4);
+		}
+		names = (ld_1,ld_2,ld_4);
+		action = {
+		 	bits<64> data  ;
+			bits<24> leswp_addr_correction = ((SW & CR(22)) == 1) ? 0x3 : 0;
+			
+			 bits<24> EA_temp = GPR(RB) + signExtend(DRAM_OFFSET,24);
+			
+			 bits<24> EA = EA_temp ^ leswp_addr_correction;
+
+		        if(SIZE_LDST == 1 || SIZE_LDST == 5) EA = EA & 0xfffffe;
+		        if(SIZE_LDST == 2 || SIZE_LDST == 6) EA = EA & 0xfffffc;
+		        if(SIZE_LDST == 3 || SIZE_LDST == 7) EA = EA & 0xfffff8;
+
+
+			 if (UPDATE == 1) GPR(RB) = merge(GPR(RB), EA_temp, 0xff000000);
+			
+			 bits<3>  addr_lsb = EA(21,23);
+
+			 bits<8>  be;
+			
+			 if     (SIZE_LDST == 0) be = 0x80;
+			 else if(SIZE_LDST == 1) be = 0x80;
+		 	 else if(SIZE_LDST == 2) be = 0xc0;
+			 else if(SIZE_LDST == 3) be = 0xc0;
+			 else if(SIZE_LDST == 4) be = 0xf0;
+			 else if(SIZE_LDST == 5) be = 0x70;
+			 else if(SIZE_LDST == 6) be = 0xff;
+			 else if(SIZE_LDST == 7) be = 0xff;
+				
+			 be = be >> addr_lsb;
+			
+			 bits<65> tmp  = muram_bus_access(1, EA, be, 0, SML);
+ 
+			 bits<6>  shift = concat(EA(21,23), zero(3));
+
+			 data  = tmp(1,64) << shift;
+
+			 if(SML == 1)
+  			 {
+			 	CR.sm = tmp(0);
+  			 }
+
+		         reg_update(data);
+		};
+
+        }
+
+	define(subinstr=st1) 
+        {
+	   fields = (RA,SIZE_LDST,FLAGS);
+	   action = func(bits<64>& data) {
+			// .b4/.b3
+		data = concat(GPR(RA), GPR(RA));
+
+		// .b1
+		if     (SIZE_LDST == 0) 
+		{
+                        data = concat(zero(32),GPR(RA)(24,31),GPR(RA)(24,31),GPR(RA)(24,31),GPR(RA)(24,31));
+										  
+                        data = concat(data(32,63),data(32,63));
+		}									  
+			
+		// .b2
+		else if(SIZE_LDST == 2) data = concat(GPR(RA)(16,31),GPR(RA)(16,31),GPR(RA)(16,31), GPR(RA)(16,31));
+
+		   if(FLAGS == 1)
+	          {
+		     CR = CR_status(GPR(RA), GPR(RA));
+	             CR.min = 0;
+		  }
+
+
+           };
+        }
+	define(subinstr=st0) 
+        {
+	   fields = (RA(0x1f),SIZE_LDST(6),FLAGS);
+           action = func(bits<64> &data) {
+		data = concat(GPR(31), GPR(31));
+		   if(FLAGS == 1)
+	          {
+		     CR = CR_status(GPR(31), GPR(31));
+	             CR.min = 0;
+		  }
+
+
+           };
+        }
+
+	define(subinstr=st2) 
+        {
+	   fields = (RA_2,SIZE_LDST(6),FLAGS);
+	   action = func(bits<64> &data) {
+		data = concat(GPR(RA_2(0)), GPR(RA_2(1)));
+ 	        if(FLAGS == 1)
+	        {
+		   CR = CR_status(GPR(RA_2(0)), GPR(RA_2(0)));
+	           CR.min = 0;
+		}
+           };
+		
+        }
+
+	define(subinstr=st4) 
+        {
+	   fields = (RA_4,SIZE_LDST(7),FLAGS);
+	   action = func(bits<64> &data) {
+	   data = concat(GPR(RA_4(0))(16,31), GPR(RA_4(1))(16,31), GPR(RA_4(2))(16,31), GPR(RA_4(3))(16,31));	
+           if(FLAGS == 1)
+	   {
+               CR = CR_status(GPR(RA_4(0)), GPR(RA_4(0)));
+           }
+
+           };
+	}
+
+	define(instr=st)
+	{
+	  width=32;
+		fields=(OPCD(2), reg_store, SML, UPDATE, RB, DRAM_OFFSET );
+		define(subinstrs = reg_store) {
+		  subs = (st0,st1,st2,st4);
+              	}
+	        names = (st_0,st_1,st_2,st_4);
+//		syntax = ("%i, %f, %f, %f, %f", RC, RB, RA_4(0), ML, MR); 
+		action = {		
+                    bits<64> data;
+	            reg_store(data);
+		    bits<24> EA_temp = GPR(RB) + signExtend(DRAM_OFFSET,24);
+			
+		    bits<24> EA = EA_temp;
+		   if(SIZE_LDST == 1 || SIZE_LDST == 5) EA = EA & 0xfffffe;
+		   if(SIZE_LDST == 2 || SIZE_LDST == 6) EA = EA & 0xfffffc;
+		   if(SIZE_LDST == 3 || SIZE_LDST == 7) EA = EA & 0xfffff8;
+
+		    bits<3>  addr_lsb = EA(21,23);
+		    bits<8>  be;
+		    if(SIZE_LDST == 0) be = 0x80;
+		    else if(SIZE_LDST == 1) be = 0x80;
+		    else if(SIZE_LDST == 2) be = 0xc0;
+		    else if(SIZE_LDST == 3) be = 0xc0;
+		    else if(SIZE_LDST == 4) be = 0xf0;
+		    else if(SIZE_LDST == 5) be = 0x70;
+		    else if(SIZE_LDST == 6) be = 0xff;
+		    else if(SIZE_LDST == 7) be = 0xff;
+			
+		    be = be >> addr_lsb;
+				
+		    muram_bus_access(0, EA, be, data, SML);
+
+		  if (UPDATE == 1) GPR(RB) = merge(GPR(RB), EA_temp, 0xff000000);
+	           if(FLAGS == 1)
+		   {
+		       CR.min = 0;
+        	   }
+
+		
+           };
+	}
+
+	define(subinstr=ldm1) 
+        {
+	  fields = (SIZE_LDST,RA,FLAGS);
+	  action = func(bits<64>& data1) {
+	  bits<64> data = data1;
+		// .b1
+	   		if(SIZE_LDST == 0) GPR(RA) = concat(zero(24), data(0,7) );
+			
+			// .b1s
+    	   		else if(SIZE_LDST == 1) GPR(RA) = signExtend(data(0,7), 32 );
+			
+			// .b2
+			else if(SIZE_LDST == 2) GPR(RA) = concat(zero(16), data(0,15) );
+											
+			// .b2s
+			else if(SIZE_LDST == 3) GPR(RA) = signExtend(data(0,15), 32 );
+											
+			// .b4
+			else if(SIZE_LDST == 4) GPR(RA) = data(0,31);
+											
+			// .b3
+			else if(SIZE_LDST == 5) GPR(RA) = concat(zero(8), data(8,31));
+			if(FLAGS == 1)
+			{
+			  CR = CR_status(GPR(RA),GPR(RA));
+			}	
+		data1 = data;
+	    };
+        }
+
+
+	define(subinstr=ldm2) 
+        {
+	  fields = (SIZE_LDST(6),RA_2,FLAGS);
+	  action = func(bits<64>& data1) {
+	  bits<64> data = data1;
+	   	   GPR(RA_2(0)) = data(0 ,31);
+ 		   GPR(RA_2(1)) = data(32,63);
+	   	   
+                    if(FLAGS == 1)
+	            {
+		      bits<32> tmps = concat(GPR(RA_2(0)), GPR(RA_2(0)));		
+	              CR = CR_status(tmps, tmps);
+	            }
+		   data1 = data;	
+		};
+	}
+
+	define(subinstr=ldm4) 
+        {
+	  fields = (SIZE_LDST(7),RA_4,FLAGS);
+	  action = func(bits<64>& data1) {
+		  bits<64> data = data1;	
+ 		   GPR(RA_4(0)) = concat(zero(16), data(0 ,15) );
+		   GPR(RA_4(1)) = concat(zero(16), data(16,31) );
+		   GPR(RA_4(2)) = concat(zero(16), data(32,47) );
+        	   GPR(RA_4(3)) = concat(zero(16), data(48,63) );
+
+	           if(FLAGS == 1)
+		   {
+		      bits<32> tmps = concat(GPR(RA_4(0))(16,31), GPR(RA_4(1))(16,31));		
+	              CR = CR_status(tmps, tmps);
+	           }
+		   data1 = data;
+	     } ;
+        } 
+
+    define(instr=ldm)
+	{
+	  width=32;
+		fields=(OPCD(3), OPCD_B8(0), reg_update,UPDATE, RB, DRAM_OFFSET );
+		define(subinstrs=reg_update) {
+		   subs = (ldm1,ldm2,ldm4);
+		}
+		names = (ldm_1,ldm_2m,ldm_4);
+		action =
+		{
+		   bits<64>  data;
+	 	   bits<7>  modulo = GPR(RB)(1,7);
+		   bits<7>  addr   = GPR(RB)(22,28);
+
+		   bits<7>  mask   = (modulo(0) == 1) ? 0x7f :
+  		 		     (modulo(1) == 1) ? 0x3f :
+		   		     (modulo(2) == 1) ? 0x1f :
+				     (modulo(3) == 1) ? 0x0f :
+				     (modulo(4) == 1) ? 0x07 :
+				     (modulo(5) == 1) ? 0x03 :
+			             (modulo(6) == 1) ? 0x01 : 0 ;
+
+		   bits<32> wrap    = ((addr & mask) == (modulo & mask)) ? 0x80000000 : 0;
+
+		   bits<24> EA_temp = (wrap == 0) ? GPR(RB) +  signExtend(DRAM_OFFSET,24) 
+	        	                  : GPR(RB) & ~concat(zero(14), mask, zero(3)) ;
+
+		   bits<24> EA = EA_temp;
+		   if(SIZE_LDST == 1 || SIZE_LDST == 5) EA = EA & 0xfffffe;
+		   if(SIZE_LDST == 2 || SIZE_LDST == 6) EA = EA & 0xfffffc;
+		   if(SIZE_LDST == 3 || SIZE_LDST == 7) EA = EA & 0xfffff8;
+
+		   if (UPDATE == 1) GPR(RB) = merge(GPR(RB), EA_temp, 0xff000000) ^ wrap;
+			
+		   bits<3>  addr_lsb = EA(21,23);
+
+		   bits<8>  be;
+		   if     (SIZE_LDST == 0) be = 0x80;
+		   else if(SIZE_LDST == 1) be = 0x80;
+		   else if(SIZE_LDST == 2) be = 0xc0;
+		   else if(SIZE_LDST == 3) be = 0xc0;
+		   else if(SIZE_LDST == 4) be = 0xf0;
+		   else if(SIZE_LDST == 5) be = 0x70;
+		   else if(SIZE_LDST == 6) be = 0xff;
+		   else if(SIZE_LDST == 7) be = 0xff;
+			
+		   be = be >> addr_lsb;
+			
+		   bits<64> tmp  = muram_bus_access(1, EA, be, 0, 0);
+ 
+		   bits<6>  shift = concat(EA(21,23), zero(3));
+
+		   data  = tmp(0,63) << shift;
+
+	           reg_update(data);
+
+		};
+	}
+
+    define(instr=stm)
+	{
+	  width=32;
+		fields=(OPCD(3), OPCD_B8(1), reg_store, UPDATE, RB, DRAM_OFFSET );
+		define(subinstrs=reg_store) {
+		  subs = (st0,st1,st2,st4);
+              	}
+	        names = (stm_0,stm_1,stm_2,stm_4);
+
+		action =
+		{
+	            bits<64> data;
+                    reg_store(data);
+
+		    bits<7>  modulo = GPR(RB)(1,7);
+		    bits<7>  addr   = GPR(RB)(22,28);
+		    bits<7>  mask   = (modulo(0) == 1) ? 0x7f :
+  		    (modulo(1) == 1) ? 0x3f :
+ 		    (modulo(2) == 1) ? 0x1f :
+		    (modulo(3) == 1) ? 0x0f :
+		    (modulo(4) == 1) ? 0x07 :
+		    (modulo(5) == 1) ? 0x03 :
+		    (modulo(6) == 1) ? 0x01 :
+					0 ;
+		    bits<32> wrap    = ((addr & mask) == (modulo & mask)) ? 0x80000000 : 0;										
+
+		    bits<24> EA_temp = (wrap == 0) ? GPR(RB) +  signExtend(DRAM_OFFSET,24)       
+					 : GPR(RB) & ~concat(zero(14), mask, zero(3)) ;
+			
+		    bits<24> EA = EA_temp;
+
+		  if(SIZE_LDST == 1 || SIZE_LDST == 5) EA = EA & 0xfffffe;
+		  if(SIZE_LDST == 2 || SIZE_LDST == 6) EA = EA & 0xfffffc;
+		  if(SIZE_LDST == 3 || SIZE_LDST == 7) EA = EA & 0xfffff8;
+			
+
+		   bits<3>  addr_lsb = EA(21,23);
+
+		   bits<8>  be;
+			
+		   if     (SIZE_LDST == 0) be = 0x80;
+		   else if(SIZE_LDST == 1) be = 0x80;
+		   else if(SIZE_LDST == 2) be = 0xc0;
+		   else if(SIZE_LDST == 3) be = 0xc0;
+		   else if(SIZE_LDST == 4) be = 0xf0;
+		   else if(SIZE_LDST == 5) be = 0x70;
+		   else if(SIZE_LDST == 6) be = 0xff;
+		   else if(SIZE_LDST == 7) be = 0xff;
+			
+		   be = be >> addr_lsb;
+
+		   muram_bus_access(0, EA, be, data, 0);
+
+
+		   if (UPDATE == 1) GPR(RB) = merge(GPR(RB), EA_temp, 0xff000000) ^ wrap;
+
+		};
+	}
+
+
+
+    define(instr=ori)
+	{
+	  width=32;
+		fields=(OPCD_SHRT(0xe), HWS, INVA, OPCD_ALU(3), UPDATE, FLAGS, RA, IMM16);
+//		syntax = ("%f, %f", RA, IMM); 
+		action =
+		{
+
+			bits<32> op1 = (RA == 0x1f) ? CR : GPR(RA);
+			
+			bits<32> imm = imm16e(IMM16, HWS);
+			
+			bits<32> op2 = (INVA == 1) ? ~imm : imm;   
+
+			bits<32> tmp = op1 | op2;
+			
+			if(UPDATE == 1)
+			{
+				if(RA == 0x1f) 
+				  CR = tmp;
+				else  
+				  GPR(RA) = tmp;
+			}  
+			
+			if(FLAGS == 1)
+			{
+			  CR = CR_status(tmp, tmp);
+			}
+		};
+	}
+
+    define(instr=movei)
+	{
+	  width=32;
+		fields=(OPCD_SHRT(0xe), HWS, INVA, OPCD_ALU(7), UPDATE, FLAGS, RA, IMM16);
+//		syntax = ("%f, %f", RA, IMM); 
+		action =
+		{
+
+			bits<32> imm = imm16e(IMM16, HWS);
+
+			bits<32> tmp = (INVA == 1) ? ~imm : imm;   
+			
+			if(UPDATE == 1)
+			{
+				if(RA == 0x1f) 
+				  CR = tmp;
+				else  
+				  GPR(RA) = tmp;
+			}  
+			
+			if(FLAGS == 1)
+			{
+			  CR = CR_status(tmp, tmp);
+			}
+		};
+	}
+
+	
+// Special instruction:  This is used for simulation purposes and is
+    // not a PPC instruction.
+    define (instr=halt)
+    {
+	  width=32;
+      fields=(OPCD(0x09));
+      action = 
+	  {
+		 halt();
+      };
+    }
+
+}
+
+
+
+
+define (sys=QE_2risc) 
+{
+	
+	define (core = qe_risc) 
+	{
+		archs = qe_risc_3_11;
+		
+	}
+
+	define(shared)
+	{
+//      regfiles = DMEM;
+//      mems      = DMEM;
+      regfiles = DSEM;
+	}
+
+	qe_risc core0;
+//	qe_risc core1;
+
+}
+
+

@@ -1,0 +1,111 @@
+#
+# Check to make sure we properly reset the decode cache when we hit the "full"
+# point.
+#
+
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	addi r1,r1,1
+	li r2,10
+	mtctr r2
+L1:
+	addi r3,r3,3
+	bdnz L1
+	cmpwi r5,1
+	beq L2
+	addi r4,r4,1
+	addi r4,r4,1
+
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	addi r4,r4,1
+	li r5,1
+	li r2,5
+	mtctr r2
+	b L1
+L2:
+	.long 0x0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000018 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000001c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000020 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000024 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000028 d=0x3840000A	#	li r2,10
+MD n=Mem ra=0x0000002c d=0x7C4903A6	#	mtctr r2
+MD n=Mem ra=0x00000030 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x00000034 d=0x4200FFFC	#	bdnz L1
+MD n=Mem ra=0x00000038 d=0x2C050001	#	cmpwi r5,1
+MD n=Mem ra=0x0000003c d=0x4182006C	#	beq L2
+MD n=Mem ra=0x00000040 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000044 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000048 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000004c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000050 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000054 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000058 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000005c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000060 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000064 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000068 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000006c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000070 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000074 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000078 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000007c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000080 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000084 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000088 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x0000008c d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000090 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000094 d=0x38840001	#	addi r4,r4,1
+MD n=Mem ra=0x00000098 d=0x38A00001	#	li r5,1
+MD n=Mem ra=0x0000009c d=0x38400005	#	li r2,5
+MD n=Mem ra=0x000000a0 d=0x7C4903A6	#	mtctr r2
+MD n=Mem ra=0x000000a4 d=0x4BFFFF8C	#	b L1
+MD n=Mem ra=0x000000a8 d=0x00000000	#	.long 0x0
+# </GEN>
+
+CORE n=:P
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=5
+RD n=GPR i=3 d=45
+RD n=GPR i=4 d=22
+RD n=GPR i=5 d=1

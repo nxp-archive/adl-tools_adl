@@ -1,0 +1,96 @@
+//
+// Tests that we catch the case where too many instruction
+// attributes are used within the MMU to be able to be stored
+// within the offset of the smallest translation.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (reg=EPID) { }
+
+  attrs = (translation_attr,minippc_mmu,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11);
+
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+      attrs = minippc_mmu;
+      define (wayfield=x) {
+        bits = 2;
+        reset = 2;
+      }
+      define (wayfield=y) {
+        bits = 3;
+        reset = 1;
+      }
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=Foo) { }
+
+      define (array) {
+        entries = 16;
+      }
+      
+      define (tests=Normal) {
+        enable = func(TransType tt) { 
+          return (instrHasAttr(a1) || instrHasAttr(a2) || instrHasAttr(a3) ||
+                  instrHasAttr(a4) || instrHasAttr(a5) || instrHasAttr(a6) ||
+                  instrHasAttr(a7) || instrHasAttr(a8) || instrHasAttr(a9) ||
+                  instrHasAttr(a10) || instrHasAttr(a11));
+        };
+        test = Compare(TID,PID0,PID1);
+        test = AddrComp(EPN);
+      }
+
+      define (tests=Extended) {
+        test = Compare(TID,EPID);
+        test = AddrComp(EPN);
+      }
+
+      test_order = (Normal,Extended);
+
+      size = SIZE;
+      sizeshift = 10;
+      realpage = RPN;
+      valid = { return (V != 0); };     
+    }
+
+  }
+
+}
+
+define (core=P) {
+  archs=(foo);
+}

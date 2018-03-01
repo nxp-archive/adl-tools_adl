@@ -1,0 +1,30 @@
+
+asm94.o:     file format elf32-powerpc
+asm94.o
+architecture: powerpc:common, flags 0x00000010:
+HAS_SYMS
+start address 0x00000000
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000010  00000000  00000000  00000034  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00000000  00000000  00000044  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000000  00000000  00000000  00000044  2**0
+                  ALLOC
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00000000 l    d  .data	00000000 .data
+00000000 l    d  .bss	00000000 .bss
+00000000 l       .text	00000000 foo
+
+
+
+Disassembly of section .text:
+
+00000000 <foo>:
+   0:	6002000c 	ori    r2,r0,0xc
+   4:	3c60deae 	lis    r3,-8530
+   8:	3863beef 	addi   r3,r3,-16657
+   c:	3c80dead 	lis    r4,-8531

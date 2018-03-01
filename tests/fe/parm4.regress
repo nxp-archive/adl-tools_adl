@@ -1,0 +1,31 @@
+======
+Cores:
+======
+Name:  "bar"
+Architectural Parameters:
+  Name:  p1
+  Options:  false true 
+  Value:  true
+  Const:  0
+  Boolean:  1
+  -------------------------------
+  Name:  p2
+  Options:  false true 
+  Value:  false
+  Const:  0
+  Boolean:  1
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

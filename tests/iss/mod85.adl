@@ -1,0 +1,19 @@
+//
+// Basically, this is just mod84, where we remove a register and compile with
+// external memory.
+//
+
+#import "mod84.adl"
+
+define (core = P) {
+  archs = (MiniPPC,MtTest);
+
+  define (reg=EXREG) {
+    remove = true;
+  }
+
+  defmod (regfile=SPR) {
+    define (entry=101) { remove = true; }
+  }
+  
+}

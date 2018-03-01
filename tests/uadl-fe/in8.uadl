@@ -1,0 +1,76 @@
+//
+// Basic test of instruction class definitions,
+// testing error handling.
+//
+
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+
+    define (fetchunit=Fetcher) {
+      fetch_memory = L1i;
+      entries = 2;
+      entry_size = 4;
+      fetch_size = (4,8);
+    }
+
+    define (pipestage mID) {}
+
+    define (pipestage mEX) {}
+
+    define (pipestage mMM) {}
+
+    define (pipestage mWB) {}
+
+    // reorder buffer (assuming at most four targets per instruction)
+    define (forwarding_path reorder) {
+      size = 32;
+    }
+
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_EX, S_MM, S_WB, S_WBp );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+  }
+
+  define (instr_class a) {
+    instructions = ( add, addi );
+
+    machine = normal;
+
+    allow_extra_operands = false;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+    };
+
+    action = {};
+  }
+
+  define (instr_class b) {
+    instructions = ( "andi." );
+
+    machine = normal;
+
+    allow_extra_operands = false;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Trg  = GPR(RT);
+    };
+
+    action = {};
+  }
+
+
+}

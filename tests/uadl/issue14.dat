@@ -1,0 +1,67 @@
+#
+# Make sure that speculatively executed instructions which take exceptions do
+# not mess with the normal flow of control.  In this case, we prefetch past the
+# rfi because the translation allows it, but once the rfi is executed, we can no
+# longer access that memory.
+#
+
+= asm
+
+	addi r4,r4,1   # Should execute from rfi.
+	.long 0x0
+	addi r2,r2,1   # Start of program.
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	addi r2,r2,1
+	rfi
+bad:
+	addi r3,r3,1   # Will never be reached.
+	addi r3,r3,1				
+
+  
+= /asm
+
+= mdopts
+
+instr-offset: 0x10fd4
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010fd4 d=0x38840001	#	addi r4,r4,1   # Should execute from rfi.
+MD n=Mem ra=0x00010fd8 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00010fdc d=0x38420001	#	addi r2,r2,1   # Start of program.
+MD n=Mem ra=0x00010fe0 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010fe4 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010fe8 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010fec d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010ff0 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010ff4 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010ff8 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00010ffc d=0x4C000064	#	rfi
+MD n=Mem ra=0x00011000 d=0x38630001	#	addi r3,r3,1   # Will never be reached.
+MD n=Mem ra=0x00011004 d=0x38630001	#	addi r3,r3,1				
+# </GEN>
+
+CORE n=:P
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 UX=1 SX=1 SR=1 SW=1 EPN=0
+
+# ea=0x1000 ra=0x11000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x44 WIMG=0x2 UX=0 SX=1 SR=0 SW=0 EPN=0x4
+
+RD n=MSR      d=0x00000000
+RD n=NIA      d=0xfdc
+RD n=SRR0     d=0xfd4
+RD n=SRR1     d=0x00400000
+
+RESULTS
+
+RD n=GPR i=2 d=8
+RD n=GPR i=3 d=0
+RD n=GPR i=4 d=1

@@ -1,0 +1,88 @@
+======
+Cores:
+======
+Name:  "qe_risc"
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+  Current instruction address for fetch.
+  
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+  Next instruction address for fetch.
+     
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  DS_ALU: [26,29] 
+      data size for cnt and ffs instructions.
+  
+  FLAGS: [10,10] 
+      CR update for ALU instruction.
+  
+  INVA: [5,5] 
+      INV operand B in ALU instruction.
+  
+  OPCD: [0,4] 
+      Primary opcode.
+  
+  OPCD_ALU: [6,8] 
+      Secondary opcode for ALU instructions.
+  
+  OPCD_B31: [31,31] 
+      Secondary opcode.
+  
+  RA: [11,15] 
+      RA.
+  
+  RB: [16,20] 
+      RB.
+  
+  RC: [21,25] 
+      RC.
+  
+  SWAP_TYPE: [26,28] 
+      ALU swap type.
+  
+  UPDATE: [9,9] 
+      Update option of ALU instruction.
+  
+Instructions:
+  Name:  bset (rank: 100)
+  Width:  32
+  Fields:  OPCD(27) INVA OPCD_ALU(5) UPDATE FLAGS RA RB RC SWAP_TYPE(7) OPCD_B31(0)
+  Action:  {
+     ;
+}
+  -------------------------------
+  Name:  cnt (rank: 100)
+  Width:  32
+  Fields:  OPCD(27) INVA OPCD_ALU(5) UPDATE FLAGS RA(31) RB RC DS_ALU OPCD_B31(1)
+  Action:  {
+     ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfb800001
+    3665821696(da800000):      Mask:  0x38
+      7(38):  bset
+    3665821697(da800001):      Mask:  0x1f0000
+      31(1f0000):  cnt
+-------------------------------
+

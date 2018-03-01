@@ -1,0 +1,93 @@
+#
+# Tests to make sure that loads/stores of various alignments will work.
+# This is designed to work with a cache model- it does a dcbf at the end
+# to flush everything out.
+#
+= asm
+
+       lbz r1,0(r20)
+       lbz r2,1(r20)
+       lbz r3,2(r20)
+       lbz r4,3(r20)
+
+       lhz r5,0(r20)
+       lhz r6,2(r20)
+
+       stb r8,3(r21)
+       srw r8,r8,r31
+       stb r8,2(r21)
+       srw r8,r8,r31
+       stb r8,1(r21)
+       srw r8,r8,r31
+       stb r8,0(r21)
+       srw r8,r8,r31
+
+       addi r31,r31,8
+
+       sth r9,0x22(r21)
+       srw r9,r9,r31
+       sth r9,0x20(r21)
+       srw r9,r9,r31
+
+	   ori r10,r10,0xdead
+	   sth r10,0x13(r21)
+
+	   dcbf r0,r21
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x88340000	#	lbz r1,0(r20)
+MD n=Mem ra=0x00000004 d=0x88540001	#	lbz r2,1(r20)
+MD n=Mem ra=0x00000008 d=0x88740002	#	lbz r3,2(r20)
+MD n=Mem ra=0x0000000c d=0x88940003	#	lbz r4,3(r20)
+MD n=Mem ra=0x00000010 d=0xA0B40000	#	lhz r5,0(r20)
+MD n=Mem ra=0x00000014 d=0xA0D40002	#	lhz r6,2(r20)
+MD n=Mem ra=0x00000018 d=0x99150003	#	stb r8,3(r21)
+MD n=Mem ra=0x0000001c d=0x7D08FC30	#	srw r8,r8,r31
+MD n=Mem ra=0x00000020 d=0x99150002	#	stb r8,2(r21)
+MD n=Mem ra=0x00000024 d=0x7D08FC30	#	srw r8,r8,r31
+MD n=Mem ra=0x00000028 d=0x99150001	#	stb r8,1(r21)
+MD n=Mem ra=0x0000002c d=0x7D08FC30	#	srw r8,r8,r31
+MD n=Mem ra=0x00000030 d=0x99150000	#	stb r8,0(r21)
+MD n=Mem ra=0x00000034 d=0x7D08FC30	#	srw r8,r8,r31
+MD n=Mem ra=0x00000038 d=0x3BFF0008	#	addi r31,r31,8
+MD n=Mem ra=0x0000003c d=0xB1350022	#	sth r9,0x22(r21)
+MD n=Mem ra=0x00000040 d=0x7D29FC30	#	srw r9,r9,r31
+MD n=Mem ra=0x00000044 d=0xB1350020	#	sth r9,0x20(r21)
+MD n=Mem ra=0x00000048 d=0x7D29FC30	#	srw r9,r9,r31
+MD n=Mem ra=0x0000004c d=0x614ADEAD	#	ori r10,r10,0xdead
+MD n=Mem ra=0x00000050 d=0xB1550013	#	sth r10,0x13(r21)
+MD n=Mem ra=0x00000054 d=0x7C00A8AC	#	dcbf r0,r21
+# </GEN>
+
+CORE n=:P
+
+MD n=Mem ra=0x1000 d=0x00000000
+MD n=Mem ra=0x2000 d=0x00000000
+MD n=Mem ra=0x2010 d=0x00000000
+MD n=Mem ra=0x2014 d=0x00000000
+MD n=Mem ra=0x2020 d=0x00000000
+
+RD n=NIA     d=0x00000000
+RD n=CCR     d=0xc0000000
+
+RD n=GPR i=8 d=0x12345678
+RD n=GPR i=9 d=0x87654321
+RD n=GPR i=20 d=0x1000
+RD n=GPR i=21 d=0x2000
+RD n=GPR i=31 d=8
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR i=8 d=0
+RD n=GPR i=9 d=0
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0x12345678
+MD n=Mem ra=0x2010 d=0x000000de
+MD n=Mem ra=0x2014 d=0xad000000
+MD n=Mem ra=0x2020 d=0x87654321
+

@@ -1,0 +1,88 @@
+#
+# Test to make sure that typed memory accesses have the type value propagated
+# when working with an external-memory ISS model.
+#
+
+= asm
+
+	addi r1,r1,10
+	lwarx r2,r10,r0
+	addi r10,r10,0x4
+	lwarx r3,r10,r0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x7C4A0028	#	lwarx r2,r10,r0
+MD n=Mem ra=0x00000008 d=0x394A0004	#	addi r10,r10,0x4
+MD n=Mem ra=0x0000000c d=0x7C6A0028	#	lwarx r3,r10,r0
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA      d=0x0
+RD n=GPR i=10 d=0x1000
+
+MD n=Mem ra=0x0000000000001000 d=0x00000030
+MD n=Mem ra=0x0000000000001004 d=0x00000040
+
+TRACE
+
+I ea=0x0 id=1
+R n=BCCNT d=0x00000001
+R n=FCNT d=0x00000001
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x3821000a
+INSTR op=0x3821000a					asm="addi 1,1,0x000a"
+R n=GPR i=1 d=0x0000000a
+R n=ICNT d=0x00000001
+R n=PCCNT d=0x00000001
+
+I ea=0x4 id=2
+R n=BCCNT d=0x00000002
+R n=FCNT d=0x00000002
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c4a0028
+INSTR op=0x7c4a0028					asm="lwarx 2,10,0"
+D n=Mem t=read ea=0x1000 nb=4 type=25
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00000030
+R n=GPR i=2 d=0x00000030
+R n=FOO5_WR d=0x00000001
+R n=XPR i=0 d=0x00001000
+R n=ICNT d=0x00000002
+R n=PCCNT d=0x00000002
+
+I ea=0x8 id=3
+R n=BCCNT d=0x00000003
+R n=FCNT d=0x00000003
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x394a0004
+INSTR op=0x394a0004					asm="addi 10,10,0x0004"
+R n=GPR i=10 d=0x00001004
+R n=ICNT d=0x00000003
+R n=PCCNT d=0x00000003
+
+I ea=0xc id=4
+R n=BCCNT d=0x00000004
+R n=FCNT d=0x00000004
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c6a0028
+INSTR op=0x7c6a0028					asm="lwarx 3,10,0"
+D n=Mem t=read ea=0x1004 nb=4 type=25
+M n=Mem t=read ea=0x1004 ra=0x1004 d=0x00000040
+R n=GPR i=3 d=0x00000040
+R n=FOO5_WR d=0x00000002
+R n=XPR i=0 d=0x00001004
+R n=ICNT d=0x00000004
+R n=PCCNT d=0x00000004
+
+I ea=0x10 id=5
+R n=BCCNT d=0x00000005
+R n=FCNT d=0x00000005
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=ICNT d=0x00000005
+R n=PCCNT d=0x00000005
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000000a
+RD n=GPR i=2 d=0x00000030
+RD n=GPR i=3 d=0x00000040

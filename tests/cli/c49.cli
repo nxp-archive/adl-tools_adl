@@ -1,0 +1,17 @@
+#
+# Test instruction jamming via the 'ijam' function and external-write logging
+# via writereg.
+#
+
+triggerexcpt PMT:t0:External
+triggerexcpt PMT:t1:External
+step 4
+triggerexcpt PMT:t0:External
+step 4
+triggerexcpt PMT:t1:External
+step 4
+triggerexcpt PMT:t0:External
+step 4
+triggerexcpt PMT:t1:External
+go
+quit

@@ -1,0 +1,85 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RT: [6,10] 
+  RX: [6,8] 
+  SI: [16,31] 
+  SI7: [9,15] 
+  XO: [21,30] [not used]  
+Instructions:
+  Name:  addi (rank: 100)
+  Width:  32
+  Attributes:  fxu base group('add')  bar(123)
+  Fields:  OPCD(14) RT RA SI
+  Action:  {
+    if ( RA == 0 ) {
+        GPR ( RT ) = SI ;
+    } else {
+        GPR ( RT ) = GPR ( RA ) + SI ;
+    }
+}
+  Source Registers:  GPR(RA)? 
+  Target Registers:  GPR(RT) 
+  Nested insructions:  
+    Name:  l3 (rank: 100)
+    Width:  16
+    Attributes:  fxu base group('add')  a
+    Fields:  OPCD(15) RX SI7
+    Alias:  addi RT(RX) RA(0) SI(SI7) 
+    Target Registers:  GPR(RT) 
+    -------------------------------
+    Name:  l4 (rank: 100)
+    Width:  16
+    Attributes:  a b c
+    Fields:  OPCD(16) RX SI7
+    Alias:  addi RT(RX) RA(0) SI(SI7) 
+    Target Registers:  GPR(RT) 
+    -------------------------------
+  -------------------------------
+  Name:  l1 (rank: 100) (shorthand)
+  Width:  32
+  Attributes:  a b c
+  Fields:  RT SI
+  Alias:  addi RT(RT) RA(0) SI(SI) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  l2 (rank: 100) (shorthand)
+  Width:  32
+  Attributes:  fxu base group('add')  bar(123) a b c
+  Fields:  RT SI
+  Alias:  addi RT(RT) RA(0) SI(SI) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    14(38000000):  addi
+      Shorthand:  l1: addi RT(RT) RA(0) SI(SI) 
+      Shorthand:  l2: addi RT(RT) RA(0) SI(SI) 
+    15(3c000000):  l3
+    16(40000000):  l4
+-------------------------------
+

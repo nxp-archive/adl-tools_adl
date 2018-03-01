@@ -1,0 +1,83 @@
+//
+// Basic test of using defmod with uADL stuff.
+//
+
+define (core P) {
+
+  allow_unimpl_instrs = true;
+
+  define (resources) {
+
+    define (fetchunit Fetcher) {
+      fetch_memory = L1i;
+      entries = 1;
+      entry_size = 4;
+      fetch_size = 4;
+    }
+    
+    define (pipestage mID) {
+      size = 2;
+    }
+
+    define (pipestage mEX) {
+      size = 2;
+      rigid = true;
+    }
+
+    define (pipestage mMM) {
+      size = 2;
+    }
+
+    define (pipestage mWB) {
+      size = 8;
+      bandwidth=8;
+    }
+
+    define (semaphore Foo) { count = 10; }
+
+    define (semaphore Bar) {}
+
+    define (flag stall) {}
+
+    define (reg PC) {
+      latency = 1;
+    }
+
+    define (regfile GPR) {
+      latency = 1;
+    }
+
+    define (forwarding_path reorder) {
+      size = 4;
+      width = 64;
+    }
+
+    define (branch_predictor BP) {
+      algorithm = Counter;
+      size = 8;
+      counter_width = 2;
+    }
+
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+    define (cache L1i) {
+      next_level_memory = mMEM;
+      write_mode = WriteThrough;
+      data_width = 32;
+      linefill_lock_holdoff_cycle = 2;
+      linefill_lock_cycle = 1;
+      linefill_lazy_writeback = true;
+      linefill_lock_on_valid = true;
+    }
+
+    define (cache L1d) {
+      next_level_memory = mMEM;
+      write_mode = WriteThrough;
+      consecutive_linefills = true;
+      data_width = 32;
+      linefill_access_width = 128;
+    }
+  }
+}

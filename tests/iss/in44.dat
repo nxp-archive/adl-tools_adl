@@ -1,0 +1,43 @@
+#
+# Simple test to verify that the lastRealAddr() function works.
+#
+
+= asm
+ lwarx r2,r0,r10
+ lwarx r3,r0,r11
+= /asm
+
+= mdopts
+ instr-offset: 0x10000
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x7C405028	# lwarx r2,r0,r10
+MD n=Mem ra=0x00010004 d=0x7C605828	# lwarx r3,r0,r11
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=10 d=0x1000
+RD n=GPR i=11 d=0x2000
+
+RD n=NIA   d=0x00000000
+
+MD n=Mem ra=0xb2000 d=0xdeadbeef
+MD n=Mem ra=0xa1000 d=0x12345678
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 EPN=0x0 SX=1 SR=1 SW=1
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 EPN=0x4 SX=0 SR=1 SW=0
+
+# ea=0x2000 ra=0xB2000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x2c8 WIMG=0x3 EPN=0x8 SX=0 SR=1 SW=0
+
+RESULTS
+
+RD n=GPR i=2 d=0x12345678
+RD n=GPR i=3 d=0xdeadbeef
+
+RD n=RESRV d=0x000B2000

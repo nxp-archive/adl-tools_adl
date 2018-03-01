@@ -1,0 +1,109 @@
+#
+# Same as dmiload3.dat, but with the cache enabled and flushed.
+#
+
+= asm
+
+	li r3,4
+	mtctr r3
+	li r3,24
+L1:
+	srw r4,r1,r3
+	stb r4,0x1000(r10)
+	addi r3,r3,-8
+	addi r10,r10,1
+	bdnz L1
+
+	li r3,4
+	mtctr r3
+	li r3,24
+L2:
+	srw r4,r2,r3
+	stb r4,0x1000(r10)
+	addi r3,r3,-8
+	addi r10,r10,1
+	bdnz L2
+
+	lwz r20,0x1000(r0)
+	lwz r21,0x1004(r0)
+
+	li r10,0
+	li r3,4
+	mtctr r3
+L3:
+	slwi r22,r22,8
+	lbz r5,0x1000(r10)
+	addi r10,r10,1
+	or r22,r22,r5
+	bdnz L3
+
+	li r3,4
+	mtctr r3
+L4:
+	slwi r23,r23,8
+	lbz r5,0x1000(r10)
+	addi r10,r10,1
+	or r23,r23,r5
+	bdnz L4
+
+	li r0,0x1000
+	dcbf r10,r0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38600004	#	li r3,4
+MD n=Mem ra=0x00000004 d=0x7C6903A6	#	mtctr r3
+MD n=Mem ra=0x00000008 d=0x38600018	#	li r3,24
+MD n=Mem ra=0x0000000c d=0x7C241C30	#	srw r4,r1,r3
+MD n=Mem ra=0x00000010 d=0x988A1000	#	stb r4,0x1000(r10)
+MD n=Mem ra=0x00000014 d=0x3863FFF8	#	addi r3,r3,-8
+MD n=Mem ra=0x00000018 d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x0000001c d=0x4200FFF0	#	bdnz L1
+MD n=Mem ra=0x00000020 d=0x38600004	#	li r3,4
+MD n=Mem ra=0x00000024 d=0x7C6903A6	#	mtctr r3
+MD n=Mem ra=0x00000028 d=0x38600018	#	li r3,24
+MD n=Mem ra=0x0000002c d=0x7C441C30	#	srw r4,r2,r3
+MD n=Mem ra=0x00000030 d=0x988A1000	#	stb r4,0x1000(r10)
+MD n=Mem ra=0x00000034 d=0x3863FFF8	#	addi r3,r3,-8
+MD n=Mem ra=0x00000038 d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x0000003c d=0x4200FFF0	#	bdnz L2
+MD n=Mem ra=0x00000040 d=0x82801000	#	lwz r20,0x1000(r0)
+MD n=Mem ra=0x00000044 d=0x82A01004	#	lwz r21,0x1004(r0)
+MD n=Mem ra=0x00000048 d=0x39400000	#	li r10,0
+MD n=Mem ra=0x0000004c d=0x38600004	#	li r3,4
+MD n=Mem ra=0x00000050 d=0x7C6903A6	#	mtctr r3
+MD n=Mem ra=0x00000054 d=0x56D6402E	#	slwi r22,r22,8
+MD n=Mem ra=0x00000058 d=0x88AA1000	#	lbz r5,0x1000(r10)
+MD n=Mem ra=0x0000005c d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x00000060 d=0x7ED62B78	#	or r22,r22,r5
+MD n=Mem ra=0x00000064 d=0x4200FFF0	#	bdnz L3
+MD n=Mem ra=0x00000068 d=0x38600004	#	li r3,4
+MD n=Mem ra=0x0000006c d=0x7C6903A6	#	mtctr r3
+MD n=Mem ra=0x00000070 d=0x56F7402E	#	slwi r23,r23,8
+MD n=Mem ra=0x00000074 d=0x88AA1000	#	lbz r5,0x1000(r10)
+MD n=Mem ra=0x00000078 d=0x394A0001	#	addi r10,r10,1
+MD n=Mem ra=0x0000007c d=0x7EF72B78	#	or r23,r23,r5
+MD n=Mem ra=0x00000080 d=0x4200FFF0	#	bdnz L4
+MD n=Mem ra=0x00000084 d=0x38001000	#	li r0,0x1000
+MD n=Mem ra=0x00000088 d=0x7C0A00AC	#	dcbf r10,r0
+# </GEN>
+
+CORE n=:P
+
+RD n=CCR d=0xc0000000
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0x12345678
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+
+RESULTS
+
+RD n=GPR i=20 d=0xdeadbeef
+RD n=GPR i=21 d=0x12345678
+RD n=GPR i=22 d=0xdeadbeef
+RD n=GPR i=23 d=0x12345678
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678

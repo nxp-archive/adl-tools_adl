@@ -1,0 +1,53 @@
+#
+# Tests to make sure that we don't have a problem caused by a store's cache
+# action which is processsed in postCycle before the corresponding write() (and
+# thus store-buffer entry is available).
+#
+= asm
+
+	li r1,10
+	li r3,30
+	li r4,40
+	stw r1,0x1000(r0)
+	lwz r2,0x2000(r0)
+	stw r1,0x1000(r0)
+	stw r3,0x1004(r0)
+	stw r4,0x1008(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3820000A	#	li r1,10
+MD n=Mem ra=0x00000004 d=0x3860001E	#	li r3,30
+MD n=Mem ra=0x00000008 d=0x38800028	#	li r4,40
+MD n=Mem ra=0x0000000c d=0x90201000	#	stw r1,0x1000(r0)
+MD n=Mem ra=0x00000010 d=0x80402000	#	lwz r2,0x2000(r0)
+MD n=Mem ra=0x00000014 d=0x90201000	#	stw r1,0x1000(r0)
+MD n=Mem ra=0x00000018 d=0x90601004	#	stw r3,0x1004(r0)
+MD n=Mem ra=0x0000001c d=0x90801008	#	stw r4,0x1008(r0)
+# </GEN>
+
+RD n=HDBCR0 d=0x80000000
+RD n=CCR d=0xc0000000
+
+CORE n=:P
+
+# ea=0x2000 ra=0x2000, cache-inhibited.
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x08 WIMG=0x4 E=0 SX=1 SR=1 SW=1 EPN=0x8
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x1008 d=0
+MD n=Mem ra=0x2000 d=20
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=40
+
+MD n=Mem ra=0x1000 d=10
+MD n=Mem ra=0x2000 d=20
+MD n=Mem ra=0x1004 d=30
+MD n=Mem ra=0x1008 d=40

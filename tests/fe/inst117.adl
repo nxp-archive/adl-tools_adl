@@ -1,0 +1,264 @@
+//
+// Example of a model where the encoding differs only on
+// the second word for 64-bit instructions.  This means that
+// we have to skip over the first word when creating the
+// encoding tree.
+//
+
+define (arch foo) {
+
+  define (reg=PC) {
+    attrs = (cia,nia);
+  }
+
+  bit_endianness = little;
+
+  define (instrfield=PR) {
+    width = 2;
+    pseudo = true;
+  }
+  
+  define (instrfield=s32) {
+    width = 32;
+    pseudo = true;
+    is_signed = true;
+  }
+
+  define (instrfield=Pn) {
+    width = 3;
+    pseudo = true;
+  }
+
+  define (instrfield=Da) {
+    width = 5;
+    pseudo = true;
+  }
+
+  define (instrfield=SG) {
+    width = 1;
+    pseudo = true;
+  }
+
+  define (instrfield=Dn) {
+    width = 5;
+    pseudo = true;
+  }
+
+  define (instr=add) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b0),
+            (bits(4),b0),
+            (bits(5),b1),
+            (bits(6),b0),
+            (bits(7),b0),
+            (bits(8),b1),
+            (bits(9),b1),
+            (bits(10),b1),
+            (bits(11),b0),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),b1),
+            (bits(17),b1),
+            (bits(18),b1),
+            (bits(19),s32(0)),
+            (bits(20),s32(1)),
+            (bits(21),s32(2)),
+            (bits(22),s32(3)),
+            (bits(23),s32(4)),
+            (bits(24),s32(5)),
+            (bits(25),s32(6)),
+            (bits(26),s32(7)),
+            (bits(27),s32(8)),
+            (bits(28),s32(9)),
+            (bits(29),s32(10)),
+            (bits(30),s32(11)),
+            (bits(31),b0),
+            (bits(32),s32(12)),
+            (bits(33),s32(13)),
+            (bits(34),s32(14)),
+            (bits(35),s32(15)),
+            (bits(36),s32(16)),
+            (bits(37),s32(17)),
+            (bits(38),s32(18)),
+            (bits(39),s32(19)),
+            (bits(40),s32(20)),
+            (bits(41),s32(21)),
+            (bits(42),s32(22)),
+            (bits(43),s32(23)),
+            (bits(44),s32(24)),
+            (bits(45),s32(25)),
+            (bits(46),s32(26)),
+            (bits(47),b0),
+            (bits(48),Dn(0)),
+            (bits(49),Dn(1)),
+            (bits(50),Dn(2)),
+            (bits(51),Dn(3)),
+            (bits(52),Dn(4)),
+            (bits(53),s32(27)),
+            (bits(54),s32(28)),
+            (bits(55),s32(29)),
+            (bits(56),s32(30)),
+            (bits(57),s32(31)),
+            (bits(58),b1),
+            (bits(59),b1),
+            (bits(60),b1),
+            (bits(61),b1),
+            (bits(62),b1),
+            (bits(63),b0));
+    action = {
+      int i;
+    };
+  }
+
+  define (instr=and) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b0),
+            (bits(4),b0),
+            (bits(5),b1),
+            (bits(6),b1),
+            (bits(7),b0),
+            (bits(8),b1),
+            (bits(9),b0),
+            (bits(10),b1),
+            (bits(11),b1),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),b1),
+            (bits(17),b1),
+            (bits(18),b1),
+            (bits(19),s32(0)),
+            (bits(20),s32(1)),
+            (bits(21),s32(2)),
+            (bits(22),s32(3)),
+            (bits(23),s32(4)),
+            (bits(24),s32(5)),
+            (bits(25),s32(6)),
+            (bits(26),s32(7)),
+            (bits(27),s32(8)),
+            (bits(28),s32(9)),
+            (bits(29),s32(10)),
+            (bits(30),s32(11)),
+            (bits(31),b0),
+            (bits(32),s32(12)),
+            (bits(33),s32(13)),
+            (bits(34),s32(14)),
+            (bits(35),s32(15)),
+            (bits(36),s32(16)),
+            (bits(37),s32(17)),
+            (bits(38),s32(18)),
+            (bits(39),s32(19)),
+            (bits(40),s32(20)),
+            (bits(41),s32(21)),
+            (bits(42),s32(22)),
+            (bits(43),s32(23)),
+            (bits(44),s32(24)),
+            (bits(45),s32(25)),
+            (bits(46),s32(26)),
+            (bits(47),b0),
+            (bits(48),Dn(0)),
+            (bits(49),Dn(1)),
+            (bits(50),Dn(2)),
+            (bits(51),Dn(3)),
+            (bits(52),Dn(4)),
+            (bits(53),s32(27)),
+            (bits(54),s32(28)),
+            (bits(55),s32(29)),
+            (bits(56),s32(30)),
+            (bits(57),s32(31)),
+            (bits(58),Da(0)),
+            (bits(59),Da(1)),
+            (bits(60),Da(2)),
+            (bits(61),Da(3)),
+            (bits(62),Da(4)),
+            (bits(63),b0));
+    action = {
+      int j;
+    };
+  }
+
+  define (instr=cmple) {
+    fields=(
+            (bits(0),b0),
+            (bits(1),b0),
+            (bits(2),b0),
+            (bits(3),b0),
+            (bits(4),b0),
+            (bits(5),b0),
+            (bits(6),b1),
+            (bits(7),b0),
+            (bits(8),b1),
+            (bits(9),b0),
+            (bits(10),b1),
+            (bits(11),b1),
+            (bits(12),PR(0)),
+            (bits(13),PR(1)),
+            (bits(14),SG),
+            (bits(15),b1),
+            (bits(16),b1),
+            (bits(17),b1),
+            (bits(18),b1),
+            (bits(19),s32(0)),
+            (bits(20),s32(1)),
+            (bits(21),s32(2)),
+            (bits(22),s32(3)),
+            (bits(23),s32(4)),
+            (bits(24),s32(5)),
+            (bits(25),s32(6)),
+            (bits(26),s32(7)),
+            (bits(27),s32(8)),
+            (bits(28),s32(9)),
+            (bits(29),s32(10)),
+            (bits(30),s32(11)),
+            (bits(31),b0),
+            (bits(32),s32(12)),
+            (bits(33),s32(13)),
+            (bits(34),s32(14)),
+            (bits(35),s32(15)),
+            (bits(36),s32(16)),
+            (bits(37),s32(17)),
+            (bits(38),s32(18)),
+            (bits(39),s32(19)),
+            (bits(40),s32(20)),
+            (bits(41),s32(21)),
+            (bits(42),s32(22)),
+            (bits(43),s32(23)),
+            (bits(44),s32(24)),
+            (bits(45),s32(25)),
+            (bits(46),s32(26)),
+            (bits(47),b0),
+            (bits(48),Pn(0)),
+            (bits(49),Pn(1)),
+            (bits(50),Pn(2)),
+            (bits(51),b1),
+            (bits(52),b1),
+            (bits(53),s32(27)),
+            (bits(54),s32(28)),
+            (bits(55),s32(29)),
+            (bits(56),s32(30)),
+            (bits(57),s32(31)),
+            (bits(58),Da(0)),
+            (bits(59),Da(1)),
+            (bits(60),Da(2)),
+            (bits(61),Da(3)),
+            (bits(62),Da(4)),
+            (bits(63),b0));
+    action = {
+      int k;
+    };
+  }
+
+}
+
+define (core=sc) {
+  archs = foo;
+}

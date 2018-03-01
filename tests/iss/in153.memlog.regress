@@ -1,0 +1,28 @@
+Instr Fetch:  ifetch: ea: 0x0, ra: 0x0 (4 bytes)
+Instr 0x90410000:  Mem:  write: ea: 0x1000, ra: 0x1000 (4 bytes)
+Instr Fetch:  ifetch: ea: 0x4, ra: 0x4 (4 bytes)
+Instr 0x7c0100ac:  Mem:  flush: cache 0, set:  32, way: 0
+Instr 0x7c0100ac:  Mem:  invalidate: cache 0, set:  32, way: 0
+Instr 0x7c0100ac:  Mem:  flush: cache 1, set:  32, way: 0
+Instr 0x7c0100ac:  Mem:  invalidate: cache 1, set:  32, way: 0
+Instr Fetch:  ifetch: ea: 0x8, ra: 0x8 (4 bytes)
+Instr 0x7c0100ac:  Mem:  flush: cache 0, set:  -1, way: -1
+Instr 0x7c0100ac:  Mem:  invalidate: cache 0, set:  -1, way: -1
+Instr 0x7c0100ac:  Mem:  flush: cache 1, set:  -1, way: -1
+Instr 0x7c0100ac:  Mem:  invalidate: cache 1, set:  -1, way: -1
+Instr Fetch:  ifetch: ea: 0xc, ra: 0xc (4 bytes)
+Instr Fetch:  ifetch: ea: 0x10, ra: 0x10 (4 bytes)
+Instr 0x90410000:  Mem:  write: ea: 0x2000, ra: 0x2000 (4 bytes)
+Instr Fetch:  ifetch: ea: 0x14, ra: 0x14 (4 bytes)
+Instr 0x7c01006c:  Mem:  write: cache 0, set:  0, way: 0
+Instr 0x7c01006c:  Mem:  write: cache 1, set:  64, way: 0
+Instr Fetch:  ifetch: ea: 0x18, ra: 0x18 (4 bytes)
+Instr 0x7c01006c:  Mem:  write: cache 0, set:  -1, way: -1
+Instr 0x7c01006c:  Mem:  write: cache 1, set:  -1, way: -1
+Instr Fetch:  ifetch: ea: 0x1c, ra: 0x1c (4 bytes)
+Instr 0x7c0103ac:  Mem:  invalidate: cache 0, set:  0, way: 0
+Instr 0x7c0103ac:  Mem:  invalidate: cache 1, set:  64, way: 0
+Instr Fetch:  ifetch: ea: 0x20, ra: 0x20 (4 bytes)
+Instr 0x7c0103ac:  Mem:  invalidate: cache 0, set:  -1, way: -1
+Instr 0x7c0103ac:  Mem:  invalidate: cache 1, set:  -1, way: -1
+Instr Fetch:  ifetch: ea: 0x24, ra: 0x24 (4 bytes)

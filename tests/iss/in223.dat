@@ -1,0 +1,46 @@
+#
+# Tests to make sure that a tlb is properly reset in a shared system.  The reset
+# translation shouldn't be overwritten by anybody else's reset.
+#
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	addi r3,r3,3
+  .long 0x0
+	addi r1,r1,4
+	addi r2,r2,5
+	addi r3,r3,6
+
+= /asm
+
+CORE n=:PMT
+
+RD n=NIA0 d=0xfffff000
+RD n=NIA1 d=0xfffff010
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x38210004	#	addi r1,r1,4
+MD n=Mem ra=0x00000014 d=0x38420005	#	addi r2,r2,5
+MD n=Mem ra=0x00000018 d=0x38630006	#	addi r3,r3,6
+# </GEN>
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000003
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=0x00000004
+RD n=GPR i=2 d=0x00000005
+RD n=GPR i=3 d=0x00000006

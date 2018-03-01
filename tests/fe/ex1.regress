@@ -1,0 +1,33 @@
+======
+Cores:
+======
+Name:  "P"
+Exceptions:
+  Name:  Program
+  Attributes:  user super
+  Action:  {
+    FOO = 12 ;
+    IAR = 0x0000700 ;
+}
+  Documention:
+
+Program interrupt.
+  -------------------------------
+Registers:
+  Name:  "FOO"
+  Usage:  written
+  Width:  32
+  -------------------------------
+  Name:  "IAR"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  IAR
+Next-instruction-address register:  IAR
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

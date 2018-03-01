@@ -1,0 +1,5552 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// This file represents a portion of the Power architecture- primarily the
+// fixed-point, load-store, and supervisor instructions, without floating-point.
+// This is only an approximation of Power and should *not* be taken to be a
+// specification for teh architecture itself.
+//
+// THIS MODEL IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
+//                   Constants and defines                                  //
+//                                                                          //
+//////////////////////////////////////////////////////////////////////////////
+
+
+// TODO(1) - why can't we make all these #defines, const bits variables: ex:
+// const bits<64> ones64(0xFFFFFFFFFFFFFFFFULL); ????  because they are later
+// used in combination with var and it complains about the constness (see extsw
+// instruction as an example).
+ 
+// We've chosen 64 bits as the default Power register size.  32 bit
+// implementations will need to override this using defmod for those
+// registers/register files.
+#ifndef regSize
+#define regSize 64
+#endif
+
+#ifndef defaultOffset
+#define defaultOffset 0 
+#endif
+
+// The ones64 object is used for a 64 bit qty with all bits set to one
+#define ones64 bits<64>(0xFFFFFFFFFFFFFFFFULL)
+
+// The ones65 object is used for a 65 bit qty with all bits set to one
+#define ones65 bits<65>("0x1FFFFFFFFFFFFFFFF")
+
+// The ones128 object is used for a 128 bit qty with all bits set to one
+#define ones128 bits<128>("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+
+// The ones33 object is used for a 33 bit qty with all bits set to one
+#define ones33 bits<33>(0x1FFFFFFFFULL)
+
+// The ones32 object is used for a 32 bit qty with all bits set to one
+#define ones32 bits<32>(0xFFFFFFFFFULL)
+
+// The ones1 object is used for a 1 bit qty with it's bit set to one
+#define ones1 bits<1>(1)
+
+// The zero1 object is used for a 1 bit qty with it's bit set to zero
+#define zero1 zero(1)
+
+// The zero2 object is used for a 2 bit qty with all bits set to zero
+#define zero2 zero(2)
+
+// The zero4 object is used for a 4 bit qty with all bits set to zero
+#define zero4 zero(4)
+
+// The zero11 object is used for a 11 bit qty with all bits set to zero
+#define zero11 zero(11)
+
+// The zero16 object is used for a 16 bit qty with all bits set to zero
+#define zero16 zero(16)
+
+// The zero29 object is used for a 29 bit qty with all bits set to zero
+#define zero29 zero(29)
+
+// The zero32 object is used for a 32 bit qty with all bits set to zero
+#define zero32 zero(32)
+
+// The zero48 object is used for a 48 bit qty with all bits set to zero
+#define zero48 zero(48)
+
+// The zero56 object is used for a 56 bit qty with all bits set to zero
+#define zero56 zero(56)
+
+// The zero64 object is used for a 64 bit qty with all bits set to zero
+#define zero64 zero(64)
+
+// Bit indices used for sign-extension instructions.  These are used as defines
+// so that bit slices will be of the correct return size.
+// FIXME: While this is good programming style, it doesn't match the spec, is
+//  this what we want?
+#define b_BitIndex     56
+#define hw_BitIndex    48
+#define w_BitIndex     32
+
+
+//////////////////////////////////////////////////////////////////////////////
+//                                                                          //
+//            Power Architecture Definition                                 //
+//                                                                          //
+//////////////////////////////////////////////////////////////////////////////
+
+define (arch = power) {
+  /* here */
+
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  //                   Attributes                                             //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+
+  attrs = (unarchitected,indeterminate,load,store,multiply,divide,branch);
+ 
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                          //
+  //                   Helper Functions                                       //
+  //                                                                          //
+  //////////////////////////////////////////////////////////////////////////////
+  
+  //
+  // These are defined in section 1.5.7 Description of Instruction Operation
+  // in the Power spec.  
+  //
+  // Note: some are not defined here because they are directly supported by the
+  //  language (Carry, GPR(x), MEM(x,y), etc.)
+  //
+  /***************************************************************************
+  Function: AllocateDataCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x does not exist in the 
+     data cache, allocates a block in the data cache and sets the contents of 
+     the block to zero.
+
+  Parameters: 
+ 
+     x - The effective address.
+ 
+  Returns: 
+ 
+  ***************************************************************************/
+  
+  void AllocateDataCacheBlock(bits<regSize> x ) {  
+    var ra = dataWriteTranslate(x);
+    CacheAccess ca  = CacheWrite;
+    if (L1d.enabled(ca)) { L1d.allocate(ra); } 
+    if (L2.enabled(ca)) { L2.allocate(ra); }
+    Mem(x,64) = zero(512);
+  }
+  /***************************************************************************
+  Function: FlushDataCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x exists in the data cache 
+     and is dirty, the block is written to main storage and is removed from 
+     the data cache.  It also invalidates the flushed entry.
+
+  Parameters: 
+ 
+     x - The effective address.
+ 
+  Returns: 
+ 
+  ***************************************************************************/
+  void FlushDataCacheBlock(bits<regSize> x) {  
+    var ra = dataReadTranslate(x);
+    CacheAccess ca  = CacheRead;
+    if (L1d.enabled(ca)) { L1d.flush(ra); L1d.invalidate(ra);}
+    if (L2.enabled(ca)) { L2.flush(ra); L2.invalidate(ra); }
+  }
+  /***************************************************************************
+  Function: InvalidateDataCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x exists in the data cache,
+     the block is removed from the data cache.
+
+  Parameters: 
+ 
+     x - The effective address.
+ 
+  Returns: 
+ 
+  ***************************************************************************/
+  void InvalidateDataCacheBlock(bits<regSize> x) {  
+    var ra = dataWriteTranslate(x);
+    CacheAccess ca  = CacheWrite;
+    if (L1d.enabled(ca)) { L1d.invalidate(ra); }
+    if (L2.enabled(ca))  { L2.invalidate(ra); }
+  }
+  /***************************************************************************
+  Function: InvalidateInstructionCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x exists in the instr cache,
+     the block is removed from the instr cache.
+
+  Parameters: 
+ 
+     x - The effective address.
+ 
+  Returns: 
+ 
+  ***************************************************************************/
+  void InvalidateInstructionCacheBlock(bits<regSize> x) {  
+    var ra = dataReadTranslate(x);
+    CacheAccess ca  = CacheRead;
+    if (L1d.enabled(ca)) { L1i.invalidate(ra); }
+    if (L2.enabled(ca))  { L2.invalidate(ra); }
+  }
+  /***************************************************************************
+  Function: StoreDataCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x exists in the data cache 
+     and is dirty, the block is written to main storage but may remain in the 
+     data cache.
+
+  Parameters: 
+ 
+     x  - The effective address.
+
+  Returns: 
+ 
+  ***************************************************************************/
+  void StoreDataCacheBlock(bits<regSize> x) {     
+    // todo: This should not cause any translation interrupts.  If it would
+    // cause an interrupt then it should be no-op'd.
+    MmuInterruptMode = off;
+    var ra = dataReadTranslate(x);
+    CacheAccess ca  = CacheRead;
+    if (L1d.enabled(ca)) { L1d.store(ra); }
+    if (L2.enabled(ca)) { L2.store(ra); }
+    MmuInterruptMode = on;
+  }
+  /***************************************************************************
+  Function: PrefetchDataCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x does not exist in the 
+     portion of the data cache specified by y, the block in storage is copied 
+     into the data cache.
+
+  Parameters: 
+ 
+     x - The effective address.
+     y - The portion of the cache targeted (implementation dependent)
+
+  Returns: 
+ 
+  ***************************************************************************/
+  void PrefetchDataCacheBlock(bits<regSize> x,bits<5> y) {
+    // todo: This should not cause any translation interrupts.  If it would
+    // cause an interrupt then it should be no-op'd.
+    MmuInterruptMode = off;
+    var ra = dataReadTranslate(x);      
+    CacheAccess ca  = CacheRead;
+    if (L1d.enabled(ca)) {L1d.touch(ra); }
+    if (L2.enabled(ca)) { L2.touch(ra); }
+    MmuInterruptMode = on;
+  }
+
+
+  /***************************************************************************
+  Function: PrefetchInstructionCacheBlock
+ 
+  Description: 
+     If the block containing the byte addressed by x does not exist in the 
+     portion of the instr cache specified by y, the block in storage is copied 
+     into the instr cache.
+
+  Parameters: 
+ 
+     x - The effective address.
+     y - The portion of the cache targeted (implementation dependent)
+
+  Returns: 
+ 
+  ***************************************************************************/
+ 
+  void PrefetchInstructionCacheBlock(bits<regSize> x,bits<5> y) {  
+    // todo: This should not cause any translation interrupts.  If it would
+    // cause an interrupt then it should be no-op'd.
+    MmuInterruptMode = off;
+    var ra = dataReadTranslate(x);      
+    CacheAccess ca  = CacheRead;
+    if (L1d.enabled(ca)) { L1i.touch(ra); }
+    if (L2.enabled(ca)) { L2.touch(ra); }
+    MmuInterruptMode = on;
+  }
+ 
+  /***************************************************************************
+  Function: ZeroDataCacheBlock
+ 
+  Description: 
+     The contents of the block containing the byte addressed by x in the 
+     data cache is set to 0.
+
+  Parameters: 
+ 
+     x  - The effective address.
+
+  Returns: 
+ 
+  ***************************************************************************/
+  void ZeroDataCacheBlock(bits<regSize> x) {   
+    var ra = dataWriteTranslate(x);
+    CacheAccess ca  = CacheWrite;
+    if (L1d.enabled(ca)) { L1d.fill(ra,0); }
+    if (L2.enabled(ca)) { L2.fill(ra,0); }
+    Mem(x,64) = zero (512);
+  }
+ 
+  /***************************************************************************
+  Function: MASK
+ 
+  Description: Mask having 1s in bit positions x through y (wrapping if x>y) 
+     and 0s elsewhere.
+ 
+  Parameters: 
+ 
+     x - the starting bit position
+     y - the ending bit position
+ 
+  Returns: the result of the building the mask.
+ 
+  ***************************************************************************/
+  bits<regSize> MASK(const bits<regSize>& x,const bits<regSize>& y) {
+    bits<regSize> m;
+    return m.mask(x%regSize,y%regSize);
+  }
+
+  /***************************************************************************
+  Function: ROTL64
+ 
+  Description: Implements the ROTL64 function defined in power as:
+     The result of rotating the 64 bit value x left y positions.
+ 
+  Parameters: 
+ 
+     x - a 64 bit value
+     y - the number of bit positions to rotate by
+ 
+  Returns: the result of the rotate operation
+ 
+  ***************************************************************************/
+  bits<regSize> ROTL64(const bits<64> &x,const bits<6>& y) {
+    return x.left_rotate(y);
+  }
+  /***************************************************************************
+  Function: ROTL32
+ 
+  Description: Implements the ROTL32 function defined in power as:
+     The result of rotating the 64 bit value x concatenated with x
+     left y positions, where x is 32 bits long.
+ 
+  Parameters: 
+ 
+     x - a 32 bit value
+     y - the number of bit positions to rotate by
+ 
+  Returns: the result of the rotate operation
+ 
+  ***************************************************************************/
+  bits<regSize> ROTL32(const bits<32> &x,const bits<5>& y) {
+    // For performance reasons, we simplify the 32-bit version.
+    if (regSize == 32) {
+      return x.left_rotate(y);
+    } else {
+      return concat(x,x).left_rotate(y);
+    }
+  }
+
+  /***************************************************************************
+  Function: TRAP
+ 
+  Description: Invoke a Trap type program interrupt.
+ 
+  Parameters: none
+
+  Returns: void
+ 
+  ***************************************************************************/
+  void TRAP() {
+    if (DBCR0.TRAP == 1 && DBCR0.IDM == 1 && MSR.DE == 1) {
+      //take a debug interrupt
+      dbg_t dbg;
+      dbg.Trap = 1;
+      raiseException(dbg);
+    } else {
+      // take a trap program interrupt
+      prog_t prog;
+      prog.ESR = 0x02000000;
+      raiseException(prog);
+    }
+  }
+
+
+  //
+  //  The following are not defined in the Power spec, they are here to cut down on code
+  //  duplication (setCrField) or to hide complex syntax (buildDataEA) or to allow
+  //  other implementations to add their own hooks.
+  //
+  //
+  /***************************************************************************
+  Function: checkPendingInterrupts
+                                                                                                                                                                                          
+  Description: Checks for any pending interrupts in order of interrupt priority..
+                                                                                                                                                                                          
+  Parameters:
+                                                                                                                                                                                          
+  Returns: none
+                                                                                                                                                                                          
+  ***************************************************************************/
+  void checkPendingInterrupts() {}
+                                                                                                 
+  /***************************************************************************
+  Function: mode
+ 
+  Description: Returns the m bit representing 32bit or 64 bit moded behavior,
+     
+  Parameters: 
+     reg     - unused by Power.
+     addr    - unused by Power.
+
+ 
+  ***************************************************************************/
+  int mode (bool reg, bool addr ) {
+    var m = (Mode == Mode64) ? 0 : 32;
+    return m;
+  }
+
+  /***************************************************************************
+  Function: setXerField
+ 
+  Description: Modifies the XER fields (CA,OV & SO) as requested based on carry.
+
+ 
+  Parameters: 
+     carry  - the value computed by the carry function
+     xer    - whether XER should be updated
+     so     - whether SO should be updated
+     ov     - whether OV should be updated
+ 
+  ***************************************************************************/
+  void setXerField(bool ov, bool so, bool ca,const bits<regSize>& carry)
+  {
+    var m = mode(true/*reg*/,false/*addr*/);
+    if (ov) { XER.OV = carry(m) ^ carry(m+1);}
+    if (so) { XER.SO = XER.SO | XER.OV ;}
+    if (ca) { XER.CA = carry(m);}
+  }
+
+ 
+  /***************************************************************************
+  Function: setCrField
+ 
+  Description: Modifies the cr[field] based on the signed comparison of x and y.
+
+     LT <- x(m:63) < y
+     GT <- x(m:63) > y
+     EQ <- x(m:63) = y
+     
+     CR[field] <- LT || GT || EQ || SO
+ 
+  Parameters: 
+     m     - the mode (32 bit or 64 bit) 
+     field - the field in the CR to be set
+     x     - the left hand value in the comparison
+     y     - the right hand value in the comparison
+ 
+  ***************************************************************************/
+  void setCrField(unsigned m, const bits<32>& field, bits<regSize> x, bits<regSize> y)
+  {
+    if (m) {
+      // sign extend because we are in 32 bit mode
+      x.signExtend(regSize - m);
+      y.signExtend(regSize - m);
+    }
+          
+    bits<4> tmp =
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) |
+      XER.SO;
+     
+    unsigned i = 4*field.uint32();
+      
+    CR(i,i+3) = tmp;
+  }
+
+  /***************************************************************************
+  Function: setCrFieldU
+
+  Description: Modifies the cr[field] based on the unsigned comparison of x and y.
+
+     LT <- x(m:63) < y
+     GT <- x(m:63) > y
+     EQ <- x(m:63) = y
+     
+     CR[field] <- LT || GT || EQ || SO
+ 
+  Parameters: 
+ 
+     m     - the mode (32 bit or 64 bit) 
+     field - the field in the CR to be set
+     x     - the left hand value in the comparison
+     y     - the right hand value in the comparison
+ 
+  ***************************************************************************/
+  void setCrFieldU(unsigned m,const bits<32>& field,const bits<regSize>& x,const bits<regSize>& y)
+  {     
+     
+    // unsigned version of setCrField
+    bits<64> X (x(m,63));
+    bits<64> Y (y(m,63));
+     
+    bits<4> tmp =
+      ( (X < Y) ? 0x8 : 0) |
+      ( (X > Y) ? 0x4 : 0) |
+      ( (X == Y)? 0x2 : 0) |
+      XER.SO;
+     
+    unsigned i = 4*field.uint32();
+    CR = CR.set(i,i+3,tmp);
+  }
+
+ 
+  /***************************************************************************
+  Function: buildDataEA
+ 
+  Description: 
+     This function hides the fact that we can't match the syntax in the RTL for
+     building an ea for a data access.  The RTL syntax is:
+          EA <- zero(m) || (value)m:63
+     where || indicates concatenation and value is either a+GPR(RB) or a + EXTS(D || 0b00)
+   
+     Our underlying data type is bits which is templated on the size of the bitvector.  Thus,
+     we can't handle variable sizes since it must be known at compile time.  So, we can't create
+     a bits of size m and we also can't concatenate on a bits of size m.  But, functionally we don't 
+     need to concatenate the zero(m) on because we are always dealing with a 64 bit quantity and 
+     when you take the requested slice, you are doing one of two things:
+        1. the slice is (0,63) in which case you aren't slicing at all, you're just returning 
+           the full 64 bit value
+        2. the slice is (32,63) in which case the upper 32 bits will be zero
+     So, while this functionality gives the correct answer, the syntax doesn't match.  We have
+     chosen to hide this by using this helper function.
+
+  Parameters: 
+ 
+     x - The value
+ 
+  Returns: The slice of the value passed in.
+ 
+  ***************************************************************************/
+  bits<regSize> buildDataEA(const bits<regSize> &value) {
+    var m = mode (false/*reg*/,true/*addr*/);
+    return value(m,regSize-1);
+  }
+ 
+  /***************************************************************************
+  Function: handleDecrementer
+
+  Description: decrements the decrementer register
+ 
+  Parameters: 
+
+ 
+  ***************************************************************************/
+  void handleDecrementer ( ) {
+    if ( DEC == 1 ) {
+      TSR . DIS = 1 ;
+      if ( TCR . ARE == 1 ) {
+        // decrement to one and auto-reload 
+        DEC = DECAR ;
+      } else {
+        // decrement to one and stop on zero
+        DEC = 0;
+      }
+      if ( ( TCR . DIE == 1 ) && ( MSR . EE == 1 ) ) {
+        raiseException ( dec ) ;
+      }
+    } else if ( DEC != 0 ) {
+      DEC = DEC - 1 ;
+    }
+  } 
+  /***************************************************************************
+  Function: handleTimeBase
+
+  Description: increments the time base register
+ 
+  Parameters: 
+
+  ***************************************************************************/
+  void handleTimeBase() {
+    if (TBL != ones32) {
+      TBL = TBL + 1;
+    } else {
+      if (TBU == ones32) {
+        TBU = 0;
+        TBL = 0;
+      } else { 
+        TBU = TBU + 1;
+      }
+    }
+  }
+
+  /***************************************************************************
+  Function: populateMasRegsForTlbMiss 
+                                                                                                                                                                            
+  Description: Implementation specific.  Should be called be mmu miss handler
+    before raising tlb exception. 
+                                                                                                                                                                            
+  Parameters:
+                                                                                                                                                                            
+  ***************************************************************************/
+  void populateMasRegsForTlbMiss(addr_t addr,bool data){}
+
+  /***************************************************************************
+  Function: undefDivide 
+                                                                                                                                                                
+                                                                                                                                                                
+  Description: Implementation specific.  
+                                                                                                                                                                
+                                                                                                                                                                
+  Parameters:
+                                                                                                                                                                
+                                                                                                                                                                
+  ***************************************************************************/
+  uint32_t undefDivide(bits<5> ra,bool _signed=true){ return 0;}
+
+  ////////////////////////////////////////////////////////////////////
+  //
+  // Parameters.  
+  //
+  ////////////////////////////////////////////////////////////////////
+ 
+  /***************************************************************************
+    Parameter: Mode
+   
+    NOTES: 
+    
+    * Power has two operating modes: 32-bit, and 64-bit
+        this parameter keeps track of the current mode and controls
+        the behavior of instructions that behave differently depending
+        on the mode.  
+  ***************************************************************************/
+  define (parm=Mode) {
+    options = (Mode32,Mode64);
+    value=Mode32;
+    watch = {
+      if (MSR.CM == 0) {
+        Mode = Mode32;
+      } else {
+        Mode = Mode64;
+      }
+    };
+  }
+ 
+  /***************************************************************************
+    Parameter: ProtectionMode
+   
+    NOTES: 
+    
+    * Power has two protection modes: user and supervisor
+        this parameter keeps track of the current mode and controls
+        the behavior of instructions that behave differently depending
+        on the mode.
+   
+  ***************************************************************************/
+  define (parm=ProtectionMode) {
+    options = (User,Super);
+    value=User;
+    watch = {
+      if (MSR.PR == 0) {
+        ProtectionMode = Super;
+      } else {
+        ProtectionMode = User;
+      }
+    };
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  // Registers.  
+  //
+  //  NOTES: 
+  // 
+  //  * Registers are defined in alphabetical order
+  //  * Register definitions are from the Power Spec Section 1.6
+  //  * POR/reset Values are only specified where Power specifies them as non-zero.
+  //
+  ////////////////////////////////////////////////////////////////////
+ 
+  /****************************************************************** 
+               Non-architected registers.
+  *******************************************************************/
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+    width = regSize;
+    offset = defaultOffset;
+  }
+ 
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+    width = regSize;
+    offset = defaultOffset;
+    // NOTE - some variants may have different POR or override values based on signals
+    reset = 0xfffffffc;
+  }
+
+  define (reg=IAR) {
+    alias = NIA;
+  }
+ 
+  define (reg=RESRV) {
+    """
+    The reservation register.
+    """;
+    width = 64;
+    define (field=ADDR) { bits = (0,62); }
+    define (field=RES)  { bits = 63; }
+  }
+ 
+  /****************************************************************** 
+               Architected registers.
+  *******************************************************************/
+  define (reg=CR) {
+    // TODO - define all SPR register fields
+    """
+    The condition register.
+    """;
+    width = 32;
+    offset = 32;
+  }
+  
+  define (reg=CSRR0) {    
+    """
+    The critical save-restore register 0.
+    """;
+    width = regSize;
+  }
+  
+  define (reg=CSRR1) {    
+    """
+    The critical save-restore register 1.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=CM)  { bits = 32; }
+    define (field=ICM) { bits = 33; }
+    define (field=WE)  { bits = 45; }
+    define (field=CE)  { bits = 46; }   
+    define (field=EE)  { bits = 48; }
+    define (field=PR)  { bits = 49; }
+    define (field=FP)  { bits = 50; }
+    define (field=ME)  { bits = 51; }  
+    define (field=FE0) { bits = 52; }
+    define (field=DE)  { bits = 54; }  
+    define (field=FE1) { bits = 55; }
+    define (field=IS)  { bits = 58; }
+    define (field=DS)  { bits = 59; }
+  }
+
+  define (reg=CTR) {
+    """
+    The counter register.
+    """;
+    width  = regSize;
+    offset = defaultOffset;
+  }
+
+  define (reg=DAC1) {
+    """
+    The data address compare register 1.
+    """;
+    width = regSize;
+  }
+  
+  define (reg=DAC2) {
+    """
+    The data address compare register 2.
+    """;
+    width = regSize;
+  }
+
+  define (reg=DBCR0) {
+    """
+    The debug control register 0.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=IDM  ) { bits = 33; }
+    define (field=RST  ) { bits = (34,35); }
+    define (field=ICMP ) { bits = 36; }
+    define (field=BRT  ) { bits = 37; }
+    define (field=IRPT ) { bits = 38; }
+    define (field=TRAP ) { bits = 39; }
+    define (field=IAC1 ) { bits = 40; }
+    define (field=IAC2 ) { bits = 41; }
+    define (field=IAC3 ) { bits = 42; }
+    define (field=IAC4 ) { bits = 43; }
+    define (field=DAC1 ) { bits = (44,45); }
+    define (field=DAC2 ) { bits = (46,47); }
+    define (field=RET  ) { bits = 48; }
+    define (field=FT   ) { bits = 63; }
+  }
+
+  define (reg=DBCR1) {
+    """
+    The debug control register 1.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=IAC1US ) { bits = (32,33); }
+    define (field=IAC1ER ) { bits = (34,35); }
+    define (field=IAC2US ) { bits = (36,37); }
+    define (field=IAC2ER ) { bits = (38,39); }
+    define (field=IAC12M ) { bits = (40,41); }
+    define (field=IAC3US ) { bits = (48,49); }
+    define (field=IAC3ER ) { bits = (50,51); }
+    define (field=IAC4US ) { bits = (52,53); }
+    define (field=IAC4ER ) { bits = (54,55); }
+    define (field=IAC34M ) { bits = (56,57); }
+  }
+  
+  define (reg=DBCR2) {
+    """
+    The debug control register 2.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=DAC1US ) { bits = (32,33); }
+    define (field=DAC1ER ) { bits = (34,35); }
+    define (field=DAC2US ) { bits = (36,37); }
+    define (field=DAC2ER ) { bits = (38,39); }
+    define (field=DAC12M ) { bits = (40,41); }
+    define (field=DVC1M  ) { bits = (44,45); }
+    define (field=DVC2M  ) { bits = (46,47); }
+    define (field=DVC1BE ) { bits = (48,55); }
+    define (field=DVC2BE ) { bits = (56,63); }
+  }
+
+  define (reg=DBSR) {
+    """
+    The debug control register 02.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=IDE   ) { bits = 32; }
+    define (field=UDE   ) { bits = 33; }
+    define (field=MRR   ) { bits = (34,35); }
+    define (field=ICMP  ) { bits = 36; }
+    define (field=BRT   ) { bits = 37; }
+    define (field=IRPT  ) { bits = 38; }
+    define (field=TRAP  ) { bits = 39; }
+    define (field=IAC1  ) { bits = 40; }
+    define (field=IAC2  ) { bits = 41; }
+    define (field=IAC3  ) { bits = 42; }
+    define (field=IAC4  ) { bits = 43; }
+    define (field=DAC1R ) { bits = 44; }
+    define (field=DAC1W ) { bits = 45; }
+    define (field=DAC2R ) { bits = 46; }
+    define (field=DAC2W ) { bits = 47; }
+    define (field=RET   ) { bits = 48; }
+
+  }
+  
+  define (reg=DEAR) {
+    """
+    The data exception address register.
+    """;
+    width = regSize;
+  }
+
+  define (reg=DEC) {
+    """
+    The decrementer register.
+    """;
+    width = 32;
+    offset = 32;
+
+  }
+
+  define (reg=DECAR) {
+    """
+    The decrementer Auto-Reload Register.
+    """;
+    width = 32;
+    offset = 32;
+  }
+
+  define (reg=DVC1) {
+    """
+    The data value compare 1 register.
+    """;
+    width = regSize;
+  }
+
+  define (reg=DVC2) {
+    """
+    The data value compare 1 register.
+    """;
+    width = regSize;
+  }
+
+  define (reg=ESR) {
+    """
+    The exception syndrome register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=PIL ) { bits = 36; }
+    define (field=PPR ) { bits = 37; }
+    define (field=PTR ) { bits = 38; }
+    define (field=FP  ) { bits = 39; }
+    define (field=ST  ) { bits = 40; }
+    define (field=DLK ) { bits = (42,43); }
+    define (field=AP  ) { bits = 44; }
+    define (field=PUO ) { bits = 45; }
+    define (field=BO  ) { bits = 46; }
+    define (field=PIE ) { bits = 47; }
+  }
+
+  /* Explanation of unarchitected register "dsESR" follows.  
+  
+  !!!!!!!!!!!!!!!!!!!!!!!!!!  PLEASE NOTE  !!!!!!!!!!!!!!!!!!!!!!!!!!
+  CORRECT OPERATION OF THIS REGISTER AND OF EXCEPTION PROCESSING DEPENDS 
+  UPON THE pre_fetch() HOOK IN THE PROCESSOR'S arch DEFINITION!  See
+  "VERY IMPORTANT" note below.
+  
+  According to table 7-1 in the Power spec, there are several ESR indi-
+  cators attached to various exceptions.  Two kinds of interrupts can't 
+  programmatically "plan ahead" to set these indicator, notably Data 
+  Storage and Data TLB.  Until you actually perform the memory access, 
+  there's no realistic way to know whether you'll get a Data-Storage 
+  exception.  
+ 
+  The ESR bits that need to be set in accordance with these two excep-
+  tions, notably, FP, ST, DLK0, DLK1, AP, and BO.  Since which of these 
+  bits get set is defined by the to the nature of the instruction, the 
+  instruction's action code must determine which ones get set in the 
+  event of these exceptions occurring, and yet the exception action code 
+  itself must actually set those bits, if indeed the exception occurs.
+     
+  Therefore, dsESR is an image of the ESR register - the value that the
+  ESR will take if a Data-Storage or Data-TLB exception should occur
+  during that instuction.
+ 
+  VERY IMPORTANT:  The pre_fetch() hook to turn off all of the indi-
+  cations by:
+     
+  dsESR = 0;
+     
+  Speaking hypothetically, a floating-point instruction that writes to 
+  memory must do this:
+     
+  dsESR.FP = dsESR.ST = 1;
+     
+  and the Data-Storage exception handler must do this:
+     
+  ESR = dsESR;
+  */
+  define (reg=dsESR) {  // (unarchitected)
+    """
+    Exception syndrome register value if Data-Storage or Data-TLB exception 
+    occurs on current instruction.
+    """;
+    width = 32;
+    offset = 32;
+    attrs = unarchitected;
+    define (field=FP  ) { bits = 39; }
+    define (field=ST  ) { bits = 40; }
+    define (field=DLK ) { bits = (42,43); }
+    define (field=AP  ) { bits = 44; }
+    define (field=BO  ) { bits = 46; }
+  }
+
+  define (reg=IAC1) {
+    """
+    The interrupt address compare register 1.
+    """;
+    width = regSize;
+  }
+  
+  define (reg=IAC2) {
+    """
+    The interrupt address compare register 2.
+    """;
+    width = regSize;
+  }
+   
+  define (reg=IAC3) {
+    """
+    The interrupt address compare register 3.
+    """;
+    width = regSize;
+  }
+  
+  define (reg=IAC4) {
+    """
+    The interrupt address compare register 4.
+    """;
+    width = regSize;
+  }
+  
+  define (reg=IVOR0) {
+    """
+    The interrupt-vector offset register 0.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR1) {
+    """
+    The interrupt-vector offset register 1.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR2) {
+    """
+    The interrupt-vector offset register 2.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+ 
+  define (reg=IVOR3) {
+    """
+    The interrupt-vector offset register 3.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR4) {
+    """
+    The interrupt-vector offset register 4.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR5) {
+    """
+    The interrupt-vector offset register 5.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR6) {
+    """
+    The interrupt-vector offset register 6.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR7) {
+    """
+    The interrupt-vector offset register 7.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR8) {
+    """
+    The interrupt-vector offset register 8.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR9) {
+    """
+    The interrupt-vector offset register 9.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR10) {
+    """
+    The interrupt-vector offset register 10.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR11) {
+    """
+    The interrupt-vector offset register 11.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR12) {
+    """
+    The interrupt-vector offset register 12.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR13) {
+    """
+    The interrupt-vector offset register 13.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR14) {
+    """
+    The interrupt-vector offset register 14.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+  
+  define (reg=IVOR15) {
+    """
+    The interrupt-vector offset register 15.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ADDR) { bits = (48,59); }
+  }
+
+  define (reg=IVPR) {
+    """
+    The interrupt-vector prefix register.
+    """;
+    width = regSize;
+  }
+
+  define (reg=LR) {
+    """
+    The link register.
+    """;
+    width = regSize;
+  }
+  
+  define (reg=MSR) {
+    """
+    The machine state register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=CM)  { bits = 32; }
+    define (field=ICM) { bits = 33; }
+    define (field=WE)  { bits = 45; }
+    define (field=CE)  { bits = 46; }
+    define (field=EE)  { bits = 48; }
+    define (field=PR)  { bits = 49; }
+    define (field=FP)  { bits = 50; }
+    define (field=ME)  { bits = 51; }
+    define (field=FE0) { bits = 52; }
+    define (field=DE)  { bits = 54; }
+    define (field=FE1) { bits = 55; }
+    define (field=IS)  { bits = 58; }
+    define (field=DS)  { bits = 59; }
+  }
+
+  define (reg=PID) {
+    """
+    The process ID register 0.
+    """;
+  }
+ 
+  define (reg=PIR) {
+    """
+    The processor identification register.
+    """;
+   
+    width = 32;
+    offset = 32;
+  }
+
+
+  define (reg=PVR) {
+    """
+    The processor version register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=version)  { bits = (32,47); }
+    define (field=revision) { bits = (48,63); }
+    define(write) {
+      ignore = true;
+    }
+  }  
+
+  define (reg=SPRG0) {
+    """
+    The SPR general register 0.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG1) {
+    """
+    The SPR general register 1.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG2) {
+    """
+    The SPR general register 2.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG3) {
+    """
+    The SPR general register 3.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG4) {
+    """
+    The SPR general register 4.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG5) {
+    """
+    The SPR general register 5.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG6) {
+    """
+    The SPR general register 6.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SPRG7) {
+    """
+    The SPR general register 7.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SRR0) {
+    """
+    The save-restore register 0.
+    """;
+    width = regSize;
+  }
+
+  define (reg=SRR1) {
+    """
+    The save-restore register 1.
+    """;
+    width = 32;
+    offset = 32;
+  }
+    
+  define (reg=TBL) {
+    """
+    The time base lower register.
+    """;
+    width = 32;
+    offset = 32;
+  }
+
+  define (reg=TBU) {
+    """
+    The time base upper register.
+    """;
+    width = 32;
+    offset = 32;
+  }
+
+  define (reg=TCR) {
+    """
+    The timer control register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=WP)  { bits = (32,33); }
+    define (field=WRC) { bits = (34,35); }
+    define (field=WIE) { bits = 36; }
+    define (field=DIE) { bits = 37; }
+    define (field=FP)  { bits = (38,39); }
+    define (field=FIE) { bits = 40; }
+    define (field=ARE) { bits = 41; }
+  }
+  
+  define (reg=TSR) {
+    """
+    The timer status register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=ENW) { bits = 32; }
+    define (field=WIS) { bits = 33; }
+    define (field=WRS) { bits = (34,35); }
+    define (field=DIS) { bits = 36; }
+    define (field=FIS) { bits = 37; }
+  }
+  
+  define (reg=USPRG0) {
+    """
+    The user software-use SPR 0.
+    """;
+    width = regSize;
+  }
+ 
+  define (reg=ATBL) {
+    """
+    The user time base register lower.
+    """;
+    width = regSize;
+    define(write) {
+      ignore = true;
+    }
+  }
+
+  define (reg=ATBU) {
+    """
+    The user time base register upper.
+    """;
+    width = regSize;
+    define(write) {
+      ignore = true;
+    }
+  }
+
+  define (reg=XER) {
+    """
+    The overflow and carry register.
+    """;
+    width = 32;
+    offset = 32;
+    define (field=SO) { bits = 32; }
+    define (field=OV) { bits = 33; }
+    define (field=CA) { bits = 34; }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  //
+  // Register Files.  
+  //
+  //  NOTES: 
+  //
+  //  * Register Files are defined in alphabetical order
+  //]
+  ////////////////////////////////////////////////////////////////////
+  
+  define (regfile=GPR) {
+    """
+    The general purpose register file.
+    """;
+    size = 32;
+    width = regSize;
+    offset = defaultOffset;
+    prefix = r;
+  }
+
+  
+  define (regfile=SPR) {
+    """
+    The special purpose register file.
+    """;
+    size=1024;
+    width = regSize;
+
+    // Note: read/write hooks placed on the entry (vs. in the
+    // register definition) will only be invoked for 
+    // instructions that access them through the register file
+    // (ex: mtspr/mfspr)
+    define (entry=58)   { reg = CSRR0; }
+    define (entry=59)   { reg = CSRR1; }
+    define (entry=9)    { reg = CTR; }
+    define (entry=316)  { reg = DAC1; }
+    define (entry=317)  { reg = DAC2; }
+    define (entry=308)  { reg = DBCR0; }
+    define (entry=309)  { reg = DBCR1; }
+    define (entry=310)  { reg = DBCR2; }
+    define (entry=304)  { reg = DBSR; } 
+    define (entry=61)   { reg = DEAR; }
+    define (entry=22)   { reg = DEC; }
+    define (entry=54)   { reg = DECAR; }
+    define (entry=318)  { reg = DVC1; }
+    define (entry=319)  { reg = DVC2; }
+    define (entry=62)   { reg = ESR; }
+    define (entry=312)  { reg = IAC1; }
+    define (entry=313)  { reg = IAC2; }
+    define (entry=314)  { reg = IAC3; }
+    define (entry=315)  { reg = IAC4; }
+    define (entry=400)  { reg = IVOR0; }
+    define (entry=401)  { reg = IVOR1; }
+    define (entry=402)  { reg = IVOR2; }
+    define (entry=403)  { reg = IVOR3; }
+    define (entry=404)  { reg = IVOR4; }
+    define (entry=405)  { reg = IVOR5; }
+    define (entry=406)  { reg = IVOR6; }
+    define (entry=407)  { reg = IVOR7; }
+    define (entry=408)  { reg = IVOR8; }
+    define (entry=409)  { reg = IVOR9; }
+    define (entry=410)  { reg = IVOR10; }
+    define (entry=411)  { reg = IVOR11; }
+    define (entry=412)  { reg = IVOR12; }
+    define (entry=413)  { reg = IVOR13; }
+    define (entry=414)  { reg = IVOR14; }
+    define (entry=415)  { reg = IVOR15; }
+    define (entry=63)   { reg = IVPR; }
+    define (entry=8)    { reg = LR; }
+    define (entry=48)   { reg = PID; }
+    define (entry=286)  { reg = PIR; }
+    define (entry=287)  { reg = PVR; }
+    define (entry=272)  { reg = SPRG0; }
+    define (entry=273)  { reg = SPRG1; }
+    define (entry=274)  { reg = SPRG2; }
+    define (entry=275)  { reg = SPRG3; }
+    define (entry=276)  { reg = SPRG4; }
+    define (entry=277)  { reg = SPRG5; }
+    define (entry=278)  { reg = SPRG6; }
+    define (entry=279)  { reg = SPRG7; }
+    define (entry=26)   { reg = SRR0; }
+    define (entry=27)   { reg = SRR1; }
+    define (entry=284)  { reg = TBL; }
+    define (entry=285)  { reg = TBU; }
+    define (entry=340)  { 
+      reg = TCR;
+      define(write) {
+        action = func (bits<32> value) {
+          if (TCR.WRC != 0) {
+            // can't change WRC anymore
+            TCR = (value & 0xcfffffff) | (TCR & 0x30000000);
+          } else {
+            TCR = value;
+          }
+        };
+      }
+    }
+    define (entry=336)  { 
+      reg = TSR;    
+      define(write) {
+        action = func (bits<64> value) {
+          TSR = TSR & ~value;
+        };
+      }
+    }
+    define (entry=256)  { reg = USPRG0; }
+    define (entry=268)  { reg = ATBL; }
+    define (entry=269)  { reg = ATBU; }
+    define (entry=1)    { reg = XER; }
+  }
+ 
+  
+  ////////////////////////////////////////////////////////////////////
+  //
+  // Instruction fields.
+  //
+  //  NOTES: 
+  //
+  //  * Instruction Fields are defined in alphabetical order
+  //  * Specific fields are defined in Power Spec Section 1.7.1
+  //       
+  ////////////////////////////////////////////////////////////////////
+    
+  define (instrfield=AA) {
+    """
+    Absolute address bit.
+    """;
+    bits = 30;
+  }
+
+  define (instrfield=BA) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (11,15);
+  }
+
+  define (instrfield=BB) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a source.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=BC) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a branch indicator.
+    """;
+    bits = (21,25);
+  }
+
+  define (instrfield=BD) {
+    """
+    Immediate field specifying a 14-bit signed two's complement pc-relative
+    branch displacement which is concatenated on the right with 0b00 and
+    sign-extended.
+    """;
+    bits = (16,29);
+    addr = pc;
+    shift = 2;
+    is_signed = true;
+  }
+
+  define (instrfield=BD_A) {
+    """
+    Immediate field specifying a 14-bit signed two's complement absolute branch
+    displacement which is concatenated on the right with 0b00 and sign-extended.
+    """;
+    bits = (16,29);
+    addr = abs;
+    shift = 2;
+    is_signed = true;
+  }
+  
+  define (instrfield=BF) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    """;
+    bits = (6,8);
+  }
+  
+  define (instrfield=BFA) {
+    """
+    Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a source.
+    """;
+    bits = (11,13);
+  }
+
+  define (instrfield=BH) {
+    """
+    Field used to provide a hint about the target address with respect to whether
+    or not the instruction is a subroutine return.
+    """;
+    bits = (19,20);
+  }
+
+  define (instrfield=BI) {
+    """
+    Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    """;
+    bits = (11,15);
+    display = hex;
+  }
+
+  define (instrfield=CRn) {
+    """
+Assembler field used to specify a CR field for a conditional branch.
+    """;
+    pseudo = true;
+    width = 3;
+  }
+  
+  define (instrfield=BO) {
+    """
+    Field used to specify options for the Branch Conditional instructions.
+    """;
+    bits = (6,10);
+    display = hex;
+  }
+  
+  define (instrfield=BT) {
+    """
+    Field used to specify one of the Condition Register bits to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  
+  define (instrfield=CT) {
+    """
+    Field used to specify the portion of the cache to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  
+  define (instrfield=D) {
+    """
+    Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+
+  define (instrfield=DS) {
+    """
+    Immediate field used to specify a 14-bit signed two's complement integer
+    which is concatenated on the right with 0b00 and sign-extended to 64 bits.
+    """;
+    bits = (16,29);
+    is_signed = true;
+    display = dec;
+    shift = 2;
+  }
+
+  define (instrfield=E) {
+    """
+    Immediate field used to specify the target field of the Condition Register.
+    """;
+    bits = (11,11);
+  }
+
+  define (instrfield=E_WRTEEI) {
+    """
+    Immediate field used to specify the value of the MSR.EE bit by wrteei.
+    """;
+    bits = (16,16);
+  }
+
+  define (instrfield=FRS) {
+    """
+    Field used to specify a Floating Point Register as a source.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=FRT) {
+    """
+    Field used to specify a Floating Point Register as a target.
+    """;
+    bits = (6,10);
+  }
+ 
+  define (instrfield=FLM) {
+    """
+    Field used to specify a field mask.
+    """;
+    bits = (7,14);
+  }
+ 
+  define (instrfield=FXM) {
+    """
+    Field used to specify a field mask.
+    """;
+    bits = (12,19);
+    display = dec;
+  }
+                                                                                                                       
+  define (instrfield=L) {
+    """
+    Sign extend indicator for compare instructions.
+    """;
+    bits = (10,10);
+  }
+
+  define (instrfield=Y) {
+    """
+This is a hint bit for conditional branches.
+    """;
+    bits = 10;
+    overlay = true;
+  }
+
+  define (instrfield=LI) {
+    """
+    Immediate address field for pc-relative branch instructions.
+    """;
+    bits = (6,29);
+    is_signed = true;
+    shift = 2;
+    addr = pc;
+  }
+
+  define (instrfield=LI_A) {
+    """
+    Immediate address field for absolute branch instructions.
+    """;
+    bits = (6,29);
+    is_signed = true;
+    shift = 2;
+    addr = abs;
+  }
+  
+  define (instrfield=LK) {
+    """
+    LINK bit.
+    """;
+    bits = 31;
+  }
+
+  define (instrfield=MB) {
+    """
+    Field used in conjunction with ME field for M-Form Rotate instructions to specify a 64-bit mask 
+    consisting of 1-bits from bit MB+32 through bit ME+32 inclusive and 0-bits elsewhere.
+    """;
+    bits = (21,25);
+  }
+
+  define (instrfield=MBE) {
+    """
+In order to support a 4-operand form of rlwinm, we use this field, which is
+interpreted as a bitmask.
+    """;
+    pseudo = true;
+    width = 32;
+  }
+
+  define (instrfield=mb) {
+    """
+    Field used in MD-form and MDS-form rotate instructions to specify the first
+    1-bit of a 64-bit mask.
+    """;
+    bits = (26,(21,25));
+  }
+
+  define (instrfield=ME) {
+    """
+    Field used in conjunction with MB field for M-Form Rotate instructions to specify a 64-bit mask 
+    consisting of 1-bits from bit MB+32 through bit ME+32 inclusive and 0-bits elsewhere.
+    """;
+    bits = (26,30);
+  }
+
+  define (instrfield=me) {
+    """
+    Field used in MD-form and MDS-form rotate instructions to specify the last
+    1-bit of a 64-bit mask.
+    """;
+    bits = (26,(21,25));
+  }
+ 
+  define (instrfield=NB) {
+    """
+    Field used to specify a number of bytes to load on a string instruction.
+    """;
+    bits = (16,20);
+  }
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RC) {
+    """
+    Extended RC opcode.
+    """;
+    bits = (31,31);
+  }
+  
+  define (instrfield=RS) {
+    """
+    Field used to specify a General Purpose Register as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=SH) {
+    """
+    Field used to specify a shift amount in Rotate Word Immediate and Shift Word Immediate Instructions.
+    """;
+    bits = (16,20);
+  }
+  
+  define (instrfield=sh) {
+    """
+    Field used to specify a shift amount in rotate doubleword immediate and
+    shift doubleword immediate instructions.
+    """;
+    bits = (30,(16,20));
+  }
+
+  define (instrfield=SI) {
+    """
+    Signed immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+    is_signed = true;
+  }
+  
+  define (instrfield=SPRN) {
+    """
+    Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    """;
+    bits = ((16,20),(11,15));
+    ref = SPR;
+    type = regfile;
+  }
+
+  define (instrfield=TO) {
+    """
+    Field used to specify a trap condition.
+    """;
+    bits = (6,10);
+  }
+
+  define (instrfield=U) {
+    """
+    Unsigned immediate field for FP operations.
+    """;
+    bits = (16,19);
+  }
+
+  define (instrfield=UI) {
+    """
+    Unsigned immediate field for arithmetic operations.
+    """;
+    bits = (16,31);
+    display = dec;
+  }
+
+  /**
+   **
+   ** The XO field is problematic because it has several different 
+   ** definitions depending on the instruction form.  The following 
+   ** table summarizes naming conventions used to alleviate this issue.
+   **
+   ** Instruction              XO              ADL 
+   ** Format                   Location        Field Name
+   ** -------------------------------------------------------
+   **   A                      26:30           XO_A
+   **   DS                     30:31           XO_DS
+   **   MD                     27:29           XO_MD
+   **   MDS                    27:30           XO_MDS
+   **   X, XFL, XFX, XL        21:30           XO_X     
+   **   XS                     21:29           XO_XS 
+   **/
+  
+  define (instrfield=XO_A) {
+    """
+    Extended opcode for A Instruction Format.
+    """;
+    bits = (26,30);
+  }
+  
+  define (instrfield=XO_DS) {
+    """
+    Extended opcode for DS Instruction Format.
+    """;
+    bits = (30,31);
+  }
+  
+  define (instrfield=XO_MD) {
+    """
+    Extended opcode for MD Instruction format.
+    """;
+    bits = (27,29);
+  }
+  
+  define (instrfield=XO_MDS) {
+    """
+    Extended opcode for MDS Instruction Format.
+    """;
+    bits = (27,30);
+  }
+  
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=XO_XS) {
+    """
+    Extended opcode for XS Instruction Format.
+    """;
+    bits = (21,29);
+  }  
+  ////////////////////////////////////////////////////////////////////
+  //
+  // Instructions.
+  //
+  //  NOTES: 
+  //
+  //  * Instructions are defined in alphabetical order
+  //
+  //  * Style Conventions
+  // 
+  //    - The m variable should be computed using the '?' operator
+  //
+  //  * Variable Naming, Type, and Usage conventions:
+  //
+  //
+  //    Power     ADL       ADL           
+  //    Name      Name      Type          Purpose
+  //    ----------------------------------------------------------------------------------------------------
+  //    a         a         var           branch target address
+  //    b         b         var           hold the sign-extended version of an immediate value
+  //    carry     carry     var           tmp for carry detection for future assignment to register fields
+  //    ctr_ok    ctr_ok    var           branch conditional CTR expression
+  //    cond_ok   cond_ok   var           branch conditional CR expression
+  //    e         e         var           used to hold ME+32 for masking in rotates
+  //    EA        EA        var           holds effective address for ld*/st* instructions
+  //    k         k         var           used to hold a mask of ones in rotate with mask insert instructions
+  //    m         m         var           for bit slicing/concat that depend on the Mode parameter
+  //    n         n         var           holds the shift count for sl* & sr* instructions
+  //    ni        ni        var           holds tmp next instruction address for bl* instructions
+  //    OV        OV        var           used in mul* instructions as a tmp value for SO calculation
+  //    prod      prod      var           holds the product for mul* instructions
+  //    r         r         var           holds the results of rotate operations
+  //    r         r         int           loop counter for lmw, stmw
+  //    result    result    var           holds the result of a shift expression in sraw* instructions
+  //    N/A       si        var           tmp sign extension result used multiple times in an action
+  //    sum       N/A       N/A           handled by the setCrField helper function via 'm' parameter
+  //    -------------------------------------------------------------------------
+  ///////////////////////////////////////////////////////////////////////////////
+
+    //
+    //
+    // TODO: We need to resolve the GPR(RA)(32,63) type cases.  We wanted to get away from that syntax.  See the cmp instrs
+    //       for a good example of this.  We need to decide if this is acceptable and if not how do we change this.
+    //
+
+    define (instr="add") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(266),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+      };
+    }
+  
+    define (instr="add.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(266),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+  
+    define (instr="addo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(778),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),0);  
+        setXerField(true/*ov*/,true/*so*/,false/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+      };
+    }
+  
+    define (instr="addo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(778),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),0);
+        setXerField(true/*ov*/,true/*so*/,false/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);     
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+  
+    define (instr="addc") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(10),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    }  
+  
+    define (instr="addc.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(10),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }  
+
+    define (instr="addco") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(522),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }  
+
+    define (instr="addco.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(522),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB);
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }  
+
+    define (instr="adde") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(138),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB) + XER.CA;
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    }  
+  
+
+    define (instr="adde.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(138),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB) + XER.CA;
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    } 
+ 
+    define (instr="addeo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(650),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB) + XER.CA;
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }  
+
+    define (instr="addeo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(650),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),GPR(RB),XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + GPR(RB) + XER.CA;
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }  
+ 
+    define (instr="addi") {
+      fields=(OPCD(14),RT,RA,SI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        if (RA == 0) {
+          GPR(RT)(m,regSize-1) = SI;
+        } else {
+          GPR(RT)(m,regSize-1) = GPR(RA) + SI;
+        }
+      };
+    }
+ 
+    define (instr="addic") {
+      fields=(OPCD(12),RT,RA,SI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),SI,0);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = GPR(RA) + SI;
+      };
+    }
+  
+    define (instr="addic.") {
+      fields=(OPCD(13),RT,RA,SI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),SI,0);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = GPR(RA) + SI;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+ 
+    define (instr="addis") {
+      fields=(OPCD(15),RT,RA,SI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var b = SI << 16;
+        GPR(RT)(m,regSize-1) = a + b;
+      };
+    }
+ 
+    define (instr="addme") {
+      fields=(OPCD(31),RT,RA,XO_X(234),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),ones64,XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + ones64 + XER.CA;
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    } 
+ 
+    define (instr="addme.") {
+      fields=(OPCD(31),RT,RA,XO_X(234),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),ones64,XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + ones64 + XER.CA;
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    } 
+ 
+    define (instr="addmeo") {
+      fields=(OPCD(31),RT,RA,XO_X(746),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);   
+        var carry = Carry(GPR(RA),ones64,XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + ones64 + XER.CA;
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }  
+ 
+    define (instr="addmeo.") {
+      fields=(OPCD(31),RT,RA,XO_X(746),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),ones64,XER.CA); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + ones64 + XER.CA;
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+ 
+    define (instr="addze") {
+      fields=(OPCD(31),RT,RA,XO_X(202),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),XER.CA,0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + XER.CA;
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    }  
+  
+    define (instr="addze.") {
+      fields=(OPCD(31),RT,RA,XO_X(202),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),XER.CA,0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + XER.CA;
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    } 
+ 
+    define (instr="addzeo") {
+      fields=(OPCD(31),RT,RA,XO_X(714),RC(0));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),XER.CA,0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + XER.CA;
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }  
+ 
+    define (instr="addzeo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(714),RC(1));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var carry = Carry(GPR(RA),XER.CA,0); 
+        GPR(RT)(m,regSize-1) = GPR(RA) + XER.CA;
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }  
+ 
+    define (instr="and") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(28),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) & GPR(RB);
+      };
+    }
+ 
+    define (instr="and.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(28),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) & GPR(RB);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="andc") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(60),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) & ~GPR(RB);
+      };
+    }
+ 
+    define (instr="andc.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(60),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) & ~GPR(RB);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+ 
+    define (instr="andi.") {
+      fields=(OPCD(28),RA,RS,UI);
+      syntax = ("%i %f,%f,%f",RA,RS,UI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) & UI;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="andis.") {
+      fields=(OPCD(29),RA,RS,UI);
+      syntax = ("%i %f,%f,%f",RA,RS,UI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var b = concat(UI,zero16);
+        GPR(RA)(m,regSize-1) = GPR(RS) & b;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+  
+    define (instr="b") {
+      fields=(OPCD(18),LI,AA(0),LK(0));
+      attrs = branch;
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        NIA = LI(m,63);
+      };
+    }
+ 
+    define (instr="ba") {
+      fields=(OPCD(18),LI_A,AA(1),LK(0));
+      attrs = branch;
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        NIA = LI_A(m,63);
+      };
+    }
+    
+    define (instr="bc") {
+      fields=(OPCD(16),BO,Y,BI,BD,AA(0),LK(0));
+      attrs = branch;
+      syntax = ("%i %f,%f,%f",BO,BI,BD);
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        if (BO(2) == 0) {
+          CTR= CTR - 1;
+        }
+        var ctr_ok  = (BO(2) != 0) || (((CTR(m,63) != 0) ^ BO(3)) != 0);
+        var cond_ok = (BO(0) != 0) || (CR(BI+32) == BO(1));
+        if (ctr_ok && cond_ok) {
+          NIA = BD(m,63);
+        }
+      };
+    }  
+
+    define (instr="bca") {
+      fields=(OPCD(16),BO,BI,BD_A,AA(1),LK(0));
+      attrs = branch;
+      syntax = ("%i %f,%f,%f",BO,BI,BD_A);
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        if (BO(2) == 0) {
+          CTR = CTR - 1;
+        }
+        var ctr_ok = (BO(2)!=0) || (((CTR(m,63)!=0) ^ BO(3)) != 0);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (ctr_ok && cond_ok) {
+          NIA = BD_A(m,63);
+        }
+      };
+    } 
+
+    define (instr="bcctr") {
+      fields=(OPCD(19),BO,BI,BH,LK(0),XO_X(528));
+      attrs = branch;
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (cond_ok) {
+          var a = CTR & ~0x3;
+          NIA = a(m,63);
+        }
+      };
+    }
+
+    // Two operand version: BH is assumed to be 0 in this case.
+    define (instr="bcctr_") {
+      alias = bcctr(BO(BO),BI(BI),BH(0));
+      syntax = ("bcctr %f,%f",BO,BI);
+    }
+
+    define (instr="bcctrl") {
+      fields=(OPCD(19),BO,BI,BH,LK(1),XO_X(528));
+      attrs = branch;
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (cond_ok) {
+          var a = CTR & ~0x3ULL;
+          NIA = a(m,63);
+        }
+        LR = CIA + 4;
+      };
+    } 
+
+    // Two operand version: BH is assumed to be 0 in this case.
+    define (instr="bcctrl_") {
+      alias = bcctrl(BO(BO),BI(BI),BH(0));
+      syntax = ("bcctrl %f,%f",BO,BI);
+    }
+
+    define (instr=bctr) {
+      alias = bcctr(BO(20),BI(0));
+    }
+
+    define (instr="bcl") {
+      fields=(OPCD(16),BO,Y,BI,BD,AA(0),LK(1));
+      attrs = branch;
+      syntax = ("%i %f,%f,%f",BO,BI,BD);
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        if (BO(2) == 0) {
+          CTR = CTR - 1;
+        }
+        var ctr_ok = (BO(2)!=0) || (((CTR(m,63)!=0) ^ BO(3)) != 0);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (ctr_ok && cond_ok) {
+          NIA = BD;
+        }
+        LR = CIA + 4;
+      };
+    } 
+
+    define (instr="bcla") {
+      fields=(OPCD(16),BO,Y,BI,BD_A,AA(1),LK(1));
+      attrs = branch;
+      syntax = ("%i %f,%f,%f",BO,BI,BD_A);
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        if (BO(2) == 0) {
+          CTR = CTR - 1;
+        }
+        var ctr_ok = (BO(2)!=0) || (((CTR(m,63)!=0) ^ BO(3)) != 0);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (ctr_ok && cond_ok) {
+          NIA = BD_A;
+        }
+        LR = CIA + 4;
+      };
+    } 
+
+    // We accept this form of the instruction, but we want the disassemble to use
+    // the +/- version for clarity.
+    define (instr=beq) {
+      alias = bc(BO(12),BI(2),BD(BD));
+      syntax = ("%i %f",BD);
+      disassemble=false;
+    }
+
+    define (instr="beq+") {
+      alias = bc(BO(12),Y((BD<0) ? 0 : 1),BI(CRn*4+2),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="beq-") {
+      alias = bc(BO(12),Y((BD<0) ? 1 : 0),BI(CRn*4+2),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="beq+_") {
+      alias = bc(BO(12),Y((BD<0) ? 0 : 1),BI(2),BD(BD));
+      syntax = ("beq+ %f",BD);
+    }
+
+    define (instr="beq-_") {
+      alias = bc(BO(12),Y((BD<0) ? 1 : 0),BI(2),BD(BD));
+      syntax = ("beq- %f",BD);
+    }
+
+    define (instr=bne) {
+      alias = bc(BO(4),BI(2),BD(BD));
+      syntax = ("%i %f",BD);
+    }
+
+    define (instr="bne+") {
+      alias = bc(BO(4),Y((BD<0) ? 0 : 1),BI(CRn*4+2),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="bne-") {
+      alias = bc(BO(4),Y((BD<0) ? 1 : 0),BI(CRn*4+2),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="bne+_") {
+      alias = bc(BO(4),Y((BD<0) ? 0 : 1),BI(2),BD(BD));
+      syntax = ("bne+ %f",BD);
+    }
+
+    define (instr="bne-_") {
+      alias = bc(BO(4),Y((BD<0) ? 1 : 0),BI(2),BD(BD));
+      syntax = ("bne- %f",BD);
+    }
+
+    // We accept this form of the instruction, but we want the disassemble to use
+    // the +/- version for clarity.
+    define (instr=bgt) {
+      alias = bc(BO(12),BI(1),BD(BD));
+      syntax = ("%i %f",BD);
+      disassemble = false;
+    }
+
+    define (instr="bgt+") {
+      alias = bc(BO(12),Y((BD<0) ? 0 : 1),BI(CRn*4+1),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="bgt-") {
+      alias = bc(BO(12),Y((BD<0) ? 1 : 0),BI(CRn*4+1),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="bgt+_") {
+      alias = bc(BO(12),Y((BD<0) ? 0 : 1),BI(1),BD(BD));
+      syntax = ("bgt+ %f",BD);
+    }
+
+    define (instr="bgt-_") {
+      alias = bc(BO(12),Y((BD<0) ? 1 : 0),BI(1),BD(BD));
+      syntax = ("bgt- %f",BD);
+    }
+
+    // We accept this form of the instruction, but we want the disassemble to use
+    // the +/- version for clarity.
+    define (instr=blt) {
+      alias = bc(BO(12),BI(0),BD(BD));
+      syntax = ("%i %f",BD);
+      disassemble = false;
+    }
+
+    define (instr="blt+") {
+      alias = bc(BO(12),Y((BD<0) ? 0 : 1),BI(CRn*4),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="blt-") {
+      alias = bc(BO(12),Y((BD<0) ? 1 : 0),BI(CRn*4),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="blt+_") {
+      alias = bc(BO(12),Y((BD<0) ? 0 : 1),BI(0),BD(BD));
+      syntax = ("blt+ %f",BD);
+    }
+
+    define (instr="blt-_") {
+      alias = bc(BO(12),Y((BD<0) ? 1 : 0),BI(0),BD(BD));
+      syntax = ("blt- %f",BD);
+    }
+
+    // We accept this form of the instruction, but we want the disassemble to use
+    // the +/- version for clarity.
+    define (instr=ble) {
+      alias = bc(BO(4),BI(1),BD(BD));
+      syntax = ("%i %f",BD);
+      disassemble=false;
+    }
+
+    define (instr="ble+") {
+      alias = bc(BO(4),Y((BD<0) ? 0 : 1),BI(CRn*4+1),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="ble-") {
+      alias = bc(BO(4),Y((BD<0) ? 1 : 0),BI(CRn*4+1),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="ble+_") {
+      alias = bc(BO(4),Y((BD<0) ? 0 : 1),BI(1),BD(BD));
+      syntax = ("ble+ %f",BD);
+    }
+
+    define (instr="ble-_") {
+      alias = bc(BO(4),Y((BD<0) ? 1 : 0),BI(1),BD(BD));
+      syntax = ("ble- %f",BD);
+    }
+
+    // We accept this form of the instruction, but we want the disassemble to use
+    // the +/- version for clarity.
+    define (instr=bge) {
+      alias = bc(BO(4),BI(0),BD(BD));
+      syntax = ("%i %f",BD);
+      disassemble=false;
+    }
+
+    define (instr="bge+") {
+      alias = bc(BO(4),Y((BD<0) ? 0 : 1),BI(CRn*4),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="bge-") {
+      alias = bc(BO(4),Y((BD<0) ? 1 : 0),BI(CRn*4),BD(BD));
+      syntax = ("%i %f,%f",CRn,BD);
+    }
+
+    define (instr="bge+_") {
+      alias = bc(BO(4),Y((BD<0) ? 0 : 1),BI(0),BD(BD));
+      syntax = ("bge+ %f",BD);
+    }
+
+    define (instr="bge-_") {
+      alias = bc(BO(4),Y((BD<0) ? 1 : 0),BI(0),BD(BD));
+      syntax = ("bge- %f",BD);
+    }
+
+    define (instr=bdnz) {
+      alias = bc(BO(16),BI(0),BD(BD));
+      syntax = ("%i %f",BD);
+      disassemble=false;
+    }
+    
+    define (instr="bdnz+") {
+      alias = bc(BO(16),Y((BD<0) ? 0 : 1),BI(0),BD(BD));
+      syntax = ("%i %f",BD);
+    }
+
+    define (instr="bdnz-") {
+      alias = bc(BO(16),Y((BD<0) ? 1 : 0),BI(0),BD(BD));
+      syntax = ("%i %f",BD);
+    }
+
+    define (instr="bclr") {
+      fields=(OPCD(19),BO,BI,LK(0),XO_X(16));
+      attrs = branch;
+      syntax = ("%i %f,%f",BO,BI);
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        if (BO(2) == 0) {
+          CTR = CTR - 1;
+        }
+        var ctr_ok = (BO(2)!=0) || (((CTR(m,63)!=0) ^ BO(3)) != 0);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (ctr_ok && cond_ok) {
+          var a = LR & ~0x3ULL;
+          NIA = a(m,63);
+        }
+      };
+    }
+
+    define (instr="bclrl") {
+      fields=(OPCD(19),BO,BI,LK(1),XO_X(16));
+      attrs = branch;
+      syntax = ("%i %f,%f",BO,BI);
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        if (BO(2) == 0) {
+          CTR = CTR - 1;
+        }
+        var ctr_ok = (BO(2)!=0) || (((CTR(m,63)!=0) ^ BO(3)) != 0);
+        var cond_ok = (BO(0)!=0) || (CR(BI+32) == BO(1));
+        if (ctr_ok && cond_ok) {
+          var a = LR & ~0x3ULL;
+          NIA = a(m,63);
+        }
+        LR = CIA + 4;
+      };
+    }
+
+  define (instr=blr) {
+    alias = bclr(BO(20),BI(0));
+  }
+
+    define (instr="bl") {
+      fields=(OPCD(18),LI,AA(0),LK(1));
+      attrs = branch;
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        NIA = LI(m,63);
+        var ni = CIA + 4;
+        LR = ni(m,63);
+      };
+    }
+
+    define (instr="bla") {
+      fields=(OPCD(18),LI_A,AA(1),LK(1));
+      attrs = branch;
+      action =  {
+        var m = mode(false/*reg*/,true/*addr*/);
+        NIA = LI_A(m,63);
+        var ni = CIA + 4;
+        LR = ni(m,63);
+      };
+    }
+
+    define (instr="cmp") {
+      fields=(OPCD(31),L,BF,RA,RB,XO_X(0));
+      action = {
+        // TODO: how to handle undefined if L = 1?
+        var m = mode(true/*reg*/,false/*addr*/);
+        var a = (L == 0) ? signExtend(GPR(RA)(32,63),regSize) : GPR(RA);
+        var b = (L == 0) ? signExtend(GPR(RB)(32,63),regSize) : GPR(RB);
+        setCrField(m,BF,a,b);
+      };
+    }
+
+    // Three-operand form: L = 0.
+    define (instr=cmpw) {
+      alias = cmp(BF(BF),L(0),RA(RA),RB(RB));
+    }
+
+    // Two-operand form: L = 0, BF = 0.
+    define (instr=cmpw_) {
+      alias = cmp(BF(0),L(0),RA(RA),RB(RB));
+      syntax = ("cmpw %f,%f",RA,RB);
+    }
+  
+    define (instr="cmpi") {
+      // TODO: how to handle undefined if L = 1?
+      fields=(OPCD(11),BF,L,RA,SI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var a = (L == 0) ? signExtend(GPR(RA)(32,63),regSize) : GPR(RA);
+        var b = signExtend(SI,regSize);
+        setCrField(m,BF,a,b);
+      };
+    }
+
+    // Three-operand form: L = 0.
+    define (instr=cmpwi) {
+      alias = cmpi(BF(BF),L(0),RA(RA),SI(SI));
+    }
+
+    // Two-operand form.
+    define (instr=cmpwi_) {
+      alias = cmpi(BF(0),L(0),RA(RA),SI(SI));
+      syntax = ("cmpwi %f,%f",RA,SI);
+    }
+  
+    define (instr="cmpl") {
+      // TODO: how to handle undefined if L = 1?
+      fields=(OPCD(31),BF,L,RA,RB,XO_X(32));
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var a = (L == 0) ? zeroExtend(GPR(RA)(32,63),regSize) : GPR(RA);
+        var b = (L == 0) ? zeroExtend(GPR(RB)(32,63),regSize) : GPR(RB);
+        setCrFieldU(m,BF,a,b);
+      };
+    }
+
+    define (instr=cmplw) {
+      alias = cmpl(BF(BF),L(0),RA(RA),RB(RB));
+    }
+
+    define (instr=cmplw_) {
+      alias = cmpl(BF(0),L(0),RA(RA),RB(RB));
+      syntax = ("cmplw %f,%f",RA,RB);
+    }
+  
+    define (instr="cmpli") {
+      // TODO: how to handle undefined if L = 1?
+      fields=(OPCD(10),BF,L,RA,UI);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var a = (L == 0) ? zeroExtend(GPR(RA)(32,63),regSize) : GPR(RA);
+        var b = UI;
+        setCrFieldU(m,BF,a,b);
+      };
+    }
+
+    define (instr=cmplwi) {
+      alias = cmpli(BF(BF),L(0),RA(RA),UI(UI));
+    }
+
+    define (instr=cmplwi_) {
+      alias = cmpli(BF(0),L(0),RA(RA),UI(UI));
+      syntax = ("cmplwi %f,%f",RA,UI);
+    }
+
+    define (instr="cntlzw") {
+      fields=(OPCD(31),RS,RA,XO_X(26),RC(0));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var n = 32;
+        var i = 0;
+        var rs = GPR(RS);  
+        for (;  n < 64 && rs(n) == 0;  n++, i++);
+        GPR(RA)(m,regSize-1) = i;
+      };
+    }
+
+    define (instr="cntlzw.") {
+      fields=(OPCD(31),RS,RA,XO_X(26),RC(1));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode(true/*reg*/,false/*addr*/);
+        var n = 32;
+        var i = 0;
+        var rs = GPR(RS);  
+        for (;  n < 64 && rs(n) == 0;  n++, i++);
+        GPR(RA)(m,regSize-1) = i;
+        setCrField(m,0,i,0);
+      };
+    }
+
+    define (instr="cntlzd") {
+      fields=(OPCD(31),RS,RA,XO_X(58),RC(0));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        if (Mode == Mode32) {
+          // GPR(RA)(m,regSize-1) = undefined
+          XER.SO = 1;  // all other bits undefined
+        } else {
+          var n = 0;
+          var i = 0;
+          var rs = GPR(RS);
+          for (;  n < 64 && rs(n) == 0;  n++, i++);
+          GPR(RA)(m,regSize-1) = i;
+        }
+      };
+    }
+
+    define (instr="cntlzd.") {
+      fields=(OPCD(31),RS,RA,XO_X(58),RC(1));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = 0;
+        var i = 0;
+        if (Mode == Mode32) {
+          // GPR(RA)(m,regSize-1) = undefined
+          XER.SO = 1;  // all other bits undefined
+        } else {
+          var rs = GPR(RS);
+          for (;  n < 64 && rs(n) == 0;  n++, i++);
+          GPR(RA)(m,regSize-1) = i;
+        }
+        setCrField(m,0,i,0);
+      };
+    }
+
+    define (instr="crand") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(257));
+      action = {
+        CR = CR.set(BT+32,CR(BA+32) & CR(BB+32));
+      };
+    }
+
+    define (instr="crandc") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(129));
+      action = {
+        CR = CR.set(BT+32,CR(BA+32) & ~CR(BB+32));
+      };
+    }
+
+    define (instr="creqv") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(289));
+      action = {
+        CR = CR.set(BT+32,~(CR(BA+32) ^ CR(BB+32)));
+      };
+    }
+
+    define (instr="crnand") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(225));
+      action = {
+        CR = CR.set(BT+32,~(CR(BA+32) & CR(BB+32)));
+      };
+    }
+
+    define (instr="crnor") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(33));
+      action = {
+        CR = CR.set(BT+32,~(CR(BA+32) | CR(BB+32)));
+      };
+    }
+
+    define (instr="cror") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(449));
+      action = {
+        CR = CR.set(BT+32,CR(BA+32) | CR(BB+32));
+      };
+    }
+
+    define (instr="crorc") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(417));
+      action = {
+        CR = CR.set(BT+32,CR(BA+32) | ~CR(BB+32));
+      };
+    }
+
+    define (instr="crxor") {
+      fields=(OPCD(19),BT,BA,BB,XO_X(193));
+      action = {
+        CR = CR.set(BT+32,CR(BA+32) ^ CR(BB+32));
+      };
+    }
+
+    define (instr="dcba") {
+      fields=(OPCD(31),RA,RB,XO_X(758));
+      attrs = load;
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        AllocateDataCacheBlock(EA);
+      };
+    }
+    
+    define (instr="dcbf") {
+      fields=(OPCD(31),RA,RB,XO_X(86));
+      attrs = store;
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        FlushDataCacheBlock(EA);  // also invalidates.
+      };
+    }
+    
+    define (instr="dcbi") {
+      fields=(OPCD(31),RA,RB,XO_X(470));
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        if (ProtectionMode == User) {
+          // Executing this instruction in user mode causes a Priviliged 
+          // Instruction Exception (prog Interrupt)
+          prog_t prog;
+          prog.ESR = 0x04000000;
+          raiseException(prog);
+        }  
+        InvalidateDataCacheBlock(EA);
+      };
+    }
+    
+    define (instr="dcbst") {
+      fields=(OPCD(31),RA,RB,XO_X(54));
+      attrs = store;
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        StoreDataCacheBlock(EA);
+      };
+    }
+    
+    define (instr="dcbt") {
+      fields=(OPCD(31),CT,RA,RB,XO_X(278));
+      attrs = load;
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        PrefetchDataCacheBlock(EA,CT);
+      };
+    }
+    
+    define (instr="dcbz") {
+      fields=(OPCD(31),RA,RB,XO_X(1014));
+      attrs = store;
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        ZeroDataCacheBlock(EA);
+      };
+    }
+    
+    define (instr="divd") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(489),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        GPR(RT)(m,regSize-1) = quotient;
+      };
+    }   
+
+    define (instr="divd.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(489),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        GPR(RT)(m,regSize-1) = (u) ? 0 : quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }   
+
+    define (instr="divdo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(1001),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = (u) ? 0 : quotient;
+      };
+    }   
+
+    define (instr="divdo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(1001),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = (u) ? 0 : quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="divdu") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(457),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? 0 : (dividend / divisor);
+        GPR(RT)(m,regSize-1) = (u) ? 0 : quotient;
+      };
+    }   
+
+    define (instr="divdu.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(457),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? 0 : (dividend / divisor);
+        GPR(RT)(m,regSize-1) = (u) ? 0 : quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }   
+
+    define (instr="divduo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(969),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? 0 : (dividend / divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = quotient;
+      };
+    }   
+
+    define (instr="divduo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(969),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA);
+        var divisor = GPR(RB);
+        var u = ((GPR(RA)(m,regSize-1) == 0x8000000000000000ULL) & (GPR(RB) == ones64)) || (GPR(RB) == 0);
+        var quotient = (u) ? 0 : (dividend / divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="divw") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(491),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = ((GPR(RA)(32,63) == 0x80000000) & (GPR(RB)(32,63) == 0xffffffff)) || (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        GPR(RT)(m,regSize-1) = quotient;
+      };
+    }   
+
+    define (instr="divw.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(491),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);  
+        var divisor = GPR(RB)(32,63);
+        var u = ((GPR(RA)(32,63) == 0x80000000) & (GPR(RB)(32,63) == 0xffffffff)) || (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        GPR(RT)(m,regSize-1) = quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }   
+
+    define (instr="divwo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(1003),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = ((GPR(RA)(32,63) == 0x80000000) & (GPR(RB)(32,63) == 0xffffffff)) || (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = quotient;
+      };
+    }   
+
+    define (instr="divwo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(1003),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = ((GPR(RA)(32,63) == 0x80000000) & (GPR(RB)(32,63) == 0xffffffff)) || (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA) : signedDivide (dividend,divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="divwu") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(459),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = GPR(RA);
+        var rb = GPR(RB);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA,false) : (dividend / divisor);
+        GPR(RT)(m,regSize-1) = quotient;
+      };
+    }   
+
+    define (instr="divwu.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(459),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA,false) : (dividend / divisor);
+        GPR(RT)(m,regSize-1) = quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }   
+
+    define (instr="divwuo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(971),RC(0));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA,false) : (dividend / divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = quotient;
+      };
+    }   
+
+    define (instr="divwuo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(971),RC(1));
+      attrs = divide;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var dividend = GPR(RA)(32,63);
+        var divisor = GPR(RB)(32,63);
+        var u = (GPR(RB)(32,63) == 0);
+        var quotient = (u) ? undefDivide(RA,false) : (dividend / divisor);
+        XER.OV = u;
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = quotient;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="eqv") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(284),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = (~GPR(RS) ^ GPR(RB));
+      };
+    } 
+
+    define (instr="eqv.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(284),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = (~GPR(RS) ^ GPR(RB)); 
+        setCrField(m,0,GPR(RA),0);
+      };
+    } 
+
+    define (instr="extsb") {
+      fields=(OPCD(31),RS,RA,XO_X(954),RC(0));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var s = zero56;
+        if (GPR(RS)(b_BitIndex,b_BitIndex)==1) {
+          s = ~s;
+        }
+        GPR(RA)(m,regSize-1) = concat(s,GPR(RS)(b_BitIndex,63));
+      };
+    } 
+  
+    define (instr="extsb.") {
+      fields=(OPCD(31),RS,RA,XO_X(954),RC(1));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var s = zero56;
+        if (GPR(RS)(b_BitIndex,b_BitIndex)==1) {
+          s = ~s;
+        }
+        GPR(RA)(m,regSize-1) = concat(s,GPR(RS)(b_BitIndex,63));
+        setCrField(m,0,GPR(RA),0);
+      };
+    } 
+
+    define (instr="extsh") {
+      fields=(OPCD(31),RS,RA,XO_X(922),RC(0));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var s = zero48;
+        if (GPR(RS)(hw_BitIndex,hw_BitIndex)==1) {
+          s = ~s;
+        }
+        GPR(RA)(m,regSize-1) = concat(s,GPR(RS)(hw_BitIndex,63));
+      };
+    } 
+  
+    define (instr="extsh.") {
+      fields=(OPCD(31),RS,RA,XO_X(922),RC(1));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var s = zero48;
+        if (GPR(RS)(hw_BitIndex,hw_BitIndex)==1) {
+          s = ~s;
+        }
+        GPR(RA)(m,regSize-1) = concat(s,GPR(RS)(hw_BitIndex,63));
+        setCrField(m,0,GPR(RA),0);
+      };
+    } 
+
+    define (instr="extsw") {
+      fields=(OPCD(31),RS,RA,XO_X(986),RC(0));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var s = zero32;
+        if (GPR(RS)(w_BitIndex,w_BitIndex)==1) {
+          s = ~s;
+        }
+        GPR(RA)(m,regSize-1) = concat(s,GPR(RS)(w_BitIndex,63));
+      };
+    } 
+  
+    define (instr="extsw.") {
+      fields=(OPCD(31),RS,RA,XO_X(986),RC(1));
+      syntax = ("%i %f,%f",RA,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var s = zero32;
+        if (GPR(RS)(w_BitIndex,w_BitIndex)==1) {
+          s = ~s;
+        }
+        GPR(RA)(m,regSize-1) = concat(s,GPR(RS)(w_BitIndex,63));
+        setCrField(m,0,GPR(RA),0);
+      };
+    } 
+
+    define (instr="icbi") {
+      fields=(OPCD(31),RA,RB,XO_X(982));
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        InvalidateInstructionCacheBlock(EA);
+      };
+    }
+    
+    define (instr="icbt") {
+      fields=(OPCD(31),CT,RA,RB,XO_X(22));
+      attrs = load;
+      action = {
+        var m = mode (false/*reg*/,true/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = (a + GPR(RB))(m,63);
+        PrefetchInstructionCacheBlock(EA,CT);
+      };
+    }
+
+    define (instr="isync") {
+      fields=(OPCD(19),XO_X(150));
+      action = {
+      };
+    }
+
+    define (instr=la) {
+      syntax = ("%i %f,%f(%f)",RT,SI,RA);
+      alias = addi(RT(RT),RA(RA),SI(SI));
+    }
+
+    define (instr="lbz") {
+      fields=(OPCD(34),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = Mem(EA,1);
+      };
+    }
+  
+    define (instr="lbzu") {
+      fields=(OPCD(35),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = Mem(EA,1);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+  
+    define (instr="lbzux") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(119));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,1);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+  
+    define (instr="lbzx") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(87));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,1);
+      };
+    }   
+
+    define (instr="ld") {
+      fields=(OPCD(58),RT,RA,DS,XO_DS(0));
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,DS,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + DS);
+        GPR(RT)(m,regSize-1) = Mem(EA,8);
+      };
+    }
+
+    define (instr="ldu") {
+      fields=(OPCD(58),RT,RA,DS,XO_DS(1));
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,DS,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + DS);
+        GPR(RT)(m,regSize-1) = Mem(EA,8);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="ldx") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(21));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,8);
+      };
+    }
+
+    define (instr="ldux") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(53));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,8);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="lha") {
+      fields=(OPCD(42),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = signExtend(Mem(EA,2),regSize);
+      };
+    }
+
+    define (instr="lhax") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(343));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) =signExtend(Mem(EA,2),regSize);
+      };
+    }
+
+    define (instr="lhau") { 
+      fields=(OPCD(43),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = signExtend(Mem(EA,2),regSize);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    }
+  
+    define (instr="lhaux") {   
+      fields=(OPCD(31),RT,RA,RB,XO_X(375));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = signExtend(Mem(EA,2),regSize);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    } 
+
+    define (instr="lhbrx") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(790));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        var data = Mem(EA,2);
+        GPR(RT)(m,regSize-1) = concat(data(8,15),data(0,7));
+      };
+    }
+
+    define (instr="lhz") {
+      fields=(OPCD(40),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = Mem(EA,2);
+      };
+    }
+
+    define (instr=li) {
+      alias = addi(RT(RT),RA(0),SI(SI));
+    }
+
+    define (instr=lis) {
+      alias = addis(RT(RT),RA(0),SI(SI));
+    }
+  
+    define (instr="lhzx") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(279));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,2);
+      };
+    }
+
+    define (instr="lhzu") {    
+      fields=(OPCD(41),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = Mem(EA,2);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    }
+  
+    define (instr="lhzux") {   
+      fields=(OPCD(31),RT,RA,RB,XO_X(311));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,2);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    } 
+
+    define (instr="lmw") {
+      fields=(OPCD(46),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        int r = RT.uint32();
+        do {
+          GPR(r)(m,regSize-1) = Mem(EA,4);
+          r = r + 1;
+          EA = EA + 4;
+        } while (r <= 31);
+      };
+    }
+
+    define (instr="lwa") {
+      fields=(OPCD(58),RT,RA,DS,XO_DS(2));
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,DS,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + DS);
+        GPR(RT)(m,regSize-1) = signExtend(Mem(EA,4),regSize);
+      };
+    }
+
+    define (instr="lwax") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(341));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = signExtend(Mem(EA,4),regSize);
+      };
+    }
+    
+    define (instr="lwarx") {
+      // For MP implementations, they will need to broadcast the updating
+      // of the RES field possibly using a write hook on the RESRV reg.   
+      fields=(OPCD(31),RT,RA,RB,XO_X(20));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        RESRV.RES = 1;
+        var clMask = ~0x3fULL;
+        RESRV.ADDR = (dataReadTranslate(EA) & clMask) >> 1;
+        GPR(RT)(m,regSize-1) = Mem(EA,4);
+      };
+    }
+
+    define (instr="lwaux") {   
+      fields=(OPCD(31),RT,RA,RB,XO_X(373));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) =  signExtend(Mem(EA,4),regSize);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    } 
+
+    define (instr="lwbrx") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(534));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        var data = Mem(EA,4);
+        GPR(RT)(m,regSize-1) = concat(data(24,31),data(16,23),data(8,15),data(0,7));
+      };
+    }
+
+    define (instr="lwz") {
+      fields=(OPCD(32),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = Mem(EA,4); 
+      };
+    }
+  
+    define (instr="lwzu") {
+      fields=(OPCD(33),RT,RA,D);
+      attrs = load;
+      syntax = ("%i %f,%f(%f)",RT,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        GPR(RT)(m,regSize-1) = Mem(EA,4); 
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+  
+    define (instr="lwzux") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(55));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,4);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="lwzx") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(23),RC(0));
+      attrs = load;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        GPR(RT)(m,regSize-1) = Mem(EA,4);
+      };
+    }
+  
+    define (instr="mbar") {
+      fields=(OPCD(31),XO_X(854));
+      action = {
+      };
+    }
+    
+    define (instr="mcrf") {
+      fields=(OPCD(19),BF,BFA,XO_X(0));
+      action = {
+        // CR(4*BF+32,4*BF+35) = CR(4*BFA+32,4*BFA+35); BK is working on this but we don't current get irs 8/16/06
+        CR = CR.set(4*BF+32,4*BF+35,CR(4*BFA+32,4*BFA+35));
+      };
+    }
+
+
+    define (instr="mfcr") {
+      fields=(OPCD(31),RT,XO_X(19));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = CR;
+      };
+    }
+
+    define (instr="mcrxr") {
+      fields=(OPCD(31),BF,XO_X(512));
+      action = {
+        CR(4*BF+32,4*BF+35) = XER(32,35); 
+        XER(32,35) = 0;
+      };
+    }
+
+    define (instr="mfmsr") {
+      fields=(OPCD(31),RT,XO_X(83));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        if (ProtectionMode == User) {
+          // A read from the MSR in user mode causes a Priviliged 
+          // Instruction Exception (Program Interrupt)
+          prog_t prog;
+          prog.ESR = 0x04000000;
+          raiseException(prog);
+        }  
+        GPR(RT)(m,regSize-1) = MSR;
+      };
+    }
+
+    define (instr="mfspr") {
+      fields=(OPCD(31),RT,SPRN,XO_X(339));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        if (!SPR.validIndex(SPRN)) {
+          // Accessing a non-existent SPR causes either an "Illegal" type,
+          // or a "Privilege" type of Progam Interrupt, depending upon
+          // various circumstances.
+          prog_t prog;
+          if (SPRN(5,5) == 0) {
+            prog.ESR = 0x08000000;  // PIL bit only
+          } else {
+            if (ProtectionMode == User) {
+              prog.ESR = 0x04000000;  // PPR bit only
+            } else {
+              prog.ESR = 0x08000000;  // PIL bit only
+            }
+          }
+          raiseException(prog);
+        } else {  // valid SPR index
+          if ((ProtectionMode == User) && (SPRN(5,5) == 1)) {
+            // A write to a supervisor level SPR in user mode
+            // causes a Priviliged Instruction Exception (Program Interrupt)
+            prog_t prog;
+            prog.ESR = 0x04000000;
+            raiseException(prog);
+          }
+          GPR(RT)(m,regSize-1) = SPR(SPRN);
+        }
+      };
+    }
+
+    define (instr=mr) {
+      alias=or(RS(RS),RA(RA),RB(RS));
+      syntax = ("%i %f,%f",RA,RS);
+    }
+
+
+    define (instr="msync") {
+      fields=(OPCD(31),XO_X(598));
+      action = {
+      };
+    }
+    
+    define (instr="mtcrf") {
+      fields=(OPCD(31),RS,E(0),FXM,XO_X(144));
+      syntax = ("%i %f,%f",FXM,RS);
+      action = {
+        var i = 0;
+        if (FXM == 0) {
+          CR = CR;
+        } else {
+          while (i < 8) {
+            if (FXM(i,i) == 1) {
+              CR = CR.set(4*i,4*i+3,GPR(RS)(4*i+32,4*i+35));
+            }
+            i = i + 1;
+          }
+        }
+      };
+    }
+
+    define (instr="mtocrf") {
+      fields=(OPCD(31),RS,E(1),FXM,XO_X(144));
+      action = {
+        var i = 0;
+        if (FXM == 0) {
+          CR = CR;
+        } else {
+          while (i < 8) {
+            if (FXM(i,i) == 1) {
+              CR = CR.set(4*i,4*i+3,GPR(RS)(4*i+32,4*i+35));
+            }
+            i = i + 1;
+          }
+          // if count > 1, CR undefined
+        }
+      };
+    }
+    
+    define (instr="mtmsr") {
+      fields=(OPCD(31),RS,XO_X(146));
+      action = {
+        if (ProtectionMode == User) {
+          // A write to the MSR in user mode causes a Priviliged 
+          // Instruction Exception (Program Interrupt)
+          prog_t prog;
+          prog.ESR = 0x04000000;
+          raiseException(prog);
+        }  
+        MSR = GPR(RS);
+      };
+    }
+  
+    define (instr="mtspr") {
+      fields=(OPCD(31),RS,SPRN,XO_X(467));
+      syntax = ("%i %f,%f",SPRN,RS);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        if (!SPR.validIndex(SPRN)) {
+          // Accessing a non-existent SPR causes either an "Illegal" type,
+          // or a "Privilege" type of Progam Interrupt, depending upon
+          // various circumstances (see table 2-13 of Z650 spec)
+          prog_t prog;
+          if (SPRN(5,5) == 0) {
+            prog.ESR = 0x08000000;  // PIL bit only
+          } else {
+            if (ProtectionMode == User) {
+              prog.ESR = 0x04000000;  // PPR bit only
+            } else {
+              prog.ESR = 0x08000000;  // PIL bit only
+            }
+          }
+          raiseException(prog);
+        } else {  // valid SPR index
+          if ((ProtectionMode == User) && (SPRN(5,5) == 1)) {
+            // A write to an existent supervisor-only SPR in user mode
+            // causes a Priviliged Instruction Exception (Program Interrupt)
+            prog_t prog;
+            prog.ESR = 0x04000000;  // PPR bit only
+            raiseException(prog);
+          }
+          SPR(SPRN) = zeroExtend(GPR(RS)(m,regSize-1),regSize);
+        }
+      };
+    }
+
+  define (instr=mtctr) {
+    alias=mtspr(RS(RS),SPRN(9));
+  }
+
+  define (instr=mflr) {
+    alias=mfspr(RT(RT),SPRN(8));
+  }
+
+  define (instr=mtlr) {
+    alias=mtspr(RS(RS),SPRN(8));
+  }
+    
+    define (instr="mulhd") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(73),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA),128);
+        var rb = signExtend(GPR(RB),128);
+        var prod = signedMultiply(ra,rb);
+        GPR(RT)(m,regSize-1) = prod(0,63);
+      };
+    }
+
+    define (instr="mulhd.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(73),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA),128);
+        var rb = signExtend(GPR(RB),128);
+        var prod = ra * rb;
+        GPR(RT)(m,regSize-1) = prod(0,63);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="mulhdu") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(9),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        bits<128> ra = GPR(RA);
+        bits<128> rb = GPR(RB);
+        var prod = ra * rb;
+        GPR(RT)(m,regSize-1) = prod(0,63);
+      };
+    }
+
+    define (instr="mulhdu.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(9),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        bits<128> ra = GPR(RA);
+        bits<128> rb = GPR(RB);
+        var prod = ra * rb;
+        GPR(RT)(m,regSize-1) = prod(0,63);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="mulhw") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(75),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        bits<64> ra = signExtend(GPR(RA)(32,63),64);
+        bits<64> rb = signExtend(GPR(RB)(32,63),64);
+        var prod = signedMultiply(ra,rb);
+        GPR(RT)(m,regSize-1) = prod(0,31);
+      };
+    }
+
+    define (instr="mulhw.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(75),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        bits<64> ra = signExtend(GPR(RA)(32,63),64);
+        bits<64> rb = signExtend(GPR(RB)(32,63),64);
+        var prod = signedMultiply(ra,rb);
+        GPR(RT)(m,regSize-1) = prod(0,31);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="mulhwu") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(11),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        bits<64> ra = GPR(RA)(32,63);
+        bits<64> rb = GPR(RB)(32,63);
+        var prod = ra * rb;
+        GPR(RT)(m,regSize-1) = prod(0,31);
+      };
+    }
+
+    define (instr="mulhwu.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(11),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        bits<64> ra = GPR(RA)(32,63);
+        bits<64> rb = GPR(RB)(32,63);
+        var prod = ra * rb;
+        GPR(RT)(m,regSize-1) = prod(0,31);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+  
+    define (instr="mulld") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(233),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var prod = signedMultiply(GPR(RA),GPR(RB));
+        GPR(RT)(m,regSize-1) = prod;
+      };
+    }
+  
+    define (instr="mulld.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(233),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var prod = signedMultiply(GPR(RA),GPR(RB));
+        GPR(RT)(m,regSize-1) = prod;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="mulldo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(745),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA),128);
+        var rb = signExtend(GPR(RB),128);
+        var prod = signedMultiply(ra,rb);
+        XER.OV = ((prod(0,64) != 0) && (prod(0,64) != ones65));
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = prod(64,127);
+      };
+    }
+  
+    define (instr="mulldo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(745),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA),128);
+        var rb = signExtend(GPR(RB),128);
+        var prod = signedMultiply(ra,rb);
+        XER.OV = ((prod(0,64) != 0) && (prod(0,64) != ones65));
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = prod (64,127);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="mulli") {
+      fields=(OPCD(7),RT,RA,SI);
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = GPR(RA) * signExtend(SI,regSize);
+      };
+    }
+  
+    define (instr="mullw") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(235),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA)(32,63),64);
+        var rb = signExtend(GPR(RB)(32,63),64);
+        var prod = signedMultiply(ra,rb);
+        GPR(RT)(m,regSize-1) = prod;                                       
+      };
+    }
+  
+    define (instr="mullw.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(235),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA)(32,63),64);
+        var rb = signExtend(GPR(RB)(32,63),64);
+        var prod = signedMultiply(ra,rb);
+        GPR(RT)(m,regSize-1) = prod;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="mullwo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(747),RC(0));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA)(32,63),64);
+        var rb = signExtend(GPR(RB)(32,63),64);
+        var prod = signedMultiply(ra,rb);
+        XER.OV = ((prod(0,32) != 0) && (prod(0,32) != ones33));
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = prod;
+      };
+    }
+  
+    define (instr="mullwo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(747),RC(1));
+      attrs = multiply;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var ra = signExtend(GPR(RA)(32,63),64);
+        var rb = signExtend(GPR(RB)(32,63),64);
+        var prod = signedMultiply(ra,rb);
+        XER.OV = ((prod(0,32) != 0) && (prod(0,32) != ones33));
+        XER.SO = XER.SO | XER.OV ;
+        GPR(RT)(m,regSize-1) = prod;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="nand") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(476),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = ~(GPR(RS) & GPR(RB));
+      };
+    }
+  
+    define (instr="nand.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(476),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = ~(GPR(RS) & GPR(RB));
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="neg") {
+      fields=(OPCD(31),RT,RA,XO_X(104),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + 1;
+      };
+    }
+
+    define (instr="neg.") {
+      fields=(OPCD(31),RT,RA,XO_X(104),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + 1;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="nego") {
+      fields=(OPCD(31),RT,RA,XO_X(616),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),1,0); 
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + 1;
+        setXerField(true/*ov*/,true/*so*/,false/*ca*/,carry);
+      };
+    }
+
+    define (instr="nego.") {
+      fields=(OPCD(31),RT,RA,XO_X(616),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),1,0);  
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + 1;
+        setXerField(true/*ov*/,true/*so*/,false/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="nor") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(124),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = ~(GPR(RS) | GPR(RB));
+      };
+    }
+  
+    define (instr="nor.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(124),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = ~(GPR(RS) | GPR(RB));
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="or") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(444),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) | GPR(RB);
+      };
+    }
+  
+    define (instr="or.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(444),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) | GPR(RB);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="orc") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(412),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) | ~GPR(RB);
+      };
+    }
+  
+    define (instr="orc.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(412),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) | ~GPR(RB);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="ori") {
+      fields=(OPCD(24),RS,RA,UI);
+      syntax = ("%i %f,%f,%f",RA,RS,UI);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RA)(m,regSize-1) = GPR(RS) | UI;
+      };
+    }
+
+    define (instr="oris") {
+      fields=(OPCD(25),RS,RA,UI);
+      syntax = ("%i %f,%f,%f",RA,RS,UI);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = concat(UI,zero16);
+        GPR(RA)(m,regSize-1) = GPR(RS) | b;
+      };
+    }
+
+    define (instr="rfci") {
+      fields=(OPCD(19),XO_X(51));
+      attrs = branch;
+      action = {
+        var m = (CSRR1.CM==1) ? 0 : 32;
+        if (ProtectionMode == User) {
+          // Executing this instruction in user mode causes a Priviliged 
+          // Instruction Exception (Program Interrupt)
+          prog_t prog;
+          ESR = 0x04000000;
+          raiseException(prog);
+        }  
+        MSR = CSRR1;
+        NIA = concat(CSRR0(m,61),zero2);
+      };
+    }
+
+    define (instr="rfi") {
+      fields=(OPCD(19),XO_X(50));
+      attrs = branch;
+      action = {
+        if (ProtectionMode == User) {
+          // Executing this instruction in user mode causes a Priviliged 
+          // Instruction Exception (Program Interrupt)
+          prog_t prog;
+          prog.ESR = 0x04000000;
+          raiseException(prog);
+        }  
+        MSR = SRR1;
+        NIA = SRR0;
+      };
+    }
+
+    define(instr="rldcr") {
+      fields=(OPCD(30),RA,RS,RB,me,XO_MDS(9),RC(0));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,RB,me);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),n);
+        var k = MASK(0,me);
+        GPR(RA)(m,regSize-1) = (r & k);
+      };
+    }
+
+    define(instr="rldcr.") {
+      fields=(OPCD(30),RA,RS,RB,me,XO_MDS(9),RC(1));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,RB,me);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),n);
+        var k = MASK(0,me);
+        GPR(RA)(m,regSize-1) = (r & k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rldicr") {
+      fields=(OPCD(30),RA,RS,sh,me,XO_MD(1),RC(0));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,me);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(0,me);
+        GPR(RA)(m,regSize-1) = (r & k);
+      };
+    }
+
+    define(instr="rldicr.") {
+      fields=(OPCD(30),RA,RS,sh,me,XO_MD(1),RC(1));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,me);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(0,me);
+        GPR(RA)(m,regSize-1) = (r & k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rldcl") {
+      fields=(OPCD(30),RA,RS,RB,mb,XO_MDS(8),RC(0));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,RB,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),n);
+        var k = MASK(mb,63);
+        GPR(RA)(m,regSize-1) = (r & k);
+      };
+    }
+
+    define(instr="rldcl.") {
+      fields=(OPCD(30),RA,RS,RB,mb,XO_MDS(8),RC(1));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,RB,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),n);
+        var k = MASK(mb,63);
+        GPR(RA)(m,regSize-1) = (r & k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rldicl") {
+      fields=(OPCD(30),RA,RS,sh,mb,XO_MD(0),RC(0));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(mb,63);
+        GPR(RA)(m,regSize-1) = (r & k);
+      };
+    }
+
+    define(instr="rldicl.") {
+      fields=(OPCD(30),RA,RS,sh,mb,XO_MD(0),RC(1));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(mb,63);
+        GPR(RA)(m,regSize-1) = (r & k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rldic") {
+      fields=(OPCD(30),RA,RS,sh,mb,XO_MD(2),RC(0));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(mb,~sh);
+        GPR(RA)(m,regSize-1) = (r & k);
+      };
+    }
+
+    define(instr="rldic.") {
+      fields=(OPCD(30),RA,RS,sh,mb,XO_MD(2),RC(1));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(mb,~sh);
+        GPR(RA)(m,regSize-1) = (r & k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rldimi") {
+      fields=(OPCD(30),RA,RS,sh,mb,XO_MD(3),RC(0));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(mb,~sh);
+        GPR(RA)(m,regSize-1) = (r & k) | (GPR(RA) & ~k);
+      };
+    }
+
+    define(instr="rldimi.") {
+      fields=(OPCD(30),RA,RS,sh,mb,XO_MD(3),RC(1));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,sh,mb);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),sh);
+        var k = MASK(mb,~sh);
+        GPR(RA)(m,regSize-1) = (r & k) | (GPR(RA) & ~k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rlwimi") {
+      fields=(OPCD(20),RA,RS,SH,MB,ME,RC(0));
+      syntax = ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = MB+32;
+        var e = ME+32;
+        var r = ROTL32(GPR(RS),SH);
+        var k = MASK(b,e);
+        GPR(RA)(m,regSize-1) = (r & k) | (GPR(RA) & ~k);
+      };
+    }
+
+    define(instr="rlwimi.") {
+      fields=(OPCD(20),RA,RS,SH,MB,ME,RC(1));
+      syntax = ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = MB+32;
+        var e = ME+32;
+        var r = ROTL32(GPR(RS),SH);
+        var k = MASK(b,e);
+        GPR(RA)(m,regSize-1) = (r & k) | (GPR(RA) & ~k);
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rlwinm") {
+      fields=(OPCD(21),RA,RS,SH,MB,ME,RC(0));
+      syntax= ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = SH;
+        var b = MB+32;
+        var e = ME+32;
+        var r = ROTL32(GPR(RS),n);
+        //        var r = GPR(RS).left_rotate(SH);
+        var k = MASK(b,e);
+        GPR(RA)(m,regSize-1) = r & k;
+      };
+    }
+
+    // A four-operand version of the instruction, where the final argumnt is a bit
+    // mask defining the starting and ending indices.
+    define (instr=rlwinm_) {
+      alias = rlwinm(RS(RS),RA(RA),SH(SH),MB(count_leading_zeros(MBE,32)),ME(31-count_trailing_zeros(MBE)));
+      syntax= ("rlwinm %f,%f,%f,%f",RA,RS,SH,MBE);
+      disassemble=false;
+    }
+
+    define(instr="clrlwi") {
+      alias = rlwinm(RA(RA),RS(RS),SH(0),MB(MB),ME(31));
+      syntax = ("%i %f,%f,%f",RA,RS,MB);
+    }
+
+    define(instr="clrrwi") {
+      alias = rlwinm(RA(RA),RS(RS),SH(0),MB(0),ME(31-ME));
+      syntax = ("%i %f,%f,%f",RA,RS,ME);
+    }
+
+    define(instr="clrlslwi") {
+      alias = rlwinm(RA(RA),RS(RS),SH(SH),MB(SH-MB),ME(31-MB));
+      syntax = ("%i %f,%f,%f,%f",RA,RS,SH,MB);
+    }
+
+    define(instr="rlwinm.") {
+      fields=(OPCD(21),RA,RS,SH,MB,ME,RC(1));
+      syntax = ("%i %f,%f,%f,%f,%f",RA,RS,SH,MB,ME);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = SH;
+        var b = MB+32;
+        var e = ME+32;
+        var r = ROTL32(GPR(RS),n);
+        var k = MASK(b,e);
+        GPR(RA)(m,regSize-1) = r & k;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define(instr="rlwnm") {
+      fields=(OPCD(23),RA,RS,RB,MB,ME,RC(0));
+      syntax = ("%i %f,%f,%f,%f,%f",RA,RS,RB,MB,ME);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var b = MB+32;
+        var e = ME+32;
+        var r = ROTL32(GPR(RS),n);
+        var k = MASK(b,e);
+        GPR(RA)(m,regSize-1) = r & k;
+      };
+    }
+
+    define(instr="rlwnm.") {
+      fields=(OPCD(23),RA,RS,RB,MB,ME,RC(1));
+      syntax = ("%i %f,%f,%f,%f,%f",RA,RS,RB,MB,ME);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var b = MB+32;
+        var e = ME+32;
+        var r = ROTL32(GPR(RS),n);
+        var k = MASK(b,e);
+        GPR(RA)(m,regSize-1) = r & k;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr=slwi) {
+      alias=rlwinm(RS(RS),RA(RA),SH(SH),MB(0),ME(31-SH));
+      syntax= ("%i %f,%f,%f",RA,RS,SH);
+      disassemble=false;
+    }
+
+    define (instr="sc") {
+      fields=(OPCD(17),XO_DS(2));
+      attrs = branch;
+      action = {
+        // System call support: This needs to come out when we have the library
+        if (syscall_enabled()) {
+          syscall_add_arg(GPR(1));        // stack pointer (brk needs it)
+          syscall_add_arg(GPR(3));        // arg0
+          syscall_add_arg(GPR(4));        // arg1
+          syscall_add_arg(GPR(5));        // arg2
+          syscall_add_arg(GPR(6));        // arg3
+          syscall_add_arg(GPR(7));        // arg4
+          syscall_trigger(GPR(0));        // syscode - 32 bit mode
+          GPR(3) = syscall_return_code(); // the return value
+        } else {
+          raiseException(sc);
+        }
+      };
+    }
+      
+    define (instr="sld") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(27),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),n); 
+        var k = zero64;
+        if (!GPR(RB)(57)) {
+          k = MASK(0,63-n);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+      };
+    }
+
+    define (instr="sld.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(27),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),n); 
+        var k = zero64;
+        if (!GPR(RB)(57)) {
+          k = MASK(0,63-n);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="slw") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(24),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var r = ROTL32(GPR(RS),n); 
+        var k = zero64;
+        if (!GPR(RB)(58)) {
+          k = MASK(32,63-n);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+      };
+    }
+
+    define (instr="slw.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(24),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var r = ROTL32(GPR(RS),n); 
+        var k = zero64;
+        if (!GPR(RB)(58)) {
+          k = MASK(32,63-n);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="srad") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(794),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(57)) {
+          k = MASK(n,63);
+        }
+        var s = signExtend(GPR(RS)(0,0),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k) != 0);
+        XER.CA = Carry;    
+      };
+    }
+
+    define (instr="srad.") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(794),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(57)) {
+          k = MASK(n,63);
+        }
+        var s = signExtend(GPR(RS)(0,0),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k) != 0);
+        XER.CA = Carry;    
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="sradi") {
+      fields=(OPCD(31),RA,RS,sh,XO_XS(413),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,sh);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),64-sh); 
+        var k = MASK(sh,63);
+        var s = signExtend(GPR(RS)(0,0),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k) != 0);
+        XER.CA = Carry;    
+      };
+    }
+
+    define (instr="sradi.") {
+      fields=(OPCD(31),RA,RS,sh,XO_XS(413),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,sh);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var r = ROTL64(GPR(RS),64-sh); 
+        var k = MASK(sh,63);
+        var s = signExtend(GPR(RS)(0,0),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k) != 0);
+        XER.CA = Carry;    
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="sraw") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(792),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var r = ROTL32(GPR(RS),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(58)) {
+          k = MASK(n+32,63);
+        }
+        var s = signExtend(GPR(RS)(32,32),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k)(32,63) != 0);
+        XER.CA = Carry;    
+      };
+    }
+  
+    define (instr="sraw.") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(792),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var r = ROTL32(GPR(RS),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(58)) {
+          k = MASK(n+32,63);
+        }
+        var s = signExtend(GPR(RS)(32,32),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k)(32,63) != 0);
+        XER.CA = Carry;    
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="srawi") {
+      fields=(OPCD(31),RA,RS,SH,XO_X(824),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,SH);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = SH;
+        var r = ROTL32(GPR(RS),64-n);
+        var k = MASK(n+32,63);
+        var s = signExtend(GPR(RS)(32,32),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k)(32,63) != 0);
+        XER.CA = Carry;    
+      };
+    }
+
+    define (instr="srawi.") {
+      fields=(OPCD(31),RA,RS,SH,XO_X(824),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,SH);
+      action = {  
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = SH;
+        var r = ROTL32(GPR(RS),64-n);
+        var k = MASK(n+32,63);
+        var s = signExtend(GPR(RS)(32,32),regSize);
+        GPR(RA)(m,regSize-1) = (r & k) | (s & ~k);
+        var Carry = s & ((r & ~k)(32,63) != 0);
+        XER.CA = Carry;    
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="srd") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(539),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(57)) {
+          k = MASK(n,63);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+      };
+    }
+
+    define (instr="srd.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(539),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(58,63);
+        var r = ROTL64(GPR(RS),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(57)) {
+          k = MASK(n,63);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="srw") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(536),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var r = ROTL32(GPR(RS)(32,63),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(58)) {
+          k = MASK(n+32,63);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+      };
+    }
+
+    define (instr="srw.") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(536),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var n = GPR(RB)(59,63);
+        var r = ROTL32(GPR(RS)(32,63),64-n); 
+        var k = zero64;
+        if (!GPR(RB)(58)) {
+          k = MASK(n+32,63);
+        }
+        GPR(RA)(m,regSize-1) = r & k;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="stb") {
+      fields=(OPCD(38),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA, 1) = GPR(RS);
+      };
+    }
+  
+    define (instr="stbu") {
+      fields=(OPCD(39),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,1) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    }
+  
+    define (instr="stbx") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(215));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA, 1) = GPR(RS);
+      };
+    }
+
+    define (instr="stbux") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(247));
+      attrs = store;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA, 1) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    }  
+
+    define (instr="std") {
+      fields=(OPCD(62),RS,RA,DS,XO_DS(0));
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,DS,RA);
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + DS);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,8) = GPR(RS);
+      };
+    }
+  
+    define (instr="stdu") {
+      fields=(OPCD(62),RS,RA,DS,XO_DS(1));
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,DS,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + DS);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,8) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="stdx") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(149));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,8) = GPR(RS);
+      };
+    }
+
+    define (instr="stdux") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(181));
+      attrs = store;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,8) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+   
+    define (instr="sth") {
+      fields=(OPCD(44),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,2) = GPR(RS);
+      };
+    }
+
+    define (instr="sthu") {
+      fields=(OPCD(45),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,2) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="sthx") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(407));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,2) = GPR(RS);
+      };
+    }
+
+    define (instr="sthux") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(439));
+      attrs = store;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,2) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA;
+      };
+    }
+
+    define (instr="sthbrx") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(918));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // sthbrx could cause Data-Storage exception
+        Mem(EA,2) = concat(GPR(RS)(56,63),GPR(RS)(48,55));
+      };
+    }
+
+    define (instr="stmw") {
+      fields=(OPCD(47),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        int r = RS.uint32();
+        do {
+          dsESR.ST = 1;  // could cause Data-Storage exception
+          Mem(EA,4) = GPR(r);
+          r = r + 1;
+          EA = EA + 4;
+        } while (r <= 31);
+      };
+    }
+
+    define (instr="stw") {
+      fields=(OPCD(36),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,4) = GPR(RS);
+      };
+    }
+    
+    define (instr="stwcx.") {
+      // For MP implementations, they will need to broadcast the updating
+      // of the RES field possibly using a write hook on the RESRV reg.
+      fields=(OPCD(31),RS,RA,RB,XO_X(150),RC(1));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        if (RESRV.RES == 1) {
+          var clMask = ~0x3fULL;
+          if (((RESRV.ADDR << 1) & clMask) == (dataWriteTranslate(EA) & clMask)) {
+            Mem(EA,4) = GPR(RS);
+            bits<4> cr = 0x2 | XER.SO;
+            CR = CR.set (0,3,cr);
+          } else {
+            // in some implementations, the store may still succeed
+            var u = 0; // undefined in the spec, here we use zero
+            if (u != 0) {
+              Mem(EA,4) = GPR(RS);
+            }
+            bits<4> cr = u | XER.SO;
+            CR = CR.set (0,3,cr);
+          }
+          RESRV.RES = 0;
+        } else {
+          bits<4> cr = XER.SO;
+          CR = CR.set (0,3,cr);
+        }
+      };
+    }
+
+    define (instr="stwu") {
+      fields=(OPCD(37),RS,RA,D);
+      attrs = store;
+      syntax = ("%i %f,%f(%f)",RS,D,RA);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + D);
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,4) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="stwx") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(151));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,4) = GPR(RS);
+      };
+    }
+
+    define (instr="stwux") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(183));
+      attrs = store;
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,4) = GPR(RS);
+        GPR(RA)(m,regSize-1) = EA; 
+      };
+    }
+
+    define (instr="stwbrx") {
+      fields=(OPCD(31),RS,RA,RB,XO_X(662));
+      attrs = store;
+      action = {
+        var a = (RA == 0) ? 0 : GPR(RA);
+        var EA = buildDataEA(a + GPR(RB));
+        dsESR.ST = 1;  // could cause Data-Storage exception
+        Mem(EA,4) = concat(GPR(RS)(56,63),GPR(RS)(48,55),GPR(RS)(40,47),GPR(RS)(32,39));
+      };
+    }
+
+    define (instr="subf") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(40),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1;
+      };
+    }
+
+    define (instr="subf.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(40),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+  
+    define (instr="subfc") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(8),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),1);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1; 
+      };
+    }
+
+    define (instr="subfc.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(8),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),1);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1; 
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfco") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(520),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),1);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfco.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(520),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),1);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfe") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(136),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + XER.CA; 
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfe.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(136),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + XER.CA; 
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfeo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(648),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + XER.CA; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfeo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(648),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + XER.CA; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfo") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(552),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),1);  
+        setXerField(true/*ov*/,true/*so*/,false/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1;
+      };
+    }
+
+    define (instr="subfo.") {
+      fields=(OPCD(31),RT,RA,RB,XO_X(552),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),GPR(RB),1);  
+        setXerField(true/*ov*/,true/*so*/,false/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + GPR(RB) + 1;
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfic") {
+      fields=(OPCD(8),RT,RA,SI);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var si = signExtend(SI,regSize);
+        var carry = Carry(~GPR(RA),si,1);
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + si + 1;
+      };
+    }
+  
+    define (instr="subfme") {
+      fields=(OPCD(31),RT,RA,XO_X(232),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),ones64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + ones64 + XER.CA; 
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfme.") {
+      fields=(OPCD(31),RT,RA,XO_X(232),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),ones64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + ones64 + XER.CA; 
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfmeo") {
+      fields=(OPCD(31),RT,RA,XO_X(744),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),ones64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + ones64 + XER.CA; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfmeo.") {
+      fields=(OPCD(31),RT,RA,XO_X(744),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),ones64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + ones64 + XER.CA; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfze") {
+      fields=(OPCD(31),RT,RA,XO_X(200),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),zero64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + zero64 + XER.CA; 
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfze.") {
+      fields=(OPCD(31),RT,RA,XO_X(200),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),zero64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + zero64 + XER.CA; 
+        setXerField(false/*ov*/,false/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+
+    define (instr="subfzeo") {
+      fields=(OPCD(31),RT,RA,XO_X(712),RC(0));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),zero64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + zero64 + XER.CA; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+      };
+    }
+
+    define (instr="subfzeo.") {
+      fields=(OPCD(31),RT,RA,XO_X(712),RC(1));
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var carry = Carry(~GPR(RA),zero64,XER.CA);
+        GPR(RT)(m,regSize-1) = ~GPR(RA) + zero64 + XER.CA; 
+        setXerField(true/*ov*/,true/*so*/,true/*ca*/,carry);
+        setCrField(m,0,GPR(RT),0);
+      };
+    }
+   
+    ////////////////////////////////////////////////////////////////////
+    // The following TLB instructions need to be "define"ed or 
+    // "defmod"ed with the particular core's implementation.
+    ////////////////////////////////////////////////////////////////////
+    define (instr="tlbre") {
+      fields=(OPCD(31),XO_X(946));
+      action = {
+      };
+    }
+    define (instr="tlbsx") {
+      fields=(OPCD(31),RA,RB,XO_X(914));
+      action = {
+      };
+    }
+    define (instr="tlbivax") {
+      fields=(OPCD(31),RA,RB,XO_X(786));     
+      action = {
+      };
+    }
+    define (instr="tlbsync") {
+      fields=(OPCD(31),XO_X(566));
+      action = {
+      };
+    }
+    define (instr="tlbwe") {
+      fields=(OPCD(31),XO_X(978));
+      action = {
+      };
+    }
+
+    define (instr="tw") {
+      fields=(OPCD(31),RA,RB,TO,XO_X(4));
+      attrs = branch;
+      action = {
+        var a = GPR(RA)(32,63);
+        var b = GPR(RB)(32,63);
+
+        if ( a.signedLT(b) && (TO(0)==1)){
+          TRAP();
+        }
+        if ( a.signedGT(b) && (TO(1)==1)){
+          TRAP();
+        }
+        if ((a == b) && (TO(2)==1)){
+          TRAP();
+        }
+        if ((a < b) && (TO(3)==1)){
+          TRAP();
+        }
+        if ((a > b) && (TO(4)==1)){
+          TRAP();
+        }
+      };
+    }
+
+    define (instr="twi") {
+      fields=(OPCD(3),TO,RA,SI);
+      attrs = branch;
+      action = {
+        var a = GPR(RA)(32,63);
+        var b = signExtend(SI,32);
+
+        if ( a.signedLT(b) && (TO(0)==1)){
+          TRAP();
+        }
+        if ( a.signedGT(b) && (TO(1)==1)){
+          TRAP();
+        }
+        if ((a == b) && (TO(2)==1)){
+          TRAP();
+        }
+        if ((a < b) && (TO(3)==1)){
+          TRAP();
+        }
+        if ((a > b) && (TO(4)==1)){
+          TRAP();
+        }
+      };
+    }
+    
+    define (instr="wrtee") {
+      fields=(OPCD(31),RS,XO_X(131));
+      action = {
+        if (ProtectionMode == User) {
+          prog_t prog;
+          prog.ESR = 0x04000000;
+          raiseException(prog);
+        } else {
+          MSR.EE = GPR(RS)(48,48);
+        }
+      };
+    }
+
+    define (instr="wrteei") {
+      fields=(OPCD(31),RS,E_WRTEEI,XO_X(163));
+      action = {
+        if (ProtectionMode == User) {
+          prog_t prog;
+          prog.ESR = 0x04000000;
+          raiseException(prog);
+        } else {
+          MSR.EE = E_WRTEEI;
+        }
+      };
+    }
+
+    define (instr="xor") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(316),RC(0));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = GPR(RB);
+        GPR(RA)(m,regSize-1) = GPR(RS) ^ b;
+      };
+    }
+
+    define (instr="xor.") {
+      fields=(OPCD(31),RA,RS,RB,XO_X(316),RC(1));
+      syntax = ("%i %f,%f,%f",RA,RS,RB);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = GPR(RB);
+        GPR(RA)(m,regSize-1) = GPR(RS) ^ b;
+        setCrField(m,0,GPR(RA),0);
+      };
+    }
+
+    define (instr="xori") {
+      fields=(OPCD(26),RA,RS,UI);
+      syntax = ("%i %f,%f,%f",RA,RS,UI);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = UI;
+        GPR(RA)(m,regSize-1) = GPR(RS) ^ b;
+      };
+    }
+
+    define (instr="xoris") {
+      fields=(OPCD(27),RA,RS,UI);
+      syntax = ("%i %f,%f,%f",RA,RS,UI);
+      action = {
+        var m = mode (true/*reg*/,false/*addr*/);
+        var b = concat(UI,zero16);
+        GPR(RA)(m,regSize-1) = GPR(RS) ^ b;
+      };
+    }
+
+    // Special instruction:  This is used for simulation purposes and is
+    // not a PPC instruction.
+    define (instr="halt") {
+      fields=(OPCD(0));
+      width = 32;
+      action = {
+        halt();
+      };
+    }
+
+    //-------------------------------------------------------------------------
+    // Architectural parameters
+    //-------------------------------------------------------------------------
+    // We define a noInterrupt mode so that we can shut of mmu interrupts for
+    // instructions that don't take them (ex: icbt)
+    define (parm=MmuInterruptMode) {
+      options = (on,off);
+      value = on;
+    }
+    
+    //-------------------------------------------------------------------------
+    // Interrupts
+    //-------------------------------------------------------------------------
+    
+      
+    //
+    // Decode miss handler.
+    //
+    decode_miss = func(addr_t ea,unsigned) {
+      prog_t prog;
+      prog.ESR = 0x08000000;  // PIL
+      raiseException(prog);
+    };
+    
+    
+    //
+    // Exceptions
+    //
+    // Note: The exception name needs to exactly match the Raptor UVP naming convention 
+    // that the testbench will expect.
+
+    // Data storage exception.  
+    define (exception=ds) {
+      action = {
+        SRR0 = CIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR2(48,59),zero4);
+      };
+    }
+    
+    // Instruction storage exception.  
+    define (exception=is) {
+      action = {
+        SRR0 = CIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR3(48,59),zero4);
+      };
+    }
+    
+    // Instruction TLB exception. 
+    define (exception=itlb) {
+      action = {
+        SRR0 = CIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR14(48,59),zero4);
+      };
+    }
+    
+    // Data TLB exception. 
+    define (exception=dtlb) {
+      action = {
+        SRR0 = CIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR13(48,59),zero4);
+      };
+    }
+    
+    // Decrementer exception. 
+    define (exception=dec) {
+      action = {
+        TSR.DIS = 1;
+        SRR0 = NIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR10(48,59),zero4);
+      };
+    }
+    
+    // Debug exception. 
+    define (exception=dbg) {
+
+      define (field=Trap) {};
+
+      action = func (dbg_t data) {
+        if (data.Trap) {
+          DBSR.TRAP = 1;
+        }
+        if (DBSR.ICMP == 1) {
+          CSRR0 = NIA;
+        } else if (DBSR.UDE == 1) {
+          CSRR0 = NIA;
+        } else if (DBSR.IRPT == 1) {
+          // fix me
+        } else if (DBSR.RET == 1) {
+          // fix me
+        } else {
+          CSRR0 = CIA;
+        } 
+        CSRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR15(48,59),zero4);
+      };
+    }
+    
+    // Floating point unavailable exception
+    define (exception=fp) {
+      action = {
+        ESR.FP = 1;
+        SRR0 = CIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR7(48,59),zero4);
+      };
+    }
+    
+    // Program exception
+    define (exception=prog) {
+
+      define (field=ESR) { bits=32; };
+
+      action = func (prog_t data) {
+        ESR = data.ESR;
+        SRR0 = CIA;   
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR6(48,59),zero4);
+      };
+    }
+    
+    // System exception
+    define (exception=sc) {
+      action = {
+        SRR0 = NIA;
+        SRR1 = MSR;
+        var old_icm = MSR.ICM;
+        MSR =  MSR & 0x40021200; //CE,ME,DE,ICM unchanged
+        MSR.CM = old_icm;
+        NIA = concat(IVPR(0,47),IVOR8(48,59),zero4);
+      };
+    }
+    
+} // Power architecture
+
+
+  

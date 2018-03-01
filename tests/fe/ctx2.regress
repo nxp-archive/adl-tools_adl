@@ -1,0 +1,6 @@
+ctx2.adl:34: Reset function for a non-context resource should not take any parameters.
+ctx2.adl:38: Index of 3 exceeds number of contexts for thread (2).
+ctx2.adl:41: Unknown context 'foo'.
+ctx2.adl:26: Reset function for a context resource should take one argument.
+ctx2.adl:46: Unknown register file GPR
+ctx2.adl:46: Unknown MMU lookup TlbFoo

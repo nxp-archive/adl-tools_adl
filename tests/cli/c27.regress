@@ -1,0 +1,4 @@
+Entry point:  0x1800074
+The core_mem_read item was found.
+The Program item was found.
+The foobar item was *NOT* found.

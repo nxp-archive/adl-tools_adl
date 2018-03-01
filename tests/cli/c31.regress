@@ -1,0 +1,13 @@
+MMU access:  load from TlbCam:  {E 0} {EPN 4} {RPN 284} {SIZE 1} {SR 1} {SW 0} {SX 0} {TID 0} {TS 0} {UR 0} {UW 0} {UX 0} {V 1} {WIMG 2}
+Exception ProtectionFault
+Exception ProtectionFault finished.  Now at NIA = 0x100
+MMU access:  load from TlbCam:  {E 0} {EPN 4} {RPN 284} {SIZE 1} {SR 1} {SW 0} {SX 0} {TID 0} {TS 0} {UR 0} {UW 0} {UX 0} {V 1} {WIMG 2}
+Exception ProtectionFault
+Exception ProtectionFault finished.  Now at NIA = 0x100
+MMU access:  load from TlbCam:  {E 0} {EPN 4} {RPN 284} {SIZE 1} {SR 1} {SW 0} {SX 0} {TID 0} {TS 0} {UR 0} {UW 0} {UX 0} {V 1} {WIMG 2}
+Exception ProtectionFault
+Exception ProtectionFault finished.  Now at NIA = 0x100
+MMU access:  load from TlbCam:  {E 0} {EPN 4} {RPN 284} {SIZE 1} {SR 1} {SW 0} {SX 0} {TID 0} {TS 0} {UR 0} {UW 0} {UX 0} {V 1} {WIMG 2}
+MMU access:  load from TlbCam:  {E 0} {EPN 4} {RPN 284} {SIZE 1} {SR 1} {SW 0} {SX 0} {TID 0} {TS 0} {UR 0} {UW 0} {UX 0} {V 1} {WIMG 2}
+MMU access:  load from TlbCam:  {E 0} {EPN 4} {RPN 284} {SIZE 1} {SR 1} {SW 0} {SX 0} {TID 0} {TS 0} {UR 0} {UW 0} {UX 0} {V 1} {WIMG 2}
+Simulation halted at address: 0x0000000000000020

@@ -1,0 +1,60 @@
+#
+# Test to make sure that we can generate a memory exception externally and that
+# outstanding transactions, e.g. a linefill + store-next will be properly
+# cleaned up.
+#
+= asm
+
+	addi r1,r1,1
+	addi r1,r1,1
+	li r2,20
+	lis r3,0x1
+	ori r3,r3,0x4
+	stw r2,0x0(r3)
+	addi r1,r1,1
+	.long 0x0
+	.long 0x0
+	li r10,1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38400014	#	li r2,20
+MD n=Mem ra=0x0000000c d=0x3C600001	#	lis r3,0x1
+MD n=Mem ra=0x00000010 d=0x60630004	#	ori r3,r3,0x4
+MD n=Mem ra=0x00000014 d=0x90430000	#	stw r2,0x0(r3)
+MD n=Mem ra=0x00000018 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000024 d=0x39400001	#	li r10,1
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA    d=0x0
+RD n=CCR    d=0xc0000000
+RD n=HDBCR0 d=0x80000000
+RD n=IVOR7  d=0x24
+
+MD n=Mem ra=0x10004  d=0x0
+
+# ea=0x0000 ra=0x0000  cache is enabled.
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x0 WIMG=0x0 E=0 SX=1 SR=1 SW=1 EPN=0x0
+
+# ea=0x1000 ra=0x1000  cache is enabled.
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x4 WIMG=0x0 E=0 SX=1 SR=1 SW=1 EPN=0x4
+
+# ea=0x10000 ra=0x10000  cache is enabled.
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x0 E=0 SX=1 SR=1 SW=1 EPN=0x40
+
+
+RESULTS
+
+# We should see the result of the code at the exception handler and not the
+# instruction after the store.
+RD n=GPR i=1  d=2
+RD n=GPR i=10 d=1
+
+MD n=Mem ra=0x10004  d=0x0

@@ -1,0 +1,3 @@
+delay2.adl:32: Expected two arguments for delayed_write:  delayed_write(<reg-expr | mem-expr>,<delay>).
+delay2.adl:41: Invalid register expression as first argument of delayed_write.
+delay2.adl:50: delayed_write() may only appear on the left-hand-side of an assignment.

@@ -1,0 +1,4 @@
+asm5.adl:10: Parm does not have a type specified.
+asm5.adl:21: Integer parm does not have default value.
+asm5.adl:13: Label parm can not be constant.
+asm5.adl:17: Label parm can not have a default value.

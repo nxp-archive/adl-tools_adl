@@ -1,0 +1,302 @@
+//
+// N-bit encodings, delayed jump, splited field registers
+// 
+define (arch=MiniPPC) {
+
+  
+  define (regfile = GPR) {
+    size = 8;
+    width = 64;
+    
+    // continious
+    define (field = CL) {
+      bits = (0,31);
+    }
+    define (field = CR) {
+      bits = (32,63);
+    }      
+    
+    // split
+    define (field = SL) {
+      bits = ( (0,15),(32,47));
+    }
+    define (field = SR) {
+      bits = ((16,31),(48,63));
+    } 
+    
+    // very split
+    
+    define (field = EVEN) {
+      bits = (0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,(32,33),(36,37),(40,41),(44,45),(48,49),(52,53),(56,57),(60,61));
+    }
+    define (field = ODD) {
+      bits = (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,(34,35),(38,39),(42,43),(46,47),(50,51),(54,55),(58,59),(62,63));
+    }   
+    
+     
+  } 
+  
+  define (reg = CIA) {
+    attrs = cia;
+    reset = 0;
+  }  
+  
+  define (reg = NIA) {
+    attrs = nia;
+    reset = 0;
+  }  
+ 
+  define (reg = TIA) {
+  }   
+  
+  define (parm=Fetch)  {
+    options = (Normal,Jmp);
+    value = Normal;
+  }
+
+  post_fetch = func(unsigned size) {
+    NIA = (Fetch == Jmp) ? TIA : (CIA + size);
+    Fetch = Normal;
+  };
+  
+  // 
+  // 16-bit stuff
+  //
+  define (instrfield = OPCD_1) { bits = ( 0, 3); };
+  define (instrfield = RA_1)   { bits = ( 4, 6); };
+  define (instrfield = RB_1)   { bits = ( 8,11); };
+  define (instrfield = RC_1)   { bits = (12,14); };
+  define (instrfield = IMM8_1) { bits = ( 7,14); };
+  define (instrfield = XOPCD_2){ bits = (15); };
+  
+  define (instr = add16) {
+    fields = (OPCD_1(1),RA_1,RB_1,RC_1,XOPCD_2(0));
+    width = 16;
+    action = {};
+  }
+  define (instr = sub16) {
+    fields = (OPCD_1(2),RA_1,RB_1,RC_1,XOPCD_2(0));
+    width = 16;
+    action = {};
+  }  
+  
+  define (instr = mult16) {
+    fields = (OPCD_1(3),RA_1,RB_1,RC_1,XOPCD_2(0));
+    width = 16;
+    action = {};
+  } 
+  
+  define (instr = addi16) {
+    fields = (OPCD_1(4),RA_1,IMM8_1,XOPCD_2(0));
+    width = 16;
+    action = {
+      GPR(RA_1) = GPR(RA_1) + IMM8_1;
+    };
+   
+  }
+  define (instr = subi16) {
+    fields = (OPCD_1(5),RA_1,IMM8_1,XOPCD_2(0));
+    width = 16;
+    action = {};
+  }  
+  
+  define (instr = multi16) {
+    fields = (OPCD_1(6),RA_1,IMM8_1,XOPCD_2(0));
+    width = 16;
+    action = {};
+  }  
+  
+  define (instr = ld16) {
+    fields = (OPCD_1(7),RA_1,IMM8_1,XOPCD_2(0));
+    width = 16;
+    action = {
+      GPR(RA_1).EVEN = Mem(CIA + IMM8_1  ,4);  
+      GPR(RA_1).ODD  = Mem(CIA + IMM8_1+4,4);  
+    };
+  }
+  define (instr = st16) {
+    fields = (OPCD_1(8),RA_1,IMM8_1,XOPCD_2(0));
+    width = 16;
+    action = {
+      Mem(CIA + IMM8_1  ,4) = GPR(RA_1).EVEN ;  
+      Mem(CIA + IMM8_1+4,4) = GPR(RA_1).ODD  ;      
+    };
+  } 
+   
+  // 
+  // 32-bit stuff
+  //
+  define (instrfield = RA_2)   { bits = ( 4, 12); };
+  define (instrfield = RB_2)   { bits = (( 13,14),(16,18)); };
+  define (instrfield = RC_2)   { bits = (19,31); };
+  define (instrfield = IMM16_2) { bits = (16,31); };
+  
+  define (instr = add32) {
+    fields = (OPCD_1(1),RA_2,RB_2,RC_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }
+  define (instr = sub32) {
+    fields = (OPCD_1(2),RA_2,RB_2,RC_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }  
+  
+  define (instr = mult32) {
+    fields = (OPCD_1(3),RA_2,RB_2,RC_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  } 
+  
+  define (instr = addi32) {
+    fields = (OPCD_1(4),RA_2,IMM16_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }
+  define (instr = subi32) {
+    fields = (OPCD_1(5),RA_2,IMM16_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }  
+  
+  define (instr = multi32) {
+    fields = (OPCD_1(6),RA_2,IMM16_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }  
+  
+  define (instr = ld32) {
+    fields = (OPCD_1(7),RA_2,RB_2,RC_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }
+  define (instr = st32) {
+    fields = (OPCD_1(8),RA_2,RB_2,RC_2,XOPCD_2(1));
+    width = 32;
+    action = {};
+  }  
+  
+  define (instr = ld2wc) {
+    fields = (OPCD_1(13),RA_2,IMM16_2,XOPCD_2(0));
+    action = {
+      GPR(RA_2).CL = Mem(IMM16_2  ,4);  
+      GPR(RA_2).CR = Mem(IMM16_2+4,4);    
+    };
+  }
+  
+  define (instr = st2wc) {
+    """
+    Stores register data to locations IMM16_2 and IMM16_2 + 1
+    """;
+    fields = (OPCD_1(13),RA_2,IMM16_2,XOPCD_2(1));
+    action = {
+      Mem(IMM16_2  ,4) = GPR(RA_2).CL;  
+      Mem(IMM16_2+4,4) = GPR(RA_2).CR;    
+    };
+  }  
+  
+   define (instr = ld2ws) {
+    """
+    Loads into register two words from locations IMM16_2 and IMM16_2 + 1
+    """;
+    fields = (OPCD_1(14),RA_2,IMM16_2,XOPCD_2(0));
+    action = {
+      GPR(RA_2).SL = Mem(IMM16_2  ,4);  
+      GPR(RA_2).SR = Mem(IMM16_2+4,4);    
+    };
+  }
+  
+  define (instr = st2ws) {
+    """
+    Stores register data to locations IMM16_2 and IMM16_2 + 1
+    """;
+    fields = (OPCD_1(14),RA_2,IMM16_2,XOPCD_2(1));
+    action = {
+      Mem(IMM16_2  ,4) = GPR(RA_2).SL;  
+      Mem(IMM16_2+4,4) = GPR(RA_2).SR;    
+    };
+  }
+  
+  define (instr = add2wc) {
+    fields = (OPCD_1(15),RA_2,RB_2,RC_2,XOPCD_2(0));
+    action = {
+      GPR(RA_2).CL = (GPR(RB_2).CL + GPR(RC_2).CL); 
+      GPR(RA_2).CR = (GPR(RB_2).CR + GPR(RC_2).CR); 
+    };
+  } 
+  
+  define (instr = add2ws) {
+    fields = (OPCD_1(15),RA_2,RB_2,RC_2,XOPCD_2(1));
+    action = {
+      GPR(RA_2).SL = (GPR(RB_2).SL + GPR(RC_2).SL); 
+      GPR(RA_2).SR = (GPR(RB_2).SR + GPR(RC_2).SR);    
+    };
+  } 
+  
+  // 48bit,64bit and 96bit stuff
+  //
+  define (instrfield = RA_3)    { bits = ( 4, 8); };
+  define (instrfield = RB_3)    { bits = ( 9,14); };
+  define (instrfield = RC_3)    { bits = (16,19); };
+  define (instrfield = IMM32_3) { bits = ((16,31),(33,47)); };
+  define (instrfield = ADDR_3)  { bits = ((17,31),(48,95));};
+  define (instrfield = IMM64_3) { bits = (34,95); };
+  define (instrfield = XOPCD_3)   { bits = (32); };
+  
+  define(instr=loop16) {
+    fields = (OPCD_1(9),RA_1,XOPCD_2(0),IMM8_1);
+    width=16;
+    action =
+    {
+      if(GPR(RA_1) != 0)
+      {
+	TIA = IMM8_1;	
+	Fetch = Jmp;
+	GPR(RA_1) = GPR(RA_1) - 1;
+      }	      
+    };
+  }
+  
+  define (instr = addi48) {
+    fields = (OPCD_1(9),RA_3,XOPCD_2(1),IMM32_3);
+    width = 48;
+    action = {};
+  } 
+  
+  define (instr = addi96) {
+    fields = (OPCD_1(10),XOPCD_3(0),RA_3,IMM64_3);
+    width = 96;
+    action = {GPR(RA_3) = IMM64_3 ;};
+  }  
+  define (instr = subi96) {
+    fields = (OPCD_1(10),XOPCD_3(1),RA_3,IMM64_3);
+    width = 96;
+    action = {};
+  }  
+  define (instr = ld96) {
+    fields = (OPCD_1(11),RA_3,RB_3,ADDR_3);
+    width = 96;
+    action = {};  
+  }
+  
+  define (instr = st96) {
+    fields = (OPCD_1(12),RA_3,RB_3,ADDR_3);
+    width = 96;
+    action = {};  
+  }  
+    
+  define (instr=halt) {
+    width = 16;
+    fields=(OPCD_1(0));
+    action = {
+      halt();
+    };
+  };
+  
+  
+      
+}
+
+define (core=P) {
+  archs=MiniPPC;
+}

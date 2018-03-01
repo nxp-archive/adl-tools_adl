@@ -1,0 +1,69 @@
+#
+# This tests that flushes which aren't branches are handled properly
+# by executing an msync instruction.  The instructions after the msync
+# should execute properly.
+#
+
+= asm
+  
+  addi r1,r1,1
+  addi r1,r1,1
+  msync
+  addi r2,r2,1
+  addi r2,r2,1
+
+= /asm
+
+= aopts
+
+ -mregnames -mbooke
+
+= /aopts
+
+= mdopts
+
+ instr-offset: 0x100
+
+= /mdopts
+
+
+CORE n=:P
+
+RD n=NIA     d=0x100
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000104 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000108 d=0x7C0004AC	#	msync
+MD n=Mem ra=0x0000010c d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000110 d=0x38420001	#	addi r2,r2,1
+# </GEN>
+
+TRACE
+
+I ea=0x100 id=1
+INSTR op=0x38210001                                     asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x104 id=2
+INSTR op=0x38210001                                     asm="addi 1,1,1"
+R n=GPR i=1 d=0x00000002
+
+I ea=0x108 id=3
+INSTR op=0x7c0004ac                                     asm="msync "
+
+I ea=0x10c id=4
+INSTR op=0x38420001                                     asm="addi 2,2,1"
+R n=GPR i=2 d=0x00000001
+
+I ea=0x110 id=5
+INSTR op=0x38420001                                     asm="addi 2,2,1"
+R n=GPR i=2 d=0x00000002
+
+I ea=0x114 id=6
+INSTR op=0x00000000                                     asm="halt "
+
+RESULTS
+
+RD n=GPR i=1 d=2
+RD n=GPR i=2 d=2

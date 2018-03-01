@@ -1,0 +1,87 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+    Attributes:  doc_hidden
+    Primary opcode.
+    
+  RA: [11,15] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] [regfile:  GPR]
+    Field used to specify a General Purpose Register to be used as a target.
+    
+  RX: 
+    Pseudo:  1
+    Width:   5
+  RY: 
+    Pseudo:  1
+    Width:   5
+  RZ: 
+    Pseudo:  1
+    Width:   5
+  UI: [16,31] [not used] 
+    Unsigned immediate field for arithmetic operations.
+    
+  XO: [21,30]
+    Extended opcode.
+    
+Instructions:
+  Name:  add_family (rank: 100)
+  Width:  16
+  Fields:  RX RY RZ
+  Action:  {
+    GPR ( RX ) = GPR ( RY ) + GPR ( RZ ) ;
+}
+  Source Registers:  GPR(RY) GPR(RZ) 
+  Target Registers:  GPR(RX) 
+  Nested insructions:  
+    Name:  add1 (rank: 100)
+    Width:  32
+    Attributes:  classA('1')  classB(20) classC(30)
+    Fields:  OPCD(31) RT RA RB XO(266)
+    Alias:  add_family RX(RT) RY(RA) RZ(RB) 
+    Source Registers:  GPR(RY) GPR(RZ) 
+    Target Registers:  GPR(RX) 
+    -------------------------------
+    Name:  and2 (rank: 100)
+    Width:  32
+    Attributes:  classA classB
+    Fields:  OPCD(28) RT RA RB
+    Alias:  add_family RX(RT) RY(RA) RZ(RB) 
+    Source Registers:  GPR(RY) GPR(RZ) 
+    Target Registers:  GPR(RX) 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    28(70000000):  and2
+    31(7c000000):      Mask:  0x7fe
+      266(214):  add1
+-------------------------------
+

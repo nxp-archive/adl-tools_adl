@@ -1,0 +1,6 @@
+in30.uadl:6: warning: Core powerpc is not defined by ADL, using core P instead.
+in30.uadl:6: Unimplemented instructions:  addic andi. 
+in30.uadl:38: Exec() was never called in any state action for this instruction class.
+in30.uadl:67: Exec() was never called in any state action for this instruction class.
+in30.uadl:6: warning: Instructions access no data memory
+Could not parse in30.uadl

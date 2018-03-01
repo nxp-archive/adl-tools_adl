@@ -1,0 +1,26 @@
+//
+// Simple model for testing delayed writes to memory.
+//
+
+#import "mod1.adl"
+
+define (arch=ppc_delayed_mem) {
+
+  // We override some stores in order to add delayed write semantics.
+
+  define (instr=stw) {
+    fields=(OPCD(36),RS,RA,D);
+    syntax = ("%i %f,%f(%f)",RS,D,RA);
+    attrs = store;
+    action = {
+      var b = (RA == 0) ? 0 : GPR(RA);
+      var addr = b + D;
+      delayed_write(Mem(addr,4),3) = GPR(RS);
+    };
+  }
+
+}
+
+define (core = P) {
+  archs = (MiniPPC,ppc_delayed_mem);
+}

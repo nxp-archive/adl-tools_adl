@@ -1,0 +1,43 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "SPR"
+  Size:  1024
+  Contained registers:
+    6:  GPR(1)
+    7:  LR
+    8:  foobar(0).GPR(2)
+    9:  foobar(0).LR
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "LR"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "PC"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Contexts:
+  Name:  foobar
+  Number contexts:  3
+  Registers:  LR 
+  Register-files:  GPR 
+  -------------------------------
+Current-instruction-address register:  PC
+Next-instruction-address register:  PC
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+-------------------------------
+

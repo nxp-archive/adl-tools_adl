@@ -1,0 +1,7 @@
+Disassembly:
+
+200:	se_add rr9,rr8
+202:	subf. r26,r27,r26
+206:	se_bne 0x0000000000000200
+208:	halt 
+

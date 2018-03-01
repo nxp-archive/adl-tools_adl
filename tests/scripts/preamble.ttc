@@ -1,0 +1,19 @@
+
+define (config) {
+  preamble = ("""
+INFO:  
+INFO:  This is an example
+INFO:  multi-line preamble statement.
+INFO:  
+""",
+              "INFO:  More stuff.");
+}
+
+define(core=P) {
+
+  define(group=insts) {
+    items = default_instruction;
+    stages = (Fetch,Decode,ExecMul = exec,Writeback = compl);
+  }
+
+}

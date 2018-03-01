@@ -1,0 +1,60 @@
+#
+# Make sure that shared watches execute across all cores.  In this test, the
+# first thread activates the second thread.  If the watch isn't working, then
+# the second thread will never wake up.
+#
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	addi r3,r3,3
+	li  r10,0x1c
+	mtspr 31,r10	
+	lis r10,0x4000
+	mtspr 70,r10
+	# No need to have a halt instruction for t0 b/c the mtspr will deactivate it.
+	addi r4,r4,4
+	addi r5,r5,5
+	addi r6,r6,6	
+
+= /asm
+
+CORE n=:PMT
+
+RD n=NIA0 d=0x0
+RD n=NIA1 d=0x0
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00000008 d=0x38630003	#	addi r3,r3,3
+MD n=Mem ra=0x0000000c d=0x3940001C	#	li  r10,0x1c
+MD n=Mem ra=0x00000010 d=0x7D5F03A6	#	mtspr 31,r10	
+MD n=Mem ra=0x00000014 d=0x3D404000	#	lis r10,0x4000
+MD n=Mem ra=0x00000018 d=0x7D4613A6	#	mtspr 70,r10
+MD n=Mem ra=0x0000001c d=0x38840004	#	addi r4,r4,4
+MD n=Mem ra=0x00000020 d=0x38A50005	#	addi r5,r5,5
+MD n=Mem ra=0x00000024 d=0x38C60006	#	addi r6,r6,6	
+# </GEN>
+
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=0x00000001
+RD n=GPR i=2 d=0x00000002
+RD n=GPR i=3 d=0x00000003
+RD n=GPR i=4 d=0x00000000
+RD n=GPR i=5 d=0x00000000
+RD n=GPR i=6 d=0x00000000
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=0x00000000
+RD n=GPR i=2 d=0x00000000
+RD n=GPR i=3 d=0x00000000
+RD n=GPR i=4 d=0x00000004
+RD n=GPR i=5 d=0x00000005
+RD n=GPR i=6 d=0x00000006

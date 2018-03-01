@@ -1,0 +1,82 @@
+#
+# Test of rollback.
+#
+= asm
+
+  addi r1,r1,10
+  addi r2,r2,20
+  mtspr 9,r5
+  stw r2,0x1000(r0)
+  stw r10,0x1006(r0)
+  mtspr 100,r5
+  mtspr 202,r5
+  mtspr 210,r5
+  # This enables rollback.
+  crorc 0,1,0
+  addi r1,r1,50
+  addi r2,r2,70
+  addi r3,r3,10
+  stw r2,0x1000(r0)
+  stw r3,0x1006(r0)
+  mtspr 9,r6
+  mtspr 100,r6
+  mtspr 202,r6
+  mtspr 210,r6
+  # This restores everything to before the first crorc.
+  crorc 1,0,0
+  addi r1,r1,1
+  addi r2,r2,1
+  .long 0
+
+= /asm
+
+CORE n=:P
+
+RD n=GPR i=5  d=75
+RD n=GPR i=6  d=33
+RD n=GPR i=10 d=0xdeadbeef
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x1008 d=0
+MD n=Mem ra=0x100c d=0
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000004 d=0x38420014	#	addi r2,r2,20
+MD n=Mem ra=0x00000008 d=0x7CA903A6	#	mtspr 9,r5
+MD n=Mem ra=0x0000000c d=0x90401000	#	stw r2,0x1000(r0)
+MD n=Mem ra=0x00000010 d=0x91401006	#	stw r10,0x1006(r0)
+MD n=Mem ra=0x00000014 d=0x7CA41BA6	#	mtspr 100,r5
+MD n=Mem ra=0x00000018 d=0x7CAA33A6	#	mtspr 202,r5
+MD n=Mem ra=0x0000001c d=0x7CB233A6	#	mtspr 210,r5
+MD n=Mem ra=0x00000020 d=0x4C010342	#	crorc 0,1,0
+MD n=Mem ra=0x00000024 d=0x38210032	#	addi r1,r1,50
+MD n=Mem ra=0x00000028 d=0x38420046	#	addi r2,r2,70
+MD n=Mem ra=0x0000002c d=0x3863000A	#	addi r3,r3,10
+MD n=Mem ra=0x00000030 d=0x90401000	#	stw r2,0x1000(r0)
+MD n=Mem ra=0x00000034 d=0x90601006	#	stw r3,0x1006(r0)
+MD n=Mem ra=0x00000038 d=0x7CC903A6	#	mtspr 9,r6
+MD n=Mem ra=0x0000003c d=0x7CC41BA6	#	mtspr 100,r6
+MD n=Mem ra=0x00000040 d=0x7CCA33A6	#	mtspr 202,r6
+MD n=Mem ra=0x00000044 d=0x7CD233A6	#	mtspr 210,r6
+MD n=Mem ra=0x00000048 d=0x4C200342	#	crorc 1,0,0
+MD n=Mem ra=0x0000004c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000050 d=0x38420001	#	addi r2,r2,1
+MD n=Mem ra=0x00000054 d=0x00000000	#	.long 0
+# </GEN>
+
+RESULTS
+
+RD n=GPR i=1  d=11
+RD n=GPR i=2  d=21
+RD n=GPR i=20 d=75
+RD n=CTR      d=75
+RD n=FOO5     d=75
+RD n=FOO5_WR  d=1
+RD n=FOO9     d=0x004b0000
+
+MD n=Mem ra=0x1000 d=0x00000014
+MD n=Mem ra=0x1004 d=0x0000dead
+MD n=Mem ra=0x1008 d=0xbeef0000
+MD n=Mem ra=0x100c d=0x00000000

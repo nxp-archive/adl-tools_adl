@@ -1,0 +1,91 @@
+//
+// Testing the use of inherit_attrs to control attribute inheritence.
+//
+
+define (arch=minippc) {
+
+  attrs = (fxu,base,foo,group,bar,a,b,c);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RX) {
+    bits = (6,8);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=SI7) {
+    bits = (9,15);
+  }
+
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (regfile=GPR) { size = 32; };
+
+  define (instr=addi) {
+    attrs=(fxu,base,group("add"),bar(123));
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = SI;
+      } else {
+        GPR(RT) = GPR(RA) + SI;
+      }
+    };
+
+    // We inherit from addi, since we're nested.
+    define (instr=l3) {
+      remove_attrs = bar;
+      attrs = a;
+      width = 16;
+      fields = (OPCD(15),RX,SI7);
+      alias = addi(RT(RX),RA(0),SI(SI7));
+    }
+
+    // This turns off inheritence.
+    define (instr=l4) {
+      inherit_attrs = false;
+      attrs = (a,b,c);
+      width = 16;
+      fields = (OPCD(16),RX,SI7);
+      alias = addi(RT(RX),RA(0),SI(SI7));
+    }
+  }
+
+  // We don't inherit from addi.
+  define (instr=l1) {
+    alias = addi(RT(RT),RA(0),SI(SI));
+    inherit_attrs = false;
+    attrs = (a,b,c);
+  }
+
+  // Normal inheritence of attributes from addi.
+  define (instr=l2) {
+    alias = addi(RT(RT),RA(0),SI(SI));
+    attrs = (a,b,c);
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

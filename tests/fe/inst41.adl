@@ -1,0 +1,49 @@
+//
+// Test on enumerated fields: default value, syntax ( %p) and repeating items (up1 = up2).
+// Must fail.
+
+define (arch=minippc) {
+  attrs = (up,down,ff); 
+  
+
+//REGISTERS
+
+  define (reg = REG1) {
+    attrs = (cia,nia);
+  }
+ define(instrfield=R1){
+   bits = (11,16);
+ }
+ define(instrfield=R2){
+   bits = (17,22);
+   }
+ define(instrfield=OPCD){
+   bits =(1,5);
+ }
+ 
+  
+  define(instrfield=F1){
+    bits = 9;
+   enumerated = (".up",".down",(".up1",".up2"),".down1",("a1","a2","a3","a4"));
+   value = ".upp";
+  }
+  define(instrfield=F2){
+   bits = 10;
+   enumerated = (".left",".right");
+  }
+  define (instr = foo){
+   fields = (OPCD(11),F1,F2,R1,R2);
+   syntax = ("%i%f%p %f %f",F1,F2,R1,R2);
+   action={};
+  }
+  define (instr = foo2){
+   fields = (OPCD(11),F1,F2,R1,R2);
+   syntax = ("%i%p%p %f %p",F1,F2,R1,R2);
+   action={};
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

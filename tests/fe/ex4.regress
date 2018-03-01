@@ -1,0 +1,4 @@
+ex4.adl:51: Unknown sensitivity type 'whoknows'.  Expected 'edge' or 'level'.
+ex4.adl:49: Unknown variable/resource found in action code:  BAR
+ex4.adl:40: Expected exception handler to take a first argument of type Foo_t
+ex4.adl:24: Expected a function of arity 0 for an exception handler but got a function of arity 1

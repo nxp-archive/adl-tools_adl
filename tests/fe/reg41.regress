@@ -1,0 +1,293 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    General purpose registers.
+    
+  -------------------------------
+  Name:  "SPR"
+  Size:  1024
+  Contained registers:
+    9:  CTR
+    20:  A
+      Write hook:  func ( bits < 32 > v ) {
+    if ( MSR . PR[read: MSR.PR] == 1 ) {
+        raiseException ( Program ) ;
+    }
+    ThisReg = v[write thisreg: A := v] ;
+}
+        Source Registers:  MSR[mask 0x00200000]/p 
+        Target Registers:  A 
+        Does raise exceptions.
+
+    21:  B
+      Write hook:  func ( bits < 32 > v ) {
+    if ( MSR . PR[read: MSR.PR] == 1 ) {
+        raiseException ( Program ) ;
+    }
+    ThisReg = v[write thisreg: B := v] ;
+}
+        Source Registers:  MSR[mask 0x00200000]/p 
+        Target Registers:  B 
+        Does raise exceptions.
+
+    22:  C
+      Write hook:  func ( bits < 32 > v ) {
+    if ( MSR . PR[read: MSR.PR] == 1 ) {
+        raiseException ( Program ) ;
+    }
+    ThisReg = v[write thisreg: C := v] ;
+}
+        Source Registers:  MSR[mask 0x00200000]/p 
+        Target Registers:  C 
+        Does raise exceptions.
+
+    23:  GPR(0)
+      Write hook:  func ( bits < 32 > v ) {
+    if ( MSR . PR[read: MSR.PR] == 1 ) {
+        raiseException ( Program ) ;
+    }
+    ThisReg = v[write thisreg: GPR(0 ()) := v] ;
+}
+        Source Registers:  MSR[mask 0x00200000]/p 
+        Target Registers:  GPR 
+        Does raise exceptions.
+
+    26:  SRR0
+    27:  SRR1
+    62:  ESR
+  Width:  32
+  -------------------------------
+Exceptions:
+  Name:  External (level sensitive)
+  Enable:  {
+    return MSR . EE[read: MSR.EE] == 1 ;
+}
+  Action:  {
+    SRR0 = CIA[read: CIA][write: SRR0 := CIA[read: CIA]] ;
+    SRR1 = MSR[read: MSR][write: SRR1 := MSR[read: MSR]] ;
+    MSR = 0[write: MSR := 0] ;
+    NIA = concat ( IVPR[read: IVPR] . get < 16 > ( 0 , 15 ) , IVOR5[read: IVOR5] . get < 16 > ( 16 , 31 ) )[write: NIA := concat ( IVPR[read: IVPR] . get < 16 > ( 0 , 15 ) , IVOR5[read: IVOR5] . get < 16 > ( 16 , 31 ) )] ;
+}
+  -------------------------------
+  Name:  Program (priority:  1)
+  Action:  {
+    SRR0 = CIA[read: CIA][write: SRR0 := CIA[read: CIA]] ;
+    SRR1 = MSR[read: MSR][write: SRR1 := MSR[read: MSR]] ;
+    MSR = 0[write: MSR := 0] ;
+    NIA = concat ( IVPR[read: IVPR] . get < 16 > ( 0 , 15 ) , IVOR6[read: IVOR6] . get < 16 > ( 16 , 31 ) )[write: NIA := concat ( IVPR[read: IVPR] . get < 16 > ( 0 , 15 ) , IVOR6[read: IVOR6] . get < 16 > ( 16 , 31 ) )] ;
+}
+  -------------------------------
+Registers:
+  Name:  "A"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "B"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "C"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  Documention:
+
+    Current instruction address.
+    
+  -------------------------------
+  Name:  "CR"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    The condition register.
+    
+  -------------------------------
+  Name:  "CTR"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    The counter register.
+    
+  -------------------------------
+  Name:  "ESR"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    Exception syndrome register.
+    
+  -------------------------------
+  Name:  "IVOR5"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 5.
+    
+  -------------------------------
+  Name:  "IVOR6"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector offset register 6.
+    
+  -------------------------------
+  Name:  "IVPR"
+  Usage:  read
+  Width:  32
+  Documention:
+
+    Interrupt-vector prefix register.
+    
+  -------------------------------
+  Name:  "MSR"
+  Usage:  read, written, field-read
+  Width:  32
+    EE[9]   
+      Usage:  field-read
+    PR[10]   
+      Usage:  field-read
+  Documention:
+
+    Machine state register.
+    
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  Documention:
+
+    Next instruction address.
+    
+  -------------------------------
+  Name:  "SPRG0"
+  Width:  32
+  -------------------------------
+  Name:  "SRR0"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    Save-restore register 0.
+    
+  -------------------------------
+  Name:  "SRR1"
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+    Save-restore register 1.
+    
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  AA: [30,30] [not used]
+        Absolute address bit.
+    
+  BD: [16,29] [not used]
+        Immediate field specifying a 14-bit signed two's complement branch displacement
+    which is concatenated on the right with 0b00 and sign-extended.
+    
+  BF: [6,8] [not used] 
+        Field used to specify one of the Condition Register fields or one of the
+    Floating-Point Status and Control Register fields to be used as a target.
+    
+  BI: [11,15] [not used] 
+        Field used to specify a bit in the Condition Register to be used
+    as the condition of a Branch Conditional instruction.
+    
+  BO: [6,10] [not used] 
+        Field used to specify options for the Branch Conditional instructions.
+    
+  D: [16,31] [not used] 
+        Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    
+  LK: [31,31] [not used] 
+        LINK bit.
+    
+  MB: [21,25] [not used] 
+  ME: [26,30] [not used] 
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RS: [6,10] [not used] 
+        Field used to specify a General Purpose Register as a target.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  SH: [16,20] [not used] 
+  SI: [16,31] [not used] 
+        Signed immediate field for arithmetic operations.
+    
+  SPRN: [16,20] [11,15] [not used] 
+        Field used to specify a Special Purpose Register for the *mtspr* and *mfspr* instructions.
+    
+  UI: [16,31] [not used] 
+        Unsigned immediate field for arithmetic operations.
+    
+  XO: [21,30] 
+        Extended opcode.
+    
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA RB XO(266)
+  Action:  {
+    GPR ( RT ) = GPR ( RA )[read: GPR(RA)] + GPR ( RB )[read: GPR(RB)][write: GPR(RT) := GPR ( RA )[read: GPR(RA)] + GPR ( RB )[read: GPR(RB)]] ;
+}
+  Source Registers:  GPR(RA) GPR(RB) 
+  Target Registers:  GPR(RT) 
+  -------------------------------
+  Name:  halt (rank: 100)
+  Width:  8
+  Fields:  OPCD(0)
+  Action:  {
+    halt (  ) ;
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    0(0):  halt
+    31(7c000000):      Mask:  0x7fe
+      266(214):  add
+
+Helper Functions:
+  setCrField:
+ void setCrField ( bits < 32 > field , bits < 32 > x , bits < 32 > y ) {
+     bits < 4 > r = ( ( x . signedLT ( y ) ) ? 0x8 : 0 ) | ( ( x . signedGT ( y ) ) ? 0x4 : 0 ) | ( ( x == y ) ? 0x2 : 0 ) ;
+    CR[read: CR] . set ( 4 * field , 4 * field + 3 , r ) ;
+}
+    Source Registers:  CR 
+-------------------------------
+

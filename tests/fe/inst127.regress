@@ -1,0 +1,88 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  Da: 
+    Pseudo:  1
+    Width:   6
+  Da_imp_bits__21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_: [21,16] 
+    Implements:  Da
+  PR: 
+    Pseudo:  1
+    Width:   2
+    Assembler:  1
+  PR_imp_bits__13_13_x_12_12_: [13,12] 
+    Implements:  PR
+  Rn: 
+    Pseudo:  1
+    Width:   5
+  Rn_imp_bits__20_20_x_19_19_x_18_18_x_17_17_x_16_16_: [20,16] 
+    Implements:  Rn
+  Rn_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_: [30,26] 
+    Implements:  Rn
+  SG: 
+    Pseudo:  1
+    Width:   1
+    Reserved:  1
+    Default value :'0'
+  SG_imp_bits__14_14_: [14,14] 
+    Implements:  SG
+  VarInstrOpcode_imp_bits__47_47_x_31_31_x_15_15_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [47,47] [31,31] [15,15] [4,0] 
+  VarInstrOpcode_imp_bits__47_47_x_31_31_x_25_25_x_24_24_x_23_23_x_22_22_x_15_15_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [47,47] [31,31] [25,22] [15,15] [11,0] 
+  s15: 
+    Pseudo:  1
+    Width:   15
+  s15_imp_bits__46_46_x_45_45_x_44_44_x_43_43_x_42_42_x_41_41_x_40_40_x_39_39_x_38_38_x_37_37_x_36_36_x_35_35_x_34_34_x_33_33_x_32_32_: [46,32] 
+    Implements:  s15
+  s32: 
+    Pseudo:  1
+    Width:   32
+  s32_imp_bits__46_46_x_45_45_x_44_44_x_43_43_x_42_42_x_41_41_x_40_40_x_39_39_x_38_38_x_37_37_x_36_36_x_35_35_x_34_34_x_33_33_x_32_32_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_: [46,32] [30,21] [11,5] 
+    Implements:  s32
+Instructions:
+  Name:  a (rank: 100)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_47_x_31_31_x_25_25_x_24_24_x_23_23_x_22_22_x_15_15_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ s15_imp_bits__46_46_x_45_45_x_44_44_x_43_43_x_42_42_x_41_41_x_40_40_x_39_39_x_38_38_x_37_37_x_36_36_x_35_35_x_34_34_x_33_33_x_32_32_ Rn_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_ Da_imp_bits__21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_ SG_imp_bits__14_14_(reserved) PR_imp_bits__13_13_x_12_12_
+  Action:  {
+}
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_47_x_31_31_x_25_25_x_24_24_x_23_23_x_22_22_x_15_15_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ s15_imp_bits__46_46_x_45_45_x_44_44_x_43_43_x_42_42_x_41_41_x_40_40_x_39_39_x_38_38_x_37_37_x_36_36_x_35_35_x_34_34_x_33_33_x_32_32_ Rn_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_ Da_imp_bits__21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_ SG_imp_bits__14_14_(reserved) PR_imp_bits__13_13_x_12_12_
+  Action:  {
+}
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  48
+  Fields:  VarInstrOpcode_imp_bits__47_47_x_31_31_x_15_15_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ s32_imp_bits__46_46_x_45_45_x_44_44_x_43_43_x_42_42_x_41_41_x_40_40_x_39_39_x_38_38_x_37_37_x_36_36_x_35_35_x_34_34_x_33_33_x_32_32_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_ Rn_imp_bits__20_20_x_19_19_x_18_18_x_17_17_x_16_16_ SG_imp_bits__14_14_(reserved) PR_imp_bits__13_13_x_12_12_
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0x8000800000000000
+    0(0000000000000000):      Mask:  0x00000000801f0000
+      32768(0000000080000000):        Mask:  0x000003c000000000
+        15(000003c000000000):          Mask:  0x000000000fe00000
+          0(0000000000000000):  a
+      32780(00000000800c0000):        Mask:  0x000003c000000000
+        15(000003c000000000):          Mask:  0x000000000fe00000
+          0(0000000000000000):  b
+      32784(0000000080100000):  c
+-------------------------------
+

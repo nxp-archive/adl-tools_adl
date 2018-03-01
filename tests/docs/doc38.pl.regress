@@ -1,0 +1,280 @@
+$data = {
+"cores" => {
+"P" => {
+"RaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"EaMask" => {
+"initial" => "0xffffffff",
+"constant" => 1,
+},
+"regs" => {
+"CIA" => {
+"width" => 32,
+"attributes" => {
+"cia" => "",
+},
+"shared" => 0,
+},
+"NIA" => {
+"width" => 32,
+"attributes" => {
+"nia" => "",
+},
+"shared" => 0,
+},
+},
+"regfiles" => {
+"GPR" => {
+"width" => 32,
+"size" => 32,
+"shared" => 0,
+},
+},
+"instrfields" => {
+"OPCD" => {
+"doc" => <<DATA
+Primary opcode.
+    
+DATA
+,
+"bits" => [
+[
+0,
+5,
+],
+],
+"width" => 6,
+"size" => 6,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xfc000000",
+"type" => "imm",
+},
+"RA" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+11,
+15,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x1f0000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RB" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register to be used as a source.
+    
+DATA
+,
+"bits" => [
+[
+16,
+20,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xf800",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"RT" => {
+"doc" => <<DATA
+Field used to specify a General Purpose Register to be used as a target.
+    
+DATA
+,
+"bits" => [
+[
+6,
+10,
+],
+],
+"width" => 5,
+"size" => 5,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x3e00000",
+"type" => "regfile",
+"ref" => "GPR",
+},
+"SI" => {
+"doc" => <<DATA
+Signed immediate field for arithmetic operations.
+    
+DATA
+,
+"bits" => [
+[
+16,
+31,
+],
+],
+"width" => 16,
+"size" => 16,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0xffff",
+"display" => "dec",
+"type" => "imm",
+"signed" => 1,
+},
+"XO" => {
+"doc" => <<DATA
+Extended opcode.
+    
+DATA
+,
+"bits" => [
+[
+21,
+30,
+],
+],
+"width" => 10,
+"size" => 10,
+"shift" => 0,
+"offset" => 0,
+"mask" => "0x7fe",
+"type" => "imm",
+},
+},
+"instrs" => {
+"add" => {
+"width" => 32,
+"doc" => <<DATA
+The sum GPR(RA) + GPR(RB) is placed into RD.
+
+The add instruction is preferred for additions because it sets few status bits.
+    
+DATA
+,
+"syntax" => "add RT, RA, RB",
+"dsyntax" => "add ${RT}, ${RA}, ${RB}",
+"fields" => {
+"OPCD" => 31,
+"RT" => "",
+"RA" => "",
+"RB" => "",
+"XO" => 266,
+},
+"action" => <<DATA
+{
+    delayed_write ( GPR ( RT ) , 3 ) = GPR ( RA ) + GPR ( RB ) ;
+    delayed_write ( Mem ( RA , 4 ) , 2 ) = GPR ( RA ) ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)",
+"GPR(RB)",
+],
+"outputs" => [
+"GPR(RT)/d[3]",
+],
+"output_mems" => [
+"Mem/d[2]",
+],
+},
+"addi" => {
+"width" => 32,
+"syntax" => "addi RT, RA, SI",
+"dsyntax" => "addi ${RT}, ${RA}, ${SI}",
+"fields" => {
+"OPCD" => 14,
+"RT" => "",
+"RA" => "",
+"SI" => "",
+},
+"action" => <<DATA
+{
+    if ( RA == 0 ) {
+        delayed_write ( GPR ( RT ) , 2 ) = SI ;
+    } else delayed_write ( GPR ( RT ) , 2 ) = GPR ( RA ) + SI ;
+}
+DATA
+,
+"disassemble" => 1,
+"inputs" => [
+"GPR(RA)?",
+],
+"outputs" => [
+"GPR(RT)/d[2]",
+],
+},
+},
+"core-level-hooks" => {
+"decode-miss" => <<DATA
+
+DATA
+,
+"pre-cycle" => <<DATA
+
+DATA
+,
+"post-cycle" => <<DATA
+
+DATA
+,
+"pre-fetch" => <<DATA
+
+DATA
+,
+"post-fetch" => <<DATA
+
+DATA
+,
+"post-exec" => <<DATA
+
+DATA
+,
+"post-asm" => <<DATA
+
+DATA
+,
+"post-packet-asm" => <<DATA
+
+DATA
+,
+"post-packet" => <<DATA
+
+DATA
+,
+"active-watch" => <<DATA
+
+DATA
+,
+"instr-table-watch" => <<DATA
+
+DATA
+,
+},
+"asm_config" => {
+"comments" => [
+"#",
+],
+"line_comments" => [
+"#",
+],
+},
+},
+},
+"systems" => {
+},
+};
+

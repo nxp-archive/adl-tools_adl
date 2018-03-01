@@ -1,0 +1,2 @@
+cache8.adl:18: Unknown variable/resource found in action code:  L2CR
+cache8.adl:20: Argument 1 of hit-predicate function must be of type CacheAccess.

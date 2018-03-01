@@ -1,0 +1,118 @@
+//
+// Tests exception-related parsing issues.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {};
+
+    // memory system
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+    define (custom B) {
+      header = "Foo.h";
+      define (args) {
+        x = 1;
+        y = 2;
+        z = true;
+      }
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDe, S_EX, S_EXe, S_MM, S_MMe, S_WB, S_WBp, S_WBe );
+
+    define (mapping) {
+      mID = S_ID;
+      mEX = S_EX;
+      mMM = S_MM;
+      mWB = (S_WB,S_WBp);
+    };
+
+    // Defines the state transition on an exception:
+    //  Lhs:  exception state.
+    //  Rhs:  states which might generate an exception.
+    define (exception_mapping) {
+      S_IDe = S_ID;
+      S_EXe = S_EX;
+      S_MMe = S_MM;
+      S_WBe = (S_WB,S_WBp);
+   }
+  }
+
+  commit_on_exception = true;
+
+  define (instr_class sfx) {
+    instructions = ( add, addi, "addic.", or, ori, "andi." );
+
+    machine = normal;
+
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+      Flags = CR;
+      Flags = XER;
+      Foo  = 10;
+    };
+
+    define (instr=(or,ori,"andi.")) {
+      define (operands) {
+        Src1 = GPR(RS);
+        Src2 = GPR(RB);
+        Trg  = GPR(RA);
+        Imm  = field(UI);
+        Foo  = 20;
+      };
+    }
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read() && Src2.can_read() && 
+							Trg.can_allocate() && mEX.has_space()) {
+				Src1.read();
+				Src2.read();
+				Trg.allocate();
+				change_state(S_EX);
+			}
+		// No space-check, so one will be inserted.
+		S_EX: {
+			exec();
+			change_state(S_MM);
+		}
+		S_MM: { 
+			change_state(S_WB); 
+		}
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: if (Trg.can_write()) {
+				write_ops();
+				change_state(S_WBp);
+			}
+		S_WBp:{
+			change_state(S_INIT);
+		}
+    };
+  }
+
+}

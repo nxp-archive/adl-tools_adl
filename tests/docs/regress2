@@ -1,0 +1,87 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use rdriver;
+use regress_utils;
+use strict;
+use Data::Dumper;
+
+use vars qw($src);
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+my $cmd = "$root/misc/make-db -t=xml ";
+
+#
+# IMPORTANT: Add to this list only the tests which reference models which may be
+# released as open source.
+#
+my @Tests = (
+ {
+  cmd => "$cmd $src/doc1.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/doc2.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/doc4.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/doc5.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/doc7.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/doc12.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/doc33.adl | rnv $src/../../misc/adl.rnc"
+ },
+ {
+  cmd => "$cmd $src/microinstr11.adl | rnv $src/../../misc/adl.rnc"
+ },
+);
+
+#
+# IMPORTANT: Add any tests here which use models which are considered
+# proprietary/confidential.
+#
+if (! $is_external_release ) {
+  my @ProprietaryTests = 
+      (
+       );
+  
+  @Tests = (@Tests,@ProprietaryTests);
+}
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## </HELPERS>
+##
+
+##
+### Place test routines here.
+## <TESTS>
+##
+
+##
+## </TESTS>
+##
+

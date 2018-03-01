@@ -1,0 +1,39 @@
+//
+// This makes sure that we won't share buses with
+// different action code.
+//
+
+#import "bus1.adl"
+
+defmod (core=P) {
+  remove = 1;
+}
+
+define (sys=S) {
+
+  define (core=P0) {
+    archs=(foo,foo2); 
+  }
+
+  define (core=P1) {
+    archs=(foo,foo2); 
+
+    define (reg=FOO) {}
+
+    defmod(eventbus=msg) {
+      action = func (msg_t x) {
+        FOO = x.data;
+      };
+    }
+  }
+
+  define (shared) {
+    regs = HIT;
+    eventbuses = (msg);
+  }
+
+  P0 core0;
+  P1 core1;
+
+}
+ 

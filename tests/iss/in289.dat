@@ -1,0 +1,685 @@
+#
+# Make sure that we can set the cache size dynamically for an MT design with a
+# shared cache.
+#
+
+= asm
+
+	li r1,8
+	mtctr r1
+	li r1,0x0
+L1:
+	addi r1,r1,0x2000
+	stw r2,0x0(r1)
+	bdnz L1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38200008	#	li r1,8
+MD n=Mem ra=0x00000004 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x00000008 d=0x38200000	#	li r1,0x0
+MD n=Mem ra=0x0000000c d=0x38212000	#	addi r1,r1,0x2000
+MD n=Mem ra=0x00000010 d=0x90410000	#	stw r2,0x0(r1)
+MD n=Mem ra=0x00000014 d=0x4200FFF8	#	bdnz L1
+# </GEN>
+
+CORE n=:PMT
+
+RD n=CCR d=0x80000000
+RD n=TEN d=0xc0000000
+
+CORE n=:PMT:t0
+
+RD n=NIA d=0x0
+
+CORE n=:PMT:t1
+
+RD n=NIA d=0x0
+
+TRACE
+
+
+CORE n=:PMT:t0
+
+
+I ea=0x0 id=1 tic=1
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+C n=L1i a=load t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38200008
+INSTR op=0x38200008					asm="li r1,8"
+R n=NIA d=0x00000004
+R n=GPR i=1 d=0x00000008
+
+CORE n=:PMT:t1
+
+
+I ea=0x0 id=2 tic=1
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38200008
+INSTR op=0x38200008					asm="li r1,8"
+R n=NIA d=0x00000004
+R n=GPR i=1 d=0x00000008
+
+CORE n=:PMT:t0
+
+
+I ea=0x4 id=3 tic=2
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c2903a6
+INSTR op=0x7c2903a6					asm="mtctr r1"
+R n=NIA d=0x00000008
+R n=CTR d=0x00000008
+
+CORE n=:PMT:t1
+
+
+I ea=0x4 id=4 tic=2
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c2903a6
+INSTR op=0x7c2903a6					asm="mtctr r1"
+R n=NIA d=0x00000008
+R n=CTR d=0x00000008
+
+CORE n=:PMT:t0
+
+
+I ea=0x8 id=5 tic=3
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38200000
+INSTR op=0x38200000					asm="li r1,0"
+R n=NIA d=0x0000000c
+R n=GPR i=1 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x8 id=6 tic=3
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38200000
+INSTR op=0x38200000					asm="li r1,0"
+R n=NIA d=0x0000000c
+R n=GPR i=1 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=7 tic=4
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00002000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=8 tic=4
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00002000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=9 tic=5
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=miss t=write set=0 way=0 lm=0x7f ra=0x2000
+C n=L1d a=load t=write set=0 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=10 tic=5
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x2000 nb=4
+C n=L1d a=hit t=write set=0 way=0 lm=0x7f ra=0x2000
+M n=Mem t=write ea=0x2000 ra=0x2000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=11 tic=6
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000007
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=12 tic=6
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000007
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=13 tic=7
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00004000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=14 tic=7
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00004000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=15 tic=8
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x4000 nb=4
+C n=L1d a=miss t=write set=0 way=1 lm=0x7f ra=0x4000
+C n=L1d a=load t=write set=0 way=1 lm=0x7f ra=0x4000
+M n=Mem t=write ea=0x4000 ra=0x4000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=16 tic=8
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x4000 nb=4
+C n=L1d a=hit t=write set=0 way=1 lm=0x7f ra=0x4000
+M n=Mem t=write ea=0x4000 ra=0x4000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=17 tic=9
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000006
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=18 tic=9
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000006
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=19 tic=10
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00006000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=20 tic=10
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00006000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=21 tic=11
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x6000 nb=4
+C n=L1d a=miss t=write set=0 way=2 lm=0x7f ra=0x6000
+C n=L1d a=load t=write set=0 way=2 lm=0x7f ra=0x6000
+M n=Mem t=write ea=0x6000 ra=0x6000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=22 tic=11
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x6000 nb=4
+C n=L1d a=hit t=write set=0 way=2 lm=0x7f ra=0x6000
+M n=Mem t=write ea=0x6000 ra=0x6000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=23 tic=12
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000005
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=24 tic=12
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000005
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=25 tic=13
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00008000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=26 tic=13
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00008000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=27 tic=14
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x8000 nb=4
+C n=L1d a=miss t=write set=0 way=3 lm=0x7f ra=0x8000
+C n=L1d a=load t=write set=0 way=3 lm=0x7f ra=0x8000
+M n=Mem t=write ea=0x8000 ra=0x8000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=28 tic=14
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x8000 nb=4
+C n=L1d a=hit t=write set=0 way=3 lm=0x7f ra=0x8000
+M n=Mem t=write ea=0x8000 ra=0x8000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=29 tic=15
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000004
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=30 tic=15
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000004
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=31 tic=16
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000a000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=32 tic=16
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000a000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=33 tic=17
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0xa000 nb=4
+C n=L1d a=miss t=write set=0 way=4 lm=0x7f ra=0xa000
+C n=L1d a=load t=write set=0 way=4 lm=0x7f ra=0xa000
+M n=Mem t=write ea=0xa000 ra=0xa000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=34 tic=17
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0xa000 nb=4
+C n=L1d a=hit t=write set=0 way=4 lm=0x7f ra=0xa000
+M n=Mem t=write ea=0xa000 ra=0xa000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=35 tic=18
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000003
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=36 tic=18
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000003
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=37 tic=19
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000c000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=38 tic=19
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000c000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=39 tic=20
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0xc000 nb=4
+C n=L1d a=miss t=write set=0 way=5 lm=0x7f ra=0xc000
+C n=L1d a=load t=write set=0 way=5 lm=0x7f ra=0xc000
+M n=Mem t=write ea=0xc000 ra=0xc000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=40 tic=20
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0xc000 nb=4
+C n=L1d a=hit t=write set=0 way=5 lm=0x7f ra=0xc000
+M n=Mem t=write ea=0xc000 ra=0xc000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=41 tic=21
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000002
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=42 tic=21
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000002
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=43 tic=22
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000e000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=44 tic=22
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000e000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=45 tic=23
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0xe000 nb=4
+C n=L1d a=miss t=write set=0 way=6 lm=0x7f ra=0xe000
+C n=L1d a=load t=write set=0 way=6 lm=0x7f ra=0xe000
+M n=Mem t=write ea=0xe000 ra=0xe000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=46 tic=23
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0xe000 nb=4
+C n=L1d a=hit t=write set=0 way=6 lm=0x7f ra=0xe000
+M n=Mem t=write ea=0xe000 ra=0xe000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=47 tic=24
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000001
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=48 tic=24
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000001
+R n=NIA d=0x0000000c
+B taken=1 ea=0xc
+
+CORE n=:PMT:t0
+
+
+I ea=0xc id=49 tic=25
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00010000
+
+CORE n=:PMT:t1
+
+
+I ea=0xc id=50 tic=25
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38212000
+INSTR op=0x38212000					asm="addi r1,r1,8192"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x00010000
+
+CORE n=:PMT:t0
+
+
+I ea=0x10 id=51 tic=26
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x10000 nb=4
+C n=L1d a=miss t=write set=0 way=7 lm=0x7f ra=0x10000
+C n=L1d a=load t=write set=0 way=7 lm=0x7f ra=0x10000
+M n=Mem t=write ea=0x10000 ra=0x10000 d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x10 id=52 tic=26
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x90410000
+INSTR op=0x90410000					asm="stw r2,0(r1)"
+R n=NIA d=0x00000014
+D n=Mem t=write ea=0x10000 nb=4
+C n=L1d a=hit t=write set=0 way=7 lm=0x7f ra=0x10000
+M n=Mem t=write ea=0x10000 ra=0x10000 d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x14 id=53 tic=27
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000000
+
+CORE n=:PMT:t1
+
+
+I ea=0x14 id=54 tic=27
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x4200fff8
+INSTR op=0x4200fff8					asm="bdnz+ 0x000000000000000c"
+R n=NIA d=0x00000018
+R n=CTR d=0x00000000
+
+CORE n=:PMT:t0
+
+
+I ea=0x18 id=55 tic=28
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x0000001c
+
+CORE n=:PMT:t1
+
+
+I ea=0x18 id=56 tic=28
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+R n=NIA d=0x0000001c
+
+RESULTS
+
+#
+# We only have 8 ways if we set the number of ways dynamically at start-up time.
+#
+
+CORE n=:PMT
+
+CD n=L1d set=0 way=0 ra=0x0000000000002000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=1 ra=0x0000000000004000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=2 ra=0x0000000000006000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=3 ra=0x0000000000008000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=4 ra=0x000000000000a000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=5 ra=0x000000000000c000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=6 ra=0x000000000000e000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000
+CD n=L1d set=0 way=7 ra=0x0000000000010000 valid=1 dirty=1 locked=0 d=0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000

@@ -1,0 +1,44 @@
+#
+# Check to make sure that we can set an aliased register (NIA) via a reset
+# action, for an MT design.
+#
+
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	addi r3,r3,3	
+
+= /asm
+
+= mdopts
+
+	instr-offset: 0x1000
+
+= /mdopts
+
+# <GEN>
+MD n=Mem ra=0x00001000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00001004 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00001008 d=0x38630003	#	addi r3,r3,3	
+# </GEN>
+
+CORE n=:PMT
+
+RD n=TEN d=0xc0000000
+
+# The NIAs are set via BootAddr, so we start at 0x1000.
+
+RESULTS
+
+CORE n=:PMT:t0
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3
+
+CORE n=:PMT:t1
+
+RD n=GPR i=1 d=1
+RD n=GPR i=2 d=2
+RD n=GPR i=3 d=3

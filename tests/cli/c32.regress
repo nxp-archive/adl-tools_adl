@@ -1,0 +1,32 @@
+Executing lwz
+Cache L1d miss on read at 0x1000
+Cache L2 miss on read at 0x1000
+Cache L2 load on read at 0x1000
+Cache L1d load on read at 0x1000
+Executing addi
+Executing add
+Executing addic.
+Executing stw
+Cache L1d miss on write at 0x2000
+Cache L2 miss on write at 0x2000
+Cache L2 load on write at 0x2000
+Cache L1d load on write at 0x2000
+Executing stw
+Cache L1d miss on write at 0xfffffffe
+Cache L2 miss on write at 0xfffffffe
+Cache L2 load on write at 0xffffff80
+Cache L1d load on write at 0xffffff80
+Cache L1d miss on write at 0x0
+Cache L2 miss on write at 0x0
+Cache L2 load on write at 0x0
+Cache L1d load on write at 0x0
+Executing lhz
+Cache L1d hit on read at 0x1004
+Executing lbz
+Cache L1d hit on read at 0x1005
+Executing stb
+Cache L1d hit on write at 0x2004
+Executing sth
+Cache L1d hit on write at 0x2008
+Executing halt
+Simulation halted at address: 0x000000000000012c

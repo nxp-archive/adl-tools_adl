@@ -1,0 +1,71 @@
+//
+// Test of removing registers and register files.
+//
+
+define (arch = Base) {
+
+  attrs = (foo,stuff);
+
+  define (regfile = sprs) {
+    size = 1024;
+    attrs = foo;
+
+    define (entry=20) {
+      reg = a;
+    }
+    define (entry=21) {
+      reg = b;
+    }
+    define (entry=22) {
+      reg = c;
+    }
+  }
+
+  define (regfile = gprs) {
+    size = 32;
+    attrs = (foo,stuff);
+  }
+
+  define (reg = a) {
+    """ This is a sample register!. """;
+    width = 32;
+    attrs = (foo);
+  }
+
+  define (reg = b) { }
+  define (reg = c) { }
+
+}
+
+define (arch = minippc) {
+
+  attrs = gpr;
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+ 
+  define (reg = a) {
+    remove = 1;
+  }
+
+  defmod (regfile = sprs) {
+    defmod (entry=20) { remove = 1; };
+    defmod (entry=21) { remove = 1; };
+  }
+
+  define (regfile = gprs) {
+    remove = 1;
+  }
+
+}
+
+define (arch = Foo ) {
+
+}
+
+define (core = P) {
+  archs = (Base,minippc);
+}
+
+

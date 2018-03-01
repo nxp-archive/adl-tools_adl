@@ -1,0 +1,57 @@
+#
+# We must invalidate a line in the DMI cache even if it's not dirty,
+# so that subsequent reads are still valid.  Normally, accesses will
+# update the cache, but in some situations, such as write-through
+# we can replace a line w/o updating the DMI cache, causing it to
+# get out of synch.
+#
+= asm
+
+  lwz r2,0x1000(r0)
+  mtspr 52,r12        # Turn on write-through.
+  add r10,r10,r11     # This will eventually push out the line.
+  stwx r1,r10,r0
+  add r10,r10,r11
+  stwx r1,r10,r0
+  add r10,r10,r11
+  stwx r1,r10,r0
+  add r10,r10,r11
+  stwx r1,r10,r0
+  lwz r3,0x1004(r0)   # Line should no longer be in the DMI cache.
+
+= /asm
+
+= mdopts
+  instr-offset: 0x100
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000100 d=0x80401000	#	lwz r2,0x1000(r0)
+MD n=Mem ra=0x00000104 d=0x7D940BA6	#	mtspr 52,r12        # Turn on write-through.
+MD n=Mem ra=0x00000108 d=0x7D4A5A14	#	add r10,r10,r11     # This will eventually push out the line.
+MD n=Mem ra=0x0000010c d=0x7C2A012E	#	stwx r1,r10,r0
+MD n=Mem ra=0x00000110 d=0x7D4A5A14	#	add r10,r10,r11
+MD n=Mem ra=0x00000114 d=0x7C2A012E	#	stwx r1,r10,r0
+MD n=Mem ra=0x00000118 d=0x7D4A5A14	#	add r10,r10,r11
+MD n=Mem ra=0x0000011c d=0x7C2A012E	#	stwx r1,r10,r0
+MD n=Mem ra=0x00000120 d=0x7D4A5A14	#	add r10,r10,r11
+MD n=Mem ra=0x00000124 d=0x7C2A012E	#	stwx r1,r10,r0
+MD n=Mem ra=0x00000128 d=0x80601004	#	lwz r3,0x1004(r0)   # Line should no longer be in the DMI cache.
+# </GEN>
+
+RD n=NIA      d=0x100
+RD n=CCR      d=0xc0000000
+
+RD n=GPR i=10 d=0x1000
+RD n=GPR i=11 d=0x100000
+RD n=GPR i=12 d=0xc0000800
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x1004 d=0x12345678
+
+RESULTS
+
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0x12345678

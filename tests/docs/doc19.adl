@@ -1,0 +1,247 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Test of expression expansion in instruction action code.
+//
+
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  bit_endianness = little;  
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=D) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  define (reg=SR) {
+    define (field = C)
+      {
+        bits=0;
+      }
+    define (field = (T,P0))
+      {
+        bits=1;
+      }
+    define (field = SM)
+      {
+        bits=2;
+      }
+    define (field = RM)
+      {
+        bits=3;
+      }
+    define (field = SCM)
+      {
+        bits=(8,5,4);
+      }
+    define (field = S)
+      {
+        bits=6;
+      }
+    define (field = SM2)
+      {
+        bits=7;
+      }
+    define (field = OVF)
+      {
+        bits=10;
+      }
+    define (field = SAT)
+      {
+        bits=11;
+      }
+
+    define (field = W20)
+      {
+        bits=12;
+      }
+    define (field = RF)
+      {
+        bits=13;
+      }
+    define (field = P5)
+      {
+        bits=27;
+      }
+    define (field = P4)
+      {
+        bits=28;
+      }
+    define (field = P3)
+      {
+        bits=29;
+      }
+    define (field = P2)
+      {
+        bits=30;
+      }
+    define (field = P1)
+      {
+        bits=31;
+      }
+    define (field =LF)
+      {
+        bits = (30,27);
+      }
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=Src1) { pseudo = true; width = 5; };
+  define (instrfield=Src2) { pseudo = true; width = 5; };
+  define (instrfield=Trg)  { pseudo = true; width = 5; };
+
+  define (instrfield=DoSub) { width = 1; parm = true; }
+
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (5,0);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (30,21);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    """;
+    bits = (15,11);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register (D_) to be used as a source.
+    """;
+    bits = (20,16);
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (D_) to be used as a target.
+    """;
+    bits = (10,6);
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register (D_) as a target.
+    """;
+    bits = (10,6);
+  }
+
+  //
+  // Instructions.
+  //
+
+  attrs = (a1,a2,a3,a4);
+
+  define (instr=add_family) {
+    fields=(Src1,Src2,Trg);
+    action={
+
+      sbits<41> mult;
+      sbits<41> MB_H = (signedMultiply( signExtend( D(Src1).H,41),signExtend( D(Src2).H,41)));
+      mult = (signedMultiply( signExtend( D(Src1).L,41),signExtend( D(Src2).L,41)));
+      MB_H = (MB_H - mult)<<1;
+      MB_H = (MB_H + 0x8000)>>16;
+
+      D(Trg).WH = D(Src1).WH + MB_H(19,0);
+    };
+
+    define (instr=add1) {
+      fields=(OPCD(31),RT,RA,RB,XO(266));
+      width = 32;
+      alias = add_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+
+    define (instr=add2) {
+      fields=(OPCD(32),RT,RA,RB,XO(266));
+      attrs = doc_no_expand_exprs;
+      width = 32;
+      alias = add_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+  }
+
+  define (instr=sub_family) {
+    fields=(Src1,Src2,Trg,DoSub);
+    action={
+
+      sbits<41> x;
+
+      if (DoSub == 1) {
+        x = signExtend( D(Src1).H,41) - signExtend( D(Src2).L,41);
+      } else {
+        x = signExtend( D(Src1).H,41) + signExtend( D(Src2).L,41);
+      }
+
+      D(Trg).WH = x;
+    };
+
+    define (instr=sub1) {
+      fields=(OPCD(33),RT,RA,RB,XO(266));
+      width = 32;
+      alias = sub_family(Src1(RA),Src2(RB),Trg(RT),DoSub(1));
+    }
+  }
+
+  define (instr=foo_family) {
+    fields=(Src1,Src2,Trg);
+
+    action =
+      {
+        sbits<65> mult32_32_1 = signedMultiply( signExtend(D(Src1).M,65) , signExtend(D(Src2).M,65));
+        sbits<65> mult32_32_2 = signedMultiply( signExtend(D(Src1).M,65) , signExtend(D(Src2).M,65));
+        mult32_32_2=0-mult32_32_2;
+
+        D(Trg) = ((sbits<65>)(((mult32_32_1 <<1) + 0x80000000ull) )>>32)(39,0);
+        D(Trg) = ((sbits<65>)(((mult32_32_2 <<1) + 0x80000000ull) )>>32)(39,0);
+      };
+
+    define (instr=foo1) {
+      fields=(OPCD(34),RT,RA,RB,XO(266));
+      width = 32;
+      alias = foo_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+  }
+
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

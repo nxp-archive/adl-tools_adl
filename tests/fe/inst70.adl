@@ -1,0 +1,55 @@
+//
+// Simple test of instructions.
+//
+
+define (arch=minippc) {
+
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instr=add1) {
+    attrs=(fxu,base);
+    fields=(OPCD(40),RT,RA,RB,XO(10));
+    action={
+    };
+  }
+
+  define (instr=add2) {
+    attrs=(fxu,base);
+    fields=(OPCD(40),RT,RA,RB,XO(10));
+    action={
+    };
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

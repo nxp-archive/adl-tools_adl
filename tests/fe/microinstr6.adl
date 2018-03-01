@@ -1,0 +1,348 @@
+//
+// Testing of micro instructions in a big-endian model.
+//
+// This demonstrates the idea of a packetized encoding for a serial-execution
+// machine.
+//
+
+
+define (arch = packet_ops) {
+   
+  attrs = (other, instr_subinstr1, instr_subinstr2);
+
+  define (reg=CIA) {
+    """
+    Current instruction address
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address
+    """;
+    attrs = nia;
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+    prefix = r;
+  }
+
+
+  define (instrfield=fop) {
+    """
+    Outer 'envelope' instruction opcode.
+    """;
+    bits = (0,1);
+  }
+  
+  define(instrfield=opA) {
+    """
+    Instruction field for storing a 31-bit instruction (first slot).
+    """;
+    bits = (2,32);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+  
+  define(instrfield=opB) {
+    """
+    Instruction field for storing a 31-bit instruction (second slot).
+    """;    
+    bits = (33,63);
+    type = instr;
+    ref = instr_subinstr1;
+  }
+
+  define(instrfield=opC) {
+    """
+    Instruction field for storing a 20-bit instruction (first slot).
+    """;    
+    bits = (2,21);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+
+  define(instrfield=opD) {
+    """
+    Instruction field for storing a 20-bit instruction (second slot).
+    """;    
+    bits = (22,41);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+
+  define(instrfield=opE) {
+    """
+    Instruction field for storing a 20-bit instruction (third slot).
+    """;    
+    bits = (42,61);
+    type = instr;
+    ref = instr_subinstr2;
+  }
+  
+
+  define(instrfield=op) {
+    """
+    Primary opcode for sub-instrutions.
+    """;
+    bits = (0,4);
+  }
+
+  
+  define(instrfield=ra) {
+    """
+    First operand source instruction field.
+    """;
+    bits = (10,14);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rb) {
+    """
+    Second operand source instruction field.
+    """;   
+    bits = (15,19);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rt) {
+    """
+    Standard target instruction field. 
+    """;
+    bits = (5,9);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define(instrfield=rs) {
+    """
+    Standard source instruction field. 
+    """;
+    bits = (5,9);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=simm) {
+    """
+    Unsigned immediate field.
+    """;
+    bits = (15,30);
+    display = dec;
+    is_signed = true;    
+  }
+
+  define (instrfield=bdp) {
+    """
+    PC-relative branch destination-packet field.
+
+    This is used to specify the address of the instruction.
+    """;
+    bits = (10,28);
+    addr = pc;
+    is_signed = true;
+    shift = 3;
+  }
+
+  define (instrfield=bdo) {
+    """
+    Branch destination packet offset field.
+
+    This specifies the micro-op to execute within the target instruction.
+    """;
+    bits = (29,30);
+  }
+
+ 
+  define (instr = serial1) {
+    """
+    Contains two 31-bit instructions.  Implies serial execution.
+    """;
+    width = 64;
+    fields = (fop(1),opA,opB);
+    dsyntax = ("%f ; %f", opA, opB );
+    attrs = (other);
+  }
+
+  define (instr = serial2) {
+    """
+    Contains three 20-bit instructions.  Implies serial execution.
+    """;
+    width = 64;
+    fields = (fop(2),opC,opD,opE);
+    dsyntax = ("%f ; %f ; %f", opC, opD, opE );
+    attrs = (other);
+  }
+  
+  define (instr = parallel) {
+    """
+    Contains two 31-bit instructions.  Implies parallel execution.
+    """;
+    width = 64;
+    fields = (fop(3),opA,opB);
+    dsyntax = ("%f = %f", opA, opB );
+    attrs = (other);
+  }  
+  
+  define (instr = halt) {
+    """
+    Halt simulation.
+    """;
+    width = 64;
+    fields = (fop(0));  
+    attrs = (other);
+    action={ 
+      halt(); 
+    };
+  }
+  
+
+  define (instr = addi) {
+    """
+    Add immediate.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(1), rt, ra, simm );
+
+    action = {
+
+      GPR(rt) = GPR(ra) + simm;
+
+    };
+  }
+
+  define (instr = mulli) {
+    """
+    Multiply immediate.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(2), rt, ra, simm);
+
+    action = {
+
+      GPR(rt) = GPR(ra) * simm;
+
+    };
+  }
+
+  define (instr = bc) {
+    """
+    Branch conditional.
+    """;
+    width = 31;
+
+    attrs = (instr_subinstr1);
+
+    fields = ( op(3), rs, bdp, bdo );
+
+    action = {
+      if (GPR(rs) != 0) {
+        setMicroOpOffset(bdo);
+        NIA = bdp;
+      }
+    };
+  }
+
+  define (instr = nop1) {
+    """
+    Format-1 no-op.
+    """;
+    width = 31;
+    attrs = (instr_subinstr1);
+
+    fields = ( op(0) );
+
+    action = {
+
+    };
+  }
+
+
+
+  define (instr = add) {
+    """
+    Add register-register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(1), rt, ra, rb );
+
+    action = {
+
+      GPR(rt) = GPR(ra) + GPR(rb);
+
+    };
+  }
+
+  define (instr = sub) {
+    """
+    Subtract register-register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(2), rt, ra, rb );
+
+    action = {
+
+      GPR(rt) = GPR(ra) - GPR(rb);
+
+    };
+  }
+
+  define (instr = mul) {
+    """
+    Multiply register-register.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(3), rt, ra, rb );
+
+    action = {
+
+      GPR(rt) = GPR(ra) * GPR(rb);
+
+    };
+  }    
+
+  define (instr = nop2) {
+    """
+    Format-2 no-op.
+    """;
+    width = 20;
+    attrs = (instr_subinstr2);
+
+    fields = ( op(0) );
+
+    action = {
+
+    };
+  }
+ 
+  
+  define (assembler) {
+    asm_instrtables = (other, instr_subinstr1, instr_subinstr2);
+    instr_separators = (" ","=",";");
+  }
+
+  post_packet_asm = func(InstrBundle b) {
+
+  };
+
+}
+
+
+define (core = packet_ops) {
+  archs = packet_ops; 
+  instrtables = (other, instr_subinstr1, instr_subinstr2);
+}

@@ -1,0 +1,420 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Demonstrates a multithreaded processor.  PMT has two threads.  The actual
+// program counters are stored in the NIAs register-file (which is logged as
+// NIA0 and NIA1).  These are mapped to SPRs so that they can be referenced
+// across threads.  The virtual program counter for each thread is NIA which is
+// aliased to the relevant real counter.
+//
+// This also demonstrates defining architectural elements
+// directly within a core and using child-id indexing for aliases
+// and sparse register-file entries.
+
+#import "mod1.adl"
+
+#ifndef ThreadCount
+# define ThreadCount 2
+#endif
+
+enum Parameters {
+  NumThreads   = ThreadCount,
+  CacheSize    = 32768,
+  L1iCacheSize = (0 + CacheSize), // Just for testing.
+  L1dCacheSize = CacheSize,  
+};
+
+enum FooBits {
+  ABit = 4,
+  BBit, CBit, DBit, EBit,  EWidth = 3,
+};
+
+define (arch=mt) {
+
+  attrs = (log_as_reg,asynchronous,ia1);
+
+  active = { return TEN(getChildId()) != 0; };
+
+  define (reg=TEN) { reset = 0x80000000; }
+
+  define (reg=HID0) {
+    """
+    A hardware control register.
+    """;
+    define (field=M) {
+      bits = 0;
+    }
+  }
+
+  define (reg=HID1) {
+    define (read) {
+      action = {
+        if (Mode == ModeA) {
+          return 0xdeadbeef;
+        } else {
+          return 0x12345678;
+        }
+      };
+    }
+  }
+
+  // This tests to make sure that slice aliases obey reserved masks.
+  define (reg=XERU) {
+    width = 16;
+    alias = XER;
+    alias_slice = (0,15);
+  }
+
+  define (regfile=NIAs) {
+    attrs = log_as_reg;
+    size = NumThreads;
+    log_name = NIA;
+    reset = func() {
+      for (unsigned i = 0;i != NIAs.size(); ++i) {
+        NIAs(i) = BootAddr;
+      }
+    };
+  }
+
+  define (regfile=TCR) {
+    size = NumThreads;
+  }
+
+  define (regfile=FOOs) {
+    size = NumThreads;    
+  }
+
+  // Make sure that reserved and read-only bits for alias of register-files are
+  // preserved.
+  define (regfile=UFOO) {
+    alias = FOOs;
+    define (field=A) {
+      bits = ABit;
+    }
+    define (field=B) {
+      bits = BBit;
+    }
+    define (field=C) {
+      bits = CBit;
+    }
+    define (field=D) {
+      bits = DBit;
+    }
+    define (field=E) {
+      bits = (EBit,EBit+EWidth);
+      readonly = true;
+    }
+  }  
+
+  // Same thing, but make sure that write-hook generates the correct code
+  define (regfile=BARs) {
+    size = NumThreads;
+    define (field=A) {
+      bits = ABit;
+    }
+    define (field=B) {
+      bits = BBit;
+    }
+    define (field=C) {
+      bits = CBit;
+    }
+    define (field=D) {
+      bits = DBit;
+    }
+    define (field=E) {
+      bits = (EBit,EBit+EWidth);
+      readonly = true;
+    }
+
+    define (write) {
+      action = func(unsigned i,bits<32> x) {
+        ThisReg(i) = ThisReg(i) + x;
+      };
+    }
+  }  
+
+  define (regfile=STUFFs) {
+    size = 4;
+  }
+
+  // Test to make sure that reserved and read-only bits on the alias will be
+  // preserved.
+  define (reg=FOO) {
+    alias = FOOs(child_id);
+    define (field=A) {
+      bits = ABit;
+    }
+    define (field=B) {
+      bits = BBit;
+    }
+    define (field=C) {
+      bits = CBit;
+    }
+    define (field=D) {
+      bits = DBit;
+    }
+    define (field=E) {
+      bits = (EBit,EBit+EWidth);
+      readonly = true;
+    }
+  }
+
+  defmod (reg=NIA) {
+    alias = NIAs(child_id);
+  }
+
+  // Make sure that an alias to an alias is OK.
+  define (reg=IAR) {
+    alias = NIA;
+  }
+
+  define (reg=SRR0) {
+    """
+    Save-restore register 0.
+    """;
+  }
+
+  define (reg=SRR1) {
+    """
+    Save-restore register 1.
+    """;
+  }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR4) {
+    """
+    Interrupt-vector offset register 4 (External Interrupt).
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7 (Protection Interrupt).
+    """;
+  }
+
+  define (reg=ESR) {
+    """
+    Exception syndrome register.
+    """;
+  }
+
+  // Make sure that alias slices w/shifts work, plus check it with child-id
+  // indexing.  In this case, the TCR low nibble is shifted into the high-nibble
+  // of the PTN register.
+  define (reg=PTN) {
+    width = 32;
+    alias = TCR(child_id);
+    alias_slice = ((24,31),24);
+  }
+
+  // For testing that register watches on aliases work correctly.
+  define (regfile=MSRs) {
+    size = NumThreads;
+    define (field=PR) {
+      bits = 0;
+    }
+  }
+
+  define (reg=MSR) {
+    alias = MSRs(child_id);
+    define (field=PR) {
+      bits = 0;
+    }
+    reset = 0;
+  }
+
+  define (reg=STEST) {
+    define (read) {
+      action = {
+        return (SMode == Super) ? 1 : 0;
+      };
+    }
+    define (write) {
+      ignore = true;
+    }
+  }
+
+  define (parm=SMode) {
+    options = (User,Super);
+    value = Super;
+    watch = {
+      if (MSR.PR == 0) {
+        SMode = Super;
+      } else {
+        SMode = User;
+      }
+    };
+  }
+
+  define (reg=CBTEST1) {}
+  define (reg=CBTEST2) {}
+
+  defmod (regfile=SPR) {
+    define (entry=26) { reg=SRR0; }
+    define (entry=27) { reg=SRR1; }
+    define (entry=20)  { reg=XERU; };
+    define (entry=30)  { reg=NIAs; }
+    define (entry=50)  { reg=HID0; }
+    define (entry=51)  { reg=HID1; }
+    define (entry=60)  { reg=TCR(child_id); };
+    define (entry=61)  { reg=TCR; };
+    define (entry=70)  { reg=TEN; };
+    define (entry=80)  { reg=PTN; };
+    define (entry=81)  { reg=FOO; };
+    define (entry=90)  { reg=UFOO; };
+    define (entry=95)  { reg=BARs; };
+    define (entry=99)  { reg=STEST; };
+    define (entry=100) { reg=MSRs; };
+    define (entry=120) { reg=STUFFs;
+      // Make sure that the implicit mapping of consecutive entries to multiple
+      // register-file entries works with hooks (ThisReg needs to map properly).
+      define (write) {
+        action = func(bits<32> x ){
+          ThisReg = x + 1;
+        };
+      }
+      define (read) {
+        action = func(){
+          return ThisReg;
+        };
+      }
+    };
+    define (entry=121) { reg=CBTEST1; };
+    define (entry=122) { reg=CBTEST2; };
+  }
+  define (parm=Mode) {
+    options = (ModeA,ModeB);
+    value = ModeA;
+    watch = {
+      if (HID0.M == 0) {
+        Mode = ModeA;
+      } else {
+        Mode = ModeB;
+      }
+    };
+  }
+
+  define (instr=mfspr) {
+    fields=(OPCD(31),RT,SPRN,XO(339));
+    action = {
+      GPR(RT) = SPR(SPRN);
+    };
+  }
+
+  define (instr=mtmsr) {
+    fields=(OPCD(31),RS,XO(146));
+    action = {
+      // Just for testing, to make sure that code generation is correct.
+      if (instrHasAttr(ia1)) {
+        int i = 10;
+      }
+      MSR = GPR(RS);
+    };
+  }
+
+  define (instr=rfi) {
+    fields=(OPCD(19),RS,RA,RB,XO(50));
+    action = {
+      MSR = SRR1;
+      NIA = SRR0;
+    };
+  }
+
+  //
+  // External interrupt.
+  //
+  define (exception=External) {
+    attrs = asynchronous;
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR(0,15),IVOR4(16,31));
+      // This allows us to properly handle a critical interrupt which occurs at
+      // the same time as a non-critical interrupt.
+      CIA = NIA;
+    };
+  }
+
+  define (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      ESR(0,0) = (instrHasAttr(store)) ? 1 : 0;
+      NIA = concat(IVPR(0,15),IVOR7(16,31));
+    };
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = L1iCacheSize;
+    linesize  = 128;
+    set_assoc = 4;
+
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+  
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = L1dCacheSize;
+    linesize  = 128;
+    set_assoc = 4;
+
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+  
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+  }
+
+  define (reg=BootAddr) {
+    reset = 0x1000;
+  }
+
+  // Test to make sure that we handle dynamic resets correctly with aliased
+  // registers.  This is just here to make sure we compile correctly.
+  defmod (reg=NIA) {
+    reset = func() {
+      NIA = BootAddr;
+    };
+  }
+  
+}
+
+define (core=P) {
+  remove=1;
+}
+
+define (sys=PMT) {
+  type="PowerPC";
+  define (core = Thread) {
+    type="Thread";
+    archs = (MiniPPC,mt);
+  }
+  define (shared) {
+    regs = (HID0,TEN,CCR,BootAddr,CBTEST2);
+    regfiles = (NIAs,TCR,FOOs,BARs,MSRs);
+    parms = Mode;
+    caches = (L1i,L1d);
+  }
+  Thread t[NumThreads];
+}

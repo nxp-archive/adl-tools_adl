@@ -1,0 +1,12 @@
+#
+# Test instruction jamming via the 'ijam' function.
+#
+
+go
+#	addi r2,r2,2
+ijam 0x38420002
+#	addi r3,r3,3
+ijam P 0x38630003
+#	lwz r4,0x0(r0)
+ijam P 0x80801000
+quit

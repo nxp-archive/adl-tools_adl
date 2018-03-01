@@ -1,0 +1,205 @@
+#!@PERL@
+# -- -*-perl-*-a
+#
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+=head1 NAME
+
+xhtml2pdf [options] <.html file>
+
+=head1 SYNOPSIS
+
+Generates a PDF file from XHTML using an XSL-FO flow.
+
+=head1 OPTIONS
+
+Basic command-line options:
+
+=over 8
+
+=item B<--help, --h>
+
+Display help
+
+=item B<--man, -m>
+
+Display the complete help as a man page.
+
+=item B<--output=path, -o=path>
+
+Specify the output file.
+
+=item B<--xslt=file>
+
+Specify an alternate XSLT stylesheet.  If just a filename is specified, then the
+default location for stylesheets is used.
+
+=item B<cleanup>
+
+Specify whether temporary files should be removed upon successful completion.
+Default is true.  This option may be negated.
+
+=item B<--fop=path>
+
+Specify a path to the Apache FOP XSL-FO renderer.
+
+=item B<--fop-opts=str>
+
+Specify additional options to FOP, such as Java VM control options.  This option may be repeated.
+
+=item B<--jvm-max-heap=str>
+
+Specify a maximum heap size for the Java VM.  This is passed as the Java -Xmx option.  For example,
+to set the maximum heap size to 3 gigabytes, specify B<3G>.
+
+=back
+
+=cut
+
+use FindBin;
+use Getopt::Long 2.33 qw(:config permute);
+use Pod::Usage;
+use strict;
+use File::Basename;
+use Cwd 'abs_path';
+
+my $xhtmldtd = "xhtml1-transitional.dtd";
+
+# The default prefix is the installation prefix set by Autoconf.
+# This may be overridden using the "prefix" command-line option.
+my $prefix = "@prefix@";
+my $fop    = "@FOP@";
+my $xslt   = "xhtml2fo.xsl";
+
+my ($input,$help,$man,$verbose,$output,@fop_opts,$jvm_max_heap);
+
+my $cleanup = 1;
+
+if (!&GetOptions
+	(
+	 "h|help"                     => \$help,
+	 "m|man"                      => \$man,
+	 "verbose"                    => \$verbose,
+	 "prefix=s"                   => \$prefix,
+	 "o|output=s"                 => \$output,
+	 "cleanup!"                   => \$cleanup,
+	 "xslt=s"                     => \$xslt,
+	 "fop=s"                      => \$fop,
+	 "fop-opts=s"                 => \@fop_opts,
+	 "jvm-max-heap=s"             => \$jvm_max_heap,
+	 "<>"                         => \&plusargs,
+	)) {
+  printhelp(1,1);
+}
+
+sub printhelp($$) {
+  my ($eval,$verbose) = (shift,shift);
+  pod2usage(-exitval => $eval,-verbose=>$verbose);
+  exit 0;
+}
+
+sub plusargs {
+  $input = shift;
+}
+
+# This is set via the prefix, rather than by autoconf, so that we can locate
+# this file if the --prefix command-line option is specified.
+my $sharedir    = abs_path($prefix)."/share";
+
+my $uri_base;
+if ( -f "$sharedir/$xhtmldtd" ) {
+	$uri_base = "file://$sharedir/";
+} else {
+	die "Could not locate the XHTML DTD file:  $sharedir/$xhtmldtd";
+}
+
+if ($xslt !~ m#^\.|/# ) {
+	# If the XSLT path starts with . or / then we assume it's a full path.
+	# Otherwise, use the default location.
+	$xslt = "$sharedir/$xslt";
+}
+die "Could not find XHTML -> XSL-FO XSLT file: $xslt" if ( ! -f $xslt );
+
+# Runs a command- if the return code is non-zero, the function
+# prints an error and exits.
+sub runcmd {
+  if ($verbose) {
+		print "[@_]\n";
+  }
+  my $out = `@_`;
+  if ($?) {
+		print "Error executing command",(($? & 127) ? " (coredump)" : ""),":  @_.\n";		
+		if ($out) {
+			print "  Output was:\n\n$out";
+		} else {
+			print "\n\n";
+		}
+		exit 1;
+  }
+}
+
+
+# Print help if requested to do so.
+printhelp(0,1) if $help;
+
+printhelp(0,2) if $man;
+
+if (!$fop) {
+	print<<EOM;
+
+Apache FOP was not found.  This is required to convert XHTMl to PDF.
+
+It may be obtained from:
+
+http://xmlgraphics.apache.org/fop/
+
+EOM
+	exit 1;
+  }
+
+if (!$input) {
+  print "Error:  No input XHTML file was specified.\n\n";
+  printhelp(1,1);
+}
+
+my ($base,$path,$type) = fileparse($input,qr/\.(html)/);
+
+# This is the massaged XHTML input file.
+my $tmpfile = "$base.in.html";
+
+# The output file to create.
+$output  = "$base.pdf" if (!$output);
+
+# First, we have to massage the input file a bit.  Mainly, we just change the
+# DTD to point to a local copy so we don't have issues with proxy servers.
+# We do this by slurping the entire file (for speed).
+print "Creating massaged input file.\n";;
+open OUT,">$tmpfile" or die "Could not open $tmpfile for writing.";
+open IN,"$input" or die "Could not open $input for reading.";
+local $/ = undef;
+my $data = <IN>;
+$data =~ s#http://www.w3.org/TR/[^/]+/[Dd][Tt][Dd]/#$uri_base#;
+print OUT $data;
+close IN;
+close OUT;
+
+print "Running XSL-FO processor.\n";
+
+# Add on a max-heap specifier if the command-line parameter was used.
+if ($jvm_max_heap) {
+	push @fop_opts,"-Xmx$jvm_max_heap";
+}
+
+# Make this headless so that we don't get errors if we run under LSF.
+push @fop_opts,"-Djava.awt.headless=true";
+
+my $fop_env_opts = (@fop_opts) ? "FOP_OPTS=\"@fop_opts\"" : undef;
+runcmd "$fop_env_opts $fop -xml $tmpfile -xsl $xslt -pdf $output 2>&1";
+
+unlink $tmpfile if ($cleanup);
+

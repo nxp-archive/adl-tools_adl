@@ -1,0 +1,7 @@
+in37.uadl:40: warning: Instruction defined in class 'sfx' but not ADL:  halt
+in37.uadl:56: Destination state of S_EX1 not defined in this instruction class.
+in37.uadl:55: Destination state of S_EX0 not defined in this instruction class.
+in37.uadl:40: Exec() was never called in any state action for this instruction class.
+in37.uadl:25: No exiting states for pipeline stage mEX
+in37.uadl:4: warning: Instructions access no data memory
+Could not parse in37.uadl

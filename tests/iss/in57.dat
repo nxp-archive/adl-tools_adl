@@ -1,0 +1,64 @@
+#
+# Makes sure that we'll take a decode miss if we can't decode
+# an instruction in a specific table, even if it exists in another
+# table.
+#
+= asm
+
+  .section .text,"ax"
+  .switch  -mvle
+ loop2:
+    se_add  rr9,rr8
+    subf.   r26,r27,r26
+    se_bne  loop2
+
+  .section .text,"ax"
+  .switch -mdefault
+    addis r1,r1,0x1000
+	.long 0
+	.long 0
+	.long 0
+	.long 0
+	.long 0
+	.long 0
+	.long 0
+	.long 0
+  .section .text,"ax"
+  .switch  -mvle
+	se_add rr12,rr11
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x0489 s=2	#	se_add  rr9,rr8
+MD n=Mem ra=0x00000002 d=0x7F5BD051	#	subf.   r26,r27,r26
+MD n=Mem ra=0x00000006 d=0xE2FD s=2	#	se_bne  loop2
+MD n=Mem ra=0x00000008 d=0x3C211000	#	addis r1,r1,0x1000
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000014 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000018 d=0x00000000	#	.long 0
+MD n=Mem ra=0x0000001c d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000020 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0
+MD n=Mem ra=0x0000002c d=0x04BC s=2	#	se_add rr12,rr11
+# </GEN>
+
+CORE n=:P
+
+RD n=GPR i=24 d=30
+RD n=GPR i=25 d=100
+RD n=GPR i=26 d=10
+RD n=GPR i=27 d=1
+
+RD n=PRGINTR d=0x2c
+
+RESULTS
+
+RD n=GPR i=25 d=0x190
+RD n=GPR i=26 d=0
+
+# This is set by the program-interrupt handler when
+# we get the decode miss due to not knowing about
+# BookE instructions.
+RD n=GPR i=28 d=1

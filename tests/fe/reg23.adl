@@ -1,0 +1,26 @@
+//
+// Tests that registers must have valid C identifiers
+// for names.
+// 
+
+define (arch="Loser minippc") {
+  define (reg="funky+1") {
+    regfile = ("weird---->1",10);
+  }
+  define (reg = "funky+2") {
+    regfile = ("weird---->2",20);
+  }
+  define (regfile= "weird---->1") {
+    size = 16;
+  }
+  define (regfile = "weird---->2") {
+    size = 32;
+  }
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+}
+
+define (core=mycore) {
+  archs = "Loser minippc";
+}

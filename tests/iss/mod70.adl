@@ -1,0 +1,57 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Adds dependency tracking information to make sure that this feature works.
+//
+
+#import "mod1.adl"
+
+defmod (core = P) {
+
+  defmod(instr=(add,addi,"andi.",addis)) {
+    dependencies = {
+      GPR = GPR;
+      CR = GPR;
+    };
+  }
+
+  defmod(instr=(addic,"addic.")) {
+    dependencies = {
+      GPR = GPR;
+      XER = GPR;
+      CR = GPR;
+    };
+  }
+  
+  defmod(instr=(lbz,lhz,lwz,lwzx,lmw)) {
+    dependencies = {
+      GPR = Mem;
+    };
+  }
+
+  defmod(instr=(lwzu)) {
+    dependencies = {
+      GPR(RT) = Mem;
+      GPR(RA) = GPR(RA);
+    };
+  }
+
+  defmod(instr=(stb,sth,sthx,stw,stmw,stwx)) {
+    dependencies = {
+      Mem = GPR;
+    };
+  }
+
+  defmod(instr=(stwu)) {
+    dependencies = {
+      Mem = GPR(RS);
+      GPR(RA) = GPR(RA);
+    };
+  }
+
+}

@@ -1,0 +1,50 @@
+
+TEST id=0
+INIT
+
+CORE n=:powerpc
+
+
+TRACE
+
+
+I ea=0x17c168 id=1
+CTIME t=11
+
+I ea=0x17c16c id=2
+CTIME t=12
+
+I ea=0x17c170 id=3
+CTIME t=13
+
+I ea=0x17c174 id=4
+CTIME t=14
+
+I ea=0x17c178 id=5
+CTIME t=15
+
+I ea=0x17c17c id=6
+CTIME t=17
+
+I ea=0x17c180 id=7
+CTIME t=24
+
+I ea=0x17c184 id=8
+CTIME t=25
+
+I ea=0x17c188 id=9
+CTIME t=26
+
+I ea=0x17c18c id=10
+CTIME t=27
+
+I ea=0x17c190 id=11
+CTIME t=28
+
+I ea=0x17c194 id=12
+CTIME t=29
+
+I ea=0x17c198 id=13
+CTIME t=30
+
+RESULTS

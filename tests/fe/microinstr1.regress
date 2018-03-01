@@ -1,0 +1,2 @@
+microinstr1.adl:27: Field is of instruction table type but no reference was specified.
+microinstr1.adl:39: Unknown instruction table: instr_asm

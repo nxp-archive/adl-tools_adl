@@ -1,0 +1,180 @@
+======
+Cores:
+======
+Name:  "P"
+Bit Order:              little endian
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Parallel execution packet size: 8
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  CondExec: 
+    Pseudo:  1
+    Width:   8
+    Size: 1
+    Prefix:  1
+    Indexed:  1 
+    Default value :'0'
+  CondExec_imp_bits__32_32_: [32,32] 
+    Implements:  CondExec
+  Da: 
+    Pseudo:  1
+    Width:   6
+  Da_imp_bits__33_33_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_: [33,33] [30,26] 
+    Implements:  Da
+  Da_imp_bits__35_35_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_: [35,35] [20,16] 
+    Implements:  Da
+  Db: 
+    Pseudo:  1
+    Width:   6
+  Db_imp_bits__34_34_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_: [34,34] [25,21] 
+    Implements:  Db
+  Dn: 
+    Pseudo:  1
+    Width:   6
+  Dn_imp_bits__33_33_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_: [33,33] [30,26] 
+    Implements:  Dn
+  Dn_imp_bits__35_35_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_: [35,35] [20,16] 
+    Implements:  Dn
+  Enc2: 
+    Pseudo:  1
+    Width:   32
+  Enc2_imp_bits__31_0_: [31,0] 
+    Implements:  Enc2
+  HighRegister: 
+    Pseudo:  1
+    Width:   24
+    Size: 3
+    Prefix:  1
+    Indexed:  3 
+    Default value :'0'
+  HighRegister_imp_bits__35_33_: [35,33] 
+    Implements:  HighRegister
+  PR: 
+    Pseudo:  1
+    Width:   3
+    Assembler:  1
+    Disassemble:  prefix
+    Enums:  ( '' 'pr0' ) 'pr1' 'pr2' 'pr3' 'pr4' 'pr5' 'pr6' 'pr7' 
+  PR_Hi_Bits: [instrfield: CondExec]
+    Pseudo:  1
+    Width:   8
+    Size: 1
+    Prefix:  1
+    Indexed:  1 
+    Default value :'0'
+  PR_Hi_Bits_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_x_25_25_x_24_24_x_23_23_: [30,23] 
+    Implements:  PR_Hi_Bits
+  PR_imp_bits__32_32_x_13_13_x_12_12_: [32,32] [13,12] 
+    Implements:  PR
+  SG: 
+    Pseudo:  1
+    Width:   1
+    Reserved:  1
+    Default value :'0'
+  SG_imp_bits__14_14_: [14,14] 
+    Implements:  SG
+  VarInstrOpcode_imp_bits__31_31_x_15_15_x_10_10_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [31,31] [15,15] [10,10] [7,0] 
+  VarInstrOpcode_imp_bits__31_31_x_15_15_x_11_11_x_10_10_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [31,31] [15,15] [11,10] [4,0] 
+  VarInstrOpcode_imp_bits__31_31_x_15_15_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [31,31] [15,15] [11,0] 
+  VarPrefixOpcode_imp_bits__31_31_x_22_22_x_21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_x_15_15_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_: [31,31] [22,15] [9,0] 
+    Prefix:  1
+  n: 
+    Pseudo:  1
+    Width:   2
+  n_imp_bits__9_9_x_8_8_: [9,8] 
+    Implements:  n
+  reserved_imp_bits__13_13_x_12_12_x_11_11_x_10_10_: [13,10] 
+    Reserved:  1
+  reserved_imp_bits__34_34_: [34,34] 
+    Reserved:  1
+  reserved_imp_bits__35_35_x_34_34_x_33_33_: [35,33] 
+    Reserved:  1
+  u16: 
+    Pseudo:  1
+    Width:   16
+  u16_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_x_11_11_: [30,16] [11,11] 
+    Implements:  u16
+  x: 
+    Pseudo:  1
+    Width:   10
+  x_imp_bits__25_25_x_9_9_x_24_24_x_8_8_x_23_23_x_7_7_x_22_22_x_6_6_x_21_21_x_5_5_: [25,25] [9,9] [24,24] [8,8] [23,23] [7,7] [22,22] [6,6] [21,21] [5,5] 
+    Implements:  x
+Instructions:
+  Name:  TwoWords (rank: 100)
+  Width:  36
+  Fetch width:  32
+  Fields:  HighRegister_imp_bits__35_33_ CondExec_imp_bits__32_32_ Enc2_imp_bits__31_0_
+  Pseudo:  1
+  -------------------------------
+  Name:  a (rank: 100)
+  Width:  36
+  Fetch width:  32
+  Attributes:  serial_two_word
+  Fields:  reserved_imp_bits__35_35_x_34_34_x_33_33_(reserved) PR_imp_bits__32_32_x_13_13_x_12_12_ VarInstrOpcode_imp_bits__31_31_x_15_15_x_10_10_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ u16_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_x_11_11_ SG_imp_bits__14_14_(reserved) n_imp_bits__9_9_x_8_8_
+  Action:  {
+}
+  Type:  TwoWords
+  -------------------------------
+  Name:  b (rank: 100)
+  Width:  36
+  Fetch width:  32
+  Attributes:  serial_two_word
+  Fields:  Dn_imp_bits__35_35_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_ reserved_imp_bits__34_34_(reserved) Da_imp_bits__33_33_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_ PR_imp_bits__32_32_x_13_13_x_12_12_ VarInstrOpcode_imp_bits__31_31_x_15_15_x_11_11_x_10_10_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ x_imp_bits__25_25_x_9_9_x_24_24_x_8_8_x_23_23_x_7_7_x_22_22_x_6_6_x_21_21_x_5_5_ SG_imp_bits__14_14_(reserved)
+  Action:  {
+}
+  Type:  TwoWords
+  -------------------------------
+  Name:  c (rank: 100)
+  Width:  36
+  Fetch width:  32
+  Attributes:  serial_two_word
+  Fields:  Dn_imp_bits__35_35_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_ Db_imp_bits__34_34_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_ Da_imp_bits__33_33_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_ PR_imp_bits__32_32_x_13_13_x_12_12_ VarInstrOpcode_imp_bits__31_31_x_15_15_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ SG_imp_bits__14_14_(reserved)
+  Action:  {
+}
+  Type:  TwoWords
+  -------------------------------
+  Name:  d (rank: 100)
+  Width:  36
+  Fetch width:  32
+  Attributes:  serial_two_word
+  Fields:  Da_imp_bits__35_35_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_ Db_imp_bits__34_34_x_25_25_x_24_24_x_23_23_x_22_22_x_21_21_ Dn_imp_bits__33_33_x_30_30_x_29_29_x_28_28_x_27_27_x_26_26_ PR_imp_bits__32_32_x_13_13_x_12_12_ VarInstrOpcode_imp_bits__31_31_x_15_15_x_11_11_x_10_10_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ SG_imp_bits__14_14_(reserved)
+  Action:  {
+}
+  Type:  TwoWords
+  -------------------------------
+  Name:  prefix (rank: 100)
+  Width:  32
+  Attributes:  prefix
+  Fields:  VarPrefixOpcode_imp_bits__31_31_x_22_22_x_21_21_x_20_20_x_19_19_x_18_18_x_17_17_x_16_16_x_15_15_x_9_9_x_8_8_x_7_7_x_6_6_x_5_5_x_4_4_x_3_3_x_2_2_x_1_1_x_0_0_ PR_Hi_Bits_imp_bits__30_30_x_29_29_x_28_28_x_27_27_x_26_26_x_25_25_x_24_24_x_23_23_ SG_imp_bits__14_14_(reserved) reserved_imp_bits__13_13_x_12_12_x_11_11_x_10_10_(reserved)
+  Action:  {
+}
+  Prefix:  1
+  -------------------------------
+
+Instruction Tables:
+prefix(prefix):
+    Mask:  0x807f83ff
+    8356862(7f83fe):  prefix
+serial_two_word:
+    Mask:  0x0800084100000000
+    2048(0000080000000000):      Mask:  0x000000be00000000
+      64(0000008000000000):        Mask:  0x00000000f0000000
+        2(0000000020000000):  c
+        3(0000000030000000):  d
+    2112(0000084000000000):      Mask:  0x00000000f0000000
+      1(0000000010000000):        Mask:  0x0000008000000000
+        0(0000000000000000):  b
+      9(0000000090000000):        Mask:  0x0000000e00000000
+        3(0000000600000000):  a
+-------------------------------
+

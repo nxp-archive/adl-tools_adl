@@ -1,0 +1,24 @@
+#
+# A self-checking test case to make sure that we will obey max instruction
+# counts.  This needs to be run with --mic=10 to pass.
+#
+
+= asm
+
+	addi r1,r1,1
+	.long 0xff888888
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0xFF888888	#	.long 0xff888888
+# </GEN>
+
+CORE n=:P
+
+RD n=NIA d=0x0
+
+RESULTS
+
+RD n=GPR i=1 d=4

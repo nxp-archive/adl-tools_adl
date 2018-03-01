@@ -1,0 +1,95 @@
+#
+# Tests forwarding paths to make sure that their data remains
+# valid for as long as an instruction remains in a given stage.
+#
+
+= asm
+
+  lwzu  r2,0x1000(r1)
+  add   r3,r2,r1
+  # These remaining instructions just make sure that the forwarding path
+  # is emptied so that the entries can be re-used.
+  add   r4,r4,r1
+  add   r4,r4,r1
+  add   r4,r4,r1
+  add   r4,r4,r1
+
+= /asm
+
+CORE n=:P
+
+RD n=NIA     d=0
+
+MD n=Mem ra=0x1000 d=0x2000
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x84411000	#	lwzu  r2,0x1000(r1)
+MD n=Mem ra=0x00000004 d=0x7C620A14	#	add   r3,r2,r1
+MD n=Mem ra=0x00000008 d=0x7C840A14	#	add   r4,r4,r1
+MD n=Mem ra=0x0000000c d=0x7C840A14	#	add   r4,r4,r1
+MD n=Mem ra=0x00000010 d=0x7C840A14	#	add   r4,r4,r1
+MD n=Mem ra=0x00000014 d=0x7C840A14	#	add   r4,r4,r1
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x84411000
+INSTR op=0x84411000                                     asm="lwzu r2,4096(r1)"
+R n=GPR i=1 d=0x00001000
+D n=Mem t=read ea=0x1000 nb=4
+M n=Mem t=read ea=0x1000 ra=0x1000 d=0x00002000
+R n=GPR i=2 d=0x00002000
+ITIME t=1
+CTIME t=5
+
+# This is the key instruction right here:  If the forwarding paths do not work
+# correctly, then we'll get an extra delay here, as the add won't get the
+# forwarding data from FwdMM, written by lwzu in the first cycle it's in mMM.
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c620a14
+INSTR op=0x7c620a14                                     asm="add r3,r2,r1"
+R n=GPR i=3 d=0x00003000
+ITIME t=2
+CTIME t=7
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x7c840a14
+INSTR op=0x7c840a14                                     asm="add r4,r4,r1"
+R n=GPR i=4 d=0x00001000
+ITIME t=4
+CTIME t=8
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x7c840a14
+INSTR op=0x7c840a14                                     asm="add r4,r4,r1"
+R n=GPR i=4 d=0x00002000
+ITIME t=5
+CTIME t=9
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7c840a14
+INSTR op=0x7c840a14                                     asm="add r4,r4,r1"
+R n=GPR i=4 d=0x00003000
+ITIME t=6
+CTIME t=10
+
+I ea=0x14 id=6
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x7c840a14
+INSTR op=0x7c840a14                                     asm="add r4,r4,r1"
+R n=GPR i=4 d=0x00004000
+ITIME t=7
+CTIME t=11
+
+I ea=0x18 id=7
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+ITIME t=8
+CTIME t=12
+
+RESULTS
+
+RD n=GPR i=1 d=0x1000
+RD n=GPR i=2 d=0x2000
+RD n=GPR i=3 d=0x3000
+RD n=GPR i=4 d=0x4000

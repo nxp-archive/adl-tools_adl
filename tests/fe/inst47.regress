@@ -1,0 +1,111 @@
+inst47.adl:128: warning: Item 'andis' was redefined.
+inst47.adl:108: warning:     Previous definition was here.
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  1024
+  Prefix:  r
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "REG1"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  REG1
+Next-instruction-address register:  REG1
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  B: [24,29] 
+  F1: [6,6] 
+    Enums:  '.up' '.down' 
+  F2: [7,7] 
+    Enums:  '.left' '.right' 
+  IMM: 
+    Pseudo:  1
+    Width:   16
+  IMM2: [not used] 
+    Pseudo:  1
+    Width:   16
+  OPCD: [0,5] 
+  R1: [8,11] 
+  R2: [12,15] 
+  R3: [16,19] 
+  R4: [20,23] 
+Instructions:
+  Name:  add (rank: 100)
+  Width:  32
+  Syntax:  "add%p%p %f,%f":   F1 F2 R1 IMM B(IMM > 0xFFFF ? 0 : 1) R3(IMM > 0xFFFF ? IMM >> 16 : IMM)
+  DSyntax:  "add%f%f %f,%f":   F1 F2 R1 IMM(( (( ( R3 << 16 ) > 0xFFFF ? 0 : 1 ) ==  B ) ? ( R3 << 16 ) : ( R3 ) ))
+  Fields:  OPCD(5) F1 F2 R1 R3 B
+  Action:  {
+}
+  -------------------------------
+  Name:  and (rank: 100)
+  Width:  32
+  Syntax:  "and%p%p %f,%f":   F1 F2 R1 IMM R3(( ( IMM & 0xFFFF0000 ) == 0 ) || ( ( IMM & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0) B(( ( IMM & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( IMM & 0xFFFF ) == 0xFFFF ) ? 1 : 0) R2(( ( IMM & 0xFFFF0000 ) == 0 ) ? IMM : ( ( IMM & 0xFFFF ) == 0 ) ? IMM >> 16 : ( ( IMM & 0xFFFF0000 ) == 0xFFFF0000 ) ? ~ IMM : ~ ( IMM >> 16 ))
+  DSyntax:  "and%f%f %f,%f":   F1 F2 R1 IMM(( (( ( ( ( 0xFFFFFFFF ^ R2 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ R2 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  B )  &&  (( ( ( ( 0xFFFFFFFF ^ R2 ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ R2 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  R3 ) ? ( 0xFFFFFFFF ^ R2 ) : (( ( ( ( 0xFFFFFFFF ^ ( R2 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( 0xFFFFFFFF ^ ( R2 << 16 ) ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  B )  &&  (( ( ( ( 0xFFFFFFFF ^ ( R2 << 16 ) ) & 0xFFFF0000 ) == 0 ) || ( ( ( 0xFFFFFFFF ^ ( R2 << 16 ) ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  R3 ) ? ( 0xFFFFFFFF ^ ( R2 << 16 ) ) : (( ( ( ( R2 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) || ( ( ( R2 << 16 ) & 0xFFFF ) == 0xFFFF ) ? 1 : 0 ) ==  B )  &&  (( ( ( ( R2 << 16 ) & 0xFFFF0000 ) == 0 ) || ( ( ( R2 << 16 ) & 0xFFFF0000 ) == 0xFFFF0000 ) ? 1 : 0 ) ==  R3 ) ? ( R2 << 16 ) : ( R2 ) ))
+  Fields:  OPCD(4) F1 F2 R1 R2 R3 B
+  Action:  {
+}
+  -------------------------------
+  Name:  andis (rank: 100)
+  Width:  24
+  Syntax:  "andis%p%p %f%f[%f],%f":   F1 F2 R1 R2 R3 R4 R3(31 - R3)
+  DSyntax:  "andis%f%f %f%f[%f],%f":   F1 F2 R1 R2 R3(31 - R3) R4
+  Fields:  OPCD(6) F1 F2 R1 R2 R3 R4
+  Action:  {
+}
+  -------------------------------
+  Name:  ldschi (rank: 100)
+  Width:  24
+  Syntax:  "ldschi %f,%f,%f":   R1 R2 R3 R3(( R3 >= cia (  ) ) ? ( R3 - cia (  ) ) : ( ~ ( cia (  ) - R3 ) + 1 ))
+  DSyntax:  "ldschi %f,%f,%f":   R1 R2 R3
+  Fields:  OPCD(7) R1 R2 R3
+  Action:  {
+}
+  -------------------------------
+  Name:  mfspr (rank: 100)
+  Width:  24
+  Syntax:  "mfspr%p %f,%f":   F1 R1 R2 R3(( ! R1 ) && ( ( R2 & 1 ) == 1 )) R2(R2 >> 1)
+  DSyntax:  "mfspr%f %f,%f":   F1 R1 R2(R2 << 1)
+  Fields:  OPCD(3) F1 R1 R2 R3
+  Action:  {
+}
+  -------------------------------
+  Name:  mtspr (rank: 100)
+  Width:  24
+  Syntax:  "mtspr%f%f %f,%f,%f":   F1 F2 R1 R2 R3 R3(R3 >> 1)
+  DSyntax:  "mtspr%f%f %f,%f,%f":   F1 F2 R1 R2 R3(R3 << 1)
+  Fields:  OPCD(2) F1 F2 R1 R2 R3
+  Action:  {
+}
+  -------------------------------
+  Name:  pushsch (rank: 100)
+  Width:  24
+  Syntax:  "pushsch%p%p%p%p %f":   F1 F2 R1 R2 R3 R4(R3 != R3)
+  DSyntax:  "pushsch%f%f%f%f %f":   F1 F2 R1 R2 R3
+  Fields:  OPCD(1) F1 F2 R1 R2 R3 R4
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    1(4000000):  pushsch
+    2(8000000):  mtspr
+    3(c000000):  mfspr
+    4(10000000):  and
+    5(14000000):  add
+    6(18000000):  andis
+    7(1c000000):  ldschi
+-------------------------------
+

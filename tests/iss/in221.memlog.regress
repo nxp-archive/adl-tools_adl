@@ -1,0 +1,35 @@
+Instr Fetch:  ifetch: ea: 0x0, ra: 0x0 (4 bytes)
+Instr 0xb8201000:  Mem:  read: ea: 0x1000, ra: 0x1000 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1004, ra: 0x1004 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1008, ra: 0x1008 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x100c, ra: 0x100c (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1010, ra: 0x1010 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1014, ra: 0x1014 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1018, ra: 0x1018 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x101c, ra: 0x101c (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1020, ra: 0x1020 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1024, ra: 0x1024 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1028, ra: 0x1028 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x102c, ra: 0x102c (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1030, ra: 0x1030 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1034, ra: 0x1034 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x1038, ra: 0x1038 (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr 0xb8201000:  Mem:  read: ea: 0x103c, ra: 0x103c (4 bytes)  Original Addr:  1000  Original Size:  64
+Instr Fetch:  ifetch: ea: 0x4, ra: 0x4 (4 bytes)
+Instr 0xba001040:  Mem:  read: ea: 0x1040, ra: 0x1040 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1044, ra: 0x1044 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1048, ra: 0x1048 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x104c, ra: 0x104c (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1050, ra: 0x1050 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1054, ra: 0x1054 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1058, ra: 0x1058 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x105c, ra: 0x105c (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1060, ra: 0x1060 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1064, ra: 0x1064 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1068, ra: 0x1068 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x106c, ra: 0x106c (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1070, ra: 0x1070 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1074, ra: 0x1074 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x1078, ra: 0x1078 (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr 0xba001040:  Mem:  read: ea: 0x107c, ra: 0x107c (4 bytes)  Original Addr:  1040  Original Size:  64
+Instr Fetch:  ifetch: ea: 0x8, ra: 0x8 (4 bytes)

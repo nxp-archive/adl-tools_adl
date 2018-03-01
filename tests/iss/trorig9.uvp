@@ -1,0 +1,276 @@
+format=huvp;
+//------------------------------------------------------------------------------
+test => zen_mpu7 {
+  num     = 1001;
+  ver     = "";
+  genseed = 0x479e3a16;
+  seed    = "";
+  genver  = {};
+
+  z420n3_medc18 => powerpc {
+    I : R {nm="CR"; d=0x2bcd168a;};
+    //   CR0:2 CR1:b CR2:c CR3:d CR4:1 CR5:6 CR6:8 CR7:a EQ:1 GT:0 LT:0 SO:0
+    I : R {nm="CTR"; d=0x37b8df42;};
+    I : R {nm="DAC1"; d=0x22c6bc8e;};
+    I : R {nm="DAC2"; d=0x11fdc416;};
+    I : R {nm="DBCR0"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 DCNT1:0 DCNT2:0 DEVT1:0 DEVT2:0 EDM:0
+    //   FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDM:0
+    //   IRPT:0 RET:0 RST:0 TRAP:0
+    I : R {nm="DBCR1"; d=0x00000000;};
+    //   IAC12M:0 IAC1ER:0 IAC1US:0 IAC2ER:0 IAC2US:0 IAC34M:0 IAC3ER:0 IAC3US:0
+    //   IAC4ER:0 IAC4US:0
+    I : R {nm="DBCR2"; d=0x00000000;};
+    //   DAC12M:0 DAC1ER:0 DAC1LNK:0 DAC1US:0 DAC2ER:0 DAC2LNK:0 DAC2US:0 DVC1BE:0
+    //   DVC1M:0 DVC2BE:0 DVC2M:0
+    I : R {nm="DBSR"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CNT1TRG:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DEVT1:0
+    //   DEVT2:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:0 IDE:0 IRPT:0 MRR:0 PMI:0 RET:0
+    //   TRAP:0 UDE:0 VLES:0
+    I : R {nm="DEAR"; d=0xd322b675;};
+    I : R {nm="EDBCR0"; d=0x00000000;};
+    //   DFT:0 DNH_EN:0 EDM:0
+    I : R {nm="GPR15"; d=0xbbbbbfff;};
+    I : R {nm="GPR31"; d=0x08961ae5;};
+    I : R {nm="GPR5"; d=0xbac45d44;};
+    I : R {nm="GPR7"; d=0xbbbbb000;};
+    I : R {nm="GPR8"; d=0x00f752bc;};
+    I : R {nm="HDBCR0"; d=0x00000009;};
+    //   DSB:1 ISTRM:1
+    I : R {nm="HID0"; d=0x80431800;};
+    //   CICLRDE:0 DCLRCE:1 DCLREE:1 DOZE:0 EMCP:1 ICR:1 MCCLRDE:0 NAP:1 NHR:1
+    //   NOPTI:0 SLEEP:0
+    I : R {nm="HID1"; d=0x00005c00;};
+    //   ATS:0 SYSCTL:5c
+    I : R {nm="IAC1"; d=0xe2ae7364;};
+    //   ADDR:38ab9cd9
+    I : R {nm="IAC2"; d=0xdb73feac;};
+    //   ADDR:36dcffab
+    I : R {nm="IAC3"; d=0x245cc970;};
+    //   ADDR:122e64b8
+    I : R {nm="IAC4"; d=0x03672a14;};
+    //   ADDR:1b3950a
+    I : R {nm="IAC5"; d=0x2966d646;};
+    //   ADDR:14b36b23
+    I : R {nm="IAC6"; d=0x6436d612;};
+    //   ADDR:321b6b09
+    I : R {nm="IAC7"; d=0xfdd11702;};
+    //   ADDR:7ee88b81
+    I : R {nm="IAC8"; d=0x1e9a6746;};
+    //   ADDR:f4d33a3
+    I : R {nm="NIA"; d=0x12345678;};
+    I : R {nm="IVOR0"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR1"; d=0x00000010;};
+    //   OFFSET:1
+    I : R {nm="IVOR10"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR11"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR12"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR13"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR14"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR15"; d=0x00000090;};
+    //   OFFSET:9
+    I : R {nm="IVOR2"; d=0x00000020;};
+    //   OFFSET:2
+    I : R {nm="IVOR3"; d=0x00000030;};
+    //   OFFSET:3
+    I : R {nm="IVOR32"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR33"; d=0x000000a0;};
+    //   OFFSET:a
+    I : R {nm="IVOR34"; d=0x000000b0;};
+    //   OFFSET:b
+    I : R {nm="IVOR35"; d=0x00000070;};
+    //   OFFSET:7
+    I : R {nm="IVOR4"; d=0x00000040;};
+    //   OFFSET:4
+    I : R {nm="IVOR5"; d=0x00000050;};
+    //   OFFSET:5
+    I : R {nm="IVOR6"; d=0x00000060;};
+    //   OFFSET:6
+    I : R {nm="IVOR7"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVOR8"; d=0x00000080;};
+    //   OFFSET:8
+    I : R {nm="IVOR9"; d=0x00000000;};
+    //   OFFSET:0
+    I : R {nm="IVPR"; d=0x4b396a00;};
+    //   ADDR:4b396a
+    I : R {nm="L1CFGPR0"; d=0x28680804;};
+    //   CARCH:0 CWPA:1 DCBSIZE:0 DCFAHA:0 DCFISWA:1 DCLA:0 DCNWAY:1 DCPA:1 DCREPL:3
+    //   DCSIZE:4
+    I : R {nm="L1CFGPR1"; d=0x08680808;};
+    //   ICBSIZE:0 ICECA:1 ICFISWA:1 ICLA:0 ICNWAY:1 ICREPL:3 ICSIZE:8
+    I : R {nm="L1CSR0"; d=0x80098001;};
+    //   DCABT:0 DCE:1 DCEA:0 DCECE:1 DCEI:1 DCINV:0 DCLOC:0 DCLOINV:0 DCWA:1 WDD:0
+    //   WID:2
+    I : R {nm="L1CSR1"; d=0x0000a020;};
+    //   ICABT:0 ICE:0 ICEA:1 ICECE:0 ICEI:1 ICINV:0 ICLOC:1 ICLOINV:0
+    I : R {nm="MAS0"; d=0xe1001130;};
+    //   DEBUG:0 E:0 ESEL:0 G:0 GOVR:0 I:0 INST:1 IOVR:0 IPROT:1 M:0 RO:0 SEL:2 SHD:0
+    //   SW:0 SXSR:1 UAMSK:1 UW:0 UXUR:0 VALID:1 VLE:1 W:1
+    I : R {nm="MAS1"; d=0x00000000;};
+    //   TID:0 TIDMSK:0
+    I : R {nm="MAS2"; d=0xaaaaafff;};
+    //   UPPER_BOUND:aaaaafff
+    I : R {nm="MAS3"; d=0xaaaaa000;};
+    //   LOWER_BOUND:aaaaa000
+    I : R {nm="MCSR"; d=0x00000000;};
+    //   BUS_DRERR:0 BUS_IRERR:0 BUS_WRERR:0 DCDPERR:0 DCTPERR:0 DC_LKERR:0
+    //   DMEM_RPERR:0 DMEM_WRPERR:0 EXCP_ERR:0 ICDPERR:0 ICTPERR:0 IC_LKERR:0 IF:0
+    //   IMEM_PERR:0 LD:0 LDG:0 MAV:0 MCP:0 MEA:0 NMI:0 ST:0 STACK_ERR:0
+    I : R {nm="MPU0CSR0"; d=0x00006061;};
+    //   BYPSR:0 BYPSW:1 BYPSX:1 BYPUR:0 BYPUW:0 BYPUX:0 DRDEN:0 DWDEN:1 IDEN:1
+    //   MPUEN:1 MPUFI:0 TIDCTL:0
+    I : R {nm="MSR"; d=0x00000900;};
+    //   CE:0 DE:0 DS:0 EE:0 FE0:1 FE1:1 FP:0 IS:0 ME:0 PMM:0 PR:0 SPE:0 UCLE:0 WE:0
+    I : R {nm="PID0"; d=0x0000008f;};
+    //   PID:8f
+    I : R {nm="PVR"; d=0x815d0000;};
+    //   Revision:0 Version:815d
+    I : R {nm="SPEFSCR"; d=0x00000000;};
+    //   FDBZ:0 FDBZE:0 FDBZS:0 FG:0 FINV:0 FINVE:0 FINVS:0 FINXE:0 FINXS:0 FOVF:0
+    //   FOVFE:0 FOVFS:0 FRMC:0 FUNF:0 FUNFE:0 FUNFS:0 FX:0
+    I : R {nm="XER"; d=0x20000006;};
+    //   CA:1 CNT:6 OV:0 SO:0
+    I : D {ea=0xbbbbb000; ra=0xbbbbb000; d=0x50caf61e;};
+    I : T {n="MPU0_INST"; t=""; way=0; ep=0x00000000;
+            d={{"DEBUG",0x0},{"G",0x1},{"GOVR",0x0},{"I",0x0},{"INST",0x1},{"IOVR",0x0},
+              {"IPROT",0x0},{"LOWER_BOUND",0x0},{"RO",0x1},{"SR",0x1},{"SW",0x1},
+              {"SX",0x0},{"TID",0x8f},{"TIDMSK",0x0},{"UAMSK",0x4},{"UPPER_BOUND",0xfffffff},
+              {"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},};};
+    I : T {n="MPU0_DATA"; t=""; way=0; ep=0x0bbbb000;
+            d={{"DEBUG",0x0},{"G",0x0},{"GOVR",0x0},{"I",0x0},{"INST",0x0},{"IOVR",0x0},
+              {"IPROT",0x0},{"LOWER_BOUND",0xbbbb000},{"RO",0x0},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TIDMSK",0x0},{"UAMSK",0x4},
+              {"UPPER_BOUND",0xbbbbfff},{"UR",0x0},{"UW",0x0},{"UX",0x0},{"V",0x1},};};
+    E : I {asm="mpuwe "; c=1;
+                   ea=0x12345678; ra=0x12345678; d=0x7e0007a4; op=0x7e0007a4; op_size=32;
+                   // Access granted using MPU0CSR0 bypass.
+                   // Access granted using MPU-Inst[0].
+                  };
+    E : I {asm="mtspr MAS2,15"; c=2;
+                   ea=0x1234567c; ra=0x1234567c; d=0x7df29ba6; op=0x7df29ba6; op_size=32;
+                   // Access granted using MPU0CSR0 bypass.
+                   // Access granted using MPU-Inst[0].
+                   ir={[ t=>"reg", rn=>"MAS2", d=>0xbbbbbfff ],};};
+    E : I {asm="mtspr MAS3,7"; c=3;
+                   ea=0x12345680; ra=0x12345680; d=0x7cf39ba6; op=0x7cf39ba6; op_size=32;
+                   // Access granted using MPU0CSR0 bypass.
+                   // Access granted using MPU-Inst[0].
+                   ir={[ t=>"reg", rn=>"MAS3", d=>0xbbbbb000 ],};};
+    E : I {asm="mpuwe "; c=4;
+                   ea=0x12345684; ra=0x12345684; d=0x7e0007a4; op=0x7e0007a4; op_size=32;
+                   // Access granted using MPU0CSR0 bypass.
+                   // Access granted using MPU-Inst[0].
+                  };
+    E : I {asm="stwx 31,8,5 (EA=0xbbbbb000)"; c=5;
+                   ea=0x12345688; ra=0x12345688; d=0x7fe8292e; op=0x7fe8292e; op_size=32;
+                   tea=0xbbbbb000; 
+                   // Access granted using MPU0CSR0 bypass.
+                   // Access granted using MPU-Inst[0].
+                   // Access granted using MPU0CSR0 bypass.
+                   // Access granted using MPU-Data[0].
+                   ir={[ t=>"store", ra=>0xbbbbb000, d=>0x08961ae5 ],};};
+    R : RES {ea=0x1234568c; ra=0x1234568c;};
+    R : R {nm="CR"; d=0x2bcd168a;};
+    //   CR0:2 CR1:b CR2:c CR3:d CR4:1 CR5:6 CR6:8 CR7:a EQ:1 GT:0 LT:0 SO:0
+    R : R {nm="CTR"; d=0x37b8df42;};
+    R : R {nm="DAC1"; d=0x22c6bc8e;};
+    R : R {nm="DAC2"; d=0x11fdc416;};
+    R : R {nm="DBCR0"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CRET:0 DAC1:0 DAC2:0 DCNT1:0 DCNT2:0 DEVT1:0 DEVT2:0 EDM:0
+    //   FT:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 IAC5:0 IAC6:0 IAC7:0 IAC8:0 ICMP:0 IDM:0
+    //   IRPT:0 RET:0 RST:0 TRAP:0
+    R : R {nm="DBCR1"; d=0x00000000;};
+    //   IAC12M:0 IAC1ER:0 IAC1US:0 IAC2ER:0 IAC2US:0 IAC34M:0 IAC3ER:0 IAC3US:0
+    //   IAC4ER:0 IAC4US:0
+    R : R {nm="DBCR2"; d=0x00000000;};
+    //   DAC12M:0 DAC1ER:0 DAC1LNK:0 DAC1US:0 DAC2ER:0 DAC2LNK:0 DAC2US:0 DVC1BE:0
+    //   DVC1M:0 DVC2BE:0 DVC2M:0
+    R : R {nm="DBSR"; d=0x00000000;};
+    //   BRT:0 CIRPT:0 CNT1TRG:0 CRET:0 DAC1R:0 DAC1W:0 DAC2R:0 DAC2W:0 DEVT1:0
+    //   DEVT2:0 IAC1:0 IAC2:0 IAC3:0 IAC4:0 ICMP:0 IDE:0 IRPT:0 MRR:0 PMI:0 RET:0
+    //   TRAP:0 UDE:0 VLES:0
+    R : R {nm="DEAR"; d=0xd322b675;};
+    R : R {nm="EDBCR0"; d=0x00000000;};
+    //   DFT:0 DNH_EN:0 EDM:0
+    R : R {nm="GPR15"; d=0xbbbbbfff;};
+    R : R {nm="GPR31"; d=0x08961ae5;};
+    R : R {nm="GPR5"; d=0xbac45d44;};
+    R : R {nm="GPR7"; d=0xbbbbb000;};
+    R : R {nm="GPR8"; d=0x00f752bc;};
+    R : R {nm="HDBCR0"; d=0x00000009;};
+    //   DSB:1 ISTRM:1
+    R : R {nm="HID0"; d=0x80431800;};
+    //   CICLRDE:0 DCLRCE:1 DCLREE:1 DOZE:0 EMCP:1 ICR:1 MCCLRDE:0 NAP:1 NHR:1
+    //   NOPTI:0 SLEEP:0
+    R : R {nm="HID1"; d=0x00005c00;};
+    //   ATS:0 SYSCTL:5c
+    R : R {nm="IAC1"; d=0xe2ae7364;};
+    //   ADDR:38ab9cd9
+    R : R {nm="IAC2"; d=0xdb73feac;};
+    //   ADDR:36dcffab
+    R : R {nm="IAC3"; d=0x245cc970;};
+    //   ADDR:122e64b8
+    R : R {nm="IAC4"; d=0x03672a14;};
+    //   ADDR:1b3950a
+    R : R {nm="IAC5"; d=0x2966d646;};
+    //   ADDR:14b36b23
+    R : R {nm="IAC6"; d=0x6436d612;};
+    //   ADDR:321b6b09
+    R : R {nm="IAC7"; d=0xfdd11702;};
+    //   ADDR:7ee88b81
+    R : R {nm="IAC8"; d=0x1e9a6746;};
+    //   ADDR:f4d33a3
+    R : R {nm="NIA"; d=0x1234568c;};
+    R : R {nm="IVPR"; d=0x4b396a00;};
+    //   ADDR:4b396a
+    R : R {nm="L1CSR0"; d=0x80098001;};
+    //   DCABT:0 DCE:1 DCEA:0 DCECE:1 DCEI:1 DCINV:0 DCLOC:0 DCLOINV:0 DCWA:1 WDD:0
+    //   WID:2
+    R : R {nm="L1CSR1"; d=0x0000a020;};
+    //   ICABT:0 ICE:0 ICEA:1 ICECE:0 ICEI:1 ICINV:0 ICLOC:1 ICLOINV:0
+    R : R {nm="MAS0"; d=0xe1001130;};
+    //   DEBUG:0 E:0 ESEL:0 G:0 GOVR:0 I:0 INST:1 IOVR:0 IPROT:1 M:0 RO:0 SEL:2 SHD:0
+    //   SW:0 SXSR:1 UAMSK:1 UW:0 UXUR:0 VALID:1 VLE:1 W:1
+    R : R {nm="MAS1"; d=0x00000000;};
+    //   TID:0 TIDMSK:0
+    R : R {nm="MAS2"; d=0xbbbbbfff;};
+    //   UPPER_BOUND:bbbbbfff
+    R : R {nm="MAS3"; d=0xbbbbb000;};
+    //   LOWER_BOUND:bbbbb000
+    R : R {nm="MCSR"; d=0x00000000;};
+    //   BUS_DRERR:0 BUS_IRERR:0 BUS_WRERR:0 DCDPERR:0 DCTPERR:0 DC_LKERR:0
+    //   DMEM_RPERR:0 DMEM_WRPERR:0 EXCP_ERR:0 ICDPERR:0 ICTPERR:0 IC_LKERR:0 IF:0
+    //   IMEM_PERR:0 LD:0 LDG:0 MAV:0 MCP:0 MEA:0 NMI:0 ST:0 STACK_ERR:0
+    R : R {nm="MPU0CSR0"; d=0x00006061;};
+    //   BYPSR:0 BYPSW:1 BYPSX:1 BYPUR:0 BYPUW:0 BYPUX:0 DRDEN:0 DWDEN:1 IDEN:1
+    //   MPUEN:1 MPUFI:0 TIDCTL:0
+    R : R {nm="MSR"; d=0x00000900;};
+    //   CE:0 DE:0 DS:0 EE:0 FE0:1 FE1:1 FP:0 IS:0 ME:0 PMM:0 PR:0 SPE:0 UCLE:0 WE:0
+    R : R {nm="PID0"; d=0x0000008f;};
+    //   PID:8f
+    R : R {nm="SPEFSCR"; d=0x00000000;};
+    //   FDBZ:0 FDBZE:0 FDBZS:0 FG:0 FINV:0 FINVE:0 FINVS:0 FINXE:0 FINXS:0 FOVF:0
+    //   FOVFE:0 FOVFS:0 FRMC:0 FUNF:0 FUNFE:0 FUNFS:0 FX:0
+    R : R {nm="XER"; d=0x20000006;};
+    //   CA:1 CNT:6 OV:0 SO:0
+    R : D {ea=0xbbbbb000; ra=0xbbbbb000; d=0x08961ae5;};
+    R : T {n="MPU0_INST"; t=""; way=0; ep=0x00000000;
+            d={{"DEBUG",0x0},{"G",0x1},{"GOVR",0x0},{"I",0x0},{"INST",0x1},{"IOVR",0x0},
+              {"IPROT",0x0},{"LOWER_BOUND",0x0},{"RO",0x1},{"SR",0x1},{"SW",0x1},
+              {"SX",0x0},{"TID",0x8f},{"TIDMSK",0x0},{"UAMSK",0x4},{"UPPER_BOUND",0xfffffff},
+              {"UR",0x0},{"UW",0x0},{"UX",0x1},{"V",0x1},};};
+    R : T {n="MPU0_DATA"; t=""; way=0; ep=0x0bbbb000;
+            d={{"DEBUG",0x0},{"G",0x0},{"GOVR",0x0},{"I",0x0},{"INST",0x0},{"IOVR",0x0},
+              {"IPROT",0x0},{"LOWER_BOUND",0xbbbb000},{"RO",0x0},{"SR",0x1},
+              {"SW",0x1},{"SX",0x1},{"TID",0x0},{"TIDMSK",0x0},{"UAMSK",0x4},
+              {"UPPER_BOUND",0xbbbbfff},{"UR",0x0},{"UW",0x0},{"UX",0x0},{"V",0x1},};};
+  } // powerpc
+} // zen_mpu7

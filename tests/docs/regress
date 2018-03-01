@@ -1,0 +1,487 @@
+#!/usr/bin/env perl 
+# -- -*-perl-*-a
+#
+# Tests used in this regression.
+#
+# Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+#
+# You may distribute under the terms of the Artistic License, as specified in
+# the COPYING file.
+#
+
+use FindBin;
+use lib "$FindBin::RealBin/../../scripts";
+use lib "../../scripts";
+use rdriver;
+use regress_utils;
+use adl_config;
+use strict;
+use Data::Dumper;
+
+use vars qw($src $designs $adldb);
+
+# We do want to run these in separate directories so that we can run them in
+# parallel w/o conflicts.
+setupForSeparateDirs();
+
+my $cmd   = "$root/scripts/adl2doc --prefix=$root --no-html";
+my $makedb = "$root/misc/make-db ";
+
+my $iss_src = "$src/../iss";
+
+# top_srcdir is used by adl-db to find its library files, so if this isn't set,
+# we need to set it based upon the srcdir variable, which is exported by Make.
+if ( ! exists $ENV{top_srcdir} ) {
+  $ENV{top_srcdir} = "$src/../..";
+}
+
+#
+# IMPORTANT: Add to this list only the tests which reference models which may be
+# released as open source.
+#
+my @Tests = (
+	{
+		cmd => "$cmd $src/doc1.adl -t 'Mini Core Documentation' --print-source-location --no-full-path",
+		checker => sub { file_diff("doc1.rst","$src/doc1.rst.regress"); },
+	},
+	# Same thing, but make sure that the output option works correctly.
+	{
+		cmd => "$cmd $src/doc1.adl -t 'Mini Core Documentation' --print-source-location --no-full-path --output=otest",
+		checker => sub { file_diff("otest.rst","$src/doc1.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc2.adl -t 'P Core' --warn-redefine",
+		checker => sub { file_diff("doc2.rst","$src/doc2.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc2.adl -o doc2-no-sections -t 'P Core' --no-registers --no-rf --no-if --no-instr --no-iba --no-ibb --no-exc --no-caches " .
+				"--no-mem --no-eb --no-contexts --no-mmu --no-clh --no-helper-functions",
+				checker => sub { file_diff("doc2-no-sections.rst","$src/doc2-no-sections.rst.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --orig-alias-fmt $src/doc1.adl > doc1.pl",
+		checker => sub { 
+			# Make sure that we can parse it.
+			no strict;
+			eval `cat doc1.pl` or die $@;
+			file_diff("doc1.pl","$src/doc1.pl.regress");
+		},	      			  
+	},
+	{
+		cmd => "$makedb --type=xml --orig-alias-fmt $src/doc1.adl > doc1.xml",
+		checker => sub { file_diff("doc1.xml","$src/doc1.xml.regress"); },
+	},
+    # Check if instruction-type instruction fields are properly processed
+	{
+		cmd => "$makedb --type=xml $src/microinstr11.adl > microinstr11.xml",
+		checker => sub { file_diff("microinstr11.xml","$src/microinstr11.xml.regress"); },
+	},
+	{
+		cmd => "$cmd $src/microinstr11.adl",
+		checker => sub { file_diff("microinstr11.rst","$src/microinstr11.rst.regress"); },
+	},
+	# Check if field property unsigned_upper_bound is properly processed
+	{
+		cmd => "$makedb --type=xml $src/doc37.adl > doc37.xml",
+		checker => sub { file_diff("doc37.xml","$src/doc37.xml.regress"); },
+	},
+  {
+		cmd => "$cmd $src/doc37.adl",
+		checker => sub { file_diff("doc37.rst","$src/doc37.rst.regress"); },
+	}, 
+	# Check if the number of bits the relocation value is right-shifted before it is encoded is specified
+	{
+		cmd => "$makedb --type=xml $src/doc39.adl > doc39.xml",
+		checker => sub { file_diff("doc39.xml","$src/doc39.xml.regress"); },
+	},
+  {
+		cmd => "$cmd $src/doc39.adl",
+		checker => sub { file_diff("doc39.rst","$src/doc39.rst.regress"); },
+	},  
+	{
+		cmd => "$src/regfile-query.pl $makedb $src/doc1.adl cores:P SPR > spr-query.out",
+		checker => sub { file_diff("spr-query.out","$src/spr-query.regress"); },
+	},
+	{
+		cmd => "$src/xmltest.pl $makedb $src/doc1.adl > xml-parse1.out",
+		checker => sub { file_diff("xml-parse1.out","$src/xml-parse1.regress"); },
+	},
+	{			 
+		cmd => "$src/xmltest.pl $makedb $src/doc4.adl > xml-parse4.out",
+		checker => sub { file_diff("xml-parse4.out","$src/doc4.regress"); },
+	},
+	{
+		cmd => "$src/xmltest.pl $makedb $src/doc5.adl > xml-parse5.out",
+		checker => sub { file_diff("xml-parse5.out","$src/xml-parse5.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc5.adl --title='DOC5 ISS' --subtitle='Subtitle One' --subtitle='Subtitle Two' --subtitle='Subtitle Three'",
+		checker => sub { file_diff("doc5.rst","$src/doc5.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc6.adl",
+		checker => sub { file_diff("doc6.rst","$src/doc6.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc6.adl --orig-action",
+		checker => sub { file_diff("doc6.rst","$src/doc6-orig.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc7.adl",
+		checker => sub { file_diff("doc7.rst","$src/doc7.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc8.adl --no-instr-prefix-bits --no-ops-in-affect-tables --proportional-subfields",
+		checker => sub { file_diff("doc8.rst","$src/doc8.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc9.adl --no-syntax-prefix-fields",
+		checker => sub { file_diff("doc9.rst","$src/doc9-no-spf.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc9.adl",
+		checker => sub { file_diff("doc9.rst","$src/doc9.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc11.adl --config=$src/doc11.cfg",
+		checker => sub { file_diff("doc11.rst","$src/doc11.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc12.adl",
+		checker => sub { file_diff("doc12.rst","$src/doc12.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc13.adl",
+		checker => sub { file_diff("doc13.rst","$src/doc13.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc14.adl",
+		checker => sub { file_diff("doc14.rst","$src/doc14.rst.regress"); },
+	},
+	# Make sure that we can use an include path with adl2doc.
+	{
+		cmd => "$cmd $src/doc31.adl -I=$src/../iss --no-instr --no-memories --no-mmu --no-instruction-fields  --no-exceptions --no-helper-functions",
+		checker => sub { file_diff("doc31.rst","$src/doc31.rst.regress"); },
+	},
+	# Make sure that external resources are properly displayed.
+	{
+		cmd => "$cmd $src/doc33.adl",
+		checker => sub { file_diff("doc33.rst","$src/doc33.rst.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc34.adl",
+		checker => sub { file_diff("doc34.rst","$src/doc34.rst.regress"); },
+	},
+	# Testing of delayed-write documentation.
+	{
+		cmd => "$cmd $src/doc38.adl",
+		checker => sub { file_diff("doc38.rst","$src/doc38.rst.regress"); },
+	},
+	{
+		cmd => "$makedb --used-only --type=perl $src/doc13.adl > doc13.pl",
+		checker => sub { file_diff("doc13.pl","$src/doc13.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl $src/doc15.adl > doc15.pl",
+		checker => sub { file_diff("doc15.pl","$src/doc15.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields $src/doc18.adl > doc18.pl",
+		checker => sub { file_diff("doc18.pl","$src/doc18.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc19.adl > doc19.pl",
+		checker => sub { file_diff("doc19.pl","$src/doc19.pl.regress"); },
+	},
+	{
+		cmd => "$cmd $src/doc20.adl -I=$iss_src --no-unused-instrs ",
+		checker => sub { file_diff("doc20.rst","$src/doc20.rst.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc21.adl --config=$src/doc21.cfg > doc21.pl",
+		checker => sub { file_diff("doc21.pl","$src/doc21.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc22.adl --config=$src/doc22.cfg > doc22.pl",
+		checker => sub { file_diff("doc22.pl","$src/doc22.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc23.adl --config=$src/doc23.cfg > doc23.pl",
+		checker => sub { file_diff("doc23.pl","$src/doc23.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc24.adl --config=$src/doc24.cfg > doc24.pl",
+		checker => sub { file_diff("doc24.pl","$src/doc24.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc25.adl --config=$src/doc25.cfg > doc25.pl",
+		checker => sub { file_diff("doc25.pl","$src/doc25.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc26.adl --config=$src/doc26.cfg > doc26.pl",
+		checker => sub { file_diff("doc26.pl","$src/doc26.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc27.adl --config=$src/doc27.cfg > doc27.pl",
+		checker => sub { file_diff("doc27.pl","$src/doc27.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc28.adl > doc28.pl",
+		checker => sub { file_diff("doc28.pl","$src/doc28.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-reg-fields --expand-exprs $src/doc29.adl --config=$src/doc29.cfg > doc29.pl",
+		checker => sub { file_diff("doc29.pl","$src/doc29.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl --used-only $src/doc32.adl > doc32.pl",
+		checker => sub { file_diff("doc32.pl","$src/doc32.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl $src/doc33.adl > doc33.pl",
+		checker => sub { file_diff("doc33.pl","$src/doc33.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl $src/doc34.adl > doc34.pl",
+		checker => sub { file_diff("doc34.pl","$src/doc34.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl $src/doc35.adl > doc35.pl",
+		checker => sub { file_diff("doc35.pl","$src/doc35.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl $src/doc38.adl > doc38.pl",
+		checker => sub { file_diff("doc38.pl","$src/doc38.pl.regress"); },
+	},
+	{
+		cmd => "$makedb --type=perl $src/doc40.adl > doc40.pl",
+		checker => sub { file_diff("doc40.pl","$src/doc40.pl.regress"); },
+	},	
+
+	#
+	# adl-db has been deprecated and is no longer regressed.
+	#
+	
+	# passtest("$src/doc3.pl","string =~ /d/","name:10,string:40","doc3-attr1_q.txt"),
+	# passtest("$src/doc3.pl","string =~ /d/","name:10,string:40","doc3-attr1_q.html"),
+	
+	# passtest("$src/doc3.pl -M","integer > 3 || intlist == 2","name:10,string:10,integer:10,intlist:10,strlist:10,attrs:30","doc3-attr2_q.txt"),
+	# passtest("$src/doc3.pl -M","integer > 3 || intlist == 2","name:10,string:10,integer:10,intlist:10,strlist:10,attrs:30","doc3-attr2_q.html"),
+
+	# passtest("$src/doc3.pl -M","inputs =~/GPR/  && outputs =~/F2/","name:10,inputs:30,outputs:30","doc3-inout_q.txt"),
+	# passtest("$src/doc3.pl -M","inputs =~/GPR/  && outputs =~/F2/","name:10,inputs:30,outputs:30","doc3-inout_q.html"),
+
+	# passtest("$src/doc3.pl -M","blk eq 'dalu' || prefix || pseudo || type eq 'I3'",              "name:20,block:5,prefix:5,pseudo:5,type:5","doc3-small1_q.txt"),
+	# passtest("$src/doc3.pl -M","blk eq 'dalu' || prefix || pseudo || type eq 'I3'",               "name:20,block:5,prefix:5,pseudo:5,type:5","doc3-small1_q.html"),
+	
+	# passtest("$src/doc3.pl -M","iname =~/^add/ || helpers =~/sincos/","name:20,width:5,action:40","doc3-small2_q.txt"),
+	# passtest("$src/doc3.pl -M","iname =~/^add/ || helpers =~/sincos/","name:20,width:5,action:40","doc3-small2_q.html"),
+
+	# passtest("$src/doc1.adl", "1","name:30,enc:40,action:30","doc1-bigendian1_q.txt"),
+	# passtest("$src/doc1.adl", "1","name:30,enc:40,action:30","doc1-bigendian1_q.html"),
+
+	# passtest("$src/doc1.adl -expand='F1,RS'", "1","name:30,fields:40,syntax:30","doc1-expand4_q.txt"),
+	# passtest("$src/doc1.adl -expand='F1,RS'", "1","name:30,fields:40,syntax:30","doc1-expand4_q.html"),
+
+	# passtest("$src/doc1.adl --object=instrs","syntax !~/_family/","syntax:20,sources:20,destinations:20,inputs:20,outputs:20","doc1-sd.txt"),
+	# passtest("$src/doc1.adl --object=instrs","syntax !~/_family/","syntax:20,sources:20,destinations:20,inputs:20,outputs:20","doc1-sd.html"),
+
+	# passtest("$src/doc11.adl --object=instrs","1","syntax:30,sources:20,destinations:20,parent_action:20,attrs:10","doc11-q1.txt"),
+	# passtest("$src/doc11.adl --object=instrs --orig-action --used-reg-fields","1","syntax,inputs,outputs,parent_action","doc11-q2.txt"),
+	# passtest("$src/doc11.adl --object=instrs","1","syntax:30,sources:20,destinations:20,parent_action:20","doc11.csv"),
+	# passtest("$src/doc11.adl --enc-type=fields --object=instrs","1","syntax,enc:80","doc11-q3.txt"),
+	# passtest("$src/doc11.adl --enc-type=bin-fields --enc-sep='_' --object=instrs","1","syntax,enc:80","doc11-q4.txt"),
+	# passtest("$src/doc11.adl --enc-type=long-fields --object=instrs","1","syntax,enc:150","doc11-q5.txt"),
+	# passtest("$src/doc11.adl --object=instrs","1","syntax,extracted-doc-op:50","doc11-q6.txt"),
+	# passtest("$src/doc11.adl --object=instrfields","1","name:10,attrs:10,doc:40","doc11-q7.txt"),
+
+	# # Test is_alias tests with new and old database format.
+	# passtest("$src/doc11.adl",                             "is_alias =~ /_family/","","doc11-a1.txt"),
+	# passtest("$src/doc11.adl --mdflags='--orig-alias-fmt'","is_alias =~ /_family/","","doc11-a1.txt"),
+
+	# passtest("$src/doc13.adl --enc-type=bin-fields --object=instrs","syntax !~ /_family|Word/","syntax,enc:80","doc13-q1.txt"),
+	# passtest("$src/doc13.adl --enc-type=long-fields --object=instrs","syntax !~ /_family|Word/","syntax,enc:120","doc13-q2.txt"),
+	# passtest("$src/doc13.adl --enc-type=bin-fields --no-instr-prefix-bits --object=instrs","syntax !~ /_family|Word/","syntax,enc:80","doc13-q3.txt"),
+
+	# passtest("$src/doc14.adl --used-reg-fields --object=instrs","1","syntax:30,inputs:20,outputs:20,parent_action:20,attrs:10","doc14-q1.txt"),
+	# passtest("$src/doc14.adl --object=instrs","syntax !~ /_family/","syntax,extracted-doc-op:55","doc14-q2.txt"),
+	# passtest("$src/doc14.adl --used-reg-fields --object=instrs","syntax !~ /_family/","syntax:30,inputs:20,outputs:20,sources:10,destinations:10,parent_action:20,attrs:10","doc14-q3.txt"),
+
+	# passtest("$src/doc15.adl --object=instrs ","first eq 'nop' or second > 5","name:50,second:5,attrs:30","doc15-q1.txt"),
+	# # Note:  Also testing that an unknown attribute doesn't cause a problem.
+	# passtest("$src/doc15.adl --object=instrs ","exists first && \\!(exists foobar)","name:50,first:5,attrs:30","doc15-q2.txt"),
+	# passtest("$src/doc15.adl --object=instrs ","first","name:50,first:5,attrs:30","doc15-q3.txt"),
+
+	# passtest("$src/doc16.adl --object=instrs --used-reg-fields","1","syntax,inputs","doc16-q1.txt"),
+
+	# passtest("$src/doc17.adl --object=instrs --enc-type=fields","syntax !~ /family/","syntax:20,enc:80","doc17-q1.txt"),
+	# passtest("$src/doc17.adl --object=instrs --enc-type=bin-fields","syntax !~ /family/","syntax:20,enc:80","doc17-q2.txt"),
+	# passtest("$src/doc17.adl --object=instrs --enc-type=long-fields","syntax !~ /family/","syntax:20,enc:80","doc17-q3.txt"),
+
+	# passtest("$src/doc30.adl","exists store_word","","doc30-q1.txt"),
+	# passtest("$src/doc30.adl",'attrs =~ /store_word/',"","doc30-q1.txt"),
+	# passtest("$src/doc30.adl","attrs eq 'store_word'","","doc30-q1.txt"),
+	# passtest("$src/doc30.adl","attrs =~ /(load|store)_.*/","","doc30-q2.txt"),
+	# passtest("$src/doc30.adl --exclude='outputs=~/XER|CR/'","outputs=~/GPR/","name:20,outputs:20","doc30-q3.txt"),
+
+	# # Test that we can use explicit unrolling with the @ operator.
+	# passtest("$src/doc36.adl --used-reg-fields --unroll-arrays=off",'@inputs =~ /CR\.CR1/ && @inputs =~ /CR\.CR2/',"name:5,inputs:10,outputs:10","doc36-q1.txt"),
+	# passtest("$src/doc36.adl --used-reg-fields --unroll-arrays=off",'@outputs !~ /GPR/ && @inputs =~ /CR\.CR1/ && @inputs =~ /CR\.CR2/',"name:5,inputs:10,outputs:10","doc36-q2.txt"),
+		
+	# # Same thing, using implicit unrolling.
+	# passtest("$src/doc36.adl --used-reg-fields",'inputs =~ /CR\.CR1/ && inputs =~ /CR\.CR2/',"name:5,inputs:10,outputs:10","doc36-q1.txt"),
+	# passtest("$src/doc36.adl --used-reg-fields",'outputs !~ /GPR/ && inputs =~ /CR\.CR1/ && inputs =~ /CR\.CR2/',"name:5,inputs:10,outputs:10","doc36-q2.txt"),
+
+	# # Same as above, testing for whitespace issues with regex operator detection with array fields.
+	# passtest("$src/doc36.adl --used-reg-fields",'inputs=~/CR\.CR1/&&inputs=~/CR\.CR2/',"name:5,inputs:10,outputs:10","doc36-q1.txt"),
+	# passtest("$src/doc36.adl --used-reg-fields",'outputs!~/GPR/&&inputs=~/CR\.CR1/&&inputs=~/CR\.CR2/',"name:5,inputs:10,outputs:10","doc36-q2.txt"),
+
+		);
+
+#
+# IMPORTANT: Add any tests here which use models which are considered
+# proprietary/confidential.
+#
+
+
+if (! $is_external_release ) {
+  my @ProprietaryTests = (		
+
+	#
+	# adl-db has been deprecated and is no longer regressed.
+	#
+	
+#       passtest("$src/sc3400.pl","name =~/add/i","name:40","sc-name_q.txt"),
+#       passtest("$src/sc3400.pl","name =~/add/i","name:40","sc-name_q.html"),
+  
+#       passtest("$src/sc3400.pl","fields =~/^FFF/","name:25,iname:20,fields:40","sc-fields_q.txt"),
+#       passtest("$src/sc3400.pl","fields =~/^FFF/","name:25,iname:20,fields:40","sc-fields_q.html"),
+
+#       passtest("$src/sc3400.pl","1","name:20,iname:20,bits:40","sc-bits_q.txt"),
+#       passtest("$src/sc3400.pl","1","name:20,iname:20,bits:40","sc-bits_q.html"),
+
+# #      passtest("$src/sc3400.pl","name =~ /^mpy/i && fields->ref eq 'D'","name:20,enc:60","sc-enc_q.txt"),
+# #      passtest("$src/sc3400.pl","name =~ /^mpy/i && fields->ref eq 'D'","name:20,enc:60","sc-enc_q.html"),
+
+#       passtest("$src/sc3400.pl","is_alias","name:20,action:40","sc-alias1_q.txt"),
+#       passtest("$src/sc3400.pl","is_alias","name:20,action:40","sc-alias1_q.html"),
+
+#       passtest("$src/sc3400.pl","is_alias eq 'BMSET_W__u16__a16_'","name:20,alias:40","sc-alias2_q.txt"),
+#       passtest("$src/sc3400.pl","is_alias eq 'BMSET_W__u16__a16_'","name:20,alias:40","sc-alias2_q.html"),
+
+#       passtest("$src/sc3400.pl  --expand='JJJJJ,FFF'", "name eq 'MPY_Da_Db_Dn'","name:40,syntax:40","sc-expand1_q.txt"),
+#       passtest("$src/sc3400.pl  --expand='JJJJJ,FFF'", "name eq 'MPY_Da_Db_Dn'","name:40,syntax:40","sc-expand1_q.html"),
+
+
+#       passtest("$src/sc3400.pl  --expand='MM,RRR,jjj'", "fields eq 'MM'","name:40,syntax:40","sc-expand2_q.txt"),
+#       passtest("$src/sc3400.pl  --expand='MM,RRR,jjj'", "fields eq 'MM'","name:40,syntax:40","sc-expand2_q.html"),
+      
+#       passtest("$src/sc3400.pl  --expand='RRRR,rrrr'", "fields->ref eq 'RxTable'","name:40,syntax:40","sc-expand3_q.txt"),
+#       passtest("$src/sc3400.pl  --expand='RRRR,rrrr'", "fields->ref eq 'RxTable'","name:40,syntax:40","sc-expand3_q.html"),
+ 
+#       passtest("$src/sc3400.pl  --object=instrfields --expand", "pseudo","","sc-expand5_q.txt"),
+#       passtest("$src/sc3400.pl  --object=instrfields --expand", "pseudo","","sc-expand5_q.html"),
+
+#       passtest("$src/sc3400.pl  --object=regs", "exists entries","name:10,entries:10,entries->reg:12,entries->syntax:40","sc-reg_q.txt"),
+#       passtest("$src/sc3400.pl  --object=regs", "exists entries","name:10,entries:10,entries->reg:12,entries->syntax:40","sc-reg_q.html"),
+
+     {
+			 cmd => "$cmd $src/zen0.adl -t 'Zen Core'",
+			 checker => sub { file_diff("zen0.rst","$src/zen0.rst.regress"); },
+     },
+ );
+
+  @Tests = (@Tests,@ProprietaryTests);
+}
+
+# Seems to be problems with newer versions of Prest, so comment this out until we figure out what the problem is.
+# if ( $prest ) {
+# 	push @Tests,(
+# 		{
+# 			cmd     => "$cmd --html --hl-level=2 $src/doc10.adl",
+# 			checker => \&check_doc10,
+# 			temps   => [ qw( doc10.rst doc10.html ) ],
+# 		}
+# 	);
+# }
+
+##
+## Entry point into the regression code.
+## 
+doTest(\@Tests);
+
+##
+## </HELPERS>
+##
+
+##
+## Place test routines here.
+## <TESTS>
+##
+
+# Test for adl-db.
+# Arg0: input file (in perl or adl format)
+# Arg1: Query
+# Arg2: format of output
+# Arg3: Name of output file.
+sub passtest($) {
+  my ($infile,$cond,$format,$file) = @_;
+  return {
+    cmd      => "$adldb --no-header $infile -c=\"$cond\" -f=\"$format\" -o=$file",
+    checker  => sub { file_diff("$file","$src/$file.regress",1,'database report created')}, 
+		temps    => [ $file ],
+  };
+}
+
+# Test html generation with highlight-level 2.
+# We just do a few perfunctory tests to make sure that 
+sub check_doc10 {
+
+	# Slurp in the entire input file.
+	local $/ = undef;
+	open IN,"doc10.html" or die "Could not open input file doc10.html";
+	my $data = <IN>;
+	close IN;
+
+	# Now we do some miscellaneous regular expression matches to check to make
+	# sure that expected subsitutions were performed.
+	my ($got_bits,$got_zero,$got_le,$got_ge,$got_ne,$got_xor,$got_lo,$got_la,$got_rf,$got_r);
+
+	$got_bits = 1 if ($data =~ m#<span class="type-name">bits</span><sub>\s*32\s*</sub># );
+
+	$got_zero = 1 if ($data =~ m#<span class="keyword">\s*0\s*</span><sub>\s*2\s*</sub># );
+
+	$got_le = 1 if ($data =~ m#<math title="leq" xmlns="&mathml;"><mstyle><mo>&le;</mo></mstyle></math># );
+
+	$got_ge = 1 if ($data =~ m#<math title="geq" xmlns="&mathml;"><mstyle><mo>&ge;</mo></mstyle></math># );
+
+	$got_ne = 1 if ($data =~ m#<math title="ne" xmlns="&mathml;"><mstyle><mo>&ne;</mo></mstyle></math># );
+
+	$got_xor = 1 if ($data =~ m#<math title="oplus" xmlns="&mathml;"><mstyle><mo>&oplus;</mo></mstyle></math># );
+
+	$got_lo = 1 if ($data =~ m#<math title="vee" xmlns="&mathml;"><mstyle><mo>&or;</mo></mstyle></math># );
+
+	$got_la = 1 if ($data =~ m#<math title="wedge" xmlns="&mathml;"><mstyle><mo>&and;</mo></mstyle></math># );
+
+	$got_rf = 1 if ($data =~ m#<span class="variable-name">\s*GPR\s*</span><sub>\s*RT\s*</sub># );
+
+	$got_r = 1 if ($data =~ m#<span class="variable-name">\s*NIA\s*</span># );
+
+	my $fail = 0;
+	print "Did not find expected 'bits' transformation (fail ",++$fail,").\n" unless ($got_bits);
+	print "Did not find expected 'zero' transformation (fail ",++$fail,").\n" unless ($got_zero);
+	print "Did not find expected <= transformation (fail ",++$fail,").\n" unless ($got_le);
+	print "Did not find expected >= transformation (fail ",++$fail,").\n" unless ($got_ge);
+	print "Did not find expected != transformation (fail ",++$fail,").\n" unless ($got_ne);
+	print "Did not find expected ^ transformation (fail ",++$fail,").\n" unless ($got_xor);
+	print "Did not find expected || transformation (fail ",++$fail,").\n" unless ($got_lo);
+	print "Did not find expected && transformation (fail ",++$fail,").\n" unless ($got_la);
+	print "Did not find expected regfile index transformation (fail ",++$fail,").\n" unless ($got_rf);
+	print "Did not find expected register transformation (fail ",++$fail,").\n" unless ($got_r);
+
+	die if ($fail);
+}
+
+##
+## </TESTS>
+##

@@ -1,0 +1,5 @@
+ctx3.adl:33: No argument supplied for context access.
+ctx3.adl:47: Context index of 3 is out of range [0,1].
+ctx3.adl:60: TA0 is not a member of the context thread
+ctx3.adl:73: FOO is a pseudo register and thus may not be accessed directly through a context.
+ctx3.adl:79: Not all resources were covered by the mem_layout and mem_omit lists:  CIA CTR LR XER

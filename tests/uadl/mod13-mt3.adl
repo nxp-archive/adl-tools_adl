@@ -1,0 +1,64 @@
+//
+// Turns mod13 into a 4-thread device, with an extra level of hierarchy to
+// represent the thread grouping.
+//
+
+// We have 4 total threads, spread across the system hierarchy.
+#define ThreadCount 4
+
+#define UADL
+
+#import "mod13.adl"
+
+// Number of SMT threads in the system.
+#define NumSmtThreads 2
+
+// Number of fused-core threads in the system (each fused core contains
+// NumSmtThreads of SMT threads).
+#define NumFcThreads 2
+
+define (sys=PMT) {
+  type="PowerPC";
+  define (sys=SMT) {
+    define (core = Thread) {
+      type="Thread";
+      archs = (MiniPPC,mt);
+
+      define (reg=CfxIndex) {}
+      
+      bool cfxProceed(unsigned tid,unsigned numthreads)
+      {
+        if (CfxIndex == tid) {
+          CfxIndex = (CfxIndex + 1) % numthreads;
+          return true;
+        }
+        return false;
+      }
+
+      define (reg=SmtIndex) {}
+
+      bool smtProceed(unsigned tid,bool has_other,unsigned numthreads)
+      {
+        if (!has_other || SmtIndex == (tid % numthreads)) {
+          SmtIndex = (SmtIndex + 1) % numthreads;
+          return true;
+        }
+        return false;
+      }
+    }
+
+    define (shared) {
+      regs = SmtIndex;
+    }
+
+    Thread t[NumSmtThreads];
+  }
+
+  define (shared) {
+    regs = (HID0,TEN,CfxIndex);
+    regfiles = (NIAs,TCR,FOOs,BARs,MSRs);
+    parms = Mode;
+  }
+
+  SMT s[NumFcThreads];
+}

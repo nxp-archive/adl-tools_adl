@@ -1,0 +1,276 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// This model is only meant to demonstrate the use of the ADL language and does
+// not represent any actual Freescale product.
+//
+// THIS MODEL IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
+// INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND
+// FITNESS FOR A PARTICULAR PURPOSE.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//--------------------------------------------------------------------------- 
+//
+// An example 32-bit Power ISA microprocessor with a 2-level cache: A split L1
+// and a unified L2, plus a simple variable-page-size MMU.
+//
+//---------------------------------------------------------------------------
+
+#ifndef DisableL2
+#  define HaveL2
+#endif
+
+#define regSize 32
+#define defaultOffset 32
+
+#import "power.adl"
+
+define (arch = generic32_cache) {
+
+  // On reset, we start at top of memory.
+  defmod (reg=NIA) {
+    reset = 0xfffffffc;
+  }
+
+  define (reg=CCR) {
+    """
+Cache control register.
+    """;
+    define (field=L1E) {
+      bits = 0;
+    }
+    define (field=L2E) {
+      bits = 1;
+    }
+    define (field=WT) {
+      bits = 20;
+    }
+  }
+
+  define (reg=PID0) {
+  }
+
+  define (reg=PID1) {
+  }
+
+  defmod(regfile=SPR) {
+    define (entry=52) { reg=CCR; }
+  }
+
+  define (cache=L1i) {
+    type      = instr;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+  }
+
+  define (cache=L1d) {
+    type      = data;
+    level     = 1;
+    size      = 32768;
+    linesize  = 128;
+    set_assoc = 4;
+    enable    = func (CacheAccess) { return (CCR.L1E == 1); };
+    write_through = func(CacheAccess,addr_t addr) { return (CCR.WT == 1); };
+  }
+
+
+  define (cache=L2) {
+    level     = 2;
+    size      = 65536;
+    linesize  = 128;
+    set_assoc = 4;
+    sets      = 128;
+    enable    = func (CacheAccess) { return (CCR.L2E == 1); };
+    write_through = func(CacheAccess,addr_t addr) { return (CCR.WT == 1); };
+  }
+
+  attrs = (translation_attr);
+
+  define (mmu) {
+
+    define(lookup=TlbCam) {
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+       }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      define (wayfield=E) {
+        bits = 1;
+        attrs = translation_attr;
+      }
+      
+      define (array) {
+        entries = 16;
+      }
+
+      test = Compare(V,1);
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      size      = SIZE;
+      sizetype  = BitSize;
+      sizeshift = 10;
+      sizescale = 2;
+
+      realpage = RPN;
+
+      valid = { return (V != 0); };
+
+      miss = func(TransType tt,addr_t a,unsigned seq) {
+        if (tt == InstrTrans) {
+          raiseException(itlb);
+        } else {
+          raiseException(dtlb);
+        }
+        // Shouldn't never get here...
+        TlbCam_t t;
+        return t;
+      };
+
+    }
+    
+  }
+
+  //-------------------------------------------------------------------------
+  // Address masks
+  //-------------------------------------------------------------------------
+ 
+  // The effective address size is fixed.
+  define (ea_mask) {
+    value = 0xffffffff;
+  }
+                                                                                                                                                         
+  // The real-address size is fixed.
+  define (ra_mask) {
+    value = 0xffffffff;
+  }
+
+  // The mode is always 32-bit.
+  int mode (bool reg, bool addr ) {
+    return 32;
+  }  
+
+  void AllocateDataCacheBlock(bits<regSize> x ) {
+    var ra = dataWriteTranslate(x);
+    L1d.allocate(ra);
+#   ifdef HaveL2
+    L2.allocate(ra);
+#   endif
+  }
+
+  void FlushDataCacheBlock(bits<regSize> x) {
+    var ra = dataWriteTranslate(x);
+    L1d.flush(ra);
+#   ifdef HaveL2
+    L2.flush(ra);
+#   endif    
+  }
+
+  void InvalidateDataCacheBlock(bits<regSize> x) {
+    var ra = dataWriteTranslate(x);
+    L1d.invalidate(ra);
+#   ifdef HaveL2
+    L2.invalidate(ra);
+#   endif        
+  }
+
+  void InvalidateInstructionCacheBlock(bits<regSize> x) {
+    var ra = instrReadTranslate(x);
+    L1i.invalidate(ra);
+#   ifdef HaveL2
+    L2.invalidate(ra);
+#   endif        
+  }
+
+  void StoreDataCacheBlock(bits<regSize> x) {
+    var ra = dataReadTranslate(x);
+    L1d.store(ra);
+#   ifdef HaveL2
+    L2.store(ra);
+#   endif        
+  }
+
+  void PrefetchDataCacheBlock(bits<regSize> x,bits<5> y) {
+    var ra = dataReadTranslate(x);
+    L1d.touch(ra);
+#   ifdef HaveL2
+    L2.touch(ra);
+#   endif        
+  }
+
+  void PrefetchInstructionCacheBlock(bits<regSize> x,bits<5> y) {
+    var ra = instrReadTranslate(x);
+    L1i.touch(ra);
+#   ifdef HaveL2
+    L2.touch(ra);
+#   endif        
+  }
+
+  void ZeroDataCacheBlock(bits<regSize> x) {
+    var ra = dataWriteTranslate(x);
+    L1d.fill(ra,0);
+#   ifdef HaveL2
+    L2.fill(ra,0);
+#   endif        
+  }
+  
+}
+
+//---------------------------------------------------------------------------
+//  An example 32-bit Power ISA processor core.
+//---------------------------------------------------------------------------
+
+define (core = powerpc) {
+
+  archs = (power,generic32_cache);
+
+  type = "generic32_0";
+}
+
+

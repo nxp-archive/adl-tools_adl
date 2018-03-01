@@ -1,0 +1,3 @@
+asm90.s: Assembler messages:
+asm90.s:6: Error: unsupported relocation against foo
+asm90.s:6: Error: unsupported relocation against foo

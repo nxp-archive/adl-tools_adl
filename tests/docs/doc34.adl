@@ -1,0 +1,57 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// This tests more complex shorthands, including those that target multiple instructions.
+//
+
+#import "doc1.adl"
+
+defmod (core = P) {
+  archs = minippc;
+
+  define (instrfield=(R1,R2,R3)) {
+    width = 5;
+    pseudo = true;
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instr=isync) {
+    fields=(OPCD(19),XO(150));
+    action = {
+    };
+  }
+
+  define (instr=foo) {
+    fields=(OPCD(19),XO(151));
+    action = {
+      CTR = CTR + 1;
+    };
+  }
+
+  // Add on some extra shorthands here.
+
+  // Multple targets with arguments spanning the two instructions.
+  define(instr=add3) {
+    syntax = ("add %f,%f,%f,%f",R1,R2,R3,SI);
+    alias = ( addi(RT(R3),RA(R3),SI(SI)), add(RT(R1),RA(R2),RB(R3)) );
+  } 
+
+  // Test with instructions with no operands.
+  define(instr=add4) {
+    syntax = ("add %f,%f,%f,%f",R1,R2,R3,SI);
+    alias = ( addi(RT(R3),RA(R3),SI(SI)), add(RT(R1),RA(R2),RB(R3)), isync(), foo() );
+  } 
+
+  // Make sure that a shorthand with syntax works with remapping of parameters.
+  define (instr=ori_) {
+    syntax = ("or %f,%f(%f)",R1,R2,UI);
+    alias = ( ori(RA(R1),RS(R2),UI(UI)) );
+  }
+
+}

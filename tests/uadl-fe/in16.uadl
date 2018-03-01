@@ -1,0 +1,180 @@
+//
+// This makes sure that we include instruction resources which are included via
+// various hooks, such as mmu communication registers.
+//
+define (core powerpc) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit Fetcher) {
+      fetch_memory = Mem;
+      entries = 8;
+      entry_size = 1;
+      fetch_size = (8, 4);
+    }
+
+    // pipeline stages
+    define (pipestage mID) {
+      issue = true;
+    }
+
+    define (pipestage=(mEX, mMM, mWB)) {}
+
+    // memory system
+    define (memory Mem) {
+      data_width = 32;
+    }
+  }
+
+  define (machine normal) {
+    init_state = S_INIT;
+    states = ( S_ID, S_IDe, S_EX, S_EXp, S_EXe, S_MM, S_MMp, S_MMe, S_WB, S_WBp, S_WBe );
+
+    define (mapping) {
+      mID = (S_ID,S_IDe);
+      mEX = (S_EX,S_EXp,S_EXe);
+      mMM = (S_MM,S_MMp,S_MMe);
+      mWB = (S_WB,S_WBp,S_WBe);
+    };
+
+    // Defines the state transition on an exception:
+    //  Lhs:  exception state.
+    //  Rhs:  states which might generate an exception.
+    define (exception_mapping) {
+      S_IDe = S_ID;
+      S_EXe = S_EX;
+      S_MMe = S_MM;
+      S_WBe = S_WB;
+   }
+  }
+
+  // Behavior common to all instruction classes (can be overridden on a
+  // per-class basis): If an exception occurs, perform its actions (commit) and
+  // flush the pipe behind it.
+  commit_on_exception = true;
+
+
+ define (instr_class stmw) {
+    instructions = ( stmw );
+
+    machine = normal;
+    
+    // Ugly, but this makes sure that we can list an operand multiple times in
+    // order to include multiple resources.  Could be simplified by having a
+    // single source operand with "sources" as a value.
+    define (operands) {
+      Src1 = GPR(RA);
+      Src1 = FOO;
+      Src1 = dsESR;
+      Src1 = dsFoo;
+      Src2 = GPR(RS);
+    };
+
+    action = {
+		S_INIT: { 
+			change_state(S_ID); 
+		};
+		S_ID: if (Src1.can_read() && Src2.can_read() && mEX.has_space()) {
+				Src1.read();
+				Src2.read();
+				change_state(S_EX);
+			}
+    S_EX: if (mMM.has_space() && Mem.can_request_write()) {
+        // Calc ea.
+        exec();
+        Mem.send_write_request(8);
+        change_state(S_MM);
+      }
+		S_MM: if (Mem.can_write()) { 
+        // Do 64-bit writes, unless our request is odd in size, in which case
+        // we'll have a 4-byte write at the end.
+        exec_and_write(Mem,2,4);
+        change_state(S_MMp);
+      }
+    // "edge" action:  If we're done executing, then move to writeback, else stay at MM.
+    S_MMp: if (exec_done() && mWB.has_space()) {
+        change_state(S_WB);
+      }
+      else if (Mem.can_request_write()) {
+        Mem.send_write_request(8);
+        change_state(S_MM);
+      }
+		// No need for a space-check, since S_WBp maps to the same stage.
+		S_WB: {
+      change_state(S_WBp);
+    }
+		S_WBp: {
+      change_state(S_INIT);
+    }
+
+    S_IDe: { change_state(S_EXe); };
+    S_EXe: { change_state(S_MMe); };
+    S_MMe: { change_state(S_WBe); };
+    S_WBe: { change_state(S_INIT); };
+
+    };
+  }
+
+ define (instr_class decode_miss) {
+   instructions = ( decode_miss );
+   
+   machine = normal;
+
+   allow_missing_operands = true;
+
+   action = {
+   S_INIT: {
+     change_state(S_ID);
+   }
+   S_ID: if (can_read_ops() && can_write_ops() && mEX.has_space()) {
+     exec();
+     change_state(S_EXe);
+   }
+   S_IDe: {
+     change_state(S_EXe);
+   }
+   S_EXe: {
+     change_state(S_MMe);
+   }
+   S_MMe: {
+     change_state(S_WBe);
+   }
+   S_WBe: {
+     change_state(S_INIT);
+   }
+
+   };
+ }
+
+ define (instr_class fetch_exception) {
+   instructions = ( fetch_exception );
+   
+   machine = normal;
+
+   // We have explicit code to do this, so we don't need the automatic code.
+   commit_on_exception = false;
+
+   action = {
+   S_INIT: {
+     change_state(S_ID);
+   }
+   S_ID: {
+     commit_exceptions();
+     taken_flush();
+     change_state(S_EX);
+   }
+   S_EX: {
+     change_state(S_MM);
+   }
+   S_MM: {
+     change_state(S_WB);
+   }
+   S_WB: {
+     change_state(S_INIT);
+   }
+
+   };
+ }
+
+
+};

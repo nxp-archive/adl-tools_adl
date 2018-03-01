@@ -1,0 +1,125 @@
+//
+// Basic switch testing or propagating values in order to track sources and targets.
+//
+
+#define regSize 32
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO_X) {
+    """
+    Extended opcode for X Instruction Format.
+    """;
+    bits = (21,30);
+  }   
+
+  define (instrfield=RA) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (11,15);
+    ref = GPR;
+    type = regfile;
+  }
+  
+  define (instrfield=RB) {
+    """
+    Field used to specify a General Purpose Register to be used as a source.
+    """;
+    bits = (16,20);
+    ref = GPR;
+    type = regfile;
+  }
+
+  define (instrfield=RT) {
+    """
+    Field used to specify a General Purpose Register to be used as a target.
+    """;
+    bits = (6,10);
+    ref = GPR;
+    type = regfile;
+  }
+ 
+  // Should have no sources or targets, since the case label has no code before
+  // the break.
+  define (instr=a) {
+    fields=(OPCD(1),RT,RA,RB,XO_X(10));
+    action = {
+      foo(RT, RA, RB, 0);
+    };
+  }
+
+  // Should fall through to the next case label's statements.
+  define (instr=b) {
+    fields=(OPCD(2),RT,RA,RB,XO_X(10));
+    action = {
+      foo(RT, RA, RB, 1);
+    };
+  }
+
+  // Should have sources/targets for this case's statements and the next, since
+  // there isn't a break.
+  define (instr=c) {
+    fields=(OPCD(3),RT,RA,RB,XO_X(10));
+    action = {
+      foo(RT, RA, RB, 2);
+    };
+  }
+
+  // Should just have its own sources/targets.
+  define (instr=d) {
+    fields=(OPCD(4),RT,RA,RB,XO_X(10));
+    action = {
+      foo(RT, RA, RB, 3);
+    };
+  }
+
+  // Should record nothing, since the value has no corresponding case label.
+  define (instr=e) {
+    fields=(OPCD(5),RT,RA,RB,XO_X(10));
+    action = {
+      foo(RT, RA, RB, 4);
+    };
+  }
+
+  // Should record everything, since the switch is based upon a non-constant.
+  define (instr=f) {
+    fields=(OPCD(6),RT,RA,RB,XO_X(10));
+    action = {
+      foo(RT, RA, RB, RB);
+    };
+  }
+
+  void foo ( uint32_t d, uint32_t a, uint32_t b, uint8_t X )
+  {
+    switch (X) {
+    case 0:
+      break;
+    case 1:
+    case 2:
+      GPR(d) = GPR(a);
+    case 3:
+      GPR(d) = GPR(b);
+    }
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

@@ -1,0 +1,167 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Test of extracting an operaion from the code using a label, and then
+// transforming it.
+//
+
+define (arch = minippc) {
+
+  attrs = (one,two,three);
+
+  void setCrField(bits<3> field,bits<32> x,bits<32> y) {
+    var cr = CR;
+    bits<4> r = 
+      ( (x.signedLT(y)) ? 0x8 : 0) |
+      ( (x.signedGT(y)) ? 0x4 : 0) |
+      ( (x == y)        ? 0x2 : 0) ;
+      
+    cr.set(4*field,4*field+3,r);
+    CR = cr;
+  }
+
+  //
+  // Registers.
+  //
+
+  define (reg=CIA) {
+    """
+Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=CR) {}
+
+  define (regfile=GPR) {
+    """
+General purpose registers.
+    """;
+    size = 32;
+  }
+
+  //
+  // Instruction fields.
+  //
+
+  define (instrfield=Src1) { pseudo = true; width = 5; };
+  define (instrfield=Src2) { pseudo = true; width = 5; };
+  define (instrfield=Trg)  { pseudo = true; width = 5; };
+
+  define (instrfield=OPCD) {
+    """
+Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    """
+Extended opcode.
+    """;
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (11,15);
+  }
+  define (instrfield=RB) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a source.
+    """;
+    bits = (16,20);
+  }
+  define (instrfield=RT) {
+    """
+Field used to specify a General Purpose Register (GPR_) to be used as a target.
+    """;
+    bits = (6,10);
+  }
+  define (instrfield=RS) {
+    """
+Field used to specify a General Purpose Register (GPR_) as a target.
+    """;
+    bits = (6,10);
+  }
+
+  //
+  // Instructions.
+  //
+
+  // test doc-operation strings when nesting multiple aliases
+  define (instr=add_family) {
+    """This description should represent the entire family
+    and appear at the top.""";
+    fields=(Src1,Src2,Trg);
+    action={
+      GPR(Trg) = GPR(Src1) + GPR(Src2);
+      setCrField(0,GPR(Trg),0);
+    };
+
+    define (instr=add1) {
+      """This description should be appended
+      to that of the family.""";
+      fields=(OPCD(31),RT,RA,RB,XO(266));
+      width = 32;
+      doc_op = "Ra + Rb -> Rt";
+      alias = add_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+    define (instr=add2) {
+      """This description should also be appended
+      to that of the family.""";
+      fields=(OPCD(32),RT,RA,RB,XO(300));
+      width = 32;
+      doc_op = "Ra2 + Rb2 -> Rt2";
+      alias = add_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+
+  }
+
+  // test doc-operation strings when nesting multiple aliases
+  define (instr=sub_family) {
+    fields=(Src1,Src2,Trg);
+    action={
+      GPR(Trg) = GPR(Src1) + GPR(Src2);
+      setCrField(0,GPR(Trg),0);
+    };
+
+    define (instr=sub1) {
+      """This is the only description.""";
+      fields=(OPCD(33),RT,RA,RB,XO(266));
+      width = 32;
+      doc_op = "Ra - Rb -> Rt";
+      alias = sub_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+    define (instr=sub2) {
+      fields=(OPCD(34),RT,RA,RB,XO(300));
+      width = 32;
+      // Equal operation- only one should be shown.
+      doc_op = "Ra - Rb -> Rt";
+      alias = sub_family(Src1(RA),Src2(RB),Trg(RT));
+    }
+
+  }
+
+}
+
+define (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+  archs = minippc;
+}

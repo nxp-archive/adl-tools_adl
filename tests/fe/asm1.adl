@@ -1,0 +1,45 @@
+// Assembler configuration test
+
+
+define (arch = sc3400){
+  define (reg = pc) { attrs = (cia,nia);};
+  
+  define (instrfield = pfx_field) {
+    pseudo = true;
+    prefix = true;
+    width = 3;
+    value = 0;
+  }
+
+  parallel_execution = 3;
+
+  define (assembler) {
+    comments = ("//","#",";");
+    line_comments =  ("#rem","#");
+    line_separators = ("\t");
+    instr_separators = ("|");
+    packet_grouping = (("[","]"),"\t");
+  }
+  define (instr = LPMARK_A) {
+    assembler =  {
+         halt();
+    };
+  }
+  define (instr = ahalt) {
+    fields = ((bits(0,7),0x0));
+    action = {halt();};
+  }
+
+  post_asm = func(unsigned instr_width) {
+     pfx_field += instr_width;
+  };
+
+// --------------------------------------------------------------------------------------------------------
+
+} // arch
+
+define (core = StarCore)
+{
+	archs = sc3400;
+	instrtables = (prefix,other);
+}

@@ -1,0 +1,79 @@
+#
+# Basic MP/MT test.
+#
+
+CORE n=PSystem:chip0:core0
+RD n=GPR i=1 d=0x1fff
+RD n=GPR i=4 d=0x2000
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0x00000000
+
+MD n=Mem ra=0x00000000 d=0x80401000	# lwz r2,0x1000(0)
+MD n=Mem ra=0x00000004 d=0x7C620A14	# add r3,r2,r1
+MD n=Mem ra=0x00000008 d=0x34A5FFFE	# subic. r5,r5,2
+MD n=Mem ra=0x0000000c d=0x90640000	# stw r3,0(r4)
+MD n=Mem ra=0x00000010 d=0x00000000	# halt
+
+CORE n=PSystem:chip0:core1
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=NIA d=0x10000
+
+MD n=Mem ra=0x00010000 d=0x7C420A14	# add r2,r2,r1
+MD n=Mem ra=0x00010004 d=0x3463FFFF	# subic. r3,r3,1
+MD n=Mem ra=0x00010008 d=0x4082FFF8	# bne loop
+MD n=Mem ra=0x0001000c d=0x00000000	# halt
+
+CORE n=PSystem:chip1:core0
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=NIA d=0x20000
+
+MD n=Mem ra=0x00020000 d=0x7C420A14	# add r2,r2,r1
+MD n=Mem ra=0x00020004 d=0x3463FFFF	# subic. r3,r3,1
+MD n=Mem ra=0x00020008 d=0x4082FFF8	# bne loop
+MD n=Mem ra=0x00020 d=00c	# 0x00000000 halt
+
+
+CORE n=PSystem:chip1:core1
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=NIA d=0x30000
+
+MD n=Mem ra=0x00030000 d=0x7C420A14	# add r2,r2,r1
+MD n=Mem ra=0x00030004 d=0x3463FFFF	# subic. r3,r3,1
+MD n=Mem ra=0x00030008 d=0x4082FFF8	# bne loop
+MD n=Mem ra=0x0003000c d=0x00000000	# halt
+
+RESULTS
+
+CORE n=PSystem:chip0:core0
+RD n=GPR i=2 d=0xdeadbeef
+RD n=GPR i=3 d=0xdeaddeee
+RD n=GPR i=5 d=0xfffffffe
+RD n=PIR     d=0
+
+CORE n=PSystem:chip0:core1
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+RD n=PIR     d=1
+
+CORE n=PSystem:chip1:core0
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+RD n=PIR     d=2
+
+CORE n=PSystem:chip1:core1
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+RD n=PIR     d=3
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+MD n=Mem ra=0x2000 d=0xdeaddeee
+

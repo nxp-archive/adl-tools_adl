@@ -1,0 +1,51 @@
+#
+# Tests that explicit checking of registers in an instruction class works.
+#
+= asm
+
+	addic.  r1,r1,2
+	mullwo. r3,r2,r1  # Stall b/c of addic.
+	mullwo  r4,r3,r2  # Stall b/c of false CR dependency on mullwo.
+	
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x34210002	#	addic.  r1,r1,2
+MD n=Mem ra=0x00000004 d=0x7C620DD7	#	mullwo. r3,r2,r1  # Stall b/c of addic.
+MD n=Mem ra=0x00000008 d=0x7C8315D6	#	mullwo  r4,r3,r2  # Stall b/c of false CR dependency on mullwo.
+# </GEN>
+
+RD n=NIA      d=0x0
+RD n=GPR i=2 d=10
+
+TRACE
+
+I ea=0x0 id=1
+INSTR op=0x34210002					asm="addic. r1,r1,2"
+ITIME t=1
+CTIME t=4
+
+I ea=0x4 id=2
+INSTR op=0x7c620dd7					asm="mullwo. r3,r2,r1"
+ITIME t=2
+CTIME t=15
+
+I ea=0x8 id=3
+INSTR op=0x7c8315d6					asm="mullwo r4,r3,r2"
+ITIME t=4
+CTIME t=26
+
+I ea=0xc id=4
+INSTR op=0x00000000					asm="halt "
+ITIME t=15
+CTIME t=27
+
+RESULTS
+
+RD n=GPR i=1 d=2
+RD n=GPR i=2 d=10
+RD n=GPR i=3 d=20
+RD n=GPR i=4 d=200
+

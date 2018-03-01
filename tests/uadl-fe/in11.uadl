@@ -1,0 +1,157 @@
+//
+// Test scheduling.   This creates a model
+// consisting of a 1-stage sfx pipeline,
+// two-stage memory pipeline, and
+// a three-stage cfx pipeline, plus a writeback stage
+// and two initial stages.
+//
+define (core P) {
+  allow_unimpl_instrs = true;
+  define (resources) {
+    // instruction buffer (fetch stage)
+    define (fetchunit fetcher) {
+      fetch_memory = mMEM;
+      entries = 6;
+      entry_size = 1;
+      fetch_size = (4);
+      min_fetch_entries = 4;
+    }
+
+    define (memory mMEM) {
+      data_width = 32;
+    }
+
+    // pipeline stages
+    define (pipestage mID1) {
+      issue = true;
+    }
+
+    define (pipestage=(mID2, mS0, mM0, mM1, mC0, mC1, mC2, mWB)) {};
+  }
+
+  define (machine sfx) {
+    init_state = S_INIT;
+    states = ( S_ID1, S_ID2, S_S0, S_WB  );
+
+    define (mapping) {
+      mID1 = S_ID1;
+			mID2 = S_ID2;
+			mS0  = S_S0;
+			mWB  = S_WB;
+    };
+	}
+
+  define (machine mem) {
+    init_state = S_INIT;
+    states = ( S_ID1, S_ID2, S_M0, S_M1, S_WB );
+
+    define (mapping) {
+      mID1 = S_ID1;
+			mID2 = S_ID2;
+			mM0  = S_M0;
+			mM1  = S_M1;
+			mWB  = S_WB;
+    };
+	}
+
+  define (machine cfx) {
+    init_state = S_INIT;
+    states = ( S_ID1, S_ID2, S_C0, S_C1, S_C2, S_WB );
+
+    define (mapping) {
+      mID1 = S_ID1;
+			mID2 = S_ID2;
+			mC0  = S_C0;
+			mC1  = S_C1;
+			mC2  = S_C2;
+			mWB  = S_WB;
+    };
+  }
+
+  define (instr_class sfx) {
+    instructions = ( add, addi, halt );
+
+    machine = sfx;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { change_state(S_ID1); }
+		S_ID1:  { change_state(S_ID2); }
+		S_ID2:  { change_state(S_S0); }
+		S_S0:   { exec(); change_state(S_WB); }
+		S_WB:   { change_state(S_INIT); }
+    };
+  }
+
+  define (instr_class load) {
+    instructions = ( lmw );
+
+    machine = mem;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { change_state(S_ID1); }
+		S_ID1:  { change_state(S_ID2); }
+		S_ID2:  { change_state(S_M0); }
+		S_M0:   { exec(); change_state(S_M1); }
+		S_M1:   { 
+      // Example of a self-loop and a general loop.
+      if (1) {
+        change_state(S_WB); 
+      } else if (0) {
+        change_state(S_M1);
+      } else {
+        change_state(S_M0);
+      }
+    }
+		S_WB:   { change_state(S_INIT); }
+    };
+  }
+
+  define (instr_class cfx) {
+    instructions = ( mullw );
+
+    machine = cfx;
+    
+    define (operands) {
+      Src1 = GPR(RA);
+      Src2 = GPR(RB);
+      Trg  = GPR(RT);
+    };
+
+    allow_missing_operands = true;
+
+    action = {
+		S_INIT: { change_state(S_ID1); }
+		S_ID1:  { change_state(S_ID2); }
+		S_ID2:  { change_state(S_C0); }
+		S_C0:   {
+      exec();
+      // Example of an early-out situation.
+      if (1) {
+				change_state(S_C1);
+			} else {
+				change_state(S_WB);
+			}
+    }
+		S_C1:   { change_state(S_C2); }
+		S_C2:   { change_state(S_WB); }
+		S_WB:   { change_state(S_INIT); }
+    };
+  }
+ 
+}

@@ -1,0 +1,195 @@
+// Test assembler prefix grouping
+define (arch = MiniStarCore) {
+
+  parallel_execution = 3;
+  attrs = (type1,prefix,prefix1,first,second);  
+
+// ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 8;  prefix = r; };
+
+// -------- INSTRFIELDS ----------
+  
+
+define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+define (instrfield = RT)  { width = 3; pseudo = true; ref=GPR;}
+define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; } // Serial Grouping
+define (instrfield = IMM) { width = 4; pseudo = true; is_signed=true;}
+define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+
+
+
+define (instrfield = LpmarkA)    { width = 1; prefix = true; pseudo = true; value  = 0; }
+define (instrfield = LpmarkB)    { width = 1; prefix = true; pseudo = true; value  = 0; }
+
+
+  
+
+// -------- PREFIX INSTRUCTIONS -----------
+
+
+
+ define (instr = LPREFIX1) {
+    fields = (
+	      (bits(0,14),6),
+	      (bits(15),LpmarkA));
+    prefix = true;
+    syntax = ("LPREFIX1, LpmarkA %f",LpmarkA);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+ define (instr = LPREFIX2) {
+    fields = (
+	      (bits(0,14),7),
+	      (bits(15),LpmarkB));
+    prefix = true;
+    syntax = ("LPREFIX2, LpmarkB %f",LpmarkB);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+// --------- ASM INSTRUCTIONS ---------
+
+  define (instr = LPMARK1) {
+    syntax = ("lpmarkA");
+    assembler = { LpmarkA = 1; };
+  }
+  define (instr = LPMARK2) {
+    syntax = ("lpmarkB");
+    assembler = { LpmarkB = 1; };
+  }
+
+
+
+// ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr=nop) {
+    attrs = (type1,first);
+    fields = (
+	      (bits(0,15),5));
+     action = {
+      };
+   }
+
+  define(instr=sub) {
+    attrs = (type1,first);
+    fields = (
+	      (bits(0,3),2),
+	      (bits(4,6),RA),
+	      (bits(7,9),RB),
+              (bits(10,12),RT),
+	      (bits(13),SG),
+	      (bits(14),0),
+	      (bits(15),0));
+     action = {
+          GPR(RT) = GPR(RA) - GPR(RB);
+     };
+    syntax = ("sub %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=add) {
+    attrs = (type1,first);
+    fields = (
+	      (bits(0,3),8),
+	      (bits(4,6),RA),
+	      (bits(7,9),RB),
+              (bits(10,12),RT),
+	      (bits(13),SG),
+	      (bits(14),0),
+	      (bits(15),0));
+     action = {
+          GPR(RT) = GPR(RA) + GPR(RB);
+     };
+    syntax = ("add %f,%f,%f",RA,RB,RT);
+  }
+
+  define (instr = move) {
+    attrs = (type1,second);
+    fields = (
+	      (bits(0,3),3),
+	      (bits(4,6),RA),
+	      (bits(7,10),IMM),
+	      (bits(13),SG),
+	      (bits(14),0),
+	      (bits(15),0));
+
+    action = { 
+	GPR(RA) = IMM; 
+    };
+    syntax = ("move %f,%f",IMM,RA);
+  }
+
+
+
+  define (instr = halt) {
+    fields = ((bits(0,12),0),
+	       (bits(13),SG),
+	       (bits(14),0),
+	       (bits(15),0));
+    attrs = (type1,second);
+    action = { halt(); };
+  }
+
+  // -------- POST EXEC ----------------
+  
+
+  post_exec = func() {
+
+   if (getCurrentInstrTable() == prefix) {	   	
+      setCurrentInstrTable(type1);
+   } else {
+       int num_bytes;
+       uint32_t *x = getCurrentInstr(num_bytes);
+       if (x[0] & 0x40000) {
+      	setPacketPosition(0);
+     }
+   } 
+  };
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+  };    
+
+
+// ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+ 
+
+// -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (type1,prefix);
+    disasm_instrtables = (type1,prefix); 
+    explicit_regs = true;
+    symbol_chars =  ("+","(",")","#","-");
+  };
+
+  post_packet_asm = func(InstrBundle b) {
+    SG = 1;
+  } ;
+
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

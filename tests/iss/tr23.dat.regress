@@ -1,0 +1,8 @@
+P:  Instr 1:  IR element 4 of type M:  Bad tags:  (d => 0x3 ea => 0x1008 ra => 0x1008 )
+  Found data:  (d => 0x2 ea => 0x1004 n => Mem ra => 0x1004 t => read )
+P:  Instr 2:  IR element 3 of type M:  Bad tags:  (d => 0x2 )
+  Found data:  (d => 0x6 ea => 0x1004 n => Mem ra => 0x1004 t => write )
+P:  Instr 2:  IR element 4 of type M:  Bad tags:  (d => 0x3 ea => 0x1008 ra => 0x1008 )
+  Found data:  (d => 0x2 ea => 0x1004 n => Mem ra => 0x1004 t => write )
+P:  Differences were found when checking intermediate results.
+Error:  Test 1:  Intermediate result mismatches were found.

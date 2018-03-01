@@ -1,0 +1,169 @@
+=================
+ADL Documentation
+=================
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: rubber
+============
+
+
+.. _adl-internal-target-1:
+Registers
+---------
+
+
+.. _adl-internal-target-2:
+*CIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">CIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-3:
+*NIA*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">NIA</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-4:
+Instruction Fields
+------------------
+
+
+.. _adl-internal-target-5:
+*opHw*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 25
+   * - Instruction Table
+     - instr_micro
+
+
+Reference: **`instr_micro <#adl-internal-target-6>`__**
+
+
+.. _adl-internal-target-7:
+Instructions
+------------
+
+
+.. _adl-internal-target-8:
+*done*
+``````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        halt (  ) ;
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="12.5%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000</td>
+     <td colspan="2" width="15.625%" class="field">00&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000</td>
+     <td colspan="2" width="71.875%" class="reserved" title="Reserved">00&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000</td>
+     </tr>
+     <tr>
+     <td class="leftodd">63</td><td class="rightodd">56</td>
+     <td class="lefteven">55</td><td class="righteven">46</td>
+     <td class="leftodd">45</td><td class="rightodd">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-9:
+*null*
+``````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="32%" class="field">0011&nbsp;/&nbsp;1111</td>
+     <td colspan="2" width="68%" class="reserved" title="Reserved">0&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0000</td>
+     </tr>
+     <tr>
+     <td class="leftodd">24</td><td class="rightodd">17</td>
+     <td class="lefteven">16</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+Attributes:
+  instr_micro
+
+
+.. _adl-internal-target-10:
+Instructions by Attribute
+-------------------------
+
+
+.. _adl-internal-target-6:
+*instr\_micro*
+``````````````
+
+* `null <#adl-internal-target-9>`__
+
+.. _adl-internal-target-11:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+

@@ -1,0 +1,108 @@
+#
+# Tests to make sure that a fetch exception is cleaned up properly when an
+# exception occurs.
+#
+CORE n=:P
+
+= asm
+
+	addi r1,r1,1
+	addi r2,r2,2
+	mtspr 100,r1  # Causes exception.
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	.long 0x0
+	addi r1,r1,1
+	addi r2,r2,2
+	.long 0x0
+
+= /asm
+
+= mdopts
+	instr-offset: 0x10ff4
+= /mdopts
+
+# Note- hand modified due to address changes.
+# <GEN>
+MD n=Mem ra=0x00010ff4 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00010ff8 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x00010ffc d=0x7C241BA6	#	mtspr 100,r1  # Causes exception.
+MD n=Mem ra=0x00012000 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00012004 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00012008 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0001200c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00012010 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00012014 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00012018 d=0x38420002	#	addi r2,r2,2
+MD n=Mem ra=0x0001201c d=0x00000000	#	.long 0x0
+# </GEN>
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 UX=1 SX=0 SR=0 SW=0 EPN=0
+
+# ea=0x1000 ra=0x11000
+TD n=TlbCam set=0 way=1 V=1 TID=0 SIZE=1 TS=0 RPN=0x44 WIMG=0x2 UX=1 SX=0 SR=1 SW=1 EPN=0x4
+
+# ea=0x2000 ra=0x12000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x48 WIMG=0x2 SX=1 SR=1 SW=1 EPN=0x8
+
+RD n=NIA d=0xff4
+
+RD n=MSR d=0x00400000
+
+RD n=IVOR6 d=0x12014
+
+TRACE
+
+I ea=0xff4 id=1
+M n=Mem t=ifetch ea=0xff4 ra=0x10ff4 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=1
+R n=GPR i=1 d=0x00000001
+CTIME t=5
+
+I ea=0xff8 id=2
+M n=Mem t=ifetch ea=0xff8 ra=0x10ff8 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+ITIME t=2
+R n=GPR i=2 d=0x00000002
+CTIME t=6
+
+I ea=0xffc id=3
+M n=Mem t=ifetch ea=0xffc ra=0x10ffc d=0x7c241ba6
+INSTR op=0x7c241ba6					asm="mtspr HDBCR0,r1"
+ITIME t=2
+E n=Program
+R n=SRR0 d=0x00000ffc
+R n=SRR1 d=0x00400000
+R n=MSR d=0x00000000
+B taken=1 ea=0x2014
+CTIME t=8
+
+I ea=0x2014 id=4
+M n=Mem t=ifetch ea=0x2014 ra=0x12014 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+ITIME t=7
+R n=GPR i=1 d=0x00000002
+CTIME t=11
+
+I ea=0x2018 id=5
+M n=Mem t=ifetch ea=0x2018 ra=0x12018 d=0x38420002
+INSTR op=0x38420002					asm="addi r2,r2,2"
+ITIME t=8
+R n=GPR i=2 d=0x00000004
+CTIME t=12
+
+I ea=0x201c id=6
+M n=Mem t=ifetch ea=0x201c ra=0x1201c d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=8
+CTIME t=12
+
+RESULTS
+
+RD n=HDBCR0 d=0x00000000
+RD n=GPR i=1 d=0x00000002
+RD n=GPR i=2 d=0x00000004

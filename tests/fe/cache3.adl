@@ -1,0 +1,42 @@
+
+//
+// Error checking on various cache hooks.
+//
+define (arch=foo) {
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (cache=L1) {
+    level     = 1;
+    size      = 131072;
+    linesize  = 256;
+    set_assoc = 2;
+    type      = data;
+
+    enable = func(CacheAccess) { return L2CR.EN == 1; };
+
+    hit = func (CacheAccess,unsigned) {
+      Foo = Foo + 1;
+    };
+
+    miss = func (CacheAccess,unsigned) {
+      Foo = Foo + 1;
+    };
+
+    invalidate_line = func (CacheAccess,char *set,unsigned way) { };
+
+    read_line = func(CacheAccess ca,char *set,unsigned way,int addr) { };
+
+    write_through = func(CacheAccess,int addr) { };
+
+    miss_enable = func(int x,int y,unsigned z) {};
+
+  }
+
+}
+
+define (core=P) {
+  archs=(foo);
+}

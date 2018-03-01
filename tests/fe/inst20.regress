@@ -1,0 +1,5 @@
+inst20.adl:59: Unknown instruction field FOO
+inst20.adl:65: Field 'RT' used in alias does not exist in instruction's field definition.
+inst20.adl:72: Target not finalized, probably due to prior error.
+inst20.adl:79: Unknown instruction field twizzle
+inst20.adl:90: Non-shorthand aliases may not use helper functions in their expressions.

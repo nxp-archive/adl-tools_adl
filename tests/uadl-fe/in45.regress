@@ -1,0 +1,582 @@
+in45.uadl:143: warning: Instruction defined in class 'cfx' but not ADL:  mullw 
+in45.uadl:111: warning: Instruction defined in class 'load' but not ADL:  lmw 
+in45.uadl:89: warning: Instruction defined in class 'sfx' but not ADL:  halt 
+in45.uadl:5: warning: Instructions access no data memory
+P (for architecture P):
+  First-level instruction memory:  mMEM
+
+  Pipeline Stage:  mC0
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler     :  dependent
+    Is issue stage:  0
+    Shared        :  0
+  Pipeline Stage:  mC1
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler     :  dependent
+    Is issue stage:  0
+    Shared        :  0
+  Pipeline Stage:  mC2
+    Size          :  1
+    Bandwidth     :  1
+    Rigid         :  0
+    Scheduler     :  dependent
+    Is issue stage:  0
+    Shared        :  0
+
+  Semaphore:  S1
+    Count:  1
+
+  Flag:  F1
+
+  Forwarding Path:  Fwd
+    Broadcast:  0
+    Size     :  1
+    Width    :  32
+
+  Memory:  mMEM
+    Total address bandwidth: 1
+    Total data bandwidth:    1
+    Data width:              32
+    Max requests:            1
+    Read latency :  1
+    Write latency:  1
+    Read-only    :  0
+
+  Thread:  t0
+    Fetch Unit:  fetcher
+      Fetch Memory:  mMEM
+      Entries     :  6
+      Entry Size  :  1
+			Interleaved :  true
+      Fetch Sizes :  4 
+
+    Pipeline Stage:  mC0
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mC1
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mC2
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mID1 (t0.mID1)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  1
+      Shared        :  0
+    Pipeline Stage:  mID2 (t0.mID2)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mM0 (t0.mM0)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mM1 (t0.mM1)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mS0 (t0.mS0)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mWB (t0.mWB)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+
+    Semaphore:  S1
+      Count:  1
+  
+    Flag:  F1
+
+    Register:  Bar
+      ID        :  0
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register:  Foo
+      ID        :  1
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register File:  GPR
+      ID        :  3
+      Size      :  32
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register:  PC
+      ID        :  2
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+
+    Forwarding Path:  Fwd
+      Broadcast:  0
+      Size     :  1
+      Width    :  32
+
+    Memory:  mMEM
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Read latency :  1
+      Write latency:  1
+      Read-only    :  0
+
+    Cache:  L1d
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Next-level memory          :  mMEM
+      critical_word_first        :  1
+      invalidate_latency         :  1
+			linefill_access_width      :  64
+      linefill_lock_holdoff_cycle:  1
+      linefill_read_latency      :  1
+      linefill_write_latency     :  1
+      lock_latency               :  1
+      read_hit_latency           :  1
+      unlock_latency             :  1
+      write_hit_latency          :  1
+      write_mode                 :  WriteThrough
+      zero_latency               :  1
+    Cache:  L1i
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Next-level memory          :  mMEM
+      critical_word_first        :  1
+      invalidate_latency         :  1
+      linefill_access_width      :  64
+      linefill_lock_holdoff_cycle:  1
+      linefill_read_latency      :  1
+      linefill_write_latency     :  1
+      lock_latency               :  1
+      read_hit_latency           :  1
+      unlock_latency             :  1
+      write_hit_latency          :  1
+      write_mode                 :  WriteThrough
+      zero_latency               :  1
+
+  Thread:  t1
+    Fetch Unit:  fetcher
+      Fetch Memory:  mMEM
+      Entries     :  6
+      Entry Size  :  1
+			Interleaved :  true
+      Fetch Sizes :  4 
+
+    Pipeline Stage:  mC0
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mC1
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mC2
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mID1 (t1.mID1)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  1
+      Shared        :  0
+    Pipeline Stage:  mID2 (t1.mID2)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mM0 (t1.mM0)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mM1 (t1.mM1)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mS0 (t1.mS0)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+    Pipeline Stage:  mWB (t1.mWB)
+      Size          :  1
+      Bandwidth     :  1
+      Rigid         :  0
+      Scheduler     :  dependent
+      Is issue stage:  0
+      Shared        :  0
+
+    Semaphore:  S1
+      Count:  1
+  
+    Flag:  F1
+
+    Register:  Bar
+      ID        :  0
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register:  Foo
+      ID        :  1
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register File:  GPR
+      ID        :  3
+      Size      :  32
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+    Register:  PC
+      ID        :  2
+      Size      :  1
+      Width     :  32
+      Latency   :  0
+      Is aliased:  0
+
+    Forwarding Path:  Fwd
+      Broadcast:  0
+      Size     :  1
+      Width    :  32
+
+    Memory:  mMEM
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Read latency :  1
+      Write latency:  1
+      Read-only    :  0
+
+    Cache:  L1d
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Next-level memory          :  mMEM
+      critical_word_first        :  1
+      invalidate_latency         :  1
+      linefill_access_width      :  64
+      linefill_lock_holdoff_cycle:  1
+      linefill_read_latency      :  1
+      linefill_write_latency     :  1
+      lock_latency               :  1
+      read_hit_latency           :  1
+      unlock_latency             :  1
+      write_hit_latency          :  1
+      write_mode                 :  WriteThrough
+      zero_latency               :  1
+    Cache:  L1i
+      Total address bandwidth: 1
+      Total data bandwidth:    1
+      Data width:              32
+      Max requests:            1
+      Next-level memory          :  mMEM
+      critical_word_first        :  1
+      invalidate_latency         :  1
+      linefill_access_width      :  64
+      linefill_lock_holdoff_cycle:  1
+      linefill_read_latency      :  1
+      linefill_write_latency     :  1
+      lock_latency               :  1
+      read_hit_latency           :  1
+      unlock_latency             :  1
+      write_hit_latency          :  1
+      write_mode                 :  WriteThrough
+      zero_latency               :  1
+
+  Pipeline Scheduling Order:   t0.mWB t1.mWB mC2 t0.mM1 t0.mS0 t1.mM1 t1.mS0 mC1 t0.mM0 t1.mM0 mC0 t0.mID2 t1.mID2 t0.mID1 t1.mID1 
+
+  Machine:  cfx
+    Initial state:  S_INIT
+    States       :  S_C0 S_C1 S_C2 S_ID1 S_ID2 S_WB
+    Default State Bindings:
+      S_ID1 = mID1
+      S_ID2 = mID2
+      S_C0 = mC0
+      S_C1 = mC1
+      S_C2 = mC2
+      S_WB = mWB
+  Machine:  mem
+    Initial state:  S_INIT
+    States       :  S_ID1 S_ID2 S_M0 S_M1 S_WB
+    Default State Bindings:
+      S_ID1 = mID1
+      S_ID2 = mID2
+      S_M0 = mM0
+      S_M1 = mM1
+      S_WB = mWB
+  Machine:  sfx
+    Initial state:  S_INIT
+    States       :  S_ID1 S_ID2 S_S0 S_WB
+    Default State Bindings:
+      S_ID1 = mID1
+      S_ID2 = mID2
+      S_S0 = mS0
+      S_WB = mWB
+
+  Instruction Class:  cfx
+    Instructions:
+
+    Commit On Exception:  1
+    Machine    :  cfx
+    State Bindings:
+      S_ID1 = mID1
+      S_ID2 = mID2
+      S_C0 = mC0
+      S_C1 = mC1
+      S_C2 = mC2
+      S_WB = mWB
+    State actions:
+      S_C0:
+        To-States:  S_C1 S_WB 
+        From-States:  S_ID1 S_ID2 S_INIT 
+        Action:
+if ( mWB . has_space (  ) ) if ( mC1 . has_space (  ) ) {
+    exec (  ) ;
+    if ( 1 ) {
+        change_state ( S_C1 ) ;
+    } else {
+        change_state ( S_WB ) ;
+    }
+}
+
+      S_C1:
+        To-States:  S_C2 
+        From-States:  S_C0 S_ID1 S_ID2 S_INIT 
+        Action:
+if ( mC2 . has_space (  ) ) {
+    change_state ( S_C2 ) ;
+}
+
+      S_C2:
+        To-States:  S_WB 
+        From-States:  S_C0 S_C1 S_ID1 S_ID2 S_INIT 
+        Action:
+if ( mWB . has_space (  ) ) {
+    change_state ( S_WB ) ;
+}
+
+      S_ID1:
+        To-States:  S_ID2 
+        From-States:  S_INIT 
+        Action:
+if ( mID2 . has_space (  ) ) {
+    change_state ( S_ID2 ) ;
+}
+
+      S_ID2:
+        To-States:  S_C0 
+        From-States:  S_ID1 S_INIT 
+        Action:
+if ( mC0 . has_space (  ) ) {
+    change_state ( S_C0 ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID1 
+        Action:
+if ( mID1 . has_space (  ) ) {
+    change_state ( S_ID1 ) ;
+}
+
+      S_WB:
+        To-States:  S_INIT 
+        From-States:  S_C0 S_C1 S_C2 S_ID1 S_ID2 S_INIT 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+  Instruction Class:  load
+    Instructions:
+
+    Commit On Exception:  1
+    Machine    :  mem
+    State Bindings:
+      S_ID1 = mID1
+      S_ID2 = mID2
+      S_M0 = mM0
+      S_M1 = mM1
+      S_WB = mWB
+    State actions:
+      S_ID1:
+        To-States:  S_ID2 
+        From-States:  S_INIT 
+        Action:
+if ( mID2 . has_space (  ) ) {
+    change_state ( S_ID2 ) ;
+}
+
+      S_ID2:
+        To-States:  S_M0 
+        From-States:  S_ID1 S_INIT 
+        Action:
+if ( mM0 . has_space (  ) ) {
+    change_state ( S_M0 ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID1 
+        Action:
+if ( mID1 . has_space (  ) ) {
+    change_state ( S_ID1 ) ;
+}
+
+      S_M0:
+        To-States:  S_M1 
+        From-States:  S_ID1 S_ID2 S_INIT 
+        Action:
+if ( mM1 . has_space (  ) ) {
+    exec (  ) ;
+    change_state ( S_M1 ) ;
+}
+
+      S_M1:
+        To-States:  S_M0 S_M1 S_WB 
+        From-States:  S_ID1 S_ID2 S_INIT S_M0 
+        Action:
+if ( mWB . has_space (  ) ) if ( mM0 . has_space (  ) ) {
+    if ( 1 ) {
+        change_state ( S_WB ) ;
+    } else if ( 0 ) {
+        change_state ( S_M1 ) ;
+    } else {
+        change_state ( S_M0 ) ;
+    }
+}
+
+      S_WB:
+        To-States:  S_INIT 
+        From-States:  S_ID1 S_ID2 S_INIT S_M0 S_M1 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+  Instruction Class:  sfx
+    Instructions:
+      add
+        Src1 = (src: GPR(RA)), 
+        Src2 = (src: GPR(RB)), 
+        Trg = (trg: GPR(RT)), 
+      addi
+        Src1 = (src: GPR(RA)?), 
+        Trg = (trg: GPR(RT)), 
+
+    Commit On Exception:  1
+    Machine    :  sfx
+    State Bindings:
+      S_ID1 = mID1
+      S_ID2 = mID2
+      S_S0 = mS0
+      S_WB = mWB
+    State actions:
+      S_ID1:
+        To-States:  S_ID2 
+        From-States:  S_INIT 
+        Action:
+if ( mID2 . has_space (  ) ) {
+    change_state ( S_ID2 ) ;
+}
+
+      S_ID2:
+        To-States:  S_S0 
+        From-States:  S_ID1 S_INIT 
+        Action:
+if ( mS0 . has_space (  ) ) {
+    change_state ( S_S0 ) ;
+}
+
+      S_INIT:
+        To-States:  S_ID1 
+        Action:
+if ( mID1 . has_space (  ) ) {
+    change_state ( S_ID1 ) ;
+}
+
+      S_S0:
+        To-States:  S_WB 
+        From-States:  S_ID1 S_ID2 S_INIT 
+        Action:
+if ( mWB . has_space (  ) ) {
+    exec (  ) ;
+    change_state ( S_WB ) ;
+}
+
+      S_WB:
+        To-States:  S_INIT 
+        From-States:  S_ID1 S_ID2 S_INIT S_S0 
+        Action:
+{
+    change_state ( S_INIT ) ;
+}
+
+

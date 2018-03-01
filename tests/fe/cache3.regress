@@ -1,0 +1,9 @@
+cache3.adl:18: Unknown variable/resource found in action code:  L2CR
+cache3.adl:21: Unknown variable/resource found in action code:  Foo
+cache3.adl:25: Unknown variable/resource found in action code:  Foo
+cache3.adl:28: Argument 2 of invalidate-line function must be of type unsigned-integer.
+cache3.adl:30: Argument 2 of read-line function must be of type unsigned-integer.
+cache3.adl:30: Argument 4 of read-line function must be of type addr_t.
+cache3.adl:32: Argument 2 of write-through predicate must be of type addr_t.
+cache3.adl:34: Argument 1 of miss-enable predicate must be of type CacheAccess.
+cache3.adl:34: Argument 2 of miss-enable predicate must be of type addr_t.

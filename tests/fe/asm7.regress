@@ -1,0 +1,44 @@
+======
+Cores:
+======
+Name:  "StarCore"
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Parallel execution packet size: 3
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  SG: [0,1] [not used]  
+
+Instruction Tables:
+prefix:
+  other:
+  
+Instruction Attributes:  mini 
+
+Post-Asm Handler:  func ( unsigned i ) {
+    SG = 1 ;
+}
+
+Post-Packet-Asm Handler:  func ( InstrBundle b ) {
+    foo ( b [ 0 ] ) ;
+}
+  Helper Functions:  foo 
+
+Helper Functions:
+  foo:
+ void foo ( InstrInfo & ii ) {
+    if ( ii . RT > 0 ) {
+        ii . RA = 0 ;
+    }
+}
+-------------------------------
+

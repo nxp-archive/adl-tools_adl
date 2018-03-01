@@ -1,0 +1,52 @@
+#
+# Tests the ability to fix-up branches which lie at the start of a cache-line
+# boundary and thus have icache touch logic.  This specifically tests
+# trace-caches, which, if the cache-touch logic isn't taken into account, will
+# overwrite the trace-item for the touch logic, leaving the branch trampoline,
+# which then causes problems which manifest themselves when the next instruction
+# is not a branch.
+#
+= asm
+
+  addi r1,r1,10
+  addi r1,r1,20
+L1:
+  bc 0x0c,2,L2   # Shouldn't be taken.
+  addi r1,r1,30
+  addi r1,r1,40
+  bc 0x10,0,L1   # Will loop once.
+L2:
+  .long 0x0
+  .long 0x0
+  .long 0x0
+
+= /asm
+
+= mdopts
+
+instr-offset: 0xf78
+
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000f78 d=0x3821000A	#	addi r1,r1,10
+MD n=Mem ra=0x00000f7c d=0x38210014	#	addi r1,r1,20
+MD n=Mem ra=0x00000f80 d=0x41820010	#	bc 0x0c,2,L2   # Shouldn't be taken.
+MD n=Mem ra=0x00000f84 d=0x3821001E	#	addi r1,r1,30
+MD n=Mem ra=0x00000f88 d=0x38210028	#	addi r1,r1,40
+MD n=Mem ra=0x00000f8c d=0x4200FFF4	#	bc 0x10,0,L1   # Will loop once.
+MD n=Mem ra=0x00000f90 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f94 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000f98 d=0x00000000	#	.long 0x0
+# </GEN>
+
+RD n=NIA   d=0xf78
+RD n=CCR   d=0xc0000000
+RD n=CTR   d=0x00000002
+
+RESULTS
+
+RD n=GPR i=1 d=170
+RD n=CTR     d=0x00000000

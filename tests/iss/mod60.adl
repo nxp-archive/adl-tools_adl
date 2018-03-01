@@ -1,0 +1,330 @@
+//
+// This tests the use of createInstr and replaceInstr within a post-packet
+// assembler handler in order to modify the instructions which are actually
+// inserted into the final assembler output.
+//
+define (arch = MiniStarCore) {
+
+  parallel_execution = 3;
+  attrs = (type1,prefix,prefix1,first,second,has_premium,add_add);  
+  blk = (red,blue);
+
+  // ----- REGISTERS ---------
+  // CIA,NIA
+  define (reg = PC) { attrs = (cia,nia);  serial = true; };  
+  // GPR
+  define (regfile = GPR) {  width = 32;  size  = 8;  prefix = r; };
+  define (regfile = FPR) {  width = 32;  size  = 8;  prefix = f; };
+  define (regfile = AGPR)  {
+    size = 2;
+    define(entry=0) { reg = GPR(7); } 
+    define(entry=1) { reg = SR; } 	
+  };
+
+  define (reg=SR) 	 {  define(field=T) { bits = 3; } };
+
+  // -------- INSTRFIELDS ----------
+  
+  define (instrfield = RA)  { width = 3; pseudo = true; ref=GPR;}	
+  define (instrfield = RB)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = RT)  { width = 3; pseudo = true; ref=GPR;}
+  define (instrfield = SG)  { width = 1; pseudo = true; assembler = true; value = 0; } // Serial Grouping
+  define (instrfield = CG)  { width = 1; pseudo = true; assembler = true; value = 0; }
+  define (instrfield = IMM) { width = 4; pseudo = true; is_signed=true; }
+  define (instrfield=OPCD)  { width  = variable; 	pseudo = true; }
+
+
+
+  define (instrfield = LpmarkA)    { width = 1; prefix = true; pseudo = true; value  = 0; }
+  define (instrfield = LpmarkB)    { width = 1; prefix = true; pseudo = true; value  = 0; }
+
+
+  
+
+  // -------- PREFIX INSTRUCTIONS -----------
+
+
+
+  define (instr = LPREFIX1) {
+    fields = (
+              (bits(0,14),6),
+              (bits(15),LpmarkA));
+    prefix = true;
+    syntax = ("LPREFIX1, LpmarkA %f",LpmarkA);  
+    attrs = prefix;
+    width  = 16;
+  }
+
+
+  // --------- ASM INSTRUCTIONS ---------
+
+  define (instr = LPMARK1) {
+    syntax = ("lpmarkA");
+    assembler = { LpmarkA = 1; };
+  }
+  define (instr = LPMARK2) {
+    syntax = ("lpmarkB");
+    assembler = { LpmarkB = 1; };
+  }
+
+
+
+  // ------------- USUAL INSTRUCTIONS ------------
+
+
+  define(instr=nop) {
+    attrs = (type1(1),first);
+    fields = (
+              (bits(0,15),5));
+    action = {
+    };
+  }
+
+  define(instr=sub) {
+    attrs = (type1(2),first);
+    blk = red;
+    fields = (
+              (bits(0,3),2),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      GPR(RT) = GPR(RA) - GPR(RB);
+    };
+    syntax = ("sub %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=asub) {
+    attrs = (type1,first);
+    blk = blue;
+    fields = (
+              (bits(0,3),4),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      if (RA > 1 || RB > 1 || RT > 1) {
+      } else {
+        AGPR(RT) = AGPR(RA) - AGPR(RB);		
+      }
+    };
+    syntax = ("asub %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=add) {
+    attrs = (type1,first,has_premium(1));
+    fields = (
+              (bits(0,3),8),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+    syntax = ("add %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=add_premium) {
+    attrs = (type1,first);
+    fields = (
+              (bits(0,3),8),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),CG),
+              (bits(15),1));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+    syntax = ("add2 %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=mul) {
+    attrs = (type1,first,has_premium(1),add_add("123"));
+    fields = (
+              (bits(0,3),9),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    action = {
+      GPR(RT) = GPR(RA) * GPR(RB);
+    };
+    syntax = ("mul %f,%f,%f",RA,RB,RT);
+  }
+
+  define(instr=mul_premium) {
+    attrs = (type1,first);
+    fields = (
+              (bits(0,3),9),
+              (bits(4,6),RA),
+              (bits(7,9),RB),
+              (bits(10,12),RT),
+              (bits(13),SG),
+              (bits(14),CG),
+              (bits(15),1));
+    action = {
+      GPR(RT) = GPR(RA) * GPR(RB);
+    };
+    syntax = ("mul2 %f,%f,%f",RA,RB,RT);
+  }
+
+  // 0-operand instruction designed to make sure that we can handle them.  when
+  // we have multiple assembler-only operands.  Thus, even though the instruction
+  // takes no arguments, it does have operands, they're just not set on the
+  // assembly line.
+  define(instr=inc0) {
+    attrs = (type1,first);
+    fields = (
+              (bits(0,3),6),
+              (bits(4,6),0),
+              (bits(7,9),0),
+              (bits(10,12),0),
+              (bits(13),SG),
+              (bits(14),CG),
+              (bits(15),0));
+    action = {
+      GPR(0) = GPR(0) + 1;
+    };
+    syntax = ("%i");
+  }
+
+  define (instr = move) {
+    attrs = (type1,second);
+    blk = (red,blue);
+    fields = (
+              (bits(0,3),3),
+              (bits(4,6),RA),
+              (bits(7,10),IMM),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+
+    action = { 
+      GPR(RA) = IMM; 
+    };
+    syntax = ("move %f,%f",IMM,RA);
+  }
+
+  define (instr = halt) {
+    fields = ((bits(0,12),0),
+              (bits(13),SG),
+              (bits(14),0),
+              (bits(15),0));
+    attrs = (type1,second);
+    action = { halt(); };
+  }
+
+  // -------- POST EXEC ----------------
+  
+
+  post_exec = func() {
+
+    if (getCurrentInstrTable() == prefix) {	   	
+      setCurrentInstrTable(type1);
+    } else {
+      int num_bytes;
+      uint32_t *x = getCurrentInstr(num_bytes);
+      if (x[0] & 0x40000) {
+      	setPacketPosition(0);
+      }
+    } 
+  };
+
+  post_packet = func() {
+    info(1,"------------------------- eop ----------------------");
+    setCurrentInstrTable(prefix);
+  };    
+
+
+  // ---------- DECODE MISS ---------------
+  decode_retry = func(addr_t,unsigned) {
+
+    if (getCurrentInstrTable() == prefix) {
+      setCurrentInstrTable(type1);
+      return true;
+    } else {
+      return false;
+    }
+  };
+ 
+
+  // -------- ASSEMBLER CONFIG -----------  
+  define (assembler) {
+    packet_grouping = (("[","]"),"\n");
+    comments = ";";
+    line_comments = ";";
+    line_separators = "\n";
+    asm_instrtables = (type1,prefix);
+    disasm_instrtables = (type1,prefix); 
+    explicit_regs = true;
+    symbol_chars =  ("+","(",")","#","-");   
+  };
+
+  // If an instruction has the "has_premium" attribute, then substitute that
+  // encoding.  If it's the first of a pair, then set CG.  Add a nop if it's not
+  // part of a pair.  For testing purposes, rather than a nop, add an 'add 1,2,3'
+  // if the instruction has the add_add attribute.
+  post_packet_asm = func(InstrBundle b) {
+    InstrBundle newb;
+
+    int odd = 0;
+    bool use_add = false;
+    for (unsigned i = 0; i != b.size(); ++i) {
+      if (b[i].instrHasAttr(has_premium)) {
+        std::string nname = b[i].instrName();
+        nname += "_premium";
+        newb.push_back(replaceInstr(b[i],nname));
+        if (!odd) {
+          newb.back().CG = 1;
+        }
+        odd = !odd;
+        use_add = b[i].instrHasAttrVal(add_add,"123");
+      } else {
+        if (odd) {
+          // No second instruction that's being replaced, so add nop.
+          if (use_add) {
+            info (1,"Using add rather than nop.");
+            // Specifically not specifying all arguments here to make sure that
+            // works.
+            newb.push_back(createInstr("add",1,2));
+          } else {
+            newb.push_back(createInstr("nop"));
+          }
+        }
+        odd = 0;
+        use_add = false;
+        newb.push_back(b[i]);
+      }
+    }
+    if (odd) {
+      // No second instruction that's being replaced, so add nop.
+      if (use_add) {
+        info (1,"Using add rather than nop.");
+        newb.push_back(createInstr("add",1,2,3));
+      } else {
+        newb.push_back(createInstr("nop"));
+      }
+    }
+    b = newb;
+  };
+
+}
+
+
+define (core = P) {
+  archs = MiniStarCore;
+  instrtables = (prefix,type1);
+}

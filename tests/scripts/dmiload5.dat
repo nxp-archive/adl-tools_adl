@@ -1,0 +1,50 @@
+#
+# Test basic loads and stores with a two-level cache, where the first-level
+# cache is write-through.  This only works (currently) if external DMI write
+# updates are disabled via a flag in the .ttc file.
+#
+= asm
+
+	stw r1,0x1000(r0)
+	stw r2,0x1004(r0)
+	stw r3,0x1008(r0)
+	stw r4,0x100c(r0)
+	addi r5,r5,1
+	lwz r6,0x1000(r0)
+	lwz r7,0x1004(r0)
+	lwz r8,0x1008(r0)
+	lwz r9,0x100c(r0)
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x90201000	#	stw r1,0x1000(r0)
+MD n=Mem ra=0x00000004 d=0x90401004	#	stw r2,0x1004(r0)
+MD n=Mem ra=0x00000008 d=0x90601008	#	stw r3,0x1008(r0)
+MD n=Mem ra=0x0000000c d=0x9080100C	#	stw r4,0x100c(r0)
+MD n=Mem ra=0x00000010 d=0x38A50001	#	addi r5,r5,1
+MD n=Mem ra=0x00000014 d=0x80C01000	#	lwz r6,0x1000(r0)
+MD n=Mem ra=0x00000018 d=0x80E01004	#	lwz r7,0x1004(r0)
+MD n=Mem ra=0x0000001c d=0x81001008	#	lwz r8,0x1008(r0)
+MD n=Mem ra=0x00000020 d=0x8120100C	#	lwz r9,0x100c(r0)
+# </GEN>
+
+CORE n=:P
+
+RD n=CCR d=0xc0000400
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=40
+
+RESULTS
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+RD n=GPR i=3 d=30
+RD n=GPR i=4 d=40
+RD n=GPR i=6 d=10
+RD n=GPR i=7 d=20
+RD n=GPR i=8 d=30
+RD n=GPR i=9 d=40

@@ -1,0 +1,61 @@
+//
+// Simple test of instructions.Support for partially specialized instr field
+//
+
+define (arch=minippc) {
+
+  define (mem=MemA) {
+    size = 2048;
+    addr_unit = 1;
+  }
+
+  define (regfile = GPR) {
+    size = 32;
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+    ref = GPR;
+  }
+
+
+
+  define (instrfield=RS) {
+    bits = (6,10);
+    ref = GPR;
+  }
+
+  define (instrfield=UI) {
+    bits = (16,31);
+  }
+
+
+
+  define (instr=ork) {
+    fields=(OPCD(24),RS(15),RA,UI);
+    action = {};
+  }
+
+  define (instr=orj) {
+    fields=(OPCD(24),RS,RA,UI);
+    action = {};
+  }
+
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

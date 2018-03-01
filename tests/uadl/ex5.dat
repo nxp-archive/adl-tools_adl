@@ -1,0 +1,53 @@
+#
+# Test to make sure that an instruction dependent upon a prior instruction which
+# takes an exception will execute.  We want to make sure that the instruction
+# that takes the exception releases its resources.
+#
+= asm
+  
+	lwz    r1,0x1000(0)
+  addi   r2,r1,10
+	.long 0x0
+	addi r31,r31,1
+	mfspr r30,SRR0
+	addi r30,r30,4
+	mtspr SRR0,r30
+	rfi
+
+= /asm
+
+= mdopts
+
+	instr-offset:  0x10000
+
+= /mdopts
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00010000 d=0x80201000	#	lwz    r1,0x1000(0)
+MD n=Mem ra=0x00010004 d=0x3841000A	#	addi   r2,r1,10
+MD n=Mem ra=0x00010008 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0001000c d=0x3BFF0001	#	addi r31,r31,1
+MD n=Mem ra=0x00010010 d=0x7FDA02A6	#	mfspr r30,SRR0
+MD n=Mem ra=0x00010014 d=0x3BDE0004	#	addi r30,r30,4
+MD n=Mem ra=0x00010018 d=0x7FDA03A6	#	mtspr SRR0,r30
+MD n=Mem ra=0x0001001c d=0x4C000064	#	rfi
+# </GEN>
+
+RD n=NIA d=0
+RD n=IVOR7 d=0x0001000c
+
+MD n=Mem ra=0xa1000 d=0xdeadbeef
+
+# ea=0x0000 ra=0x10000
+TD n=TlbCam set=0 way=0 V=1 TID=0 SIZE=1 TS=0 RPN=0x40 WIMG=0x1 EPN=0x0 SX=1 SR=1 SW=1 UX=1 UR=1 UW=1
+
+# ea=0x1000 ra=0xA1000
+TD n=TlbCam set=0 way=2 V=1 TID=0 SIZE=1 TS=0 RPN=0x284 WIMG=0x2 EPN=0x4 SX=0 SR=0 SW=0 UX=0 UR=0 UW=0 
+
+RESULTS
+
+RD n=GPR i=1  d=0
+RD n=GPR i=2  d=10
+RD n=GPR i=31 d=1

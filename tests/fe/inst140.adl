@@ -1,0 +1,71 @@
+//
+// Error checking with shorthands that map to multiple instructions.
+//
+
+define (arch=minippc) {
+
+  define (reg=pc) {
+    attrs = (cia,nia);
+  }
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=RB) {
+    bits = (16,20);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  define (instrfield=(R1,R2,R3)) {
+    width = 5;
+    pseudo = true;
+  }
+
+  define (regfile=GPR) { size = 32; };
+
+  define (instr=addi) {
+    fields=(OPCD(14),RT,RA,SI);
+    action = {
+      if (RA == 0) {
+        GPR(RT) = SI;
+      } else {
+        GPR(RT) = GPR(RA) + SI;
+      }
+    };
+  }
+
+  define (instr=add) {
+    fields=(OPCD(31),RT,RA,RB,XO(266));
+    action = {
+      GPR(RT) = GPR(RA) + GPR(RB);
+    };
+  }
+
+  // True aliases (those actually recognized by a simulator) are not allowed to
+  // map to multiple instructions.
+  define(instr=add2) {
+    fields = (OPCD(14),RT,RA,SI);
+    alias = ( addi(RT(RT),RA(RA),SI(SI)), add(RT(RT),RA(RA),RB(RT)) );
+  } 
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

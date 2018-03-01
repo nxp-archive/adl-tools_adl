@@ -1,0 +1,47 @@
+// Small test on legal encoding overlap
+
+define (arch=minippc) {
+
+  define (instrfield=OPCD) {
+    bits = (0,7);
+  }
+  
+  define (instrfield=RA) {
+    bits = (8,11);
+  }
+
+  define (instrfield=XO) {
+    bits = (12,15);
+  }
+
+  define(instr=a) {
+    width = 32;
+    fields=(OPCD(0x11));
+    action = {};
+  }
+ 
+  define(instr=b) {
+    width = 32;
+    fields=(OPCD(0x11),RA(2));
+    action = {};
+  }
+  
+  define(instr=c) {
+    fields=(OPCD(0x11),RA(1));
+    action = {};
+  }
+ 
+  define(instr=d) {
+    fields=(OPCD(0x11),RA(1),XO(1));
+    action = {};
+  }
+ 
+
+
+  define (reg=pc) { attrs = (cia,nia);};
+
+}
+
+define (core=P) {
+  archs=minippc;
+}

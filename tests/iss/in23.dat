@@ -1,0 +1,72 @@
+#
+# Further exercising of write hooks whose behavior is modified
+# by parameters.
+#
+# <ASM>
+#
+#     mtspr 100,r1
+#     mtspr 51,r20
+#     mtspr 101,r1
+#     mtspr 102,r1
+#     mtspr 51,r21
+#     mtspr 100,r1
+# </ASM>
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C241BA6	# mtspr 100,r1
+MD n=Mem ra=0x00000004 d=0x7E930BA6	# mtspr 51,r20
+MD n=Mem ra=0x00000008 d=0x7C251BA6	# mtspr 101,r1
+MD n=Mem ra=0x0000000c d=0x7C261BA6	# mtspr 102,r1
+MD n=Mem ra=0x00000010 d=0x7EB30BA6	# mtspr 51,r21
+MD n=Mem ra=0x00000014 d=0x7C241BA6	# mtspr 100,r1
+# </GEN>
+CORE n=:P
+RD n=HID0 d=0x00000000
+RD n=HID1 d=0x00000000
+
+RD n=GPR i=1 d=0x12345678_deadbeef
+
+RD n=GPR i=20 d=0x80000000
+RD n=GPR i=21 d=0x00000000
+
+TRACE
+
+I id=1 ea=0x0
+M n=Mem t=ifetch ea=0x0 d=0x7c241ba6
+INSTR op=0x7c241ba6 asm="mtspr 1,100"
+R n=AReg d=0x12345678deadbeef
+
+I id=2 ea=0x4
+M n=Mem t=ifetch ea=0x4 d=0x7e930ba6
+INSTR op=0x7e930ba6 asm="mtspr 20,51"
+R n=HID1 d=0x80000000
+
+I id=3 ea=0x8
+M n=Mem t=ifetch ea=0x8 d=0x7c251ba6
+INSTR op=0x7c251ba6 asm="mtspr 1,101"
+R n=BReg d=0x00000000deadbeef
+
+I id=4 ea=0xc
+M n=Mem t=ifetch ea=0xc d=0x7c261ba6
+INSTR op=0x7c261ba6 asm="mtspr 1,102"
+R n=CReg d=0x00000000deadbeef
+
+I id=5 ea=0x10
+M n=Mem t=ifetch ea=0x10 d=0x7eb30ba6
+INSTR op=0x7eb30ba6 asm="mtspr 21,51"
+R n=HID1 d=0x00000000
+
+I id=6 ea=0x14
+M n=Mem t=ifetch ea=0x14 d=0x7c241ba6
+INSTR op=0x7c241ba6 asm="mtspr 1,100"
+R n=AReg d=0x12345678deadbeef
+
+I id=7 ea=0x18
+M n=Mem t=ifetch ea=0x18 d=0x0
+INSTR op=0x0 asm="halt"
+
+RESULTS
+
+RD n=AReg d=0x12345678deadbeef
+RD n=BReg d=0x00000000deadbeef
+RD n=CReg d=0x00000000deadbeef
+

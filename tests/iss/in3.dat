@@ -1,0 +1,31 @@
+#
+# A basic counter loop.
+#
+= asm
+
+loop:
+      add             r2,r2,r1
+      subic.  r3,r3,1
+      bne             loop
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C420A14	# add r2,r2,r1
+MD n=Mem ra=0x00000004 d=0x3463FFFF	# subic. r3,r3,1
+MD n=Mem ra=0x00000008 d=0x4082FFF8	# bne loop
+# </GEN>
+CORE n=:P
+RD n=NIA     d=0x00000000
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=100
+RD n=GPR i=3 d=10
+RD n=XER     d=0x00000000
+
+RESULTS
+
+RD n=GPR i=1 d=30
+RD n=GPR i=2 d=400
+RD n=GPR i=3 d=0
+
+RD n=XER     d=0x20000000

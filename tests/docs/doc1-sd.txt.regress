@@ -1,0 +1,38 @@
+
+--------------------------------------------------------------------------------------------------------------------
+| SYNTAX               | SOURCES              | DESTINATIONS         | INPUTS               | OUTPUTS              |
+--------------------------------------------------------------------------------------------------------------------
+| add RT, RA, RB       |                      |                      | GPR(RA), GPR(RB)     | GPR(RT)              |
+| add2                 |                      |                      | GPR(0)               | GPR(0)               |
+| addi RT, RA, SI      |                      |                      | GPR(RA)?             | GPR(RT)              |
+| addic. RT, RA, SI    |                      |                      | CR, GPR(RA)          | CR, GPR(RT)          |
+| addis RT, RA, SI     |                      |                      | GPR(RA)?             | GPR(RT)              |
+| bc BO, BI, BD        |                      |                      | CIA?, CR/p, CTR?     | CTR?, NIA?           |
+| cmp BF, RA, RB       |                      |                      | CR, GPR(RA), GPR(RB) | CR                   |
+| cmpi BF, RA, SI      |                      |                      | CR, GPR(RA)          | CR                   |
+| crand RT, RA, RB     |                      |                      | FOO2/p               | GPR(RT)              |
+| crandc RS, RA, RB    |                      |                      | GPR(RS)              | FOO2/p               |
+| dum1F1 RA,RS         |                      |                      |                      |                      |
+| halt                 |                      |                      |                      |                      |
+| li RT,SI32           |                      |                      |                      |                      |
+| lwz RT, RA, D        |                      |                      | GPR(RA)              | GPR(RT)              |
+| lwzx RT, RA, RB      |                      |                      | GPR(RA), GPR(RB)     | GPR(RT)              |
+| mfspr RT, SPRN       |                      |                      | ESR?, SPR(SPRN)      | GPR(RT)              |
+| mr RA,RS             | RS(RS), RB(RS)       | RA(RA)               | GPR(RS)              | GPR(RA)              |
+| mtspr RS, SPRN       |                      |                      | ESR?, GPR(RS)        | SPR(SPRN)            |
+| mullw RT, RA, RB     |                      |                      | GPR(RA), GPR(RB)     | GPR(RT)              |
+| or RS, RA, RB        |                      |                      | GPR(RB), GPR(RS)     | GPR(RA)              |
+| ori RS, RA, UI       |                      |                      | GPR(RS)              | GPR(RA)              |
+| rfi RS, RA, RB       |                      |                      | SRR0, SRR1           | MSR, NIA             |
+| rlwinm RS, RA, SH,   |                      |                      | GPR(RS)              | GPR(RA)              |
+| se_add RY, RX        | RA(RX), RB(RY)       | RT(RX)               | GPR(RX), GPR(RY)     | GPR(RX)              |
+| se_addi RX,OIM5      |                      |                      | rGPR(RX)             | rGPR(RX)             |
+| stw RS, RA, D        |                      |                      | GPR(RA), GPR(RS)     |                      |
+| stwu RS, RA, D       |                      |                      | GPR(RA), GPR(RS)     | GPR(RA)              |
+| stwx RS, RA, RB      |                      |                      | GPR(RA), GPR(RB),    |                      |
+|                      |                      |                      | GPR(RS)              |                      |
+| tw RA, RB            |                      |                      | GPR(RA), GPR(RB + 1) | FOO1, GPR(RB)        |
+| vaddubm RT, RA, RB   |                      |                      | VPR(RA)/p, VPR(RB)/p | VPR(RT)/p            |
+| vadduhm RT, RA, RB   |                      |                      | VPR(RA)/p, VPR(RB)/p | VPR(RT)/p            |
+| vadduwm RT, RA, RB   |                      |                      | VPR(RA)/p, VPR(RB)/p | VPR(RT)/p            |
+--------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,10 @@
+
+// Define various instructions as being part of split-branches (or canceling
+// that effect).
+define (core=P) {
+  define (config) {
+    split_branch_begin  = (ptb);
+    split_branch_end    = (bcctr,bctr);
+    split_branch_cancel = (mtctr);
+  }
+}

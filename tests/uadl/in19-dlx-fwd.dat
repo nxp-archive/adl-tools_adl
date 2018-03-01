@@ -1,0 +1,33 @@
+#
+# Results for running iss/in19.dat on dlx-fwd and dlx-fwd-safe
+#
+
+CORE n=:P
+
+TRACE
+
+
+I ea=0xca6498c0 id=1
+M n=Mem t=ifetch ea=0xca6498c0 ra=0xca6498c0 d=0x7d0a2b2e
+INSTR op=0x7d0a2b2e					asm="sthx r8,r10,r5"
+ITIME t=1
+D n=Mem t=write ea=0x6f47562 nb=2
+M n=Mem t=write ea=0x6f47560 ra=0x6f47560 d=0x047cc7c5
+CTIME t=5
+
+I ea=0xca6498c4 id=2
+M n=Mem t=ifetch ea=0xca6498c4 ra=0xca6498c4 d=0x00000000
+INSTR op=0x00000000					asm="halt "
+ITIME t=2
+CTIME t=6
+
+RESULTS
+
+RESULTS
+
+RD n=CR d=0x0577594e
+RD n=GPR i=10 d=0x1ef8a6af
+RD n=GPR i=5 d=0xe7fbceb3
+RD n=GPR i=8 d=0x7fffc7c5
+RD n=XER d=0xe0000017
+MD n=Mem ra=0x06f47560 d=0x047cc7c5

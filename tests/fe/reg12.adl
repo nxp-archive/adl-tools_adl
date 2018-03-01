@@ -1,0 +1,71 @@
+//
+// Using defmod, we can modify a register- add fields,
+// remove fields, or change parms.  We also check that our
+// calculations for bit widths and stuff are done once all
+// register modifications are finished.
+//
+
+define (arch = minippc) {
+
+  attrs = (A,B,C);
+
+  define (regfile = vprs) {
+    width = 128;
+    size = 32;
+    prefix = v;
+    define (field = d) {
+      indexed = 64;
+    }
+    define (field = w) {
+      attrs = (A,B);
+      indexed = 32;
+    }
+    define (field = h) {
+      indexed = 16;
+    }
+    define (field = b) {
+      indexed = 8;
+    }
+  }
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  define (reg = a) {
+    width = 32;
+    define (field = f0) {
+      attrs = C;
+      "A reserved field.";
+      bits = (0,10);
+      reserved = 1;
+    }
+    define (field = f1) {
+      "A read-only field.";
+      bits = (11,20);
+      readonly = 1;
+    }
+    define (field = f2) {
+      bits = (21,31);
+    }
+  }
+
+  defmod(regfile = vprs) {
+    width = 64;
+    define (field = d) {
+      remove = 1;
+    }
+  }
+
+  defmod(reg = a) {
+    define (field = f2) {
+      remove = 1;
+    }
+  }
+
+}
+
+define (core = P) {
+  archs = minippc;
+}
+

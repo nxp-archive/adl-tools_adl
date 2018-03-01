@@ -1,0 +1,2 @@
+group4.adl:32: Attempt to use group 'regfile_g' which has not yet been defined.
+group4.adl:36: Nonhomogeneous group 'reg_g': The type of group is 'instrfield' but 'c' of this type does not exist.

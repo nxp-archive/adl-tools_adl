@@ -1,0 +1,32 @@
+#
+# Check that an explicit cache invalidate will invalidate an entry
+# in the DMI cache.
+#
+= asm
+
+  lwz r1,0x1000(r0)   # Puts entry in DMI.
+  dcbf r0,r10         # Invalidate that entry.
+  stw r1,0x1004(r0)
+  lwz r2,0x1004(r0)   # Should reload entry b/c it was invalidated.
+
+= /asm
+
+CORE n=:P
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x80201000	#	lwz r1,0x1000(r0)   # Puts entry in DMI.
+MD n=Mem ra=0x00000004 d=0x7C0050AC	#	dcbf r0,r10         # Invalidate that entry.
+MD n=Mem ra=0x00000008 d=0x90201004	#	stw r1,0x1004(r0)
+MD n=Mem ra=0x0000000c d=0x80401004	#	lwz r2,0x1004(r0)   # Should reload entry b/c it was invalidated.
+# </GEN>
+
+RD n=CCR      d=0xc0000000
+RD n=GPR i=10 d=0x00001000
+
+MD n=Mem ra=0x1000 d=0xdeadbeef
+
+RESULTS
+
+RD n=GPR i=1 d=0xdeadbeef
+RD n=GPR i=2 d=0xdeadbeef
+

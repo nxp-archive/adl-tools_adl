@@ -1,0 +1,88 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+Registers:
+  Name:  "CIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia
+  -------------------------------
+  Name:  "NIA"
+  Usage:  read, written
+  Width:  32
+  Attributes:  nia
+  -------------------------------
+Current-instruction-address register:  CIA
+Next-instruction-address register:  NIA
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+  RA: [11,15] 
+  RB: [16,20] 
+  RT: [6,10] 
+  Rc: [31,31] 
+  Res: 
+    Pseudo:  1
+    Width:   5
+  Src1: 
+    Pseudo:  1
+    Width:   5
+  Src2: 
+    Pseudo:  1
+    Width:   5
+  XO: [21,30] 
+Instructions:
+  Name:  add_outer (rank: 100)
+  Width:  32
+  Fields:  Src1 Src2 Res
+  Action:  {
+     var x = Res . uint32 (  ) ;
+     var y = Src1 ;
+    GPR ( x ) = GPR ( y )[read: GPR(y (Src1))] + GPR ( Src2 )[read: GPR(Src2)] + extra[helper: GPR(Src1 ( 0 , 1 )), GPR(Src2 ( 0 , 1 )), ] ( Src1 ( 0 , 1 ) , Src2 ( 0 , 1 ) )[write: GPR(x (Res . uint32 (  ))) := GPR ( y )[read: GPR(y (Src1))] + GPR ( Src2 )[read: GPR(Src2)] + extra[helper: GPR(Src1 ( 0 , 1 )), GPR(Src2 ( 0 , 1 )), ] ( Src1 ( 0 , 1 ) , Src2 ( 0 , 1 ) )] ;
+}
+  Source Registers:  GPR(Src1) GPR(Src1 ( 0 , 1 )) GPR(Src2) GPR(Src2 ( 0 , 1 )) 
+  Target Registers:  GPR(Res . uint32 (  )) 
+  Helper Functions:  extra 
+  Nested insructions:  
+    Name:  add (rank: 100)
+    Width:  32
+    Fields:  OPCD(31) RT RA RB XO(266) Rc(0)
+    Alias:  add_outer Src1(RA & 0xf) Src2(RB & 0xf) Res(RT & 0xf) 
+    Source Registers:  GPR(Src1) GPR(Src1 ( 0 , 1 )) GPR(Src2) GPR(Src2 ( 0 , 1 )) 
+    Target Registers:  GPR(Res . uint32 (  )) 
+    Helper Functions:  extra 
+    -------------------------------
+    Name:  add. (rank: 100)
+    Width:  32
+    Fields:  OPCD(31) RT RA RB XO(266) Rc(1)
+    Alias:  add_outer Src1(RA + 16) Src2(RB + 16) Res(RT + 16) 
+    Source Registers:  GPR(Src1) GPR(Src1 ( 0 , 1 )) GPR(Src2) GPR(Src2 ( 0 , 1 )) 
+    Target Registers:  GPR(Res . uint32 (  )) 
+    Helper Functions:  extra 
+    -------------------------------
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc0007ff
+    2080375316(7c000214):  add
+    2080375317(7c000215):  add.
+
+Helper Functions:
+  extra:
+ bits < 32 > extra ( bits < 2 > n , bits < 2 > m ) {
+    return ( GPR ( n )[read: GPR(n)] + GPR ( m )[read: GPR(m)] ) / 2 ;
+}
+    Source Registers:  GPR(m [parm #1]) GPR(n [parm #0]) 
+-------------------------------
+

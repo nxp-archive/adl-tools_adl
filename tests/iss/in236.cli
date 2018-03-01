@@ -1,0 +1,20 @@
+#
+# Test instruction jamming in an SMT model via the 'ijam' function.
+#
+
+go
+#	addi r2,r2,2
+ijam PMT:t0 0x38420002
+#	addi r2,r2,4
+ijam PMT:t1 0x38420004
+#	addi r3,r3,3
+setpath PMT:t0
+ijam 0x38630003
+#	addi r3,r3,6
+setpath PMT:t1
+ijam 0x38630006
+#	lwz r4,0x1000(r0)
+ijam PMT:t0 0x80801000
+#	lwz r4,0x1004(r0)
+ijam PMT:t1 0x80801004
+quit

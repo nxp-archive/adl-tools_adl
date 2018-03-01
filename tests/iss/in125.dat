@@ -1,0 +1,31 @@
+# <ASM>
+# .align 8
+#
+#     Test with ADL generated encoding       
+#
+# 	mv d0:d2:d4:d6,d4		
+# 	mv d8:d10:d12:d14,d11
+#         add d0,d2,d5
+# 	add d8,d0,d12	
+#         stop
+# </ASM>
+# <GEN>
+
+MD n=Mem ra=0x0000000000000000 d=0x42005580	#	(1107318144)
+MD n=Mem ra=0x0000000000000004 d=0x24942c30	#	(613690416)
+MD n=Mem ra=0x0000000000000008 d=0x60000000	#	(1610612736)
+
+CORE n=:SC
+
+TRACE
+
+RESULTS
+RD n=NPC d=0x0000000a
+RD n=D i=0 d=0x0000000008
+RD n=D i=4 d=0x000000001a
+RD n=D i=5 d=0x0000000002
+RD n=D i=11 d=0x00000000ba
+RD n=D i=12 d=0x0000000008
+MD n=Mem ra=0x0000000000000000 d=0x42005580	#	(1107318144)
+MD n=Mem ra=0x0000000000000004 d=0x24942c30	#	(613690416)
+MD n=Mem ra=0x0000000000000008 d=0x60000000	#	(1610612736)

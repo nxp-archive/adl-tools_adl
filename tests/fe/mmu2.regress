@@ -1,0 +1,8 @@
+mmu2.adl:39: Unknown variable/resource found in action code:  PID0
+mmu2.adl:40: The first argument to the Compare test must be a field name.
+mmu2.adl:41: The first argument to the AddrComp test must be a field name.
+mmu2.adl:42: The AddrIndex test is only allowed for arrays with a set-associativity of 1.
+mmu2.adl:43: Unknown variable/resource found in action code:  FOO
+mmu2.adl:44: Unknown variable/resource found in action code:  FooCam
+mmu2.adl:9: Unknown variable/resource found in action code:  FOO
+mmu2.adl:12: Unknown variable/resource found in action code:  FOO

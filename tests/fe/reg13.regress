@@ -1,0 +1,133 @@
+reg13.adl:66: warning: Target of alias is smaller than the alias.  This will result in 0-padding in the higher-order bits.
+reg13.adl:66: warning: Target of alias is smaller than the alias.  This will result in 0-padding in the higher-order bits.
+reg13.adl:72: warning: Target of alias is larger than the alias.  This will result in truncation.
+reg13.adl:72: warning: Target of alias is larger than the alias.  This will result in truncation.
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPRS"
+  Size:  32
+  Read alias/hook:
+    gprs
+
+  Write alias/hook:
+    gprs
+
+  Width:  64
+  Pseudo:  1
+  -------------------------------
+  Name:  "gprs"
+  Size:  32
+  Usage:  read, written
+  Width:  64
+  -------------------------------
+  Name:  "mixed_gprs"
+  Size:  16
+  Read alias/hook:
+    gprs (Regs:  0 1 2 3 4 5 6 7 24 25 26 27 28 29 30 31 )
+
+  Write alias/hook:
+    gprs (Regs:  0 1 2 3 4 5 6 7 24 25 26 27 28 29 30 31 )
+
+  Width:  64
+  Pseudo:  1
+  -------------------------------
+Registers:
+  Name:  "A"
+  Read alias/hook:
+    a
+
+  Write alias/hook:
+    a
+
+  Usage:  read, written
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "B"
+  Read alias/hook:
+    gprs(1)
+
+  Write alias/hook:
+    gprs(1)
+
+  Width:  64
+  Pseudo:  1
+  -------------------------------
+  Name:  "C"
+  Read alias/hook:
+    gprs(5)
+
+  Write alias/hook:
+    gprs(6)
+
+  Width:  64
+  Pseudo:  1
+  -------------------------------
+  Name:  "D"
+  Read alias/hook:
+    A
+
+  Write alias/hook:
+    A
+
+  Width:  64
+  Pseudo:  1
+  -------------------------------
+  Name:  "E"
+  Read alias/hook:
+    A
+
+  Write alias/hook:
+    A
+
+  Width:  16
+  Pseudo:  1
+  -------------------------------
+  Name:  "SPRG0"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "USPRG0"
+  Read alias/hook:
+    SPRG0
+
+  Write alias/hook:
+    (ignored)
+
+  Width:  32
+  Pseudo:  1
+  -------------------------------
+  Name:  "a"
+  Usage:  read, written
+  Width:  32
+  -------------------------------
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Instruction Fields:
+  OPCD: [0,5] 
+Instructions:
+  Name:  A (rank: 100)
+  Width:  32
+  Fields:  OPCD(20)
+  Action:  {
+}
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    20(50000000):  A
+-------------------------------
+

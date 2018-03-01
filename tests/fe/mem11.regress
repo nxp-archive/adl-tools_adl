@@ -1,0 +1,92 @@
+======
+Cores:
+======
+Name:  "P"
+Register Files:
+  Name:  "GPR"
+  Size:  32
+  Prefix:  r
+  Usage:  read, written
+  Width:  32
+  Documention:
+
+General purpose registers.
+    
+  -------------------------------
+Registers:
+  Name:  "pc"
+  Usage:  read, written
+  Width:  32
+  Attributes:  cia nia
+  -------------------------------
+Current-instruction-address register:  pc
+Next-instruction-address register:  pc
+Real-address Mask:
+  Initial mask:  0xffffffff (constant)
+Effective-address Mask:
+  Initial mask:  0xffffffff (constant)
+Delayed Write Targets:  Mem 
+Memories:
+  Name:  data (1)
+  Size:   512
+  Addressing unit: 1
+
+Instruction Fields:
+  D: [16,31] 
+        Immediate field used to specify a 16-bit signed two's complement integer
+    which is sign-extended to 64-bits.
+    
+  OPCD: [0,5] 
+        Primary opcode.
+    
+  RA: [11,15] 
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RB: [16,20] [not used]
+        Field used to specify a General Purpose Register to be used as a source.
+    
+  RT: [6,10] 
+        Field used to specify a General Purpose Register to be used as a target.
+    
+  XO: [21,30] [not used] 
+        Extended opcode.
+    
+Instructions:
+  Name:  lwz (rank: 100)
+  Width:  32
+  Fields:  OPCD(32) RT RA D
+  Action:  {
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA )[read: GPR(RA)] ;
+     var addr = b + d ;
+    GPR ( RT ) = data ( addr , 4 )[read: data @ addr of 4 bytes][write: GPR(RT) := data ( addr , 4 )[read: data @ addr of 4 bytes]] ;
+    GPR ( RT + 1 ) = Mem ( addr , 4 )[read: Mem @ addr of 4 bytes][write: GPR(RT + 1) := Mem ( addr , 4 )[read: Mem @ addr of 4 bytes]] ;
+    GPR ( RT + 2 ) = Mem ( addr , 4 , CacheIFetch )[read: Mem @ addr of 4 bytes, type=CacheIFetch][write: GPR(RT + 2) := Mem ( addr , 4 , CacheIFetch )[read: Mem @ addr of 4 bytes, type=CacheIFetch]] ;
+    GPR ( RT + 3 ) = Mem ( addr & 0x3 , 4 , CacheRead , true , addr )[read: Mem @ addr & 0x3 of 4 bytes, type=CacheRead, critical-addr=addr][write: GPR(RT + 3) := Mem ( addr & 0x3 , 4 , CacheRead , true , addr )[read: Mem @ addr & 0x3 of 4 bytes, type=CacheRead, critical-addr=addr]] ;
+}
+  Source Registers:  GPR(RA) 
+  Target Registers:  GPR(RT) GPR(RT + 1) GPR(RT + 2) GPR(RT + 3) 
+  Source Memories:  Mem data 
+  -------------------------------
+  Name:  stw (rank: 100)
+  Width:  32
+  Fields:  OPCD(31) RT RA D
+  Action:  {
+     var d = signExtend ( D , 32 ) ;
+     var b = ( RA == 0 ) ? 0 : GPR ( RA )[read: GPR(RA)] ;
+     var addr = b + d ;
+    data ( addr , 4 ) = GPR ( RT )[read: GPR(RT)][write: data @ addr of 4 bytes := GPR ( RT )[read: GPR(RT)]] ;
+    Mem ( addr , 4 ) = GPR ( RT + 1 )[read: GPR(RT + 1)][write: Mem @ addr of 4 bytes := GPR ( RT + 1 )[read: GPR(RT + 1)]] ;
+    delayed_write ( Mem ( addr , 4 ) , 2 ) = GPR ( RT + 1 )[read: GPR(RT + 1)][delayed (by 2) write: Mem @ addr of 4 bytes := GPR ( RT + 1 )[read: GPR(RT + 1)]] ;
+}
+  Source Registers:  GPR(RA) GPR(RT) GPR(RT + 1) 
+  Target Memories:  Mem Mem/d[2] data 
+  -------------------------------
+
+Instruction Tables:
+other:
+    Mask:  0xfc000000
+    31(7c000000):  stw
+    32(80000000):  lwz
+-------------------------------
+

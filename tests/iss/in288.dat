@@ -1,0 +1,81 @@
+#
+# Make sure that we can enforce progress via the td threshold for MT models.
+# This is only guaranteed to work with an MT sim if td-count=10, to force both
+# threads to run before either do the final loads.
+#
+= asm
+
+	.equ C1Data,					0x3100
+	.equ C2Data,					0x3200
+
+Start0:
+	b Prog1
+	.long 0x0
+
+Start1:
+	b Prog2
+	.long 0x0
+
+  # The first program writes to memory, then waits, then reads memory from core 2.
+Prog1:
+	li r1,50
+	stw r1,C1Data(r0)   # Data to be read by P1.
+	li r1,20
+	mtctr r1
+L1:
+	bdnz L1
+	lwz r2,C2Data(r0)   # Load data written by P1.
+	.long 0x0
+	
+Prog2:
+	li r1,60
+	stw r1,C2Data(r0)   # Data to be read by P0.
+	li r1,20
+	mtctr r1
+L2:
+	bdnz L2
+	lwz r2,C1Data(r0)   # Load data written by P0.
+	.long 0x0
+
+= /asm
+
+#
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x48000010	#	b Prog1
+MD n=Mem ra=0x00000004 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000008 d=0x48000024	#	b Prog2
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x38200032	#	li r1,50
+MD n=Mem ra=0x00000014 d=0x90203100	#	stw r1,C1Data(r0)   # Data to be read by P1.
+MD n=Mem ra=0x00000018 d=0x38200014	#	li r1,20
+MD n=Mem ra=0x0000001c d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x00000020 d=0x42000000	#	bdnz L1
+MD n=Mem ra=0x00000024 d=0x80403200	#	lwz r2,C2Data(r0)   # Load data written by P1.
+MD n=Mem ra=0x00000028 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000002c d=0x3820003C	#	li r1,60
+MD n=Mem ra=0x00000030 d=0x90203200	#	stw r1,C2Data(r0)   # Data to be read by P0.
+MD n=Mem ra=0x00000034 d=0x38200014	#	li r1,20
+MD n=Mem ra=0x00000038 d=0x7C2903A6	#	mtctr r1
+MD n=Mem ra=0x0000003c d=0x42000000	#	bdnz L2
+MD n=Mem ra=0x00000040 d=0x80403100	#	lwz r2,C1Data(r0)   # Load data written by P0.
+MD n=Mem ra=0x00000044 d=0x00000000	#	.long 0x0
+# </GEN>
+
+
+CORE n=:procs:P0
+
+RD n=NIA   d=0x00
+
+CORE n=:procs:P1
+
+RD n=NIA   d=0x8
+
+RESULTS
+
+CORE n=:procs:P0
+
+RD n=GPR i=2 d=60
+
+CORE n=:procs:P1
+
+RD n=GPR i=2 d=50

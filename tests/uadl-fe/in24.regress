@@ -1,0 +1,7 @@
+in24.uadl:42: Unknown variable/resource found in action code:  Flag
+in24.uadl:41: Action has no destination states.
+in24.uadl:33: Exec() was never called in any state action for this instruction class.
+adl: Initial state has no exiting states.
+
+in24.uadl:5: warning: Instructions access no data memory
+Could not parse in24.uadl

@@ -1,0 +1,129 @@
+#
+# Make sure that our invalid read/write logic for SPRs works.
+#
+
+= asm
+
+  mtspr 1000,r2
+  mfspr r2,1001
+  .long 0x0
+  .long 0x0
+  mfspr r28,SRR0
+  addi r28,r28,4
+  mtspr SRR0,r28
+  addi r29,r29,1
+  rfi
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x7C48FBA6	#	mtspr 1000,r2
+MD n=Mem ra=0x00000004 d=0x7C49FAA6	#	mfspr r2,1001
+MD n=Mem ra=0x00000008 d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x0000000c d=0x00000000	#	.long 0x0
+MD n=Mem ra=0x00000010 d=0x7F9A02A6	#	mfspr r28,SRR0
+MD n=Mem ra=0x00000014 d=0x3B9C0004	#	addi r28,r28,4
+MD n=Mem ra=0x00000018 d=0x7F9A03A6	#	mtspr SRR0,r28
+MD n=Mem ra=0x0000001c d=0x3BBD0001	#	addi r29,r29,1
+MD n=Mem ra=0x00000020 d=0x4C000064	#	rfi
+# </GEN>
+
+CORE n=:P
+
+RD n=IVPR  d=0x0
+RD n=IVOR6 d=0x10
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x7c48fba6
+INSTR op=0x7c48fba6					asm="mtspr 2,0x3e8"
+R n=NIA d=0x00000004
+R n=ESR d=0x08000000
+E n=Program
+R n=SRR0 d=0x00000000
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+R n=NIA d=0x00000010
+
+I ea=0x10 id=2
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7f9a02a6
+INSTR op=0x7f9a02a6					asm="mfspr 28,0x1a"
+R n=NIA d=0x00000014
+R n=GPR i=28 d=0x00000000
+
+I ea=0x14 id=3
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x3b9c0004
+INSTR op=0x3b9c0004					asm="addi 28,28,0x4"
+R n=NIA d=0x00000018
+R n=GPR i=28 d=0x00000004
+
+I ea=0x18 id=4
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7f9a03a6
+INSTR op=0x7f9a03a6					asm="mtspr 28,0x1a"
+R n=NIA d=0x0000001c
+R n=SRR0 d=0x00000004
+
+I ea=0x1c id=5
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x3bbd0001
+INSTR op=0x3bbd0001					asm="addi 29,29,0x1"
+R n=NIA d=0x00000020
+R n=GPR i=29 d=0x00000001
+
+I ea=0x20 id=6
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi 0,0,0"
+R n=NIA d=0x00000024
+R n=MSR d=0x00000000
+R n=NIA d=0x00000004
+
+I ea=0x4 id=7
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c49faa6
+INSTR op=0x7c49faa6					asm="mfspr 2,0x3e9"
+R n=NIA d=0x00000008
+R n=ESR d=0x08000000
+E n=Program
+R n=SRR0 d=0x00000004
+R n=SRR1 d=0x00000000
+R n=MSR d=0x00000000
+R n=NIA d=0x00000010
+
+I ea=0x10 id=8
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x7f9a02a6
+INSTR op=0x7f9a02a6					asm="mfspr 28,0x1a"
+R n=NIA d=0x00000014
+R n=GPR i=28 d=0x00000004
+
+I ea=0x14 id=9
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x3b9c0004
+INSTR op=0x3b9c0004					asm="addi 28,28,0x4"
+R n=NIA d=0x00000018
+R n=GPR i=28 d=0x00000008
+
+I ea=0x18 id=10
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x7f9a03a6
+INSTR op=0x7f9a03a6					asm="mtspr 28,0x1a"
+R n=NIA d=0x0000001c
+R n=SRR0 d=0x00000008
+
+I ea=0x1c id=11
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x3bbd0001
+INSTR op=0x3bbd0001					asm="addi 29,29,0x1"
+R n=NIA d=0x00000020
+R n=GPR i=29 d=0x00000002
+
+I ea=0x20 id=12
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x4c000064
+INSTR op=0x4c000064					asm="rfi 0,0,0"
+R n=NIA d=0x00000024
+R n=MSR d=0x00000000
+R n=NIA d=0x00000008
+
+I ea=0x8 id=13
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x00					asm="halt "
+R n=NIA d=0x00000009
+
+RESULTS
+
+RD n=GPR i=29 d=0x00000002

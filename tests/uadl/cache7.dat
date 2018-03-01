@@ -1,0 +1,46 @@
+#
+# Make sure that if we zero out memory via a cache operation, and that operation
+# is kicked to the next-level due to the fact that we're not allocating a cache
+# line, then things still work.  In this situation, we generate store-next
+# transactions to store to the next level and these were getting out of sync
+# with the corresponding store-buffer entries.
+#
+
+= asm
+
+	li r0,0
+	li r1,0x1000
+	dcbz r0,r1
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38000000	#	li r0,0
+MD n=Mem ra=0x00000004 d=0x38201000	#	li r1,0x1000
+MD n=Mem ra=0x00000008 d=0x7C000FEC	#	dcbz r0,r1
+# </GEN>
+
+CORE n=:P
+
+# Enable the cache and disable allocate-on-write.
+RD n=CCR d=0xf0000000
+
+MD n=Mem ra=0x1000 d=0xdeadbee1
+MD n=Mem ra=0x1004 d=0xdeadbee2
+MD n=Mem ra=0x1008 d=0xdeadbee3
+MD n=Mem ra=0x100c d=0xdeadbee4
+MD n=Mem ra=0x1010 d=0xdeadbee5
+MD n=Mem ra=0x1014 d=0xdeadbee6
+MD n=Mem ra=0x1018 d=0xdeadbee7
+MD n=Mem ra=0x101c d=0xdeadbee8
+
+RESULTS
+
+MD n=Mem ra=0x1000 d=0
+MD n=Mem ra=0x1004 d=0
+MD n=Mem ra=0x1008 d=0
+MD n=Mem ra=0x100c d=0
+MD n=Mem ra=0x1010 d=0
+MD n=Mem ra=0x1014 d=0
+MD n=Mem ra=0x1018 d=0
+MD n=Mem ra=0x101c d=0

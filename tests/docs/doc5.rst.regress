@@ -1,0 +1,1340 @@
+========
+DOC5 ISS
+========
+
+++++++++++++
+Subtitle One
+++++++++++++
+
+.. class:: subtitle
+
+Subtitle Two
+
+.. class:: subtitle
+
+Subtitle Three
+
+.. contents:: Table of Contents
+   :backlinks: entry
+   :depth: 2
+
+.. sectnum::
+
+.. |ne|:  mathml:: ne
+.. |le|:  mathml:: leq
+.. |ge|:  mathml:: geq
+.. |la|:  mathml:: wedge
+.. |lo|:  mathml:: vee
+.. |xor|: mathml:: oplus
+
+
+.. _adl-internal-target-0:
+Core: myCore (someCore)
+=======================
+
+
+.. _adl-internal-target-1:
+Overview
+--------
+
+  my Core
+  
+
+
+.. _adl-internal-target-2:
+Registers
+---------
+
+
+.. _adl-internal-target-3:
+*CCR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="50%" class="field">H<table class="subfield"><tr>
+   <td class="subfieldunused" title="Reserved" width="75%">[31,20]</td>
+   <td class="subfield" width="25%">L2dMissCnt[19,16]</td>
+   </tr></table>
+   </td>
+   <td colspan="2" width="50%" class="field">L<table class="subfield"><tr>
+   <td class="subfield" width="25%">L2iMissCnt[15,12]</td>
+   <td class="subfield" width="25%">L1dMissCnt[11,8]</td>
+   <td class="subfield" width="25%">L1dHitCnt[7,4]</td>
+   <td class="subfieldunused" title="Reserved" width="6.25%">[3]</td>
+   <td class="subfield" width="6.25%">WAY8[2]</td>
+   <td class="subfield" width="6.25%">L2E[1]</td>
+   <td class="subfield" width="6.25%">L1E[0]</td>
+   </tr></table>
+   </td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">16</td>
+   <td class="lefteven">15</td><td class="righteven">0</td>
+   </tr>
+   </table>
+   
+Description:
+
+  Cache control register.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - L
+       -  [15,0] 
+       - 
+     * - L1E
+       -  [0] 
+       - 
+     * - L2E
+       -  [1] 
+       - 
+     * - WAY8
+       -  [2] 
+       - 
+     * - L1dHitCnt
+       -  [7,4] 
+       - 
+     * - L1dMissCnt
+       -  [11,8] 
+       - 
+     * - L2iMissCnt
+       -  [15,12] 
+       - 
+     * - H
+       -  [31,16] 
+       - 
+     * - L2dMissCnt
+       -  [19,16] 
+       - 
+
+
+.. _adl-internal-target-4:
+*DEAR*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">DEAR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-5:
+*ELPC*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="93.75%" class="field">EPID</td>
+   <td width="3.125%" class="field">EAS</td>
+   <td width="3.125%" class="field">EPR</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">2</td>
+   <td class="singleeven">1</td>
+   <td class="singleodd">0</td>
+   </tr>
+   </table>
+   
+Description:
+
+  External PID Load Context Register.
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - EPR
+       -  [0] 
+       - 
+                   Replaces the MSR.PR bit for external-PID translations.
+                   
+     * - EAS
+       -  [1] 
+       - 
+                   Replaces the MSR.IS/MSR.DS bit for external-PID translations.
+                   
+     * - EPID
+       -  [31,2] 
+       - 
+                   Replaces the PID registers for external-PID translations.
+                   
+
+
+.. _adl-internal-target-6:
+*HDBCR0*
+````````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="96.875%" class="reserved" title="Reserved"></td>
+   <td width="3.125%" class="field">MMU_ENABLE</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">1</td>
+   <td class="singleeven">0</td>
+   </tr>
+   </table>
+   
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - MMU\_ENABLE
+       -  [0] 
+       - 
+
+
+.. _adl-internal-target-7:
+*MSR*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="65.625%" class="reserved" title="Reserved"></td>
+   <td width="3.125%" class="field">PR</td>
+   <td colspan="2" width="31.25%" class="reserved" title="Reserved"></td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">11</td>
+   <td class="singleeven">10</td>
+   <td class="leftodd">9</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - PR
+       -  [10] 
+       - 
+
+
+.. _adl-internal-target-8:
+*PC*
+````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="20.8333%" class="reserved" title="Reserved"></td>
+   <td colspan="2" width="12.5%" class="reserved" title="Reserved"></td>
+   <td colspan="2" width="66.6667%" class="field">B</td>
+   </tr>
+   <tr>
+   <td class="leftodd">23</td><td class="rightodd">19</td>
+   <td class="lefteven">18</td><td class="righteven">16</td>
+   <td class="leftodd">15</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Reset value:  3
+
+Description:
+
+  PC
+  
+  
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - B (read-only)
+       -  [15,0] 
+       - 
+     * - A (reserved)
+       -  [18,16] 
+       - 
+
+
+.. _adl-internal-target-9:
+*PID0*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">PID0</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+
+.. _adl-internal-target-10:
+*PID1*
+``````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">PID1</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+On a read
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return ThisReg ;
+    }
+    
+On a write
+  .. code_block:: cpp
+     :color:
+  
+    func ( bits < 32 > x ) {
+        ThisReg = x ;
+    }
+    
+
+.. _adl-internal-target-11:
+Register Files
+--------------
+
+
+.. _adl-internal-target-12:
+*D*
+```
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="10%" class="field">WH</td>
+   <td colspan="2" width="10%" class="field">WL</td>
+   <td colspan="2" width="80%" class="field">IL<table class="subfield"><tr>
+   <td class="subfield" width="50%">WH[31,16]<table class="subfield"><tr>
+   <td class="subfield" width="100%">H[31,16]<table class="subfield"><tr>
+   <td class="subfield" width="50%">HH[31,24]</td>
+   <td class="subfield" width="50%">HL[23,16]</td>
+   </tr></table>
+   </td>
+   </tr></table>
+   </td>
+   <td class="subfield" width="50%">WL[15,0]<table class="subfield"><tr>
+   <td class="subfield" width="100%">L[15,0]<table class="subfield"><tr>
+   <td class="subfield" width="50%">LH[15,8]</td>
+   <td class="subfield" width="50%">LL[7,0]</td>
+   </tr></table>
+   </td>
+   </tr></table>
+   </td>
+   </tr></table>
+   </td>
+   </tr>
+   <tr>
+   <td class="leftodd">39</td><td class="rightodd">36</td>
+   <td class="lefteven">35</td><td class="righteven">32</td>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  32
+
+Fields:
+  .. list-table::
+     :class: attributes
+     :widths: 15 10 40
+     :header-rows: 1
+  
+     * - Field
+       - Range
+       - Description
+     * - IL
+       -  [31,0] 
+       - 
+     * - WL
+       -  [35,32] [15,0] 
+       - 
+     * - L
+       -  [15,0] 
+       - 
+     * - LL
+       -  [7,0] 
+       - 
+     * - LH
+       -  [15,8] 
+       - 
+     * - WH
+       -  [39,36] [31,16] 
+       - 
+     * - H
+       -  [31,16] 
+       - 
+     * - HL
+       -  [23,16] 
+       - 
+     * - HH
+       -  [31,24] 
+       - 
+     * - E
+       -  [39,32] 
+       - 
+
+
+.. _adl-internal-target-13:
+*WXY*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">WXY</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  2
+
+.. list-table:: Constituent Registers
+   :class: sparsecontents
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Index
+     - Register Usage
+   * - 0
+     - `DEAR <#adl-internal-target-4>`__
+   * - 1
+     - `WXY1 <#adl-internal-target-14>`__
+       On a read:
+       
+         
+         .. code_block:: cpp
+            :color:
+         
+             {
+             return 0xeeeeaaaa ;
+             }
+             
+           
+       On a write:
+       
+         
+         .. code_block:: cpp
+            :color:
+         
+             {
+             DEAR = 0x1 ;
+             }
+             
+           
+   
+
+.. _adl-internal-target-15:
+*XYZ*
+`````
+
+
+.. raw:: html
+
+   <table class="field">
+   <tr><td colspan="2" width="100%" class="field">XYZ</td>
+   </tr>
+   <tr>
+   <td class="leftodd">31</td><td class="rightodd">0</td>
+   </tr>
+   </table>
+   
+Number of registers in file:  64
+
+.. list-table:: Constituent Registers
+   :class: sparsecontents
+   :widths: 10 40
+   :header-rows: 1
+
+   * - Index
+     - Register Usage
+   * - 1
+     - `DEAR <#adl-internal-target-4>`__
+   * - 2
+     - `XYZ:2 <#adl-internal-target-16>`__
+   
+
+.. _adl-internal-target-17:
+Instruction Fields
+------------------
+
+.. raw:: html
+
+   <a href="#ifield-section-j">&nbsp;&nbsp;J&nbsp;&nbsp;</a> <a href="#ifield-section-o">&nbsp;&nbsp;O&nbsp;&nbsp;</a> <a href="#ifield-section-r">&nbsp;&nbsp;R&nbsp;&nbsp;</a> <a href="#ifield-section-s">&nbsp;&nbsp;S&nbsp;&nbsp;</a> 
+
+
+.. _ifield-section-j:
+
+
+.. _adl-internal-target-18:
+*JJJJJ*
+```````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 8
+
+Description:
+
+  Example documentation string for an instruction field.
+  This is multiple lines, too.
+  
+  Previous indentation preservation::
+  
+      example {
+          abc();
+      }
+  
+  
+
+
+.. _adl-internal-target-19:
+*JJJJJ.Da*
+::::::::::
+
+.. _adl-internal-target-20:
+*JJJJJ.Db*
+::::::::::
+
+.. _adl-internal-target-21:
+*JJJJJ.Dc*
+::::::::::
+
+Syntax: **Da,Db,Dc**
+
+
+Reference: **`D <#adl-internal-target-12>`__**
+
+Permitted values:
+  .. list-table::
+     :class: attributes
+     :widths: 10 8
+     :header-rows: 1
+  
+     * - Values
+       - Encoding
+     * - d0 d4 d1 
+       - 00000
+     * - d0 d5 d2 
+       - 00001
+     * - d0 d6 d3 
+       - 00010
+     * - d0 d7 d4 
+       - 00011
+     * - d1 d4 d5 
+       - 00100
+     * - d1 d5 d6 
+       - 00101
+     * - d1 d6 d7 
+       - 00110
+     * - d2 d1 d1 
+       - 00111
+     * - d2 d1 d2 
+       - 01000
+
+.. _ifield-section-o:
+
+
+.. _adl-internal-target-22:
+*Opcode*
+````````
+
+
+.. _ifield-section-r:
+
+
+.. _adl-internal-target-23:
+*Res*
+`````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 4
+   * - Relocation Name
+     - a
+   * - Relocation Width
+     - 16
+   * - Relocation Value
+     - 101
+   * - Relocation Value Right Shift
+     - 0
+
+
+.. _ifield-section-s:
+
+
+.. _adl-internal-target-24:
+*Src1*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 4
+
+
+.. _adl-internal-target-25:
+*Src2*
+``````
+
+
+.. list-table::
+   :class: attributes
+   :widths: 10 8
+   :header-rows: 0
+
+   * - Size
+     - 4
+
+
+.. _adl-internal-target-26:
+Instructions
+------------
+
+
+.. _adl-internal-target-27:
+*amnf Da,Db,Dc,Src1*
+````````````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        JJJJJ . Da = D ( Src1 ) . HL ;
+        JJJJJ . Db = D ( Src1 ) . H ;
+    }
+    
+Affect instruction:
+  .. list-table::
+     :class: attributes
+     :widths: 10 15 10
+     :header-rows: 1
+  
+     * - Register
+       - Fields
+       - Details
+     * - `D <#adl-internal-target-12>`__ (Src1)
+       - H
+       - Partial
+  
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td width="4.16667%" class="reserved" title="Reserved">0</td>
+     <td colspan="2" width="8.33333%" class="field">01</td>
+     <td colspan="2" width="37.5%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000&nbsp;/&nbsp;0</td>
+     <td colspan="2" width="33.3333%" class="field">JJJJJ</td>
+     <td colspan="2" width="16.6667%" class="field">Src1</td>
+     </tr>
+     <tr>
+     <td class="singleodd">23</td>
+     <td class="lefteven">22</td><td class="righteven">21</td>
+     <td class="leftodd">20</td><td class="rightodd">12</td>
+     <td class="lefteven">11</td><td class="righteven">4</td>
+     <td class="leftodd">3</td><td class="rightodd">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-28:
+*dni Da,Db,Dc*
+``````````````
+
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="50%" class="field">0000&nbsp;/&nbsp;0001</td>
+     <td colspan="2" width="50%" class="reserved" title="Reserved">0000&nbsp;/&nbsp;0000</td>
+     </tr>
+     <tr>
+     <td class="leftodd">15</td><td class="rightodd">8</td>
+     <td class="lefteven">7</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+
+Operands:
+  .. list-table::
+     :class: attributes
+     :widths: 10 20
+     :header-rows: 1
+  
+     * - Operand
+       - Mapping
+     * - `Src1 <#adl-internal-target-24>`__
+       - `JJJJJ.Da <#adl-internal-target-19>`__
+  
+     * - `Src2 <#adl-internal-target-25>`__
+       - `JJJJJ.Db <#adl-internal-target-20>`__
+  
+
+
+.. _adl-internal-target-29:
+*nop Res   (x)*
+`````````````````
+
+Description:
+  
+  No operation.
+  
+  
+Action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+    }
+    
+Encoding:
+  
+  .. raw:: html
+  
+     <table class="field">
+     <tr><td colspan="2" width="3.125%" class="reserved" title="Reserved">00</td>
+     <td colspan="2" width="78.125%" class="field">00&nbsp;/&nbsp;0000&nbsp;/&nbsp;1111&nbsp;/&nbsp;1111&nbsp;/&nbsp;0101&nbsp;/&nbsp;0101&nbsp;/&nbsp;0101&nbsp;/&nbsp;0101&nbsp;/&nbsp;1111&nbsp;/&nbsp;1110&nbsp;/&nbsp;1111&nbsp;/&nbsp;1110&nbsp;/&nbsp;0110</td>
+     <td colspan="2" width="6.25%" class="field">Res</td>
+     <td colspan="2" width="12.5%" class="field">0000&nbsp;/&nbsp;0010</td>
+     </tr>
+     <tr>
+     <td class="leftodd">63</td><td class="rightodd">62</td>
+     <td class="lefteven">61</td><td class="righteven">12</td>
+     <td class="leftodd">11</td><td class="rightodd">8</td>
+     <td class="lefteven">7</td><td class="righteven">0</td>
+     </tr>
+     </table>
+     
+
+.. _adl-internal-target-30:
+Exceptions
+----------
+
+
+.. _adl-internal-target-31:
+*DEAR Exception*
+````````````````
+
+Priority:  0
+
+Action taken when exception occurs:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+    }
+    
+
+.. _adl-internal-target-32:
+*DTlbMiss Exception*
+````````````````````
+
+Priority:  0
+
+Action taken when exception occurs:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+    }
+    
+
+.. _adl-internal-target-33:
+*ITlbMiss Exception*
+````````````````````
+
+Priority:  0
+
+Action taken when exception occurs:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+    }
+    
+
+.. _adl-internal-target-34:
+*ProtectionFault Exception*
+```````````````````````````
+
+Priority:  0
+
+Action taken when exception occurs:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+    }
+    
+
+.. _adl-internal-target-35:
+Memories
+--------
+
+
+.. _adl-internal-target-36:
+*PreFetch*
+``````````
+
+Size:  16 bytes.  Address-unit size:  4 bytes.
+
+
+.. _adl-internal-target-37:
+*data*
+``````
+
+Size:  512 bytes.  Address-unit size:  1 bytes.
+
+Parent memory:  instr (located at offset 0x256
+
+Action on a read:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( unsigned size , bits < size  > d ) {
+        return d . swap_bytes (  ) ;
+    }
+    
+Action on a write:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( unsigned size , bits < size  > d ) {
+        return d . swap_bytes (  ) ;
+    }
+    
+
+.. _adl-internal-target-38:
+*instr*
+```````
+
+Instruction Memory
+
+Size:  1024 bytes.  Address-unit size:  4 bytes.
+
+
+.. _adl-internal-target-39:
+*instr2*
+````````
+
+Size:  32 bytes.  Address-unit size:  1 bytes.
+
+Parent memory:  instr (located at offset 0x512
+
+
+.. _adl-internal-target-40:
+Event Buses
+-----------
+
+
+.. _adl-internal-target-41:
+*msg*
+`````
+
+.. list-table:: **Event Bus Fields**
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Name
+     - Bits
+     - Description
+   * - addr
+     - 32
+     - 
+   * - data
+     - 32
+     - 
+   * - foo
+     - 20
+     - 
+   * - type
+     - 0
+     - 
+   
+Event action:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( msg_t x ) {
+        CCR = x . data ;
+    }
+    
+
+.. _adl-internal-target-42:
+MMU
+---
+
+
+Interleaved fetch :  true
+Interleaved reads :  true
+Interleaved writes:  true
+
+
+.. _adl-internal-target-43:
+*Lookup:  Tlb4k*
+````````````````
+
+Priority:  1
+
+Page Size:  4096 bytes.
+
+512 entries, 2-way associative.
+
+.. list-table:: **Set Fields**
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Name
+     - Bits
+     - Description
+   * - Foo
+     - 0
+     - 
+   * - NV
+     - 1
+     - 
+   
+.. list-table:: **Way Fields**
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Name
+     - Bits
+     - Description
+   * - EPN
+     - 24
+     -    Example documentation string for an MMU field.
+          
+   * - RPN
+     - 24
+     - 
+   * - SIZE
+     - 6
+     - 
+   * - TID
+     - 6
+     - 
+   * - TS
+     - 1
+     - 
+   * - V
+     - 1
+     - 
+   * - WIMG
+     - 4
+     - 
+   
+Tests::
+
+   Compare ( V , 1 )
+   
+   Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) )
+   
+   Compare ( TID , 0 , PID0 , PID1 )
+   
+   AddrComp ( EPN )
+   
+Execute permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbBase_t t , addr_t  , unsigned seq ) {
+        if ( ! ( ( MSR . PR (  ) ) ? t . SX : t . UX ) ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Load permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbBase_t t , addr_t  , unsigned seq ) {
+        if ( ! ( ( MSR . PR (  ) ) ? t . SR : t . UR ) ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Store permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbBase_t t , addr_t  , unsigned seq ) {
+        if ( ! ( ( MSR . PR (  ) ) ? t . SW : t . UW ) ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Translation-hit function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TransType tt , TlbBase_t x , addr_t  , unsigned seq ) {
+    }
+    
+Translation-miss function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TransType tt , addr_t  , unsigned seq ) {
+    }
+    
+Reset function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+    }
+    
+
+.. _adl-internal-target-44:
+*Lookup:  TlbCam*
+`````````````````
+
+Priority:  0
+
+Page Size:  2^(2 * SIZE + 0) << 10
+
+16 entries, fully associative.
+
+.. list-table:: **Set Fields**
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Name
+     - Bits
+     - Description
+   * - Foo
+     - 0
+     - 
+   
+.. list-table:: **Way Fields**
+   :widths: 10 10 40
+   :header-rows: 1
+
+   * - Name
+     - Bits
+     - Description
+   * - EPN
+     - 24
+     -    Example documentation string for an MMU field.
+          
+   * - RPN
+     - 24
+     - 
+   * - SIZE
+     - 6
+     - 
+   * - TID
+     - 6
+     - 
+   * - TS
+     - 1
+     - 
+   * - V
+     - 1
+     - 
+   * - WIMG
+     - 4
+     - 
+   * - x
+     - 2
+     - 
+   * - y
+     - 3
+     - 
+   
+Test Sets:
+
+   External
+      Enable::
+      
+         func ( TransType  ) {
+             return instrHasAttr ( external_pid ) ;
+         }
+         
+      Tests::
+      
+         Compare ( V , 1 )
+         
+         Compare ( TS , ELPC . EAS )
+         
+         Compare ( TID , ELPC . EPID )
+         
+         AddrComp ( EPN )
+         
+   Normal
+      Tests::
+      
+         Compare ( V , 1 )
+         
+         Compare ( TS , ( ( Instr ) ? MSR . IR : MSR . DR ) )
+         
+         Compare ( TID , 0 , PID0 , PID1 )
+         
+         AddrComp ( EPN )
+         
+Execute permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbBase_t t , addr_t  , unsigned seq ) {
+        if ( ! ( ( MSR . PR (  ) ) ? t . SX : t . UX ) ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Load permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbBase_t t , addr_t  , unsigned seq ) {
+        if ( ! ( ( MSR . PR (  ) ) ? t . SR : t . UR ) ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Store permission:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TlbBase_t t , addr_t  , unsigned seq ) {
+        if ( ! ( ( MSR . PR (  ) ) ? t . SW : t . UW ) ) {
+            raiseException ( ProtectionFault ) ;
+        }
+    }
+    
+Valid predicate:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return ( V != 0 ) ;
+    }
+    
+Translation-hit function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TransType tt , TlbBase_t x , addr_t  , unsigned seq ) {
+    }
+    
+Translation-miss function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( TransType tt , addr_t  , unsigned seq ) {
+    }
+    
+Reset function:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func (  ) {
+    }
+    
+Instruction-enable predicate:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return HDBCR0 . MMU_ENABLE (  ) ;
+    }
+    
+Data-enable predicate:
+  
+  .. code_block:: cpp
+     :color:
+  
+    {
+        return HDBCR0 . MMU_ENABLE (  ) ;
+    }
+    
+Action on an instruction miss:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t a , unsigned seq ) {
+        raiseException ( ITlbMiss ) ;
+    }
+    
+Action on a data miss:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t a , unsigned seq ) {
+        DEAR = a ;
+        raiseException ( DTlbMiss ) ;
+    }
+
+Action on a load miss:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t a , unsigned seq ) {
+        DEAR = 0 ;
+        raiseException ( DTlbMiss ) ;
+    }
+
+Action on a store miss:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t a , unsigned seq ) {
+        DEAR = 1 ;
+        raiseException ( DTlbMiss ) ;
+    }
+    
+Misaligned-write hook:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t ea , addr_t ra ) {
+         int j = 30 ;
+    }
+    
+Misaligned-read hook:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t ea , addr_t ra ) {
+         int k = 40 ;
+    }
+    
+Post-write hook:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t ea , addr_t ra ) {
+         int m = 60 ;
+    }
+    
+Post-read hook:
+  
+  .. code_block:: cpp
+     :color:
+  
+    func ( addr_t ea , addr_t ra ) {
+         int l = 50 ;
+    }
+    
+
+.. _adl-internal-target-45:
+Helper Functions
+----------------
+
+Built-in helper routines are documented in `the ADL user manual`_.
+
+.. _`the ADL user manual`: http://cad.freescale.net/trac/adl/chrome/site/adl-language-reference.html#global-functions
+

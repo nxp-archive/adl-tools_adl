@@ -1,0 +1,50 @@
+//
+// Make sure we can control aspect expansion using has_attr with parameter
+// values.
+//
+define (arch=minippc) {
+      
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+  
+  attrs = (up,down,left,right,red,blue);
+      
+  define (instrfield = OPCD) { bits = (0 , 5);}  
+  define (instrfield = A   ) { bits = (6 ,20);}
+  define (instrfield = B   ) { bits = (21,30);}
+  define (instrfield = C   ) { bits = (21,30);}
+  
+  define (instr = i1) { attrs = (up(1),down);    fields = (OPCD(1),A,B); action  = {};}
+  define (instr = i2) { attrs = (left,right); fields = (OPCD(2),A,B); action  = {};}
+  define (instr = i3) { attrs = (red,right(3));   fields = (OPCD(3),A,C); action  = {};}  
+  define (instr = i4) { attrs = (up);         fields = (OPCD(4),A,B); action  = {}; attrs = red;}  
+  define (instr = i5) { 
+    attrs = (right(2));      
+    fields = (OPCD(5),A,C); 
+    action  = {
+      int i = 10;
+    };
+  }  
+
+  define (group = g1) {
+    type = instr;
+    items = "*";
+  }
+
+  defmod (instr=*g1) {
+    define (aspect=A) {
+      instr_pre_exec = true;
+      attrs = (up(1),right(2));
+      action = {
+        int j = 20;
+      };
+    }
+  }
+
+}
+
+
+define (core=P) {
+  archs=minippc;
+}

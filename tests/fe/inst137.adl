@@ -1,0 +1,92 @@
+//
+// Further testing of default parameters- make sure that booleans work.
+//
+
+define (arch=minippc) {
+
+  attrs = (fxu,base);
+
+  define (instrfield=OPCD) {
+    bits = (0,5);
+  }
+
+  define (instrfield=XO) {
+    bits = (21,30);
+  }
+
+  define (instrfield=RA) {
+    bits = (11,15);
+  }
+
+  define (instrfield=SI) {
+    bits = (16,31);
+  }
+
+  define (instrfield=RT) {
+    bits = (6,10);
+  }
+
+  void set_foo1(const bits<32> &data,bool set_foo = true,bool set_flag = false)
+  {
+    if (set_foo) {
+      FOO = data;
+    }
+    if (set_flag) {
+      FLAG.F = 1;
+    }
+  }
+
+  void set_foo2(bool set_flag = true)
+  {
+    if (set_flag) {
+      FLAG.X = 1;
+    }
+  }
+
+  define (instr=add1) {
+    attrs=(fxu,base);
+    fields=(OPCD(40),RT,RA,SI);
+    action={
+      set_foo1(20,false);
+      set_foo2();
+    };
+  }
+
+  define (instr=add2) {
+    attrs=(fxu,base);
+    fields=(OPCD(41),RT,RA,SI);
+    reserved_bits_value = 0;
+    action={
+      GPR(RA).L = SI;
+      GPR(RA).H = SI;
+      GPR(RT).L = SI;
+      GPR(RT).H = GPR(RA).H;
+      set_foo1(40,true,true);
+      set_foo2(false);
+    };
+  }
+
+  define (regfile=GPR) {
+    size = 32;
+
+    define (field=H) { bits = (0,15); };
+    define (field=L) { bits = (16,31); };
+  }
+
+  define (reg=FOO) {};
+
+  define (reg=FLAG) {
+    define (field=F) { bits = 10; };
+    define (field=X) { bits = 20; };
+  };
+
+  define (reg = pc) {
+    attrs = (cia,nia);
+  }
+
+  
+}
+
+define (core=P) {
+  archs=minippc;
+}

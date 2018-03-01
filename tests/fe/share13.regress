@@ -1,0 +1,72 @@
+=======
+Systems:
+=======
+System:  PChip
+  Locally-defined Cores:
+    Name:  "P0"
+    Registers:
+      Name:  "MSR"
+      Width:  32
+        PR[10]   
+      -------------------------------
+      Name:  "pc"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  pc
+    Next-instruction-address register:  pc
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    
+User Type Declarations:
+       enum Foo {
+    aFoo
+    ,
+    bFoo
+    ,
+    cFoo
+} ;
+       struct XX  {
+     bits < 10 > _x ;
+     bits < 10 > _y ;
+} ;
+    -------------------------------
+    Name:  "P1"
+    Registers:
+      Name:  "MSR"
+      Width:  32
+        PR[10]   
+      -------------------------------
+      Name:  "pc"
+      Usage:  read, written
+      Width:  32
+      Attributes:  cia nia
+      -------------------------------
+    Current-instruction-address register:  pc
+    Next-instruction-address register:  pc
+    Real-address Mask:
+      Initial mask:  0xffffffff (constant)
+    Effective-address Mask:
+      Initial mask:  0xffffffff (constant)
+    
+User Type Declarations:
+       enum Foo {
+    aFoo
+    ,
+    bFoo
+    ,
+    cFoo
+} ;
+       struct XX  {
+     bits < 10 > _x ;
+     bits < 10 > _y ;
+} ;
+    -------------------------------
+  Constituent Items:
+    c0:  P0
+    c1:  P1
+-------------------------------
+

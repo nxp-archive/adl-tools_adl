@@ -1,0 +1,219 @@
+//
+// Example MMU- this should parse correctly.
+//
+// Demonstrates the use of an interface class for MMU lookups.
+//
+define (arch=foo) {
+
+  define (reg=CIA) {
+    """
+    Current instruction address.
+    """;
+    attrs = cia;
+  }
+
+  define (reg=NIA) {
+    """
+    Next instruction address.
+    """;
+    attrs = nia;
+  }
+
+  define (reg=MSR) {
+    define (field=PR) {
+      bits = 10;
+    }
+  }
+
+  define (reg=HDBCR0) {
+    define (field=MMU_ENABLE) {
+      bits = 0;
+    }
+  }
+
+  define (reg=SRR0) { }
+
+  define (reg=SRR1) { }
+
+  define (reg=IVPR) {
+    """
+    Interrupt-vector prefix register.
+    """;
+  }
+
+  define (reg=IVOR6) {
+    """
+    Interrupt-vector offset register 6.
+    """;
+  }
+
+  define (reg=IVOR7) {
+    """
+    Interrupt-vector offset register 7.
+    """;
+  }
+
+  define (reg=DEAR) { }
+
+  define (reg=PID0) { }
+
+  define (reg=PID1) { }
+
+  define (exception=ITlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=DTlbMiss) {
+    action = func() { };
+  }
+
+  define (exception=ProtectionFault) {
+    action = func() { };
+  }
+
+  attrs = (translation_attr,minippc_mmu);
+
+  define (instrfield=OPCD) {
+    """
+    Primary opcode.
+    """;
+    bits = (0,5);
+  }
+
+  // Make sure that we can use MMU lookups in code.
+  define (instr=tlbwe) {
+    fields=(OPCD(10));
+    action = {
+      Mmu(TlbCam,0,0) = TlbCam();
+    };
+  }
+
+  //
+  // Program interrupt.
+  // 
+  define (exception=Program) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR.get<16>(0,15),IVOR6.get<16>(16,31));
+    };
+  }
+
+  defmod (exception=ProtectionFault) {
+    action = {
+      SRR0 = CIA;
+      SRR1 = MSR;
+      MSR = 0;
+      NIA = concat(IVPR.get<16>(0,15),IVOR7.get<16>(16,31));
+    };
+  }
+
+  define (mmu) {
+
+    both_enable = { return (HDBCR0.REALMODE() == 0); };
+
+    define(lookup=TlbBase) {
+
+      interface = true;
+
+      define (wayfield=TID) {
+        bits = 6;
+      }
+      define (wayfield=SIZE) {
+        bits = 6;
+      }
+      define (wayfield=V) {
+        bits = 1;
+      }
+      define (wayfield=TS) {
+        bits = 1;
+      }
+      define (wayfield=RPN) {
+        bits = 24;
+      }
+      define (wayfield=EPN) {
+        """
+        Example documentation string for an MMU field.
+        """;
+        bits = 24;
+      }
+      define (wayfield=SX) {
+        bits=1;
+      }
+      define (wayfield=SW) {
+        bits=1;
+      }
+      define (wayfield=SR) {
+        bits=1;
+      }
+      define (wayfield=UX) {
+        bits=1;
+      }
+      define (wayfield=UW) {
+        bits=1;
+      }
+      define (wayfield=UR) {
+        bits=1;
+      }
+      define (wayfield=WIMG) {
+        bits = 4;
+        attrs = translation_attr;
+      }
+      
+      test = Compare(V,1);
+      test = Compare(TS, ((Instr) ? MSR.IR : MSR.DR) );
+      test = Compare(TID,0,PID0,PID1);      
+      test = AddrComp(EPN);
+
+      sizescale = 2;
+      sizeshift = 10;
+
+      pageshift = 2;
+
+      realpage = RPN;
+
+      exec_perm = func(TlbBase_t t,addr_t ea,unsigned seq) {
+      };
+
+    }
+
+    define (lookup=TlbCam) {
+      
+      inherit = TlbBase;
+
+      priority = 0;
+
+      define (array) {
+        entries = 16;
+      }
+
+      sizetype  = BitSize;
+      size      = SIZE;
+    }
+
+    define (lookup=Tlb4k) {
+      inherit = TlbBase;
+
+      priority = 1;
+
+      define (array) {
+        entries = 512;
+        set_assoc = 2;
+      }
+
+      define (setfield=NV) {
+        bits = 1;
+      }
+
+      size = 4096;
+
+    }
+
+  }
+
+}
+
+define (core=P) {
+  archs=foo;
+}

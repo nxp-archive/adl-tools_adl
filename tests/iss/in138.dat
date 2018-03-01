@@ -1,0 +1,76 @@
+#
+# Tests various kinds of delayed writes.
+#
+= asm
+
+  cror r3,r2,r1
+  addi r1,r1,1
+  addi r1,r1,1
+  addi r1,r1,1
+  .long 0
+
+= /asm
+
+CORE n=:P
+
+RD n=GPR i=1 d=10
+RD n=GPR i=2 d=20
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x4C620B82	#	cror r3,r2,r1
+MD n=Mem ra=0x00000004 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000008 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x0000000c d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000010 d=0x00000000	#	.long 0
+# </GEN>
+
+TRACE
+
+I ea=0x0 id=1
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x4c620b82
+INSTR op=0x4c620b82                                     asm="cror 3,2,1"
+R n=NIA d=0x00000004
+
+I ea=0x4 id=2
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x38210001
+INSTR op=0x38210001                                     asm="addi 1,1,0x1"
+R n=NIA d=0x00000008
+R n=GPR i=1 d=0x0000000b
+R n=CTR d=0x0000001e
+R n=FOO1 d=0xdead1400
+
+I ea=0x8 id=3
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x38210001
+INSTR op=0x38210001                                     asm="addi 1,1,0x1"
+R n=NIA d=0x0000000c
+R n=GPR i=1 d=0x0000000c
+R n=GPR i=3 d=0x0000001e
+R n=FOO2 d=0x000a000000000000
+R n=FOO5_RD d=0x00000001
+R n=FOO5_WR d=0x00000001
+R n=XPR i=1 d=0x43210000
+
+I ea=0xc id=4
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x38210001
+INSTR op=0x38210001                                     asm="addi 1,1,0x1"
+R n=NIA d=0x00000010
+R n=GPR i=1 d=0x0000000d
+R n=XER d=0x12340000
+R n=VPR i=4 d=0x0000dead000000000000000000000000
+R n=GPR i=4 d=0x00002800
+
+I ea=0x10 id=5
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x00000000
+INSTR op=0x00000000                                     asm="halt "
+R n=NIA d=0x00000014
+
+RESULTS
+
+RD n=GPR i=1 d=0x0000000d
+RD n=GPR i=2 d=0x00000014
+RD n=GPR i=3 d=0x0000001e
+RD n=GPR i=4 d=0x00002800
+RD n=FOO1    d=0xdead1400
+RD n=FOO2    d=0x000a000000000000
+RD n=XPR i=1 d=0x43210000
+RD n=VPR i=4 d=0x0000dead000000000000000000000000

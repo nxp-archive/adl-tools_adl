@@ -1,0 +1,18 @@
+//
+// Copyright (C) 2005 by Freescale Semiconductor Inc.  All rights reserved.
+//
+// You may distribute under the terms of the Artistic License, as specified in
+// the COPYING file.
+//
+
+//
+// Modifying assignments, such as +=, have to be treated in a special manner.
+//
+
+#import "mod8.adl"
+
+defmod (core = P) {
+  """
+Example documentation string- place overview information here.
+""";
+}

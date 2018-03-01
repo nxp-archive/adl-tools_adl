@@ -1,0 +1,23 @@
+#
+# This tests to make sure that we can use the CLI with a simple, non-threaded model.
+#
+
+puts [regs]
+step
+puts [regs]
+step
+puts [regs]
+
+# Make sure that we're actually returning the instruction count value to the interpreter.
+set ic [icount]
+
+puts "instrcount=$ic"
+if { $ic > 0 } {
+	puts "Some instructions were executed!"
+} else {
+	puts "No instructions were executed!"
+}
+
+puts "Command-line arguments ($argc):  $argv"
+
+quit

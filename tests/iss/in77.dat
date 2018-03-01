@@ -1,0 +1,118 @@
+#
+# Tests the ability to send to all receivers on an event bus, including
+# the sender itself.
+#
+
+= asm
+
+  addi r1,r1,1
+  mtspr 300,r1
+  .long 0
+  nop
+  nop
+  nop
+  nop
+  addi r2,r2,10
+  mtspr 300,r2
+  .long 0
+
+= /asm
+
+# <GEN>
+MD n=Mem ra=0x00000000 d=0x38210001	#	addi r1,r1,1
+MD n=Mem ra=0x00000004 d=0x7C2C4BA6	#	mtspr 300,r1
+MD n=Mem ra=0x00000008 d=0x00000000	#	.long 0
+MD n=Mem ra=0x0000000c d=0x60000000	#	nop
+MD n=Mem ra=0x00000010 d=0x60000000	#	nop
+MD n=Mem ra=0x00000014 d=0x60000000	#	nop
+MD n=Mem ra=0x00000018 d=0x60000000	#	nop
+MD n=Mem ra=0x0000001c d=0x3842000A	#	addi r2,r2,10
+MD n=Mem ra=0x00000020 d=0x7C4C4BA6	#	mtspr 300,r2
+MD n=Mem ra=0x00000024 d=0x00000000	#	.long 0
+# </GEN>
+
+CORE n=:MP:core0
+
+RD n=NIA d=0x0
+
+CORE n=:MP:core1
+
+RD n=NIA d=0xc
+
+TRACE
+
+CORE n=:MP:core0
+
+I ea=0x0 id=1
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+C n=L1i a=load t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x0 ra=0x0 d=0x38210001
+INSTR op=0x38210001					asm="addi r1,r1,1"
+R n=GPR i=1 d=0x00000001
+
+I ea=0x4 id=3
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x4 ra=0x4 d=0x7c2c4ba6
+INSTR op=0x7c2c4ba6					asm="mtspr r1,300"
+R n=DBELL d=0x00000001
+R n=DBELL d=0x00000001 cn=:MP:core1
+
+I ea=0x8 id=5
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x8 ra=0x8 d=0x00000000
+INSTR op=0x0					asm="halt "
+
+CORE n=:MP:core1
+
+I ea=0xc id=2
+C n=L1i a=miss t=ifetch set=0 way=0 lm=0x7f ra=0x0
+C n=L1i a=load t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0xc ra=0xc d=0x60000000
+INSTR op=0x60000000					asm="ori r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+I ea=0x10 id=4
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x10 ra=0x10 d=0x60000000
+INSTR op=0x60000000					asm="ori r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+I ea=0x14 id=6
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x14 ra=0x14 d=0x60000000
+INSTR op=0x60000000					asm="ori r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+I ea=0x18 id=7
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x18 ra=0x18 d=0x60000000
+INSTR op=0x60000000					asm="ori r0,r0,0x0"
+R n=GPR i=0 d=0x00000000
+
+I ea=0x1c id=8
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x1c ra=0x1c d=0x3842000a
+INSTR op=0x3842000a					asm="addi r2,r2,10"
+R n=GPR i=2 d=0x0000000a
+
+I ea=0x20 id=9
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x20 ra=0x20 d=0x7c4c4ba6
+INSTR op=0x7c4c4ba6					asm="mtspr r2,300"
+R n=DBELL d=0x0000000a cn=:MP:core0
+R n=DBELL d=0x0000000a
+
+I ea=0x24 id=10
+C n=L1i a=hit t=ifetch set=0 way=0 lm=0x7f ra=0x0
+M n=Mem t=ifetch ea=0x24 ra=0x24 d=0x00000000
+INSTR op=0x0					asm="halt "
+
+RESULTS
+
+CORE n=:MP:core0
+
+RD n=DBELL d=0x0000000a
+
+CORE n=:MP:core1
+
+RD n=DBELL d=0x0000000a
