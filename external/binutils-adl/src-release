@@ -215,13 +215,14 @@ do-proto-toplev: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex
 	     msgfmt -o `echo $$f | sed -e 's/\.po$$/.gmo/'` $$f ; \
 	done
   #
-  # Remove any Subversion, autoconf cache files, automake, and backup files that
+  # Remove any Subversion, autoconf cache files, automake, .gmo files, and backup files that
   # shouldn't have been copied over.
 	find proto-toplev -name ".deps" -print0 | xargs -0 rm -rf
 	find proto-toplev -name ".libs" -print0 | xargs -0 rm -rf
 	find proto-toplev -name ".svn" -print0 | xargs -0 rm -rf
 	find proto-toplev -name "*.cache" -print0 | xargs -0 rm -rf
 	find proto-toplev -name "*~" -print0 | xargs -0 rm -rf
+	find proto-toplev -name "*.gmo" -print0 | xargs -0 rm -rf
   # Now move everything over to the desired directory.
 	-rm -f $(PACKAGE)-$(VER)
 	cp -lpR proto-toplev $(PACKAGE)-$(VER)
